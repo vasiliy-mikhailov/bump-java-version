@@ -2,14 +2,12 @@
 # IDs and versions are anchored to OpenRewrite's published catalogue.
 
 seed:
-  # iter-2: split Spring framework vs Boot, force pom source/target >= 8 first.
-  # Iter-1 found:
-  #   * UpgradeSpringBoot_3_3 fires on non-Boot Spring repos and adds Boot-only
-  #     imports that fail to resolve. Add Framework_6_1 first, before Boot_3_3.
-  #   * source/target=7 in old EE samples isn't fixed by any seed recipe and
-  #     bypassed by our compat flag, faking wins. UpgradeJavaVersion(21) at head
-  #     bumps the pom properties before anything else runs.
-  - org.openrewrite.java.migrate.UpgradeJavaVersion
+  # iter-2 (corrected): UpgradeJavaVersion takes a required `version` option;
+  # the previous run failed fast on a NullPointerException because we passed
+  # bare ID without options, so the chain never executed and all "wins"
+  # were compat-flag salvages of unchanged source. Now using object form.
+  - org.openrewrite.java.migrate.UpgradeJavaVersion:
+      version: 21
   - org.openrewrite.java.migrate.jakarta.JakartaEE10
   - org.openrewrite.java.spring.framework.UpgradeSpringFramework_6_1
   - org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3
