@@ -1,0 +1,8 @@
+# Deliberately weak seed — only one recipe — used to exercise the ralph
+# loop's discovery from scratch. The mutator must add the missing family
+# coverage (jakarta, spring-boot, junit, hibernate, ...) one operator
+# at a time.
+active_recipes:
+  - org.openrewrite.java.migrate.UpgradeToJava21
+  - org.openrewrite.java.RemoveUnusedImports
+  - org.openrewrite.java.cleanup.UnnecessaryParentheses
