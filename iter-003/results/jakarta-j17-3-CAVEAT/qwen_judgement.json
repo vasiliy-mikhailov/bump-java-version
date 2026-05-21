@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 4,
+  "overall": 3,
+  "justification": "The diff updates dependencies and Java version to 21, removes deprecated `@Autowired` in favor of constructor injection, and uses `getFirst()` for List access, which is a Java 21 idiom. However, it introduces Lombok annotations (`@Getter`, `@Setter`) which are not strictly Java 21 idioms but rather a third-party library choice, and the diff doesn't fully leverage Java 21 features like records or pattern matching. The removal of wildcard imports and explicit imports is good practice. The diff is coherent with minimal churn, but the introduction of Lombok might be seen as adding a dependency rather than using standard Java features."
+}

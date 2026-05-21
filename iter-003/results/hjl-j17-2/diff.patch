@@ -1,0 +1,360 @@
+diff --git a/pom.xml b/pom.xml
+index 36251b4..9b34494 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -16,7 +16,7 @@
+ 
+   <properties>
+     <!-- Generic properties -->
+-    <java.version>17</java.version>
++    <java.version>21</java.version>
+     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+     <!-- Important for reproducible builds. Update using e.g. ./mvnw versions:set -DnewVersion=... -->
+diff --git a/src/main/java/org/springframework/samples/petclinic/model/BaseEntity.java b/src/main/java/org/springframework/samples/petclinic/model/BaseEntity.java
+index 6babed5..9df750d 100644
+--- a/src/main/java/org/springframework/samples/petclinic/model/BaseEntity.java
++++ b/src/main/java/org/springframework/samples/petclinic/model/BaseEntity.java
+@@ -21,6 +21,8 @@ import jakarta.persistence.GeneratedValue;
+ import jakarta.persistence.GenerationType;
+ import jakarta.persistence.Id;
+ import jakarta.persistence.MappedSuperclass;
++import lombok.Getter;
++import lombok.Setter;
+ 
+ /**
+  * Simple JavaBean domain object with an id property. Used as a base class for objects
+@@ -33,17 +35,11 @@ import jakarta.persistence.MappedSuperclass;
+ public class BaseEntity implements Serializable {
+ 
+ 	@Id
++	@Setter
+ 	@GeneratedValue(strategy = GenerationType.IDENTITY)
++	@Getter
+ 	private Integer id;
+ 
+-	public Integer getId() {
+-		return id;
+-	}
+-
+-	public void setId(Integer id) {
+-		this.id = id;
+-	}
+-
+ 	public boolean isNew() {
+ 		return this.id == null;
+ 	}
+diff --git a/src/main/java/org/springframework/samples/petclinic/model/NamedEntity.java b/src/main/java/org/springframework/samples/petclinic/model/NamedEntity.java
+index 8eec021..d78cba8 100644
+--- a/src/main/java/org/springframework/samples/petclinic/model/NamedEntity.java
++++ b/src/main/java/org/springframework/samples/petclinic/model/NamedEntity.java
+@@ -18,6 +18,8 @@ package org.springframework.samples.petclinic.model;
+ import jakarta.persistence.Column;
+ import jakarta.persistence.MappedSuperclass;
+ import jakarta.validation.constraints.NotBlank;
++import lombok.Getter;
++import lombok.Setter;
+ 
+ /**
+  * Simple JavaBean domain object adds a name property to <code>BaseEntity</code>. Used as
+@@ -31,17 +33,11 @@ import jakarta.validation.constraints.NotBlank;
+ public class NamedEntity extends BaseEntity {
+ 
+ 	@Column
++	@Getter
+ 	@NotBlank
++	@Setter
+ 	private String name;
+ 
+-	public String getName() {
+-		return this.name;
+-	}
+-
+-	public void setName(String name) {
+-		this.name = name;
+-	}
+-
+ 	@Override
+ 	public String toString() {
+ 		String name = this.getName();
+diff --git a/src/main/java/org/springframework/samples/petclinic/model/Person.java b/src/main/java/org/springframework/samples/petclinic/model/Person.java
+index 30b5829..152696d 100644
+--- a/src/main/java/org/springframework/samples/petclinic/model/Person.java
++++ b/src/main/java/org/springframework/samples/petclinic/model/Person.java
+@@ -18,6 +18,8 @@ package org.springframework.samples.petclinic.model;
+ import jakarta.persistence.Column;
+ import jakarta.persistence.MappedSuperclass;
+ import jakarta.validation.constraints.NotBlank;
++import lombok.Getter;
++import lombok.Setter;
+ 
+ /**
+  * Simple JavaBean domain object representing an person.
+@@ -28,27 +30,15 @@ import jakarta.validation.constraints.NotBlank;
+ public class Person extends BaseEntity {
+ 
+ 	@Column
++	@Getter
+ 	@NotBlank
++	@Setter
+ 	private String firstName;
+ 
+ 	@Column
++	@Getter
+ 	@NotBlank
++	@Setter
+ 	private String lastName;
+ 
+-	public String getFirstName() {
+-		return this.firstName;
+-	}
+-
+-	public void setFirstName(String firstName) {
+-		this.firstName = firstName;
+-	}
+-
+-	public String getLastName() {
+-		return this.lastName;
+-	}
+-
+-	public void setLastName(String lastName) {
+-		this.lastName = lastName;
+-	}
+-
+ }
+diff --git a/src/main/java/org/springframework/samples/petclinic/owner/Owner.java b/src/main/java/org/springframework/samples/petclinic/owner/Owner.java
+index 480a7a6..9ae2e53 100644
+--- a/src/main/java/org/springframework/samples/petclinic/owner/Owner.java
++++ b/src/main/java/org/springframework/samples/petclinic/owner/Owner.java
+@@ -18,7 +18,8 @@ package org.springframework.samples.petclinic.owner;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.Objects;
+-
++import lombok.Getter;
++import lombok.Setter;
+ import org.springframework.core.style.ToStringCreator;
+ import org.springframework.samples.petclinic.model.Person;
+ import org.springframework.util.Assert;
+@@ -49,51 +50,30 @@ import jakarta.validation.constraints.NotBlank;
+ public class Owner extends Person {
+ 
+ 	@Column
++	@Getter
+ 	@NotBlank
++	@Setter
+ 	private String address;
+ 
+ 	@Column
++	@Getter
+ 	@NotBlank
++	@Setter
+ 	private String city;
+ 
+ 	@Column
++	@Getter
+ 	@NotBlank
+ 	@Pattern(regexp = "\\d{10}", message = "{telephone.invalid}")
++	@Setter
+ 	private String telephone;
+ 
++	@Getter
+ 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+ 	@JoinColumn(name = "owner_id")
+ 	@OrderBy("name")
+ 	private final List<Pet> pets = new ArrayList<>();
+ 
+-	public String getAddress() {
+-		return this.address;
+-	}
+-
+-	public void setAddress(String address) {
+-		this.address = address;
+-	}
+-
+-	public String getCity() {
+-		return this.city;
+-	}
+-
+-	public void setCity(String city) {
+-		this.city = city;
+-	}
+-
+-	public String getTelephone() {
+-		return this.telephone;
+-	}
+-
+-	public void setTelephone(String telephone) {
+-		this.telephone = telephone;
+-	}
+-
+-	public List<Pet> getPets() {
+-		return this.pets;
+-	}
+-
+ 	public void addPet(Pet pet) {
+ 		if (pet.isNew()) {
+ 			getPets().add(pet);
+diff --git a/src/main/java/org/springframework/samples/petclinic/owner/Pet.java b/src/main/java/org/springframework/samples/petclinic/owner/Pet.java
+index 4f8409e..0ff6e69 100644
+--- a/src/main/java/org/springframework/samples/petclinic/owner/Pet.java
++++ b/src/main/java/org/springframework/samples/petclinic/owner/Pet.java
+@@ -19,7 +19,8 @@ import java.time.LocalDate;
+ import java.util.Collection;
+ import java.util.LinkedHashSet;
+ import java.util.Set;
+-
++import lombok.Getter;
++import lombok.Setter;
+ import org.springframework.format.annotation.DateTimeFormat;
+ import org.springframework.samples.petclinic.model.NamedEntity;
+ 
+@@ -47,9 +48,13 @@ public class Pet extends NamedEntity {
+ 
+ 	@Column
+ 	@DateTimeFormat(pattern = "yyyy-MM-dd")
++	@Getter
++	@Setter
+ 	private LocalDate birthDate;
+ 
++	@Getter
+ 	@ManyToOne
++	@Setter
+ 	@JoinColumn(name = "type_id")
+ 	private PetType type;
+ 
+@@ -58,22 +63,6 @@ public class Pet extends NamedEntity {
+ 	@OrderBy("date ASC")
+ 	private final Set<Visit> visits = new LinkedHashSet<>();
+ 
+-	public void setBirthDate(LocalDate birthDate) {
+-		this.birthDate = birthDate;
+-	}
+-
+-	public LocalDate getBirthDate() {
+-		return this.birthDate;
+-	}
+-
+-	public PetType getType() {
+-		return this.type;
+-	}
+-
+-	public void setType(PetType type) {
+-		this.type = type;
+-	}
+-
+ 	public Collection<Visit> getVisits() {
+ 		return this.visits;
+ 	}
+diff --git a/src/main/java/org/springframework/samples/petclinic/owner/Visit.java b/src/main/java/org/springframework/samples/petclinic/owner/Visit.java
+index 085cd28..d327b37 100644
+--- a/src/main/java/org/springframework/samples/petclinic/owner/Visit.java
++++ b/src/main/java/org/springframework/samples/petclinic/owner/Visit.java
+@@ -16,7 +16,8 @@
+ package org.springframework.samples.petclinic.owner;
+ 
+ import java.time.LocalDate;
+-
++import lombok.Getter;
++import lombok.Setter;
+ import org.springframework.format.annotation.DateTimeFormat;
+ import org.springframework.samples.petclinic.model.BaseEntity;
+ 
+@@ -37,9 +38,13 @@ public class Visit extends BaseEntity {
+ 
+ 	@Column(name = "visit_date")
+ 	@DateTimeFormat(pattern = "yyyy-MM-dd")
++	@Getter
++	@Setter
+ 	private LocalDate date;
+ 
++	@Getter
+ 	@NotBlank
++	@Setter
+ 	private String description;
+ 
+ 	/**
+@@ -49,20 +54,4 @@ public class Visit extends BaseEntity {
+ 		this.date = LocalDate.now();
+ 	}
+ 
+-	public LocalDate getDate() {
+-		return this.date;
+-	}
+-
+-	public void setDate(LocalDate date) {
+-		this.date = date;
+-	}
+-
+-	public String getDescription() {
+-		return this.description;
+-	}
+-
+-	public void setDescription(String description) {
+-		this.description = description;
+-	}
+-
+ }
+diff --git a/src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java b/src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java
+index ecbbe23..f59c192 100644
+--- a/src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java
++++ b/src/test/java/org/springframework/samples/petclinic/PostgresIntegrationTests.java
+@@ -24,8 +24,8 @@ import java.util.Arrays;
+ import java.util.LinkedList;
+ import java.util.List;
+ 
++import lombok.extern.apachecommons.CommonsLog;
+ import org.apache.commons.logging.Log;
+-import org.apache.commons.logging.LogFactory;
+ import org.junit.jupiter.api.BeforeAll;
+ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.api.condition.DisabledInNativeImage;
+@@ -48,9 +48,10 @@ import org.springframework.test.context.ActiveProfiles;
+ import org.springframework.web.client.RestTemplate;
+ import org.testcontainers.DockerClientFactory;
+ 
+-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = { "spring.docker.compose.skip.in-tests=false", //
+-		"spring.docker.compose.start.arguments=--force-recreate,--renew-anon-volumes,postgres" })
++@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, properties = {"spring.docker.compose.skip.in-tests=false", //
++	"spring.docker.compose.start.arguments=--force-recreate,--renew-anon-volumes,postgres"})
+ @ActiveProfiles("postgres")
++@CommonsLog
+ @DisabledInNativeImage
+ public class PostgresIntegrationTests {
+ 
+@@ -91,10 +92,9 @@ public class PostgresIntegrationTests {
+ 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+ 	}
+ 
++	@CommonsLog
+ 	static class PropertiesLogger implements ApplicationListener<ApplicationPreparedEvent> {
+ 
+-		private static final Log log = LogFactory.getLog(PropertiesLogger.class);
+-
+ 		private ConfigurableEnvironment environment;
+ 
+ 		private boolean isFirstRun = true;
+diff --git a/src/test/java/org/springframework/samples/petclinic/service/ClinicServiceTests.java b/src/test/java/org/springframework/samples/petclinic/service/ClinicServiceTests.java
+index ddc5bab..c9c757c 100644
+--- a/src/test/java/org/springframework/samples/petclinic/service/ClinicServiceTests.java
++++ b/src/test/java/org/springframework/samples/petclinic/service/ClinicServiceTests.java
+@@ -100,8 +100,8 @@ class ClinicServiceTests {
+ 		Owner owner = optionalOwner.get();
+ 		assertThat(owner.getLastName()).startsWith("Franklin");
+ 		assertThat(owner.getPets()).hasSize(1);
+-		assertThat(owner.getPets().get(0).getType()).isNotNull();
+-		assertThat(owner.getPets().get(0).getType().getName()).isEqualTo("cat");
++		assertThat(owner.getPets().getFirst().getType()).isNotNull();
++		assertThat(owner.getPets().getFirst().getType().getName()).isEqualTo("cat");
+ 	}
+ 
+ 	@Test
+@@ -208,7 +208,7 @@ class ClinicServiceTests {
+ 		Vet vet = EntityUtils.getById(vets, Vet.class, 3);
+ 		assertThat(vet.getLastName()).isEqualTo("Douglas");
+ 		assertThat(vet.getNrOfSpecialties()).isEqualTo(2);
+-		assertThat(vet.getSpecialties().get(0).getName()).isEqualTo("dentistry");
++		assertThat(vet.getSpecialties().getFirst().getName()).isEqualTo("dentistry");
+ 		assertThat(vet.getSpecialties().get(1).getName()).isEqualTo("surgery");
+ 	}
+ 

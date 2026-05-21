@@ -187,6 +187,82 @@
         "build_post_pass_rate_honest": "1/4",
         "improvement_vs_iter1_on_shared_3_repos": "null (3 repos unchanged in iter-2; 2 new repos at 4/5)"
       }
+    },
+    {
+      "iter": 3,
+      "label": "smoke-add-lombok-springfox",
+      "mutation_from_iter_2": "ADD LombokBestPractices, ADD SpringFoxToSpringDoc; DROP jakarta-j8-1 (fitness #6 violation)",
+      "recipes": [
+        {
+          "id": "org.openrewrite.java.migrate.UpgradeJavaVersion",
+          "version": 21
+        },
+        "org.openrewrite.java.migrate.jakarta.JakartaEE10",
+        "org.openrewrite.java.migrate.lombok.LombokBestPractices",
+        "org.openrewrite.java.spring.framework.UpgradeSpringFramework_6_1",
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3",
+        "org.openrewrite.java.springdoc.SpringFoxToSpringDoc",
+        "org.openrewrite.hibernate.MigrateToHibernate62",
+        "org.openrewrite.java.testing.junit5.JUnit4to5Migration",
+        "org.openrewrite.java.testing.mockito.MockitoBestPractices",
+        "org.openrewrite.java.migrate.UpgradeToJava21",
+        "org.openrewrite.java.RemoveUnusedImports"
+      ],
+      "corpus": "smoke: hjl-j17-2, hjl-j8-3, jakarta-j17-3-CAVEAT, sb2-j11-1",
+      "harness_changes": [
+        "added -Dspring-javaformat.skip + -Dformat.skip compat flags after format plugin blocked the build",
+        "corrected wrong recipe ID for SpringFoxToSpringDoc (lives under java.springdoc, not java.spring.boot3)"
+      ],
+      "results_per_repo": {
+        "hjl-j8-3": {
+          "build_pre": 1,
+          "build_post": 0,
+          "recipe_rc": 0,
+          "recipe_applied": 1,
+          "diff_lines": 7068,
+          "qwen_overall": 4,
+          "empty_diff": false
+        },
+        "hjl-j17-2": {
+          "build_pre": 1,
+          "build_post": 0,
+          "recipe_rc": 0,
+          "recipe_applied": 1,
+          "diff_lines": 360,
+          "qwen_overall": 3,
+          "empty_diff": false
+        },
+        "sb2-j11-1": {
+          "build_pre": 1,
+          "build_post": 0,
+          "recipe_rc": 0,
+          "recipe_applied": 1,
+          "diff_lines": 1491,
+          "qwen_overall": 4,
+          "empty_diff": false
+        },
+        "jakarta-j17-3-CAVEAT": {
+          "build_pre": 1,
+          "build_post": 0,
+          "recipe_rc": 0,
+          "recipe_applied": 1,
+          "diff_lines": 794,
+          "qwen_overall": 3,
+          "empty_diff": false
+        }
+      },
+      "aggregates": {
+        "n_evaluated": 4,
+        "mean_qwen_overall_honest": 3.5,
+        "build_post_pass_rate_honest": "0/4",
+        "regression_vs_iter2": "yes: mean Qwen 4.0 -> 3.5; build_post 1/4 -> 0/4; hjl-j17-2 was a win, now fails on LombokBestPractices adding @Getter but Pet/PetType callers still use direct method calls"
+      },
+      "verdict": "REJECTED \u2014 hill-climber rolls back to iter-2 minus the toxic mutations",
+      "next_iter_proposals": [
+        "REMOVE LombokBestPractices (toxic on non-Lombok projects; un-idiomatic Java 21 per Qwen)",
+        "KEEP SpringFoxToSpringDoc (helped sb2-j11-1 diff, didn't hurt others)",
+        "DEFERRED: cell-aware recipe selection (Boot recipes only on Boot projects) to fix jakarta-j17-3-CAVEAT's stray DependsOnDatabaseInitialization import"
+      ]
     }
   ],
   "fitness": "0.4 * (qwen_overall / 5) + 0.4 * build_post + 0.2 * (tests_passed / max(tests_total, 1))",
