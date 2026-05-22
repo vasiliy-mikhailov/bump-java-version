@@ -1,0 +1,18 @@
+{
+  "repo_id": "junit-j11-2",
+  "repo_url": "https://github.com/jenkinsci/jenkins.git",
+  "sha": "a8adff86700b4363b791e9d77477af3852117d9d",
+  "java_version": 11,
+  "build_tool": "maven",
+  "phase_reached": "post-build",
+  "failure": "build-post",
+  "build_pre": 1,
+  "build_post": 0,
+  "tests_passed_post": 0,
+  "tests_total_post": 0,
+  "recipe_applied": 1,
+  "recipe_rc": 1,
+  "recipe_elapsed_s": 58,
+  "build_elapsed_s": 55,
+  "test_elapsed_s": 0
+}

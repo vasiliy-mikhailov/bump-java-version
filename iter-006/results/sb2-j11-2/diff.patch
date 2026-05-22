@@ -1,0 +1,2102 @@
+diff --git a/.mvn/wrapper/MavenWrapperDownloader.java b/.mvn/wrapper/MavenWrapperDownloader.java
+index c845b33..579b68a 100644
+--- a/.mvn/wrapper/MavenWrapperDownloader.java
++++ b/.mvn/wrapper/MavenWrapperDownloader.java
+@@ -14,8 +14,11 @@
+  * limitations under the License.
+  */
+ import java.io.*;
+-import java.net.*;
+-import java.nio.channels.*;
++import java.net.Authenticator;
++import java.net.PasswordAuthentication;
++import java.net.URL;
++import java.nio.channels.Channels;
++import java.nio.channels.ReadableByteChannel;
+ import java.util.Properties;
+ 
+ public class MavenWrapperDownloader {
+diff --git a/pom.xml b/pom.xml
+index 5904b26..ee33423 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -25,7 +25,7 @@
+     <properties>
+         <!-- Build properties -->
+         <maven.version>3.2.5</maven.version>
+-        <java.version>11</java.version>
++        <java.version>21</java.version>
+         <node.version>v16.17.0</node.version>
+         <npm.version>8.19.1</npm.version>
+ 
+@@ -48,7 +48,7 @@
+         <jhipster-dependencies.version>7.9.3</jhipster-dependencies.version>
+         <!-- The spring-boot version should match the one managed by
+         https://mvnrepository.com/artifact/tech.jhipster/jhipster-dependencies/${jhipster-dependencies.version} -->
+-        <spring-boot.version>2.7.3</spring-boot.version>
++        <spring-boot.version>3.3.13</spring-boot.version>
+         <!-- The hibernate version should match the one managed by
+         https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies/${spring-boot.version} -->
+         <hibernate.version>5.6.10.Final</hibernate.version>
+@@ -63,17 +63,17 @@
+         <!-- Plugin versions -->
+         <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
+         <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
+-        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
++        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+         <maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
+         <maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
+         <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
+-        <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
++        <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
+         <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+         <maven-idea-plugin.version>2.2.1</maven-idea-plugin.version>
+         <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
+-        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+-        <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
+-        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
++        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
++        <maven-war-plugin.version>3.5.1</maven-war-plugin.version>
++        <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+         <checkstyle.version>10.3.2</checkstyle.version>
+         <nohttp-checkstyle.version>0.0.10</nohttp-checkstyle.version>
+         <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
+@@ -81,7 +81,7 @@
+         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+         <git-commit-id-plugin.version>5.0.0</git-commit-id-plugin.version>
+         <modernizer-maven-plugin.version>2.4.0</modernizer-maven-plugin.version>
+-        <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
++        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+         <jib-maven-plugin.version>3.2.1</jib-maven-plugin.version>
+         <jib-maven-plugin.image>eclipse-temurin:11-jre-focal</jib-maven-plugin.image>
+         <jib-maven-plugin.architecture>amd64</jib-maven-plugin.architecture>
+@@ -111,8 +111,8 @@
+             <artifactId>jhipster-framework</artifactId>
+         </dependency>
+         <dependency>
+-            <groupId>javax.annotation</groupId>
+-            <artifactId>javax.annotation-api</artifactId>
++            <groupId>jakarta.mail</groupId>
++            <artifactId>jakarta.mail-api</artifactId>
+         </dependency>
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+@@ -120,7 +120,7 @@
+         </dependency>
+         <dependency>
+             <groupId>com.fasterxml.jackson.module</groupId>
+-            <artifactId>jackson-module-jaxb-annotations</artifactId>
++            <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+         </dependency>
+         <dependency>
+             <groupId>com.fasterxml.jackson.datatype</groupId>
+@@ -136,7 +136,8 @@
+         </dependency>
+         <dependency>
+             <groupId>org.springdoc</groupId>
+-            <artifactId>springdoc-openapi-webmvc-core</artifactId>
++            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
++            <version>2.1.0</version>
+         </dependency>
+         <dependency>
+             <groupId>com.zaxxer</groupId>
+@@ -153,19 +154,23 @@
+         <dependency>
+             <groupId>org.ehcache</groupId>
+             <artifactId>ehcache</artifactId>
++            <classifier>jakarta</classifier>
+         </dependency>
+         <dependency>
+-            <groupId>org.hibernate</groupId>
++            <groupId>org.hibernate.orm</groupId>
+             <artifactId>hibernate-jcache</artifactId>
++            <version>6.0.2.Final</version>
+         </dependency>
+         <dependency>
+-            <groupId>org.hibernate</groupId>
++            <groupId>org.hibernate.orm</groupId>
+             <artifactId>hibernate-jpamodelgen</artifactId>
+             <scope>provided</scope>
++            <version>6.0.2.Final</version>
+         </dependency>
+         <dependency>
+-            <groupId>org.hibernate</groupId>
++            <groupId>org.hibernate.orm</groupId>
+             <artifactId>hibernate-core</artifactId>
++            <version>6.0.2.Final</version>
+         </dependency>
+         <dependency>
+             <groupId>org.hibernate.validator</groupId>
+@@ -399,8 +404,6 @@
+                     <artifactId>maven-compiler-plugin</artifactId>
+                     <version>${maven-compiler-plugin.version}</version>
+                     <configuration>
+-                        <source>${java.version}</source>
+-                        <target>${java.version}</target>
+                         <annotationProcessorPaths>
+                             <path>
+                                 <groupId>org.springframework.boot</groupId>
+@@ -425,6 +428,7 @@
+                             </path>
+                             <!-- jhipster-needle-maven-add-annotation-processor -->
+                         </annotationProcessorPaths>
++                        <release>${java.version}</release>
+                     </configuration>
+                 </plugin>
+                 <plugin>
+@@ -925,6 +929,7 @@
+                             <testExcludes>
+                                 <testExclude>io/github/jhipster/sample/config/MysqlTestContainer.java</testExclude>
+                             </testExcludes>
++                            <release>${java.version}</release>
+                         </configuration>
+                     </plugin>
+ 
+@@ -996,9 +1001,8 @@
+                                     <version>${spring-boot.version}</version>
+                                 </dependency>
+                                 <dependency>
+-                                    <groupId>javax.validation</groupId>
+-                                    <artifactId>validation-api</artifactId>
+-                                    <version>${validation-api.version}</version>
++                                    <groupId>jakarta.validation</groupId>
++                                    <artifactId>jakarta.validation-api</artifactId>
+                                 </dependency>
+                             </dependencies>
+                         </plugin>
+@@ -1019,8 +1023,9 @@
+                     <scope>test</scope>
+                 </dependency>
+                 <dependency>
+-                    <groupId>mysql</groupId>
+-                    <artifactId>mysql-connector-java</artifactId>
++                    <groupId>com.mysql</groupId>
++                    <artifactId>mysql-connector-j</artifactId>
++                    <version>8.0.33</version>
+                 </dependency>
+             </dependencies>
+             <build>
+@@ -1091,9 +1096,8 @@
+                                     <version>${spring-boot.version}</version>
+                                 </dependency>
+                                 <dependency>
+-                                    <groupId>javax.validation</groupId>
+-                                    <artifactId>validation-api</artifactId>
+-                                    <version>${validation-api.version}</version>
++                                    <groupId>jakarta.validation</groupId>
++                                    <artifactId>jakarta.validation-api</artifactId>
+                                 </dependency>
+                             </dependencies>
+                         </plugin>
+@@ -1204,8 +1208,9 @@
+                     <version>${mapstruct.version}</version>
+                 </dependency>
+                 <dependency>
+-                    <groupId>org.hibernate</groupId>
++                    <groupId>org.hibernate.orm</groupId>
+                     <artifactId>hibernate-jpamodelgen</artifactId>
++                    <version>6.0.2.Final</version>
+                 </dependency>
+             </dependencies>
+         </profile>
+diff --git a/src/main/java/io/github/jhipster/sample/GeneratedByJHipster.java b/src/main/java/io/github/jhipster/sample/GeneratedByJHipster.java
+index 37db789..db8771a 100644
+--- a/src/main/java/io/github/jhipster/sample/GeneratedByJHipster.java
++++ b/src/main/java/io/github/jhipster/sample/GeneratedByJHipster.java
+@@ -4,7 +4,7 @@ import java.lang.annotation.ElementType;
+ import java.lang.annotation.Retention;
+ import java.lang.annotation.RetentionPolicy;
+ import java.lang.annotation.Target;
+-import javax.annotation.Generated;
++import jakarta.annotation.Generated;
+ 
+ @Generated(value = "JHipster", comments = "Generated by JHipster 7.9.4")
+ @Retention(RetentionPolicy.SOURCE)
+diff --git a/src/main/java/io/github/jhipster/sample/JhipsterSampleApplicationReactApp.java b/src/main/java/io/github/jhipster/sample/JhipsterSampleApplicationReactApp.java
+index 3a881a3..3189556 100644
+--- a/src/main/java/io/github/jhipster/sample/JhipsterSampleApplicationReactApp.java
++++ b/src/main/java/io/github/jhipster/sample/JhipsterSampleApplicationReactApp.java
+@@ -7,7 +7,7 @@ import java.net.UnknownHostException;
+ import java.util.Arrays;
+ import java.util.Collection;
+ import java.util.Optional;
+-import javax.annotation.PostConstruct;
++import jakarta.annotation.PostConstruct;
+ import org.apache.commons.lang3.StringUtils;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -86,11 +86,18 @@ public class JhipsterSampleApplicationReactApp {
+         }
+         log.info(
+             CRLFLogConverter.CRLF_SAFE_MARKER,
+-            "\n----------------------------------------------------------\n\t" +
+-            "Application '{}' is running! Access URLs:\n\t" +
+-            "Local: \t\t{}://localhost:{}{}\n\t" +
+-            "External: \t{}://{}:{}{}\n\t" +
+-            "Profile(s): \t{}\n----------------------------------------------------------",
++            """
++            
++            ----------------------------------------------------------
++            	\
++            Application '{}' is running! Access URLs:
++            	\
++            Local: 		{}://localhost:{}{}
++            	\
++            External: 	{}://{}:{}{}
++            	\
++            Profile(s): 	{}
++            ----------------------------------------------------------""",
+             env.getProperty("spring.application.name"),
+             protocol,
+             serverPort,
+diff --git a/src/main/java/io/github/jhipster/sample/config/CacheConfiguration.java b/src/main/java/io/github/jhipster/sample/config/CacheConfiguration.java
+index bffc4ba..1a5108d 100644
+--- a/src/main/java/io/github/jhipster/sample/config/CacheConfiguration.java
++++ b/src/main/java/io/github/jhipster/sample/config/CacheConfiguration.java
+@@ -1,7 +1,9 @@
+ package io.github.jhipster.sample.config;
+ 
+ import java.time.Duration;
+-import org.ehcache.config.builders.*;
++import org.ehcache.config.builders.CacheConfigurationBuilder;
++import org.ehcache.config.builders.ExpiryPolicyBuilder;
++import org.ehcache.config.builders.ResourcePoolsBuilder;
+ import org.ehcache.jsr107.Eh107Configuration;
+ import org.hibernate.cache.jcache.ConfigSettings;
+ import org.springframework.beans.factory.annotation.Autowired;
+@@ -11,7 +13,8 @@ import org.springframework.boot.info.BuildProperties;
+ import org.springframework.boot.info.GitProperties;
+ import org.springframework.cache.annotation.EnableCaching;
+ import org.springframework.cache.interceptor.KeyGenerator;
+-import org.springframework.context.annotation.*;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
+ import tech.jhipster.config.JHipsterProperties;
+ import tech.jhipster.config.cache.PrefixedKeyGenerator;
+ 
+diff --git a/src/main/java/io/github/jhipster/sample/config/LocaleConfiguration.java b/src/main/java/io/github/jhipster/sample/config/LocaleConfiguration.java
+index 4956285..199244e 100644
+--- a/src/main/java/io/github/jhipster/sample/config/LocaleConfiguration.java
++++ b/src/main/java/io/github/jhipster/sample/config/LocaleConfiguration.java
+@@ -3,7 +3,8 @@ package io.github.jhipster.sample.config;
+ import org.springframework.context.annotation.Bean;
+ import org.springframework.context.annotation.Configuration;
+ import org.springframework.web.servlet.LocaleResolver;
+-import org.springframework.web.servlet.config.annotation.*;
++import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
++import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+ import tech.jhipster.config.locale.AngularCookieLocaleResolver;
+ 
+diff --git a/src/main/java/io/github/jhipster/sample/config/LoggingAspectConfiguration.java b/src/main/java/io/github/jhipster/sample/config/LoggingAspectConfiguration.java
+index 58e25a1..a8a9c11 100644
+--- a/src/main/java/io/github/jhipster/sample/config/LoggingAspectConfiguration.java
++++ b/src/main/java/io/github/jhipster/sample/config/LoggingAspectConfiguration.java
+@@ -1,7 +1,10 @@
+ package io.github.jhipster.sample.config;
+ 
+ import io.github.jhipster.sample.aop.logging.LoggingAspect;
+-import org.springframework.context.annotation.*;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
++import org.springframework.context.annotation.EnableAspectJAutoProxy;
++import org.springframework.context.annotation.Profile;
+ import org.springframework.core.env.Environment;
+ import tech.jhipster.config.JHipsterConstants;
+ 
+diff --git a/src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java b/src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java
+index 09b36fa..28a834c 100644
+--- a/src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java
++++ b/src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java
+@@ -1,11 +1,14 @@
+ package io.github.jhipster.sample.config;
+ 
++import static org.springframework.security.config.Customizer.withDefaults;
++
+ import io.github.jhipster.sample.security.*;
+ import io.github.jhipster.sample.security.jwt.*;
+ import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
+ import org.springframework.context.annotation.Import;
+ import org.springframework.http.HttpMethod;
+-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
++import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+ import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+ import org.springframework.security.config.http.SessionCreationPolicy;
+@@ -18,8 +21,9 @@ import org.springframework.web.filter.CorsFilter;
+ import org.zalando.problem.spring.web.advice.security.SecurityProblemSupport;
+ import tech.jhipster.config.JHipsterProperties;
+ 
++@Configuration
+ @EnableWebSecurity
+-@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
++@EnableMethodSecurity(securedEnabled = true)
+ @Import(SecurityProblemSupport.class)
+ public class SecurityConfiguration {
+ 
+@@ -51,50 +55,44 @@ public class SecurityConfiguration {
+     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+         // @formatter:off
+         http
+-            .csrf()
+-            .ignoringAntMatchers("/h2-console/**")
+-            .disable()
++            .csrf(csrf -> csrf
++                .ignoringRequestMatchers("/h2-console/**")
++                .disable())
+             .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+-            .exceptionHandling()
++            .exceptionHandling(handling -> handling
+                 .authenticationEntryPoint(problemSupport)
+-                .accessDeniedHandler(problemSupport)
+-        .and()
+-            .headers()
+-                .contentSecurityPolicy(jHipsterProperties.getSecurity().getContentSecurityPolicy())
+-            .and()
+-                .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+-            .and()
+-                .permissionsPolicy().policy("camera=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), sync-xhr=()")
+-            .and()
+-                .frameOptions().sameOrigin()
+-        .and()
+-            .sessionManagement()
+-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+-        .and()
+-            .authorizeRequests()
+-            .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+-            .antMatchers("/app/**/*.{js,html}").permitAll()
+-            .antMatchers("/i18n/**").permitAll()
+-            .antMatchers("/content/**").permitAll()
+-            .antMatchers("/swagger-ui/**").permitAll()
+-            .antMatchers("/test/**").permitAll()
+-            .antMatchers("/h2-console/**").permitAll()
+-            .antMatchers("/api/authenticate").permitAll()
+-            .antMatchers("/api/register").permitAll()
+-            .antMatchers("/api/activate").permitAll()
+-            .antMatchers("/api/account/reset-password/init").permitAll()
+-            .antMatchers("/api/account/reset-password/finish").permitAll()
+-            .antMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
+-            .antMatchers("/api/**").authenticated()
+-            .antMatchers("/management/health").permitAll()
+-            .antMatchers("/management/health/**").permitAll()
+-            .antMatchers("/management/info").permitAll()
+-            .antMatchers("/management/prometheus").permitAll()
+-            .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN)
+-        .and()
+-            .httpBasic()
+-        .and()
+-            .apply(securityConfigurerAdapter());
++                .accessDeniedHandler(problemSupport))
++            .headers(headers -> headers
++                .contentSecurityPolicy(policy -> policy
++                    .policyDirectives(jHipsterProperties.getSecurity().getContentSecurityPolicy()))
++                .referrerPolicy(policy -> policy
++                    .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
++                .permissionsPolicy(policy -> policy.policy("camera=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), sync-xhr=()"))
++                .frameOptions(options -> options.sameOrigin()))
++            .sessionManagement(management -> management
++                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
++            .authorizeHttpRequests(requests -> requests
++                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
++                .requestMatchers("/app/**/*.{js,html}").permitAll()
++                .requestMatchers("/i18n/**").permitAll()
++                .requestMatchers("/content/**").permitAll()
++                .requestMatchers("/swagger-ui/**").permitAll()
++                .requestMatchers("/test/**").permitAll()
++                .requestMatchers("/h2-console/**").permitAll()
++                .requestMatchers("/api/authenticate").permitAll()
++                .requestMatchers("/api/register").permitAll()
++                .requestMatchers("/api/activate").permitAll()
++                .requestMatchers("/api/account/reset-password/init").permitAll()
++                .requestMatchers("/api/account/reset-password/finish").permitAll()
++                .requestMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
++                .requestMatchers("/api/**").authenticated()
++                .requestMatchers("/management/health").permitAll()
++                .requestMatchers("/management/health/**").permitAll()
++                .requestMatchers("/management/info").permitAll()
++                .requestMatchers("/management/prometheus").permitAll()
++                .requestMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN))
++            .httpBasic(withDefaults())
++            .with(securityConfigurerAdapter(), withDefaults());
+         return http.build();
+         // @formatter:on
+     }
+diff --git a/src/main/java/io/github/jhipster/sample/config/WebConfigurer.java b/src/main/java/io/github/jhipster/sample/config/WebConfigurer.java
+index 75d7d6c..eee762b 100644
+--- a/src/main/java/io/github/jhipster/sample/config/WebConfigurer.java
++++ b/src/main/java/io/github/jhipster/sample/config/WebConfigurer.java
+@@ -4,11 +4,13 @@ import static java.net.URLDecoder.decode;
+ 
+ import java.io.File;
+ import java.nio.charset.StandardCharsets;
+-import java.nio.file.Paths;
+-import javax.servlet.*;
++import java.nio.file.Path;
++import jakarta.servlet.ServletContext;
++import jakarta.servlet.ServletException;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+-import org.springframework.boot.web.server.*;
++import org.springframework.boot.web.server.WebServerFactory;
++import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+ import org.springframework.boot.web.servlet.ServletContextInitializer;
+ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
+ import org.springframework.context.annotation.Bean;
+@@ -62,8 +64,7 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
+     }
+ 
+     private void setLocationForStaticAssets(WebServerFactory server) {
+-        if (server instanceof ConfigurableServletWebServerFactory) {
+-            ConfigurableServletWebServerFactory servletWebServer = (ConfigurableServletWebServerFactory) server;
++        if (server instanceof ConfigurableServletWebServerFactory servletWebServer) {
+             File root;
+             String prefixPath = resolvePathPrefix();
+             root = new File(prefixPath + "target/classes/static/");
+@@ -78,7 +79,7 @@ public class WebConfigurer implements ServletContextInitializer, WebServerFactor
+      */
+     private String resolvePathPrefix() {
+         String fullExecutablePath = decode(this.getClass().getResource("").getPath(), StandardCharsets.UTF_8);
+-        String rootPath = Paths.get(".").toUri().normalize().getPath();
++        String rootPath = Path.of(".").toUri().normalize().getPath();
+         String extractedPath = fullExecutablePath.replace(rootPath, "");
+         int extractionEndIndex = extractedPath.indexOf("target/");
+         if (extractionEndIndex <= 0) {
+diff --git a/src/main/java/io/github/jhipster/sample/domain/AbstractAuditingEntity.java b/src/main/java/io/github/jhipster/sample/domain/AbstractAuditingEntity.java
+index ffef4f5..8bfdce7 100644
+--- a/src/main/java/io/github/jhipster/sample/domain/AbstractAuditingEntity.java
++++ b/src/main/java/io/github/jhipster/sample/domain/AbstractAuditingEntity.java
+@@ -1,11 +1,12 @@
+ package io.github.jhipster.sample.domain;
+ 
+ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
++import java.io.Serial;
+ import java.io.Serializable;
+ import java.time.Instant;
+-import javax.persistence.Column;
+-import javax.persistence.EntityListeners;
+-import javax.persistence.MappedSuperclass;
++import jakarta.persistence.Column;
++import jakarta.persistence.EntityListeners;
++import jakarta.persistence.MappedSuperclass;
+ import org.springframework.data.annotation.CreatedBy;
+ import org.springframework.data.annotation.CreatedDate;
+ import org.springframework.data.annotation.LastModifiedBy;
+@@ -21,6 +22,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+ @JsonIgnoreProperties(value = { "createdBy", "createdDate", "lastModifiedBy", "lastModifiedDate" }, allowGetters = true)
+ public abstract class AbstractAuditingEntity<T> implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     public abstract T getId();
+diff --git a/src/main/java/io/github/jhipster/sample/domain/Authority.java b/src/main/java/io/github/jhipster/sample/domain/Authority.java
+index ecc01e6..78adf09 100644
+--- a/src/main/java/io/github/jhipster/sample/domain/Authority.java
++++ b/src/main/java/io/github/jhipster/sample/domain/Authority.java
+@@ -1,13 +1,13 @@
+ package io.github.jhipster.sample.domain;
+-
++import java.io.Serial;
+ import java.io.Serializable;
+ import java.util.Objects;
+-import javax.persistence.Column;
+-import javax.persistence.Entity;
+-import javax.persistence.Id;
+-import javax.persistence.Table;
+-import javax.validation.constraints.NotNull;
+-import javax.validation.constraints.Size;
++import jakarta.persistence.Column;
++import jakarta.persistence.Entity;
++import jakarta.persistence.Id;
++import jakarta.persistence.Table;
++import jakarta.validation.constraints.NotNull;
++import jakarta.validation.constraints.Size;
+ import org.hibernate.annotations.Cache;
+ import org.hibernate.annotations.CacheConcurrencyStrategy;
+ 
+@@ -19,6 +19,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
+ @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+ public class Authority implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     @NotNull
+diff --git a/src/main/java/io/github/jhipster/sample/domain/BankAccount.java b/src/main/java/io/github/jhipster/sample/domain/BankAccount.java
+index 21d5f20..c9f0280 100644
+--- a/src/main/java/io/github/jhipster/sample/domain/BankAccount.java
++++ b/src/main/java/io/github/jhipster/sample/domain/BankAccount.java
+@@ -1,12 +1,13 @@
+ package io.github.jhipster.sample.domain;
+ 
+ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
++import java.io.Serial;
+ import java.io.Serializable;
+ import java.math.BigDecimal;
+ import java.util.HashSet;
+ import java.util.Set;
+-import javax.persistence.*;
+-import javax.validation.constraints.*;
++import jakarta.persistence.*;
++import jakarta.validation.constraints.NotNull;
+ import org.hibernate.annotations.Cache;
+ import org.hibernate.annotations.CacheConcurrencyStrategy;
+ 
+@@ -19,6 +20,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
+ @SuppressWarnings("common-java:DuplicatedBlocks")
+ public class BankAccount implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     @Id
+diff --git a/src/main/java/io/github/jhipster/sample/domain/Label.java b/src/main/java/io/github/jhipster/sample/domain/Label.java
+index ee7cf29..79cdb8d 100644
+--- a/src/main/java/io/github/jhipster/sample/domain/Label.java
++++ b/src/main/java/io/github/jhipster/sample/domain/Label.java
+@@ -1,11 +1,13 @@
+ package io.github.jhipster.sample.domain;
+ 
+ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
++import java.io.Serial;
+ import java.io.Serializable;
+ import java.util.HashSet;
+ import java.util.Set;
+-import javax.persistence.*;
+-import javax.validation.constraints.*;
++import jakarta.persistence.*;
++import jakarta.validation.constraints.NotNull;
++import jakarta.validation.constraints.Size;
+ import org.hibernate.annotations.Cache;
+ import org.hibernate.annotations.CacheConcurrencyStrategy;
+ 
+@@ -18,6 +20,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
+ @SuppressWarnings("common-java:DuplicatedBlocks")
+ public class Label implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     @Id
+diff --git a/src/main/java/io/github/jhipster/sample/domain/Operation.java b/src/main/java/io/github/jhipster/sample/domain/Operation.java
+index 063cf10..ec8719e 100644
+--- a/src/main/java/io/github/jhipster/sample/domain/Operation.java
++++ b/src/main/java/io/github/jhipster/sample/domain/Operation.java
+@@ -1,13 +1,14 @@
+ package io.github.jhipster.sample.domain;
+ 
+ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
++import java.io.Serial;
+ import java.io.Serializable;
+ import java.math.BigDecimal;
+ import java.time.Instant;
+ import java.util.HashSet;
+ import java.util.Set;
+-import javax.persistence.*;
+-import javax.validation.constraints.*;
++import jakarta.persistence.*;
++import jakarta.validation.constraints.NotNull;
+ import org.hibernate.annotations.Cache;
+ import org.hibernate.annotations.CacheConcurrencyStrategy;
+ 
+@@ -20,6 +21,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
+ @SuppressWarnings("common-java:DuplicatedBlocks")
+ public class Operation implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     @Id
+diff --git a/src/main/java/io/github/jhipster/sample/domain/User.java b/src/main/java/io/github/jhipster/sample/domain/User.java
+index 2dc643e..1007d14 100644
+--- a/src/main/java/io/github/jhipster/sample/domain/User.java
++++ b/src/main/java/io/github/jhipster/sample/domain/User.java
+@@ -2,16 +2,17 @@ package io.github.jhipster.sample.domain;
+ 
+ import com.fasterxml.jackson.annotation.JsonIgnore;
+ import io.github.jhipster.sample.config.Constants;
++import java.io.Serial;
+ import java.io.Serializable;
+ import java.time.Instant;
+ import java.util.HashSet;
+ import java.util.Locale;
+ import java.util.Set;
+-import javax.persistence.*;
+-import javax.validation.constraints.Email;
+-import javax.validation.constraints.NotNull;
+-import javax.validation.constraints.Pattern;
+-import javax.validation.constraints.Size;
++import jakarta.persistence.*;
++import jakarta.validation.constraints.Email;
++import jakarta.validation.constraints.NotNull;
++import jakarta.validation.constraints.Pattern;
++import jakarta.validation.constraints.Size;
+ import org.apache.commons.lang3.StringUtils;
+ import org.hibernate.annotations.BatchSize;
+ import org.hibernate.annotations.Cache;
+@@ -25,6 +26,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
+ @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+ public class User extends AbstractAuditingEntity<Long> implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     @Id
+diff --git a/src/main/java/io/github/jhipster/sample/repository/BankAccountRepository.java b/src/main/java/io/github/jhipster/sample/repository/BankAccountRepository.java
+index f704899..da9b02f 100644
+--- a/src/main/java/io/github/jhipster/sample/repository/BankAccountRepository.java
++++ b/src/main/java/io/github/jhipster/sample/repository/BankAccountRepository.java
+@@ -5,7 +5,8 @@ import java.util.List;
+ import java.util.Optional;
+ import org.springframework.data.domain.Page;
+ import org.springframework.data.domain.Pageable;
+-import org.springframework.data.jpa.repository.*;
++import org.springframework.data.jpa.repository.JpaRepository;
++import org.springframework.data.jpa.repository.Query;
+ import org.springframework.data.repository.query.Param;
+ import org.springframework.stereotype.Repository;
+ 
+diff --git a/src/main/java/io/github/jhipster/sample/repository/LabelRepository.java b/src/main/java/io/github/jhipster/sample/repository/LabelRepository.java
+index e863552..73b5ca9 100644
+--- a/src/main/java/io/github/jhipster/sample/repository/LabelRepository.java
++++ b/src/main/java/io/github/jhipster/sample/repository/LabelRepository.java
+@@ -1,7 +1,7 @@
+ package io.github.jhipster.sample.repository;
+ 
+ import io.github.jhipster.sample.domain.Label;
+-import org.springframework.data.jpa.repository.*;
++import org.springframework.data.jpa.repository.JpaRepository;
+ import org.springframework.stereotype.Repository;
+ 
+ /**
+diff --git a/src/main/java/io/github/jhipster/sample/repository/OperationRepository.java b/src/main/java/io/github/jhipster/sample/repository/OperationRepository.java
+index a81c147..753146e 100644
+--- a/src/main/java/io/github/jhipster/sample/repository/OperationRepository.java
++++ b/src/main/java/io/github/jhipster/sample/repository/OperationRepository.java
+@@ -5,7 +5,8 @@ import java.util.List;
+ import java.util.Optional;
+ import org.springframework.data.domain.Page;
+ import org.springframework.data.domain.Pageable;
+-import org.springframework.data.jpa.repository.*;
++import org.springframework.data.jpa.repository.JpaRepository;
++import org.springframework.data.jpa.repository.Query;
+ import org.springframework.data.repository.query.Param;
+ import org.springframework.stereotype.Repository;
+ 
+diff --git a/src/main/java/io/github/jhipster/sample/repository/OperationRepositoryWithBagRelationshipsImpl.java b/src/main/java/io/github/jhipster/sample/repository/OperationRepositoryWithBagRelationshipsImpl.java
+index e88dbdc..c32d814 100644
+--- a/src/main/java/io/github/jhipster/sample/repository/OperationRepositoryWithBagRelationshipsImpl.java
++++ b/src/main/java/io/github/jhipster/sample/repository/OperationRepositoryWithBagRelationshipsImpl.java
+@@ -6,8 +6,8 @@ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Optional;
+ import java.util.stream.IntStream;
+-import javax.persistence.EntityManager;
+-import javax.persistence.PersistenceContext;
++import jakarta.persistence.EntityManager;
++import jakarta.persistence.PersistenceContext;
+ import org.hibernate.annotations.QueryHints;
+ import org.springframework.data.domain.Page;
+ import org.springframework.data.domain.PageImpl;
+diff --git a/src/main/java/io/github/jhipster/sample/repository/UserRepository.java b/src/main/java/io/github/jhipster/sample/repository/UserRepository.java
+index 5233c91..a278441 100644
+--- a/src/main/java/io/github/jhipster/sample/repository/UserRepository.java
++++ b/src/main/java/io/github/jhipster/sample/repository/UserRepository.java
+@@ -5,7 +5,8 @@ import java.time.Instant;
+ import java.util.List;
+ import java.util.Optional;
+ import org.springframework.cache.annotation.Cacheable;
+-import org.springframework.data.domain.*;
++import org.springframework.data.domain.Page;
++import org.springframework.data.domain.Pageable;
+ import org.springframework.data.jpa.repository.EntityGraph;
+ import org.springframework.data.jpa.repository.JpaRepository;
+ import org.springframework.stereotype.Repository;
+diff --git a/src/main/java/io/github/jhipster/sample/security/DomainUserDetailsService.java b/src/main/java/io/github/jhipster/sample/security/DomainUserDetailsService.java
+index a9d2f31..2a8539c 100644
+--- a/src/main/java/io/github/jhipster/sample/security/DomainUserDetailsService.java
++++ b/src/main/java/io/github/jhipster/sample/security/DomainUserDetailsService.java
+@@ -3,7 +3,8 @@ package io.github.jhipster.sample.security;
+ import io.github.jhipster.sample.domain.Authority;
+ import io.github.jhipster.sample.domain.User;
+ import io.github.jhipster.sample.repository.UserRepository;
+-import java.util.*;
++import java.util.List;
++import java.util.Locale;
+ import java.util.stream.Collectors;
+ import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator;
+ import org.slf4j.Logger;
+diff --git a/src/main/java/io/github/jhipster/sample/security/UserNotActivatedException.java b/src/main/java/io/github/jhipster/sample/security/UserNotActivatedException.java
+index 7285d6c..c9f3767 100644
+--- a/src/main/java/io/github/jhipster/sample/security/UserNotActivatedException.java
++++ b/src/main/java/io/github/jhipster/sample/security/UserNotActivatedException.java
+@@ -1,5 +1,6 @@
+ package io.github.jhipster.sample.security;
+ 
++import java.io.Serial;
+ import org.springframework.security.core.AuthenticationException;
+ 
+ /**
+@@ -7,6 +8,7 @@ import org.springframework.security.core.AuthenticationException;
+  */
+ public class UserNotActivatedException extends AuthenticationException {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     public UserNotActivatedException(String message) {
+diff --git a/src/main/java/io/github/jhipster/sample/security/jwt/JWTFilter.java b/src/main/java/io/github/jhipster/sample/security/jwt/JWTFilter.java
+index 27faea2..0220959 100644
+--- a/src/main/java/io/github/jhipster/sample/security/jwt/JWTFilter.java
++++ b/src/main/java/io/github/jhipster/sample/security/jwt/JWTFilter.java
+@@ -1,11 +1,11 @@
+ package io.github.jhipster.sample.security.jwt;
+ 
+ import java.io.IOException;
+-import javax.servlet.FilterChain;
+-import javax.servlet.ServletException;
+-import javax.servlet.ServletRequest;
+-import javax.servlet.ServletResponse;
+-import javax.servlet.http.HttpServletRequest;
++import jakarta.servlet.FilterChain;
++import jakarta.servlet.ServletException;
++import jakarta.servlet.ServletRequest;
++import jakarta.servlet.ServletResponse;
++import jakarta.servlet.http.HttpServletRequest;
+ import org.springframework.security.core.Authentication;
+ import org.springframework.security.core.context.SecurityContextHolder;
+ import org.springframework.util.StringUtils;
+diff --git a/src/main/java/io/github/jhipster/sample/security/jwt/TokenProvider.java b/src/main/java/io/github/jhipster/sample/security/jwt/TokenProvider.java
+index 203f944..a8e4f72 100644
+--- a/src/main/java/io/github/jhipster/sample/security/jwt/TokenProvider.java
++++ b/src/main/java/io/github/jhipster/sample/security/jwt/TokenProvider.java
+@@ -7,7 +7,9 @@ import io.jsonwebtoken.security.Keys;
+ import io.jsonwebtoken.security.SignatureException;
+ import java.nio.charset.StandardCharsets;
+ import java.security.Key;
+-import java.util.*;
++import java.util.Arrays;
++import java.util.Collection;
++import java.util.Date;
+ import java.util.stream.Collectors;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+diff --git a/src/main/java/io/github/jhipster/sample/service/EmailAlreadyUsedException.java b/src/main/java/io/github/jhipster/sample/service/EmailAlreadyUsedException.java
+index f82fe90..93d303b 100644
+--- a/src/main/java/io/github/jhipster/sample/service/EmailAlreadyUsedException.java
++++ b/src/main/java/io/github/jhipster/sample/service/EmailAlreadyUsedException.java
+@@ -1,7 +1,10 @@
+ package io.github.jhipster.sample.service;
+ 
++import java.io.Serial;
++
+ public class EmailAlreadyUsedException extends RuntimeException {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     public EmailAlreadyUsedException() {
+diff --git a/src/main/java/io/github/jhipster/sample/service/InvalidPasswordException.java b/src/main/java/io/github/jhipster/sample/service/InvalidPasswordException.java
+index 3bacfcc..f8a18ce 100644
+--- a/src/main/java/io/github/jhipster/sample/service/InvalidPasswordException.java
++++ b/src/main/java/io/github/jhipster/sample/service/InvalidPasswordException.java
+@@ -1,7 +1,10 @@
+ package io.github.jhipster.sample.service;
+ 
++import java.io.Serial;
++
+ public class InvalidPasswordException extends RuntimeException {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     public InvalidPasswordException() {
+diff --git a/src/main/java/io/github/jhipster/sample/service/MailService.java b/src/main/java/io/github/jhipster/sample/service/MailService.java
+index 73cfe18..2affec6 100644
+--- a/src/main/java/io/github/jhipster/sample/service/MailService.java
++++ b/src/main/java/io/github/jhipster/sample/service/MailService.java
+@@ -3,8 +3,8 @@ package io.github.jhipster.sample.service;
+ import io.github.jhipster.sample.domain.User;
+ import java.nio.charset.StandardCharsets;
+ import java.util.Locale;
+-import javax.mail.MessagingException;
+-import javax.mail.internet.MimeMessage;
++import jakarta.mail.MessagingException;
++import jakarta.mail.internet.MimeMessage;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.context.MessageSource;
+@@ -14,7 +14,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
+ import org.springframework.scheduling.annotation.Async;
+ import org.springframework.stereotype.Service;
+ import org.thymeleaf.context.Context;
+-import org.thymeleaf.spring5.SpringTemplateEngine;
++import org.thymeleaf.spring6.SpringTemplateEngine;
+ import tech.jhipster.config.JHipsterProperties;
+ 
+ /**
+diff --git a/src/main/java/io/github/jhipster/sample/service/UserService.java b/src/main/java/io/github/jhipster/sample/service/UserService.java
+index fc7647b..2853606 100644
+--- a/src/main/java/io/github/jhipster/sample/service/UserService.java
++++ b/src/main/java/io/github/jhipster/sample/service/UserService.java
+@@ -169,8 +169,7 @@ public class UserService {
+                 .getAuthorities()
+                 .stream()
+                 .map(authorityRepository::findById)
+-                .filter(Optional::isPresent)
+-                .map(Optional::get)
++                .flatMap(Optional::stream)
+                 .collect(Collectors.toSet());
+             user.setAuthorities(authorities);
+         }
+@@ -208,8 +207,7 @@ public class UserService {
+                     .getAuthorities()
+                     .stream()
+                     .map(authorityRepository::findById)
+-                    .filter(Optional::isPresent)
+-                    .map(Optional::get)
++                    .flatMap(Optional::stream)
+                     .forEach(managedAuthorities::add);
+                 this.clearUserCaches(user);
+                 log.debug("Changed Information for User: {}", user);
+diff --git a/src/main/java/io/github/jhipster/sample/service/UsernameAlreadyUsedException.java b/src/main/java/io/github/jhipster/sample/service/UsernameAlreadyUsedException.java
+index a22bcd6..d8a01e0 100644
+--- a/src/main/java/io/github/jhipster/sample/service/UsernameAlreadyUsedException.java
++++ b/src/main/java/io/github/jhipster/sample/service/UsernameAlreadyUsedException.java
+@@ -1,7 +1,10 @@
+ package io.github.jhipster.sample.service;
+ 
++import java.io.Serial;
++
+ public class UsernameAlreadyUsedException extends RuntimeException {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     public UsernameAlreadyUsedException() {
+diff --git a/src/main/java/io/github/jhipster/sample/service/dto/AdminUserDTO.java b/src/main/java/io/github/jhipster/sample/service/dto/AdminUserDTO.java
+index 89f7a0a..6e891f4 100644
+--- a/src/main/java/io/github/jhipster/sample/service/dto/AdminUserDTO.java
++++ b/src/main/java/io/github/jhipster/sample/service/dto/AdminUserDTO.java
+@@ -3,17 +3,22 @@ package io.github.jhipster.sample.service.dto;
+ import io.github.jhipster.sample.config.Constants;
+ import io.github.jhipster.sample.domain.Authority;
+ import io.github.jhipster.sample.domain.User;
++import java.io.Serial;
+ import java.io.Serializable;
+ import java.time.Instant;
+ import java.util.Set;
+ import java.util.stream.Collectors;
+-import javax.validation.constraints.*;
++import jakarta.validation.constraints.Email;
++import jakarta.validation.constraints.NotBlank;
++import jakarta.validation.constraints.Pattern;
++import jakarta.validation.constraints.Size;
+ 
+ /**
+  * A DTO representing a user, with his authorities.
+  */
+ public class AdminUserDTO implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     private Long id;
+diff --git a/src/main/java/io/github/jhipster/sample/service/dto/BankAccountDTO.java b/src/main/java/io/github/jhipster/sample/service/dto/BankAccountDTO.java
+index 8f5f151..f3d4983 100644
+--- a/src/main/java/io/github/jhipster/sample/service/dto/BankAccountDTO.java
++++ b/src/main/java/io/github/jhipster/sample/service/dto/BankAccountDTO.java
+@@ -3,7 +3,7 @@ package io.github.jhipster.sample.service.dto;
+ import java.io.Serializable;
+ import java.math.BigDecimal;
+ import java.util.Objects;
+-import javax.validation.constraints.*;
++import jakarta.validation.constraints.NotNull;
+ 
+ /**
+  * A DTO for the {@link io.github.jhipster.sample.domain.BankAccount} entity.
+diff --git a/src/main/java/io/github/jhipster/sample/service/dto/LabelDTO.java b/src/main/java/io/github/jhipster/sample/service/dto/LabelDTO.java
+index fcfadfa..0ff29b4 100644
+--- a/src/main/java/io/github/jhipster/sample/service/dto/LabelDTO.java
++++ b/src/main/java/io/github/jhipster/sample/service/dto/LabelDTO.java
+@@ -2,7 +2,8 @@ package io.github.jhipster.sample.service.dto;
+ 
+ import java.io.Serializable;
+ import java.util.Objects;
+-import javax.validation.constraints.*;
++import jakarta.validation.constraints.NotNull;
++import jakarta.validation.constraints.Size;
+ 
+ /**
+  * A DTO for the {@link io.github.jhipster.sample.domain.Label} entity.
+diff --git a/src/main/java/io/github/jhipster/sample/service/dto/OperationDTO.java b/src/main/java/io/github/jhipster/sample/service/dto/OperationDTO.java
+index a0a0814..f5e46dd 100644
+--- a/src/main/java/io/github/jhipster/sample/service/dto/OperationDTO.java
++++ b/src/main/java/io/github/jhipster/sample/service/dto/OperationDTO.java
+@@ -6,7 +6,7 @@ import java.time.Instant;
+ import java.util.HashSet;
+ import java.util.Objects;
+ import java.util.Set;
+-import javax.validation.constraints.*;
++import jakarta.validation.constraints.NotNull;
+ 
+ /**
+  * A DTO for the {@link io.github.jhipster.sample.domain.Operation} entity.
+diff --git a/src/main/java/io/github/jhipster/sample/service/dto/PasswordChangeDTO.java b/src/main/java/io/github/jhipster/sample/service/dto/PasswordChangeDTO.java
+index e08c6e2..5634b2e 100644
+--- a/src/main/java/io/github/jhipster/sample/service/dto/PasswordChangeDTO.java
++++ b/src/main/java/io/github/jhipster/sample/service/dto/PasswordChangeDTO.java
+@@ -1,5 +1,6 @@
+ package io.github.jhipster.sample.service.dto;
+ 
++import java.io.Serial;
+ import java.io.Serializable;
+ 
+ /**
+@@ -7,6 +8,7 @@ import java.io.Serializable;
+  */
+ public class PasswordChangeDTO implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     private String currentPassword;
+diff --git a/src/main/java/io/github/jhipster/sample/service/dto/UserDTO.java b/src/main/java/io/github/jhipster/sample/service/dto/UserDTO.java
+index 0a269b4..99a7027 100644
+--- a/src/main/java/io/github/jhipster/sample/service/dto/UserDTO.java
++++ b/src/main/java/io/github/jhipster/sample/service/dto/UserDTO.java
+@@ -1,6 +1,7 @@
+ package io.github.jhipster.sample.service.dto;
+ 
+ import io.github.jhipster.sample.domain.User;
++import java.io.Serial;
+ import java.io.Serializable;
+ 
+ /**
+@@ -8,6 +9,7 @@ import java.io.Serializable;
+  */
+ public class UserDTO implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     private Long id;
+diff --git a/src/main/java/io/github/jhipster/sample/service/mapper/BankAccountMapper.java b/src/main/java/io/github/jhipster/sample/service/mapper/BankAccountMapper.java
+index caa91b2..4351344 100644
+--- a/src/main/java/io/github/jhipster/sample/service/mapper/BankAccountMapper.java
++++ b/src/main/java/io/github/jhipster/sample/service/mapper/BankAccountMapper.java
+@@ -4,7 +4,10 @@ import io.github.jhipster.sample.domain.BankAccount;
+ import io.github.jhipster.sample.domain.User;
+ import io.github.jhipster.sample.service.dto.BankAccountDTO;
+ import io.github.jhipster.sample.service.dto.UserDTO;
+-import org.mapstruct.*;
++import org.mapstruct.BeanMapping;
++import org.mapstruct.Mapper;
++import org.mapstruct.Mapping;
++import org.mapstruct.Named;
+ 
+ /**
+  * Mapper for the entity {@link BankAccount} and its DTO {@link BankAccountDTO}.
+diff --git a/src/main/java/io/github/jhipster/sample/service/mapper/LabelMapper.java b/src/main/java/io/github/jhipster/sample/service/mapper/LabelMapper.java
+index 50dce8f..676ee18 100644
+--- a/src/main/java/io/github/jhipster/sample/service/mapper/LabelMapper.java
++++ b/src/main/java/io/github/jhipster/sample/service/mapper/LabelMapper.java
+@@ -2,7 +2,7 @@ package io.github.jhipster.sample.service.mapper;
+ 
+ import io.github.jhipster.sample.domain.Label;
+ import io.github.jhipster.sample.service.dto.LabelDTO;
+-import org.mapstruct.*;
++import org.mapstruct.Mapper;
+ 
+ /**
+  * Mapper for the entity {@link Label} and its DTO {@link LabelDTO}.
+diff --git a/src/main/java/io/github/jhipster/sample/service/mapper/OperationMapper.java b/src/main/java/io/github/jhipster/sample/service/mapper/OperationMapper.java
+index 5c3055e..810d7e9 100644
+--- a/src/main/java/io/github/jhipster/sample/service/mapper/OperationMapper.java
++++ b/src/main/java/io/github/jhipster/sample/service/mapper/OperationMapper.java
+@@ -8,7 +8,10 @@ import io.github.jhipster.sample.service.dto.LabelDTO;
+ import io.github.jhipster.sample.service.dto.OperationDTO;
+ import java.util.Set;
+ import java.util.stream.Collectors;
+-import org.mapstruct.*;
++import org.mapstruct.BeanMapping;
++import org.mapstruct.Mapper;
++import org.mapstruct.Mapping;
++import org.mapstruct.Named;
+ 
+ /**
+  * Mapper for the entity {@link Operation} and its DTO {@link OperationDTO}.
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/AccountResource.java b/src/main/java/io/github/jhipster/sample/web/rest/AccountResource.java
+index 9ee6857..f12df19 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/AccountResource.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/AccountResource.java
+@@ -7,12 +7,14 @@ import io.github.jhipster.sample.service.MailService;
+ import io.github.jhipster.sample.service.UserService;
+ import io.github.jhipster.sample.service.dto.AdminUserDTO;
+ import io.github.jhipster.sample.service.dto.PasswordChangeDTO;
+-import io.github.jhipster.sample.web.rest.errors.*;
++import io.github.jhipster.sample.web.rest.errors.EmailAlreadyUsedException;
++import io.github.jhipster.sample.web.rest.errors.InvalidPasswordException;
++import io.github.jhipster.sample.web.rest.errors.LoginAlreadyUsedException;
+ import io.github.jhipster.sample.web.rest.vm.KeyAndPasswordVM;
+ import io.github.jhipster.sample.web.rest.vm.ManagedUserVM;
+-import java.util.*;
+-import javax.servlet.http.HttpServletRequest;
+-import javax.validation.Valid;
++import java.util.Optional;
++import jakarta.servlet.http.HttpServletRequest;
++import jakarta.validation.Valid;
+ import org.apache.commons.lang3.StringUtils;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -74,7 +76,7 @@ public class AccountResource {
+     @GetMapping("/activate")
+     public void activateAccount(@RequestParam(value = "key") String key) {
+         Optional<User> user = userService.activateRegistration(key);
+-        if (!user.isPresent()) {
++        if (user.isEmpty()) {
+             throw new AccountResourceException("No user was found for this activation key");
+         }
+     }
+@@ -122,7 +124,7 @@ public class AccountResource {
+             throw new EmailAlreadyUsedException();
+         }
+         Optional<User> user = userRepository.findOneByLogin(userLogin);
+-        if (!user.isPresent()) {
++        if (user.isEmpty()) {
+             throw new AccountResourceException("User could not be found");
+         }
+         userService.updateUser(
+@@ -179,7 +181,7 @@ public class AccountResource {
+         }
+         Optional<User> user = userService.completePasswordReset(keyAndPassword.getNewPassword(), keyAndPassword.getKey());
+ 
+-        if (!user.isPresent()) {
++        if (user.isEmpty()) {
+             throw new AccountResourceException("No user was found for this reset key");
+         }
+     }
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/BankAccountResource.java b/src/main/java/io/github/jhipster/sample/web/rest/BankAccountResource.java
+index 79f1580..38e1588 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/BankAccountResource.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/BankAccountResource.java
+@@ -10,8 +10,8 @@ import java.net.URISyntaxException;
+ import java.util.List;
+ import java.util.Objects;
+ import java.util.Optional;
+-import javax.validation.Valid;
+-import javax.validation.constraints.NotNull;
++import jakarta.validation.Valid;
++import jakarta.validation.constraints.NotNull;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.beans.factory.annotation.Value;
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/LabelResource.java b/src/main/java/io/github/jhipster/sample/web/rest/LabelResource.java
+index 67b2bcf..64d6630 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/LabelResource.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/LabelResource.java
+@@ -10,8 +10,8 @@ import java.net.URISyntaxException;
+ import java.util.List;
+ import java.util.Objects;
+ import java.util.Optional;
+-import javax.validation.Valid;
+-import javax.validation.constraints.NotNull;
++import jakarta.validation.Valid;
++import jakarta.validation.constraints.NotNull;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.beans.factory.annotation.Value;
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/OperationResource.java b/src/main/java/io/github/jhipster/sample/web/rest/OperationResource.java
+index 13fdb60..f3028fa 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/OperationResource.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/OperationResource.java
+@@ -10,15 +10,15 @@ import java.net.URISyntaxException;
+ import java.util.List;
+ import java.util.Objects;
+ import java.util.Optional;
+-import javax.validation.Valid;
+-import javax.validation.constraints.NotNull;
++import jakarta.validation.Valid;
++import jakarta.validation.constraints.NotNull;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
++import org.springdoc.core.annotations.ParameterObject;
+ import org.springframework.beans.factory.annotation.Value;
+ import org.springframework.data.domain.Page;
+ import org.springframework.data.domain.Pageable;
+ import org.springframework.http.HttpHeaders;
+-import org.springframework.http.HttpStatus;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.transaction.annotation.Transactional;
+ import org.springframework.web.bind.annotation.*;
+@@ -162,7 +162,7 @@ public class OperationResource {
+      */
+     @GetMapping("/operations")
+     public ResponseEntity<List<OperationDTO>> getAllOperations(
+-        @org.springdoc.api.annotations.ParameterObject Pageable pageable,
++        @ParameterObject Pageable pageable,
+         @RequestParam(required = false, defaultValue = "false") boolean eagerload
+     ) {
+         log.debug("REST request to get a page of Operations");
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/PublicUserResource.java b/src/main/java/io/github/jhipster/sample/web/rest/PublicUserResource.java
+index 1e9956f..df0520b 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/PublicUserResource.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/PublicUserResource.java
+@@ -2,17 +2,22 @@ package io.github.jhipster.sample.web.rest;
+ 
+ import io.github.jhipster.sample.service.UserService;
+ import io.github.jhipster.sample.service.dto.UserDTO;
+-import java.util.*;
++import java.util.Arrays;
++import java.util.Collections;
++import java.util.List;
+ import java.util.Collections;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
++import org.springdoc.core.annotations.ParameterObject;
+ import org.springframework.data.domain.Page;
+ import org.springframework.data.domain.Pageable;
+ import org.springframework.data.domain.Sort;
+ import org.springframework.http.HttpHeaders;
+ import org.springframework.http.HttpStatus;
+ import org.springframework.http.ResponseEntity;
+-import org.springframework.web.bind.annotation.*;
++import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.RequestMapping;
++import org.springframework.web.bind.annotation.RestController;
+ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+ import tech.jhipster.web.util.PaginationUtil;
+ 
+@@ -39,7 +44,7 @@ public class PublicUserResource {
+      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body all users.
+      */
+     @GetMapping("/users")
+-    public ResponseEntity<List<UserDTO>> getAllPublicUsers(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
++    public ResponseEntity<List<UserDTO>> getAllPublicUsers(@ParameterObject Pageable pageable) {
+         log.debug("REST request to get all public User names");
+         if (!onlyContainsAllowedProperties(pageable)) {
+             return ResponseEntity.badRequest().build();
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/UserJWTController.java b/src/main/java/io/github/jhipster/sample/web/rest/UserJWTController.java
+index cdc088c..79f6fd8 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/UserJWTController.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/UserJWTController.java
+@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
+ import io.github.jhipster.sample.security.jwt.JWTFilter;
+ import io.github.jhipster.sample.security.jwt.TokenProvider;
+ import io.github.jhipster.sample.web.rest.vm.LoginVM;
+-import javax.validation.Valid;
++import jakarta.validation.Valid;
+ import org.springframework.http.HttpHeaders;
+ import org.springframework.http.HttpStatus;
+ import org.springframework.http.ResponseEntity;
+@@ -12,7 +12,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
+ import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+ import org.springframework.security.core.Authentication;
+ import org.springframework.security.core.context.SecurityContextHolder;
+-import org.springframework.web.bind.annotation.*;
++import org.springframework.web.bind.annotation.PostMapping;
++import org.springframework.web.bind.annotation.RequestBody;
++import org.springframework.web.bind.annotation.RequestMapping;
++import org.springframework.web.bind.annotation.RestController;
+ 
+ /**
+  * Controller to authenticate users.
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/UserResource.java b/src/main/java/io/github/jhipster/sample/web/rest/UserResource.java
+index a6f822d..acad496 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/UserResource.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/UserResource.java
+@@ -14,10 +14,11 @@ import java.net.URI;
+ import java.net.URISyntaxException;
+ import java.util.*;
+ import java.util.Collections;
+-import javax.validation.Valid;
+-import javax.validation.constraints.Pattern;
++import jakarta.validation.Valid;
++import jakarta.validation.constraints.Pattern;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
++import org.springdoc.core.annotations.ParameterObject;
+ import org.springframework.beans.factory.annotation.Value;
+ import org.springframework.data.domain.Page;
+ import org.springframework.data.domain.Pageable;
+@@ -163,7 +164,7 @@ public class UserResource {
+      */
+     @GetMapping("/users")
+     @PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+-    public ResponseEntity<List<AdminUserDTO>> getAllUsers(@org.springdoc.api.annotations.ParameterObject Pageable pageable) {
++    public ResponseEntity<List<AdminUserDTO>> getAllUsers(@ParameterObject Pageable pageable) {
+         log.debug("REST request to get all User for an admin");
+         if (!onlyContainsAllowedProperties(pageable)) {
+             return ResponseEntity.badRequest().build();
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/errors/BadRequestAlertException.java b/src/main/java/io/github/jhipster/sample/web/rest/errors/BadRequestAlertException.java
+index 6a4cc7e..337b96b 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/errors/BadRequestAlertException.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/errors/BadRequestAlertException.java
+@@ -1,5 +1,6 @@
+ package io.github.jhipster.sample.web.rest.errors;
+ 
++import java.io.Serial;
+ import java.net.URI;
+ import java.util.HashMap;
+ import java.util.Map;
+@@ -9,6 +10,7 @@ import org.zalando.problem.Status;
+ @SuppressWarnings("java:S110") // Inheritance tree of classes should not be too deep
+ public class BadRequestAlertException extends AbstractThrowableProblem {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     private final String entityName;
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/errors/EmailAlreadyUsedException.java b/src/main/java/io/github/jhipster/sample/web/rest/errors/EmailAlreadyUsedException.java
+index 39426a0..bf34965 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/errors/EmailAlreadyUsedException.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/errors/EmailAlreadyUsedException.java
+@@ -1,8 +1,11 @@
+ package io.github.jhipster.sample.web.rest.errors;
+ 
++import java.io.Serial;
++
+ @SuppressWarnings("java:S110") // Inheritance tree of classes should not be too deep
+ public class EmailAlreadyUsedException extends BadRequestAlertException {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     public EmailAlreadyUsedException() {
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslator.java b/src/main/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslator.java
+index 4762f03..b4ab1e3 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslator.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslator.java
+@@ -6,9 +6,9 @@ import java.util.Collection;
+ import java.util.List;
+ import java.util.Optional;
+ import java.util.stream.Collectors;
+-import javax.annotation.Nonnull;
+-import javax.annotation.Nullable;
+-import javax.servlet.http.HttpServletRequest;
++import jakarta.annotation.Nonnull;
++import jakarta.annotation.Nullable;
++import jakarta.servlet.http.HttpServletRequest;
+ import org.apache.commons.lang3.StringUtils;
+ import org.springframework.beans.factory.annotation.Value;
+ import org.springframework.core.env.Environment;
+@@ -75,9 +75,9 @@ public class ExceptionTranslator implements ProblemHandling, SecurityAdviceTrait
+             .withTitle(problem.getTitle())
+             .with(PATH_KEY, requestUri);
+ 
+-        if (problem instanceof ConstraintViolationProblem) {
++        if (problem instanceof ConstraintViolationProblem violationProblem) {
+             builder
+-                .with(VIOLATIONS_KEY, ((ConstraintViolationProblem) problem).getViolations())
++                .with(VIOLATIONS_KEY, violationProblem.getViolations())
+                 .with(MESSAGE_KEY, ErrorConstants.ERR_VALIDATION);
+         } else {
+             builder.withCause(((DefaultProblem) problem).getCause()).withDetail(problem.getDetail()).withInstance(problem.getInstance());
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/errors/FieldErrorVM.java b/src/main/java/io/github/jhipster/sample/web/rest/errors/FieldErrorVM.java
+index 9b2c535..a0280b6 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/errors/FieldErrorVM.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/errors/FieldErrorVM.java
+@@ -1,9 +1,11 @@
+ package io.github.jhipster.sample.web.rest.errors;
+ 
++import java.io.Serial;
+ import java.io.Serializable;
+ 
+ public class FieldErrorVM implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     private final String objectName;
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/errors/InvalidPasswordException.java b/src/main/java/io/github/jhipster/sample/web/rest/errors/InvalidPasswordException.java
+index f1b35e4..75770eb 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/errors/InvalidPasswordException.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/errors/InvalidPasswordException.java
+@@ -1,11 +1,13 @@
+ package io.github.jhipster.sample.web.rest.errors;
+ 
++import java.io.Serial;
+ import org.zalando.problem.AbstractThrowableProblem;
+ import org.zalando.problem.Status;
+ 
+ @SuppressWarnings("java:S110") // Inheritance tree of classes should not be too deep
+ public class InvalidPasswordException extends AbstractThrowableProblem {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     public InvalidPasswordException() {
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/errors/LoginAlreadyUsedException.java b/src/main/java/io/github/jhipster/sample/web/rest/errors/LoginAlreadyUsedException.java
+index 64b8610..231cea0 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/errors/LoginAlreadyUsedException.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/errors/LoginAlreadyUsedException.java
+@@ -1,8 +1,11 @@
+ package io.github.jhipster.sample.web.rest.errors;
+ 
++import java.io.Serial;
++
+ @SuppressWarnings("java:S110") // Inheritance tree of classes should not be too deep
+ public class LoginAlreadyUsedException extends BadRequestAlertException {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     public LoginAlreadyUsedException() {
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/vm/LoginVM.java b/src/main/java/io/github/jhipster/sample/web/rest/vm/LoginVM.java
+index e92f173..5aa190c 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/vm/LoginVM.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/vm/LoginVM.java
+@@ -1,7 +1,7 @@
+ package io.github.jhipster.sample.web.rest.vm;
+ 
+-import javax.validation.constraints.NotNull;
+-import javax.validation.constraints.Size;
++import jakarta.validation.constraints.NotNull;
++import jakarta.validation.constraints.Size;
+ 
+ /**
+  * View Model object for storing a user's credentials.
+diff --git a/src/main/java/io/github/jhipster/sample/web/rest/vm/ManagedUserVM.java b/src/main/java/io/github/jhipster/sample/web/rest/vm/ManagedUserVM.java
+index fb2170c..94b3613 100644
+--- a/src/main/java/io/github/jhipster/sample/web/rest/vm/ManagedUserVM.java
++++ b/src/main/java/io/github/jhipster/sample/web/rest/vm/ManagedUserVM.java
+@@ -1,7 +1,7 @@
+ package io.github.jhipster.sample.web.rest.vm;
+ 
+ import io.github.jhipster.sample.service.dto.AdminUserDTO;
+-import javax.validation.constraints.Size;
++import jakarta.validation.constraints.Size;
+ 
+ /**
+  * View Model extending the AdminUserDTO, which is meant to be used in the user management UI.
+diff --git a/src/main/resources/config/application-prod.yml b/src/main/resources/config/application-prod.yml
+index bfe07e9..a733afe 100644
+--- a/src/main/resources/config/application-prod.yml
++++ b/src/main/resources/config/application-prod.yml
+@@ -20,10 +20,7 @@ logging:
+     io.github.jhipster.sample: INFO
+ 
+ management:
+-  metrics:
+-    export:
+-      prometheus:
+-        enabled: false
++  prometheus.metrics.export.enabled: false
+ 
+ spring:
+   devtools:
+diff --git a/src/main/resources/config/application.yml b/src/main/resources/config/application.yml
+index d58d689..9062b10 100644
+--- a/src/main/resources/config/application.yml
++++ b/src/main/resources/config/application.yml
+@@ -66,11 +66,6 @@ management:
+     mail:
+       enabled: false # When using the MailService, configure an SMTP server and set this to true
+   metrics:
+-    export:
+-      # Prometheus is the default metrics backend
+-      prometheus:
+-        enabled: true
+-        step: 60
+     enable:
+       http: true
+       jvm: true
+@@ -83,12 +78,11 @@ management:
+       percentiles:
+         all: 0, 0.5, 0.75, 0.95, 0.99, 1.0
+     tags:
+-      application: ${spring.application.name}
+-    web:
+-      server:
+-        request:
+-          autotime:
+-            enabled: true
++      application: ${spring.application.name} # When using the MailService, configure an SMTP server and set this to true
++  # This property is deprecated: Should be applied at the ObservationRegistry level.
++            # enabled: true # When using the MailService, configure an SMTP server and set this to true
++  prometheus.metrics.export.enabled: true # When using the MailService, configure an SMTP server and set this to true
++  prometheus.metrics.export.step: 60
+ 
+ spring:
+   application:
+@@ -128,7 +122,7 @@ spring:
+     hibernate:
+       ddl-auto: none
+       naming:
+-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
++        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+   messages:
+     basename: i18n/messages
+diff --git a/src/main/webapp/WEB-INF/web.xml b/src/main/webapp/WEB-INF/web.xml
+index f1611b5..687ad55 100644
+--- a/src/main/webapp/WEB-INF/web.xml
++++ b/src/main/webapp/WEB-INF/web.xml
+@@ -1,9 +1,9 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <web-app
+-    xmlns="http://java.sun.com/xml/ns/javaee"
++    xmlns="https://jakarta.ee/xml/ns/jakartaee"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+-    version="3.0">
++    xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
++    version="6.0">
+ 
+     <mime-mapping>
+         <extension>html</extension>
+diff --git a/src/test/java/io/github/jhipster/sample/IntegrationTest.java b/src/test/java/io/github/jhipster/sample/IntegrationTest.java
+index 29b2a25..41a7950 100644
+--- a/src/test/java/io/github/jhipster/sample/IntegrationTest.java
++++ b/src/test/java/io/github/jhipster/sample/IntegrationTest.java
+@@ -1,6 +1,5 @@
+ package io.github.jhipster.sample;
+ 
+-import io.github.jhipster.sample.JhipsterSampleApplicationReactApp;
+ import io.github.jhipster.sample.config.AsyncSyncConfiguration;
+ import io.github.jhipster.sample.config.EmbeddedSQL;
+ import java.lang.annotation.ElementType;
+diff --git a/src/test/java/io/github/jhipster/sample/config/AsyncSyncConfiguration.java b/src/test/java/io/github/jhipster/sample/config/AsyncSyncConfiguration.java
+index 07ed690..3af8675 100644
+--- a/src/test/java/io/github/jhipster/sample/config/AsyncSyncConfiguration.java
++++ b/src/test/java/io/github/jhipster/sample/config/AsyncSyncConfiguration.java
+@@ -3,7 +3,6 @@ package io.github.jhipster.sample.config;
+ import java.util.concurrent.Executor;
+ import org.springframework.context.annotation.Bean;
+ import org.springframework.context.annotation.Configuration;
+-import org.springframework.context.annotation.Primary;
+ import org.springframework.core.task.SyncTaskExecutor;
+ 
+ @Configuration
+diff --git a/src/test/java/io/github/jhipster/sample/config/StaticResourcesWebConfigurerTest.java b/src/test/java/io/github/jhipster/sample/config/StaticResourcesWebConfigurerTest.java
+index f80a673..520c1fd 100644
+--- a/src/test/java/io/github/jhipster/sample/config/StaticResourcesWebConfigurerTest.java
++++ b/src/test/java/io/github/jhipster/sample/config/StaticResourcesWebConfigurerTest.java
+@@ -1,6 +1,7 @@
+ package io.github.jhipster.sample.config;
+ 
+-import static io.github.jhipster.sample.config.StaticResourcesWebConfiguration.*;
++import static io.github.jhipster.sample.config.StaticResourcesWebConfiguration.RESOURCE_LOCATIONS;
++import static io.github.jhipster.sample.config.StaticResourcesWebConfiguration.RESOURCE_PATHS;
+ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.mockito.Mockito.*;
+ 
+@@ -37,8 +38,8 @@ class StaticResourcesWebConfigurerTest {
+     void shouldAppendResourceHandlerAndInitializeIt() {
+         staticResourcesWebConfiguration.addResourceHandlers(resourceHandlerRegistry);
+ 
+-        verify(resourceHandlerRegistry, times(1)).addResourceHandler(RESOURCE_PATHS);
+-        verify(staticResourcesWebConfiguration, times(1)).initializeResourceHandler(any(ResourceHandlerRegistration.class));
++        verify(resourceHandlerRegistry).addResourceHandler(RESOURCE_PATHS);
++        verify(staticResourcesWebConfiguration).initializeResourceHandler(any(ResourceHandlerRegistration.class));
+         for (String testingPath : RESOURCE_PATHS) {
+             assertThat(resourceHandlerRegistry.hasMappingForPattern(testingPath)).isTrue();
+         }
+@@ -52,9 +53,9 @@ class StaticResourcesWebConfigurerTest {
+ 
+         staticResourcesWebConfiguration.initializeResourceHandler(resourceHandlerRegistration);
+ 
+-        verify(staticResourcesWebConfiguration, times(1)).getCacheControl();
+-        verify(resourceHandlerRegistration, times(1)).setCacheControl(ccExpected);
+-        verify(resourceHandlerRegistration, times(1)).addResourceLocations(RESOURCE_LOCATIONS);
++        verify(staticResourcesWebConfiguration).getCacheControl();
++        verify(resourceHandlerRegistration).setCacheControl(ccExpected);
++        verify(resourceHandlerRegistration).addResourceLocations(RESOURCE_LOCATIONS);
+     }
+ 
+     @Test
+diff --git a/src/test/java/io/github/jhipster/sample/config/TestContainersSpringContextCustomizerFactory.java b/src/test/java/io/github/jhipster/sample/config/TestContainersSpringContextCustomizerFactory.java
+index dba8939..87d1993 100644
+--- a/src/test/java/io/github/jhipster/sample/config/TestContainersSpringContextCustomizerFactory.java
++++ b/src/test/java/io/github/jhipster/sample/config/TestContainersSpringContextCustomizerFactory.java
+@@ -5,8 +5,6 @@ import java.util.List;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+-import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
+ import org.springframework.boot.test.util.TestPropertyValues;
+ import org.springframework.core.annotation.AnnotatedElementUtils;
+ import org.springframework.test.context.ContextConfigurationAttributes;
+diff --git a/src/test/java/io/github/jhipster/sample/config/WebConfigurerTest.java b/src/test/java/io/github/jhipster/sample/config/WebConfigurerTest.java
+index bf81aad..e3aad7e 100644
+--- a/src/test/java/io/github/jhipster/sample/config/WebConfigurerTest.java
++++ b/src/test/java/io/github/jhipster/sample/config/WebConfigurerTest.java
+@@ -1,7 +1,6 @@
+ package io.github.jhipster.sample.config;
+ 
+ import static org.assertj.core.api.Assertions.assertThat;
+-import static org.assertj.core.api.Assertions.assertThatCode;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.ArgumentMatchers.anyString;
+ import static org.mockito.Mockito.*;
+@@ -11,8 +10,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+ 
+ import java.io.File;
+-import java.util.*;
+-import javax.servlet.*;
++import java.util.ArrayList;
++import java.util.Arrays;
++import java.util.Collections;
++import jakarta.servlet.Filter;
++import jakarta.servlet.FilterRegistration;
++import jakarta.servlet.Servlet;
++import jakarta.servlet.ServletRegistration;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory;
+diff --git a/src/test/java/io/github/jhipster/sample/config/timezone/HibernateTimeZoneIT.java b/src/test/java/io/github/jhipster/sample/config/timezone/HibernateTimeZoneIT.java
+index 51321e8..34ef7a5 100644
+--- a/src/test/java/io/github/jhipster/sample/config/timezone/HibernateTimeZoneIT.java
++++ b/src/test/java/io/github/jhipster/sample/config/timezone/HibernateTimeZoneIT.java
+@@ -1,6 +1,5 @@
+ package io.github.jhipster.sample.config.timezone;
+ 
+-import static java.lang.String.format;
+ import static org.assertj.core.api.Assertions.assertThat;
+ 
+ import io.github.jhipster.sample.IntegrationTest;
+@@ -148,7 +147,7 @@ class HibernateTimeZoneIT {
+     }
+ 
+     private String generateSqlRequest(String fieldName, long id) {
+-        return format("SELECT %s FROM jhi_date_time_wrapper where id=%d", fieldName, id);
++        return "SELECT %s FROM jhi_date_time_wrapper where id=%d".formatted(fieldName, id);
+     }
+ 
+     private void assertThatDateStoredValueIsEqualToInsertDateValueOnGMTTimeZone(SqlRowSet sqlRowSet, String expectedValue) {
+diff --git a/src/test/java/io/github/jhipster/sample/repository/timezone/DateTimeWrapper.java b/src/test/java/io/github/jhipster/sample/repository/timezone/DateTimeWrapper.java
+index 956ad61..b496095 100644
+--- a/src/test/java/io/github/jhipster/sample/repository/timezone/DateTimeWrapper.java
++++ b/src/test/java/io/github/jhipster/sample/repository/timezone/DateTimeWrapper.java
+@@ -1,14 +1,15 @@
+ package io.github.jhipster.sample.repository.timezone;
+-
++import java.io.Serial;
+ import java.io.Serializable;
+ import java.time.*;
+ import java.util.Objects;
+-import javax.persistence.*;
++import jakarta.persistence.*;
+ 
+ @Entity
+ @Table(name = "jhi_date_time_wrapper")
+ public class DateTimeWrapper implements Serializable {
+ 
++    @Serial
+     private static final long serialVersionUID = 1L;
+ 
+     @Id
+diff --git a/src/test/java/io/github/jhipster/sample/security/jwt/TokenProviderTest.java b/src/test/java/io/github/jhipster/sample/security/jwt/TokenProviderTest.java
+index c282f69..c377ed2 100644
+--- a/src/test/java/io/github/jhipster/sample/security/jwt/TokenProviderTest.java
++++ b/src/test/java/io/github/jhipster/sample/security/jwt/TokenProviderTest.java
+@@ -11,7 +11,9 @@ import io.jsonwebtoken.security.Keys;
+ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+ import java.nio.charset.StandardCharsets;
+ import java.security.Key;
+-import java.util.*;
++import java.util.ArrayList;
++import java.util.Collection;
++import java.util.Date;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+diff --git a/src/test/java/io/github/jhipster/sample/service/MailServiceIT.java b/src/test/java/io/github/jhipster/sample/service/MailServiceIT.java
+index 9831882..493d839 100644
+--- a/src/test/java/io/github/jhipster/sample/service/MailServiceIT.java
++++ b/src/test/java/io/github/jhipster/sample/service/MailServiceIT.java
+@@ -1,6 +1,7 @@
+ package io.github.jhipster.sample.service;
+ 
+-import static org.assertj.core.api.Assertions.*;
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.assertj.core.api.Assertions.fail;
+ import static org.mockito.ArgumentMatchers.any;
+ import static org.mockito.Mockito.*;
+ 
+@@ -17,11 +18,11 @@ import java.nio.charset.Charset;
+ import java.util.Properties;
+ import java.util.regex.Matcher;
+ import java.util.regex.Pattern;
+-import javax.mail.Multipart;
+-import javax.mail.Session;
+-import javax.mail.internet.MimeBodyPart;
+-import javax.mail.internet.MimeMessage;
+-import javax.mail.internet.MimeMultipart;
++import jakarta.mail.Multipart;
++import jakarta.mail.Session;
++import jakarta.mail.internet.MimeBodyPart;
++import jakarta.mail.internet.MimeMessage;
++import jakarta.mail.internet.MimeMultipart;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ import org.mockito.ArgumentCaptor;
+diff --git a/src/test/java/io/github/jhipster/sample/service/UserServiceIT.java b/src/test/java/io/github/jhipster/sample/service/UserServiceIT.java
+index 61e2acb..6c97956 100644
+--- a/src/test/java/io/github/jhipster/sample/service/UserServiceIT.java
++++ b/src/test/java/io/github/jhipster/sample/service/UserServiceIT.java
+@@ -4,10 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
+ import static org.mockito.Mockito.when;
+ 
+ import io.github.jhipster.sample.IntegrationTest;
+-import io.github.jhipster.sample.config.Constants;
+ import io.github.jhipster.sample.domain.User;
+ import io.github.jhipster.sample.repository.UserRepository;
+-import io.github.jhipster.sample.service.dto.AdminUserDTO;
+ import java.time.Instant;
+ import java.time.LocalDateTime;
+ import java.time.temporal.ChronoUnit;
+@@ -20,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.test.mock.mockito.MockBean;
+ import org.springframework.data.auditing.AuditingHandler;
+ import org.springframework.data.auditing.DateTimeProvider;
+-import org.springframework.data.domain.Page;
+-import org.springframework.data.domain.PageRequest;
+ import org.springframework.transaction.annotation.Transactional;
+ import tech.jhipster.security.RandomUtil;
+ 
+diff --git a/src/test/java/io/github/jhipster/sample/service/mapper/BankAccountMapperTest.java b/src/test/java/io/github/jhipster/sample/service/mapper/BankAccountMapperTest.java
+index 5302dcf..cfdf651 100644
+--- a/src/test/java/io/github/jhipster/sample/service/mapper/BankAccountMapperTest.java
++++ b/src/test/java/io/github/jhipster/sample/service/mapper/BankAccountMapperTest.java
+@@ -1,9 +1,6 @@
+ package io.github.jhipster.sample.service.mapper;
+ 
+-import static org.assertj.core.api.Assertions.assertThat;
+-
+ import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+ 
+ class BankAccountMapperTest {
+ 
+diff --git a/src/test/java/io/github/jhipster/sample/service/mapper/LabelMapperTest.java b/src/test/java/io/github/jhipster/sample/service/mapper/LabelMapperTest.java
+index 8674c72..f82ad40 100644
+--- a/src/test/java/io/github/jhipster/sample/service/mapper/LabelMapperTest.java
++++ b/src/test/java/io/github/jhipster/sample/service/mapper/LabelMapperTest.java
+@@ -1,9 +1,6 @@
+ package io.github.jhipster.sample.service.mapper;
+ 
+-import static org.assertj.core.api.Assertions.assertThat;
+-
+ import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+ 
+ class LabelMapperTest {
+ 
+diff --git a/src/test/java/io/github/jhipster/sample/service/mapper/OperationMapperTest.java b/src/test/java/io/github/jhipster/sample/service/mapper/OperationMapperTest.java
+index dd1df5b..91003b1 100644
+--- a/src/test/java/io/github/jhipster/sample/service/mapper/OperationMapperTest.java
++++ b/src/test/java/io/github/jhipster/sample/service/mapper/OperationMapperTest.java
+@@ -1,9 +1,6 @@
+ package io.github.jhipster.sample.service.mapper;
+ 
+-import static org.assertj.core.api.Assertions.assertThat;
+-
+ import org.junit.jupiter.api.BeforeEach;
+-import org.junit.jupiter.api.Test;
+ 
+ class OperationMapperTest {
+ 
+diff --git a/src/test/java/io/github/jhipster/sample/service/mapper/UserMapperTest.java b/src/test/java/io/github/jhipster/sample/service/mapper/UserMapperTest.java
+index 079b603..7a6aa23 100644
+--- a/src/test/java/io/github/jhipster/sample/service/mapper/UserMapperTest.java
++++ b/src/test/java/io/github/jhipster/sample/service/mapper/UserMapperTest.java
+@@ -75,9 +75,9 @@ class UserMapperTest {
+         List<User> users = userMapper.userDTOsToUsers(usersDto);
+ 
+         assertThat(users).isNotEmpty().size().isEqualTo(1);
+-        assertThat(users.get(0).getAuthorities()).isNotNull();
+-        assertThat(users.get(0).getAuthorities()).isNotEmpty();
+-        assertThat(users.get(0).getAuthorities().iterator().next().getName()).isEqualTo("ADMIN");
++        assertThat(users.getFirst().getAuthorities()).isNotNull();
++        assertThat(users.getFirst().getAuthorities()).isNotEmpty();
++        assertThat(users.getFirst().getAuthorities().iterator().next().getName()).isEqualTo("ADMIN");
+     }
+ 
+     @Test
+@@ -90,8 +90,8 @@ class UserMapperTest {
+         List<User> users = userMapper.userDTOsToUsers(usersDto);
+ 
+         assertThat(users).isNotEmpty().size().isEqualTo(1);
+-        assertThat(users.get(0).getAuthorities()).isNotNull();
+-        assertThat(users.get(0).getAuthorities()).isEmpty();
++        assertThat(users.getFirst().getAuthorities()).isNotNull();
++        assertThat(users.getFirst().getAuthorities()).isEmpty();
+     }
+ 
+     @Test
+diff --git a/src/test/java/io/github/jhipster/sample/web/rest/AccountResourceIT.java b/src/test/java/io/github/jhipster/sample/web/rest/AccountResourceIT.java
+index eb6813e..1fa6555 100644
+--- a/src/test/java/io/github/jhipster/sample/web/rest/AccountResourceIT.java
++++ b/src/test/java/io/github/jhipster/sample/web/rest/AccountResourceIT.java
+@@ -2,7 +2,8 @@ package io.github.jhipster.sample.web.rest;
+ 
+ import static io.github.jhipster.sample.web.rest.AccountResourceIT.TEST_USER_LOGIN;
+ import static org.assertj.core.api.Assertions.assertThat;
+-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+ 
+ import io.github.jhipster.sample.IntegrationTest;
+@@ -14,11 +15,13 @@ import io.github.jhipster.sample.security.AuthoritiesConstants;
+ import io.github.jhipster.sample.service.UserService;
+ import io.github.jhipster.sample.service.dto.AdminUserDTO;
+ import io.github.jhipster.sample.service.dto.PasswordChangeDTO;
+-import io.github.jhipster.sample.service.dto.UserDTO;
+ import io.github.jhipster.sample.web.rest.vm.KeyAndPasswordVM;
+ import io.github.jhipster.sample.web.rest.vm.ManagedUserVM;
+ import java.time.Instant;
+-import java.util.*;
++import java.util.Collections;
++import java.util.HashSet;
++import java.util.Optional;
++import java.util.Set;
+ import org.apache.commons.lang3.RandomStringUtils;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.beans.factory.annotation.Autowired;
+diff --git a/src/test/java/io/github/jhipster/sample/web/rest/BankAccountResourceIT.java b/src/test/java/io/github/jhipster/sample/web/rest/BankAccountResourceIT.java
+index 5e021ef..914a34a 100644
+--- a/src/test/java/io/github/jhipster/sample/web/rest/BankAccountResourceIT.java
++++ b/src/test/java/io/github/jhipster/sample/web/rest/BankAccountResourceIT.java
+@@ -17,7 +17,7 @@ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.Random;
+ import java.util.concurrent.atomic.AtomicLong;
+-import javax.persistence.EntityManager;
++import jakarta.persistence.EntityManager;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.api.extension.ExtendWith;
+@@ -26,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+ import org.springframework.data.domain.PageImpl;
+-import org.springframework.data.domain.PageRequest;
+ import org.springframework.data.domain.Pageable;
+ import org.springframework.http.MediaType;
+ import org.springframework.security.test.context.support.WithMockUser;
+@@ -113,7 +112,7 @@ class BankAccountResourceIT {
+         // Validate the BankAccount in the database
+         List<BankAccount> bankAccountList = bankAccountRepository.findAll();
+         assertThat(bankAccountList).hasSize(databaseSizeBeforeCreate + 1);
+-        BankAccount testBankAccount = bankAccountList.get(bankAccountList.size() - 1);
++        BankAccount testBankAccount = bankAccountList.getLast();
+         assertThat(testBankAccount.getName()).isEqualTo(DEFAULT_NAME);
+         assertThat(testBankAccount.getBalance()).isEqualByComparingTo(DEFAULT_BALANCE);
+     }
+@@ -201,7 +200,7 @@ class BankAccountResourceIT {
+ 
+         restBankAccountMockMvc.perform(get(ENTITY_API_URL + "?eagerload=true")).andExpect(status().isOk());
+ 
+-        verify(bankAccountRepositoryMock, times(1)).findAllWithEagerRelationships(any());
++        verify(bankAccountRepositoryMock).findAllWithEagerRelationships(any());
+     }
+ 
+     @SuppressWarnings({ "unchecked" })
+@@ -209,7 +208,7 @@ class BankAccountResourceIT {
+         when(bankAccountRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
+ 
+         restBankAccountMockMvc.perform(get(ENTITY_API_URL + "?eagerload=false")).andExpect(status().isOk());
+-        verify(bankAccountRepositoryMock, times(1)).findAll(any(Pageable.class));
++        verify(bankAccountRepositoryMock).findAll(any(Pageable.class));
+     }
+ 
+     @Test
+@@ -261,7 +260,7 @@ class BankAccountResourceIT {
+         // Validate the BankAccount in the database
+         List<BankAccount> bankAccountList = bankAccountRepository.findAll();
+         assertThat(bankAccountList).hasSize(databaseSizeBeforeUpdate);
+-        BankAccount testBankAccount = bankAccountList.get(bankAccountList.size() - 1);
++        BankAccount testBankAccount = bankAccountList.getLast();
+         assertThat(testBankAccount.getName()).isEqualTo(UPDATED_NAME);
+         assertThat(testBankAccount.getBalance()).isEqualByComparingTo(UPDATED_BALANCE);
+     }
+@@ -356,7 +355,7 @@ class BankAccountResourceIT {
+         // Validate the BankAccount in the database
+         List<BankAccount> bankAccountList = bankAccountRepository.findAll();
+         assertThat(bankAccountList).hasSize(databaseSizeBeforeUpdate);
+-        BankAccount testBankAccount = bankAccountList.get(bankAccountList.size() - 1);
++        BankAccount testBankAccount = bankAccountList.getLast();
+         assertThat(testBankAccount.getName()).isEqualTo(UPDATED_NAME);
+         assertThat(testBankAccount.getBalance()).isEqualByComparingTo(UPDATED_BALANCE);
+     }
+@@ -386,7 +385,7 @@ class BankAccountResourceIT {
+         // Validate the BankAccount in the database
+         List<BankAccount> bankAccountList = bankAccountRepository.findAll();
+         assertThat(bankAccountList).hasSize(databaseSizeBeforeUpdate);
+-        BankAccount testBankAccount = bankAccountList.get(bankAccountList.size() - 1);
++        BankAccount testBankAccount = bankAccountList.getLast();
+         assertThat(testBankAccount.getName()).isEqualTo(UPDATED_NAME);
+         assertThat(testBankAccount.getBalance()).isEqualByComparingTo(UPDATED_BALANCE);
+     }
+diff --git a/src/test/java/io/github/jhipster/sample/web/rest/LabelResourceIT.java b/src/test/java/io/github/jhipster/sample/web/rest/LabelResourceIT.java
+index 513d1fc..4f305b0 100644
+--- a/src/test/java/io/github/jhipster/sample/web/rest/LabelResourceIT.java
++++ b/src/test/java/io/github/jhipster/sample/web/rest/LabelResourceIT.java
+@@ -13,7 +13,7 @@ import io.github.jhipster.sample.service.mapper.LabelMapper;
+ import java.util.List;
+ import java.util.Random;
+ import java.util.concurrent.atomic.AtomicLong;
+-import javax.persistence.EntityManager;
++import jakarta.persistence.EntityManager;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.beans.factory.annotation.Autowired;
+@@ -94,7 +94,7 @@ class LabelResourceIT {
+         // Validate the Label in the database
+         List<Label> labelList = labelRepository.findAll();
+         assertThat(labelList).hasSize(databaseSizeBeforeCreate + 1);
+-        Label testLabel = labelList.get(labelList.size() - 1);
++        Label testLabel = labelList.getLast();
+         assertThat(testLabel.getLabel()).isEqualTo(DEFAULT_LABEL);
+     }
+ 
+@@ -198,7 +198,7 @@ class LabelResourceIT {
+         // Validate the Label in the database
+         List<Label> labelList = labelRepository.findAll();
+         assertThat(labelList).hasSize(databaseSizeBeforeUpdate);
+-        Label testLabel = labelList.get(labelList.size() - 1);
++        Label testLabel = labelList.getLast();
+         assertThat(testLabel.getLabel()).isEqualTo(UPDATED_LABEL);
+     }
+ 
+@@ -290,7 +290,7 @@ class LabelResourceIT {
+         // Validate the Label in the database
+         List<Label> labelList = labelRepository.findAll();
+         assertThat(labelList).hasSize(databaseSizeBeforeUpdate);
+-        Label testLabel = labelList.get(labelList.size() - 1);
++        Label testLabel = labelList.getLast();
+         assertThat(testLabel.getLabel()).isEqualTo(DEFAULT_LABEL);
+     }
+ 
+@@ -319,7 +319,7 @@ class LabelResourceIT {
+         // Validate the Label in the database
+         List<Label> labelList = labelRepository.findAll();
+         assertThat(labelList).hasSize(databaseSizeBeforeUpdate);
+-        Label testLabel = labelList.get(labelList.size() - 1);
++        Label testLabel = labelList.getLast();
+         assertThat(testLabel.getLabel()).isEqualTo(UPDATED_LABEL);
+     }
+ 
+diff --git a/src/test/java/io/github/jhipster/sample/web/rest/OperationResourceIT.java b/src/test/java/io/github/jhipster/sample/web/rest/OperationResourceIT.java
+index 63c43f1..f0bd28e 100644
+--- a/src/test/java/io/github/jhipster/sample/web/rest/OperationResourceIT.java
++++ b/src/test/java/io/github/jhipster/sample/web/rest/OperationResourceIT.java
+@@ -19,7 +19,7 @@ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.Random;
+ import java.util.concurrent.atomic.AtomicLong;
+-import javax.persistence.EntityManager;
++import jakarta.persistence.EntityManager;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.api.extension.ExtendWith;
+@@ -28,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+ import org.springframework.data.domain.PageImpl;
+-import org.springframework.data.domain.PageRequest;
+ import org.springframework.data.domain.Pageable;
+ import org.springframework.http.MediaType;
+ import org.springframework.security.test.context.support.WithMockUser;
+@@ -116,7 +115,7 @@ class OperationResourceIT {
+         // Validate the Operation in the database
+         List<Operation> operationList = operationRepository.findAll();
+         assertThat(operationList).hasSize(databaseSizeBeforeCreate + 1);
+-        Operation testOperation = operationList.get(operationList.size() - 1);
++        Operation testOperation = operationList.getLast();
+         assertThat(testOperation.getDate()).isEqualTo(DEFAULT_DATE);
+         assertThat(testOperation.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
+         assertThat(testOperation.getAmount()).isEqualByComparingTo(DEFAULT_AMOUNT);
+@@ -200,7 +199,7 @@ class OperationResourceIT {
+ 
+         restOperationMockMvc.perform(get(ENTITY_API_URL + "?eagerload=true")).andExpect(status().isOk());
+ 
+-        verify(operationRepositoryMock, times(1)).findAllWithEagerRelationships(any());
++        verify(operationRepositoryMock).findAllWithEagerRelationships(any());
+     }
+ 
+     @SuppressWarnings({ "unchecked" })
+@@ -208,7 +207,7 @@ class OperationResourceIT {
+         when(operationRepositoryMock.findAllWithEagerRelationships(any())).thenReturn(new PageImpl(new ArrayList<>()));
+ 
+         restOperationMockMvc.perform(get(ENTITY_API_URL + "?eagerload=false")).andExpect(status().isOk());
+-        verify(operationRepositoryMock, times(1)).findAll(any(Pageable.class));
++        verify(operationRepositoryMock).findAll(any(Pageable.class));
+     }
+ 
+     @Test
+@@ -261,7 +260,7 @@ class OperationResourceIT {
+         // Validate the Operation in the database
+         List<Operation> operationList = operationRepository.findAll();
+         assertThat(operationList).hasSize(databaseSizeBeforeUpdate);
+-        Operation testOperation = operationList.get(operationList.size() - 1);
++        Operation testOperation = operationList.getLast();
+         assertThat(testOperation.getDate()).isEqualTo(UPDATED_DATE);
+         assertThat(testOperation.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+         assertThat(testOperation.getAmount()).isEqualByComparingTo(UPDATED_AMOUNT);
+@@ -355,7 +354,7 @@ class OperationResourceIT {
+         // Validate the Operation in the database
+         List<Operation> operationList = operationRepository.findAll();
+         assertThat(operationList).hasSize(databaseSizeBeforeUpdate);
+-        Operation testOperation = operationList.get(operationList.size() - 1);
++        Operation testOperation = operationList.getLast();
+         assertThat(testOperation.getDate()).isEqualTo(DEFAULT_DATE);
+         assertThat(testOperation.getDescription()).isEqualTo(DEFAULT_DESCRIPTION);
+         assertThat(testOperation.getAmount()).isEqualByComparingTo(DEFAULT_AMOUNT);
+@@ -386,7 +385,7 @@ class OperationResourceIT {
+         // Validate the Operation in the database
+         List<Operation> operationList = operationRepository.findAll();
+         assertThat(operationList).hasSize(databaseSizeBeforeUpdate);
+-        Operation testOperation = operationList.get(operationList.size() - 1);
++        Operation testOperation = operationList.getLast();
+         assertThat(testOperation.getDate()).isEqualTo(UPDATED_DATE);
+         assertThat(testOperation.getDescription()).isEqualTo(UPDATED_DESCRIPTION);
+         assertThat(testOperation.getAmount()).isEqualByComparingTo(UPDATED_AMOUNT);
+diff --git a/src/test/java/io/github/jhipster/sample/web/rest/PublicUserResourceIT.java b/src/test/java/io/github/jhipster/sample/web/rest/PublicUserResourceIT.java
+index e34e663..7dcc4a2 100644
+--- a/src/test/java/io/github/jhipster/sample/web/rest/PublicUserResourceIT.java
++++ b/src/test/java/io/github/jhipster/sample/web/rest/PublicUserResourceIT.java
+@@ -2,14 +2,14 @@ package io.github.jhipster.sample.web.rest;
+ 
+ import static org.hamcrest.Matchers.hasItem;
+ import static org.hamcrest.Matchers.hasItems;
+-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+ 
+ import io.github.jhipster.sample.IntegrationTest;
+ import io.github.jhipster.sample.domain.User;
+ import io.github.jhipster.sample.repository.UserRepository;
+ import io.github.jhipster.sample.security.AuthoritiesConstants;
+-import javax.persistence.EntityManager;
++import jakarta.persistence.EntityManager;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.beans.factory.annotation.Autowired;
+diff --git a/src/test/java/io/github/jhipster/sample/web/rest/TestUtil.java b/src/test/java/io/github/jhipster/sample/web/rest/TestUtil.java
+index 021f5c4..4a4de1d 100644
+--- a/src/test/java/io/github/jhipster/sample/web/rest/TestUtil.java
++++ b/src/test/java/io/github/jhipster/sample/web/rest/TestUtil.java
+@@ -11,11 +11,11 @@ import java.math.BigDecimal;
+ import java.time.ZonedDateTime;
+ import java.time.format.DateTimeParseException;
+ import java.util.List;
+-import javax.persistence.EntityManager;
+-import javax.persistence.TypedQuery;
+-import javax.persistence.criteria.CriteriaBuilder;
+-import javax.persistence.criteria.CriteriaQuery;
+-import javax.persistence.criteria.Root;
++import jakarta.persistence.EntityManager;
++import jakarta.persistence.TypedQuery;
++import jakarta.persistence.criteria.CriteriaBuilder;
++import jakarta.persistence.criteria.CriteriaQuery;
++import jakarta.persistence.criteria.Root;
+ import org.hamcrest.Description;
+ import org.hamcrest.TypeSafeDiagnosingMatcher;
+ import org.hamcrest.TypeSafeMatcher;
+@@ -130,16 +130,16 @@ public final class TestUtil {
+             if (item == null) {
+                 return null;
+             }
+-            if (item instanceof BigDecimal) {
+-                return (BigDecimal) item;
+-            } else if (item instanceof Long) {
+-                return BigDecimal.valueOf((Long) item);
+-            } else if (item instanceof Integer) {
+-                return BigDecimal.valueOf((Integer) item);
+-            } else if (item instanceof Double) {
+-                return BigDecimal.valueOf((Double) item);
+-            } else if (item instanceof Float) {
+-                return BigDecimal.valueOf((Float) item);
++            if (item instanceof BigDecimal decimal) {
++                return decimal;
++            } else if (item instanceof Long long1) {
++                return BigDecimal.valueOf(long1);
++            } else if (item instanceof Integer integer) {
++                return BigDecimal.valueOf(integer);
++            } else if (item instanceof Double double1) {
++                return BigDecimal.valueOf(double1);
++            } else if (item instanceof Float float1) {
++                return BigDecimal.valueOf(float1);
+             } else {
+                 return BigDecimal.valueOf(item.doubleValue());
+             }
+diff --git a/src/test/java/io/github/jhipster/sample/web/rest/UserResourceIT.java b/src/test/java/io/github/jhipster/sample/web/rest/UserResourceIT.java
+index 66ca5d8..148f4ab 100644
+--- a/src/test/java/io/github/jhipster/sample/web/rest/UserResourceIT.java
++++ b/src/test/java/io/github/jhipster/sample/web/rest/UserResourceIT.java
+@@ -16,7 +16,7 @@ import io.github.jhipster.sample.web.rest.vm.ManagedUserVM;
+ import java.time.Instant;
+ import java.util.*;
+ import java.util.function.Consumer;
+-import javax.persistence.EntityManager;
++import jakarta.persistence.EntityManager;
+ import org.apache.commons.lang3.RandomStringUtils;
+ import org.junit.jupiter.api.BeforeEach;
+ import org.junit.jupiter.api.Test;
+@@ -143,7 +143,7 @@ class UserResourceIT {
+         // Validate the User in the database
+         assertPersistedUsers(users -> {
+             assertThat(users).hasSize(databaseSizeBeforeCreate + 1);
+-            User testUser = users.get(users.size() - 1);
++            User testUser = users.getLast();
+             assertThat(testUser.getLogin()).isEqualTo(DEFAULT_LOGIN);
+             assertThat(testUser.getFirstName()).isEqualTo(DEFAULT_FIRSTNAME);
+             assertThat(testUser.getLastName()).isEqualTo(DEFAULT_LASTNAME);
+diff --git a/src/test/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslatorIT.java b/src/test/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslatorIT.java
+index ff08b20..b895c2d 100644
+--- a/src/test/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslatorIT.java
++++ b/src/test/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslatorIT.java
+@@ -10,7 +10,6 @@ import io.github.jhipster.sample.IntegrationTest;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+-import org.springframework.boot.test.context.SpringBootTest;
+ import org.springframework.http.MediaType;
+ import org.springframework.security.test.context.support.WithMockUser;
+ import org.springframework.test.web.servlet.MockMvc;
+diff --git a/src/test/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslatorTestController.java b/src/test/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslatorTestController.java
+index 78f39ca..29cbea8 100644
+--- a/src/test/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslatorTestController.java
++++ b/src/test/java/io/github/jhipster/sample/web/rest/errors/ExceptionTranslatorTestController.java
+@@ -1,7 +1,7 @@
+ package io.github.jhipster.sample.web.rest.errors;
+ 
+-import javax.validation.Valid;
+-import javax.validation.constraints.NotNull;
++import jakarta.validation.Valid;
++import jakarta.validation.constraints.NotNull;
+ import org.springframework.dao.ConcurrencyFailureException;
+ import org.springframework.http.HttpStatus;
+ import org.springframework.security.access.AccessDeniedException;
+diff --git a/src/test/resources/config/application-testdev.yml b/src/test/resources/config/application-testdev.yml
+index 98d28d0..c881a37 100644
+--- a/src/test/resources/config/application-testdev.yml
++++ b/src/test/resources/config/application-testdev.yml
+@@ -18,7 +18,7 @@ spring:
+     hibernate:
+       ddl-auto: none
+       naming:
+-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
++        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+     properties:
+       hibernate.id.new_generator_mappings: true
+diff --git a/src/test/resources/config/application-testprod.yml b/src/test/resources/config/application-testprod.yml
+index b2e4612..8659ed8 100644
+--- a/src/test/resources/config/application-testprod.yml
++++ b/src/test/resources/config/application-testprod.yml
+@@ -25,7 +25,7 @@ spring:
+     hibernate:
+       ddl-auto: none
+       naming:
+-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
++        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+     properties:
+       hibernate.id.new_generator_mappings: true

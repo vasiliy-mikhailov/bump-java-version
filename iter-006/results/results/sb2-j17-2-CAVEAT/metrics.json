@@ -1,0 +1,18 @@
+{
+  "repo_id": "sb2-j17-2-CAVEAT",
+  "repo_url": "https://github.com/openzipkin/zipkin.git",
+  "sha": "2b504805c661eb5b748b47151df450ebf97eb682",
+  "java_version": 17,
+  "build_tool": "maven",
+  "phase_reached": "done",
+  "failure": "",
+  "build_pre": 0,
+  "build_post": 1,
+  "tests_passed_post": 0,
+  "tests_total_post": 0,
+  "recipe_applied": 1,
+  "recipe_rc": 1,
+  "recipe_elapsed_s": 10,
+  "build_elapsed_s": 243,
+  "test_elapsed_s": 6
+}

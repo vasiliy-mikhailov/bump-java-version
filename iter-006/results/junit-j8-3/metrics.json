@@ -1,0 +1,18 @@
+{
+  "repo_id": "junit-j8-3",
+  "repo_url": "https://github.com/square/retrofit.git",
+  "sha": "8e83a242eac1afc22a13c52098eddb27421353ff",
+  "java_version": 8,
+  "build_tool": "gradle",
+  "phase_reached": "post-build",
+  "failure": "build-post",
+  "build_pre": 0,
+  "build_post": 0,
+  "tests_passed_post": 0,
+  "tests_total_post": 0,
+  "recipe_applied": 1,
+  "recipe_rc": 1,
+  "recipe_elapsed_s": 7,
+  "build_elapsed_s": 35,
+  "test_elapsed_s": 0
+}

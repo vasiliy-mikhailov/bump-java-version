@@ -1,0 +1,18 @@
+{
+  "repo_id": "hjl-j8-2",
+  "repo_url": "https://github.com/swagger-api/swagger-core.git",
+  "sha": "7d89d07a40741416d36b6592d15a1e7ab329ed95",
+  "java_version": 8,
+  "build_tool": "maven",
+  "phase_reached": "post-build",
+  "failure": "build-post",
+  "build_pre": 0,
+  "build_post": 0,
+  "tests_passed_post": 0,
+  "tests_total_post": 0,
+  "recipe_applied": 1,
+  "recipe_rc": 1,
+  "recipe_elapsed_s": 23,
+  "build_elapsed_s": 32,
+  "test_elapsed_s": 0
+}

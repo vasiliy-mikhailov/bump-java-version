@@ -1,0 +1,18 @@
+{
+  "repo_id": "sb2-j11-2",
+  "repo_url": "https://github.com/jhipster/jhipster-sample-app-react.git",
+  "sha": "13dc6133f32dd009a966e144cd4619f33cd93d24",
+  "java_version": 11,
+  "build_tool": "maven",
+  "phase_reached": "post-build",
+  "failure": "build-post",
+  "build_pre": 0,
+  "build_post": 0,
+  "tests_passed_post": 0,
+  "tests_total_post": 0,
+  "recipe_applied": 1,
+  "recipe_rc": 0,
+  "recipe_elapsed_s": 98,
+  "build_elapsed_s": 2,
+  "test_elapsed_s": 0
+}

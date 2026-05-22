@@ -2,16 +2,12 @@
 # IDs and versions are anchored to OpenRewrite's published catalogue.
 
 seed:
-  # iter-5: REORDER mutation. In iter-4, SpringFoxToSpringDoc ran *after*
-  # UpgradeSpringBoot_3_3, which had already removed the springfox dep -
-  # so the source-code transformer found no Springfox classes to map and
-  # the build still failed on Docket/ApiInfo unresolved. Move SpringFox
-  # migration ahead of the Spring Boot upgrade so source rewrites happen
-  # while the springfox classpath is still present.
+  # CHAMPION (iter-2). iter-3/4/5 mutations didn't beat this on the 4-repo
+  # smoke (mean Qwen 4.0; build_post 1/4). Validating now against the full
+  # 34-repo dataset.
   - org.openrewrite.java.migrate.UpgradeJavaVersion:
       version: 21
   - org.openrewrite.java.migrate.jakarta.JakartaEE10
-  - org.openrewrite.java.springdoc.SpringFoxToSpringDoc
   - org.openrewrite.java.spring.framework.UpgradeSpringFramework_6_1
   - org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3
   - org.openrewrite.hibernate.MigrateToHibernate62
