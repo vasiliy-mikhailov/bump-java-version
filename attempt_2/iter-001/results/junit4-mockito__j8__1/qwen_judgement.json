@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 3,
+  "overall": 3,
+  "justification": "The diff successfully migrates from Java EE (javax.*) to Jakarta EE (jakarta.*) and updates dependencies to modern versions (JUnit 5, Mockito 5, Jakarta EE 10), which is appropriate for Java 21. However, it introduces significant spurious churn by refactoring imports (e.g., replacing wildcard imports with explicit ones in `AuthorisationFilter.java` and `Inscription.java`) and removing unused imports in `AdminRepoInt.java` and `FormationRepoInt.java`, which are unrelated to the Java 21 migration. The use of `getFirst()` in `AuthorisationFilter.java` is a good Java 21 idiom, but the overall diff is cluttered with unnecessary changes."
+}

@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 3,
+  "overall": 3,
+  "justification": "The diff successfully migrates javax.* to jakarta.* and updates Spring Boot to 3.x, but it introduces a manual migration comment in SecurityConfig.java that suggests incomplete automation. The removal of @Autowired annotations is good, but the diff leaves some unused imports and doesn't fully clean up the pom.xml (e.g., duplicate junit entries). The Java 21 idioms are minimal since this is primarily a framework migration."
+}

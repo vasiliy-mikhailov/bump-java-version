@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 3,
+  "overall": 3,
+  "justification": "The diff successfully migrates javax to jakarta namespaces and updates dependencies (Jakarta EE 10, EclipseLink 4, PrimeFaces 14) to match, but fails to adopt Java 21 idioms (no records, pattern matching, or virtual threads). It also introduces a logical bug in SecurityController.java by replacing `request.getSession().invalidate()` with a second `request.logout()` call, and leaves stale `javax.mvc` imports in ReporterController.java and SecurityController.java."
+}

@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 2,
+  "overall": 3,
+  "justification": "The diff correctly updates Java version to 21 and migrates from Hibernate 5 (javax.persistence) to Hibernate 6 (jakarta.persistence), including necessary persistence.xml changes. However, it includes binary .class files in the diff which is poor practice (diff_coherence penalty). No Java 21 idioms (records, pattern matching, etc.) are introduced, just version bumps and package renames."
+}

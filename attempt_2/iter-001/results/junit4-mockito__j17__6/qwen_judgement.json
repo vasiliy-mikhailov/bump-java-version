@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 2,
+  "antipattern_clearance": 4,
+  "diff_coherence": 5,
+  "overall": 3,
+  "justification": "The diff performs a mechanical javax -> jakarta namespace migration and updates build tool versions (maven-compiler-plugin 3.15.0, surefire 3.1.2, spring-framework-bom 6.1.21) to support Java 21, but introduces no Java 21 idioms (e.g., pattern matching for switch, record patterns, virtual threads, or sequence protocols). The removal of junit-vintage-engine and junit 4.13.2 is a positive cleanup for a JUnit 5 project, though the diff is otherwise purely mechanical."
+}

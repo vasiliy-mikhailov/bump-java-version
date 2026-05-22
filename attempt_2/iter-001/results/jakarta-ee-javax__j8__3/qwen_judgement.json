@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 5,
+  "overall": 4,
+  "justification": "The diff correctly updates Maven compiler settings to Java 21 and migrates javax.servlet to jakarta.servlet 6.0.0, including web.xml namespace/schema updates. However, it doesn't leverage any Java 21-specific idioms (records, pattern matching, etc.), limiting the idiomatic score. The migration is clean with no spurious churn."
+}

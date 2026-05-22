@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 3,
+  "overall": 3,
+  "justification": "The diff updates Maven compiler settings to Java 21 and modernizes Optional usage (isEmpty() instead of !isPresent()), but introduces spurious XML whitespace reformatting in persistence.xml and web.xml files. The removal of the JUnit 4 dependency is appropriate for the junit4-mockito target, but the diff lacks meaningful Java 21 idioms like pattern matching or records."
+}

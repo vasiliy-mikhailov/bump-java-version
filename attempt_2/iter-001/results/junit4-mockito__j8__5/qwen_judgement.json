@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 4,
+  "antipattern_clearance": 5,
+  "diff_coherence": 5,
+  "overall": 4,
+  "justification": "The diff correctly upgrades JUnit 4 to JUnit 5 and Mockito 1 to Mockito 5, replacing deprecated `mockito-all` with `mockito-core` and updating compiler settings to `release 21`. It also modernizes `Optional.isPresent()` to `isEmpty()` and replaces JUnit 4's `@Test(expected=...)` with JUnit 5's `assertThrows()`. However, it doesn't fully leverage Java 21 features like pattern matching for switch or records, keeping idiomatic score at 4."
+}
