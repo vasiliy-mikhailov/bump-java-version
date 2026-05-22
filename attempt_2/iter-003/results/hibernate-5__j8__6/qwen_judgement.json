@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 4,
+  "overall": 3,
+  "justification": "The diff correctly migrates javax.* to jakarta.* namespaces and updates Maven dependencies (JUnit 4->5, Arquillian, Jakarta EE 10), but fails to update the Hibernate dependency (hibernate-entitymanager 5.4.20.Final is removed without a Jakarta-compatible replacement like Hibernate 6.x, which is required for Java 21/Jakarta EE 10). The use of List.getFirst() in AuthorisationFilter.java is a valid Java 21 idiom, but the missing Hibernate upgrade is a critical oversight for a 'hibernate-5__j8__6' migration targeting Java 21."
+}

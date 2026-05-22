@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 3,
+  "overall": 3,
+  "justification": "The diff successfully migrates javax.* to jakarta.* and updates Spring Boot to 3.x, but introduces spurious churn by removing @Autowired annotations (which are optional but not harmful) and refactoring imports unnecessarily. The SecurityConfig migration is incomplete, leaving a comment marker instead of fully removing WebSecurityConfigurerAdapter. The JUnit 4 to JUnit 5 migration is mostly correct but leaves some unused imports and incomplete test refactoring."
+}

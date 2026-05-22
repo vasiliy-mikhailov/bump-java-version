@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 2,
+  "antipattern_clearance": 3,
+  "diff_coherence": 2,
+  "overall": 2,
+  "justification": "The diff primarily removes unused imports and updates Spring Boot/Hibernate versions, but fails to introduce any Java 21 idioms (e.g., records, pattern matching, virtual threads). The removal of imports like `jakarta.validation.constraints` and `org.hibernate.annotations.Cascade` suggests cleanup, but the diff is sparse on actual migration value and lacks evidence of Java 21 feature adoption."
+}

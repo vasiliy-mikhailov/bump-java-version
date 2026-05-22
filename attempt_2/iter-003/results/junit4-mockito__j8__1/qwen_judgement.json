@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 3,
+  "overall": 3,
+  "justification": "The diff successfully migrates javax.* to jakarta.* namespaces and updates dependencies (JUnit 4 -> 5, Mockito 3 -> 5, Arquillian JUnit -> JUnit5), which is appropriate for Java 21. However, it introduces significant spurious churn by removing unused imports (e.g., in AdminRepoInt.java, Candidat.java) and refactoring imports from wildcards to explicit names (e.g., AuthorisationFilter.java), which are not strictly required for the migration. The use of `authHeader.getFirst()` in AuthorisationFilter.java is a good Java 21 idiom (replacing `get(0)`), but the overall diff is cluttered with unnecessary import cleanups."
+}

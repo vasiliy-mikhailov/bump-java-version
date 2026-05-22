@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 5,
+  "overall": 3,
+  "justification": "The diff correctly updates Spring Boot to 3.x (Jakarta EE) and Java to 21, fixing javax->jakarta imports and adding @Serial for serialVersionUID. However, it misses opportunities for Java 21 idioms (e.g., records, pattern matching) and doesn't address the typo in NegocioExcpetion.java. The changes are coherent and focused on the migration without spurious churn."
+}

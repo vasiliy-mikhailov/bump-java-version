@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 3,
+  "antipattern_clearance": 4,
+  "diff_coherence": 4,
+  "overall": 3,
+  "justification": "The diff successfully migrates from JUnit 4 to JUnit 5 (Jupiter) and updates the Java version to 21 in CI and Maven, which is a significant step. However, it leaves a stale import `org.junit.rules.TestWatcher` in `AbstractWebTest.java` (line 4) which is JUnit 4 specific and unused, and the `@Rule` annotation (line 3) is also JUnit 4 specific but the diff doesn't remove the field or the annotation, only changing `@Before` to `@BeforeEach`. This incomplete migration of the test base reduces the score. The maven-compiler-plugin version update is good but hardcoding `21` instead of using the property is a minor inconsistency."
+}

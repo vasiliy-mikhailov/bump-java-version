@@ -1,0 +1,7 @@
+{
+  "idiomatic_java21": 4,
+  "antipattern_clearance": 5,
+  "diff_coherence": 5,
+  "overall": 4,
+  "justification": "The diff correctly migrates javax.persistence to jakarta.persistence and updates build tooling (Maven compiler, Surefire, JaCoCo, GitHub Actions) to Java 21. It also modernizes a few String.format calls to String.formatted() in test code, which is a nice Java 15+ idiom. However, it misses opportunities to use more Java 21 idioms like pattern matching for instanceof or records where applicable, and the main source code doesn't show any Java 21-specific improvements beyond the namespace migration. The diff is clean with no spurious churn."
+}
