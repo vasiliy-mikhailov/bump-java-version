@@ -1,0 +1,11 @@
+{
+  "repo": "Usmanov2003/Basic_spring_boot_web_example",
+  "commit_sha": "5aa705af5fde54ff3622efb03cc1c21041afddff",
+  "java_version": 17,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 47,
+  "build_rc": 0,
+  "build_pass": true
+}

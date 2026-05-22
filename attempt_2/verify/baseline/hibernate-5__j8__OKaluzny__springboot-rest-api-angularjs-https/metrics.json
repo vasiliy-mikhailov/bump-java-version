@@ -1,0 +1,11 @@
+{
+  "repo": "OKaluzny/springboot-rest-api-angularjs-https",
+  "commit_sha": "d057f4bad81a8a888a7f057dc77e53c0dec111e0",
+  "java_version": 8,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 2,
+  "build_rc": 0,
+  "build_pass": true
+}

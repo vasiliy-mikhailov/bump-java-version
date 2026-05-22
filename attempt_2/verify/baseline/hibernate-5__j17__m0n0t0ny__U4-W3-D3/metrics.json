@@ -1,0 +1,11 @@
+{
+  "repo": "m0n0t0ny/U4-W3-D3",
+  "commit_sha": "920b642da5f3c47e5a6bfc9e51f287dd44f772bc",
+  "java_version": 17,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 1,
+  "build_rc": 0,
+  "build_pass": true
+}

@@ -1,0 +1,11 @@
+{
+  "repo": "bygui86/multiple-json-fields",
+  "commit_sha": "6a13ed51fc0b669bf7f975ea40cc92472bfcc7ba",
+  "java_version": 11,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 2,
+  "build_rc": 0,
+  "build_pass": true
+}

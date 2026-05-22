@@ -1,0 +1,11 @@
+{
+  "repo": "JotaPrimo/CRUD-REPOSITORY",
+  "commit_sha": "63f84fee131027c0de25ffabbb9881a558e899b3",
+  "java_version": 11,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 1,
+  "build_rc": 1,
+  "build_pass": false
+}

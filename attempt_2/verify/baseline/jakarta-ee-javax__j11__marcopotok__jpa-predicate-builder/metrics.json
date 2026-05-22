@@ -1,0 +1,11 @@
+{
+  "repo": "marcopotok/jpa-predicate-builder",
+  "commit_sha": "ed8e953baac3f76432d588b261f46df314b3f217",
+  "java_version": 11,
+  "dep_family": "jakarta-ee-javax",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 3,
+  "build_rc": 0,
+  "build_pass": true
+}

@@ -1,0 +1,11 @@
+{
+  "repo": "TechPrimers/multi-stage-example",
+  "commit_sha": "49acfe5c5d7af5144dd3f2c8328dc4d7401ce949",
+  "java_version": 8,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 2,
+  "build_rc": 0,
+  "build_pass": true
+}

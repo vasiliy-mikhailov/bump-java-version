@@ -1,0 +1,11 @@
+{
+  "repo": "viniciussantos02/Crud-Desafio-Pitang",
+  "commit_sha": "9f3d3694e514c4114c3969516f5a607620e21bb8",
+  "java_version": 8,
+  "dep_family": "junit4-mockito",
+  "build_tool": "maven",
+  "clone_elapsed_s": 0,
+  "build_elapsed_s": 4,
+  "build_rc": 1,
+  "build_pass": false
+}

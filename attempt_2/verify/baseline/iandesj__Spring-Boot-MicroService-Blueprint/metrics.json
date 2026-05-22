@@ -1,0 +1,11 @@
+{
+  "repo": "iandesj/Spring-Boot-MicroService-Blueprint",
+  "commit_sha": "b317bd2b8c18b902893f06b2bd7281b47ec65ba7",
+  "java_version": 8,
+  "dep_family": "junit4-mockito",
+  "build_tool": "gradle",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 15,
+  "build_rc": 0,
+  "build_pass": true
+}

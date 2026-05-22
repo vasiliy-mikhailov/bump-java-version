@@ -1,0 +1,11 @@
+{
+  "repo": "nakave123/ESD",
+  "commit_sha": "7edf206a77d3e78c08af9a815410cb7bdca172c8",
+  "java_version": 17,
+  "dep_family": "jakarta-ee-javax",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 2,
+  "build_rc": 0,
+  "build_pass": true
+}

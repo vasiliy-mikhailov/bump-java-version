@@ -1,0 +1,11 @@
+{
+  "repo": "syqu22/spring-boot-shop-sample",
+  "commit_sha": "d1e567d6ac5c5011e5f6ee2f21d7caa4c269c1d3",
+  "java_version": 11,
+  "dep_family": "junit4-mockito",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 3,
+  "build_rc": 0,
+  "build_pass": true
+}

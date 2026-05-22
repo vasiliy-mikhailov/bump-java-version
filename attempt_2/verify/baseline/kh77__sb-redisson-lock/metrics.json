@@ -1,0 +1,11 @@
+{
+  "repo": "kh77/sb-redisson-lock",
+  "commit_sha": "1c822addc15c9d58af532f40a17457086b7c1114",
+  "java_version": 11,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 2,
+  "build_rc": 1,
+  "build_pass": false
+}

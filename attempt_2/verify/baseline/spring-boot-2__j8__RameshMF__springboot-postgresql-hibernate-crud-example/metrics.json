@@ -1,0 +1,11 @@
+{
+  "repo": "RameshMF/springboot-postgresql-hibernate-crud-example",
+  "commit_sha": "5c2214c22162106283342e1f0825ec1f616b608f",
+  "java_version": 8,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 0,
+  "build_elapsed_s": 2,
+  "build_rc": 0,
+  "build_pass": true
+}

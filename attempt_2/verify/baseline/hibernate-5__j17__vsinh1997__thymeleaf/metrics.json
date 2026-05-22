@@ -1,0 +1,11 @@
+{
+  "repo": "vsinh1997/thymeleaf",
+  "commit_sha": "e1e9e0effa50a2cc14020114fbd0eb644fb760fe",
+  "java_version": 17,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 2,
+  "build_rc": 0,
+  "build_pass": true
+}

@@ -1,0 +1,11 @@
+{
+  "repo": "DsTyM/PharmaciesOnDutyAttica",
+  "commit_sha": "03dd8e369e6fb986c0657156186a1adafaddf200",
+  "java_version": 17,
+  "dep_family": "jakarta-ee-javax",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 17,
+  "build_rc": 0,
+  "build_pass": true
+}

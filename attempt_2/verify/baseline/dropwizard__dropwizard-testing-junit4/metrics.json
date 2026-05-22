@@ -1,0 +1,11 @@
+{
+  "repo": "dropwizard/dropwizard-testing-junit4",
+  "commit_sha": "30136bdbf8119cbfb76b8384b2c1cd9cac7bf6be",
+  "java_version": 11,
+  "dep_family": "junit4-mockito",
+  "build_tool": "maven",
+  "clone_elapsed_s": 14,
+  "build_elapsed_s": 67,
+  "build_rc": 1,
+  "build_pass": false
+}

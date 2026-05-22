@@ -1,0 +1,11 @@
+{
+  "repo": "lazaronixon/active-persistence",
+  "commit_sha": "157d3f96f5ea79d747bd6a29917f85a8850cb543",
+  "java_version": 11,
+  "dep_family": "junit4-mockito",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 2,
+  "build_rc": 0,
+  "build_pass": true
+}

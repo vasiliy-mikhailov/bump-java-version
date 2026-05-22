@@ -1,0 +1,11 @@
+{
+  "repo": "gumaciel/CRUD-Java",
+  "commit_sha": "84fb2eaf7ea5a05f2fcbf7ca94653b2c78d33dde",
+  "java_version": 11,
+  "dep_family": "junit4-mockito",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 2,
+  "build_rc": 1,
+  "build_pass": false
+}

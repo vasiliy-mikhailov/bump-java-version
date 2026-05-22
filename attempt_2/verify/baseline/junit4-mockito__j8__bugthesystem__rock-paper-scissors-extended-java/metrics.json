@@ -1,0 +1,11 @@
+{
+  "repo": "bugthesystem/rock-paper-scissors-extended-java",
+  "commit_sha": "70f47e94fcdf015b5af4889b66d78e0eacaedbe9",
+  "java_version": 8,
+  "dep_family": "junit4-mockito",
+  "build_tool": "maven",
+  "clone_elapsed_s": 0,
+  "build_elapsed_s": 1,
+  "build_rc": 0,
+  "build_pass": true
+}

@@ -1,0 +1,11 @@
+{
+  "repo": "OctavioHGoncalves/API-REST-com-java-SpringBoot-e-MySQL",
+  "commit_sha": "78187c7d480b279930a054217d13564beabf381b",
+  "java_version": 11,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 2,
+  "build_rc": 0,
+  "build_pass": true
+}

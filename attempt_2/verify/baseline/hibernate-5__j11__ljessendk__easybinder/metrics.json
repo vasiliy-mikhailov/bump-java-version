@@ -1,0 +1,11 @@
+{
+  "repo": "ljessendk/easybinder",
+  "commit_sha": "87cb0aa946896f5ff2ca6907f2b0dd0d46cb3bcd",
+  "java_version": 11,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 2,
+  "build_rc": 0,
+  "build_pass": true
+}

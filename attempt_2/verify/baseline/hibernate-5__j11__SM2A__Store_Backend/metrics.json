@@ -1,0 +1,11 @@
+{
+  "repo": "SM2A/Store_Backend",
+  "commit_sha": "6da8a69bfbbceea0b49ad0a0825130d16f760427",
+  "java_version": 11,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 3,
+  "build_rc": 0,
+  "build_pass": true
+}

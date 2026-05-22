@@ -1,0 +1,11 @@
+{
+  "repo": "Sherif-toiema22/AlaaAdin-",
+  "commit_sha": "c40e5695148fe1c8de879cb03217db016a4ae6fc",
+  "java_version": 17,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 13,
+  "build_elapsed_s": 45,
+  "build_rc": 0,
+  "build_pass": true
+}

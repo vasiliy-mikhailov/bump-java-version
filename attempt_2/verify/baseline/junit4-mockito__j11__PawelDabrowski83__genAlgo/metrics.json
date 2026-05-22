@@ -1,0 +1,11 @@
+{
+  "repo": "PawelDabrowski83/genAlgo",
+  "commit_sha": "63153be62bd89accfb0543ff37e1ce45d335324d",
+  "java_version": 11,
+  "dep_family": "junit4-mockito",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 1,
+  "build_rc": 1,
+  "build_pass": false
+}

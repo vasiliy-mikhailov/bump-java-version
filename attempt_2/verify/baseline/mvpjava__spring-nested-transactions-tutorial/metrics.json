@@ -1,0 +1,11 @@
+{
+  "repo": "mvpjava/spring-nested-transactions-tutorial",
+  "commit_sha": "7ed9116831132e225a1f846fc8efcd3d8f126b51",
+  "java_version": 8,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 7,
+  "build_rc": 0,
+  "build_pass": true
+}

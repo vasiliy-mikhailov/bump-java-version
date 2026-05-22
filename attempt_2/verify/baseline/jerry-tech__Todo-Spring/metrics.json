@@ -1,0 +1,11 @@
+{
+  "repo": "jerry-tech/Todo-Spring",
+  "commit_sha": "d5ef12dbb83d40dc7116ffc8199d0c1743318c58",
+  "java_version": 11,
+  "dep_family": "jakarta-ee-javax",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 12,
+  "build_rc": 0,
+  "build_pass": true
+}

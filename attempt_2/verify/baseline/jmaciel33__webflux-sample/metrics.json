@@ -1,0 +1,11 @@
+{
+  "repo": "jmaciel33/webflux-sample",
+  "commit_sha": "d0935337511af0df0e94ad06641d03cccd281fc4",
+  "java_version": 11,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 38,
+  "build_rc": 0,
+  "build_pass": true
+}

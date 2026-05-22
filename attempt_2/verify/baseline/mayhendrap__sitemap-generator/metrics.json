@@ -1,0 +1,11 @@
+{
+  "repo": "mayhendrap/sitemap-generator",
+  "commit_sha": "cc39111d55d75ca352c66b3a6ad97782cb1cc828",
+  "java_version": 11,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 11,
+  "build_rc": 0,
+  "build_pass": true
+}

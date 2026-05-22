@@ -1,0 +1,11 @@
+{
+  "repo": "taok-monitor/taok-api",
+  "commit_sha": "2caa56b17ac44f1f22a1772e9337c6ab6c4dd15b",
+  "java_version": 8,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 0,
+  "build_elapsed_s": 1,
+  "build_rc": 0,
+  "build_pass": true
+}

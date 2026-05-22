@@ -1,0 +1,11 @@
+{
+  "repo": "danilkozyrev/file-storage-api",
+  "commit_sha": "f0481fba80647ea47320769bf6f2c0ac87568c5e",
+  "java_version": 11,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 4,
+  "build_rc": 0,
+  "build_pass": true
+}

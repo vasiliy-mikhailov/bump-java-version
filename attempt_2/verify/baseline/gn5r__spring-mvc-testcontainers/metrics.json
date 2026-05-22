@@ -1,0 +1,11 @@
+{
+  "repo": "gn5r/spring-mvc-testcontainers",
+  "commit_sha": "a080b41763c118452019f860f16c0318d40fb789",
+  "java_version": 8,
+  "dep_family": "junit4-mockito",
+  "build_tool": "maven",
+  "clone_elapsed_s": 0,
+  "build_elapsed_s": 24,
+  "build_rc": 0,
+  "build_pass": true
+}

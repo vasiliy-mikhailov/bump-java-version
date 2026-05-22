@@ -1,0 +1,11 @@
+{
+  "repo": "tramon/springcrudapp",
+  "commit_sha": "c02be91bea4445fca1b056fe181c31da831a42a0",
+  "java_version": 8,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 37,
+  "build_rc": 0,
+  "build_pass": true
+}

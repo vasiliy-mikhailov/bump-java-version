@@ -1,0 +1,11 @@
+{
+  "repo": "guspaz0/expenseTracker",
+  "commit_sha": "7bdb04c4033d7adf6527eac3274976af16801ba1",
+  "java_version": 17,
+  "dep_family": "junit4-mockito",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 1,
+  "build_rc": 0,
+  "build_pass": true
+}

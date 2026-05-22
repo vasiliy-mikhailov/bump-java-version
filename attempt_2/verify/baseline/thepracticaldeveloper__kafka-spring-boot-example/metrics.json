@@ -1,0 +1,11 @@
+{
+  "repo": "thepracticaldeveloper/kafka-spring-boot-example",
+  "commit_sha": "7fe1d2d508b273a9683f03a3641896f3b574e55e",
+  "java_version": 17,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 8,
+  "build_rc": 0,
+  "build_pass": true
+}

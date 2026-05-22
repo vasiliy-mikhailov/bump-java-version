@@ -1,0 +1,11 @@
+{
+  "repo": "Jouo/solid-spring-boot",
+  "commit_sha": "ef5affe74f9588b4236bccd3260ff1e8d9437dbe",
+  "java_version": 11,
+  "dep_family": "jakarta-ee-javax",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 3,
+  "build_rc": 0,
+  "build_pass": true
+}

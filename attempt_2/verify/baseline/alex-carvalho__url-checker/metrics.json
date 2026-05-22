@@ -1,0 +1,11 @@
+{
+  "repo": "alex-carvalho/url-checker",
+  "commit_sha": "c52e742ed46ba99a4ca679ae6408a4da889667fa",
+  "java_version": 8,
+  "dep_family": "junit4-mockito",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 27,
+  "build_rc": 0,
+  "build_pass": true
+}

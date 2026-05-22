@@ -1,0 +1,11 @@
+{
+  "repo": "mayhendrap/audittrail-envers",
+  "commit_sha": "3f66758743f4eee2b778b3ee6b4135b59a8161d3",
+  "java_version": 17,
+  "dep_family": "spring-boot-2",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 2,
+  "build_rc": 0,
+  "build_pass": true
+}

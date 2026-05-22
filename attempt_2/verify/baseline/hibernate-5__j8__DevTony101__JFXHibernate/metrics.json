@@ -1,0 +1,11 @@
+{
+  "repo": "DevTony101/JFXHibernate",
+  "commit_sha": "10771f49df6536b8a332919e7c3b2c05e9ac26de",
+  "java_version": 8,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 0,
+  "build_elapsed_s": 2,
+  "build_rc": 1,
+  "build_pass": false
+}

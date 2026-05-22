@@ -1,0 +1,11 @@
+{
+  "repo": "tlandeka/authentication-microservice-with-domain-driven-design",
+  "commit_sha": "f883165dea9190dde6eb8f3d49b4e8309a7e882d",
+  "java_version": 11,
+  "dep_family": "jakarta-ee-javax",
+  "build_tool": "maven",
+  "clone_elapsed_s": 2,
+  "build_elapsed_s": 4,
+  "build_rc": 0,
+  "build_pass": true
+}

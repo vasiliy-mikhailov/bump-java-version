@@ -1,0 +1,11 @@
+{
+  "repo": "RedisGears/rghibernate",
+  "commit_sha": "14d2dd6373b3ce6bfa9db048be37c745ac8dc5cc",
+  "java_version": 11,
+  "dep_family": "hibernate-5",
+  "build_tool": "maven",
+  "clone_elapsed_s": 1,
+  "build_elapsed_s": 1,
+  "build_rc": 1,
+  "build_pass": false
+}
