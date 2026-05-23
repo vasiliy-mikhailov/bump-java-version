@@ -10,6 +10,7 @@
 - **Dataset rediscovery** (item 6): the corpus the recipe fitness measures against, ralph-looped over candidate repos.
 - **Per-failing-repo refinement** (item 7): a finer-grained ralph loop nested under the recipe fitness. Used when the coarse loop plateaus on the build-success metric.
 - **Runner saturation** (item 8): keep the verifier host loaded enough to make progress without thrashing.
+- **Sub-agent delegation** (item 10): an agent endpoint the orchestrator can hand well-scoped coding subtasks to.
 
 0. **Fitness (writing this file):** keep AGENTS.md compact and outcome-named so the agent re-derives the *how* every iteration from its tools and the corpus.
    - **Constraints:** no implementation instructions the agent can fill itself, no enumerations that age, no justifications for the rule alongside the rule.
@@ -28,8 +29,14 @@
    - **Search:** ground each candidate fix in a known community workaround.
    - **Reward:** real `build_post 0 → 1` flips net of regressions on the full corpus.
    - **Repeat:** simplest cluster first; stop when only bespoke engineering remains.
-8. **Fitness (runner saturation):** keep the verifier host CPU between 60 % and 80 % of cores *while items 4 / 6 / 7 are running* — this fitness composes with them rather than standing alone — saturation only counts toward the composite objective when a parent loop is making progress.
+8. **Fitness (runner saturation):** keep the verifier host CPU between 60 % and 80 % of cores *while items 4 / 6 / 7 / 10 are running* — this fitness composes with them rather than standing alone — saturation only counts toward the composite objective when a parent loop is making progress.
    - **Constraints:** any concurrency dial the agent can reach.
    - **Search:** sample load periodically, decide what to adjust given the recent action history and which parent loop is active.
    - **Reward:** sustained band hit without thrashing or stalling the parent loop.
    - **Repeat:** continuous, dampened against oscillation; pause when no parent loop is active.
+
+10. **Fitness (sub-agent delegation):** stand up an OpenHands (or equivalent) agent endpoint on the work host that the orchestrating agent can hand well-scoped subtasks to, so the orchestrator writes less glue code itself.
+    - **Constraints:** sub-agent runs in Docker on the work host, can read/write the project workdir, can invoke build tools, returns structured results.
+    - **Search:** ralph loop over container config, model backend wiring, auth.
+    - **Reward:** dispatch a representative subtask, get a usable artifact back without writing the script.
+    - **Repeat:** every time the orchestrator catches itself writing throwaway scripting glue.
