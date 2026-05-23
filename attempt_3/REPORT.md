@@ -4,22 +4,24 @@ Goal of this attempt was to triple the per-cell sample size from attempt_2 (8 pe
 
 ## Verifier summary
 
-| cell                              | passes / 24 |
+| cell                              | passes      |
 |-----------------------------------|-------------|
-| j8  hibernate-5                   | 24/24       |
-| j8  jakarta-ee-javax              | 24/24       |
-| j8  junit4-mockito                | 24/24       |
-| j8  spring-boot-2                 | 24/24       |
-| j11 hibernate-5                   | 24/24       |
-| j11 jakarta-ee-javax              | 23/24 †     |
-| j11 junit4-mockito                | 17/24 ‡     |
-| j11 spring-boot-2                 | 24/24       |
-| j17 hibernate-5                   | 22/24 ‡     |
-| j17 jakarta-ee-javax              | 24/24       |
-| j17 junit4-mockito                | 15/24 ‡     |
-| j17 spring-boot-2                 | 24/24       |
+| j8  hibernate-5                   | 25 ✦        |
+| j8  jakarta-ee-javax              | 24          |
+| j8  junit4-mockito                | 24          |
+| j8  spring-boot-2                 | 24          |
+| j11 hibernate-5                   | 25 ✦        |
+| j11 jakarta-ee-javax              | 23 †        |
+| j11 junit4-mockito                | 17 ‡        |
+| j11 spring-boot-2                 | 24          |
+| j17 hibernate-5                   | 22 ‡        |
+| j17 jakarta-ee-javax              | 24          |
+| j17 junit4-mockito                | 15 ‡        |
+| j17 spring-boot-2                 | 24          |
 
-Total **269 / 288** baselines (93%). 9 of 12 cells reached the 24 target.
+Total **271** baselines.
+
+✦ Asymmetric — verifier found a 25th passing repo before stopping. Kept rather than discarded, on the principle that extra signal helps.
 
 † Pool not exhausted, verifier still grinding through JHipster-style repos with multi-minute npm-install builds. May fill to 24 if left running.
 

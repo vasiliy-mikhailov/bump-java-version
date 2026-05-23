@@ -240,6 +240,16 @@
     "baseline_build_elapsed_s": 4
   },
   {
+    "cell_id": "hibernate-5__j8__25",
+    "java_version": 8,
+    "dep_family": "hibernate-5",
+    "repo_full_name": "zhisheng17/springmvc",
+    "commit_sha": "d224d3539b7c1ff7f9264df5554c6c36daac4f72",
+    "clone_url": "https://github.com/zhisheng17/springmvc.git",
+    "build_tool": "maven",
+    "baseline_build_elapsed_s": 27
+  },
+  {
     "cell_id": "jakarta-ee-javax__j8__01",
     "java_version": 8,
     "dep_family": "jakarta-ee-javax",
@@ -1198,6 +1208,16 @@
     "clone_url": "https://github.com/n19dccn112/WEBTS.git",
     "build_tool": "maven",
     "baseline_build_elapsed_s": 16
+  },
+  {
+    "cell_id": "hibernate-5__j11__25",
+    "java_version": 11,
+    "dep_family": "hibernate-5",
+    "repo_full_name": "yakupselami4/HRMSprojectdayeight",
+    "commit_sha": "ccec65599c408aceb601110bd7fa139d79a3ecca",
+    "clone_url": "https://github.com/yakupselami4/HRMSprojectdayeight.git",
+    "build_tool": "maven",
+    "baseline_build_elapsed_s": 7
   },
   {
     "cell_id": "jakarta-ee-javax__j11__01",
