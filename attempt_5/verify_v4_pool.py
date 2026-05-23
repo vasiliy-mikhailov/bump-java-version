@@ -32,10 +32,10 @@ def verify_one_commit(repo_url, sha, jv):
                "-Dspotbugs.skip=true -Dspring-javaformat.skip=true -Dformat.skip=true compile")
         home = os.environ["HOME"]
         cname = f"lv4-{os.getpid()}-{threading.get_ident()}"
-        docker_cmd = ["docker","run","--rm","--name",cname,"--cpus","2.5","--memory","6g",
+        docker_cmd = ["docker","run","--rm","--network","mvn-cache","--name",cname,"--cpus","2.5","--memory","6g",
                       "--entrypoint","/bin/bash",
                       "-v", f"{root}:/work",
-                      "-v", f"{home}/.m2-fitness:/root/.m2",
+                      "-v", "/home/vmihaylov/maven-config/settings.xml:/root/.m2/settings.xml:ro",
                       "-e", f"JAVA_HOME={jdk_path}",
                       "-e", f"PATH={jdk_path}/bin:/opt/maven/bin:/usr/local/bin:/usr/bin:/bin",
                       "-w","/work","j21-fitness:latest","-c", cmd]
