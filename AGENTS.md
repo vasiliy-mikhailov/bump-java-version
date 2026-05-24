@@ -21,7 +21,7 @@
 1. **Workdir:** `$HOME/java_8_11_17_to_java_21`.
 2. **Containment:** all build toolchains and recipe execution run inside Docker. If a host resource this project needs is held by something unrelated, free it in favour of this project. External-artifact caching is governed by item 11.
 3. **Access:** SSH calls to the work host share one session, not one per command.
-4. **Fitness (recipe):** find a recipe composition that converges each repo in `java21-migration-dataset.json` to the form humans committed.
+4. **Fitness (recipe):** find an OpenRewrite recipe composition that converges each repo in `java21-migration-dataset.json` to the form humans committed.
     - **Constraints:** declarative YAML only; each adjacent step in a lineage is its own stage; each stage runs under the JDK matching its output level, accepts exactly one input level, and its source+pom edits persist into the next stage's working tree.
     - **Search:** per stage, draw from the recipe catalog, community migration guidance, and the diff between the candidate's output and the human's commit at that stage's output level.
     - **Reward:** per stage, fraction of the corpus that builds on the stage's JDK, jointly with closeness to the human's commit at that level, with regressions weighted heavier than non-improvements.
