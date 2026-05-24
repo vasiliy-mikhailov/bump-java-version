@@ -10,7 +10,7 @@
     - **Search:** per stage, draw from the recipe catalog, community migration guidance, the corpus's empirical human-intent catalog (item 6), and the diff between the candidate's output and the human's commit at that stage's output level.
     - **Reward:** per stage, fraction of the corpus that builds on the stage's JDK, jointly with intent overlap with the human's commit at that level (item 11), with regressions weighted heavier than non-improvements.
     - **Repeat:** ralph loop per stage; on plateau, drop into item 7.
-2. **Workdir:** `$HOME/java_8_11_17_to_java_21`.
+2. **Paths:** project workdir `$HOME/java_8_11_17_to_java_21`; corpus repo-mirror cache `/var/cache/git-mirrors/<owner>/<repo>.git`.
 3. **Containment:** all build toolchains and recipe execution run inside Docker. If a host resource this project needs is held by something unrelated, free it in favour of this project.
 4. **Access:** SSH calls to the work host share one session, not one per command.
 5. **Fitness (vLLM spin-up):** stand up an OpenAI-compatible chat-completion endpoint serving a tool-capable model.
