@@ -1,0 +1,147 @@
+{
+  "meta": {
+    "repo": "andrei-punko/spring-boot-2-jsonb",
+    "stage": "J8->J11",
+    "family": "spring-boot-2",
+    "sha_from": "6c95ff50d27fb26ed197868280b24e616175b085",
+    "sha_to": "cd6fc5b6e9ce004f25e695d36cef6247b9e09f59"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the Java source and target version property from 1.8 to 11 to align with the migration target.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_plugin",
+        "general_idea": "Configure the Maven compiler plugin to use the new Java version and set up annotation processor paths for MapStruct and Lombok.",
+        "human_impl": "<plugin>...<source>${java.version}</source>...<annotationProcessorPaths>...</annotationProcessorPaths>...</plugin>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Data JPA starter to enable persistence layer functionality.",
+        "human_impl": "<artifactId>spring-boot-starter-data-jpa</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Web starter to enable REST controller functionality.",
+        "human_impl": "<artifactId>spring-boot-starter-web</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add MapStruct library for object mapping.",
+        "human_impl": "<artifactId>mapstruct</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Lombok library to reduce boilerplate code.",
+        "human_impl": "<artifactId>lombok</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Jakarta Validation API for bean validation.",
+        "human_impl": "<artifactId>jakarta.validation-api</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Springfox Swagger2 for API documentation.",
+        "human_impl": "<artifactId>springfox-swagger2</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Springfox Swagger UI for interactive API documentation.",
+        "human_impl": "<artifactId>springfox-swagger-ui</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Swagger annotations explicitly to resolve version conflicts.",
+        "human_impl": "<artifactId>swagger-annotations</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Swagger models explicitly to resolve version conflicts.",
+        "human_impl": "<artifactId>swagger-models</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Flyway for database migration management.",
+        "human_impl": "<artifactId>flyway-core</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add PostgreSQL driver for database connectivity.",
+        "human_impl": "<artifactId>postgresql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Hibernate Types library to support JSONB types in PostgreSQL.",
+        "human_impl": "<artifactId>hibernate-types-52</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Testcontainers PostgreSQL module for integration testing.",
+        "human_impl": "<artifactId>postgresql</artifactId> ... <groupId>org.testcontainers</groupId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_project_metadata",
+        "general_idea": "Rename the project artifact and name to reflect its specific purpose (JSONB usage).",
+        "human_impl": "<artifactId>spring-boot-jsonb</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_project_metadata",
+        "general_idea": "Update the project description to describe the JSONB example.",
+        "human_impl": "<description>Spring Boot app with example of Jsonb usage</description>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_parent_version",
+        "general_idea": "Bump Spring Boot parent version to a newer patch release.",
+        "human_impl": "<version>2.3.2.RELEASE</version>",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "add_server_port",
+        "general_idea": "Configure the application to listen on a specific port instead of the default.",
+        "human_impl": "server.port=9080",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_datasource_config",
+        "general_idea": "Configure the JDBC connection details using environment variables for database connectivity.",
+        "human_impl": "spring.datasource.url=${DB_URL}\nspring.datasource.username=${DB_USER}\nspring.datasource.password=${DB_PASSWORD}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_postgres_driver",
+        "general_idea": "Specify the PostgreSQL JDBC driver class for the datasource.",
+        "human_impl": "spring.datasource.driver-class-name=org.postgresql.Driver",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_hibernate_dialect",
+        "general_idea": "Set the Hibernate dialect to PostgreSQL 9.5 to ensure correct SQL generation for the target database.",
+        "human_impl": "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQL95Dialect",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

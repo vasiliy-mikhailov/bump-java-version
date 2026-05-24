@@ -1,0 +1,255 @@
+{
+  "meta": {
+    "repo": "gal16v8d/earthquake-svc",
+    "stage": "J8->J17",
+    "family": "spring-boot-2",
+    "sha_from": "472c0f791579e249d9ea1ff0d630686ba776b74d",
+    "sha_to": "a9d0caba3cb0ad50b038ff535cbcac02fcc86b17"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent version to 2.6.6 to align with Java 17 compatibility requirements.",
+        "human_impl": "<version>2.6.6</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_java_version_property",
+        "general_idea": "Set the Java source and target version to 17 to enable compilation on the new JDK.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_group_id",
+        "general_idea": "Rename the project group ID from co.com.gsdd to com.gsdd.",
+        "human_impl": "<groupId>com.gsdd</groupId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_artifact_version",
+        "general_idea": "Bump the project artifact version to 2.0.1.",
+        "human_impl": "<version>2.0.1</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jstl_dependency",
+        "general_idea": "Add explicit JSTL dependency for runtime support.",
+        "human_impl": "<dependency><groupId>javax.servlet</groupId><artifactId>jstl</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "exclude_junit_vintage",
+        "general_idea": "Remove JUnit Vintage engine exclusion to modernize test execution or fix compatibility.",
+        "human_impl": "<exclusions><exclusion><groupId>org.junit.vintage</groupId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_surefire_plugin",
+        "general_idea": "Configure Maven Surefire plugin for unit test execution.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_failsafe_plugin",
+        "general_idea": "Configure Maven Failsafe plugin for integration test execution.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-failsafe-plugin</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_plugin",
+        "general_idea": "Configure JaCoCo plugin for code coverage reporting.",
+        "human_impl": "<plugin><groupId>org.jacoco</groupId><artifactId>jacoco-maven-plugin</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_formatter_plugin",
+        "general_idea": "Add code formatting plugin using Google style.",
+        "human_impl": "<plugin><groupId>net.revelc.code.formatter</groupId><artifactId>formatter-maven-plugin</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_copy_plugin",
+        "general_idea": "Configure dependency plugin to copy Lombok during packaging.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-dependency-plugin</artifactId>...",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "add_i18n_note",
+        "general_idea": "Document the addition of internationalization support to the service.",
+        "human_impl": "Adding i18n support",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_start_url",
+        "general_idea": "Provide the local URL to access the service index.",
+        "human_impl": "Get started in: http://localhost:8092/earthquake-svc/index.gg",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_docker_instructions",
+        "general_idea": "Add documentation for building and running the service via Docker.",
+        "human_impl": "docker build -t earthquake-svc . && docker run --rm -d -p 8092:8092 earthquake-svc",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "rename_application",
+        "general_idea": "Rename the Spring Boot application name to reflect a new service identity.",
+        "human_impl": "spring.application.name=earthquake-svc",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_context_path",
+        "general_idea": "Update the servlet context path to match the new service name.",
+        "human_impl": "server.servlet.context-path=/earthquake-svc",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_server_port",
+        "general_idea": "Change the server listening port from 8080 to 8092.",
+        "human_impl": "server.port=8092",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/webapp/WEB-INF/extensions/footer.xhtml": [
+      {
+        "kind": "remove_hardcoded_social_links",
+        "general_idea": "Removed hardcoded links to Twitter, Facebook, and Blogspot from the footer.",
+        "human_impl": "Deleted <a> tags for Twitter, Facebook, and Blogspot.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_youtube_link",
+        "general_idea": "Updated the YouTube link to point to a new channel URL.",
+        "human_impl": "Changed href to https://www.youtube.com/channel/UCjuLPC1fqIa8JaulIhpY1KQ/videos",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "externalize_footer_text",
+        "general_idea": "Replaced hardcoded 'Siguenos en:' text with an i18n message key.",
+        "human_impl": "Replaced 'Siguenos en:' with #{msg['follow.us']}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_commented_paypal_code",
+        "general_idea": "Cleaned up commented-out PayPal donation form code.",
+        "human_impl": "Removed HTML comment block containing PayPal form inputs.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_commented_youtube_widget",
+        "general_idea": "Cleaned up commented-out YouTube subscription widget code.",
+        "human_impl": "Removed HTML comment block containing YouTube iframe widget.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/webapp/WEB-INF/extensions/menu.xhtml": [
+      {
+        "kind": "refactor_component_rename",
+        "general_idea": "Rename JSF form and component IDs to reflect the new English naming convention for earthquakes.",
+        "human_impl": "formFilterSismos -> formFilterEarthquakes, btnConsultarSismos -> btnSearch",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_bean_rename",
+        "general_idea": "Update JSF expressions to reference the renamed backing bean and its properties.",
+        "human_impl": "beanSismos -> earthquakeBean, minMagnitud -> minMagnitude, dias -> days",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "feature_i18n_labels",
+        "general_idea": "Replace hardcoded Spanish text with internationalization message bundle keys.",
+        "human_impl": "value=\"Auto:\" -> value=\"#{msg['lbl.update']}:\", value=\"Magnitud+:\" -> value=\"#{msg['tbl.prop.mag']}+:\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_paypal_config",
+        "general_idea": "Update PayPal donation button configuration with new hosted button ID and correct target attribute.",
+        "human_impl": "hosted_button_id='3YVV2Y874NXP4', target='_blank' -> target='_top'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_paypal_i18n",
+        "general_idea": "Internationalize the PayPal button alt text and update image URLs to English locale.",
+        "human_impl": "alt=\"PayPal...\" -> alt=\"#{msg['paypal.alt']}\", src updated to en_US/en_CO paths",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/webapp/WEB-INF/faces-config.xml": [
+      {
+        "kind": "add_i18n_resource_bundle",
+        "general_idea": "Configure JSF to use a resource bundle for internationalization support.",
+        "human_impl": "<resource-bundle><base-name>i18n.msg.messages</base-name><var>msg</var></resource-bundle>",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/webapp/WEB-INF/template.xhtml": [
+      {
+        "kind": "refactor_whitespace",
+        "general_idea": "Standardize indentation from spaces to tabs for consistent code style.",
+        "human_impl": "Changed leading spaces to tabs in XML elements.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_rename",
+        "general_idea": "Rename layout component ID to better reflect its content (Earthquakes).",
+        "human_impl": "Changed id='layoutSismos' to id='layoutEarthquake'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_resource",
+        "general_idea": "Update favicon reference to a new file name.",
+        "human_impl": "Changed href from 'LogoJR.png' to 'logo.png'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "feature_i18n",
+        "general_idea": "Externalize the page title to support internationalization.",
+        "human_impl": "Replaced static title text with '#{msg['template.title']}'.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/webapp/index.xhtml": [
+      {
+        "kind": "refactor_i18n",
+        "general_idea": "Replace hardcoded Spanish strings with EL expressions referencing a message bundle for internationalization support.",
+        "human_impl": "title=\"#{msg['export.xls']}\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_rename_component",
+        "general_idea": "Rename JSF component IDs and bean references from Spanish ('sismo', 'beanSismos') to English ('earthquake', 'earthquakeBean') to align with the new naming convention.",
+        "human_impl": "id=\"tblEarthquakes\" value=\"#{earthquakeBean.features}\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_remove_feature",
+        "general_idea": "Remove the embedded YouTube subscription widget iframe from the main container.",
+        "human_impl": "Removed <iframe ... src=\"https://www.youtube.com/subscribe_widget...\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_update_export_target",
+        "general_idea": "Update data exporter components to target the renamed table ID and use i18n keys for filenames.",
+        "human_impl": "target=\"tblEarthquakes\" fileName=\"#{msg['export.filename']}\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_update_dialog_content",
+        "general_idea": "Update the detail dialog to use the new English bean properties and i18n keys for labels and titles.",
+        "human_impl": "value=\"#{earthquakeBean.selectedEarthquake.place}\" title=\"#{msg['clic.see.map']}\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_update_widget_var",
+        "general_idea": "Rename PrimeFaces widget variables and dialog IDs to match the new English naming scheme.",
+        "human_impl": "widgetVar=\"wvDetail\" id=\"dlgEarthquakeDetail\"",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

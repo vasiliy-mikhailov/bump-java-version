@@ -1,0 +1,335 @@
+{
+  "meta": {
+    "repo": "Dangkoolwat/stack-app-2025-v1",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "4d29f13cdc299934d060845bebcd0eed6e13c31a",
+    "sha_to": "27ce6a4c2caed3045fade696cad6920a232aec4f"
+  },
+  "by_file": {
+    "src/main/java/com/daangcool/stack/StackApp.java": [
+      {
+        "kind": "import_migration_liquibase",
+        "general_idea": "Update LiquibaseProperties import to match Spring Boot 4 package structure changes.",
+        "human_impl": "import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "constant_refactor",
+        "general_idea": "Replace external JHipster constants with local application constants for profile checks.",
+        "human_impl": "activeProfiles.contains(StackAppConstants.SPRING_PROFILE_DEVELOPMENT)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/aop/logging/LoggingAspect.java": [
+      {
+        "kind": "replace_external_constant",
+        "general_idea": "Replace the JHipster-specific constant for the development profile with a local application constant to decouple from the JHipster library.",
+        "human_impl": "JHipsterConstants.SPRING_PROFILE_DEVELOPMENT -> StackAppConstants.SPRING_PROFILE_DEVELOPMENT",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency_import",
+        "general_idea": "Remove the import statement for the JHipster configuration class since its constants are no longer used in this file.",
+        "human_impl": "Removed import tech.jhipster.config.JHipsterConstants;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add the import statement for the local application constants class to support the new constant usage.",
+        "human_impl": "Added import com.daangcool.stack.common.constant.StackAppConstants;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/ApplicationProperties.java": [
+      {
+        "kind": "add_lombok_annotations",
+        "general_idea": "Add Lombok @Getter and @Setter annotations to the main class and inner static classes to replace manual getter/setter methods.",
+        "human_impl": "@Getter @Setter public class ApplicationProperties { ... public static class Liquibase { ... } }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_liquibase_properties",
+        "general_idea": "Introduce a nested Liquibase configuration class with an asyncStart boolean property.",
+        "human_impl": "private final Liquibase liquibase = new Liquibase(); public static class Liquibase { private Boolean asyncStart = true; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_logging_properties",
+        "general_idea": "Introduce a nested Logging configuration class with file path, size, and history properties.",
+        "human_impl": "private final Logging logging = new Logging(); public static class Logging { private String filePath; ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_file_storage_properties",
+        "general_idea": "Introduce a nested File configuration class with storage type, upload, share, and path properties.",
+        "human_impl": "private final File file = new File(); public static class File { private FileStorageType storageType = FileStorageType.LOCAL; ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Import the FileStorageType enumeration required for the new File configuration properties.",
+        "human_impl": "import com.daangcool.stack.domain.enumeration.FileStorageType;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/CacheConfiguration.java": [
+      {
+        "kind": "import_migration",
+        "general_idea": "Update Spring Boot auto-configuration imports to match Spring Boot 4 package structure.",
+        "human_impl": "import org.springframework.boot.cache.autoconfigure.JCacheManagerCustomizer;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "import_migration",
+        "general_idea": "Update Hibernate auto-configuration imports to match Spring Boot 4 package structure.",
+        "human_impl": "import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bean_extraction",
+        "general_idea": "Extract RedissonClient into a dedicated bean to ensure single instance reuse and fix lifecycle issues.",
+        "human_impl": "@Bean public RedissonClient redissonClient(JHipsterProperties jHipsterProperties) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_injection",
+        "general_idea": "Inject the extracted RedissonClient bean into JCache configuration instead of creating a new instance.",
+        "human_impl": "RedissonConfiguration.fromInstance(redissonClient, jcacheConfig);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "feature_addition",
+        "general_idea": "Add a long-TTL cache configuration bean for static data like Tags and CommonCodes.",
+        "human_impl": "@Bean public ... longTtlCacheConfiguration(RedissonClient redissonClient) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "cache_registration",
+        "general_idea": "Register specific cache regions with appropriate TTLs (short for dynamic, long for static) in the customizer.",
+        "human_impl": "createCache(cm, SETTING_CACHE, longTtlCacheConfiguration);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bug_fix",
+        "general_idea": "Remove duplicate cache registration for Board.boardTags to prevent conflicts.",
+        "human_impl": "// \ubc84\uadf8 \uc218\uc815: Board.boardTags \uc911\ubcf5 \ub4f1\ub85d \uc81c\uac70",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_refactoring",
+        "general_idea": "Extract Redisson configuration logic into a separate private method for clarity.",
+        "human_impl": "private Config getRedissonConfig(JHipsterProperties jHipsterProperties) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_refactoring",
+        "general_idea": "Extract TTL configuration logic into a reusable helper method.",
+        "human_impl": "private ... buildTTLConfig(RedissonClient redissonClient, long duration, TimeUnit unit) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_cleanup",
+        "general_idea": "Remove unused GitProperties and BuildProperties fields and their setters.",
+        "human_impl": "- private GitProperties gitProperties; - public void setGitProperties(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_cleanup",
+        "general_idea": "Remove unused KeyGenerator bean and PrefixedKeyGenerator import.",
+        "human_impl": "- @Bean public KeyGenerator keyGenerator() { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "deprecation_handling",
+        "general_idea": "Suppress deprecation warnings for Redisson setPassword() method pending library upgrade.",
+        "human_impl": "@SuppressWarnings(\"deprecation\") private Config getRedissonConfig(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/DateTimeFormatConfiguration.java": [
+      {
+        "kind": "use_var_keyword",
+        "general_idea": "Replace explicit type declaration with 'var' for local variable type inference.",
+        "human_impl": "var registrar = new DateTimeFormatterRegistrar();",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/InitDataConfiguration.java": [
+      {
+        "kind": "add_jakarta_annotation_import",
+        "general_idea": "Replace javax.annotation with jakarta.annotation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3/4.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_spring_stereotype_annotations",
+        "general_idea": "Add @Configuration and @Profile annotations to properly register the class as a Spring bean conditional on the 'data' profile.",
+        "human_impl": "@Configuration\n@Profile(\"data\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_logging_infrastructure",
+        "general_idea": "Introduce SLF4J logger instance for debug output within the configuration class.",
+        "human_impl": "private final Logger log = LoggerFactory.getLogger(InitDataConfiguration.class);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_post_construct_hook",
+        "general_idea": "Define a @PostConstruct method to handle initialization logic, currently serving as a placeholder for Liquibase-managed data.",
+        "human_impl": "@PostConstruct\npublic void initiateData() { ... }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/JacksonConfiguration.java": [
+      {
+        "kind": "remove_manual_jackson_modules",
+        "general_idea": "Remove manual registration of JavaTimeModule, Jdk8Module, and Hibernate6Module beans to rely on Spring Boot 4's auto-configuration for Jackson 3.",
+        "human_impl": "Deleted @Bean methods for JavaTimeModule, Jdk8Module, and Hibernate6Module and added a comment explaining the switch to auto-configuration.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/LoggingAspectConfiguration.java": [
+      {
+        "kind": "replace_external_constant",
+        "general_idea": "Replace JHipster framework constant with a local application constant to decouple from the external library.",
+        "human_impl": "Changed @Profile(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT) to @Profile(StackAppConstants.SPRING_PROFILE_DEVELOPMENT)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove the import for the JHipster constants class that is no longer used in the file.",
+        "human_impl": "Removed import tech.jhipster.config.JHipsterConstants;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_local_import",
+        "general_idea": "Add import for the local constants class to support the new profile definition.",
+        "human_impl": "Added import com.daangcool.stack.common.constant.StackAppConstants;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/OpenApiConfiguration.java": [
+      {
+        "kind": "replace_jhipster_constant",
+        "general_idea": "Replaced JHipster-specific profile constant with a project-specific constant to decouple from JHipster defaults.",
+        "human_impl": "@Profile(StackAppConstants.SPRING_PROFILE_API_DOCS)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_swagger_security_scheme",
+        "general_idea": "Added JWT Bearer authentication scheme to OpenAPI components for API documentation.",
+        "human_impl": ".addSecuritySchemes(\"bearerAuth\", new SecurityScheme()...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_swagger_problem_schema",
+        "general_idea": "Defined RFC7807 Problem response schema in OpenAPI components to document error responses.",
+        "human_impl": ".addSchemas(\"Problem\", new Schema<>()...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_swagger_security_requirement",
+        "general_idea": "Applied the defined bearerAuth security requirement to all API operations in the documentation.",
+        "human_impl": ".addSecurityItem(new SecurityRequirement().addList(\"bearerAuth\"))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_swagger_info_metadata",
+        "general_idea": "Populated OpenAPI info section with title, description, version, contact, and license details.",
+        "human_impl": ".info(new Info().title(\"Stack App 2025 API\")...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_swagger_tags",
+        "general_idea": "Added descriptive tags for User Management and Auth API groups in the documentation.",
+        "human_impl": ".addTagsItem(new Tag().name(\"User Management\")...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/SecurityConfiguration.java": [
+      {
+        "kind": "remove_mvc_matcher_dependency",
+        "general_idea": "Remove dependency on MvcRequestMatcher and HandlerMappingIntrospector to simplify security configuration.",
+        "human_impl": "Removed MvcRequestMatcher.Builder bean and replaced mvc.pattern() calls with standard string patterns in requestMatchers.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_csrf_config",
+        "general_idea": "Update CSRF disable syntax to use method reference compatible with newer Spring Security versions.",
+        "human_impl": "Changed .csrf(csrf -> csrf.disable()) to .csrf(AbstractHttpConfigurer::disable).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "inject_custom_auth_handlers",
+        "general_idea": "Replace default OAuth2 entry point and access denied handlers with custom implementations.",
+        "human_impl": "Injected CustomAuthenticationEntryPoint and CustomAccessDeniedHandler and assigned them in exceptionHandling and oauth2ResourceServer configs.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_file_storage_security_rules",
+        "general_idea": "Add security rules for public and private file storage paths based on application properties.",
+        "human_impl": "Added requestMatchers for fileStorageProperties.getFile().getPublicPath() (permitAll) and getPrivatePath() (denyAll).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_static_resource_patterns",
+        "general_idea": "Update static resource permit patterns to match standard Spring Boot static resource locations.",
+        "human_impl": "Replaced specific file extension patterns with directory-based patterns like /css/**, /js/**, /images/**, /webjars/**.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_otp_auth_permissions",
+        "general_idea": "Allow public access to Email OTP authentication endpoints.",
+        "human_impl": "Added .requestMatchers(\"/api/auth/email/**\").permitAll() to the authorization rules.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refine_upload_api_permissions",
+        "general_idea": "Differentiate permissions for file upload operations: allow public reads, require auth for writes, and admin for deletes.",
+        "human_impl": "Added specific rules for /api/uploads/**: GET permitAll, POST authenticated, DELETE hasAuthority(ADMIN).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "open_public_api_paths",
+        "general_idea": "Allow public access to explicitly marked public API endpoints.",
+        "human_impl": "Added .requestMatchers(\"/api/public/**\").permitAll() and .requestMatchers(\"/api/auth/**\").permitAll().",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "relax_swagger_access",
+        "general_idea": "Allow public access to Swagger UI and API documentation endpoints.",
+        "human_impl": "Changed /v3/api-docs/** and /swagger-ui/** from hasAuthority(ADMIN) to permitAll().",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/SecurityJwtConfiguration.java": [
+      {
+        "kind": "security_hardening",
+        "general_idea": "Disable JWT token transmission via URI query parameters to prevent exposure in logs and browser history.",
+        "human_impl": "bearerTokenResolver.setAllowUriQueryParameter(false);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/StaticResourcesWebConfiguration.java": [
+      {
+        "kind": "disable_profile_activation",
+        "general_idea": "Comment out the @Profile annotation to disable production-specific static resource configuration, likely to allow static resources to be served in all profiles or due to a change in how profiles are managed in the new Spring Boot version.",
+        "human_impl": "@Profile({ JHipsterConstants.SPRING_PROFILE_PRODUCTION }) -> //@Profile({ StackAppConstants.SPRING_PROFILE_PRODUCTION })",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove the import for JHipsterConstants as it is no longer used after commenting out the @Profile annotation.",
+        "human_impl": "import tech.jhipster.config.JHipsterConstants; -> [removed]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove the import for Profile annotation as it is no longer used.",
+        "human_impl": "import org.springframework.context.annotation.Profile; -> [removed]",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

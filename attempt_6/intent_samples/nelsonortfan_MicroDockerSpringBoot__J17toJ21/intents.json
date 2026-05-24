@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "repo": "nelsonortfan/MicroDockerSpringBoot",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "7b1afc8b7fb677f7a1224d11ac11a18880745bf4",
+    "sha_to": "adea2edf91eb0ad7d0787f6d158d7f331210ebe7"
+  },
+  "by_file": {
+    "Folder2/accounts/src/main/java/com/eazybytes/accounts/AccountsApplication.java": [
+      {
+        "kind": "enable_jpa_auditing",
+        "general_idea": "Enable Spring Data JPA auditing to automatically populate audit fields like creation and modification timestamps.",
+        "human_impl": "@EnableJpaAuditing(auditorAwareRef = \"auditAwareImpl\")",
+        "bucket": "polishment"
+      }
+    ],
+    "Folder2/accounts/src/main/java/com/eazybytes/accounts/controller/AccountsController.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ standards required by Spring Boot 3 on Java 21.",
+        "human_impl": "import jakarta.validation.Valid;\nimport jakarta.validation.constraints.Pattern;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_controller_validations",
+        "general_idea": "Enable method-level validation on the controller to enforce request constraints.",
+        "human_impl": "@Validated",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_create_account_endpoint",
+        "general_idea": "Implement POST endpoint to create a new account with validation.",
+        "human_impl": "@PostMapping(\"/create\")\npublic ResponseEntity<ResponseDto> createAccount(@Valid @RequestBody CustomerDto customerDto)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_fetch_account_endpoint",
+        "general_idea": "Implement GET endpoint to fetch account details by mobile number with pattern validation.",
+        "human_impl": "@GetMapping(\"/fetch\")\npublic ResponseEntity<CustomerDto> fetchAccountDetails(@RequestParam @Pattern(...) String mobileNumber)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_update_account_endpoint",
+        "general_idea": "Implement PUT endpoint to update account details with validation.",
+        "human_impl": "@PutMapping(\"/update\")\npublic ResponseEntity<ResponseDto> updateAccountDetails(@Valid @RequestBody CustomerDto customerDto)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_delete_account_endpoint",
+        "general_idea": "Implement DELETE endpoint to remove an account by mobile number with pattern validation.",
+        "human_impl": "@DeleteMapping(\"/delete\")\npublic ResponseEntity<ResponseDto> deleteAccountDetails(@RequestParam @Pattern(...) String mobileNumber)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_service_dependency",
+        "general_idea": "Inject the account service interface to handle business logic for the new endpoints.",
+        "human_impl": "private IAccountsService iAccountsService;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_lombok_constructor",
+        "general_idea": "Use Lombok to generate the constructor for dependency injection.",
+        "human_impl": "@AllArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_request_mapping",
+        "general_idea": "Define the base path and media type for the controller endpoints.",
+        "human_impl": "@RequestMapping(path = \"/api\", produces = {MediaType.APPLICATION_JSON_VALUE})",
+        "bucket": "polishment"
+      }
+    ],
+    "Folder2/accounts/pom.xml": [
+      {
+        "kind": "add_packaging_element",
+        "general_idea": "Explicitly set the Maven packaging type to jar.",
+        "human_impl": "<packaging>jar</packaging>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_boot_image",
+        "general_idea": "Configure the Spring Boot Maven plugin to build a container image with a specific name.",
+        "human_impl": "<image><name>nelork/${project.artifactId}:s4</name></image>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jib_plugin",
+        "general_idea": "Add the Google Jib Maven plugin to enable building container images directly from Maven.",
+        "human_impl": "<plugin><groupId>com.google.cloud.tools</groupId><artifactId>jib-maven-plugin</artifactId>...",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

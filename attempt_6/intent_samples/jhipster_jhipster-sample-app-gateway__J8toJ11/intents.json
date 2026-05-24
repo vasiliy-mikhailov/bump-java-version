@@ -1,0 +1,521 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-gateway",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "7605c1da1679564a7eb86b18292936728a04ee5c",
+    "sha_to": "7a1e8a2b4fa7caa68158641ce8be12956fff5d8c"
+  },
+  "by_file": {
+    "src/main/java/io/github/jhipster/sample/ApplicationWebXml.java": [
+      {
+        "kind": "update_import_package",
+        "general_idea": "Update import for SpringBootServletInitializer to reflect the package restructure in Spring Boot 2.x.",
+        "human_impl": "import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_import_package",
+        "general_idea": "Update import for DefaultProfileUtil to reflect the package restructure in JHipster libraries.",
+        "human_impl": "import tech.jhipster.config.DefaultProfileUtil;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_javadoc",
+        "general_idea": "Modernize Javadoc comments to use code formatting and correct capitalization.",
+        "human_impl": "* This is a helper Java class that provides an alternative to creating a {@code web.xml}.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_comment",
+        "general_idea": "Replace verbose block comment with a concise single-line comment.",
+        "human_impl": "// set a default to use when no profile is configured.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/JhipsterSampleGatewayApp.java": [
+      {
+        "kind": "refactor_annotations",
+        "general_idea": "Replace explicit Spring Boot annotations with the consolidated @SpringBootApplication annotation.",
+        "human_impl": "Removed @ComponentScan, @EnableAutoConfiguration, and @EnableDiscoveryClient; added @SpringBootApplication.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_injection",
+        "general_idea": "Switch from field injection using @Inject to constructor injection for the Environment bean.",
+        "human_impl": "Removed @Inject field; added constructor taking Environment and assigning it to a final field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_imports",
+        "general_idea": "Update imports to reflect the new package structure of JHipster configuration classes.",
+        "human_impl": "Replaced io.github.jhipster.sample.config imports with tech.jhipster.config imports.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_constants",
+        "general_idea": "Replace custom Constants class references with standard JHipsterConstants.",
+        "human_impl": "Changed Constants.SPRING_PROFILE_* to JHipsterConstants.SPRING_PROFILE_*.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_startup_logging",
+        "general_idea": "Refactor application startup logging to handle SSL and context paths correctly and remove checked exception from main.",
+        "human_impl": "Extracted logging logic to logApplicationStartup method, added SSL protocol detection, and wrapped UnknownHostException in try-catch.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_properties",
+        "general_idea": "Update configuration property binding to use the new ApplicationProperties class.",
+        "human_impl": "Replaced JHipsterProperties.class with ApplicationProperties.class in @EnableConfigurationProperties.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/aop/logging/LoggingAspect.java": [
+      {
+        "kind": "switch_to_constructor_injection",
+        "general_idea": "Replace field injection with constructor injection to adhere to modern Spring best practices and improve testability.",
+        "human_impl": "Removed @Inject on field and added constructor taking Environment.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_profile_check_api",
+        "general_idea": "Update environment profile checking to use the newer Profiles.of() API instead of string constants.",
+        "human_impl": "Changed env.acceptsProfiles(Constants.SPRING_PROFILE_DEVELOPMENT) to env.acceptsProfiles(Profiles.of(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT)).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_pointcut_strategy",
+        "general_idea": "Refactor AspectJ pointcuts to target Spring stereotypes and specific packages rather than generic package wildcards.",
+        "human_impl": "Replaced single loggingPointcut with springBeanPointcut (stereotypes) and applicationPackagePointcut (packages).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "optimize_logger_retrieval",
+        "general_idea": "Extract logger retrieval into a helper method to reduce code duplication and improve clarity.",
+        "human_impl": "Added private Logger logger(JoinPoint joinPoint) method and used it in advice methods.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_log_messages",
+        "general_idea": "Simplify log message templates by removing redundant class name logging since the logger is already scoped to the class.",
+        "human_impl": "Removed joinPoint.getSignature().getDeclaringTypeName() from log message strings.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/AsyncConfiguration.java": [
+      {
+        "kind": "replace_custom_properties_with_boot_autoconfig",
+        "general_idea": "Migrate from custom JHipsterProperties to Spring Boot's TaskExecutionProperties for thread pool configuration.",
+        "human_impl": "Replaced JHipsterProperties injection with TaskExecutionProperties constructor injection and updated getter calls.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_import_package",
+        "general_idea": "Update import for ExceptionHandlingAsyncTaskExecutor to the new tech.jhipster package structure.",
+        "human_impl": "Changed import from io.github.jhipster.sample.async to tech.jhipster.async.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_injection_style",
+        "general_idea": "Switch from field injection using @Inject to constructor injection for better testability and immutability.",
+        "human_impl": "Removed @Inject field and added constructor parameter for TaskExecutionProperties.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "clean_up_imports",
+        "general_idea": "Remove unused wildcard imports and organize import statements.",
+        "human_impl": "Replaced 'import org.springframework.scheduling.annotation.*;' with specific imports and removed unused javax.inject.Inject.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/CacheConfiguration.java": [
+      {
+        "kind": "refactor_inject",
+        "general_idea": "Replace field injection with constructor injection for required dependencies to improve testability and adhere to modern Spring best practices.",
+        "human_impl": "private final Environment env; public CacheConfiguration(Environment env, ...) { this.env = env; ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_optional_inject",
+        "general_idea": "Replace field injection with setter injection for optional dependencies (Registration, GitProperties, BuildProperties) to handle missing beans gracefully.",
+        "human_impl": "@Autowired(required = false) public void setRegistration(Registration registration) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_imports",
+        "general_idea": "Update imports to use wildcard for Hazelcast config classes and add new Spring Boot info and JHipster config imports.",
+        "human_impl": "import com.hazelcast.config.*; import org.springframework.boot.info.BuildProperties;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_api_migration",
+        "general_idea": "Migrate from DiscoveryClient.getLocalServiceInstance() to Registration.getServiceId() for obtaining the service ID, aligning with newer Spring Cloud Commons API.",
+        "human_impl": "String serviceId = registration.getServiceId();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_api_migration",
+        "general_idea": "Migrate from Constants.SPRING_PROFILE_DEVELOPMENT to JHipsterConstants.SPRING_PROFILE_DEVELOPMENT with Profiles.of() wrapper.",
+        "human_impl": "env.acceptsProfiles(Profiles.of(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT))",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_api_migration",
+        "general_idea": "Migrate from HazelcastInstanceFactory.newHazelcastInstance() to Hazelcast.newHazelcastInstance() as the factory class was deprecated/removed.",
+        "human_impl": "return Hazelcast.newHazelcastInstance(config);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_api_migration",
+        "general_idea": "Migrate from MapConfig.setEvictionPolicy/setMaxSizeConfig/setEvictionPercentage to the nested EvictionConfig API in newer Hazelcast versions.",
+        "human_impl": "mapConfig.getEvictionConfig().setEvictionPolicy(EvictionPolicy.LRU);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_config_source",
+        "general_idea": "Externalize Hazelcast cache configuration values (backup count, time to live) from hardcoded defaults to JHipsterProperties.",
+        "human_impl": "mapConfig.setBackupCount(jHipsterProperties.getCache().getHazelcast().getBackupCount());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "feature_add_keygen",
+        "general_idea": "Add a custom KeyGenerator bean using PrefixedKeyGenerator to ensure cache keys are unique across different application versions/commits.",
+        "human_impl": "@Bean public KeyGenerator keyGenerator() { return new PrefixedKeyGenerator(this.gitProperties, this.buildProperties); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_cleanup",
+        "general_idea": "Remove static HazelcastInstance field and getter, relying on Spring-managed bean lifecycle instead.",
+        "human_impl": "Removed: private static HazelcastInstance hazelcastInstance; public static HazelcastInstance getHazelcastInstance()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_cleanup",
+        "general_idea": "Remove unused @AutoConfigureAfter annotation and @SuppressWarnings annotation.",
+        "human_impl": "Removed: @AutoConfigureAfter(value = { MetricsConfiguration.class, DatabaseConfiguration.class })",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_logic",
+        "general_idea": "Add check to return existing Hazelcast instance if already initialized, preventing duplicate instance creation.",
+        "human_impl": "HazelcastInstance hazelCastInstance = Hazelcast.getHazelcastInstanceByName(\"jhipsterSampleGateway\"); if (hazelCastInstance != null) { return hazelCastInstance; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_config",
+        "general_idea": "Add ManagementCenterConfig to Hazelcast configuration.",
+        "human_impl": "config.setManagementCenterConfig(new ManagementCenterConfig());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_logging",
+        "general_idea": "Update log messages to use parameterized logging instead of string concatenation.",
+        "human_impl": "log.debug(\"Adding Hazelcast (dev) cluster member {}\", clusterMember);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/Constants.java": [
+      {
+        "kind": "update_login_regex",
+        "general_idea": "The login validation regex was updated to support email addresses and a broader set of special characters.",
+        "human_impl": "LOGIN_REGEX = \"^(?>[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)$\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_spring_profile_constants",
+        "general_idea": "Removed hardcoded Spring profile constants (dev, prod, cloud, heroku, etc.) likely in favor of configuration properties or externalized config.",
+        "human_impl": "Removed SPRING_PROFILE_DEVELOPMENT, SPRING_PROFILE_PRODUCTION, SPRING_PROFILE_CLOUD, SPRING_PROFILE_HEROKU, SPRING_PROFILE_SWAGGER, SPRING_PROFILE_NO_LIQUIBASE",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_system_account_constant",
+        "general_idea": "Renamed the constant SYSTEM_ACCOUNT to SYSTEM for brevity or consistency with other parts of the codebase.",
+        "human_impl": "public static final String SYSTEM = \"system\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_default_language_constant",
+        "general_idea": "Added a constant for the default application language.",
+        "human_impl": "public static final String DEFAULT_LANGUAGE = \"en\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_constructor_body",
+        "general_idea": "Changed the empty private constructor body from block style to inline style.",
+        "human_impl": "private Constants() {}",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/DatabaseConfiguration.java": [
+      {
+        "kind": "refactor_inject_to_constructor",
+        "general_idea": "Replace field injection with constructor injection for the Environment bean to align with modern Spring best practices.",
+        "human_impl": "private final Environment env; public DatabaseConfiguration(Environment env) { this.env = env; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_h2_server_delegation",
+        "general_idea": "Delegate H2 TCP server creation to a JHipster helper class and change return type to Object to avoid dependency on specific H2 Server class.",
+        "human_impl": "return H2ConfigurationHelper.createServer(port);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_h2_port_logic",
+        "general_idea": "Implement logic to calculate a valid port for the H2 TCP server based on the application server port.",
+        "human_impl": "private String getValidPortForH2() { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_liquibase_config",
+        "general_idea": "Remove manual Liquibase bean configuration in favor of Spring Boot auto-configuration.",
+        "human_impl": "Removed @Bean public SpringLiquibase liquibase(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_hibernate_module",
+        "general_idea": "Remove manual Hibernate4Module bean definition, likely relying on auto-configuration or Jackson modules.",
+        "human_impl": "Removed @Bean public Hibernate4Module hibernate4Module()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_constant_import",
+        "general_idea": "Update import to use the new JHipster constants package location.",
+        "human_impl": "import tech.jhipster.config.JHipsterConstants;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Clean up imports that are no longer used after removing manual bean configurations.",
+        "human_impl": "Removed imports for AsyncSpringLiquibase, Hibernate4Module, SpringLiquibase, Server, LiquibaseProperties, Inject, DataSource",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/GatewayConfiguration.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove import for RateLimitingRepository which is no longer used in the configuration.",
+        "human_impl": "-import io.github.jhipster.sample.gateway.ratelimiting.RateLimitingRepository;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove import for javax.inject.Inject as constructor injection is used instead.",
+        "human_impl": "-import javax.inject.Inject;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_required_import",
+        "general_idea": "Add import for RouteLocator required by the updated AccessControlFilter constructor.",
+        "human_impl": "+import org.springframework.cloud.netflix.zuul.filters.RouteLocator;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_required_import",
+        "general_idea": "Add import for JHipsterProperties required by the updated configuration classes.",
+        "human_impl": "+import tech.jhipster.config.JHipsterProperties;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "fix_whitespace",
+        "general_idea": "Add space before opening brace in method definition for code style consistency.",
+        "human_impl": "-public SwaggerBasePathRewritingFilter swaggerBasePathRewritingFilter(){\n+public SwaggerBasePathRewritingFilter swaggerBasePathRewritingFilter() {",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_constructor_injection",
+        "general_idea": "Update AccessControlFilter bean to inject RouteLocator and JHipsterProperties via constructor arguments.",
+        "human_impl": "public AccessControlFilter accessControlFilter(RouteLocator routeLocator, JHipsterProperties jHipsterProperties) {\n    return new AccessControlFilter(routeLocator, jHipsterProperties);\n}",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_documentation",
+        "general_idea": "Simplify JavaDoc for RateLimitingConfiguration to reflect the switch from Cassandra to Bucket4J.",
+        "human_impl": "-* For this filter to work, you need to have:\n-* <ul>\n-* <li>A working Cassandra cluster\n... \n+* This uses Bucket4J to limit the API calls, see {@link io.github.jhipster.sample.gateway.ratelimiting.RateLimitingFilter}.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_injection_style",
+        "general_idea": "Replace field injection with constructor injection for JHipsterProperties in RateLimitingConfiguration.",
+        "human_impl": "-@Inject\n-private JHipsterProperties jHipsterProperties;\n+private final JHipsterProperties jHipsterProperties;\n+public RateLimitingConfiguration(JHipsterProperties jHipsterProperties) {\n+    this.jHipsterProperties = jHipsterProperties;\n}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_bean",
+        "general_idea": "Remove the RateLimitingRepository bean definition as it is no longer needed for the new rate limiting implementation.",
+        "human_impl": "-@Bean\n-public RateLimitingRepository rateLimitingRepository() {\n-    return new RateLimitingRepository();\n-}",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_bean_dependencies",
+        "general_idea": "Update RateLimitingFilter bean to remove dependency on RateLimitingRepository.",
+        "human_impl": "-return new RateLimitingFilter(rateLimitingRepository(), jHipsterProperties);\n+return new RateLimitingFilter(jHipsterProperties);",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LocaleConfiguration.java": [
+      {
+        "kind": "replace_deprecated_webmvc_adapter",
+        "general_idea": "Replace the deprecated WebMvcConfigurerAdapter class with the WebMvcConfigurer interface to comply with Spring Framework 5.x requirements.",
+        "human_impl": "extends WebMvcConfigurerAdapter implements EnvironmentAware -> implements WebMvcConfigurer",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_environment_aware_implementation",
+        "general_idea": "Remove the EnvironmentAware interface implementation and associated property resolver logic as it is no longer needed or supported in the new configuration style.",
+        "human_impl": "Removed implements EnvironmentAware, setEnvironment method, and RelaxedPropertyResolver field.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_locale_resolver_import",
+        "general_idea": "Update the import for AngularCookieLocaleResolver to use the new tech.jhipster package structure.",
+        "human_impl": "import io.github.jhipster.sample.config.locale.AngularCookieLocaleResolver -> import tech.jhipster.config.locale.AngularCookieLocaleResolver",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "simplify_bean_annotation",
+        "general_idea": "Remove the explicit name attribute from the @Bean annotation for localeResolver, relying on the method name instead.",
+        "human_impl": "@Bean(name = \"localeResolver\") -> @Bean",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_imports",
+        "general_idea": "Replace specific imports with wildcard imports for Spring Web MVC configuration annotations.",
+        "human_impl": "import org.springframework.web.servlet.config.annotation.InterceptorRegistry; import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter; -> import org.springframework.web.servlet.config.annotation.*;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LoggingAspectConfiguration.java": [
+      {
+        "kind": "update_profile_constant",
+        "general_idea": "Replace deprecated Spring Boot Constants with JHipster-specific constants for profile definition.",
+        "human_impl": "@Profile(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "inject_environment_dependency",
+        "general_idea": "Inject Environment bean into the configuration to pass it to the LoggingAspect constructor.",
+        "human_impl": "public LoggingAspect loggingAspect(Environment env)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_aspect_constructor",
+        "general_idea": "Update LoggingAspect instantiation to accept the Environment object.",
+        "human_impl": "return new LoggingAspect(env);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LoggingConfiguration.java": [
+      {
+        "kind": "refactor_inject_dependencies",
+        "general_idea": "Replace field injection with constructor injection for Spring beans and values to align with modern best practices.",
+        "human_impl": "public LoggingConfiguration(@Value(...) String appName, JHipsterProperties jHipsterProperties, ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_javax_annotation",
+        "general_idea": "Remove dependency on javax.annotation.PostConstruct which is deprecated in Java 11 and removed in Java 11+ modules without explicit dependency.",
+        "human_impl": "Removed @PostConstruct annotation and moved logic to constructor.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_javax_inject",
+        "general_idea": "Remove dependency on javax.inject.Inject which is part of the Java EE API not included in standard Java 11 distributions.",
+        "human_impl": "Removed import javax.inject.Inject and replaced with constructor injection.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_logging_utils",
+        "general_idea": "Replace manual Logback appender configuration with centralized JHipster LoggingUtils helper methods.",
+        "human_impl": "import static tech.jhipster.config.logging.LoggingUtils.*; addJsonConsoleAppender(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_json_console_support",
+        "general_idea": "Add support for JSON formatted console logging based on JHipster properties.",
+        "human_impl": "if (loggingProperties.isUseJsonFormat()) { addJsonConsoleAppender(context, customFields); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_build_version_field",
+        "general_idea": "Include application build version in logging custom fields using Spring Boot BuildProperties.",
+        "human_impl": "ObjectProvider<BuildProperties> buildProperties ... map.put(\"version\", it.getVersion())",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_refresh_scope",
+        "general_idea": "Enable configuration refresh for logging settings in cloud environments.",
+        "human_impl": "@RefreshScope",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_custom_fields_format",
+        "general_idea": "Change custom fields from string concatenation to JSON serialization via ObjectMapper for safety and extensibility.",
+        "human_impl": "String customFields = mapper.writeValueAsString(map);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java": [
+      {
+        "kind": "refactor_injection_style",
+        "general_idea": "Replace field injection with constructor injection to align with modern Spring best practices and improve testability.",
+        "human_impl": "private final TokenProvider tokenProvider; public SecurityConfiguration(TokenProvider tokenProvider, ...) { this.tokenProvider = tokenProvider; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Remove imports for classes that are no longer used in the configuration class.",
+        "human_impl": "-import org.springframework.beans.factory.BeanInitializationException; -import javax.inject.Inject;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_security_problem_support",
+        "general_idea": "Integrate Zalando Problem library for standardized HTTP error responses in security contexts.",
+        "human_impl": "@Import(SecurityProblemSupport.class) ... .authenticationEntryPoint(problemSupport)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_cors_configuration",
+        "general_idea": "Explicitly add the CorsFilter to the security filter chain to ensure CORS headers are applied correctly.",
+        "human_impl": ".addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_security_headers",
+        "general_idea": "Configure Content-Security-Policy, Referrer-Policy, and Feature-Policy headers to enhance browser security.",
+        "human_impl": ".contentSecurityPolicy(\"...\") .referrerPolicy(...) .featurePolicy(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_frame_options",
+        "general_idea": "Change frame options from disabled to deny to prevent clickjacking attacks.",
+        "human_impl": ".frameOptions().deny()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_ignored_paths",
+        "general_idea": "Update the list of static resources ignored by Spring Security to match current frontend asset structure.",
+        "human_impl": ".antMatchers(\"/app/**/*.{js,html}\") .antMatchers(\"/i18n/**\") .antMatchers(\"/content/**\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_api_permissions",
+        "general_idea": "Refine API endpoint permissions, including renaming reset password endpoints and adding management endpoints.",
+        "human_impl": ".antMatchers(\"/api/account/reset-password/init\").permitAll() .antMatchers(\"/management/health\").permitAll()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_legacy_authentication_config",
+        "general_idea": "Remove the legacy AuthenticationManagerBuilder configuration as it is no longer needed or handled differently.",
+        "human_impl": "-@Inject public void configureGlobal(AuthenticationManagerBuilder auth) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_bean",
+        "general_idea": "Remove the SecurityEvaluationContextExtension bean which is no longer required.",
+        "human_impl": "-@Bean public SecurityEvaluationContextExtension securityEvaluationContextExtension() { ... }",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

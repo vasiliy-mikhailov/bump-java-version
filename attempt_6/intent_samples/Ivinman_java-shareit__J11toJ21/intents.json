@@ -1,0 +1,349 @@
+{
+  "meta": {
+    "repo": "Ivinman/java-shareit",
+    "stage": "J11->J21",
+    "family": "spring-boot-2",
+    "sha_from": "72cdc17f604dc1073ec59669e3ae3a876ada5a38",
+    "sha_to": "f9ec0d2d78b7a9a6c72ff7c0879e6ba07bef5684"
+  },
+  "by_file": {
+    "src/main/java/ru/practicum/shareit/booking/BookingController.java": [
+      {
+        "kind": "add_lombok_annotation",
+        "general_idea": "Introduce Lombok @RequiredArgsConstructor to generate constructor injection for final fields.",
+        "human_impl": "@RequiredArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_service_field",
+        "general_idea": "Add final BookingService field to enable dependency injection via Lombok.",
+        "human_impl": "private final BookingService bookingService;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_post_endpoint",
+        "general_idea": "Implement POST endpoint to create a new booking.",
+        "human_impl": "@PostMapping public Booking addBooking(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_patch_endpoint",
+        "general_idea": "Implement PATCH endpoint to update booking approval status.",
+        "human_impl": "@PatchMapping(\"/{bookingId}\") public Booking patchBooking(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_get_single_endpoint",
+        "general_idea": "Implement GET endpoint to retrieve a single booking by ID.",
+        "human_impl": "@GetMapping(\"/{bookingId}\") public Booking getBooking(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_get_all_endpoint",
+        "general_idea": "Implement GET endpoint to retrieve all bookings for the current user.",
+        "human_impl": "@GetMapping public List<Booking> getAllBookings(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_get_owner_endpoint",
+        "general_idea": "Implement GET endpoint to retrieve all bookings owned by the current user.",
+        "human_impl": "@GetMapping(\"/owner\") public List<Booking> getAllBookingsByOwner(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_todo_comment",
+        "general_idea": "Remove placeholder TODO comment indicating incomplete sprint work.",
+        "human_impl": "Removed /** TODO Sprint add-bookings. */",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_imports",
+        "general_idea": "Update imports to include new dependencies for DTOs, models, services, and enums.",
+        "human_impl": "import ru.practicum.shareit.booking.dto.BookingDto; ...",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ru/practicum/shareit/booking/dto/BookingDto.java": [
+      {
+        "kind": "add_lombok_annotation",
+        "general_idea": "Added @Data annotation to replace boilerplate getters, setters, and toString methods.",
+        "human_impl": "@Data",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_item_id",
+        "general_idea": "Added itemId field to the DTO to identify the booked item.",
+        "human_impl": "private Integer itemId;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_start",
+        "general_idea": "Added start field to the DTO to define the booking start time.",
+        "human_impl": "private LocalDateTime start;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_end",
+        "general_idea": "Added end field to the DTO to define the booking end time.",
+        "human_impl": "private LocalDateTime end;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ru/practicum/shareit/item/ItemController.java": [
+      {
+        "kind": "add_lombok_annotation",
+        "general_idea": "Introduce Lombok @RequiredArgsConstructor to simplify constructor injection.",
+        "human_impl": "@RequiredArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_service_dependency",
+        "general_idea": "Inject ItemService to handle business logic for items.",
+        "human_impl": "private final ItemService itemService;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_post_item_endpoint",
+        "general_idea": "Implement endpoint to create a new item.",
+        "human_impl": "@PostMapping public Item addItem(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_patch_item_endpoint",
+        "general_idea": "Implement endpoint to update an existing item.",
+        "human_impl": "@PatchMapping(\"/{itemId}\") public Item editItem(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_get_item_endpoint",
+        "general_idea": "Implement endpoint to retrieve a single item by ID.",
+        "human_impl": "@GetMapping(\"/{itemId}\") public ItemDateAndCommDto getItemById(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_get_items_endpoint",
+        "general_idea": "Implement endpoint to retrieve all items owned by a user.",
+        "human_impl": "@GetMapping public List<ItemDateAndCommDto> getItemsByOwnerId(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_search_endpoint",
+        "general_idea": "Implement endpoint to search for items by text.",
+        "human_impl": "@GetMapping(\"/search\") public List<Item> getSearchedItems(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_comment_endpoint",
+        "general_idea": "Implement endpoint to add a comment to an item.",
+        "human_impl": "@PostMapping(\"/{itemId}/comment\") public CommentDto addComment(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ru/practicum/shareit/item/dto/ItemDto.java": [
+      {
+        "kind": "add_lombok_annotation",
+        "general_idea": "Add Lombok @Data annotation to the DTO class to automatically generate boilerplate methods like getters, setters, toString, equals, and hashCode.",
+        "human_impl": "import lombok.Data; @Data",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dto_fields",
+        "general_idea": "Define the data structure of the ItemDto by adding name, description, and available fields.",
+        "human_impl": "private final String name; private final String description; private final Boolean available;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_todo_comment",
+        "general_idea": "Remove the placeholder TODO comment indicating the sprint task is now implemented.",
+        "human_impl": "Removed /** TODO Sprint add-controllers. */",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ru/practicum/shareit/item/model/Item.java": [
+      {
+        "kind": "add_jakarta_persistence_entity",
+        "general_idea": "Convert the class into a JPA entity using Jakarta Persistence annotations to replace the older javax.persistence API.",
+        "human_impl": "import jakarta.persistence.*; @Entity @Table(name = \"items\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_lombok_annotations",
+        "general_idea": "Add Lombok annotations to automatically generate boilerplate code like getters, setters, and toString.",
+        "human_impl": "import lombok.*; @Getter @Setter @ToString @EqualsAndHashCode",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_entity_fields",
+        "general_idea": "Define the data fields for the Item entity including id, name, description, and availability status.",
+        "human_impl": "private Integer id; private String name; private String description; private Boolean available;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_user_relationship",
+        "general_idea": "Establish a many-to-one relationship with the User entity to link items to their owners.",
+        "human_impl": "@ManyToOne @JoinColumn(name = \"user_id\") private User user;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ru/practicum/shareit/request/ItemRequest.java": [
+      {
+        "kind": "add_lombok_annotation",
+        "general_idea": "Add Lombok @Data annotation to generate boilerplate methods for the entity class.",
+        "human_impl": "@Data",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_id",
+        "general_idea": "Add integer id field to the ItemRequest entity.",
+        "human_impl": "private Integer id;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_description",
+        "general_idea": "Add string description field to the ItemRequest entity.",
+        "human_impl": "private String description;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_requestor",
+        "general_idea": "Add User requestor field to the ItemRequest entity.",
+        "human_impl": "private User requestor;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_created",
+        "general_idea": "Add LocalDateTime created field to the ItemRequest entity.",
+        "human_impl": "private LocalDateTime created;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ru/practicum/shareit/user/UserController.java": [
+      {
+        "kind": "add_lombok_annotations",
+        "general_idea": "Added Lombok annotations to reduce boilerplate code for logging and dependency injection.",
+        "human_impl": "@Slf4j @RequiredArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_controller_endpoints",
+        "general_idea": "Implemented REST controller methods for user CRUD operations.",
+        "human_impl": "@PostMapping public User createUser...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_service_dependency",
+        "general_idea": "Injected UserService to handle business logic within the controller.",
+        "human_impl": "private final UserService userService;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_logging",
+        "general_idea": "Added informational logging for incoming HTTP requests.",
+        "human_impl": "log.info(\"\u041f\u043e\u0441\u0442\u0443\u043f\u043b\u0435\u043d\u0438\u0435 \u0437\u0430\u043f\u0440\u043e\u0441\u0430 \u043d\u0430 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u0435 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_imports",
+        "general_idea": "Updated imports to include new dependencies and wildcard imports for Spring annotations.",
+        "human_impl": "import org.springframework.web.bind.annotation.*;",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.2 to 3.3.2 to support Java 21 and modern Spring features.",
+        "human_impl": "<version>3.3.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the target Java version property from 11 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_actuator_dependency",
+        "general_idea": "Add Spring Boot Actuator for production-ready features like health checks and metrics.",
+        "human_impl": "<artifactId>spring-boot-starter-actuator</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jpa_dependency",
+        "general_idea": "Add Spring Data JPA starter to enable ORM capabilities.",
+        "human_impl": "<artifactId>spring-boot-starter-data-jpa</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_h2_scope",
+        "general_idea": "Change H2 database dependency scope from runtime to test, implying it is only used for testing.",
+        "human_impl": "<scope>test</scope>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_postgresql_scope",
+        "general_idea": "Remove explicit runtime scope from PostgreSQL driver, relying on default compile scope or transitive management.",
+        "human_impl": "<artifactId>postgresql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_spotbugs_version",
+        "general_idea": "Update SpotBugs Maven plugin from 4.7.0.0 to 4.8.5.0 for better static analysis.",
+        "human_impl": "<version>4.8.5.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_jacoco_version",
+        "general_idea": "Update JaCoCo Maven plugin from 0.8.8 to 0.8.12 for improved code coverage reporting.",
+        "human_impl": "<version>0.8.12</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reformat_xml_indentation",
+        "general_idea": "Reformat pom.xml indentation from tabs to spaces for consistent style.",
+        "human_impl": "    <modelVersion>4.0.0</modelVersion>",
+        "bucket": "polishment"
+      }
+    ],
+    "checkstyle.xml": [
+      {
+        "kind": "update_checkstyle_namespace",
+        "general_idea": "Update the commented-out Checkstyle import order configuration to reflect the migration from javax to jakarta namespaces.",
+        "human_impl": "Changed specialImportsRegExp from '^javax\\.' to '^jakarta\\.' in checkstyle.xml",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "remove_deprecated_dialect",
+        "general_idea": "Removed explicit PostgreSQL 10 dialect configuration to allow Hibernate to auto-detect the dialect, which is preferred in newer versions.",
+        "human_impl": "Removed line: spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQL10Dialect",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "switch_db_driver",
+        "general_idea": "Changed the database driver from H2 in-memory to PostgreSQL to support persistent storage.",
+        "human_impl": "Changed spring.datasource.driverClassName from org.h2.Driver to org.postgresql.Driver",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_db_url",
+        "general_idea": "Updated the database connection URL to point to a local PostgreSQL instance instead of an H2 memory database.",
+        "human_impl": "Changed spring.datasource.url from jdbc:h2:mem:shareit to jdbc:postgresql://localhost:5432/shareit",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_db_credentials",
+        "general_idea": "Updated database username and password placeholders for the new PostgreSQL connection.",
+        "human_impl": "Changed spring.datasource.username to username and spring.datasource.password to password",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_profile_activation",
+        "general_idea": "Removed the specific profile activation line for ci/test, likely consolidating configuration or relying on default profiles.",
+        "human_impl": "Removed line: spring.config.activate.on-profile=ci,test",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}
