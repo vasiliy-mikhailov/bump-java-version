@@ -12,7 +12,7 @@
 - **Runner saturation** (item 8): keep the verifier host loaded enough to make progress without thrashing.
 - **Dependency-resolution proxy** (item 11): a local Maven/etc cache with plural upstreams, so build outcomes reflect code, not upstream availability.
 - **Observability compactor** (item 12): route verbose tool/metric output through a summariser so the orchestrator scans digests, not dumps; raw source kept on disk.
-- **Intent coverage** (item 13): measure recipe-vs-human at the intent level, not byte level; drives item 4's reward.
+- **Intent coverage** (item 13): measure recipe-vs-human at the intent level, bucketed as breaking vs polishment; drives item 4's reward.
 
 0. **Fitness (writing this file):** keep AGENTS.md compact and outcome-named so the agent re-derives the *how* every iteration from its tools and the corpus.
    - **Constraints:** no implementation instructions the agent can fill itself, no enumerations that age, no justifications for the rule alongside the rule.
@@ -55,7 +55,7 @@
     - **Repeat:** whenever a new noisy stream enters the loop.
 
 13. **Fitness (intent coverage):** measure recipe-vs-human as overlap of intents, per stage.
-    - **Constraints:** intents are typed atoms extracted from diffs of each side against the same source baseline; not bytes.
-    - **Search:** per stage, extract recipe-intents and human-intents; intersect; surface recipe-only and human-only sets; on the intersection, compare implementations.
-    - **Reward:** maximize human-intent coverage; minimize recipe-intent rejection rate; secondarily, minimize implementation divergence on shared intents.
+    - **Constraints:** intents are typed atoms extracted from diffs of each side against the same source baseline; each intent is bucketed as breaking (build won't pass without it on the target JDK) or polishment (build passes without it); not bytes.
+    - **Search:** per stage, extract recipe-intents and human-intents with their buckets; intersect; surface recipe-only and human-only sets; on the intersection, compare implementations.
+    - **Reward:** breaking-intent coverage first, polishment second; minimize recipe-intent rejection rate; minimize implementation divergence on shared intents.
     - **Repeat:** alongside item 4's loop; recompute on every composition mutation.
