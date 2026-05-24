@@ -1,0 +1,17 @@
+diff --git a/spring-project/spring-boot-fastdfs/src/main/resources/application.yml b/spring-project/spring-boot-fastdfs/src/main/resources/application.yml
+index 08fee4a..90143ec 100644
+--- a/spring-project/spring-boot-fastdfs/src/main/resources/application.yml
++++ b/spring-project/spring-boot-fastdfs/src/main/resources/application.yml
+@@ -1,5 +1,4 @@
+ server:
+-  port: 9002
+   servlet:
+     # 解决静态页面中文乱码
+     encoding:
+@@ -21,4 +20,4 @@ spring:
+       max-request-size: 900MB
+ 
+ app:
+-  upload-location: E:/app/upload
+\ No newline at end of file
++  upload-location: E:/app/upload

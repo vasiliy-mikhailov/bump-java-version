@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "repo": "itning/yunshu-nas",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "b0a67331e23da3d10f4e38f076e22d777efc3804",
+    "sha_to": "77900e4114e77a9e4482a877ee90b98e279ceac7"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Update the target Java version property from 11 to 17 to align with the new runtime environment.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "spring_boot_upgrade",
+        "general_idea": "Bump Spring Boot parent version from 2.3.1.RELEASE to 2.6.2 to support Java 17 and access newer features.",
+        "human_impl": "<version>2.6.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "project_restructure",
+        "general_idea": "Convert the project into a multi-module Maven structure by defining packaging as pom and listing child modules.",
+        "human_impl": "<packaging>pom</packaging>\n<modules>...</modules>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade",
+        "general_idea": "Update commons-io dependency version to 2.11.0.",
+        "human_impl": "<commons-io.version>2.11.0</commons-io.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade",
+        "general_idea": "Update guava dependency version to 31.0.1-jre.",
+        "human_impl": "<guava.version>31.0.1-jre</guava.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade",
+        "general_idea": "Update Java-WebSocket dependency version to 1.5.2.",
+        "human_impl": "<java-webSocket.version>1.5.2</java-webSocket.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add MapStruct dependencies for object mapping support.",
+        "human_impl": "<artifactId>mapstruct</artifactId>\n<artifactId>mapstruct-processor</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Lombok dependency to reduce boilerplate code.",
+        "human_impl": "<artifactId>lombok</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Hibernate Validator and Validation API for bean validation support.",
+        "human_impl": "<artifactId>hibernate-validator</artifactId>\n<artifactId>validation-api</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove Thymeleaf starter as the project likely moved to a different templating engine or API-only structure.",
+        "human_impl": "- <artifactId>spring-boot-starter-thymeleaf</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove Spring WebSocket starter, possibly replaced by Java-WebSocket or other mechanisms.",
+        "human_impl": "- <artifactId>spring-boot-starter-websocket</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove custom utility starter and TypeBuilder dependency.",
+        "human_impl": "- <artifactId>utils-spring-boot-starter</artifactId>\n- <artifactId>TypeBuilder</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "test_modernization",
+        "general_idea": "Exclude JUnit Vintage engine to enforce JUnit 5 usage and remove legacy JUnit 4 support.",
+        "human_impl": "<exclusion>\n    <groupId>org.junit.vintage</groupId>\n    <artifactId>junit-vintage-engine</artifactId>\n</exclusion>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "build_config_change",
+        "general_idea": "Configure Maven to skip tests by default during builds.",
+        "human_impl": "<skipTests>true</skipTests>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_management",
+        "general_idea": "Move version management of internal modules and common libraries to dependencyManagement section.",
+        "human_impl": "<dependencyManagement>\n    <dependencies>...</dependencies>\n</dependencyManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "repository_cleanup",
+        "general_idea": "Remove custom Maven repository definitions (Aliyun, Jitpack) likely no longer needed or handled differently.",
+        "human_impl": "- <repositories>...</repositories>",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": []
+  }
+}

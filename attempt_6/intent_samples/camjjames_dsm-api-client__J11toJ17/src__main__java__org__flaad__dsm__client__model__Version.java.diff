@@ -1,0 +1,35 @@
+diff --git a/src/main/java/org/flaad/dsm/client/model/Version.java b/src/main/java/org/flaad/dsm/client/model/Version.java
+index a14f615..f18ba03 100644
+--- a/src/main/java/org/flaad/dsm/client/model/Version.java
++++ b/src/main/java/org/flaad/dsm/client/model/Version.java
+@@ -1,7 +1,5 @@
+ package org.flaad.dsm.client.model;
+ 
+-import com.fasterxml.jackson.annotation.JsonCreator;
+-import com.fasterxml.jackson.annotation.JsonProperty;
+ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ import lombok.Getter;
+ import lombok.NoArgsConstructor;
+@@ -11,18 +9,9 @@ import lombok.NoArgsConstructor;
+ @JsonDeserialize
+ public class Version {
+ 
+-    private int major;
+-    private int minor;
+-    private int build;
+-
+-    @JsonCreator
+-    public Version(
+-            @JsonProperty("major") int major,
+-            @JsonProperty("minor") int minor,
+-            @JsonProperty("build") int build) {
+-        this.major = major;
+-        this.minor = minor;
+-        this.build = build;
+-    }
++    int major;
++    int minor;
++    int small;
++    int build;
+ 
+ }

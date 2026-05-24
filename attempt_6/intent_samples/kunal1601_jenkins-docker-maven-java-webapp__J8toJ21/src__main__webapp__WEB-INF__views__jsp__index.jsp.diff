@@ -1,0 +1,15 @@
+diff --git a/src/main/webapp/WEB-INF/views/jsp/index.jsp b/src/main/webapp/WEB-INF/views/jsp/index.jsp
+index f71626b..a3be8aa 100644
+--- a/src/main/webapp/WEB-INF/views/jsp/index.jsp
++++ b/src/main/webapp/WEB-INF/views/jsp/index.jsp
+@@ -40,8 +40,8 @@
+ 
+ 	<div class="row">
+ 		<div class="col-md-8">
+-			<h2>Welcome To LinuxWorld, India</h2>
+-			<h3>Contact training@lwindia.com</h3>
++			<h2>Welcome to LinuxWorld, India , in fully automated jenkins</h2>
++			<h3>Contact training@lwindia.com or mob 9351009002</h3>
+ 		</div>	
+ 	</div>
+ 

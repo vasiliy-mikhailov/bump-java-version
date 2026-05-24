@@ -1,0 +1,61 @@
+diff --git a/src/main/resources/templates/index.html b/src/main/resources/templates/index.html
+index 8b9c59e..560beee 100644
+--- a/src/main/resources/templates/index.html
++++ b/src/main/resources/templates/index.html
+@@ -11,11 +11,33 @@
+     <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+     <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+     <![endif]-->
++    <style>
++        .links a {
++            color: rgba(0, 0, 0, .87);
++            text-decoration: none;
++        }
++
++        .links a:visited {
++            color: rgba(0, 0, 0, .87);
++            text-decoration: none;
++        }
++
++        .links a:hover {
++            color: #FF4081;
++            text-decoration: underline;
++        }
++    </style>
+ </head>
+ <body class="mdui-drawer-body-left mdui-appbar-with-toolbar mdui-theme-primary-indigo mdui-theme-accent-pink">
+ <header th:replace="common :: header"></header>
+ <nav th:replace="common :: nav"></nav>
+ <section class="mdui-container">
++    <div th:unless="${#lists.isEmpty(links)}" class="mdui-card" style="margin-bottom: 8px;">
++        <div class="mdui-card-content links">
++            <span th:each="link:${links}"><a th:href="${'/?location='+link.link}"
++                                             th:text="${link.name}"></a><span>&#92;</span></span>
++        </div>
++    </div>
+     <div class="mdui-table-fluid">
+         <table class="mdui-table mdui-table-hoverable">
+             <thead>
+@@ -26,9 +48,11 @@
+             </thead>
+             <tbody>
+             <tr th:each="file: ${files}" onclick="go(this)" th:data-dir="${!file.file}"
++                th:data-canplay="${file.canPlay}"
+                 th:data-location="${file.location}">
+-                <td><i th:if="${file.isFile()}" class="mdui-icon material-icons">insert_drive_file</i>
+-                    <i th:if="${!file.isFile()}" class="mdui-icon material-icons">folder</i>
++                <td><i th:if="${file.isFile()&&!file.canPlay}" class="mdui-icon material-icons">insert_drive_file</i>
++                    <i th:if="${file.isFile()&&file.canPlay}" class="mdui-icon material-icons">videocam</i>
++                    <i th:if="${!file.isFile() }" class="mdui-icon material-icons">folder</i>
+                     <span th:if="${file.name==''}" th:text="${file.location}"></span>
+                     <span th:if="${file.name!=''}" th:text="${file.name}"></span>
+                 </td>
+@@ -46,7 +70,7 @@
+     function go(location) {
+         if (location.dataset.dir === 'true') {
+             window.location.href = "/?location=" + encodeURIComponent(location.dataset.location)
+-        }else {
++        } else if (location.dataset.canplay === 'true') {
+             window.location.href = "/video?location=" + encodeURIComponent(location.dataset.location)
+         }
+     }

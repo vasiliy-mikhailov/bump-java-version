@@ -1,0 +1,14 @@
+diff --git a/freemarker-hello-world/pom.xml b/freemarker-hello-world/pom.xml
+index eda33d6..60967a4 100644
+--- a/freemarker-hello-world/pom.xml
++++ b/freemarker-hello-world/pom.xml
+@@ -9,7 +9,7 @@
+ 		<dependency>
+ 			<groupId>org.freemarker</groupId>
+ 			<artifactId>freemarker</artifactId>
+-			<version>2.3.26-incubating</version>
++			<version>2.3.27-incubating</version>
+ 		</dependency>
+ 	</dependencies>
+ </project>
+\ No newline at end of file

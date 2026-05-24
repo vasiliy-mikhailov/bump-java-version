@@ -1,0 +1,245 @@
+diff --git a/pom.xml b/pom.xml
+index 3698a1d..1af7bd1 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -1,33 +1,65 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
++<project xmlns="http://maven.apache.org/POM/4.0.0" 
++         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
++         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 	<modelVersion>4.0.0</modelVersion>
+ 
+ 	<groupId>com.fractalshot</groupId>
+ 	<artifactId>XmlSplit</artifactId>
+ 	<version>1.0</version>
++	<packaging>jar</packaging>
++
++	<name>XmlSplit</name>
++	<description>XML file splitting utility</description>
++
++	<properties>
++		<maven.compiler.release>21</maven.compiler.release>
++		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
++		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
++		
++		<!-- Dependency versions -->
++		<commons-cli.version>1.9.0</commons-cli.version>
++		<commons-io.version>2.18.0</commons-io.version>
++		
++		<!-- Plugin versions -->
++		<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
++		<maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
++		<exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
++		
++		<!-- Launch4j configuration -->
++		<launch4j.executable>C:\Program Files (x86)\Launch4j\launch4j.exe</launch4j.executable>
++	</properties>
+ 
+ 	<dependencies>
+ 		<dependency>
+ 			<groupId>commons-cli</groupId>
+ 			<artifactId>commons-cli</artifactId>
+-			<version>1.3.1</version>
++			<version>${commons-cli.version}</version>
+ 		</dependency>
+ 		<dependency>
+ 			<groupId>commons-io</groupId>
+ 			<artifactId>commons-io</artifactId>
+-			<version>2.11.0</version>
++			<version>${commons-io.version}</version>
+ 		</dependency>
+ 	</dependencies>
+ 
+-	<properties>
+-		<maven.compiler.source>17</maven.compiler.source>
+-		<maven.compiler.target>17</maven.compiler.target>
+-	</properties>
+-
+ 	<build>
+ 		<plugins>
++			<!-- Compiler Plugin -->
+ 			<plugin>
++				<groupId>org.apache.maven.plugins</groupId>
++				<artifactId>maven-compiler-plugin</artifactId>
++				<version>${maven-compiler-plugin.version}</version>
++				<configuration>
++					<release>${maven.compiler.release}</release>
++				</configuration>
++			</plugin>
++
++			<!-- Assembly Plugin - Creates fat JAR -->
++			<plugin>
++				<groupId>org.apache.maven.plugins</groupId>
+ 				<artifactId>maven-assembly-plugin</artifactId>
++				<version>${maven-assembly-plugin.version}</version>
+ 				<executions>
+ 					<execution>
+ 						<phase>package</phase>
+@@ -49,72 +81,99 @@
+ 					</descriptorRefs>
+ 				</configuration>
+ 			</plugin>
+-			<plugin>
+-				<artifactId>exec-maven-plugin</artifactId>
+-				<groupId>org.codehaus.mojo</groupId>
+-				<version>1.2.1</version>
+-				<executions>
+-					<execution>
+-						<id>Launch4j</id>
+-						<phase>install</phase>
+-						<goals>
+-							<goal>exec</goal>
+-						</goals>
+-						<configuration>
+-							<executable>C:\Program Files (x86)\Launch4j\launch4j.exe</executable>
+-							<arguments>
+-								<argument>${basedir}\launch4j_config.xml</argument>
+-							</arguments>
+-						</configuration>
+-					</execution>
+-					<execution>
+-						<id>Zip</id>
+-						<phase>install</phase>
+-						<goals>
+-							<goal>exec</goal>
+-						</goals>
+-						<configuration>
+-							<executable>powershell</executable>
+-							<arguments>
+-								<argument>Compress-Archive</argument>
+-								<argument>-CompressionLevel</argument>
+-								<argument>Optimal</argument>
+-								<argument>-Force</argument>
+-								<argument>${basedir}\dist\XmlSplit\*</argument>
+-								<argument>${basedir}\dist\XmlSplit.zip</argument>
+-							</arguments>
+-						</configuration>
+-					</execution>
+-				</executions>
+-			</plugin>
+-			<!-- -i C:\project\data\pdok\bgt\extract.zip -size 1000000 -header 22 -depth 2 -removewhitespace -->
+-			<!--			<plugin>
+-				<groupId>org.codehaus.mojo</groupId>
+-				<artifactId>exec-maven-plugin</artifactId>
+-				<version>1.1.1</version>
+-				<executions>
+-					<execution>
+-						<phase>test</phase>
+-						<goals>
+-							<goal>java</goal>
+-						</goals>
+-						<configuration>
+-							<mainClass>com.fractalshot.xmlsplit.XmlSplit</mainClass>
+-							<arguments>
+-								<argument>-i</argument>
+-								<argument>C:\project\data\pdok\bgt\extract.zip</argument>
+-								<argument>-size</argument>
+-								<argument>1000000</argument>
+-								<argument>-header</argument>
+-								<argument>22</argument>
+-								<argument>-depth</argument>
+-								<argument>2</argument>
+-								<argument>-removewhitespace</argument>
+-						</arguments>
+-						</configuration>
+-					</execution>
+-				</executions>
+-			</plugin> -->
++
++			<!-- Exec Plugin - Distribution creation moved to profiles -->
+ 		</plugins>
+ 	</build>
++
++	<profiles>
++		<profile>
++			<id>distribution</id>
++			<activation>
++				<activeByDefault>true</activeByDefault>
++			</activation>
++			<build>
++				<plugins>
++					<plugin>
++						<groupId>org.apache.maven.plugins</groupId>
++						<artifactId>maven-resources-plugin</artifactId>
++						<version>3.3.1</version>
++						<executions>
++							<execution>
++								<id>copy-scripts</id>
++								<phase>install</phase>
++								<goals>
++									<goal>copy-resources</goal>
++								</goals>
++								<configuration>
++									<outputDirectory>${basedir}/dist/XmlSplit</outputDirectory>
++									<resources>
++										<resource>
++											<directory>src/main/scripts</directory>
++											<filtering>false</filtering>
++										</resource>
++									</resources>
++								</configuration>
++							</execution>
++							<execution>
++								<id>copy-jar</id>
++								<phase>install</phase>
++								<goals>
++									<goal>copy-resources</goal>
++								</goals>
++								<configuration>
++									<outputDirectory>${basedir}/dist/XmlSplit</outputDirectory>
++									<resources>
++										<resource>
++											<directory>${project.build.directory}</directory>
++											<includes>
++												<include>XmlSplit-${project.version}-jar-with-dependencies.jar</include>
++											</includes>
++										</resource>
++									</resources>
++								</configuration>
++							</execution>
++						</executions>
++					</plugin>
++					
++					<!-- Rename JAR in distribution -->
++					<plugin>
++						<groupId>org.codehaus.mojo</groupId>
++						<artifactId>exec-maven-plugin</artifactId>
++						<version>${exec-maven-plugin.version}</version>
++						<executions>
++							<execution>
++								<id>rename-jar</id>
++								<phase>install</phase>
++								<goals>
++									<goal>exec</goal>
++								</goals>
++								<configuration>
++									<executable>powershell</executable>
++									<arguments>
++										<argument>-Command</argument>
++										<argument>Move-Item -Force '${basedir}\dist\XmlSplit\XmlSplit-${project.version}-jar-with-dependencies.jar' '${basedir}\dist\XmlSplit\XmlSplit.jar'</argument>
++									</arguments>
++								</configuration>
++							</execution>
++							<execution>
++								<id>zip-distribution</id>
++								<phase>install</phase>
++								<goals>
++									<goal>exec</goal>
++								</goals>
++								<configuration>
++									<executable>powershell</executable>
++									<arguments>
++										<argument>-Command</argument>
++										<argument>Compress-Archive -CompressionLevel Optimal -Force -Path '${basedir}\dist\XmlSplit\*' -DestinationPath '${basedir}\dist\XmlSplit.zip'</argument>
++									</arguments>
++								</configuration>
++							</execution>
++						</executions>
++					</plugin>
++				</plugins>
++			</build>
++		</profile>
++	</profiles>
+ </project>
+\ No newline at end of file

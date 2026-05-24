@@ -1,0 +1,190 @@
+{
+  "meta": {
+    "repo": "fractalshot/XmlSplit",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "ff912c1410e030351c2496ac2998c4d6173a305c",
+    "sha_to": "6716e626b623d984aeda7e0150affa624cd97c69"
+  },
+  "by_file": {
+    "src/main/java/com/fractalshot/xmlsplit/Counter.java": [
+      {
+        "kind": "change_delimiter",
+        "general_idea": "Replace the colon-space separator with a semicolon in the counter output format.",
+        "human_impl": "String.format(\"%s;%d\", key, value.intValue())",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/fractalshot/xmlsplit/HandlerElement.java": [
+      {
+        "kind": "conditional_newline_logic",
+        "general_idea": "Refactor newline insertion around split markers to respect new 'newlines' and 'minify' configuration flags.",
+        "human_impl": "header.append(\"\\n<!-- start split -->\"); if (newlines) header.append(\"\\n\"); if (!minify) trailer.append(\"\\n\"); trailer.append(\"<!-- end split -->\\n\");",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/fractalshot/xmlsplit/HandlerFile.java": [
+      {
+        "kind": "add_output_dir_field",
+        "general_idea": "Introduce a dedicated field to store the output directory path separately from the filename.",
+        "human_impl": "public String outputDir = \"\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_path_construction",
+        "general_idea": "Replace dynamic extraction of the directory from the filename with the explicit outputDir field to allow independent configuration of output location.",
+        "human_impl": "String f = outputDir + FilenameUtils.getBaseName(filename) + ...",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/fractalshot/xmlsplit/Split.java": [
+      {
+        "kind": "add_output_directory_config",
+        "general_idea": "Introduce support for specifying an output directory via command line argument with validation.",
+        "human_impl": "outputDir = cmd.getOptionValue(\"o\", ...); if (!outputDirFile.exists() ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_zip_resource_leak",
+        "general_idea": "Wrap ZipFile usage in try-with-resources to ensure proper closure and prevent resource leaks.",
+        "human_impl": "try (ZipFile zf = new ZipFile(filename)) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_zip_stream_resource_leak",
+        "general_idea": "Wrap InputStreams from ZipFile in try-with-resources to ensure proper closure.",
+        "human_impl": "try (InputStream is = zf.getInputStream(ze); ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_file_stream_resource_leak",
+        "general_idea": "Wrap FileInputStream usage in try-with-resources to ensure proper closure and prevent resource leaks.",
+        "human_impl": "try (FileInputStream fis = new FileInputStream(filename); ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_xml_parsing_charset",
+        "general_idea": "Explicitly specify UTF-8 charset when parsing XML to fix encoding issues.",
+        "human_impl": "new InputStreamReader(bis, StandardCharsets.UTF_8)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_sax_parser_input",
+        "general_idea": "Change SAXParser.parse to accept InputSource with Reader instead of raw InputStream for better character handling.",
+        "human_impl": "parse(new InputSource(isr), this)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/fractalshot/xmlsplit/Writer.java": [
+      {
+        "kind": "explicit_utf8_charset",
+        "general_idea": "Explicitly specify UTF-8 charset for OutputStreamWriter to ensure consistent encoding across different environments.",
+        "human_impl": "new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_charset_import",
+        "general_idea": "Add import for StandardCharsets to support explicit charset specification.",
+        "human_impl": "import java.nio.charset.StandardCharsets;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "extract_output_stream_field",
+        "general_idea": "Extract outputStream into a class field to manage its lifecycle alongside the buffered writer.",
+        "human_impl": "private final OutputStream outputStream;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/fractalshot/xmlsplit/XmlSplit.java": [
+      {
+        "kind": "remove_license_check",
+        "general_idea": "Remove hardcoded license expiration logic and associated date parsing imports to clean up the main method.",
+        "human_impl": "Removed SimpleDateFormat/Date imports and the block checking if '2025-12-31' is before current date.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_output_dir_option",
+        "general_idea": "Add a new command-line option to specify the output directory for split files.",
+        "human_impl": "Added options.addOption(Option.builder(\"o\").hasArg().desc(\"output directory\").build());",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Update Maven compiler configuration to target Java 21 using the modern 'release' flag instead of separate source/target properties.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_dependency_version",
+        "general_idea": "Upgrade commons-cli dependency to version 1.9.0.",
+        "human_impl": "<commons-cli.version>1.9.0</commons-cli.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency_version",
+        "general_idea": "Upgrade commons-io dependency to version 2.18.0.",
+        "human_impl": "<commons-io.version>2.18.0</commons-io.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_plugin_version",
+        "general_idea": "Upgrade maven-compiler-plugin to version 3.13.0.",
+        "human_impl": "<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_plugin_version",
+        "general_idea": "Upgrade maven-assembly-plugin to version 3.7.1.",
+        "human_impl": "<maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_plugin_version",
+        "general_idea": "Upgrade exec-maven-plugin to version 3.5.0.",
+        "human_impl": "<exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add maven-resources-plugin to handle copying scripts and JARs during distribution.",
+        "human_impl": "<artifactId>maven-resources-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_build_structure",
+        "general_idea": "Move distribution-specific build steps (Launch4j, Zip) into a dedicated Maven profile to separate concerns.",
+        "human_impl": "<profile><id>distribution</id>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_build_step",
+        "general_idea": "Remove the Launch4j executable generation step from the build process.",
+        "human_impl": "Removed execution with id 'Launch4j'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_metadata",
+        "general_idea": "Add project name, description, and packaging type to the POM for better artifact metadata.",
+        "human_impl": "<name>XmlSplit</name><description>XML file splitting utility</description>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_encoding_config",
+        "general_idea": "Explicitly configure UTF-8 encoding for source and reporting to ensure consistent character handling.",
+        "human_impl": "<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [],
+    ".vscode/launch.json": [
+      {
+        "kind": "update_launch_args",
+        "general_idea": "Update the default command-line arguments in the VS Code launch configuration to include output path and formatting options.",
+        "human_impl": "\"args\": \"-i test/amersfoort.zip -size 1000000 -header 27 -depth 2 -o c:/temp -minify -newlines\"",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

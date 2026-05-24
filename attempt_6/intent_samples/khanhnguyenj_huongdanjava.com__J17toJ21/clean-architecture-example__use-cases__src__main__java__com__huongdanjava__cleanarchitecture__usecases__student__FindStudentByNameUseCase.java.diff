@@ -1,0 +1,26 @@
+diff --git a/clean-architecture-example/use-cases/src/main/java/com/huongdanjava/cleanarchitecture/usecases/student/FindStudentByNameUseCase.java b/clean-architecture-example/use-cases/src/main/java/com/huongdanjava/cleanarchitecture/usecases/student/FindStudentByNameUseCase.java
+index 6e20247..f2a1735 100644
+--- a/clean-architecture-example/use-cases/src/main/java/com/huongdanjava/cleanarchitecture/usecases/student/FindStudentByNameUseCase.java
++++ b/clean-architecture-example/use-cases/src/main/java/com/huongdanjava/cleanarchitecture/usecases/student/FindStudentByNameUseCase.java
+@@ -5,14 +5,14 @@ import com.huongdanjava.cleanarchitecture.usecases.adapter.StudentAdapter;
+ 
+ public class FindStudentByNameUseCase {
+ 
+-	private StudentAdapter adapter;
++  private StudentAdapter adapter;
+ 
+-	public FindStudentByNameUseCase(StudentAdapter adapter) {
+-		this.adapter = adapter;
+-	}
++  public FindStudentByNameUseCase(StudentAdapter adapter) {
++    this.adapter = adapter;
++  }
+ 
+-	public Student find(String name) {
+-		return adapter.findByName(name);
+-	}
++  public Student find(String name) {
++    return adapter.findByName(name);
++  }
+ 
+ }

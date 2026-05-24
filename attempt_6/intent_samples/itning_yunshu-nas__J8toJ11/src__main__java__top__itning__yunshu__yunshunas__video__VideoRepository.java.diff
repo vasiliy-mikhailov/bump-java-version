@@ -1,0 +1,60 @@
+diff --git a/src/main/java/top/itning/yunshu/yunshunas/video/VideoRepository.java b/src/main/java/top/itning/yunshu/yunshunas/video/VideoRepository.java
+index 437dec6..62fa721 100644
+--- a/src/main/java/top/itning/yunshu/yunshunas/video/VideoRepository.java
++++ b/src/main/java/top/itning/yunshu/yunshunas/video/VideoRepository.java
+@@ -7,6 +7,8 @@ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.stereotype.Component;
+ import org.springframework.util.DigestUtils;
++import top.itning.yunshu.yunshunas.entity.NasProperties;
++import top.itning.yunshu.yunshunas.repository.IVideoRepository;
+ 
+ import javax.annotation.Nonnull;
+ import java.io.File;
+@@ -19,15 +21,15 @@ import java.io.File;
+ public class VideoRepository implements IVideoRepository {
+     private static final Logger logger = LoggerFactory.getLogger(VideoRepository.class);
+ 
+-    public static final String TO_PATH = "C:\\Users\\Administrator\\Desktop\\a";
++    private final LoadingCache<String, String> locationMd5Cache;
++    private final NasProperties nasProperties;
+ 
+-    private LoadingCache<String, String> locationMd5Cache;
+-
+-    public VideoRepository() {
++    public VideoRepository(NasProperties nasProperties) {
++        this.nasProperties = nasProperties;
+         this.locationMd5Cache = CacheBuilder.newBuilder()
+                 .softValues()
+-                .initialCapacity(1000)
+-                .maximumSize(1000)
++                .initialCapacity(100)
++                .maximumSize(100)
+                 .build(new CacheLoader<String, String>() {
+                     @Override
+                     public String load(@Nonnull String key) {
+@@ -43,7 +45,7 @@ public class VideoRepository implements IVideoRepository {
+ 
+     @Override
+     public String getWriteDir(String location) {
+-        File file = new File(TO_PATH + File.separator + getLocationMd5(location));
++        File file = new File(nasProperties.getOutDir() + File.separator + getLocationMd5(location));
+         boolean mkdirs = file.mkdirs();
+         if (logger.isDebugEnabled()) {
+             logger.debug("path: {} mkdirs: {}", file.getPath(), mkdirs);
+@@ -53,13 +55,13 @@ public class VideoRepository implements IVideoRepository {
+ 
+     @Override
+     public String readM3U8File(String name) {
+-        return TO_PATH + File.separator + name + File.separator + name + ".m3u8";
++        return nasProperties.getOutDir() + File.separator + name + File.separator + name + ".m3u8";
+     }
+ 
+     @Override
+     public String readTsFile(String name) {
+         int i = name.lastIndexOf("-");
+         String dir = name.substring(0, i);
+-        return TO_PATH + File.separator + dir + File.separator + name + ".ts";
++        return nasProperties.getOutDir() + File.separator + dir + File.separator + name + ".ts";
+     }
+ }

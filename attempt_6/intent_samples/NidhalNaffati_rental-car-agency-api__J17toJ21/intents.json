@@ -1,0 +1,217 @@
+{
+  "meta": {
+    "repo": "NidhalNaffati/rental-car-agency-api",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "b95068e55dc082724ca81a97a9d76cbc7aca39a6",
+    "sha_to": "cd62919ef4690c9608908f99158d083504eb38f8"
+  },
+  "by_file": {
+    "src/main/java/com/CarRentalAgency/CarRentalAgencyApplication.java": [
+      {
+        "kind": "add_javadoc_author",
+        "general_idea": "Add Javadoc comment block to the main application class to attribute authorship.",
+        "human_impl": "Added /** @Autor Nidhal Naffati */ before the class declaration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_indentation",
+        "general_idea": "Adjust indentation of the main method to use spaces instead of tabs for consistent code style.",
+        "human_impl": "Changed indentation from tabs to 4 spaces for the main method body.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/CarRentalAgency/entity/Car.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.persistence.*; // replaced javax.persistence.*",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_validation_constraints",
+        "general_idea": "Add Hibernate validation annotations to enforce data integrity rules on entity fields.",
+        "human_impl": "@Length(min = 5, max = 50) private String name;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_not_null_constraints",
+        "general_idea": "Enforce non-nullability on primitive wrapper fields using Jakarta validation annotations.",
+        "human_impl": "@NotNull private short seats;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_id_generation",
+        "general_idea": "Switch from auto-increment to sequence-based ID generation for better database compatibility and control.",
+        "human_impl": "@SequenceGenerator(name = \"car_seq\", ...) @GeneratedValue(strategy = GenerationType.SEQUENCE, ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_id_type",
+        "general_idea": "Change the ID field type from primitive long to Long object to support nullability and standard JPA practices.",
+        "human_impl": "private Long id; // was private long id",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_column_metadata",
+        "general_idea": "Define explicit column constraints such as uniqueness and nullability for the registration number.",
+        "human_impl": "@Column(unique = true, nullable = false) private int registrationNumber;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "map_enum_as_string",
+        "general_idea": "Configure JPA to store enum values as strings in the database instead of ordinal integers.",
+        "human_impl": "@Enumerated(EnumType.STRING) private Model model;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_relationship_mapping",
+        "general_idea": "Establish a ManyToOne relationship with the Dealer entity and handle JSON serialization issues.",
+        "human_impl": "@ManyToOne @JsonBackReference private Dealer dealer;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "define_domain_enums",
+        "general_idea": "Introduce specific enum types for Car attributes to replace loose string or primitive representations.",
+        "human_impl": "public enum Model { SUV, SPORTS_CAR, ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_lombok_builder",
+        "general_idea": "Enable the Builder pattern for the entity class to facilitate object construction.",
+        "human_impl": "@Builder",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade Spring Boot parent version from 2.7.4 to 3.2.1 to align with Java 21 and Jakarta EE 9+ standards.",
+        "human_impl": "<version>3.2.1</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_mysql_driver",
+        "general_idea": "Replace the legacy MySQL connector artifact with the new com.mysql:mysql-connector-j required for Spring Boot 3.",
+        "human_impl": "<artifactId>mysql-connector-j</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_validation_dependency",
+        "general_idea": "Switch from explicit jakarta.validation-api to spring-boot-starter-validation to handle Jakarta namespace migration.",
+        "human_impl": "<artifactId>spring-boot-starter-validation</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_flyway_dependency",
+        "general_idea": "Add Flyway MySQL dependency for database migration management.",
+        "human_impl": "<artifactId>flyway-mysql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_flyway_plugin",
+        "general_idea": "Add Flyway Maven plugin to execute database migrations during the build process.",
+        "human_impl": "<artifactId>flyway-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jackson_jsr310",
+        "general_idea": "Add Jackson JSR310 datatype support for Java 8+ date/time API serialization.",
+        "human_impl": "<artifactId>jackson-datatype-jsr310</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mail_starter",
+        "general_idea": "Add Spring Boot Mail starter dependency for email functionality.",
+        "human_impl": "<artifactId>spring-boot-starter-mail</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_jupiter",
+        "general_idea": "Explicitly add JUnit Jupiter dependency for modern testing support.",
+        "human_impl": "<artifactId>junit-jupiter</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_vintage",
+        "general_idea": "Add JUnit 4 dependency, likely for legacy test compatibility or specific vintage engine needs.",
+        "human_impl": "<artifactId>junit</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_context_support",
+        "general_idea": "Add Spring Context Support dependency, often needed for MailSender or other legacy context features.",
+        "human_impl": "<artifactId>spring-context-support</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_thymeleaf",
+        "general_idea": "Remove Thymeleaf starter as the project appears to be moving towards a pure REST API approach.",
+        "human_impl": "Removed spring-boot-starter-thymeleaf",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_project_version",
+        "general_idea": "Update the project artifact version from 0.0.1-SNAPSHOT to 1.02.02.",
+        "human_impl": "<version>1.02.02</version>",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.yml": [
+      {
+        "kind": "update_db_url",
+        "general_idea": "Updated the database connection URL to use a new database name and removed legacy JDBC parameters.",
+        "human_impl": "url: jdbc:mysql://localhost:3306/RentalCarDB?createDatabaseIfNotExist=true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_password",
+        "general_idea": "Removed unnecessary quotes from the database password configuration.",
+        "human_impl": "password: root",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_ddl_strategy",
+        "general_idea": "Changed Hibernate DDL auto strategy from 'update' to 'validate' to enforce schema consistency with migrations.",
+        "human_impl": "ddl-auto: validate",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_hibernate_dialect",
+        "general_idea": "Switched Hibernate dialect from MySQL8Dialect to the generic MySQLDialect.",
+        "human_impl": "dialect: org.hibernate.dialect.MySQLDialect",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_sql_formatting",
+        "general_idea": "Enabled SQL formatting in Hibernate properties for better readability in logs.",
+        "human_impl": "format_sql: true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_thymeleaf_config",
+        "general_idea": "Removed Thymeleaf template engine configuration as it is no longer used.",
+        "human_impl": "-  thymeleaf:\n-    cache: false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_flyway_config",
+        "general_idea": "Added Flyway migration configuration to manage database schema changes.",
+        "human_impl": "flyway:\n    enabled: true\n    baseline-on-migrate: true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_error_config",
+        "general_idea": "Configured the server to exclude stack traces from error responses for security.",
+        "human_impl": "server:\n  error:\n    include-stacktrace: never",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

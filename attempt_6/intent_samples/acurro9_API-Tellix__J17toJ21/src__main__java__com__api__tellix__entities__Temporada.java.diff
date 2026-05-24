@@ -1,0 +1,14 @@
+diff --git a/src/main/java/com/api/tellix/entities/Temporada.java b/src/main/java/com/api/tellix/entities/Temporada.java
+index 0b37416..9a36771 100644
+--- a/src/main/java/com/api/tellix/entities/Temporada.java
++++ b/src/main/java/com/api/tellix/entities/Temporada.java
+@@ -23,9 +23,6 @@ public class Temporada extends Base{
+     @Column(name = "nombre")
+     private String nombre;
+ 
+-    @Column(name = "capitulos")
+-    private int capitulos;
+-
+     @ManyToOne(cascade = CascadeType.ALL)
+     @JoinColumn(name = "fk_serie")
+     private Serie serie;

@@ -1,0 +1,5 @@
+305023b Iniciando o curso Testes Unitários com JUnit 5 do Francisco Aquino
+be7e5a6 Understanding the use of @TestInstance(TestInstance.Lifecycle.PER_CLASS) and constructors
+43e1d3a Using @BeforeAll to create object who will be used in every test
+0bebb09 Understanding the use and application of @BeforeEach and assertTimeout
+7f0e1c1 Using assertArrayEquals and assertThrows from Assertions lib

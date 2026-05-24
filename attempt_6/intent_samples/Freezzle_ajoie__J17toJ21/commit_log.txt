@@ -1,0 +1,8 @@
+972427e ci: init Clever Cloud configuration
+6a1e144 chore: cleaning
+ebc87f1 feat: actions handlers (business, email, download)
+02ffe8b feat: huge working on billing
+d552604 feat: floor-plan & formatting
+6a86ea7 feat: authorities
+48de2ef feat: adding a lot of domain's functionalities
+3688b6d feat: first domain's generation

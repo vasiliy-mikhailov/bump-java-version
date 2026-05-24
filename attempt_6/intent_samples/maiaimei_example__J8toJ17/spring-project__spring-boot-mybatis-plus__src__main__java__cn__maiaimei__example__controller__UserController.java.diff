@@ -1,0 +1,13 @@
+diff --git a/spring-project/spring-boot-mybatis-plus/src/main/java/cn/maiaimei/example/controller/UserController.java b/spring-project/spring-boot-mybatis-plus/src/main/java/cn/maiaimei/example/controller/UserController.java
+index b1b45d1..7ea7635 100644
+--- a/spring-project/spring-boot-mybatis-plus/src/main/java/cn/maiaimei/example/controller/UserController.java
++++ b/spring-project/spring-boot-mybatis-plus/src/main/java/cn/maiaimei/example/controller/UserController.java
+@@ -4,7 +4,7 @@ import cn.maiaimei.example.model.UserRequest;
+ import cn.maiaimei.example.model.UserResponse;
+ import cn.maiaimei.example.service.UserService;
+ import cn.maiaimei.framework.beans.PageResult;
+-import cn.maiaimei.framework.validation.group.ValidationGroup;
++import cn.maiaimei.framework.spring.boot.validation.ValidationGroup;
+ import io.swagger.annotations.Api;
+ import io.swagger.annotations.ApiOperation;
+ import io.swagger.annotations.ApiParam;

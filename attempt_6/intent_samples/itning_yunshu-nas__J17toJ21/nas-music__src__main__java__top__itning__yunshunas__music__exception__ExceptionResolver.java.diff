@@ -1,0 +1,38 @@
+diff --git a/nas-music/src/main/java/top/itning/yunshunas/music/exception/ExceptionResolver.java b/nas-music/src/main/java/top/itning/yunshunas/music/exception/ExceptionResolver.java
+index 7b393de..7aae77e 100644
+--- a/nas-music/src/main/java/top/itning/yunshunas/music/exception/ExceptionResolver.java
++++ b/nas-music/src/main/java/top/itning/yunshunas/music/exception/ExceptionResolver.java
+@@ -5,14 +5,14 @@ import org.springframework.http.HttpStatus;
+ import org.springframework.web.bind.annotation.ControllerAdvice;
+ import org.springframework.web.bind.annotation.ExceptionHandler;
+ import org.springframework.web.bind.annotation.ResponseBody;
+-import top.itning.yunshunas.music.dto.RestModel;
++import top.itning.yunshunas.common.model.RestModel;
+ 
+-import javax.servlet.http.HttpServletResponse;
+-import javax.validation.ConstraintViolationException;
++import jakarta.servlet.http.HttpServletResponse;
++import jakarta.validation.ConstraintViolationException;
+ 
+ /**
+  * @author itning
+- * @date 2020/9/5 12:41
++ * @since 2020/9/5 12:41
+  */
+ @ControllerAdvice
+ @Slf4j
+@@ -44,4 +44,14 @@ public class ExceptionResolver {
+         response.setStatus(HttpStatus.BAD_REQUEST.value());
+         return restModel;
+     }
++
++    @ExceptionHandler(value = IllegalArgumentException.class)
++    @ResponseBody
++    public RestModel<?> illegalArgumentException(HttpServletResponse response, IllegalArgumentException e) {
++        RestModel<?> restModel = new RestModel<>();
++        restModel.setCode(HttpStatus.BAD_REQUEST.value());
++        restModel.setMsg(e.getMessage());
++        response.setStatus(HttpStatus.BAD_REQUEST.value());
++        return restModel;
++    }
+ }

@@ -1,0 +1,49 @@
+88b1ce2 updated javadoc and silenced debug pom warnings
+41c5356 Added license
+5c6ab74 readme version bump
+352c66f Doc update
+27a79f6 fixed javadoc links
+1bd8ba5 Enabled checkstyle severity to warn level.
+952290e Patched checkstyle config
+e4ff244 Fixed merge conflict
+daeffd0 Updated javadoc
+8426c57 Updated sources for checkstyle compatibility
+13f163c removed obsolete dependency
+91d4180 Enabled checkstyle
+7e969a3 Configured javadoc generating to docs dir
+0cc89b3 Changed CommentsImpl constructor visibility to private and adated correpsonding Unit tests
+6029d8b Adapted test cases to private constructors
+5d47238 Version bump to 1.5
+daec876 Removed overloaded constructors. Now invoking populate methods from default-private constructor.
+3756a3a Updated javadoc
+73081a0 Removed assortment verfication for local book store amount copies set and get
+9fb20a3 fixed dependency block instructions
+ba6c107 Wording in readme
+db7343d Prettified javadoc, minor code improvements.
+c6eecc5 Fixed pom.xml
+98cead6 Added maven instructions to include parameter debug info
+d8558df updated shields version
+c94a24a bump to v1.2
+7dad059 updated version tag on front page
+8e909c0 updated version tag on front page
+7bef15d version bump and maven integration instructions
+f408f95 Added encoding instruction for maven
+634bd67 removed special char in javadoc and book description.
+f5c7369 more javadoc
+950b011 Updated javadoc
+b728912 Added state reset to each test method, so they run in any order.
+37cfe06 Added missing javadoc for GlobalStock parameter
+7e94cad Fixed missing default stock initialization for framwork-invoked bean initialization of global stock singleton DAO.
+6715552 Added source version specification in pom to avoid javadoc error.
+06439cd Extended Junit tests to DAO default constructors.
+990fe37 Removed Bean interfaces, for simplicity.
+12ed45a Added two extra methods and tests, regenerated javadoc
+f3c6449 added links to relevant interfaces
+10be18e Refined description
+4300da2 added Badges
+bd35b1d Added missing method to index new books
+ad5ec66 Typo in listing corrected
+92a00b0 added clone instructions
+25b4407 fixed link to javadoc
+f9501f3 Updated and indexed javadoc
+f57a306 Extended testing coverage, finished listing of initial data. Prettified README

@@ -1,0 +1,9 @@
+fe55f66  First Spring MVC webapp
+33db912 SpringBootWeb_Practice
+a786120 Embeded Tomcat
+98ffcf1 updated pom.xml for including resources
+e019cbc Merge branch 'main' of github.com:SubediBinod/Learning-Java-Spring-Framework-6
+7e7870d  Spring JDBC
+ca7339f Update README.md
+fe81ed0 Create README.md
+3309021 Managed untracked files

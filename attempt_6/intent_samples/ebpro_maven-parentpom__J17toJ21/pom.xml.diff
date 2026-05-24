@@ -1,0 +1,209 @@
+diff --git a/pom.xml b/pom.xml
+index a522cd9..15d83db 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -1,51 +1,237 @@
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
++<?xml version="1.0" encoding="UTF-8"?>
++
++<project xmlns="http://maven.apache.org/POM/4.0.0"
++    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+ 
+     <modelVersion>4.0.0</modelVersion>
+ 
+     <!-- The Basics -->
+-    <groupId>fr.univtln.bruno.demos.poms</groupId>
+-    <artifactId>demoparentpom</artifactId>
+-    <version>1.0-SNAPSHOT</version>
++    <groupId>fr.ebruno.maven.poms</groupId>
++    <artifactId>maven-parentpom</artifactId>
++    <version>0.1.14-SNAPSHOT</version>
+     <packaging>pom</packaging>
+ 
+     <properties>
+-        <!-- These two properties should be overriden in sub projects -->
++        <!-- These two properties should be override in subprojects -->
+         <github.account>ebpro</github.account>
+         <app.main.class />
+ 
+-        <!-- github server corresponds to entry in ~/.m2/settings.xml -->
++        <!-- GitHub server corresponds to entry in ~/.m2/settings.xml -->
+         <github.global.server>github</github.global.server>
+ 
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+ 
+-        <java.version>17</java.version>
++        <!-- Java version -->
++        <java.version>21</java.version>
+         <maven.compiler.release>${java.version}</maven.compiler.release>
++        <maven.version>3.9.8</maven.version>
++
+         <!-- still needed for sonar -->
+         <maven.compiler.source>${maven.compiler.release}</maven.compiler.source>
+         <maven.compiler.target>${maven.compiler.release}</maven.compiler.target>
+ 
+-        <junit.version>5.7.2</junit.version>
+-
+-        <hibernate.version>5.5.7.Final</hibernate.version>
+-
+-        <!-- JAXRS -->
+-        <jersey.version>3.0.2</jersey.version>
+-        <jjwt.version>0.11.2</jjwt.version>
++        <!-- Test -->
++        <junit.version>5.10.2</junit.version>
++        <hamcrest.version>2.2</hamcrest.version>
++        <mockito.version>5.12.0</mockito.version>
++        <arquillian.version>1.8.0.Final</arquillian.version>
++        <version.arquillian_cube>1.18.2</version.arquillian_cube>
++
++        <jsonassert.version>1.5.1</jsonassert.version>
++        <awaitility.version>4.2.1</awaitility.version>
++        <rest-assured.version>5.4.0</rest-assured.version>
++        <testcontainers.version>1.19.8</testcontainers.version>
++        <assertj.version>3.26.0</assertj.version>
++
++        <!-- Persistence -->
++        <jakarta.persistence.version>3.2.0</jakarta.persistence.version>
++        <eclipselink.version>4.0.3</eclipselink.version>
++        <hibernate.version>6.5.2.Final</hibernate.version>
++
++        <!-- Utils -->
++        <lombok.version>1.18.34</lombok.version>
++        <eclipsecollections.version>11.1.0</eclipsecollections.version>
++        <throwing-function.version>1.5.1</throwing-function.version>
++
++        <!-- Log -->
++        <sl4j.version>2.0.13</sl4j.version>
++        <logback.version>1.5.6</logback.version>
++
++        <!-- Databases -->
++        <h2.version>2.2.224</h2.version>
++        <postgresql.version>42.7.3</postgresql.version>
++        <mysql.version>8.0.33</mysql.version>
++
++        <!-- JSON -->
++        <jackson.version>2.17.1</jackson.version>
++
++        <!-- XML -->
++        <jaxb.version>4.0.2</jaxb.version>
++        <jaxbimpl.version>4.0.5</jaxbimpl.version>
++
++        <!-- REST - JAXRS -->
++        <jaxrs.version>4.0.0</jaxrs.version>
++        <jersey.version>3.1.7</jersey.version>
++        <jersey-client.version>3.1.7</jersey-client.version>
++        <jjwt.version>0.12.5</jjwt.version>
+ 
+         <!-- WebSocket -->
+-        <tyrus.version>2.0.1</tyrus.version>
++        <tyrus.version>2.1.5</tyrus.version>
++
++        <!-- Reproducibility -->
++        <!--  see https://maven.apache.org/guides/mini/guide-reproducible-builds -->
++        <project.build.outputTimestamp>1723500364</project.build.outputTimestamp>
++
++        <!-- Java Module (Jigsaw) Name -->
++        <project.module>${project.groupId}.${project.artifactId}</project.module>
++
++        <!-- JEE -->
++        <el.version>4.0.2</el.version>
++        <beanvalidation.version>3.0.0</beanvalidation.version>
++        <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
++        <!-- Jakarta EE API 10 with Java 17 -->
++        <jakarta.jakartaee-api.version>10.0.0</jakarta.jakartaee-api.version>
++        <!-- Payara JEE server -->
++        <payara.version>6.2023.11</payara.version>
++        <arquillian-payara.version>3.0.alpha8</arquillian-payara.version>
++
++        <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
++        <maven-ejb-plugin.version>3.2.1</maven-ejb-plugin.version>
++        <maven-ear-plugin.version>3.3.0</maven-ear-plugin.version>
++
++        <!-- JSF -->
++        <primefaces.version>14.0.1</primefaces.version>
++        <all-themes.version>1.0.10</all-themes.version>
++
++        <!-- Code coverage -->
++        <jacoco.version>0.8.10</jacoco.version>
++
++        <!-- SonarQube -->
++        <sonarqube.version>4.0.0.4121</sonarqube.version>
++        <sonarqualitygate.version>1.3.0</sonarqualitygate.version>
++
++        <!-- GPG Signing -->
++        <simplify4usign.version>1.0.1</simplify4usign.version>
++
++        <!-- Maven Plugins -->
++        <mavencompiler.version>3.13.0</mavencompiler.version>
++        <mavensource.version>3.3.1</mavensource.version>
++        <mavenclean.version>3.4.0</mavenclean.version>
++        <mavenjar.version>3.4.2</mavenjar.version>
++        <mavenresource.version>3.3.1</mavenresource.version>
++        <maveninstall.version>3.1.2</maveninstall.version>
++        <mavenarchetype.version>3.2.1</mavenarchetype.version>
++        <mavenjavadoc.version>3.5.0</mavenjavadoc.version>
++        <mavendeploy.version>3.1.2</mavendeploy.version>
++        <mavensurefire.version>3.3.0</mavensurefire.version>
++        <mavensurefirereport.version>3.3.0</mavensurefirereport.version>
++        <mavenfailsafe.version>3.3.0</mavenfailsafe.version>
++        <mavensite.version>3.12.1</mavensite.version>
++        <mavenexec.version>3.3.0</mavenexec.version>
++        <mavenshade.version>3.6.0</mavenshade.version>
++        <mavenassembly.version>3.7.1</mavenassembly.version>
++        <mavenscm.version>3.3.0</mavenscm.version>
++        <mavendependency.version>3.7.0</mavendependency.version>
++        <mavenrelease.version>3.1.0</mavenrelease.version>
++        <mavenhelper.version>3.6.0</mavenhelper.version>
++        <mavenhelp.version>3.4.1</mavenhelp.version>
++        <mavenversions.version>2.16.2</mavenversions.version>
++        <mavenenforcer.version>3.5.0</mavenenforcer.version>
++        <mavenflatten.version>1.6.0</mavenflatten.version>
++        <maveninforeport.version>3.6.0</maveninforeport.version>
++        <mavenjavadoc.version>3.7.0</mavenjavadoc.version>
++
++        <!-- Release-->
++        <nexusstaging.version>1.6.7</nexusstaging.version>
++
++        <!-- Final app Packaging -->
++        <mavengrallvm.version>0.9.26</mavengrallvm.version>
++        <mavenjigsaw.version>1.1.3</mavenjigsaw.version>
++
++        <!-- Continuous integration -->
++        <gitflow-maven-plugin.version>1.21.0</gitflow-maven-plugin.version>
++        <keytool-maven-plugin.version>1.7</keytool-maven-plugin.version>
++        <testcontainers.postgresql.version>1.19.8</testcontainers.postgresql.version>
++        <arquillian-weld-embedded.version>4.0.0.Final</arquillian-weld-embedded.version>
++        <weld-se-core.version>5.1.2.Final</weld-se-core.version>
++        <hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
++        <hibernate-c3p0.version>6.5.2.Final</hibernate-c3p0.version>
++        <c3p0.version>0.10.1</c3p0.version>
+     </properties>
+ 
+-    <pluginRepositories>
+-        <pluginRepository>
+-            <id>maven-snapshots</id>
+-            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+-        </pluginRepository>
+-    </pluginRepositories>
++    <!-- More Project Information -->
++    <name>Parent POM</name>
++    <description>A parent POM for Java CI projects</description>
++    <url>
++        https://${github.account}.github.io/${project.artifactId}/
++    </url>
++    <inceptionYear>2020</inceptionYear>
++    <licenses>
++        <license>
++            <name>MIT License</name>
++            <url>https://opensource.org/licenses/MIT</url>
++            <distribution>repo</distribution>
++        </license>
++    </licenses>
++    <organization>
++        <name>Université de Toulon</name>
++        <url>https://www.univ-tln.fr</url>
++    </organization>
++    <developers>
++        <developer>

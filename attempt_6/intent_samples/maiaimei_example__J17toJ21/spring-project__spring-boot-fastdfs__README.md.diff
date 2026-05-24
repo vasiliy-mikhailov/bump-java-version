@@ -1,0 +1,11 @@
+diff --git a/spring-project/spring-boot-fastdfs/README.md b/spring-project/spring-boot-fastdfs/README.md
+index 9d433bb..59d79ec 100644
+--- a/spring-project/spring-boot-fastdfs/README.md
++++ b/spring-project/spring-boot-fastdfs/README.md
+@@ -192,4 +192,4 @@ public class FastDFSClientConfig {
+ 
+ 启动网关层：cn.maiaimei.example.GatewayApplication80
+ 
+-启动应用层：cn.maiaimei.example.FastDFSApplication9002
+\ No newline at end of file
++启动应用层：cn.maiaimei.example.FastDFSApplication

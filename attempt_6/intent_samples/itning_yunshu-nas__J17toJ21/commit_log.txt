@@ -1,0 +1,724 @@
+aa2ea6c feat: up to 21
+d63b105 Merge pull request #809 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.9.5
+72b6ae5 Merge pull request #810 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.2.0
+37f6466 build(deps): bump org.springframework.boot:spring-boot-starter-parent
+cd78ead build(deps-dev): bump @types/node in /nas-front-end
+3820913 Merge pull request #791 from itning/dependabot/npm_and_yarn/nas-front-end/types/dplayer-1.25.5
+ad1dc87 Merge pull request #798 from itning/dependabot/maven/com.qcloud-cos_api-5.6.187
+e532ede build(deps): bump com.qcloud:cos_api from 5.6.181 to 5.6.187
+615eb56 build(deps-dev): bump @types/dplayer in /nas-front-end
+a44fc67 Merge pull request #775 from itning/dependabot/maven/com.qcloud-cos_api-5.6.181
+db995a9 build(deps): bump com.qcloud:cos_api from 5.6.177 to 5.6.181
+8361d59 Merge pull request #750 from itning/dependabot/npm_and_yarn/nas-front-end/types/dplayer-1.25.4
+33d2f0b Merge pull request #771 from itning/dependabot/npm_and_yarn/nas-front-end/ng-zorro-antd-16.2.2
+921145e Merge pull request #760 from itning/dependabot/maven/com.qcloud-cos_api-5.6.177
+20e9a29 Merge pull request #761 from itning/dependabot/maven/commons-io-commons-io-2.15.0
+327e5ce build(deps): bump ng-zorro-antd from 16.2.0 to 16.2.2 in /nas-front-end
+61b6339 build(deps): bump commons-io:commons-io from 2.14.0 to 2.15.0
+28dcc98 build(deps): bump com.qcloud:cos_api from 5.6.175 to 5.6.177
+664a56d Merge pull request #755 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.1.5
+b3dcebc build(deps): bump org.springframework.boot:spring-boot-starter-parent
+e135351 build(deps-dev): bump @types/dplayer in /nas-front-end
+de13bdd Merge pull request #742 from itning/dependabot/maven/com.qcloud-cos_api-5.6.175
+65162a9 build(deps): bump com.qcloud:cos_api from 5.6.173 to 5.6.175
+4097b91 Merge pull request #729 from itning/dependabot/maven/com.google.guava-guava-32.1.3-jre
+6323950 build(deps): bump com.google.guava:guava from 32.1.2-jre to 32.1.3-jre
+732bedd chore: update
+13bb7a8 Merge pull request #713 from itning/dependabot/maven/commons-io-commons-io-2.14.0
+4b32cb4 build(deps): bump commons-io:commons-io from 2.13.0 to 2.14.0
+d83b18c Merge pull request #707 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.7.1
+4b64625 build(deps-dev): bump @types/node in /nas-front-end
+595d245 Merge remote-tracking branch 'origin/master'
+e5d9ff5 chore: update
+ebe9a1d Merge pull request #699 from itning/dependabot/npm_and_yarn/nas-front-end/types/dplayer-1.25.3
+cbdf386 Merge pull request #700 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.6.5
+080cec4 build(deps-dev): bump @types/node in /nas-front-end
+cd98bc3 build(deps-dev): bump @types/dplayer in /nas-front-end
+169e17f Merge pull request #681 from itning/dependabot/npm_and_yarn/nas-front-end/types/jasmine-4.3.6
+4af9de6 build(deps-dev): bump @types/jasmine in /nas-front-end
+4eda293 Merge pull request #698 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.6.4
+e1e3413 build(deps-dev): bump @types/node in /nas-front-end
+0e92bea chore: update
+da24e44 Merge pull request #668 from itning/dependabot/npm_and_yarn/nas-front-end/zone.js-0.13.3
+52a459e Merge pull request #685 from itning/dependabot/npm_and_yarn/nas-front-end/dayjs-1.11.10
+0dc8ccf Merge pull request #684 from itning/dependabot/maven/com.qcloud-cos_api-5.6.173
+468da18 Merge pull request #697 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.1.4
+c1a29b1 build(deps): bump org.springframework.boot:spring-boot-starter-parent
+ace68fb build(deps): bump dayjs from 1.11.9 to 1.11.10 in /nas-front-end
+11aba1c build(deps): bump com.qcloud:cos_api from 5.6.169 to 5.6.173
+6791b2d build(deps): bump zone.js from 0.13.1 to 0.13.3 in /nas-front-end
+b28babb Merge remote-tracking branch 'origin/master'
+bd1889e chore: update
+90c4c01 Merge pull request #679 from itning/dependabot/maven/com.qcloud-cos_api-5.6.169
+1b0665b build(deps): bump com.qcloud:cos_api from 5.6.167 to 5.6.169
+97bcde2 chore: update
+469564e Merge pull request #656 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.5.9
+c9b5268 Merge pull request #657 from itning/dependabot/maven/com.qcloud-cos_api-5.6.167
+e3c1a3a build(deps): bump com.qcloud:cos_api from 5.6.166 to 5.6.167
+54010db build(deps-dev): bump @types/node in /nas-front-end
+582ffef Merge pull request #644 from itning/dependabot/npm_and_yarn/nas-front-end/jasmine-core-5.1.1
+05e3d57 build(deps-dev): bump jasmine-core from 5.1.0 to 5.1.1 in /nas-front-end
+3b1e81d Merge pull request #630 from itning/dependabot/npm_and_yarn/nas-front-end/tslib-2.6.2
+a71e821 Merge pull request #645 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.5.7
+0ac8c5e build(deps-dev): bump @types/node in /nas-front-end
+609e1af build(deps): bump tslib from 2.6.1 to 2.6.2 in /nas-front-end
+a98ba06 chore: update
+8d06621 Merge pull request #642 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.1.3
+f96a655 build(deps): bump org.springframework.boot:spring-boot-starter-parent
+c5f5aed Merge pull request #621 from itning/dependabot/maven/com.qcloud-cos_api-5.6.166
+f95eb92 build(deps): bump com.qcloud:cos_api from 5.6.163 to 5.6.166
+5c9a669 Merge pull request #618 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.5.0
+1add5e1 Merge pull request #619 from itning/dependabot/maven/com.qcloud-cos_api-5.6.163
+68df006 build(deps): bump com.qcloud:cos_api from 5.6.161 to 5.6.163
+3ad82a9 build(deps-dev): bump @types/node in /nas-front-end
+7f2ab05 chore: update
+269e101 Merge pull request #575 from itning/dependabot/npm_and_yarn/nas-front-end/jasmine-core-5.1.0
+ac35e06 build(deps-dev): bump jasmine-core from 5.0.1 to 5.1.0 in /nas-front-end
+17558a3 Merge pull request #603 from itning/dependabot/npm_and_yarn/nas-front-end/karma-jasmine-html-reporter-2.1.0
+7d1e8a7 Merge pull request #602 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.4.7
+86c8086 build(deps-dev): bump karma-jasmine-html-reporter in /nas-front-end
+a6c80b1 build(deps-dev): bump @types/node in /nas-front-end
+cff9971 Merge pull request #563 from itning/dependabot/npm_and_yarn/nas-front-end/karma-jasmine-5.0.1
+0348bf6 Merge pull request #577 from itning/dependabot/npm_and_yarn/nas-front-end/tslib-2.6.1
+d9d5287 Merge pull request #601 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.4.6
+38bcb75 build(deps-dev): bump @types/node in /nas-front-end
+93d1a22 build(deps): bump tslib from 2.6.0 to 2.6.1 in /nas-front-end
+0558001 chore: update
+f400b15 chore: update
+399a035 Merge pull request #589 from itning/dependabot/maven/com.qcloud-cos_api-5.6.161
+705b293 Merge pull request #590 from itning/dependabot/maven/com.google.guava-guava-32.1.2-jre
+b4ee97d build(deps): bump com.google.guava:guava from 32.1.1-jre to 32.1.2-jre
+93294f0 build(deps): bump com.qcloud:cos_api from 5.6.159 to 5.6.161
+41ecf32 Merge pull request #576 from itning/dependabot/maven/com.qcloud-cos_api-5.6.159
+a3a5bca build(deps): bump com.qcloud:cos_api from 5.6.155 to 5.6.159
+dcabf49 Merge pull request #572 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.1.2
+0e6b590 Merge pull request #573 from itning/dependabot/maven/org.java-websocket-Java-WebSocket-1.5.4
+9fb6b6d build(deps): bump org.java-websocket:Java-WebSocket from 1.5.3 to 1.5.4
+c203bba build(deps): bump org.springframework.boot:spring-boot-starter-parent
+8d0f072 Merge pull request #559 from itning/dependabot/maven/com.qcloud-cos_api-5.6.155
+06d8db8 build(deps-dev): bump karma-jasmine in /nas-front-end
+2bfa457 build(deps): bump cos_api from 5.6.153 to 5.6.155
+c3cc5a3 Merge pull request #549 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.4.2
+ae61dc7 Merge pull request #558 from itning/dependabot/npm_and_yarn/nas-front-end/ng-zorro-antd-16.1.0
+5baca98 build(deps): bump ng-zorro-antd from 16.0.0 to 16.1.0 in /nas-front-end
+94a7b68 build(deps-dev): bump @types/node in /nas-front-end
+e0bae10 Merge pull request #548 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.4.1
+fc166e8 build(deps-dev): bump @types/node in /nas-front-end
+50ecc0c chore: update
+fa7671f Merge pull request #536 from itning/dependabot/maven/com.qcloud-cos_api-5.6.153
+63f9df0 build(deps): bump cos_api from 5.6.151 to 5.6.153
+d1a4228 Merge pull request #533 from itning/dependabot/npm_and_yarn/nas-front-end/dayjs-1.11.9
+511ee60 Merge pull request #534 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.3.3
+032ab50 Merge pull request #535 from itning/dependabot/maven/com.google.guava-guava-32.1.1-jre
+c052b78 build(deps): bump guava from 32.1.0-jre to 32.1.1-jre
+8353734 build(deps-dev): bump @types/node in /nas-front-end
+b278138 build(deps): bump dayjs from 1.11.8 to 1.11.9 in /nas-front-end
+9d42142 Merge remote-tracking branch 'origin/master'
+e7db684 chore: update
+d957cd5 Merge pull request #522 from itning/dependabot/npm_and_yarn/nas-front-end/types/jasmine-4.3.5
+25cc87c Merge pull request #526 from itning/dependabot/npm_and_yarn/nas-front-end/typescript-5.1.6
+2d9b65f Merge pull request #530 from itning/dependabot/maven/com.google.guava-guava-32.1.0-jre
+d086a00 build(deps): bump guava from 32.0.1-jre to 32.1.0-jre
+669630c build(deps-dev): bump typescript from 5.1.3 to 5.1.6 in /nas-front-end
+9201a99 build(deps-dev): bump @types/jasmine in /nas-front-end
+4173cdf Merge pull request #514 from itning/dependabot/npm_and_yarn/nas-front-end/karma-coverage-2.2.1
+7e385fb Merge pull request #515 from itning/dependabot/npm_and_yarn/nas-front-end/tslib-2.6.0
+37dd02c Merge pull request #516 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.3.2
+d81ad11 build(deps-dev): bump @types/node in /nas-front-end
+f54552f build(deps): bump tslib from 2.5.3 to 2.6.0 in /nas-front-end
+28cb152 build(deps-dev): bump karma-coverage in /nas-front-end
+05aecfe chore: change .gitignore
+2b65645 chore: add .dockerignore
+72c057a build: 2.0.3.RELEASE
+0097b2f Merge pull request #512 from itning/dependabot/npm_and_yarn/nas-front-end/angular/cli-16.1.1
+9f2e89a build(deps-dev): bump @angular/cli in /nas-front-end
+ebf36a6 Merge pull request #513 from itning/dependabot/npm_and_yarn/nas-front-end/angular-devkit/build-angular-16.1.1
+e94b242 Merge pull request #511 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.1.1
+fa40df7 build(deps-dev): bump @angular-devkit/build-angular in /nas-front-end
+4d516b3 build(deps): bump spring-boot-starter-parent from 3.1.0 to 3.1.1
+61a1305 Merge pull request #501 from itning/dependabot/npm_and_yarn/nas-front-end/types/jasmine-4.3.4
+67024e8 build(deps-dev): bump @types/jasmine in /nas-front-end
+3f5356b Merge pull request #492 from itning/dependabot/npm_and_yarn/nas-front-end/typescript-5.1.3
+c333e12 Merge remote-tracking branch 'origin/master'
+791e0eb chore: update
+b868a04 Merge pull request #502 from itning/dependabot/maven/commons-codec-commons-codec-1.16.0
+1c038a4 feat: re init index
+3ccbe3b build(deps): bump commons-codec from 1.15 to 1.16.0
+0777da2 build(deps-dev): bump typescript from 5.0.4 to 5.1.3 in /nas-front-end
+271aca2 chore: update
+a9053cf feat: config
+b1433b6 feat: config
+4dd2092 feat: config
+ee32274 feat: config
+ba688ae Merge pull request #482 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.3.1
+aa69cc9 build(deps-dev): bump @types/node in /nas-front-end
+e5f9dc7 chore: update
+742e317 Merge pull request #477 from itning/dependabot/npm_and_yarn/nas-front-end/jasmine-core-5.0.1
+d498bbc Merge pull request #479 from itning/dependabot/npm_and_yarn/nas-front-end/zone.js-0.13.1
+1c8b29b build(deps): bump zone.js from 0.13.0 to 0.13.1 in /nas-front-end
+a556783 build(deps-dev): bump jasmine-core from 5.0.0 to 5.0.1 in /nas-front-end
+5c54bca Merge pull request #478 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.3.0
+00ce304 Merge pull request #476 from itning/dependabot/maven/com.qcloud-cos_api-5.6.151
+ebba110 build(deps-dev): bump @types/node in /nas-front-end
+2f8a742 build(deps): bump cos_api from 5.6.149 to 5.6.151
+b6078d8 Merge pull request #463 from itning/dependabot/npm_and_yarn/nas-front-end/typescript-5.0.4
+ccdf8ea chore: update
+83388b0 Merge pull request #462 from itning/dependabot/npm_and_yarn/nas-front-end/dayjs-1.11.8
+b0e1e03 Merge pull request #464 from itning/dependabot/maven/commons-io-commons-io-2.13.0
+66e68d5 Merge pull request #467 from itning/dependabot/maven/com.google.guava-guava-32.0.1-jre
+4408950 build(deps): bump guava from 32.0.0-jre to 32.0.1-jre
+b7c8152 build(deps): bump commons-io from 2.12.0 to 2.13.0
+0461c40 build(deps-dev): bump typescript from 4.9.5 to 5.0.4 in /nas-front-end
+1ed5d77 build(deps): bump dayjs from 1.11.7 to 1.11.8 in /nas-front-end
+71951b9 Merge pull request #438 from itning/dependabot/npm_and_yarn/nas-front-end/jasmine-core-5.0.0
+1e651a8 Merge pull request #453 from itning/dependabot/npm_and_yarn/nas-front-end/types/jasmine-4.3.2
+7c5031f build(deps-dev): bump jasmine-core from 4.6.0 to 5.0.0 in /nas-front-end
+325f9d6 build(deps-dev): bump @types/jasmine in /nas-front-end
+02bc147 Merge pull request #456 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-20.2.5
+a277bfe Merge pull request #460 from itning/dependabot/npm_and_yarn/nas-front-end/tslib-2.5.3
+37dbcb1 Merge pull request #461 from itning/dependabot/npm_and_yarn/nas-front-end/socket.io-parser-and-socket.io-4.2.4
+56df6aa build(deps-dev): bump @types/node in /nas-front-end
+9c3e413 feat: web
+e65da95 build(deps): bump socket.io-parser and socket.io in /nas-front-end
+2c36d4b build(deps): bump tslib from 2.5.0 to 2.5.3 in /nas-front-end
+45cde7c chore: update
+1140cac feat: add loading status
+0c109c7 Merge pull request #457 from itning/dependabot/maven/com.qcloud-cos_api-5.6.149
+328f47a build(deps): bump cos_api from 5.6.147 to 5.6.149
+03f5bf1 Merge pull request #455 from itning/dependabot/maven/com.google.guava-guava-32.0.0-jre
+934574d build(deps): bump guava from 31.1-jre to 32.0.0-jre
+d7d5832 feat: ad dep
+7ca30a9 Merge pull request #446 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.1.0
+9bc5fbd build(deps): bump spring-boot-starter-parent from 3.0.6 to 3.1.0
+dd7567b Merge pull request #440 from itning/dependabot/maven/commons-io-commons-io-2.12.0
+1b3d396 build(deps): bump commons-io from 2.11.0 to 2.12.0
+a79b9e8 feat: add pool name
+c690dd3 feat: config
+ace04fb feat: config
+7ac4038 fix: fix file not found
+8b133c0 feat: log
+fb8b5f7 build: 2.0.2.RELEASE
+4d13c9e feat: web
+e219753 feat: web
+f8ff1d9 Merge pull request #436 from itning/dependabot/maven/com.qcloud-cos_api-5.6.147
+4cab2ff build(deps): bump cos_api from 5.6.145 to 5.6.147
+69ea396 feat: change log and docker file
+6f511b1 feat: web
+b409f9e Merge pull request #430 from itning/dependabot/maven/com.qcloud-cos_api-5.6.145
+9159624 build(deps): bump cos_api from 5.6.143 to 5.6.145
+0e5b28a Merge pull request #427 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.16.3
+23cd7ac build(deps-dev): bump @types/node in /nas-front-end
+58a149c Merge pull request #420 from itning/dependabot/npm_and_yarn/nas-front-end/karma-6.4.2
+8380233 Merge pull request #424 from itning/dependabot/npm_and_yarn/nas-front-end/rxjs-7.8.1
+39c7c39 feat: web
+61f1d1b Merge pull request #425 from itning/dependabot/maven/com.qcloud-cos_api-5.6.143
+f452e92 build(deps): bump cos_api from 5.6.141 to 5.6.143
+ff57412 build(deps): bump rxjs from 7.8.0 to 7.8.1 in /nas-front-end
+2fc03f1 Merge pull request #417 from itning/dependabot/maven/com.qcloud-cos_api-5.6.141
+28c8541 Merge pull request #418 from itning/dependabot/maven/mapstruct.version-1.5.5.Final
+a7a41b7 build(deps-dev): bump karma from 6.4.1 to 6.4.2 in /nas-front-end
+6df0f03 build(deps): bump mapstruct.version from 1.5.4.Final to 1.5.5.Final
+3344765 build(deps): bump cos_api from 5.6.139 to 5.6.141
+adfb558 feat: web
+08c22a9 feat: web
+3b99ea7 Merge pull request #343 from itning/dependabot/npm_and_yarn/nas-front-end/jasmine-core-4.6.0
+10fb42a Merge branch 'master' into dependabot/npm_and_yarn/nas-front-end/jasmine-core-4.6.0
+4d04aed Merge pull request #404 from itning/dependabot/npm_and_yarn/nas-front-end/music-metadata-browser-2.5.10
+ea8de3f build(deps): bump music-metadata-browser in /nas-front-end
+260dea3 Merge pull request #329 from itning/dependabot/npm_and_yarn/nas-front-end/zone.js-0.13.0
+552c8ca Merge pull request #415 from itning/dependabot/npm_and_yarn/nas-front-end/karma-chrome-launcher-3.2.0
+e4773ea Merge pull request #407 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.15.12
+19b5968 build: 2.0.1.RELEASE
+92e9019 Merge pull request #414 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.0.6
+06bc4a6 build(deps-dev): bump karma-chrome-launcher in /nas-front-end
+c72bcac build(deps): bump spring-boot-starter-parent from 3.0.5 to 3.0.6
+0056fc8 build(deps-dev): bump @types/node in /nas-front-end
+64c36cb feat: web
+e3b8c72 fix: delete music failed
+d2b516d fix: tencent cos upload type error
+7851199 fix: no error info
+6e8d920 Merge pull request #402 from itning/dependabot/maven/mapstruct.version-1.5.4.Final
+abd33b9 build(deps): bump mapstruct.version from 1.5.3.Final to 1.5.4.Final
+7be1dbf chore: readme
+8d05c8a chore: readme
+d8713c2 build: 2.0.0.RELEASE
+9cef09b feat: web
+5315c90 feat: support config
+1c06630 feat: support config
+694084e feat: web
+170d526 feat: support config
+4df34c7 build(deps): bump zone.js from 0.12.0 to 0.13.0 in /nas-front-end
+de830c1 Merge pull request #391 from itning/change_to_config
+b81ac86 feat: support config
+a720fb0 feat: support config
+a15fb93 feat: setting page
+1db55b5 feat: support config
+b1cfa4c feat: support config
+de9c0d1 feat: support config
+5afe43c feat: support config
+546be4c feat: support config
+2d39db3 feat: support config
+a4e396e feat: support config
+b44af85 feat: support config
+5d134b6 feat: support config
+a08be16 feat: support config
+7d51d1a feat: support config
+fd7956d feat: support config
+aadc306 feat: change to config
+de85192 chore: add todo
+76f9164 Update README.md
+bea5b74 chore: update
+2c1de0f feat: support upload cover
+3d5522e feat: support edit music tag
+4b8ddf2 fix: class cast exception
+6ff9f69 fix: unable-to-find-main-class
+7891256 feat: support edit music tag
+78cb57c chore: update
+20bcb9a chore: readme
+a7fb22e feat: Add FTP configuration and management with FtpConfig and NasFtpProperties.
+7f68253 refactor: Refactor pom.xml by reformatting code for better readability.
+c6ce9bb feat: Only non-MP 3 files are transcode
+d311c4b feat: Only non-MP 3 files are transcode
+2f4563b feat: support skip upload
+6f48011 feat: support skip upload
+23f1250 feat: support skip upload
+12ad4a9 feat: add delete func when done
+3abb5fc feat: update front end
+851a6f9 feat: 支持上传腾讯云之前音频转成MP3
+8dee8b5 feat: 支持上传腾讯云之前音频转成MP3
+39f1a36 chore: .gitignore
+50d85d3 refactor: Refactor the data source
+775e37a Merge pull request #369 from itning/dependabot/maven/com.qcloud-cos_api-5.6.139
+63fcf5c build(deps): bump cos_api from 5.6.137 to 5.6.139
+be3ee2c chore: update
+bebc3eb chore: update
+345412a Merge pull request #352 from itning/dependabot/maven/com.qcloud-cos_api-5.6.137
+f1babd3 Merge pull request #366 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.0.5
+4bb41eb build(deps): bump spring-boot-starter-parent from 3.0.4 to 3.0.5
+e68f424 build(deps): bump cos_api from 5.6.136 to 5.6.137
+029c27e build(deps-dev): bump jasmine-core from 4.5.0 to 4.6.0 in /nas-front-end
+34afa40 chore: update
+b723426 Merge pull request #327 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.0.4
+80e910b Merge pull request #315 from itning/dependabot/maven/com.qcloud-cos_api-5.6.136
+21feee8 build(deps): bump spring-boot-starter-parent from 3.0.3 to 3.0.4
+17a7312 build(deps): bump cos_api from 5.6.134 to 5.6.136
+ff951a5 Merge remote-tracking branch 'origin/master'
+ee58488 chore: update
+1727aa8 Merge pull request #306 from itning/dependabot/npm_and_yarn/nas-front-end/angular/router-15.2.0
+78441d2 Merge pull request #303 from itning/dependabot/npm_and_yarn/nas-front-end/angular/platform-browser-15.2.0
+6313455 Merge pull request #307 from itning/dependabot/npm_and_yarn/nas-front-end/angular-devkit/build-angular-15.2.0
+2816377 build(deps): bump @angular/router in /nas-front-end
+cf8d35b Merge pull request #309 from itning/dependabot/npm_and_yarn/nas-front-end/angular/compiler-cli-15.2.0
+143116d Merge pull request #308 from itning/dependabot/npm_and_yarn/nas-front-end/angular/animations-15.2.0
+5c45acf build(deps): bump @angular/platform-browser in /nas-front-end
+e3b4a65 build(deps): bump @angular/animations in /nas-front-end
+60da798 Merge pull request #311 from itning/dependabot/npm_and_yarn/nas-front-end/angular/forms-15.2.0
+aefef99 Merge pull request #310 from itning/dependabot/npm_and_yarn/nas-front-end/angular/platform-browser-dynamic-15.2.0
+678f42a Merge pull request #312 from itning/dependabot/npm_and_yarn/nas-front-end/angular/compiler-15.2.0
+6f5ba4b build(deps): bump @angular/forms from 15.1.5 to 15.2.0 in /nas-front-end
+954394f build(deps-dev): bump @angular/compiler-cli in /nas-front-end
+d7792f9 build(deps-dev): bump @angular-devkit/build-angular in /nas-front-end
+41b11ac build(deps): bump @angular/compiler in /nas-front-end
+d12a934 Merge pull request #305 from itning/dependabot/npm_and_yarn/nas-front-end/angular/cli-15.2.0
+973308c Merge pull request #304 from itning/dependabot/npm_and_yarn/nas-front-end/angular/common-15.2.0
+abc2080 build(deps): bump @angular/platform-browser-dynamic in /nas-front-end
+f96f72c build(deps-dev): bump @angular/cli in /nas-front-end
+4195733 build(deps): bump @angular/common in /nas-front-end
+0388b1e Merge pull request #241 from itning/dependabot/npm_and_yarn/nas-front-end/types/jasmine-4.3.1
+4b6320b Merge pull request #293 from itning/dependabot/npm_and_yarn/nas-front-end/angular/platform-browser-dynamic-15.1.5
+d10fa47 Merge pull request #297 from itning/dependabot/npm_and_yarn/nas-front-end/angular-devkit/build-angular-15.1.6
+d434a75 build(deps-dev): bump @angular-devkit/build-angular in /nas-front-end
+dcc7ab8 build(deps): bump @angular/platform-browser-dynamic in /nas-front-end
+a95275a build(deps-dev): bump @types/jasmine in /nas-front-end
+a3373ca Merge pull request #302 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.14.0
+66ad07b Merge pull request #294 from itning/dependabot/npm_and_yarn/nas-front-end/angular/cli-15.1.6
+f16d95e Merge pull request #295 from itning/dependabot/npm_and_yarn/nas-front-end/angular/platform-browser-15.1.5
+8a2f830 build(deps): bump @angular/platform-browser in /nas-front-end
+c0d19ef Merge pull request #292 from itning/dependabot/npm_and_yarn/nas-front-end/angular/compiler-15.1.5
+6195bf5 build(deps-dev): bump @types/node in /nas-front-end
+d6cb89e build(deps-dev): bump @angular/cli in /nas-front-end
+5cae1fd build(deps): bump @angular/compiler in /nas-front-end
+8761776 Merge pull request #299 from itning/dependabot/npm_and_yarn/nas-front-end/angular/compiler-cli-15.1.5
+70a47fd Merge pull request #296 from itning/dependabot/npm_and_yarn/nas-front-end/angular/router-15.1.5
+4cfb72a Merge pull request #300 from itning/dependabot/npm_and_yarn/nas-front-end/angular/forms-15.1.5
+17db4a4 Merge pull request #301 from itning/dependabot/npm_and_yarn/nas-front-end/angular/common-15.1.5
+9c05246 Merge pull request #291 from itning/dependabot/maven/com.qcloud-cos_api-5.6.134
+efdb671 build(deps): bump @angular/common in /nas-front-end
+1953438 build(deps): bump @angular/forms from 15.1.4 to 15.1.5 in /nas-front-end
+d32299f build(deps-dev): bump @angular/compiler-cli in /nas-front-end
+bb4238f build(deps): bump @angular/router in /nas-front-end
+9ff3053 build(deps): bump cos_api from 5.6.133 to 5.6.134
+0e9c5f4 Merge pull request #289 from itning/dependabot/npm_and_yarn/nas-front-end/typescript-4.9.5
+bcd0120 build(deps-dev): bump typescript from 4.8.4 to 4.9.5 in /nas-front-end
+0f05061 Merge pull request #277 from itning/dependabot/npm_and_yarn/nas-front-end/tslib-2.5.0
+07f5204 Merge pull request #274 from itning/dependabot/npm_and_yarn/nas-front-end/dplayer-1.27.1
+d64c6f4 build(deps): bump dplayer from 1.27.0 to 1.27.1 in /nas-front-end
+6f29dac build(deps): bump tslib from 2.4.1 to 2.5.0 in /nas-front-end
+efa569a Merge pull request #255 from itning/dependabot/npm_and_yarn/nas-front-end/rxjs-7.8.0
+9d15d05 Merge pull request #285 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.13.0
+63a9df8 build(deps-dev): bump @types/node in /nas-front-end
+0f754b5 build(deps): bump rxjs from 7.5.7 to 7.8.0 in /nas-front-end
+ae568b5 chore: update
+3c4ff32 chore: update
+eb4766a Merge pull request #284 from itning/dependabot/maven/com.qcloud-cos_api-5.6.133
+95f6768 Merge pull request #287 from itning/dependabot/npm_and_yarn/nas-front-end/js-base64-3.7.5
+31deaf4 build(deps): bump js-base64 from 3.7.4 to 3.7.5 in /nas-front-end
+9fa6f2c build(deps): bump cos_api from 5.6.129 to 5.6.133
+25fe50f Merge pull request #278 from itning/dependabot/npm_and_yarn/nas-front-end/ua-parser-js-0.7.33
+e3fd052 Merge pull request #264 from itning/dependabot/npm_and_yarn/nas-front-end/js-base64-3.7.4
+f2c8d26 Merge pull request #269 from itning/dependabot/maven/com.qcloud-cos_api-5.6.129
+c93e773 Merge pull request #273 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.0.2
+c5cf631 build(deps): bump ua-parser-js from 0.7.31 to 0.7.33 in /nas-front-end
+f623ecd build(deps): bump spring-boot-starter-parent from 3.0.1 to 3.0.2
+78de070 build(deps): bump cos_api from 5.6.125 to 5.6.129
+09e6ab1 build(deps): bump js-base64 from 3.7.3 to 3.7.4 in /nas-front-end
+61c9885 build: 1.8.1.RELEASE
+3497783 Merge pull request #258 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-3.0.1
+163b3d7 Merge pull request #260 from itning/dependabot/maven/com.qcloud-cos_api-5.6.125
+e29cbaa build(deps): bump cos_api from 5.6.121 to 5.6.125
+9c8b7fe build(deps): bump spring-boot-starter-parent from 3.0.0 to 3.0.1
+0965d86 Merge pull request #254 from itning/dependabot/maven/com.qcloud-cos_api-5.6.121
+464907c build(deps): bump cos_api from 5.6.117 to 5.6.121
+6f63436 feat: bad request exception
+dcefa24 Merge pull request #249 from itning/dependabot/npm_and_yarn/nas-front-end/ng-zorro-antd-14.3.0
+ebba5d1 build(deps): bump ng-zorro-antd from 14.2.1 to 14.3.0 in /nas-front-end
+150debd Merge pull request #243 from itning/dependabot/npm_and_yarn/nas-front-end/dayjs-1.11.7
+deb8388 Merge pull request #244 from itning/dependabot/maven/com.qcloud-cos_api-5.6.117
+a5f4e63 build(deps): bump cos_api from 5.6.115 to 5.6.117
+92bf4a3 feat: 上传不支持的文件类型时给出提示
+05e46b9 build(deps): bump dayjs from 1.11.6 to 1.11.7 in /nas-front-end
+4c35c9a Merge pull request #236 from itning/dependabot/npm_and_yarn/nas-front-end/ng-zorro-antd-14.2.1
+5a4421f Merge remote-tracking branch 'origin/master'
+2e13973 feat: remove spring-boot-properties-migrator
+b22fa84 build(deps): bump ng-zorro-antd from 14.2.0 to 14.2.1 in /nas-front-end
+2a35eb1 Merge pull request #234 from itning/dependabot/maven/com.qcloud-cos_api-5.6.115
+94a2708 build(deps): bump cos_api from 5.6.112 to 5.6.115
+5569fcb build: 1.8.0.RELEASE
+b77ae28 Merge pull request #233 from itning/3.0.0
+ef3c362 feat: change default to false
+55b1714 feat: change default to false
+752cbf4 chore: update
+d3cdb92 chore: update
+19474cf chore: update
+895e4c6 Update README.md
+c62560f Merge pull request #229 from itning/dependabot/npm_and_yarn/nas-front-end/engine.io-6.2.1
+5cb79f1 Merge pull request #228 from itning/dependabot/npm_and_yarn/nas-front-end/ng-zorro-antd-14.2.0
+4fe48fc Merge pull request #227 from itning/dependabot/maven/com.qcloud-cos_api-5.6.112
+1de2eac build(deps): bump engine.io from 6.2.0 to 6.2.1 in /nas-front-end
+e9ada66 build(deps): bump ng-zorro-antd from 14.1.1 to 14.2.0 in /nas-front-end
+2844ac5 build(deps): bump cos_api from 5.6.110 to 5.6.112
+59450e1 Merge pull request #223 from itning/dependabot/npm_and_yarn/nas-front-end/loader-utils-2.0.4
+7f4a591 Merge pull request #226 from itning/dependabot/npm_and_yarn/nas-front-end/js-base64-3.7.3
+8aaf4cc build(deps): bump js-base64 from 3.7.2 to 3.7.3 in /nas-front-end
+11b91c7 build(deps): bump loader-utils from 2.0.3 to 2.0.4 in /nas-front-end
+334e404 Merge pull request #222 from itning/dependabot/npm_and_yarn/nas-front-end/zone.js-0.12.0
+579107c build(deps): bump zone.js from 0.11.8 to 0.12.0 in /nas-front-end
+d14e36e feat: allow not using elasticsearch
+ffe916a feat: add log
+dedb1c3 feat: set high light fragment
+7543384 build: 1.7.0.RELEASE
+143ed8a Merge branch 'elasticsearch'
+e6a40a7 feat: crud search lyric
+a21a541 feat: crud search lyric
+870e7d1 feat: key
+acacaaf chore: update
+e389508 Merge pull request #215 from itning/dependabot/npm_and_yarn/nas-front-end/angular/cli-14.2.9
+82d7099 Merge pull request #213 from itning/dependabot/npm_and_yarn/nas-front-end/angular/router-14.2.10
+48aeb53 Merge pull request #218 from itning/dependabot/npm_and_yarn/nas-front-end/angular/common-14.2.10
+a0a7cfc build(deps): bump @angular/router in /nas-front-end
+ff3ac0b build(deps): bump @angular/common in /nas-front-end
+b779d41 build(deps-dev): bump @angular/cli in /nas-front-end
+7131f72 Merge pull request #212 from itning/dependabot/npm_and_yarn/nas-front-end/angular/compiler-cli-14.2.10
+392a7a1 Merge pull request #214 from itning/dependabot/npm_and_yarn/nas-front-end/angular-devkit/build-angular-14.2.9
+48b2750 Merge pull request #219 from itning/dependabot/npm_and_yarn/nas-front-end/angular/platform-browser-dynamic-14.2.10
+3255c4d Merge pull request #220 from itning/dependabot/npm_and_yarn/nas-front-end/angular/forms-14.2.10
+d1c86af Merge pull request #221 from itning/dependabot/npm_and_yarn/nas-front-end/angular/animations-14.2.10
+1a7aab3 chore: update
+3183aeb Merge pull request #211 from itning/dependabot/maven/com.qcloud-cos_api-5.6.110
+4ed13e6 build(deps): bump @angular/animations in /nas-front-end
+4fdad66 build(deps): bump @angular/forms in /nas-front-end
+3745fe6 build(deps): bump @angular/platform-browser-dynamic in /nas-front-end
+8f4d691 build(deps-dev): bump @angular-devkit/build-angular in /nas-front-end
+7f4f880 build(deps-dev): bump @angular/compiler-cli in /nas-front-end
+d1b9838 build(deps): bump cos_api from 5.6.109 to 5.6.110
+e56bda9 Merge pull request #210 from itning/dependabot/npm_and_yarn/nas-front-end/loader-utils-2.0.3
+3db362e feat: key
+fdaa954 build(deps): bump loader-utils from 2.0.2 to 2.0.3 in /nas-front-end
+afd2611 chore: update
+b908363 feat: key
+ae14825 feat: add Elasticsearch
+44423e3 feat: add Elasticsearch
+9678eb5 feat: add Elasticsearch
+c6c2f8e feat: add Elasticsearch
+9284a8d Merge pull request #199 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.11.9
+c7266c5 build(deps-dev): bump @types/node in /nas-front-end
+e33ad3e Merge pull request #196 from itning/dependabot/npm_and_yarn/nas-front-end/jasmine-core-4.5.0
+042eb51 Merge pull request #198 from itning/dependabot/npm_and_yarn/nas-front-end/tslib-2.4.1
+4e8d22b build(deps): bump tslib from 2.4.0 to 2.4.1 in /nas-front-end
+4e9f6e4 build(deps-dev): bump jasmine-core from 4.4.0 to 4.5.0 in /nas-front-end
+6880b58 Merge pull request #197 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.11.8
+2f32dc6 Merge pull request #195 from itning/dependabot/maven/com.qcloud-cos_api-5.6.109
+405ae2a build(deps-dev): bump @types/node in /nas-front-end
+d614e83 build(deps): bump cos_api from 5.6.108 to 5.6.109
+88f7222 chore: update
+3e05ea0 Merge pull request #183 from itning/dependabot/maven/com.qcloud-cos_api-5.6.108
+ed8256c build(deps): bump cos_api from 5.6.107 to 5.6.108
+8899c8e Merge pull request #182 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.11.5
+e58e537 build(deps-dev): bump @types/node in /nas-front-end
+1a4d0d7 Merge pull request #181 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.11.4
+20fc235 build(deps-dev): bump @types/node in /nas-front-end
+eab8332 Merge pull request #173 from itning/dependabot/npm_and_yarn/nas-front-end/dayjs-1.11.6
+acc71d8 build(deps): bump dayjs from 1.11.5 to 1.11.6 in /nas-front-end
+54763b4 Merge pull request #174 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.11.3
+7c5abe8 chore: update
+b110ed3 Merge pull request #171 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.7.5
+4d97cbb build(deps-dev): bump @types/node in /nas-front-end
+1103a9b build(deps): bump spring-boot-starter-parent from 2.7.4 to 2.7.5
+e4a9e6d Merge pull request #164 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.11.0
+5c79432 Merge pull request #165 from itning/dependabot/npm_and_yarn/nas-front-end/angular/compiler-cli-14.2.6
+7f6069b Merge pull request #166 from itning/dependabot/npm_and_yarn/nas-front-end/angular-devkit/build-angular-14.2.6
+4c6a9c3 build(deps-dev): bump @angular-devkit/build-angular in /nas-front-end
+09ee1b3 build(deps-dev): bump @angular/compiler-cli in /nas-front-end
+14f1c57 Merge pull request #167 from itning/dependabot/npm_and_yarn/nas-front-end/angular/cli-14.2.6
+7c05010 Merge pull request #168 from itning/dependabot/npm_and_yarn/nas-front-end/ng-zorro-antd-14.1.1
+93ad739 build(deps): bump ng-zorro-antd from 14.1.0 to 14.1.1 in /nas-front-end
+575cec8 build(deps-dev): bump @angular/cli in /nas-front-end
+daaa160 build(deps-dev): bump @types/node in /nas-front-end
+7ac08c6 build: 1.6.6.RELEASE
+e1964e3 feat: web
+8501df0 chore: update
+be2c2f2 Merge pull request #155 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.8.5
+48d8307 Merge pull request #154 from itning/dependabot/maven/com.qcloud-cos_api-5.6.107
+2406091 Merge pull request #156 from itning/dependabot/npm_and_yarn/nas-front-end/ng-zorro-antd-14.1.0
+c04138a build(deps): bump ng-zorro-antd from 14.0.0 to 14.1.0 in /nas-front-end
+00cc778 build(deps-dev): bump @types/node in /nas-front-end
+c7395a1 build(deps): bump cos_api from 5.6.106 to 5.6.107
+a0add35 Merge pull request #153 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.8.4
+f933a28 build(deps-dev): bump @types/node in /nas-front-end
+1216d20 Merge pull request #152 from itning/dependabot/maven/mapstruct.version-1.5.3.Final
+b7745bc build(deps): bump mapstruct.version from 1.5.2.Final to 1.5.3.Final
+1713165 Merge pull request #151 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.8.3
+453e984 build(deps-dev): bump @types/node in /nas-front-end
+94a16b9 feat: web
+8b06cab chore: update
+66d29fb feat: web
+1c2e830 Merge pull request #113 from itning/dependabot/npm_and_yarn/nas-front-end/karma-6.4.1
+8e531e9 Merge pull request #127 from itning/dependabot/npm_and_yarn/nas-front-end/typescript-4.8.4
+e858d16 Merge pull request #139 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.8.1
+0761a3e Merge pull request #124 from itning/dependabot/npm_and_yarn/nas-front-end/rxjs-7.5.7
+9346c24 build(deps-dev): bump @types/node in /nas-front-end
+56f7d80 build(deps-dev): bump typescript from 4.8.3 to 4.8.4 in /nas-front-end
+7a269ce build(deps): bump rxjs from 7.5.6 to 7.5.7 in /nas-front-end
+a2fd2a7 Merge pull request #123 from itning/dependabot/maven/com.qcloud-cos_api-5.6.106
+5691bf5 chore: update
+7eef20a build(deps): bump cos_api from 5.6.105 to 5.6.106
+5afa36c feat: web
+c997e2d Merge pull request #120 from itning/dependabot/npm_and_yarn/nas-front-end/angular/forms-14.2.3
+dbd762b Merge pull request #121 from itning/dependabot/npm_and_yarn/nas-front-end/angular/platform-browser-dynamic-14.2.3
+84b5e26 Merge pull request #122 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.7.4
+6664cd3 build(deps): bump spring-boot-starter-parent from 2.7.3 to 2.7.4
+661e66c build(deps): bump @angular/platform-browser-dynamic in /nas-front-end
+f96620d build(deps): bump @angular/forms from 14.2.2 to 14.2.3 in /nas-front-end
+678adfe Merge pull request #112 from itning/dependabot/npm_and_yarn/nas-front-end/angular/forms-14.2.2
+2fe5660 Merge pull request #102 from itning/dependabot/maven/com.qcloud-cos_api-5.6.105
+447c43f build(deps-dev): bump karma from 6.3.20 to 6.4.1 in /nas-front-end
+ddcb334 build(deps): bump @angular/forms from 14.2.1 to 14.2.2 in /nas-front-end
+33471e7 build(deps): bump cos_api from 5.6.103 to 5.6.105
+2fac004 Merge pull request #101 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.7.18
+2471006 build(deps-dev): bump @types/node in /nas-front-end
+5c06858 feat: web
+ffd9e70 Merge pull request #93 from itning/dependabot/npm_and_yarn/nas-front-end/types/node-18.7.16
+7ef1384 build(deps-dev): bump @types/node in /nas-front-end
+dd6b09e Merge pull request #84 from itning/dependabot/npm_and_yarn/nas-front-end/jasmine-core-4.4.0
+626485d Merge pull request #97 from itning/dependabot/npm_and_yarn/nas-front-end/typescript-4.8.3
+c307778 build(deps-dev): bump typescript from 4.6.4 to 4.8.3 in /nas-front-end
+afe0bcb Merge pull request #92 from itning/dependabot/npm_and_yarn/nas-front-end/angular/compiler-cli-14.2.1
+d3f8056 Merge pull request #91 from itning/dependabot/npm_and_yarn/nas-front-end/angular/platform-browser-14.2.1
+e5791fc Merge pull request #90 from itning/dependabot/npm_and_yarn/nas-front-end/angular/router-14.2.1
+d43e72c Merge pull request #89 from itning/dependabot/npm_and_yarn/nas-front-end/angular/common-14.2.1
+ae95208 build(deps): bump @angular/router in /nas-front-end
+895cddb build(deps): bump @angular/common in /nas-front-end
+5f0aab3 build(deps-dev): bump @angular/compiler-cli in /nas-front-end
+8e4d8bd build(deps): bump @angular/platform-browser in /nas-front-end
+2a18125 Merge pull request #88 from itning/dependabot/npm_and_yarn/nas-front-end/angular/platform-browser-dynamic-14.2.1
+befc5b3 Merge pull request #87 from itning/dependabot/npm_and_yarn/nas-front-end/angular/forms-14.2.1
+863f1f9 Merge pull request #86 from itning/dependabot/npm_and_yarn/nas-front-end/angular/animations-14.2.1
+931001b Merge pull request #95 from itning/dependabot/npm_and_yarn/nas-front-end/angular/cli-14.2.2
+116251d build(deps-dev): bump @angular/cli in /nas-front-end
+902fbdb Merge pull request #98 from itning/dependabot/npm_and_yarn/nas-front-end/file-type-16.5.4
+c97f19d build(deps): bump file-type from 16.5.3 to 16.5.4 in /nas-front-end
+e8273a8 Merge pull request #96 from itning/dependabot/npm_and_yarn/nas-front-end/angular-devkit/build-angular-14.2.2
+e027b97 build(deps-dev): bump @angular-devkit/build-angular in /nas-front-end
+0cc9eb4 build(deps): bump @angular/platform-browser-dynamic in /nas-front-end
+a470ffb build(deps): bump @angular/forms from 14.2.0 to 14.2.1 in /nas-front-end
+9255c68 build(deps): bump @angular/animations in /nas-front-end
+bfb6ede build: 1.6.5.RELEASE
+e829648 feat: update web
+a509f61 fix: name error
+cd90462 build(deps-dev): bump jasmine-core from 4.0.1 to 4.4.0 in /nas-front-end
+8a2cb7f fix: 设置认证时未设置忽略路径NPE&&健康检查失败
+7d2a279 Merge remote-tracking branch 'origin/master'
+f1380ee feat: change logo href
+f8937fd Merge pull request #81 from itning/dependabot/maven/com.qcloud-cos_api-5.6.103
+6a46bc0 build(deps): bump cos_api from 5.6.101 to 5.6.103
+ba7355c Merge pull request #79 from itning/dependabot/npm_and_yarn/nas-front-end/angular-devkit/build-angular-14.2.1
+d8d68da build(deps-dev): bump @angular-devkit/build-angular in /nas-front-end
+537e779 Merge pull request #77 from itning/dependabot/maven/com.qcloud-cos_api-5.6.101
+2282596 Merge pull request #80 from itning/dependabot/npm_and_yarn/nas-front-end/angular/cli-14.2.1
+acf38ed build(deps-dev): bump @angular/cli in /nas-front-end
+2ba05fc build(deps): bump cos_api from 5.6.100 to 5.6.101
+7a1889d build: 1.6.4.RELEASE
+3d50ff3 chore: readme
+ba4a8ac feat: update front-end
+fa94e90 Merge pull request #59 from itning/dependabot/npm_and_yarn/nas-front-end/zone.js-0.11.8
+c75a1fe build(deps): bump zone.js from 0.11.6 to 0.11.8 in /nas-front-end
+f83b1d1 chore: update
+af62de4 chore: update
+1bb88e4 Merge remote-tracking branch 'origin/master'
+af7b723 feat: health check
+f2b60df Merge pull request #67 from itning/dependabot/npm_and_yarn/nas-front-end/dplayer-1.27.0
+31059df Merge branch 'master' into dependabot/npm_and_yarn/nas-front-end/dplayer-1.27.0
+4f99f7b Merge pull request #69 from itning/dependabot/npm_and_yarn/nas-front-end/dayjs-1.11.5
+5b6680b build(deps): bump dayjs from 1.11.3 to 1.11.5 in /nas-front-end
+783af29 build(deps): bump dplayer from 1.26.0 to 1.27.0 in /nas-front-end
+d909e3e Update dependabot.yml
+14bf183 Update dependabot.yml
+ad74093 Merge pull request #61 from itning/dependabot/npm_and_yarn/nas-front-end/rxjs-7.5.6
+d928888 build(deps): bump rxjs from 7.5.5 to 7.5.6 in /nas-front-end
+6c2548d Update dependabot.yml
+1fdc520 build: 1.6.3.RELEASE
+9e6f433 chore: readme
+5eca64f Merge pull request #56 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.7.3
+700922a Merge pull request #57 from itning/dependabot/maven/com.qcloud-cos_api-5.6.100
+2dbc90f build(deps): bump cos_api from 5.6.99 to 5.6.100
+63a0bac build(deps): bump spring-boot-starter-parent from 2.7.2 to 2.7.3
+400e3bc feat: remove /log
+2b1190a feat: update web
+abbc918 feat: update web
+2778450 build: 1.6.2.RELEASE
+16a92b3 Merge pull request #55 from itning/frond-end
+723ba92 chore: readme
+866f82c feat: 下载与日志
+78c4eb5 feat: 下载与日志
+b6894d3 refactor: 包优化
+4f20a29 feat: 在线观看视频
+4045582 feat: 在线观看视频
+ce648dd feat: 在线观看视频
+762f53b feat: add video module
+2723e3b feat: add front-project
+271cf6f Merge pull request #54 from itning/dependabot/maven/com.qcloud-cos_api-5.6.99
+569274c build(deps): bump cos_api from 5.6.98 to 5.6.99
+59e302b feat: nas.server-url
+1bc537f feat: add front end
+591a680 feat: add front-project
+d8893c3 build: 1.6.1.RELEASE
+8886acd fix: 上传失败问题
+bb01b9b Merge pull request #53 from itning/api
+88f0892 feat: 新增&删除
+29e5830 feat: 修改音乐
+b0cb70e Merge remote-tracking branch 'origin/master' into api
+6a5a6a6 build: 1.6.0.RELEASE
+46510d1 Merge pull request #52 from itning/config
+71a23cd build: 1.6.0.RELEASE
+cd05540 feat: mysql配置继续使用环境变量
+07f4f21 fix: 初始化方法调用多次
+96440ce feat: 备份文件数据源
+c08ac17 feat: 文件数据源URL前缀处理
+f4a06c3 feat: 上传音乐返回上传信息
+8026724 feat: 配置文件抽取
+ec97a11 Merge pull request #51 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.7.2
+e82796d build(deps): bump spring-boot-starter-parent from 2.7.1 to 2.7.2
+15e9528 Merge pull request #50 from itning/dependabot/maven/com.qcloud-cos_api-5.6.98
+8f5034c build(deps): bump cos_api from 5.6.97 to 5.6.98
+97c9b1f Merge pull request #49 from itning/dependabot/maven/com.qcloud-cos_api-5.6.97
+559f957 build(deps): bump cos_api from 5.6.95 to 5.6.97
+08f8070 refactor: 后台API
+3bd4293 refactor: sonarqube问题解决
+96e2a64 chore: readme
+9f2547c chore: readme
+c649ce2 chore: readme
+9a3bb2b chore: readme
+407111a chore: rebel.xml
+e753658 chore: Dockerfile
+22b5ce5 Update compile_test.yml
+25a38fe Merge pull request #47 from itning/dependabot/maven/com.qcloud-cos_api-5.6.95
+18ad66f build(deps): bump cos_api from 5.6.93 to 5.6.95
+f177050 Merge pull request #46 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.7.1
+f9c9cb5 build(deps): bump spring-boot-starter-parent from 2.7.0 to 2.7.1
+622bc1a Merge remote-tracking branch 'origin/master'
+f29c7b2 build: 1.5.1.RELEASE
+fd286f8 Update maven.yml
+632915f style: change @date to @since
+ffaaba1 feat: 音乐文件不返回304状态码
+d4c99fd feat: 304状态码可选
+0572b5c feat: 304状态码可选
+88ea71b Merge pull request #45 from itning/dependabot/maven/com.qcloud-cos_api-5.6.93
+ec0af6a build(deps): bump cos_api from 5.6.91 to 5.6.93
+b343411 Merge pull request #43 from itning/dependabot/maven/mapstruct.version-1.5.2.Final
+6c0d2ff Update README.md
+8998a2f Merge pull request #44 from itning/dependabot/maven/com.qcloud-cos_api-5.6.91
+0b2a710 build(deps): bump cos_api from 5.6.89 to 5.6.91
+617fbe3 build(deps): bump mapstruct.version from 1.4.2.Final to 1.5.2.Final
+7735530 Merge pull request #42 from itning/dependabot/maven/com.qcloud-cos_api-5.6.89
+1df016c build(deps): bump cos_api from 5.6.80 to 5.6.89
+79b8638 Merge pull request #34 from itning/dependabot/maven/com.qcloud-cos_api-5.6.80
+7df1fd8 Merge pull request #35 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.7.0
+d4cff1a build(deps): bump spring-boot-starter-parent from 2.6.7 to 2.7.0
+c006dd4 build(deps): bump cos_api from 5.6.75 to 5.6.80
+b2318ba Merge pull request #31 from itning/dependabot/maven/com.qcloud-cos_api-5.6.75
+24e0490 build(deps): bump cos_api from 5.6.74 to 5.6.75
+88976ab Merge pull request #29 from itning/dependabot/maven/com.qcloud-cos_api-5.6.74
+cd1711f Merge pull request #30 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.6.7
+a38a4ce build(deps): bump spring-boot-starter-parent from 2.6.6 to 2.6.7
+35a5186 build(deps): bump cos_api from 5.6.73 to 5.6.74
+70ecca0 Merge pull request #28 from itning/dependabot/maven/com.qcloud-cos_api-5.6.73
+be5a0ec build(deps): bump cos_api from 5.6.72 to 5.6.73
+5436e7e Merge pull request #27 from itning/dependabot/maven/org.java-websocket-Java-WebSocket-1.5.3
+9f60f57 build(deps): bump Java-WebSocket from 1.5.2 to 1.5.3
+4ee5b20 Merge pull request #26 from itning/dependabot/maven/com.qcloud-cos_api-5.6.72
+e42e924 build(deps): bump cos_api from 5.6.70 to 5.6.72
+fe348cc chore: docker file
+802bf04 Merge pull request #24 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.6.6
+160277d build(deps): bump spring-boot-starter-parent from 2.6.5 to 2.6.6
+4f3f5e3 Merge pull request #22 from itning/dependabot/maven/com.qcloud-cos_api-5.6.70
+758c76d Merge pull request #23 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.6.5
+4264c4c build(deps): bump spring-boot-starter-parent from 2.6.4 to 2.6.5
+320571d build(deps): bump cos_api from 5.6.69 to 5.6.70
+53e845a Merge pull request #21 from itning/dependabot/maven/com.google.guava-guava-31.1-jre
+ed385f7 build(deps): bump guava from 31.0.1-jre to 31.1-jre
+e575e30 Merge pull request #19 from itning/dependabot/maven/com.qcloud-cos_api-5.6.69
+8e21b27 Merge pull request #20 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.6.4
+15b924a build(deps): bump spring-boot-starter-parent from 2.6.3 to 2.6.4
+20a6be9 build(deps): bump cos_api from 5.6.68 to 5.6.69
+3b5f9d0 fix: ipad web端无法播放问题
+60e2507 build: 1.5.0.RELEASE
+9d60814 Update maven.yml
+973923e fix: 混合数据源歌词上传失败
+4f6a6f6 Merge remote-tracking branch 'origin/master'
+6fe1e91 feat: 配置
+9c29bbe Merge pull request #18 from itning/dependabot/maven/com.qcloud-cos_api-5.6.68
+e2de8f2 Merge branch 'master' into dependabot/maven/com.qcloud-cos_api-5.6.68
+8f856c5 Merge pull request #16 from itning/dependabot/maven/com.qcloud-cos_api-5.6.67
+241e57f build(deps): bump cos_api from 5.6.66 to 5.6.68
+29ddac1 refactor: remove space
+c0605a0 Merge pull request #17 from itning/dependabot/maven/org.springframework.boot-spring-boot-starter-parent-2.6.3
+b770a6f feat: 混合数据源
+44c6d3f feat: 混合数据源
+1e2df84 feat: 混合数据源
+d6ed658 build(deps): bump spring-boot-starter-parent from 2.6.2 to 2.6.3
+bae2574 build(deps): bump cos_api from 5.6.66 to 5.6.67
+fcf8e66 Merge pull request #15 from itning/dependabot/maven/com.qcloud-cos_api-5.6.66
+555e1c0 build: 1.3.0.RELEASE
+54e6837 build(deps): bump cos_api from 5.6.65 to 5.6.66
+7f5f257 feat: 日志
+ccf44e9 feat: 支持CDN
+b1c1897 feat: 音乐返回URL
+de82748 feat: 封面数据源
+621dd80 feat: 常量
+6d22849 feat: 歌词数据源
+8942acf feat: 歌曲数据源
+0c82b5f docs: 补充文档注释
+4898d15 refactor: switch
+3b0a261 refactor: 记录类
+61726fe chore: github action update
+e195ca3 refactor: 资源关闭

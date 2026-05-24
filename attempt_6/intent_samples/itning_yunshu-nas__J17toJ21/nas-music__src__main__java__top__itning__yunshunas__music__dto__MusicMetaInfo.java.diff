@@ -1,0 +1,36 @@
+diff --git a/nas-music/src/main/java/top/itning/yunshunas/music/dto/MusicMetaInfo.java b/nas-music/src/main/java/top/itning/yunshunas/music/dto/MusicMetaInfo.java
+index f7c6a5c..7d45aa5 100644
+--- a/nas-music/src/main/java/top/itning/yunshunas/music/dto/MusicMetaInfo.java
++++ b/nas-music/src/main/java/top/itning/yunshunas/music/dto/MusicMetaInfo.java
+@@ -1,7 +1,11 @@
+ package top.itning.yunshunas.music.dto;
+ 
+ import lombok.Data;
++import lombok.ToString;
++import org.apache.commons.lang3.StringUtils;
++import org.springframework.util.CollectionUtils;
+ 
++import java.io.File;
+ import java.util.List;
+ 
+ /**
+@@ -29,7 +33,10 @@ public class MusicMetaInfo {
+ 
+     @Data
+     public static class CoverPicture {
++        private File file;
++        @ToString.Exclude
+         private String base64;
++        @ToString.Exclude
+         private byte[] binaryData;
+         private String mimeType = "";
+         private String description = "";
+@@ -37,4 +44,8 @@ public class MusicMetaInfo {
+         private String imageUrl = "";
+         private int pictureType = -1;
+     }
++
++    public boolean needModify() {
++        return StringUtils.isNotBlank(title) || StringUtils.isNotBlank(album) || !CollectionUtils.isEmpty(artists) || !CollectionUtils.isEmpty(coverPictures);
++    }
+ }

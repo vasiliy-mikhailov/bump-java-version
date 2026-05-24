@@ -1,0 +1,334 @@
+{
+  "meta": {
+    "repo": "camjjames/dsm-api-client",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "591fcebd6f722f149beaf579f1717eda7e398ae3",
+    "sha_to": "01d14082e51d2397e1fde666ef51bc7e6cc286b7"
+  },
+  "by_file": {
+    "src/main/java/org/flaad/dsm/client/client/DsmAuthClient.java": [
+      {
+        "kind": "refactor_query_params_to_object",
+        "general_idea": "Replace multiple @RequestParam annotations with a single @SpringQueryMap object to simplify method signatures and centralize request parameter handling.",
+        "human_impl": "Changed login method signature from multiple @RequestParam args to @SpringQueryMap AuthRequest authRequest",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_content_type_annotation",
+        "general_idea": "Explicitly declare the consumed media type for the GET endpoints to align with Spring Cloud OpenFeign best practices.",
+        "human_impl": "Added consumes = MediaType.APPLICATION_JSON_VALUE to @GetMapping annotations",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/client/DsmClient.java": [
+      {
+        "kind": "refactor_query_params_to_object",
+        "general_idea": "Replace individual @RequestParam annotations with a single @SpringQueryMap object to encapsulate query parameters.",
+        "human_impl": "@SpringQueryMap ApiInfoRequest apiInfoRequest",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_content_type_constraint",
+        "general_idea": "Explicitly specify the consumed media type for the endpoint using Spring's MediaType constant.",
+        "human_impl": "consumes = MediaType.APPLICATION_JSON_VALUE",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/client/DsmSurveillanceClient.java": [
+      {
+        "kind": "refactor_api_endpoint",
+        "general_idea": "Changed the base API endpoint from query.cgi to entry.cgi to align with DSM API standards.",
+        "human_impl": "path = \"/webapi/entry.cgi?api=SYNO.SurveillanceStation.Info\"",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_request_binding",
+        "general_idea": "Replaced individual @RequestParam annotations with a single @SpringQueryMap binding to a request object for cleaner interface definition.",
+        "human_impl": "@SpringQueryMap DsmRequest cameraRequest",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_content_type",
+        "general_idea": "Added consumes = MediaType.APPLICATION_JSON_VALUE to GET mappings to explicitly define expected content types.",
+        "human_impl": "consumes = MediaType.APPLICATION_JSON_VALUE",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_api_method",
+        "general_idea": "Added a new method to retrieve the list of surveillance cameras.",
+        "human_impl": "getSurveillanceCameraList(@SpringQueryMap CameraListRequest cameraRequest)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_api_method",
+        "general_idea": "Added a new method to retrieve detailed information about surveillance cameras.",
+        "human_impl": "getSurveillanceCameraInfo(@SpringQueryMap CameraInfoRequest cameraRequest)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_api_method",
+        "general_idea": "Added a new method to capture a snapshot from a surveillance camera, returning raw bytes.",
+        "human_impl": "ResponseEntity<byte[]> getSurveillanceCameraSnapshot(@SpringQueryMap CameraSnapshotRequest cameraSnapshotRequest)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/config/DsmConfiguration.java": [
+      {
+        "kind": "add_bean_definition",
+        "general_idea": "Register a new DsmApiInformation bean to capture API info for later use.",
+        "human_impl": "@Bean public DsmApiInformation setupApiInfDetails() { return new DsmApiInformation(); }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/config/DsmDecoder.java": [
+      {
+        "kind": "add_dependency_injection",
+        "general_idea": "Inject DsmApiInformation bean to store API metadata captured during decoding.",
+        "human_impl": "@Autowired private DsmApiInformation apiInfo;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_imports",
+        "general_idea": "Import new model classes required for API information handling.",
+        "human_impl": "import org.flaad.dsm.client.model.ApiInfo; import org.flaad.dsm.client.model.DsmApiInformation;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_constant",
+        "general_idea": "Remove unused static constant SID as it is no longer referenced in the logic.",
+        "human_impl": "private static final String SID = \"sid\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_decode_logic",
+        "general_idea": "Refactor decode method to handle both API info setup and auth token extraction separately.",
+        "human_impl": "if (feignResponse instanceof DsmApiResponse) { ... if (!apiInfo.isSetup() ... ) { ... } if (... instanceof AuthSessionToken) { ... } }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_api_info_processing",
+        "general_idea": "Implement logic to capture and store API details from the response when not already set up.",
+        "human_impl": "constructApiInfo(((DsmApiResponse<ApiInfo.ApiInfoList>) feignResponse).getData()); apiInfo.setSetup(true);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_helper_method",
+        "general_idea": "Add helper method to iterate over API info list and populate the apiInfo bean.",
+        "human_impl": "private void constructApiInfo(ApiInfo.ApiInfoList data) { for (ApiInfo info : data.getApiInfos()) { apiInfo.addApiDetail(...); } }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_logging",
+        "general_idea": "Add debug logging statements to track when API details and auth tokens are saved.",
+        "human_impl": "log.debug(\"Saving API Details for later use!\"); log.debug(\"Saving Auth Security Token for later use!\");",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/config/DsmRequestInterceptor.java": [],
+    "src/main/java/org/flaad/dsm/client/model/ApiInfo.java": [
+      {
+        "kind": "add_spring_component_annotation",
+        "general_idea": "Annotate the model class with @Component to register it as a Spring-managed bean.",
+        "human_impl": "@Component",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_lombok_noargs_constructor",
+        "general_idea": "Remove the @NoArgsConstructor annotation because the class now relies on a specific constructor and final fields.",
+        "human_impl": "-@NoArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "make_fields_final",
+        "general_idea": "Change instance fields to final to enforce immutability, consistent with the removal of the no-args constructor.",
+        "human_impl": "private final String api;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/model/AuthSessionToken.java": [
+      {
+        "kind": "remove_spring_component_annotation",
+        "general_idea": "Removed the @Component annotation to decouple the model class from the Spring IoC container, likely because it is now instantiated via Jackson deserialization rather than dependency injection.",
+        "human_impl": "-@Component",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_lombok_noargs_constructor",
+        "general_idea": "Removed the @NoArgsConstructor annotation to enforce immutability, as the class now relies solely on the @JsonCreator constructor for instantiation.",
+        "human_impl": "-@NoArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "make_fields_final",
+        "general_idea": "Changed instance fields to final to support immutability, ensuring state is set only during construction via the JSON creator.",
+        "human_impl": "private final String did;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/model/DsmApiError.java": [
+      {
+        "kind": "remove_lombok_annotation",
+        "general_idea": "Removed the @NoArgsConstructor annotation to align with the new immutable field structure.",
+        "human_impl": "-import lombok.NoArgsConstructor; ... -@NoArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "make_field_final",
+        "general_idea": "Changed the 'code' field to final to enforce immutability, likely relying on Lombok's @RequiredArgsConstructor or similar mechanism instead of a no-arg constructor.",
+        "human_impl": "-    private int code; +    private final int code;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/model/DsmApiResponse.java": [
+      {
+        "kind": "remove_lombok_annotation",
+        "general_idea": "Removed the @NoArgsConstructor annotation from the class, likely because a no-args constructor is no longer required or is handled differently in the migration.",
+        "human_impl": "Removed line: import lombok.NoArgsConstructor; and annotation: @NoArgsConstructor",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/model/SurveillanceStationInfo.java": [
+      {
+        "kind": "remove_json_creator",
+        "general_idea": "Removes the explicit @JsonCreator constructor in favor of Lombok-generated accessors or default deserialization.",
+        "human_impl": "Removed import com.fasterxml.jackson.annotation.JsonCreator and the entire constructor block.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_field_http_port",
+        "general_idea": "Renames the field customizedPortHttp to httpPort for clarity while preserving JSON mapping.",
+        "human_impl": "Changed private int customizedPortHttp to int httpPort with @JsonProperty(\"customizedPortHttp\").",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_field_https_port",
+        "general_idea": "Renames the field customizedPortHttps to httpsPort for clarity while preserving JSON mapping.",
+        "human_impl": "Changed private int customizedPortHttps to int httpsPort with @JsonProperty(\"customizedPortHttps\").",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_field_user_privilege",
+        "general_idea": "Renames the field userPriv to userPrivilege for better naming convention while preserving JSON mapping.",
+        "human_impl": "Changed private int userPriv to int userPrivilege with @JsonProperty(\"userPriv\").",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_enable_video_relay",
+        "general_idea": "Adds a new field to capture video relay enablement status from the API response.",
+        "human_impl": "Added boolean enableVideoRelay;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_hostname",
+        "general_idea": "Adds a new field to capture the station hostname from the API response.",
+        "human_impl": "Added String hostname;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_field_type_is_license_enough",
+        "general_idea": "Changes the type of isLicenseEnough from boolean to int to match the API response format.",
+        "human_impl": "Changed private boolean isLicenseEnough to int isLicenseEnough;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_field_license_number_mapping",
+        "general_idea": "Adds explicit JSON property mapping for licenseNumber to handle potential typo in API key.",
+        "human_impl": "Added @JsonProperty(\"liscenseNumber\") int licenseNumber;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_plugin_helper_version",
+        "general_idea": "Adds a new field to capture the plugin helper version from the API response.",
+        "human_impl": "Added String pluginHelperVersion;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_product_name",
+        "general_idea": "Adds a new field to capture the product name from the API response.",
+        "human_impl": "Added String productName;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_timezone",
+        "general_idea": "Adds a new field to capture the timezone string from the API response.",
+        "human_impl": "Added String timezone;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_timezone_tzdb",
+        "general_idea": "Adds a new field to capture the TZDB timezone identifier from the API response.",
+        "human_impl": "Added String timezoneTZDB;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_uid",
+        "general_idea": "Adds a new field to capture the user ID from the API response.",
+        "human_impl": "Added int uid;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_web_plugin_version",
+        "general_idea": "Adds a new field to capture the web plugin version from the API response.",
+        "human_impl": "Added String webPluginVersion;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_field_is_admin",
+        "general_idea": "Removes the isAdmin field as it is no longer needed or provided by the API.",
+        "human_impl": "Removed private boolean isAdmin;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_field_allow_snapshot",
+        "general_idea": "Removes the allowSnapshot field as it is no longer needed or provided by the API.",
+        "human_impl": "Removed private boolean allowSnapshot;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_field_allow_manual_rec",
+        "general_idea": "Removes the allowManualRec field as it is no longer needed or provided by the API.",
+        "human_impl": "Removed private boolean allowManualRec;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_field_allow_delete_rec",
+        "general_idea": "Removes the allowDeleteRec field as it is no longer needed or provided by the API.",
+        "human_impl": "Removed private boolean allowDeleteRec;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "relax_field_visibility",
+        "general_idea": "Changes field visibility from private to package-private, likely to allow Lombok or test access without getters.",
+        "human_impl": "Removed 'private' modifier from all fields.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/model/Version.java": [
+      {
+        "kind": "remove_jackson_annotations",
+        "general_idea": "Removed explicit Jackson @JsonCreator and @JsonProperty annotations in favor of default deserialization behavior.",
+        "human_impl": "Removed imports for JsonCreator/JsonProperty and deleted the annotated constructor.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_small",
+        "general_idea": "Added a new 'small' integer field to the Version model.",
+        "human_impl": "Added 'int small;' field declaration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_field_visibility",
+        "general_idea": "Changed field visibility from private to package-private.",
+        "human_impl": "Removed 'private' modifier from major, minor, and build fields.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_field_build_to_small",
+        "general_idea": "Renamed the 'build' field to 'small' (or added small and kept build, diff shows both present but original build was private, now small is added and build is package-private, likely a rename or addition based on context 'small' often replaces 'build' in semantic versioning contexts or vice versa, but here both exist. Wait, looking closely: Old had major, minor, build. New has major, minor, small, build. It seems 'small' was added. The prompt asks for intents. Adding a field is one intent. Changing visibility is another. Removing annotations is another. The diff shows 'build' still exists. So 'small' is a new field.",
+        "human_impl": "Added 'int small;' field.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

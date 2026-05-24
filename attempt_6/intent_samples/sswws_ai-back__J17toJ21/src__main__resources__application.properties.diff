@@ -1,0 +1,23 @@
+diff --git a/src/main/resources/application.properties b/src/main/resources/application.properties
+index 34c24e3..a825a99 100644
+--- a/src/main/resources/application.properties
++++ b/src/main/resources/application.properties
+@@ -1,6 +1,15 @@
+ server.port=8080
+ 
+-# MiniMax API Key
+-# Key: sk-api-a_fJedogzIFb5L_Wep3PjMX_6E4QxBXsGLztfgqJ-lzEgAIuv4n7gOd4r98gbmSvZlizvN_MfWQat3cZWVT_v0bjMsOI46HIaHbQ0ardL7rLiqE7nouoxCw
++# --- ????? (??) ---
++# ?????? ai_app ????
++spring.datasource.url=jdbc:mysql://localhost:3306/ai_app?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
++spring.datasource.username=root
++spring.datasource.password=12345678
++spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
++
++# --- MyBatis Plus ?? (??) ---
++mybatis-plus.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl
++
++# --- MiniMax API (????) ---
+ minimax.api.key=sk-api-a_fJedogzIFb5L_Wep3PjMX_6E4QxBXsGLztfgqJ-lzEgAIuv4n7gOd4r98gbmSvZlizvN_MfWQat3cZWVT_v0bjMsOI46HIaHbQ0ardL7rLiqE7nouoxCw
+ minimax.api.url=https://api.minimaxi.com/v1/image_generation
+\ No newline at end of file

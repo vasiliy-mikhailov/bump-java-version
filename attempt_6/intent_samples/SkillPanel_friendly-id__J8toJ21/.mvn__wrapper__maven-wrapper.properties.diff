@@ -1,0 +1,12 @@
+diff --git a/.mvn/wrapper/maven-wrapper.properties b/.mvn/wrapper/maven-wrapper.properties
+old mode 100755
+new mode 100644
+index 56bb016..c0bcafe
+--- a/.mvn/wrapper/maven-wrapper.properties
++++ b/.mvn/wrapper/maven-wrapper.properties
+@@ -1 +1,3 @@
+-distributionUrl=https://repo1.maven.org/maven2/org/apache/maven/apache-maven/3.5.0/apache-maven-3.5.0-bin.zip
+\ No newline at end of file
++wrapperVersion=3.3.4
++distributionType=only-script
++distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.11/apache-maven-3.9.11-bin.zip

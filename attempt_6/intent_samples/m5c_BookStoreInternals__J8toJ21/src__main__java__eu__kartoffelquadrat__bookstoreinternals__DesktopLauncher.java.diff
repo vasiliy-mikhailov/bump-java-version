@@ -1,0 +1,55 @@
+diff --git a/src/main/java/eu/kartoffelquadrat/bookstoreinternals/DesktopLauncher.java b/src/main/java/eu/kartoffelquadrat/bookstoreinternals/DesktopLauncher.java
+index 4436840..54f9bfb 100644
+--- a/src/main/java/eu/kartoffelquadrat/bookstoreinternals/DesktopLauncher.java
++++ b/src/main/java/eu/kartoffelquadrat/bookstoreinternals/DesktopLauncher.java
+@@ -1,18 +1,41 @@
+ package eu.kartoffelquadrat.bookstoreinternals;
+ 
+ /**
+- * This class is to demo / test the functionality of the bookstore. It has no importance in a microservice context.
++ * Legacy launcher class to demonstrate access and functionality of the bookstore.
++ *
++ * @author Maximilian Schiedermeier
+  */
+ public class DesktopLauncher {
+ 
+-    public static void main(String[] args) {
++  /**
++   * Default constructor.
++   */
++  public DesktopLauncher() {
++  }
+ 
+-        Assortment assortment = AssortmentImpl.getInstance();
+-        Comments comments = CommentsImpl.getInstance();
+-        GlobalStock stock = GlobalStockImpl.getInstance();
++  /**
++   * Creates a BookStore instance and prints the default data to screen.
++   *
++   * @param args not used. No runtime parameters expected.
++   */
++  public static void main(String[] args) {
+ 
+-        System.out.println("Welcome to the BookStore.");
+-        System.out.println("-------------------------");
+-        System.out.println("Here is a listing of the initialized data:");
+-    }
++    printData();
++  }
++
++  /**
++   * Creates a BookStore instance and prints the default data to screen.
++   */
++  public static void printData() {
++    Assortment assortment = AssortmentImpl.getInstance();
++    Comments comments = CommentsImpl.getInstance();
++    GlobalStock stock = GlobalStockImpl.getInstance();
++
++    System.out.println("Welcome to the BookStore.");
++    System.out.println("-------------------------");
++    System.out.println("Here is a listing of the persisted data:");
++    System.out.print(assortment);
++    System.out.print(stock);
++    System.out.print(comments);
++  }
+ }

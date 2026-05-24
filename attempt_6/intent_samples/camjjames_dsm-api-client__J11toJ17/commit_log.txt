@@ -1,0 +1,19 @@
+01d1408 updates to spring and jdk versions
+46c10c5 Formatting updates
+8d686a3 remove deprecated call to springDecoder
+3a03d61 updated to try and pickup on lombok annitations
+5a765ee update pom.xml
+3593a07 versioning update
+744f6d9 Version Updates and log4j removal
+98c817f Update README.md
+29f6eda Updated field names
+6a3a623 Update sonar-project.properties
+b9fa337 Update README.md
+062de68 Update sonar-project.properties
+d67bbcf Setup default DSM version and method names for the Query Maps.  Add Snapshot API
+e20daf4 Update README.md
+a7f0c5d Update sonar-project.properties
+0812efe Updates the Feign APi specifications and the related Test Cases.
+d343b05 added more test cases
+ccf4e54 Capture the ApiInfo for later use, more unit tests
+4362abe added some test cases

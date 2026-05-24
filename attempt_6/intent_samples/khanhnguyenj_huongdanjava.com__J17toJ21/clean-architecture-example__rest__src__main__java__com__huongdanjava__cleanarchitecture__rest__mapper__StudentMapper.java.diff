@@ -1,0 +1,27 @@
+diff --git a/clean-architecture-example/rest/src/main/java/com/huongdanjava/cleanarchitecture/rest/mapper/StudentMapper.java b/clean-architecture-example/rest/src/main/java/com/huongdanjava/cleanarchitecture/rest/mapper/StudentMapper.java
+index 5c1d62a..5ba79a3 100644
+--- a/clean-architecture-example/rest/src/main/java/com/huongdanjava/cleanarchitecture/rest/mapper/StudentMapper.java
++++ b/clean-architecture-example/rest/src/main/java/com/huongdanjava/cleanarchitecture/rest/mapper/StudentMapper.java
+@@ -5,15 +5,13 @@ import com.huongdanjava.cleanarchitecture.rest.dto.StudentDto;
+ 
+ public class StudentMapper {
+ 
+-	public static StudentDto toDto(Student entity) {
+-		if (entity == null) {
+-			return null;
+-		}
++  public static StudentDto toDto(Student entity) {
++    if (entity == null) {
++      return null;
++    }
+ 
+-        StudentDto studentDto = new StudentDto();
+-        studentDto.setName(entity.getName());
+-        studentDto.setAge(entity.getAge());
++    StudentDto studentDto = new StudentDto(entity.name(), entity.age());
+ 
+-        return studentDto;
+-    }
++    return studentDto;
++  }
+ }

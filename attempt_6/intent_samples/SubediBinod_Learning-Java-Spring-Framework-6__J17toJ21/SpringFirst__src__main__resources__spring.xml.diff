@@ -1,0 +1,29 @@
+diff --git a/SpringFirst/src/main/resources/spring.xml b/SpringFirst/src/main/resources/spring.xml
+index 8873acc..c4a26f8 100644
+--- a/SpringFirst/src/main/resources/spring.xml
++++ b/SpringFirst/src/main/resources/spring.xml
+@@ -24,14 +24,15 @@
+ 		
+ 		<bean id="programmer" class="com.binod.SpringFirst.Programmer"></bean>-->
+ 		
+-<!-- 		constructor injection-->
+-<bean id="Ferrari" class="ConstructorInjection.Ferrari" autowire="byType" >
+-<constructor-arg value="10"/>
+-<constructor-arg value="50"/>
+-</bean>
++<!-- Constructor Injection for Ferrari -->
++    <bean id="Ferrari" class="ConstructorInjection.Ferrari">
++        <constructor-arg value="10"/>
++        <constructor-arg value="50"/>
++        <property name="e" ref="Engine"/>
++    </bean>
+ 
+-<bean id="Engine" class ="ConstructorInjection.Engine">
+-	<property name="milage" value="250"></property>
+-
+-</bean>
++    <!-- Engine Bean -->
++    <bean id="Engine" class="ConstructorInjection.Engine">
++        <property name="milage" value="250"/>
++    </bean>
+ </beans>

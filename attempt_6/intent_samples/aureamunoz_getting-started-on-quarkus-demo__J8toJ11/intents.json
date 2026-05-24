@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "repo": "aureamunoz/getting-started-on-quarkus-demo",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "c99954f1fe952fa25bd306c9aeef2772c70d6483",
+    "sha_to": "2c413b84f4dfb1c99740170e1c9c13c5f39860c6"
+  },
+  "by_file": {
+    "src/test/java/org/acme/quickstart/NativeGreetingResourceIT.java": [
+      {
+        "kind": "rename_test_annotation",
+        "general_idea": "Replace deprecated SubstrateTest annotation with NativeImageTest to align with updated Quarkus testing APIs.",
+        "human_impl": "@NativeImageTest",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_compiler_source_target",
+        "general_idea": "Change Maven compiler source and target properties from Java 8 to Java 11 to enable compilation for the new JDK.",
+        "human_impl": "<maven.compiler.source>11</maven.compiler.source>\n<maven.compiler.target>11</maven.compiler.target>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_compiler_plugin",
+        "general_idea": "Explicitly add the maven-compiler-plugin with a specific version to ensure consistent compilation behavior.",
+        "human_impl": "<plugin>\n  <artifactId>maven-compiler-plugin</artifactId>\n  <version>${compiler-plugin.version}</version>\n</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_compiler_parameters",
+        "general_idea": "Enable parameter name retention in compiled class files, often required by frameworks like Quarkus for reflection.",
+        "human_impl": "<maven.compiler.parameters>true</maven.compiler.parameters>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_quarkus_bom",
+        "general_idea": "Switch from the deprecated quarkus-bom to the new quarkus-universe-bom and update the version to 1.5.2.Final.",
+        "human_impl": "<groupId>${quarkus.platform.group-id}</groupId>\n<artifactId>${quarkus.platform.artifact-id}</artifactId>\n<version>${quarkus.platform.version}</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_quarkus_plugin_version",
+        "general_idea": "Update the Quarkus Maven plugin version to match the new platform version.",
+        "human_impl": "<version>${quarkus-plugin.version}</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_surefire_plugin_version",
+        "general_idea": "Bump the Maven Surefire plugin version from 2.22.0 to 2.22.1.",
+        "human_impl": "<surefire-plugin.version>2.22.1</surefire-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_surefire_config",
+        "general_idea": "Replace deprecated systemProperties configuration with systemPropertyVariables in Surefire and Failsafe plugins.",
+        "human_impl": "<systemPropertyVariables>\n  <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>\n</systemPropertyVariables>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_native_profile",
+        "general_idea": "Remove redundant native-image goal configuration from the native profile and use the standard quarkus.package.type property instead.",
+        "human_impl": "<properties>\n  <quarkus.package.type>native</quarkus.package.type>\n</properties>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

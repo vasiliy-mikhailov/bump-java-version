@@ -1,0 +1,10 @@
+diff --git a/src/main/resources/application.properties b/src/main/resources/application.properties
+index 5b52f5b..0c67160 100644
+--- a/src/main/resources/application.properties
++++ b/src/main/resources/application.properties
+@@ -8,4 +8,4 @@ spring.thymeleaf.prefix=classpath:/templates/
+ spring.thymeleaf.suffix=.html
+ 
+ # Logging
+-logging.level.com.caveanimal.stinger=INFO
++logging.level.com.codecounter.stinger=INFO

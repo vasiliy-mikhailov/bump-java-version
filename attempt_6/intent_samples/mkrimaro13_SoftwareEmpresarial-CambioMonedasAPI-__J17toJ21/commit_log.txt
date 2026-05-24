@@ -1,0 +1,1 @@
+44b25cc Se crea la estructura del proyecto, las entidades en relación a la BD, las interfaces de los repositorios, el esquema del controlador y la aplicación.

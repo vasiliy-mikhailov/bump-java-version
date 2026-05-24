@@ -1,0 +1,454 @@
+{
+  "meta": {
+    "repo": "aureamunoz/getting-started-on-quarkus-demo",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "7c7f718ac7bcf3659d944b3dadc056224a4d749c",
+    "sha_to": "12057911d084194e1114541b773f30f007a006b2"
+  },
+  "by_file": {
+    ".mvn/wrapper/MavenWrapperDownloader.java": [
+      {
+        "kind": "update_wrapper_version",
+        "general_idea": "Upgrade the Maven Wrapper version constant from 0.5.5 to 3.1.1 to use the latest wrapper implementation.",
+        "human_impl": "private static final String WRAPPER_VERSION = \"3.1.1\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_download_url",
+        "general_idea": "Update the default download URL to point to the new Maven Wrapper artifact group (org.apache.maven.wrapper) compatible with version 3.1.1.",
+        "human_impl": "private static final String DEFAULT_DOWNLOAD_URL = \"https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/\" + WRAPPER_VERSION + \"/maven-wrapper-\" + WRAPPER_VERSION + \".jar\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_code_style",
+        "general_idea": "Apply modern Java coding conventions including brace placement, spacing, and license header formatting.",
+        "human_impl": "public class MavenWrapperDownloader { ... } -> public class MavenWrapperDownloader \\n { ... }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/test/java/org/acme/GreetingResourceTest.java": [
+      {
+        "kind": "add_test_annotation",
+        "general_idea": "Add JUnit 5 annotation to disable the test on Windows operating systems.",
+        "human_impl": "@DisabledOnOs(OS.WINDOWS)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_test_endpoint",
+        "general_idea": "Change the HTTP GET request path from '/hello/world' to '/hello'.",
+        "human_impl": "given().when().get(\"/hello\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_test_response",
+        "general_idea": "Update the expected response body from 'Hola world' to 'Hello World'.",
+        "human_impl": ".body(is(\"Hello World\"))",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "rename_artifact",
+        "general_idea": "Rename the project artifact ID to a shorter, cleaner name.",
+        "human_impl": "<artifactId>getting-started</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_jdk_target",
+        "general_idea": "Update the Maven compiler release property to target Java 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_quarkus_platform",
+        "general_idea": "Upgrade the Quarkus platform BOM to version 3.19.4 to support Java 21 and modern APIs.",
+        "human_impl": "<quarkus.platform.version>3.19.4</quarkus.platform.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_compiler_plugin",
+        "general_idea": "Upgrade the Maven compiler plugin to version 3.14.0 for better Java 21 support.",
+        "human_impl": "<compiler-plugin.version>3.14.0</compiler-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_surefire_plugin",
+        "general_idea": "Upgrade the Maven Surefire plugin to version 3.5.2.",
+        "human_impl": "<surefire-plugin.version>3.5.2</surefire-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "migrate_rest_api",
+        "general_idea": "Replace the deprecated RESTEasy Classic dependency with the new Quarkus REST (JAX-RS) implementation.",
+        "human_impl": "<artifactId>quarkus-rest</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_json_provider",
+        "general_idea": "Add explicit Jackson JSON provider dependency for the new REST implementation.",
+        "human_impl": "<artifactId>quarkus-rest-jackson</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_openapi_support",
+        "general_idea": "Add SmallRye OpenAPI dependency for API documentation generation.",
+        "human_impl": "<artifactId>quarkus-smallrye-openapi</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_persistence_extension",
+        "general_idea": "Add Hibernate ORM with REST Data Panache for simplified data access.",
+        "human_impl": "<artifactId>quarkus-hibernate-orm-rest-data-panache</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_database_driver",
+        "general_idea": "Add JDBC PostgreSQL driver dependency for database connectivity.",
+        "human_impl": "<artifactId>quarkus-jdbc-postgresql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_openshift_extension",
+        "general_idea": "Add Quarkus OpenShift extension for Kubernetes/OpenShift deployment support.",
+        "human_impl": "<artifactId>quarkus-openshift</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_health_checks",
+        "general_idea": "Add SmallRye Health extension for application health monitoring.",
+        "human_impl": "<artifactId>quarkus-smallrye-health</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_formatter_plugin",
+        "general_idea": "Add the formatter-maven-plugin to enforce code formatting standards.",
+        "human_impl": "<artifactId>formatter-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_failsafe_config",
+        "general_idea": "Move the failsafe plugin configuration out of the native profile to the main build section for consistency.",
+        "human_impl": "Moved <plugin>maven-failsafe-plugin</plugin> from <profile>native</profile> to <build><plugins>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_native_profile",
+        "general_idea": "Simplify the native profile by removing redundant plugin definitions and using skipITs property.",
+        "human_impl": "<skipITs>false</skipITs>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_legacy_property",
+        "general_idea": "Remove the failsafe.useModulePath property which is no longer needed in modern Maven/Java setups.",
+        "human_impl": "Removed <failsafe.useModulePath>false</failsafe.useModulePath>",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "restructure_gitignore",
+        "general_idea": "Reorganize .gitignore to group Maven-related ignores at the top and remove redundant or IDE-specific entries.",
+        "human_impl": "Moved #Maven block to top, removed .idea/ and *.iml entries.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_vscode_ignore",
+        "general_idea": "Add .factorypath to .gitignore to exclude VS Code factory path configuration.",
+        "human_impl": "Added .factorypath under # Visual Studio Code section.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_env_ignore",
+        "general_idea": "Add .env to .gitignore to prevent committing local environment variables.",
+        "human_impl": "Added .env under # Local environment section.",
+        "bucket": "polishment"
+      }
+    ],
+    ".mvn/wrapper/maven-wrapper.jar": [],
+    ".mvn/wrapper/maven-wrapper.properties": [
+      {
+        "kind": "upgrade_maven_wrapper",
+        "general_idea": "Upgrade the Maven Wrapper distribution and JAR to newer versions compatible with modern build environments.",
+        "human_impl": "distributionUrl=.../apache-maven-3.8.6-bin.zip\nwrapperUrl=.../maven-wrapper-3.1.1.jar",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_license_header",
+        "general_idea": "Add the Apache License 2.0 header to the Maven Wrapper properties file for compliance.",
+        "human_impl": "# Licensed to the Apache Software Foundation (ASF) under one\n# or more contributor license agreements...",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_quarkus_plugin_version",
+        "general_idea": "Update the Quarkus Maven plugin version in the project generation command to match the newer Quarkus release.",
+        "human_impl": "mvn io.quarkus.platform:quarkus-maven-plugin:3.8.2:create",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_code_indentation",
+        "general_idea": "Correct indentation of Java annotations and return statements in the tutorial code snippets.",
+        "human_impl": "@GET\n@Produces(MediaType.TEXT_PLAIN)\npublic String hello() {\n    return greeting + \" world\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_missing_import",
+        "general_idea": "Add the missing import statement for the GreetingService class in the Java code snippet.",
+        "human_impl": "import org.acme.getting.started.GreetingService;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_panache_tutorial_section",
+        "general_idea": "Add a comprehensive tutorial section on using REST Data with Panache for CRUD operations.",
+        "human_impl": "## Generating JAX-RS resources with Panache\n...<dependency>io.quarkus-hibernate-orm-rest-data-panache</dependency>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_native_build_command",
+        "general_idea": "Update the native executable build command to include the newer Quarkus CLI alternative.",
+        "human_impl": "./mvnw package -Pnative or quarkus build --native",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_openshift_deploy_section",
+        "general_idea": "Add instructions for deploying the application to an OpenShift cluster.",
+        "human_impl": "## Deploy to OpenShift cluster\noc apply -f ../kubernetes",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_kubernetes_deploy_section",
+        "general_idea": "Add a placeholder section referencing Kubernetes deployment instructions.",
+        "human_impl": "## Deploy to Kubernetes\nCheck the info in [this branch]...",
+        "bucket": "polishment"
+      }
+    ],
+    "mvnw": [
+      {
+        "kind": "update_license_url",
+        "general_idea": "Update the Apache License URL from HTTP to HTTPS for security compliance.",
+        "human_impl": "http://www.apache.org/licenses/LICENSE-2.0 -> https://www.apache.org/licenses/LICENSE-2.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_script_comment",
+        "general_idea": "Correct the script header comment to remove the outdated '2' from 'Maven2'.",
+        "human_impl": "Maven2 Start Up Batch script -> Maven Start Up Batch script",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_system_mavenrc",
+        "general_idea": "Add support for loading system-wide Maven configuration from /usr/local/etc/mavenrc.",
+        "human_impl": "if [ -f /usr/local/etc/mavenrc ] ; then . /usr/local/etc/mavenrc; fi",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_java_detection",
+        "general_idea": "Improve Java executable detection to avoid conflicts with shell functions named 'command'.",
+        "human_impl": "JAVACMD=\"`which java`\" -> JAVACMD=\"`\\\\unset -f command; \\\\command -v java`\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_maven_wrapper",
+        "general_idea": "Upgrade the Maven Wrapper JAR from the deprecated Takari version to the official Apache Maven Wrapper.",
+        "human_impl": "io/takari/maven-wrapper/0.5.5 -> org/apache/maven/wrapper/maven-wrapper/3.1.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_download_cleanup",
+        "general_idea": "Ensure partial or failed downloads of the wrapper JAR are removed to prevent corruption.",
+        "human_impl": "wget ... || rm -f \"$wrapperJarPath\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_debug_opts",
+        "general_idea": "Pass MAVEN_DEBUG_OPTS to the JVM to support debugging configurations.",
+        "human_impl": "exec ... $MAVEN_OPTS $MAVEN_DEBUG_OPTS ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_jvm_args",
+        "general_idea": "Reformat JVM system properties for better readability and consistency.",
+        "human_impl": "Split long line with -Dmaven.home and -Dmaven.multiModuleProjectDirectory into separate lines",
+        "bucket": "polishment"
+      }
+    ],
+    "mvnw.cmd": [
+      {
+        "kind": "update_wrapper_version",
+        "general_idea": "Upgrade the Maven Wrapper JAR version from 0.5.5 to 3.1.1 to align with modern Maven standards.",
+        "human_impl": "set DOWNLOAD_URL=\"https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.1.1/maven-wrapper-3.1.1.jar\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_wrapper_group_id",
+        "general_idea": "Change the Maven Wrapper artifact group ID from io.takari to org.apache.maven.wrapper.",
+        "human_impl": "set DOWNLOAD_URL=\".../org/apache/maven/wrapper/maven-wrapper/3.1.1/maven-wrapper-3.1.1.jar\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_env_var_usage",
+        "general_idea": "Replace deprecated %HOME% environment variable with %USERPROFILE% for better Windows compatibility.",
+        "human_impl": "if exist \"%USERPROFILE%\\mavenrc_pre.bat\" call \"%USERPROFILE%\\mavenrc_pre.bat\" %*",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_batch_syntax",
+        "general_idea": "Add usebackq option to FOR loop to correctly handle quoted file paths in properties file parsing.",
+        "human_impl": "FOR /F \"usebackq tokens=1,2 delims==\" %%A IN (\"...maven-wrapper.properties\") DO (",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_exit_behavior",
+        "general_idea": "Change exit command to cmd /C exit /B to ensure proper error code propagation in Windows CMD.",
+        "human_impl": "cmd /C exit /B %ERROR_CODE%",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_license_url",
+        "general_idea": "Update Apache License URL from http to https for security and modern standards.",
+        "human_impl": "@REM    https://www.apache.org/licenses/LICENSE-2.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_script_header",
+        "general_idea": "Rename script header from 'Maven2' to 'Maven' to reflect current naming conventions.",
+        "human_impl": "@REM Maven Start Up Batch script",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_typo_in_comment",
+        "general_idea": "Correct typo 'key stroke' to 'keystroke' in environment variable documentation.",
+        "human_impl": "@REM MAVEN_BATCH_PAUSE - set to 'on' to wait for a keystroke before ending",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "improve_command_readability",
+        "general_idea": "Break long Java execution command into multiple lines using caret continuation for better readability.",
+        "human_impl": "%MAVEN_JAVA_EXE% ^\n  %JVM_CONFIG_MAVEN_PROPS% ^\n  %MAVEN_OPTS% ^",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_string_comparison_syntax",
+        "general_idea": "Remove spaces around == in IF statements to ensure robust string comparison in batch scripts.",
+        "human_impl": "if not \"%MAVEN_SKIP_RC%\"==\"\" goto skipRcPost",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/docker/Dockerfile.jvm": [
+      {
+        "kind": "update_base_image",
+        "general_idea": "Switch the Docker base image from UBI8/OpenJDK 11 to UBI9/OpenJDK 21 to align with the target Java version.",
+        "human_impl": "FROM registry.access.redhat.com/ubi9/openjdk-21:1.21",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_deprecated_env_var",
+        "general_idea": "Remove the LANG environment variable as it is no longer required or supported in the new base image configuration.",
+        "human_impl": "ENV LANGUAGE='en_US:en'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jvm_config_strategy",
+        "general_idea": "Migrate JVM options from JAVA_OPTS to JAVA_OPTS_APPEND to prevent overriding default tuning provided by the new container entrypoint script.",
+        "human_impl": "ENV JAVA_OPTS_APPEND=\"-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager\"",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_legacy_env_var",
+        "general_idea": "Remove the AB_JOLOKIA_OFF environment variable which is likely obsolete or handled differently in the new base image.",
+        "human_impl": "Removed ENV AB_JOLOKIA_OFF=\"\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "explicit_entrypoint",
+        "general_idea": "Explicitly define the entrypoint to use the JBoss container run script, ensuring proper initialization for the new base image.",
+        "human_impl": "ENTRYPOINT [ \"/opt/jboss/container/java/run/run-java.sh\" ]",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_documentation",
+        "general_idea": "Update comments to reflect new debugging environment variables and JVM option handling in the new container image.",
+        "human_impl": "Added comments about JAVA_DEBUG=true and JAVA_OPTS_APPEND usage",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/docker/Dockerfile.legacy-jar": [
+      {
+        "kind": "update_base_image",
+        "general_idea": "Switch the Docker base image from UBI8/OpenJDK 11 to UBI9/OpenJDK 21 to align with the target Java version.",
+        "human_impl": "FROM registry.access.redhat.com/ubi9/openjdk-21:1.21",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_build_instruction",
+        "general_idea": "Update the Maven build command in comments to use the new Quarkus property for legacy jar packaging.",
+        "human_impl": "./mvnw package -Dquarkus.package.jar.type=legacy-jar",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_env_variable",
+        "general_idea": "Move Quarkus-specific JVM options from JAVA_OPTS to JAVA_OPTS_APPEND to prevent overriding default container JVM tuning.",
+        "human_impl": "ENV JAVA_OPTS_APPEND=\"-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_env_variable",
+        "general_idea": "Remove the deprecated AB_JOLOKIA_OFF environment variable as it is no longer needed or supported in the new base image.",
+        "human_impl": "Removed ENV AB_JOLOKIA_OFF=\"\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_env_variable",
+        "general_idea": "Remove the explicit LANG environment variable, relying on the base image defaults or LANGUAGE setting.",
+        "human_impl": "Removed ENV LANG='en_US.UTF-8'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_entrypoint",
+        "general_idea": "Explicitly define the entrypoint to use the standard Red Hat Java container run script.",
+        "human_impl": "ENTRYPOINT [ \"/opt/jboss/container/java/run/run-java.sh\" ]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_comments",
+        "general_idea": "Update documentation comments to reflect new debugging environment variables and JAVA_OPTS behavior.",
+        "human_impl": "Added instructions for JAVA_DEBUG=true and JAVA_DEBUG_PORT",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/docker/Dockerfile.native": [
+      {
+        "kind": "update_build_instruction_comment",
+        "general_idea": "Update the comment to reflect the new Maven flag for native compilation.",
+        "human_impl": "-# ./mvnw package -Pnative\n+# ./mvnw package -Dnative",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_base_image",
+        "general_idea": "Upgrade the base Docker image from UBI 8 to UBI 9 to align with newer JDK/runtime requirements.",
+        "human_impl": "-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5\n+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_base_image_comment",
+        "general_idea": "Add documentation explaining the base image version and how to switch to UBI 8 if needed.",
+        "human_impl": "+# The ` registry.access.redhat.com/ubi9/ubi-minimal:9.5` base image is based on UBI 9.\n+# To use UBI 8, switch to `quay.io/ubi8/ubi-minimal:8.10`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_file_permissions_in_copy",
+        "general_idea": "Explicitly set executable permissions on the application binary during the COPY step.",
+        "human_impl": "-COPY --chown=1001:root target/*-runner /work/application\n+COPY --chown=1001:root --chmod=0755 target/*-runner /work/application",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_entrypoint_instruction",
+        "general_idea": "Replace CMD with ENTRYPOINT to ensure the application binary is always executed as the main process.",
+        "human_impl": "-CMD [\"./application\", \"-Dquarkus.http.host=0.0.0.0\"]\n+ENTRYPOINT [\"./application\", \"-Dquarkus.http.host=0.0.0.0\"]",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

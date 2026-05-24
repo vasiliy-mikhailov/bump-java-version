@@ -1,0 +1,2 @@
+0d5803c Refactor package root: com.caveanimal -> com.codecounter; update pom and application.properties; migrate tests and README
+f16ea90 Add logging for error handling in file analysis

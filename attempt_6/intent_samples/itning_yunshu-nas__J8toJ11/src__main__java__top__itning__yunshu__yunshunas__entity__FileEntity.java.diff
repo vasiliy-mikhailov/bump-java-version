@@ -1,0 +1,30 @@
+diff --git a/src/main/java/top/itning/yunshu/yunshunas/entity/FileEntity.java b/src/main/java/top/itning/yunshu/yunshunas/entity/FileEntity.java
+index 745f1bc..1ac523d 100644
+--- a/src/main/java/top/itning/yunshu/yunshunas/entity/FileEntity.java
++++ b/src/main/java/top/itning/yunshu/yunshunas/entity/FileEntity.java
+@@ -17,6 +17,10 @@ public class FileEntity {
+      * 是文件
+      */
+     private boolean file;
++    /**
++     * 能够在线播放
++     */
++    private boolean canPlay;
+     /**
+      * 地址
+      */
+@@ -46,6 +50,14 @@ public class FileEntity {
+         this.file = file;
+     }
+ 
++    public boolean isCanPlay() {
++        return canPlay;
++    }
++
++    public void setCanPlay(boolean canPlay) {
++        this.canPlay = canPlay;
++    }
++
+     public String getLocation() {
+         return location;
+     }

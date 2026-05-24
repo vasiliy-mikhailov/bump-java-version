@@ -1,0 +1,223 @@
+diff --git a/src/main/User/UserController.java b/src/main/User/UserController.java
+index 16a292a..a711dd5 100644
+--- a/src/main/User/UserController.java
++++ b/src/main/User/UserController.java
+@@ -1,149 +1,562 @@
+ package User;
+ 
+-import com.auth0.jwt.JWT;
+-import com.auth0.jwt.algorithms.Algorithm;
+-import com.auth0.jwt.interfaces.DecodedJWT;
+-import com.mongodb.MongoClient;
+-import com.mongodb.client.MongoCollection;
++import Config.Message;
++import Database.Activity.ActivityDao;
++import Database.File.FileDao;
++import Database.Form.FormDao;
++import Database.Token.TokenDao;
++import Database.User.UserDao;
++import File.File;
++import File.FileMessage;
++import File.FileType;
++import File.IdCategoryType;
++import File.Services.DownloadFileService;
++import File.Services.UploadFileService;
++import User.Services.*;
++import com.google.gson.Gson;
++import com.google.gson.reflect.TypeToken;
+ import com.mongodb.client.MongoDatabase;
+-import static com.mongodb.client.model.Filters.*;
+-import de.mkammerer.argon2.Argon2;
+-import de.mkammerer.argon2.Argon2Factory;
+-import Config.MongoConfig;
+ import io.javalin.http.Handler;
+-import org.bson.Document;
++import io.javalin.http.UploadedFile;
++import java.io.BufferedReader;
++import java.io.FileReader;
++import java.io.IOException;
++import java.time.LocalDate;
++import java.time.ZoneId;
++import java.util.ArrayList;
++import java.util.Date;
++import java.util.List;
++import java.util.Optional;
++import lombok.extern.slf4j.Slf4j;
+ import org.json.JSONObject;
+ 
++@Slf4j
+ public class UserController {
+-    public static Handler loginUser = ctx -> {
++  MongoDatabase db;
++  UserDao userDao;
++  TokenDao tokenDao;
++  ActivityDao activityDao;
++  FileDao fileDao;
++  FormDao formDao;
+ 
+-        JSONObject obj = new JSONObject(ctx.body());
+-        String username = obj.getString("username");
+-        String password = obj.getString("password");
++  public UserController(
++      UserDao userDao,
++      TokenDao tokenDao,
++      FileDao fileDao,
++      ActivityDao activityDao,
++      FormDao formDao,
++      MongoDatabase db) {
++    this.userDao = userDao;
++    this.tokenDao = tokenDao;
++    this.fileDao = fileDao;
++    this.activityDao = activityDao;
++    this.formDao = formDao;
++    this.db = db;
++  }
+ 
+-        Argon2 argon2 = Argon2Factory.create();
+-        // @validate make sure that username and password are not null
+-        char[] passwordArr = password.toCharArray();
+-        try {
+-            // retrieve hash from database
+-            // do mongodb lookup here
+-            MongoClient client = MongoConfig.getMongoClient();
+-            MongoDatabase database = client.getDatabase(MongoConfig.getDatabaseName());
+-            MongoCollection<Document> userCollection = database.getCollection("user");
+-            Document user = userCollection.find(eq("username", username)).first();
+-            if (user == null) {
+-                ctx.json(UserMessage.USER_NOT_FOUND.getErrorName());
+-                argon2.wipeArray(passwordArr);
+-                return;
+-            }
++  public Handler ingestCsv =
++      ctx -> {
++        String csvName = "Face to Face Birth Certificate Clinic Signups.csv";
++        String orgName = "Face to Face";
++        String creatorUsername = "FACE-TO-FACE-ADMIN";
++        String defaultBirthdate = "01-01-2025";
++        String faceToFaceAddress = "123 E Price St";
++        String faceToFaceCity = "Philadelphia";
++        String faceToFaceState = "PA";
++        String faceToFaceZip = "19144";
++        List<String[]> records = new ArrayList<>();
+ 
+-            String hash = user.get("password", String.class);
+-            if (argon2.verify(hash, passwordArr)) {
+-                // Hash matches password
+-
+-                //ctx.sessionAttribute("privilegeLevel", user.get("privilegeLevel"));
+-                //ctx.sessionAttribute("orgName", user.get("organization"));
+-               /*
+-                Algorithm algo = Algorithm.HMAC256("secret");
+-                String token = JWT.create()
+-                        .withClaim("privilegeLevel", (String)user.get("privilegeLevel"))
+-                        .withClaim("orgName", (String)user.get("organization"))
+-                        .sign(algo);
+-                ctx.cookieStore("token", token);
+-                */
+-                ctx.json(UserMessage.AUTH_SUCCESS.getErrorName());
+-            } else {
+-                // Hash doesn't match password
+-                ctx.json(UserMessage.AUTH_FAILURE.getErrorName());
++        try (BufferedReader br = new BufferedReader(new FileReader(csvName))) {
++          String line;
++          String header = br.readLine();
++          while ((line = br.readLine()) != null) {
++            String[] values = line.split(",");
++            if (values.length >= 4) {
++              String[] entry = new String[4];
++              entry[0] = values[0].trim(); // First Name
++              entry[1] = values[1].trim(); // Last Name
++              entry[2] = values[2].trim(); // Email
++              entry[3] = values[3].trim(); // Phone Number
++              records.add(entry);
+             }
+-        } catch(Exception e) {
+-            ctx.json(UserMessage.HASH_FAILURE.getErrorName());
+-        } finally {
+-            // Wipe confidential data from cache
+-            argon2.wipeArray(passwordArr);
++          }
++        } catch (IOException e) {
++          e.printStackTrace();
+         }
+-    };
+ 
+-    /*
+-    public static Handler createUser = ctx -> {
+-        // Get all formParams
+-        String username = ctx.formParam("username");
+-        String password = ctx.formParam("password");
+-        String organization = ctx.formParam("organization");
+-        String email = ctx.formParam("email");
+-        String name = ctx.formParam("name");
+-        String userLevel = ctx.formParam("userLevel");
++        for (String[] record : records) {
++          String clientFirstName = record[0];
++          String clientLastName = record[1];
++          String clientEmail = record[2];
++          String clientPhoneNumber = record[3];
++          String clientUsername =
++              clientFirstName.toLowerCase() + "-" + clientLastName.toLowerCase();
++          String clientPassword =
++              clientFirstName.toLowerCase()
++                  + clientLastName.toLowerCase()
++                  + clientPhoneNumber.substring(
++                      clientPhoneNumber.length() - 4); // firstnamelastnamelast4phone
++          System.out.println("First Name: " + clientFirstName);
++          System.out.println("Last Name: " + clientLastName);
++          System.out.println("Email: " + clientEmail);
++          System.out.println("Phone Number: " + clientPhoneNumber);
++          System.out.println("---------------------------");
++
++          CreateUserService createUserService =
++              new CreateUserService(
++                  userDao,
++                  activityDao,
++                  UserType.Admin,
++                  orgName,
++                  creatorUsername,
++                  clientFirstName,
++                  clientLastName,
++                  defaultBirthdate,
++                  clientEmail,
++                  clientPhoneNumber,
++                  faceToFaceAddress,
++                  faceToFaceCity,
++                  faceToFaceState,
++                  faceToFaceZip,
++                  false,
++                  clientUsername,
++                  clientPassword,
++                  UserType.Client);
++          Message response = createUserService.executeAndGetResponse();
++          System.out.println(response.toResponseString());
++        }
++        ctx.result("SUCCESS");
++      };
++
++  public Handler loginUser =
++      ctx -> {
++        ctx.req.getSession().invalidate();
++        JSONObject req = new JSONObject(ctx.body());
++        String username = req.getString("username");
++        String password = req.getString("password");
++        String ip = ctx.ip();
++        String userAgent = ctx.userAgent();
++        log.info("Attempting to login " + username);
++
++        LoginService loginService =
++            new LoginService(userDao, tokenDao, activityDao, username, password, ip, userAgent);
++        Message response = loginService.executeAndGetResponse();
++        log.info(response.toString() + response.getErrorDescription());
++        JSONObject responseJSON = response.toJSON();
++        if (response == UserMessage.AUTH_SUCCESS) {
++          responseJSON.put("userRole", loginService.getUserRole());
++          responseJSON.put("organization", loginService.getOrganization());
++          responseJSON.put("firstName", loginService.getFirstName());
++          responseJSON.put("lastName", loginService.getLastName());
++          responseJSON.put("twoFactorOn", loginService.isTwoFactorOn());
++
++          ctx.sessionAttribute("privilegeLevel", loginService.getUserRole());
++          ctx.sessionAttribute("orgName", loginService.getOrganization());
++          ctx.sessionAttribute("username", loginService.getUsername());
++        

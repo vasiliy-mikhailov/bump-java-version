@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "repo": "sagiem/what-to-buy",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "8d5d101b8961389e1d2155236d76781f07948f3e",
+    "sha_to": "9bcf351f7866cc14b66601f2d472719e29a41c96"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade the Spring Boot parent version from 3.1.0 to 3.1.5.",
+        "human_impl": "<version>3.1.5</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add spring-boot-starter-log4j2 to replace default logging with Log4j2.",
+        "human_impl": "<artifactId>spring-boot-starter-log4j2</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add spring-boot-starter-validation for bean validation support.",
+        "human_impl": "<artifactId>spring-boot-starter-validation</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add swagger-annotations for API documentation annotations.",
+        "human_impl": "<artifactId>swagger-annotations</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add jjwt-api for JWT token handling.",
+        "human_impl": "<artifactId>jjwt-api</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add jjwt-impl for JWT implementation.",
+        "human_impl": "<artifactId>jjwt-impl</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add jjwt-jackson for JWT Jackson serialization.",
+        "human_impl": "<artifactId>jjwt-jackson</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add springdoc-openapi-starter-webmvc-ui for OpenAPI documentation UI.",
+        "human_impl": "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add mapstruct for object mapping.",
+        "human_impl": "<artifactId>mapstruct</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add springdoc-openapi-maven-plugin to generate OpenAPI specs during build.",
+        "human_impl": "<artifactId>springdoc-openapi-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "exclude_dependency",
+        "general_idea": "Exclude spring-boot-starter-logging from web starter to avoid conflict with Log4j2.",
+        "human_impl": "<exclusion><artifactId>spring-boot-starter-logging</artifactId></exclusion>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "exclude_dependency",
+        "general_idea": "Exclude slf4j-log4j12 and log4j from log4j2 starter to ensure clean Log4j2 usage.",
+        "human_impl": "<exclusion><artifactId>slf4j-log4j12</artifactId></exclusion>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency_version",
+        "general_idea": "Pin lombok version to 1.18.30 explicitly.",
+        "human_impl": "<version>1.18.30</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_artifact_id",
+        "general_idea": "Rename the project artifact ID from home-accounting to what-to-buy.",
+        "human_impl": "<artifactId>what-to-buy</artifactId>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

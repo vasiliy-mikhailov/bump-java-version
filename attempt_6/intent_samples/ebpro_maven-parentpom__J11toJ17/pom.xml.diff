@@ -1,0 +1,213 @@
+diff --git a/pom.xml b/pom.xml
+index 33c6261..a522cd9 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -1,5 +1,4 @@
+-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
++<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+ 
+     <modelVersion>4.0.0</modelVersion>
+ 
+@@ -8,31 +7,246 @@
+     <artifactId>demoparentpom</artifactId>
+     <version>1.0-SNAPSHOT</version>
+     <packaging>pom</packaging>
++
++    <properties>
++        <!-- These two properties should be overriden in sub projects -->
++        <github.account>ebpro</github.account>
++        <app.main.class />
++
++        <!-- github server corresponds to entry in ~/.m2/settings.xml -->
++        <github.global.server>github</github.global.server>
++
++        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
++        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
++
++        <java.version>17</java.version>
++        <maven.compiler.release>${java.version}</maven.compiler.release>
++        <!-- still needed for sonar -->
++        <maven.compiler.source>${maven.compiler.release}</maven.compiler.source>
++        <maven.compiler.target>${maven.compiler.release}</maven.compiler.target>
++
++        <junit.version>5.7.2</junit.version>
++
++        <hibernate.version>5.5.7.Final</hibernate.version>
++
++        <!-- JAXRS -->
++        <jersey.version>3.0.2</jersey.version>
++        <jjwt.version>0.11.2</jjwt.version>
++
++        <!-- WebSocket -->
++        <tyrus.version>2.0.1</tyrus.version>
++    </properties>
++
++    <pluginRepositories>
++        <pluginRepository>
++            <id>maven-snapshots</id>
++            <url>https://repository.apache.org/content/repositories/snapshots/</url>
++        </pluginRepository>
++    </pluginRepositories>
++
+     <dependencyManagement>
+         <dependencies>
++            <!-- Unit tests -->
++            <!-- Junit 5 https://junit.org/junit5/docs/current/user-guide/ -->
++            <dependency>
++                <groupId>org.junit</groupId>
++                <artifactId>junit-bom</artifactId>
++                <version>${junit.version}</version>
++                <type>pom</type>
++                <scope>import</scope>
++            </dependency>
++            <!-- Add the following in the project -->
++            <!--dependency>
++                <groupId>org.junit.jupiter</groupId>
++                <artifactId>junit-jupiter-engine</artifactId>
++                <version>${junit.version}</version>
++                <scope>test</scope>
++            </dependency-->
++            <!-- Mockito https://site.mockito.org/ -->
++            <dependency>
++                <groupId>org.mockito</groupId>
++                <artifactId>mockito-core</artifactId>
++                <version>3.12.4</version>
++                <scope>test</scope>
++            </dependency>
+             <dependency>
+-                <groupId>junit</groupId>
+-                <artifactId>junit</artifactId>
+-                <version>4.13.1</version>
++                <groupId>org.mockito</groupId>
++                <artifactId>mockito-junit-jupiter</artifactId>
++                <version>3.12.4</version>
+                 <scope>test</scope>
+             </dependency>
++            <!-- Arquillian http://arquillian.org/arquillian-core/ -->
++            <dependency>
++                <groupId>org.jboss.arquillian</groupId>
++                <artifactId>arquillian-bom</artifactId>
++                <version>1.6.0.Final</version>
++                <type>pom</type>
++                <scope>import</scope>
++            </dependency>
++            <!-- Add the following in the project -->
++            <!--dependency>
++                <groupId>org.jboss.arquillian.junit5</groupId>
++                <artifactId>arquillian-junit5-container</artifactId>
++                <scope>test</scope>
++            </dependency-->
++
++            <!-- Utilities test functions in unit tests -->
++            <!-- Harmcrest Matchers http://hamcrest.org/JavaHamcrest/tutorial -->
++            <dependency>
++                <groupId>org.hamcrest</groupId>
++                <artifactId>hamcrest</artifactId>
++                <version>2.2</version>
++                <scope>test</scope>
++            </dependency>
++
++            <!-- Lombok -->
++            <!-- https://objectcomputing.com/resources/publications/sett/january-2010-reducing-boilerplate-code-with-project-lombok -->
+             <dependency>
+                 <groupId>org.projectlombok</groupId>
+                 <artifactId>lombok</artifactId>
+-                <version>1.18.16</version>
++                <version>1.18.20</version>
++                <!--scope>provided</scope--> <!-- trouble with javadoc -->
++            </dependency>
++
++            <!-- Eclipse Collections https://www.eclipse.org/collections/-->
++            <dependency>
++                <groupId>org.eclipse.collections</groupId>
++                <artifactId>eclipse-collections</artifactId>
++                <version>10.4.0</version>
++            </dependency>
++
++            <!-- Databases connections -->
++            <!-- JDBC -->
++            <!-- H2 https://www.h2database.com -->
++            <dependency>
++                <groupId>com.h2database</groupId>
++                <artifactId>h2</artifactId>
++                <version>1.4.200</version>
++            </dependency>
++
++            <!-- PostgreSQL https://jdbc.postgresql.org/ -->
++            <dependency>
++                <groupId>org.postgresql</groupId>
++                <artifactId>postgresql</artifactId>
++                <version>42.2.23</version>
++            </dependency>
++
++            <!-- MySQL https://dev.mysql.com/doc/connector-j/8.0/en/ -->
++            <dependency>
++                <groupId>mysql</groupId>
++                <artifactId>mysql-connector-java</artifactId>
++                <version>8.0.26</version>
++            </dependency>
++
++            <!-- Jakarta Persistence (ex JPA) https://jakarta.ee/specifications/persistence/3.0/jakarta-persistence-spec-3.0.html -->
++            <dependency>
++                <groupId>jakarta.persistence</groupId>
++                <artifactId>jakarta.persistence-api</artifactId>
++                <version>3.0.0</version>
++            </dependency>
++            <!-- EclipseLink https://www.eclipse.org/eclipselink/ -->
++            <dependency>
++                <groupId>org.eclipse.persistence</groupId>
++                <artifactId>eclipselink</artifactId>
++                <version>3.0.2</version>
++            </dependency>
++            <!-- Hibernate https://hibernate.org/orm/ -->
++            <dependency>
++                <groupId>org.hibernate</groupId>
++                <artifactId>hibernate-core</artifactId>
++                <version>${hibernate.version}</version>
++            </dependency>
++
++            <!-- Java/XML Mapping -->
++            <!-- JAXB https://jakarta.ee/specifications/xml-binding/3.0/jakarta-xml-binding-spec-3.0.html -->
++            <dependency>
++                <groupId>jakarta.xml.bind</groupId>
++                <artifactId>jakarta.xml.bind-api</artifactId>
++                <version>3.0.1</version>
++            </dependency>
++            <dependency>
++                <groupId>com.sun.xml.bind</groupId>
++                <artifactId>jaxb-impl</artifactId>
++                <version>3.0.2</version>
++                <scope>runtime</scope>
++            </dependency>
++
++            <!-- Expression Language (EL) https://jakarta.ee/specifications/expression-language/4.0/jakarta-expression-language-spec-4.0.html -->
++            <dependency>
++                <groupId>org.glassfish</groupId>
++                <artifactId>jakarta.el</artifactId>
++                <version>4.0.2</version>
++            </dependency>
++
++            <!-- Authentication -->
++            <!-- JSON Web Token (JWT) https://jwt.io/ -->
++            <dependency>
++                <groupId>io.jsonwebtoken</groupId>
++                <artifactId>jjwt-api</artifactId>
++                <version>${jjwt.version}</version>
++            </dependency>
++            <dependency>
++                <groupId>io.jsonwebtoken</groupId>
++                <artifactId>jjwt-impl</artifactId>
++                <version>${jjwt.version}</version>
++                <scope>runtime</scope>
++            </dependency>
++            <dependency>
++                <groupId>io.jsonwebtoken</groupId>
++                <artifactId>jjwt-jackson</artifactId>
++                <version>${jjwt.version}</version>
++                <scope>runtime</scope>
++            </dependency>
++
++            <!-- BEAN VALIDATION https://jakarta.ee/specifications/bean-validation/3.0/ -->
++            <!-- added transitively by the Hibernate Validator -->
++            <!--dependen
