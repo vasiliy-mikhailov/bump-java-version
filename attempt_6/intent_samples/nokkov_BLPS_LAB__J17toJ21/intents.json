@@ -1,0 +1,131 @@
+{
+  "meta": {
+    "repo": "nokkov/BLPS_LAB",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "146a7ef1d497b26596ab878ac5ef4f5f1dbdf3c8",
+    "sha_to": "60d99fe6e0a984ee294526019d3168e2df661e4b"
+  },
+  "by_file": {
+    "src/main/java/ru/nokkov/blps_lab/BlpsLabApplication.java": [
+      {
+        "kind": "enable_war_deployment",
+        "general_idea": "Extend SpringBootServletInitializer to allow the Spring Boot application to be deployed as a WAR file to an external servlet container like JBoss.",
+        "human_impl": "public class BlpsLabApplication extends SpringBootServletInitializer { ... protected SpringApplicationBuilder configure(SpringApplicationBuilder application) { return application.sources(BlpsLabApplication.class); } }",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "downgrade_parent_version",
+        "general_idea": "Revert Spring Boot parent version from 3.3.0 to 3.2.4, likely for stability or compatibility reasons during migration.",
+        "human_impl": "<version>3.2.4</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_packaging",
+        "general_idea": "Switch project packaging from default jar to war to support deployment to an external application server like WildFly.",
+        "human_impl": "<packaging>war</packaging>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "exclude_embedded_tomcat",
+        "general_idea": "Exclude the embedded Tomcat starter to prevent conflicts when deploying the WAR to an external servlet container.",
+        "human_impl": "<exclusion><artifactId>spring-boot-starter-tomcat</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "exclude_logging_frameworks",
+        "general_idea": "Exclude various logging frameworks (Logback, Log4j, SLF4J bridges) to rely on the application server's logging or a specific configuration.",
+        "human_impl": "<exclusion><artifactId>logback-classic</artifactId>...</exclusion>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation_starter",
+        "general_idea": "Add the Spring Boot validation starter to enable Bean Validation support.",
+        "human_impl": "<artifactId>spring-boot-starter-validation</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_lombok_dependency",
+        "general_idea": "Add Lombok as a provided dependency to reduce boilerplate code in entities and services.",
+        "human_impl": "<artifactId>lombok</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_security_starter",
+        "general_idea": "Add Spring Security starter to implement authentication and authorization features.",
+        "human_impl": "<artifactId>spring-boot-starter-security</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_security_test_dependency",
+        "general_idea": "Add Spring Security test dependency to facilitate testing of secured endpoints.",
+        "human_impl": "<artifactId>spring-security-test</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jakarta_servlet_api",
+        "general_idea": "Add Jakarta Servlet API as a provided dependency to ensure compatibility with the external servlet container.",
+        "human_impl": "<artifactId>jakarta.servlet-api</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_wildfly_plugin",
+        "general_idea": "Add the WildFly Maven plugin to automate deployment of the WAR file to a local WildFly instance.",
+        "human_impl": "<artifactId>wildfly-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "add_server_port",
+        "general_idea": "Configure the application to listen on a specific port.",
+        "human_impl": "server.port=8294",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_article_datasource",
+        "general_idea": "Configure the primary datasource for the article database.",
+        "human_impl": "spring.article.datasource.url=jdbc:postgresql://localhost:5432/blps",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_partner_datasource",
+        "general_idea": "Configure the secondary datasource for the partner database.",
+        "human_impl": "spring.partner.datasource.url=jdbc:postgresql://localhost:5432/partner",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_sql_init",
+        "general_idea": "Enable automatic SQL initialization on startup.",
+        "human_impl": "spring.sql.init.mode=always",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_jpa_debug",
+        "general_idea": "Enable SQL logging and formatting for debugging purposes.",
+        "human_impl": "spring.jpa.show-sql=true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_hibernate_ddl",
+        "general_idea": "Configure Hibernate to create and drop schema on startup.",
+        "human_impl": "spring.jpa.properties.hibernate.hbm2ddl.auto=create-drop",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_naming_strategy",
+        "general_idea": "Configure Hibernate naming strategies for camelCase to underscores conversion.",
+        "human_impl": "spring.jpa.properties.hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}
