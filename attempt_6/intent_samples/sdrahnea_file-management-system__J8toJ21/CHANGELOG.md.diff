@@ -1,0 +1,130 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index bea50b0..7ee5adf 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -3,28 +3,106 @@ All notable changes to this project will be documented in this file.
+ 
+ ## [Unreleased]
+ ### Added
+--
++- TBD
++
++## [1.0.9] - 2026-03-13
++### Added
++- modernized `README.md` structure and content flow for a more professional external presentation
++- expanded product-facing overview to better explain value for external users and adopters
++
++### Changed
++- improved documentation tone and section organization for clearer onboarding
++
++## [1.0.8] - 2022-MM-DD
++### Added
++- add clients for interaction with the APIs
++- add clean-up scheduler by day / month / year
+ 
+ ### Fixed
+--
++- code refactoring
+ 
+-## [1.0.3] - 2021-04-25
++## [1.0.7] - 2021-12-31
+ ### Added
+-- add logging (please see and update log4j2.xml file)
+-- option to run application with specific configuration file
+-- update and write documentation
++- implement the file id from the request for ${file.db.location} / ${tenant} / ${year} / ${month} /${file_id}
++- implement the file id from the request for ${file.db.location} / ${tenant} / ${year} / ${date} /${file_id}
++- implement the file id from the request for ${file.db.location} / ${tenant} / ${year} / ${month} / ${day} / ${file_id}
++- implement the file id from the request for ${file.db.location} / ${tenant} / ${year} / ${month} / ${file_id}
++- implement the file id from the request for ${file.db.location} / ${tenant} / ${file_id}
++- implement uploadByTenantAndFileId/{tenant}/{fileId} end-point
++- implement uploadNewFile/{fileId}/{tenant} end-point
+ 
+-## [1.0.2] - 2021-04-21
+ ### Fixed
+-- fix the query which returns the multiple records in case of download request
++- add fileId field into StorageDto model
++
++## [1.0.6] - 2021-10-04
++### Added
++- add file id strategy for generating file names:
++  -- UUID: will generate an uuid value;
++  -- INSTANT: will generate equivalent epoch value for now (numbers)
+ 
+-## [1.0.1] - 2021-04-04
+ ### Fixed
+-- allow uploading files more than 100 Mb size 
+-- fix upload end-points by adding request body
++- small refactors
++
++## [1.0.5] - 2021-09-21
++### Added
++- add file metadata (size, creation date, file extension, etc)
++- add file version
++- add unit tests 
++- add performance tests (related to h2 database)
++- add possibility to communicate over queue 
+ 
+-## [1.0.0] - 2021-04-03
++### Fixed
++- fix error log text
++- small refactoring
++
++## [1.0.4] - 2021-08-29
+ ### Added
++- constraint file retrieve / store by tenant
++- add new end-point: download functionality by tenant
++
++### Fixed
++- creation file path in FileStorageStrategyService
++- small refactors
++
++## [1.0.3] - 2021-07-12
++### Added
++- file storage strategies:
++  -- ${file.db.location} / ${tenant} / ${file_id}
++  -- ${file.db.location} / ${tenant} / ${date} / ${file_id}
++  -- ${file.db.location} / ${tenant} / ${year} / ${date} / ${file_id}
++  -- ${file.db.location} / ${tenant} / ${year} / ${month} / ${date} / ${file_id}
++  -- ${file.db.location} / ${tenant} / ${year} / ${month} / ${day} / ${file_id}
++  -- ${file.db.location} / ${tenant} / ${year} / ${month} / ${file_id}
++- constraint file retrieve / store by tenant
++
++### Fixed
++- split controller and services into dedicated ones
++
++## [1.0.2] - 2021-07-02
++### Added
++- new end-point: upload file by tenant only
++
++### Fixed
++- fix data sql file 
++- small refactors
++
++## [1.0.1] - 2021-05-07
++### Added
++- storage to H2 database
++- use tenant instead of environment
++- add multi-tenant possibility
++
++### Fixed
++- bug related to multipart file config
++
++## [1.0.0] - 2021-05-04
++### Added
++- add logging (please see and update log4j2.xml file)
++- option to run application with specific configuration file
++- update and write documentation
++- fix the query which returns the multiple records in case of download request
++- allow uploading files more than 100 Mb size 
++- fix upload end-points by adding request body
+ - README file contains main information about project
+ - initial application commit
+ - Swagger UI
+@@ -33,4 +111,4 @@ All notable changes to this project will be documented in this file.
+ - upload/{documentId} REST end-point to upload file from other clients
+ - upload/{documentId}/{directory} REST end-point to upload file from other clients which contains
+   a directory. This is TEMPORARY use case.
+-- download/{documentId} REST end-point return saved content by document id.
+\ No newline at end of file
++- download/{documentId} REST end-point return saved content by document id.

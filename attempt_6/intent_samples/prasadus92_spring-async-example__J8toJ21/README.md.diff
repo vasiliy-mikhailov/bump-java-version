@@ -1,0 +1,316 @@
+diff --git a/README.md b/README.md
+index 8dac553..6863fcc 100644
+--- a/README.md
++++ b/README.md
+@@ -1,2 +1,309 @@
+-# spring-webflux-example
+-Fetching data from 2 REST endpoints asynchronously and merging the responses
++# User Data Aggregator Service
++
++[![CI/CD Pipeline](https://github.com/welt/user-data-aggregator/actions/workflows/ci.yml/badge.svg)](https://github.com/welt/user-data-aggregator/actions/workflows/ci.yml)
++[![Coverage](https://img.shields.io/badge/coverage-80%25-green.svg)]()
++[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
++[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
++[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
++
++A production-grade microservice that aggregates user data from external APIs with enterprise patterns including circuit breakers, caching, comprehensive observability, and reactive support.
++
++## Features
++
++- **Modern Stack**: Java 21, Spring Boot 3.4, WebClient (reactive HTTP client)
++- **Resilience Patterns**: Circuit breaker, retry, and timeout via Resilience4j
++- **Caching**: In-memory caching with Caffeine for improved performance
++- **Observability**: Micrometer metrics, Prometheus integration, structured logging with correlation IDs
++- **API Documentation**: OpenAPI 3.0 with Swagger UI
++- **Containerization**: Multi-stage Dockerfile, Docker Compose with optional monitoring stack
++- **Testing**: Comprehensive unit tests, integration tests with WireMock, architecture tests with ArchUnit
++- **CI/CD**: GitHub Actions pipeline with security scanning
++
++## Architecture
++
++```
++┌─────────────────┐     ┌─────────────────┐     ┌─────────────────────────┐
++│                 │     │                 │     │   JSONPlaceholder API   │
++│   HTTP Client   │────▶│   Controller    │────▶│   (External Service)    │
++│                 │     │                 │     │                         │
++└─────────────────┘     └────────┬────────┘     └─────────────────────────┘
++                                 │                          ▲
++                                 ▼                          │
++                        ┌─────────────────┐                 │
++                        │                 │                 │
++                        │    Service      │─────────────────┤
++                        │                 │                 │
++                        └────────┬────────┘                 │
++                                 │                          │
++                                 ▼                          │
++                        ┌─────────────────┐                 │
++                        │   API Client    │─────────────────┘
++                        │  (WebClient)    │
++                        │                 │
++                        │ ┌─────────────┐ │
++                        │ │Circuit Brk. │ │
++                        │ │Retry        │ │
++                        │ │Timeout      │ │
++                        │ └─────────────┘ │
++                        └─────────────────┘
++```
++
++## Quick Start
++
++### Prerequisites
++
++- Java 21 or later
++- Maven 3.9+ (or use the included Maven wrapper)
++- Docker (optional, for containerized deployment)
++
++### Running Locally
++
++```bash
++# Clone the repository
++git clone https://github.com/welt/user-data-aggregator.git
++cd user-data-aggregator
++
++# Build the application
++./mvnw clean package
++
++# Run the application
++./mvnw spring-boot:run
++
++# Or run the JAR directly
++java -jar target/user-data-aggregator-2.0.0.jar
++```
++
++The application will start at `http://localhost:8080`.
++
++### Running with Docker
++
++```bash
++# Build and run with Docker Compose
++docker-compose up --build
++
++# With monitoring stack (Prometheus + Grafana)
++docker-compose --profile monitoring up --build
++```
++
++## API Endpoints
++
++### User Data Aggregation
++
++| Method | Endpoint | Description |
++|--------|----------|-------------|
++| GET | `/api/v1/users/{userId}/data` | Get aggregated user data with posts |
++| GET | `/api/v1/users/{userId}/data/reactive` | Reactive endpoint for user data |
++| GET | `/api/v1/users/{userId}` | Get user details only |
++| GET | `/api/v1/users/{userId}/posts` | Get user's posts only |
++
++### Example Request
++
++```bash
++curl -X GET "http://localhost:8080/api/v1/users/1/data" \
++  -H "Accept: application/json" \
++  -H "X-Correlation-ID: my-request-123"
++```
++
++### Example Response
++
++```json
++{
++  "user": {
++    "id": 1,
++    "name": "Leanne Graham",
++    "username": "Bret",
++    "email": "Sincere@april.biz",
++    "address": {
++      "street": "Kulas Light",
++      "suite": "Apt. 556",
++      "city": "Gwenborough",
++      "zipcode": "92998-3874",
++      "geo": {
++        "latitude": "-37.3159",
++        "longitude": "81.1496"
++      }
++    },
++    "phone": "1-770-736-8031 x56442",
++    "website": "hildegard.org",
++    "company": {
++      "name": "Romaguera-Crona",
++      "catchPhrase": "Multi-layered client-server neural-net",
++      "bs": "harness real-time e-markets"
++    }
++  },
++  "posts": [
++    {
++      "id": 1,
++      "userId": 1,
++      "title": "sunt aut facere...",
++      "body": "quia et suscipit..."
++    }
++  ],
++  "fetchedAt": "2024-01-15T10:30:00Z",
++  "postCount": 10
++}
++```
++
++## Documentation
++
++- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
++- **OpenAPI Spec**: `http://localhost:8080/v3/api-docs`
++
++## Actuator Endpoints
++
++| Endpoint | Description |
++|----------|-------------|
++| `/actuator/health` | Application health status |
++| `/actuator/health/liveness` | Kubernetes liveness probe |
++| `/actuator/health/readiness` | Kubernetes readiness probe |
++| `/actuator/info` | Application info (Git, build) |
++| `/actuator/metrics` | Application metrics |
++| `/actuator/prometheus` | Prometheus metrics endpoint |
++| `/actuator/caches` | Cache statistics |
++
++## Configuration
++
++### Environment Variables
++
++| Variable | Description | Default |
++|----------|-------------|---------|
++| `SPRING_PROFILES_ACTIVE` | Active profile (dev, prod) | - |
++| `APP_API_JSONPLACEHOLDER_BASE_URL` | External API base URL | https://jsonplaceholder.typicode.com |
++| `APP_API_JSONPLACEHOLDER_CONNECTION_TIMEOUT` | Connection timeout | 5s |
++| `APP_API_JSONPLACEHOLDER_READ_TIMEOUT` | Read timeout | 10s |
++
++### Profiles
++
++- **default**: Standard configuration
++- **dev**: Development with debug logging
++- **prod**: Production with optimized settings
++- **test**: Test configuration with WireMock
++
++## Testing
++
++```bash
++# Run all tests
++./mvnw clean verify
++
++# Run unit tests only
++./mvnw test
++
++# Run integration tests only
++./mvnw verify -DskipUnitTests
++
++# Generate coverage report
++./mvnw test jacoco:report
++# Report available at: target/site/jacoco/index.html
++```
++
++## Resilience Configuration
++
++### Circuit Breaker
++
++```yaml
++resilience4j:
++  circuitbreaker:
++    instances:
++      jsonPlaceholder:
++        sliding-window-size: 10
++        failure-rate-threshold: 50
++        wait-duration-in-open-state: 30s
++```
++
++### Retry
++
++```yaml
++resilience4j:
++  retry:
++    instances:
++      jsonPlaceholder:
++        max-attempts: 3
++        wait-duration: 500ms
++        enable-exponential-backoff: true
++```
++
++## Monitoring
++
++### Prometheus + Grafana
++
++```bash
++# Start with monitoring stack
++docker-compose --profile monitoring up -d
++
++# Access services
++# - Application: http://localhost:8080
++# - Prometheus: http://localhost:9090
++# - Grafana: http://localhost:3000 (admin/admin)
++```
++
++### Key Metrics
++
++- `http_server_requests` - HTTP request metrics
++- `api_client_get_user` - External API call timing for users
++- `api_client_get_posts` - External API call timing for posts
++- `service_user_data_get` - Service layer aggregation timing
++- `resilience4j_circuitbreaker_*` - Circuit breaker metrics
++- `cache_*` - Cache hit/miss statistics
++
++## Project Structure
++
++```
++src/
++├── main/
++│   ├── java/com/welt/data/
++│   │   ├── Application.java           # Main application entry
++│   │   ├── client/                     # External API clients
++│   │   ├── config/                     # Configuration classes
++│   │   ├── controller/                 # REST controllers
++│   │   ├── dto/                        # Data transfer objects (records)
++│   │   ├── exception/                  # Custom exceptions & handlers
++│   │   └── service/                    # Business logic
++│   └── resources/
++│       ├── application.yml             # Main configuration
++│       ├── application-dev.yml         # Development profile
++│       ├── application-prod.yml        # Production profile
++│       └── application-test.yml        # Test profile
++├── test/
++│   └── java/com/welt/data/
++│       ├── architecture/               # ArchUnit tests
++│       ├── client/                     # Client tests
++│       ├── controller/                 # Controller tests
++│       └── service/                    # Service tests
++├── .github/workflows/                  # CI/CD pipelines
++├── docker/                             # Docker configuration
++├── Dockerfile                          # Multi-stage build
++└── docker-compose.yml                  # Container orchestration
++```
++
++## Technology Stack
++
++| Component | Technology |
++|-----------|------------|
++| Language | Java 21 |
++| Framework | Spring Boot 3.4.1 |
++| HTTP Client | WebClient (Spring WebFlux) |
++| Resilience | Resilience4j |
++| Caching | Caffeine |
++| API Docs | SpringDoc OpenAPI 3 |
++| Metrics | Micrometer + Prometheus |
++| Testing | JUnit 5, MockMvc, WireMock, ArchUnit |
++| Build | Maven |
++| Container | Docker |
++
++## Contributing
++
++1. Fork the repository
++2. Create a feature branch (`git checkout -b feature/amazing-feature`)
++3. Commit your changes (`git commit -m 'Add amazing feature'`)
++4. Push to the branch (`git push origin feature/amazing-feature`)
++5. Open a Pull Request
++
++## License
++
++This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
++
++## Acknowledgments
++
++- [JSONPlaceholder](https://jsonplaceholder.typicode.com/) - Free fake API for testing
++- [Spring Boot](https://spring.io/projects/spring-boot) - Application framework
++- [Resilience4j](https://resilience4j.readme.io/) - Fault tolerance library

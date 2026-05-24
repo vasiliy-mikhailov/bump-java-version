@@ -1,0 +1,135 @@
+{
+  "meta": {
+    "repo": "thepalslab/copilot-springboot-backend-showcase",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "fc64e31a9c2b9c1f6443632d106871c7d2b34aa8",
+    "sha_to": "8f203f4b7422b47c3692233648b5c9dec6ba61b7"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version_property",
+        "general_idea": "Update the Maven property defining the Java version from 17 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jakarta_persistence_api",
+        "general_idea": "Add the Jakarta Persistence API dependency required for JPA support in the newer environment.",
+        "human_impl": "<dependency><groupId>jakarta.persistence</groupId><artifactId>jakarta.persistence-api</artifactId><version>3.1.0</version></dependency>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_lombok_dependency",
+        "general_idea": "Add the Lombok library as a provided dependency to reduce boilerplate code.",
+        "human_impl": "<dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><version>1.18.32</version><scope>provided</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_maven_compiler_plugin",
+        "general_idea": "Configure the Maven compiler plugin to target Java 21 and include Lombok annotation processors.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.11.0</version><configuration><source>21</source><target>21</target>...</configuration></plugin>",
+        "bucket": "breaking"
+      }
+    ],
+    "docs/prompts/phase1-repository-setup.md": [
+      {
+        "kind": "update_video_placeholder",
+        "general_idea": "Replace the text-based video placeholder with an actual image reference to a GIF asset.",
+        "human_impl": "Changed `[VIDEO_PLACEHOLDER: phase1-setup-demo.mp4]` to `![Watch Demo Video](../../assets/phase1-setup-demo.gif)`",
+        "bucket": "polishment"
+      }
+    ],
+    "docs/prompts/phase2-domain-and-data-layer.md": [
+      {
+        "kind": "fix_table_formatting",
+        "general_idea": "Corrected markdown table syntax by removing an extraneous pipe character to ensure proper rendering.",
+        "human_impl": "Changed `...mobile` | Copilot` to `...mobile`| Copilot`",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refine_documentation_text",
+        "general_idea": "Updated a metaphorical instruction to be more professional and precise regarding relationship validation.",
+        "human_impl": "Changed 'Relationships are like marriages' to 'Entity relationships deserve a sanity check'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refine_documentation_text",
+        "general_idea": "Corrected informal terminology in the documentation to use standard technical language.",
+        "human_impl": "Changed 'NullPointerException therapy' to 'NullPointerException debugging'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_media_reference",
+        "general_idea": "Replaced a placeholder text with a functional markdown image link pointing to a GIF asset.",
+        "human_impl": "Replaced `[VIDEO_PLACEHOLDER: phase2-domain-demo.mp4]` with `![Watch Demo Video](../../assets/phase2-domain-demo.gif)`",
+        "bucket": "polishment"
+      }
+    ],
+    "docs/prompts/phase3-service-layer.md": [
+      {
+        "kind": "update_video_link_format",
+        "general_idea": "Replace a text-based video placeholder with an embedded GIF image markdown syntax.",
+        "human_impl": "Changed `[VIDEO_PLACEHOLDER: phase3-service-layer-demo.mp4]` to `![Watch Demo Video](../../assets/phase3-service-layer-demo.gif)`",
+        "bucket": "polishment"
+      }
+    ],
+    "docs/prompts/phase4-api-layer.md": [
+      {
+        "kind": "update_video_placeholder",
+        "general_idea": "Replace a text-based video placeholder with an actual embedded GIF image link in the documentation.",
+        "human_impl": "Changed `[VIDEO_PLACEHOLDER: phase4-api-layer-demo.mp4]` to `![Watch Demo Video](../../assets/phase4-api-layer-demo.gif)`",
+        "bucket": "polishment"
+      }
+    ],
+    "docs/prompts/phase5-infrastructure-and-crosscutting.md": [
+      {
+        "kind": "update_video_link_format",
+        "general_idea": "Replace a text-based video placeholder with a Markdown image syntax pointing to a GIF asset.",
+        "human_impl": "Changed `[VIDEO_PLACEHOLDER: phase5-infrastructure-demo.mp4]` to `![Watch Demo Video](../../assets/phase5-infrastructure-demo.gif)`",
+        "bucket": "polishment"
+      }
+    ],
+    "docs/prompts/phase7-testing-and-quality-assurance.md": [
+      {
+        "kind": "update_video_placeholder",
+        "general_idea": "Replace a text-based video placeholder with an actual image reference to a demo GIF.",
+        "human_impl": "Changed `[VIDEO_PLACEHOLDER: phase7-testing-demo.mp4]` to `![Watch Demo Video](../../assets/phase7-testing-demo.gif)`",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "add_h2_console_config",
+        "general_idea": "Enable and configure the H2 database web console for development access.",
+        "human_impl": "spring.h2.console.enabled=true\nspring.h2.console.path=/h2-console",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_datasource_config",
+        "general_idea": "Configure the in-memory H2 datasource connection details.",
+        "human_impl": "spring.datasource.url=jdbc:h2:mem:testdb\nspring.datasource.driver-class-name=org.h2.Driver\nspring.datasource.username=sa\nspring.datasource.password=",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jpa_ddl_config",
+        "general_idea": "Set Hibernate to automatically update the database schema on startup.",
+        "human_impl": "spring.jpa.hibernate.ddl-auto=update",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_fraud_limit_config",
+        "general_idea": "Define a custom property for the daily transfer fraud limit.",
+        "human_impl": "fraud.daily-transfer-limit= 10000",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_email_recipients_config",
+        "general_idea": "Define a custom property listing email recipients for notifications.",
+        "human_impl": "email-recipients=finance@example.com,audit@example.com",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

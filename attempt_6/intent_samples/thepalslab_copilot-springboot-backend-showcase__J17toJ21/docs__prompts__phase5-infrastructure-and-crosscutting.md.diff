@@ -1,0 +1,13 @@
+diff --git a/docs/prompts/phase5-infrastructure-and-crosscutting.md b/docs/prompts/phase5-infrastructure-and-crosscutting.md
+index a22dc7c..078c6e2 100644
+--- a/docs/prompts/phase5-infrastructure-and-crosscutting.md
++++ b/docs/prompts/phase5-infrastructure-and-crosscutting.md
+@@ -57,7 +57,7 @@ Copilot can scaffold these quickly, but *you* must ensure the tone, format, and
+ ---
+ 
+ ### **Video Placeholder**
+-`[VIDEO_PLACEHOLDER: phase5-infrastructure-demo.mp4]`  
++![Watch Demo Video](../../assets/phase5-infrastructure-demo.gif)
+ _Show: Copilot generating GlobalExceptionHandler, reading config from YAML, and printing clean logs._
+ 
+ ---

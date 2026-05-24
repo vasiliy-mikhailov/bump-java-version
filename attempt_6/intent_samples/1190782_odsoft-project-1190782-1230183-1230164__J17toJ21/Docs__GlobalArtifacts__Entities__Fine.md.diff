@@ -1,0 +1,24 @@
+diff --git a/Docs/GlobalArtifacts/Entities/Fine.md b/Docs/GlobalArtifacts/Entities/Fine.md
+index 4fd1924..8bd3114 100644
+--- a/Docs/GlobalArtifacts/Entities/Fine.md
++++ b/Docs/GlobalArtifacts/Entities/Fine.md
+@@ -1,6 +1,6 @@
+ # Fine
+ 
+-Appears when a Lending is overdue.
++Applied when a Lending is overdue.
+ 
+ > [Attributes](#attributes)
+ >
+@@ -9,8 +9,9 @@ Appears when a Lending is overdue.
+ > [Customer Clarifications](#Customer-Clarifications)
+ 
+ ### Attributes
+-- [Lending](Lending.md)
+-- 
++- [LendingNumber](../ValueObjects/LendingNumber.md)
++- Value
++- Paid
+ 
+ 
+ ### Relevant Use Cases

@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "repo": "mohammedfahmi/interview-question",
+    "stage": "J8->J21",
+    "family": null,
+    "sha_from": "ddbc51ab9d6145f1e59c62478e56fdab90b62216",
+    "sha_to": "e383ac058d5b2a639e2374280dde10cde0f42787"
+  },
+  "by_file": {
+    "src/main/java/ProblemSolving/TwoSums.java": [
+      {
+        "kind": "update_javadoc_examples",
+        "general_idea": "Updated Javadoc comments to reflect a change in problem requirements from returning indices to returning the actual number pairs.",
+        "human_impl": "Changed Output examples from index arrays like [0,1] to value pairs like <[2,7]>.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_grading_criteria",
+        "general_idea": "Added specific marking criteria to the Javadoc to define expected time complexity and code quality weights.",
+        "human_impl": "Appended 'marking criteria' section listing code quality and O(n^2)/O(n) complexity percentages.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refine_problem_statement",
+        "general_idea": "Corrected the assumption text in the Javadoc to refer to 'element' instead of 'input' for clarity.",
+        "human_impl": "Changed 'each input would have exactly one solution' to 'each element would have exactly one solution'.",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Switch Maven compiler configuration from source/target 8 to release 21 to target Java 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_junit_version",
+        "general_idea": "Pin JUnit Jupiter dependency to a specific modern version compatible with Java 21.",
+        "human_impl": "<version>5.14.3</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_lombok_version",
+        "general_idea": "Upgrade Lombok dependency to a newer version.",
+        "human_impl": "<lombok.version>1.18.42</lombok.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_lombok_annotation_processor",
+        "general_idea": "Explicitly configure Lombok as an annotation processor path in the compiler plugin.",
+        "human_impl": "<annotationProcessorPaths>...<artifactId>lombok</artifactId>...</annotationProcessorPaths>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_compiler_plugin_version",
+        "general_idea": "Upgrade maven-compiler-plugin to a version that supports the release flag and Java 21.",
+        "human_impl": "<artifactId>maven-compiler-plugin</artifactId>...<version>3.13.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_surefire_plugin_version",
+        "general_idea": "Upgrade maven-surefire-plugin to a version compatible with modern JUnit and Java 21.",
+        "human_impl": "<artifactId>maven-surefire-plugin</artifactId>...<version>3.2.5</version>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

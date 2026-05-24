@@ -1,0 +1,232 @@
+{
+  "meta": {
+    "repo": "sontungexpt/inlaco-crewmgr-service",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "02aca301524aebb019acb5bfbdf670624a63a417",
+    "sha_to": "cb5d27b3390e967901a08abf7616182f18860810"
+  },
+  "by_file": {
+    "src/main/java/com/inlaco/crewmgrservice/CrewmgrserviceApplication.java": [],
+    "src/main/java/com/inlaco/crewmgrservice/annotation/BearerToken.java": [
+      {
+        "kind": "add_swagger_annotation",
+        "general_idea": "Add Schema annotation to hide the BearerToken parameter from the generated OpenAPI documentation.",
+        "human_impl": "@Schema(hidden = true)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_annotation_attribute",
+        "general_idea": "Introduce a configurable attribute to control exception throwing behavior for the BearerToken annotation.",
+        "human_impl": "boolean throwException() default true;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/inlaco/crewmgrservice/annotation/PublicEndpoint.java": [
+      {
+        "kind": "add_annotation_attribute",
+        "general_idea": "Add a 'profiles' attribute to the annotation to allow specifying allowed profiles directly.",
+        "human_impl": "String[] profiles() default {};",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_annotation_attribute",
+        "general_idea": "Add a 'filterJwt' attribute to the annotation to control JWT filtering behavior.",
+        "human_impl": "boolean filterJwt() default false;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_javadoc",
+        "general_idea": "Expand Javadoc to document new attributes and reference related classes.",
+        "human_impl": "Added <p>{@link ...} references and attribute descriptions.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/inlaco/crewmgrservice/common/payload/ApiResponse.java": [
+      {
+        "kind": "add_utility_import",
+        "general_idea": "Import HttpServletUtils to access the current HTTP request context.",
+        "human_impl": "import com.inlaco.crewmgrservice.utils.HttpServletUtils;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "override_getter_with_fallback",
+        "general_idea": "Override getPath() to dynamically retrieve the request URI from the current HTTP context if the path field is null.",
+        "human_impl": "public String getPath() { if (path == null) { var request = HttpServletUtils.getRequest().orElse(null); if (request != null) { return request.getRequestURI(); } } return \"\"; }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/inlaco/crewmgrservice/config/MongoConfig.java": [
+      {
+        "kind": "add_custom_mongo_conversions",
+        "general_idea": "Register custom converters for API endpoint name types to handle serialization and deserialization in MongoDB.",
+        "human_impl": "new MongoCustomConversions(List.of(apiEndpointNameWritingConverter, ...))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_objectid_auditor_provider",
+        "general_idea": "Introduce a new AuditorAware bean that returns ObjectId instead of String to support auditing fields of type ObjectId.",
+        "human_impl": "public AuditorAware<ObjectId> auditorObjectIdProvider() { ... return Optional.of(new ObjectId(...)); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_primary_from_string_auditor",
+        "general_idea": "Remove the @Primary annotation from the String-based auditor provider to allow the new ObjectId provider to take precedence or coexist without conflict.",
+        "human_impl": "removed @Primary from auditorProvider()",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/inlaco/crewmgrservice/config/OpenApiConfig.java": [
+      {
+        "kind": "add_openapi_contact_info",
+        "general_idea": "Enrich the OpenAPI info section with contact details, terms of service, and a summary.",
+        "human_impl": "contact = @Contact(name = \"Inlaco\", email = \"sontungexpt@gmail.com\"), termsOfService = \"https://inlaco.com/terms\", summary = \"Inlaco Service API\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_programmatic_openapi_endpoint",
+        "general_idea": "Define a specific logout endpoint programmatically in the OpenAPI configuration to ensure it appears in the documentation with correct security requirements.",
+        "human_impl": "@Bean public OpenAPI customOpenAPI() { return new OpenAPI()... .path(\"/api/v1/logout\", new PathItem()...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/inlaco/crewmgrservice/config/RedisConfig.java": [
+      {
+        "kind": "uncomment_code",
+        "general_idea": "Uncomment the entire Redis configuration class to enable Redis integration in the application.",
+        "human_impl": "Removed leading '// ' from package declaration, imports, annotations, and class body.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_package_declaration",
+        "general_idea": "Correct the package declaration to match the actual project structure.",
+        "human_impl": "Changed package from 'com.foodey.server.config' to 'com.inlaco.crewmgrservice.config'.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/inlaco/crewmgrservice/config/SecurityConfig.java": [
+      {
+        "kind": "refactor_authentication_manager",
+        "general_idea": "Switch AuthenticationManager bean to use AuthenticationConfiguration.getAuthenticationManager() instead of manually constructing ProviderManager, aligning with modern Spring Security practices.",
+        "human_impl": "return authConfig.getAuthenticationManager();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_cors_configuration",
+        "general_idea": "Replace deprecated setAllowedOrigins with addAllowedOriginPattern for wildcard origin support in CORS configuration.",
+        "human_impl": "configuration.addAllowedOriginPattern(\"*\");",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_csrf_configuration",
+        "general_idea": "Enable CSRF protection with CookieCsrfTokenRepository and ignore specific request matchers, replacing the previous disabled CSRF state.",
+        "human_impl": "customizer.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_authorize_logic",
+        "general_idea": "Refactor authorizeHttpRequests to iterate over HTTP methods and use a unified getPublicSecurityPaths method for cleaner permission mapping.",
+        "human_impl": "Arrays.stream(HttpMethod.values()).forEach(method -> { ... });",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_imports",
+        "general_idea": "Add necessary imports for Arrays, Slf4j, AuthenticationConfiguration, and CookieCsrfTokenRepository to support the refactored code.",
+        "human_impl": "import java.util.Arrays; import lombok.extern.slf4j.Slf4j; ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_annotation",
+        "general_idea": "Add @Slf4j annotation to SecurityConfig class to enable logging capabilities.",
+        "human_impl": "@Slf4j",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Remove unused imports for AuthenticationProvider and ProviderManager as they are no longer used in the bean definitions.",
+        "human_impl": "removed import org.springframework.security.authentication.AuthenticationProvider;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/inlaco/crewmgrservice/exceptions/BaseException.java": [
+      {
+        "kind": "add_default_data_method",
+        "general_idea": "Add a getData method returning null to BaseException to provide a default implementation for exception data payloads.",
+        "human_impl": "public Object getData() { return null; }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/inlaco/crewmgrservice/exceptions/JwtTokenException.java": [
+      {
+        "kind": "add_constructor_overload",
+        "general_idea": "Add a new constructor that accepts only a message to handle cases where the token is not available.",
+        "human_impl": "public JwtTokenException(String message) { super(HttpStatus.UNAUTHORIZED, message); this.tokenType = TokenType.BEARER; this.token = \"\"; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_constructor_delegation",
+        "general_idea": "Refactor the existing two-argument constructor to delegate to a new three-argument constructor (implied by the call to this(TokenType.BEARER, token, message)) for code reuse.",
+        "human_impl": "public JwtTokenException(String token, String message) { this(TokenType.BEARER, token, message); }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/inlaco/crewmgrservice/exceptions/ResourceAlreadyInUseException.java": [
+      {
+        "kind": "refactor_exception_state",
+        "general_idea": "Refactor exception fields from single conflict item to a map to support multiple conflicting fields.",
+        "human_impl": "private Map<String, Object> conflictFields = new HashMap<>();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constructor_overload",
+        "general_idea": "Add constructor overloads accepting a Map of conflict fields instead of a single field name/value pair.",
+        "human_impl": "public <T> ResourceAlreadyInUseException(Class<T> resource, Map<String, Object> conflictFields)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_data_method",
+        "general_idea": "Override getData to expose the conflict fields map for API response serialization.",
+        "human_impl": "return new Object() { public Map<String, Object> getConflictFields() { return conflictFields; } };",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/inlaco/crewmgrservice/exceptions/ResourceNotFoundException.java": [
+      {
+        "kind": "change_http_status",
+        "general_idea": "Correct the HTTP status code from CONFLICT to NOT_FOUND to accurately reflect the exception's purpose.",
+        "human_impl": "super(HttpStatus.NOT_FOUND, message);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "fix_error_message",
+        "general_idea": "Update the error message template from 'already in use' to 'not found' to match the new status code and intent.",
+        "human_impl": "String.format(\"%s not found with %s : '%s'\", ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_field_storage",
+        "general_idea": "Replace individual field/value fields with a Map to support multiple conflict fields dynamically.",
+        "human_impl": "private Map<String, Object> conflictFields = new HashMap<>();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_constructor",
+        "general_idea": "Add a new constructor that accepts a Map of conflict fields directly.",
+        "human_impl": "public <T> ResourceNotFoundException(Class<T> resource, Map<String, Object> conflictFields)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constructor",
+        "general_idea": "Add a new constructor that accepts a message, resource class, and Map of conflict fields.",
+        "human_impl": "public <T> ResourceNotFoundException(String message, @NonNull Class<T> resource, Map<String, Object> conflictFields)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "implement_data_method",
+        "general_idea": "Override getData() to expose the conflict fields map in the exception response.",
+        "human_impl": "@Override public Object getData() { return new Object() { public Map<String, Object> getConflictFields() { return conflictFields; } }; }",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}
