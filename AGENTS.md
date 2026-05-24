@@ -1,4 +1,4 @@
-0. **Fitness (writing this file):** keep AGENTS.md compact and outcome-named so the agent re-derives the *how* every iteration from its tools and the corpus.
+0. **Fitness (writing this file):** keep AGENTS.md compact and outcome-named.
     - **Why:** to keep AGENTS.md compact, understandable, fit, aligned.
     - **Constraints:** every structured fitness has a Why as its first sub-clause; no implementation instructions the agent can fill itself, no enumerations that age, no justifications outside the Why clause; if a fitness produces output other fitnesses depend on, the obligation lives in Constraints as a contract clause.
     - **Search:** read → why → intent — when revisiting a clause, ask "why is this here?"; if the answer is implementation detail, enumeration, or justification that belongs in another fitness's Why, strip it back to the rule itself.
@@ -26,27 +26,27 @@
     - **Reward:** coverage in under-represented cells; fraction of entries where every commit is baseline-buildable.
     - **Repeat:** continuous; paused when downstream items are saturated on the current corpus.
 
-7. **Fitness (per-failing-repo refinement):** raise the corpus build-success rate past where coarse recipe mutations plateau, leveraging the vLLM endpoint (item 5) and Claude as solution-finder + judges throughout.
+7. **Fitness (per-failing-repo refinement):** raise the corpus build-success rate past where coarse recipe mutations plateau.
     - **Why:** the universal recipe plateaus before covering the long tail of repo-specific quirks; per-repo deltas pick up the remainder.
     - **Constraints:** declarative configuration deltas only; contract with item 1 — wins (build_post 0→1 flips on the corpus) fold into item 1's corpus build-success aggregate.
     - **Search:** ground each candidate fix in a known community workaround.
     - **Reward:** real `build_post 0 → 1` flips net of regressions on the full corpus.
     - **Repeat:** simplest cluster first; stop when only bespoke engineering remains.
-8. **Fitness (runner saturation):** keep the verifier host CPU in a healthy utilisation band *while any parent loop is making progress* — this fitness composes with the parent rather than standing alone — saturation only counts toward the composite objective when the parent loop is making progress.
+8. **Fitness (runner saturation):** keep the verifier host CPU in a healthy utilisation band while any parent loop is making progress.
     - **Why:** under-utilised iterations waste wall-clock; thrashing wastes it differently; the band between them is where the project moves fastest.
     - **Constraints:** any concurrency dial the agent can reach.
     - **Search:** sample load periodically, decide what to adjust given the recent action history and which parent loop is active.
     - **Reward:** sustained band hit without thrashing or stalling the parent loop.
     - **Repeat:** continuous, dampened against oscillation; pause when no parent loop is active.
 
-9. **Fitness (dependency-resolution proxy):** make every build's external-artifact resolution go through a local caching proxy with plural upstream mirrors, so build outcomes reflect code state rather than upstream availability.
+9. **Fitness (dependency-resolution proxy):** make every build's external-artifact resolution go through a local caching proxy with plural upstream mirrors.
     - **Why:** build outcomes drive every loop's reward; if outcomes drift with upstream availability, the reward is noise.
     - **Constraints:** the proxy caches every artifact it serves and survives across iterations; upstreams include both live mirrors and archival ones so a disappearance from one is masked by another; container builds reach the proxy by container-network DNS, not host IPs; contract with item 1 — build failures in item 1's loop are attributable to code state, not upstream availability, so an unresolved artifact in item 1 triggers an item 9 widening before that build is counted toward item 1's reward.
     - **Search:** when a build fails on "cannot resolve X", widen the upstream set first; only after widening exhausts itself is the failure attributable to the code.
     - **Reward:** per-artifact cache-hit ratio; resolution failures distinguishable from compile failures in the parent loop's classification.
     - **Repeat:** whenever a parent loop's failures cluster on artifact resolution.
 
-10. **Fitness (observability compactor):** route verbose tool output and system-metric flows through a compacting model so the orchestrator scans one-line digests instead of raw dumps.
+10. **Fitness (observability compactor):** route verbose tool output and system-metric flows through a compacting model.
     - **Why:** tool and metric output volume exceeds what the orchestrator can read; without compaction the orchestrator either misses signals or stalls reading.
     - **Constraints:** the compactor's reliability is treated as bounded — it may mislabel, and its judgement of what is unimportant is itself fallible so important context can be silently dropped; the raw uncompacted source persists on disk, keyed so the orchestrator can retrieve the original whenever the digest is insufficient or suspect, and the compactor is never load-bearing for irreversible decisions without a spot check against that source.
     - **Search:** when a stream of output becomes routine and exceeds what the orchestrator wants to read line-by-line, route it through the compactor; the snapshot fed to the compactor must include the failure signals (recently-exited containers, error/exception/traceback grep over service logs) and the compactor's output must surface those signals when present, not just summarise the happy-path state; the compactor behaves like frog's eyes — it stays silent while the snapshot is materially unchanged from the previous one and only emits when a difference crosses an alarm threshold (new errors, new exited containers, progress stall, sharp metric jump); periodically spot-sample raw vs digest to recalibrate trust.
