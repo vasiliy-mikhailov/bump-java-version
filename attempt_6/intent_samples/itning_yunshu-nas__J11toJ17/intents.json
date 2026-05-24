@@ -7,38 +7,122 @@
     "sha_to": "77900e4114e77a9e4482a877ee90b98e279ceac7"
   },
   "by_file": {
-    "pom.xml": [],
-    "README.md": [
+    "pom.xml": [
       {
-        "kind": "add_docker_documentation",
-        "general_idea": "Add documentation for running the application via Docker, including image links and environment variable configurations.",
-        "human_impl": "Added Docker section with `docker run` command and table of environment variables like MYSQL_URL and NAS_FFMPEG_BIN_DIR.",
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Update the target Java version property from 11 to 17 to align with the migration goal.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "spring_boot_upgrade",
+        "general_idea": "Bump Spring Boot parent version from 2.3.1 to 2.6.2 to support Java 17 and access newer features.",
+        "human_impl": "<version>2.6.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "project_restructure",
+        "general_idea": "Convert the project into a multi-module Maven parent POM to organize code into nas-common, nas-video, nas-music, and nas-deploy.",
+        "human_impl": "<packaging>pom</packaging>\n<modules>...</modules>",
         "bucket": "polishment"
       },
       {
-        "kind": "update_badge_service",
-        "general_idea": "Replace the external hit counter badge service with a self-hosted alternative.",
-        "human_impl": "Replaced `hits.dwyl.io` badge with `hitcount.itning.top` badge.",
+        "kind": "dependency_upgrade",
+        "general_idea": "Upgrade commons-io to version 2.11.0.",
+        "human_impl": "<commons-io.version>2.11.0</commons-io.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "update_feature_status",
-        "general_idea": "Mark the audio playback feature as implemented and provide links to client applications.",
-        "human_impl": "Changed checklist item from `- [ ] \u70b9\u64ad\u97f3\u9891\u6587\u4ef6` to `- [X] \u70b9\u64ad\u97f3\u9891\u6587\u4ef6` with links to Angular, Electron, and Mobile clients.",
+        "kind": "dependency_upgrade",
+        "general_idea": "Upgrade Guava to version 31.0.1-jre.",
+        "human_impl": "<guava.version>31.0.1-jre</guava.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "add_config_parameter_doc",
-        "general_idea": "Document the new configuration parameter for the music file directory.",
-        "human_impl": "Added `nas.music-file-dir` to the configuration parameters table.",
+        "kind": "dependency_upgrade",
+        "general_idea": "Upgrade Java-WebSocket to version 1.5.2.",
+        "human_impl": "<java-webSocket.version>1.5.2</java-webSocket.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "add_acknowledgments",
-        "general_idea": "Add a section to acknowledge support from JetBrains.",
-        "human_impl": "Added `# \u611f\u8c22` section with JetBrains logo image.",
+        "kind": "dependency_addition",
+        "general_idea": "Add MapStruct 1.4.2.Final for type-safe bean mapping.",
+        "human_impl": "<mapstruct.version>1.4.2.Final</mapstruct.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Lombok as an optional compile dependency to reduce boilerplate code.",
+        "human_impl": "<artifactId>lombok</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Hibernate Validator and Validation API for bean validation support.",
+        "human_impl": "<artifactId>hibernate-validator</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add JAudioTagger for reading audio metadata.",
+        "human_impl": "<artifactId>jaudiotagger</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Commons Codec for encoding/decoding utilities.",
+        "human_impl": "<artifactId>commons-codec</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove Thymeleaf starter as the project likely moved to a frontend-backend separation or different templating strategy.",
+        "human_impl": "- <artifactId>spring-boot-starter-thymeleaf</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove Spring WebSocket starter, possibly replaced by Java-WebSocket or handled differently in modules.",
+        "human_impl": "- <artifactId>spring-boot-starter-websocket</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove JSON Path dependency.",
+        "human_impl": "- <artifactId>json-path</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove custom itning utils starter.",
+        "human_impl": "- <artifactId>utils-spring-boot-starter</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove TypeBuilder dependency.",
+        "human_impl": "- <artifactId>TypeBuilder</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "test_modernization",
+        "general_idea": "Exclude JUnit Vintage engine to enforce JUnit 5 usage, which is standard in Spring Boot 2.6+.",
+        "human_impl": "<exclusion><groupId>org.junit.vintage</groupId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "build_config_change",
+        "general_idea": "Move dependency and plugin definitions to management sections to allow child modules to override versions.",
+        "human_impl": "<dependencyManagement>...</dependencyManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "repository_cleanup",
+        "general_idea": "Remove custom Maven repositories (Aliyun, Jitpack) likely no longer needed or handled differently.",
+        "human_impl": "- <repositories>...</repositories>",
         "bucket": "polishment"
       }
-    ]
+    ],
+    "README.md": []
   }
 }

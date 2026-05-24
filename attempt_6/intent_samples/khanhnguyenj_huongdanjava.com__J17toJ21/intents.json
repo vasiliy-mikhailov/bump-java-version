@@ -18,7 +18,7 @@
       },
       {
         "kind": "import_cleanup",
-        "general_idea": "Removed an unnecessary blank line between import statements to tighten code structure.",
+        "general_idea": "Removed an unnecessary blank line between import statements to clean up the file structure.",
         "human_impl": "Deleted empty line after 'import org.springframework.beans.factory.annotation.Autowired;'.",
         "bucket": "polishment"
       }
@@ -27,14 +27,14 @@
     "clean-architecture-example/db/src/main/java/com/huongdanjava/cleanarchitecture/db/mapper/StudentMapper.java": [
       {
         "kind": "refactor_constructor_usage",
-        "general_idea": "Replace setter-based object initialization with a constructor call to improve conciseness and immutability.",
+        "general_idea": "Replace setter-based object initialization with a constructor call to improve conciseness.",
         "human_impl": "Student student = new Student(model.getName(), model.getAge());",
         "bucket": "polishment"
       },
       {
-        "kind": "fix_indentation",
-        "general_idea": "Normalize code indentation from tabs to spaces for consistent formatting.",
-        "human_impl": "Changed leading tabs to spaces in method body.",
+        "kind": "formatting_indentation",
+        "general_idea": "Normalize code indentation from tabs to spaces.",
+        "human_impl": "Changed leading whitespace from tabs to 2 spaces.",
         "bucket": "polishment"
       }
     ],
@@ -48,26 +48,26 @@
       {
         "kind": "remove_lombok_annotation",
         "general_idea": "Remove the @Data annotation from Lombok to manually define getters and setters.",
-        "human_impl": "-@Data",
+        "human_impl": "@Data removed",
         "bucket": "polishment"
       },
       {
         "kind": "add_manual_getters_setters",
-        "general_idea": "Add explicit getter and setter methods for fields previously handled by Lombok.",
+        "general_idea": "Implement explicit getter and setter methods for fields previously handled by Lombok.",
         "human_impl": "public Long getId() { return id; }",
         "bucket": "polishment"
       },
       {
         "kind": "fix_indentation",
-        "general_idea": "Change indentation from tabs to spaces for consistent code style.",
-        "human_impl": "  private static final long serialVersionUID = 1L;",
+        "general_idea": "Standardize code indentation from tabs to spaces.",
+        "human_impl": "private Long id; ->   private Long id;",
         "bucket": "polishment"
       }
     ],
     "clean-architecture-example/entities/src/main/java/com/huongdanjava/cleanarchitecture/entities/Student.java": [
       {
         "kind": "refactor_to_record",
-        "general_idea": "Replace a standard POJO class with fields and manual getters/setters with a Java record to leverage concise syntax and immutability.",
+        "general_idea": "Replace a standard POJO class with fields and manual getters/setters with a Java record to leverage concise data carrier syntax.",
         "human_impl": "public record Student(String name, int age) {}",
         "bucket": "polishment"
       }
@@ -76,13 +76,13 @@
       {
         "kind": "indentation_normalization",
         "general_idea": "Replaced tab-based indentation with spaces to align with modern Java coding standards.",
-        "human_impl": "Changed leading tabs to spaces in method bodies and field declarations.",
+        "human_impl": "Changed leading whitespace from tabs to 2 spaces in method bodies and field declarations.",
         "bucket": "polishment"
       },
       {
-        "kind": "whitespace_cleanup",
-        "general_idea": "Removed an unnecessary blank line between import statements to tighten code structure.",
-        "human_impl": "Deleted empty line after Spring imports before custom package imports.",
+        "kind": "import_cleanup",
+        "general_idea": "Removed an unnecessary blank line between import groups to tighten the file structure.",
+        "human_impl": "Deleted the empty line separating Spring imports from local package imports.",
         "bucket": "polishment"
       }
     ],
@@ -97,20 +97,14 @@
     "clean-architecture-example/rest/src/main/java/com/huongdanjava/cleanarchitecture/rest/mapper/StudentMapper.java": [
       {
         "kind": "refactor_constructor_usage",
-        "general_idea": "Replace manual setter calls with a constructor invocation to initialize the DTO fields directly.",
-        "human_impl": "new StudentDto(entity.name(), entity.age())",
+        "general_idea": "Replace manual setter calls with a constructor that accepts the entity's data, likely leveraging Java 21 record features or a new DTO constructor.",
+        "human_impl": "StudentDto studentDto = new StudentDto(entity.name(), entity.age());",
         "bucket": "polishment"
       },
       {
-        "kind": "refactor_record_access",
-        "general_idea": "Update field accessors to use record component methods instead of traditional getter methods.",
-        "human_impl": "entity.name(), entity.age()",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "formatting_indentation",
-        "general_idea": "Normalize code indentation to use 2 spaces instead of mixed tabs/spaces.",
-        "human_impl": "  public static StudentDto toDto(Student entity) {",
+        "kind": "fix_indentation",
+        "general_idea": "Normalize code indentation from mixed tabs/spaces to consistent spaces.",
+        "human_impl": "Changed indentation from tabs to 2 spaces.",
         "bucket": "polishment"
       }
     ],

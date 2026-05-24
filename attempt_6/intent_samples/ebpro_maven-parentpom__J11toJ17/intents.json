@@ -7,7 +7,152 @@
     "sha_to": "604e1e174ff3583cdbda35909fbdfb15462780b7"
   },
   "by_file": {
-    "pom.xml": [],
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Update the Java compiler source and target properties to version 17 to align with the new JDK requirement.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_jaxb",
+        "general_idea": "Add Jakarta XML Binding (JAXB) dependencies to replace the module removed from the JDK in Java 11.",
+        "human_impl": "<artifactId>jakarta.xml.bind-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_jpa",
+        "general_idea": "Add Jakarta Persistence API dependencies to replace the javax.persistence package removed from the JDK.",
+        "human_impl": "<artifactId>jakarta.persistence-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_jaxrs",
+        "general_idea": "Add Jakarta RESTful Web Services (JAX-RS) dependencies to replace the javax.ws.rs package.",
+        "human_impl": "<artifactId>jakarta.ws.rs-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_validation",
+        "general_idea": "Add Jakarta Bean Validation dependencies to replace the javax.validation package.",
+        "human_impl": "<artifactId>hibernate-validator</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_websocket",
+        "general_idea": "Add Jakarta WebSocket dependencies to replace the javax.websocket package.",
+        "human_impl": "<artifactId>tyrus-server</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_el",
+        "general_idea": "Add Jakarta Expression Language dependencies required by newer Jakarta EE specs.",
+        "human_impl": "<artifactId>jakarta.el</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "test_framework_upgrade",
+        "general_idea": "Replace JUnit 4 with JUnit 5 (Jupiter) and add Mockito for modern testing support.",
+        "human_impl": "<artifactId>junit-bom</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_upgrade_surefire",
+        "general_idea": "Upgrade maven-surefire-plugin to version 3.0.0-M4 to support JUnit 5 and Java 17.",
+        "human_impl": "<version>3.0.0-M4</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_upgrade_failsafe",
+        "general_idea": "Upgrade maven-failsafe-plugin to version 3.0.0-M4 to support JUnit 5 and Java 17.",
+        "human_impl": "<version>3.0.0-M4</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_upgrade_javadoc",
+        "general_idea": "Upgrade maven-javadoc-plugin to version 3.3.1 to ensure compatibility with Java 17 documentation generation.",
+        "human_impl": "<version>3.3.1</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_upgrade_shade",
+        "general_idea": "Upgrade maven-shade-plugin to a snapshot version to fix compatibility issues with Java 16+ module system.",
+        "human_impl": "<version>3.3.0-SNAPSHOT</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition_hibernate",
+        "general_idea": "Add Hibernate Core and EclipseLink dependencies for JPA implementation.",
+        "human_impl": "<artifactId>hibernate-core</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition_databases",
+        "general_idea": "Add JDBC drivers for H2, PostgreSQL, and MySQL.",
+        "human_impl": "<artifactId>postgresql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition_jwt",
+        "general_idea": "Add JSON Web Token (JWT) dependencies for authentication.",
+        "human_impl": "<artifactId>jjwt-api</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition_lombok",
+        "general_idea": "Upgrade Lombok to a newer version compatible with recent Java versions.",
+        "human_impl": "<version>1.18.20</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition_collections",
+        "general_idea": "Add Eclipse Collections library.",
+        "human_impl": "<artifactId>eclipse-collections</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_addition_jacoco",
+        "general_idea": "Add Jacoco Maven plugin for code coverage analysis.",
+        "human_impl": "<artifactId>jacoco-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_addition_sonar",
+        "general_idea": "Add SonarQube scanner and quality gate plugins.",
+        "human_impl": "<artifactId>sonar-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_addition_versions",
+        "general_idea": "Add versions-maven-plugin to check for dependency updates.",
+        "human_impl": "<artifactId>versions-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_upgrade_scm",
+        "general_idea": "Upgrade maven-scm-publish-plugin and update configuration for GitHub Pages deployment.",
+        "human_impl": "<version>3.1.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_upgrade_archetype",
+        "general_idea": "Upgrade maven-archetype-plugin to version 3.2.0.",
+        "human_impl": "<version>3.2.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "config_cleanup_gitflow",
+        "general_idea": "Comment out automatic push configurations in maven-gitflow-plugin to prevent accidental pushes.",
+        "human_impl": "<!--pushFeatures>true</pushFeatures-->",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "config_cleanup_site",
+        "general_idea": "Remove commented-out maven-site-plugin configuration and clean up reporting plugins.",
+        "human_impl": "<!--plugin> ... maven-site-plugin ... </plugin-->",
+        "bucket": "polishment"
+      }
+    ],
     ".dockerignore": [
       {
         "kind": "remove_ci_dir_from_dockerignore",
@@ -19,7 +164,7 @@
     ".github/ci-settings.xml": [
       {
         "kind": "update_sonar_host_url",
-        "general_idea": "Change the SonarQube server URL from a public university instance to a local development machine address.",
+        "general_idea": "Changed the SonarQube host URL from a public university server to a local machine address.",
         "human_impl": "<sonar.host.url>http://pc-bruno:9000</sonar.host.url>",
         "bucket": "polishment"
       }
@@ -27,13 +172,13 @@
     ".github/workflows/ci.yml": [
       {
         "kind": "remove_jdk_setup",
-        "general_idea": "Removed the explicit JDK 8 setup step as the build now relies on a Docker container for the Java environment.",
+        "general_idea": "Removed explicit JDK 8 setup step as the build now relies on a Docker container for the Java environment.",
         "human_impl": "Commented out `actions/setup-java@v1` block.",
         "bucket": "polishment"
       },
       {
         "kind": "remove_maven_cache",
-        "general_idea": "Removed the Maven package caching step, likely due to the switch to a Docker-based build or self-hosted runner performance issues.",
+        "general_idea": "Removed Maven dependency caching step, likely due to switching to a self-contained Docker build or performance issues with self-hosted runners.",
         "human_impl": "Commented out `actions/cache@v2` block for `~/.m2`.",
         "bucket": "polishment"
       },
@@ -46,7 +191,13 @@
       {
         "kind": "add_teams_notification",
         "general_idea": "Added Microsoft Teams notifications for build success and failure using a specific GitHub Action.",
-        "human_impl": "Added `jdcargile/ms-teams-notification@v1.3` steps with `if: ${{ success() }}` and `if: ${{ failure() }}`.",
+        "human_impl": "Added `jdcargile/ms-teams-notification@v1.3` steps with `if: success()` and `if: failure()`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_old_notification",
+        "general_idea": "Removed previous Microsoft Teams notification implementation that was being replaced.",
+        "human_impl": "Commented out `skitionek/notify-microsoft-teams@master` blocks.",
         "bucket": "polishment"
       },
       {
@@ -65,7 +216,7 @@
       },
       {
         "kind": "remove_deprecated_credentials",
-        "general_idea": "Remove environment variable definitions for Bintray credentials which are no longer used.",
+        "general_idea": "Remove environment variables for Bintray credentials as the service is deprecated or no longer used.",
         "human_impl": "Removed ARG BINTRAY_USERNAME, ENV BINTRAY_USERNAME, ARG BINTRAY_API_KEY, ENV BINTRAY_API_KEY",
         "bucket": "polishment"
       },
@@ -78,28 +229,28 @@
     ],
     "build/build.sh": [
       {
+        "kind": "add_env_var_documentation",
+        "general_idea": "Added comments to document required environment variables for the build script.",
+        "human_impl": "Added block comment listing GITHUBLOGIN, GITHUBPASSWORD, DOCKER_USERNAME, DOCKER_PASSWORD, SONAR_TOKEN",
+        "bucket": "polishment"
+      },
+      {
         "kind": "remove_bintray_args",
-        "general_idea": "Removes build arguments for Bintray credentials as the artifact repository is being migrated away from Bintray.",
-        "human_impl": "--build-arg BINTRAY_USERNAME=$BINTRAY_USERNAME --build-arg BINTRAY_API_KEY=$BINTRAY_API_KEY",
+        "general_idea": "Removed build arguments for Bintray credentials as the artifact repository was migrated away from Bintray.",
+        "human_impl": "Removed --build-arg BINTRAY_USERNAME and --build-arg BINTRAY_API_KEY",
         "bucket": "breaking"
       },
       {
         "kind": "add_sonar_token_arg",
-        "general_idea": "Adds a build argument to pass the SonarQube token into the Docker build for code quality analysis.",
-        "human_impl": "--build-arg SONAR_TOKEN=$SONAR_TOKEN",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "add_env_var_docs",
-        "general_idea": "Documents the required environment variables for the build script to function correctly.",
-        "human_impl": "## MAKE SURE YOU HAVE enviroment variables ...",
+        "general_idea": "Added build argument to pass SonarQube token for code quality analysis during the build.",
+        "human_impl": "Added --build-arg SONAR_TOKEN=$SONAR_TOKEN",
         "bucket": "polishment"
       }
     ],
     "mvn.sh": [
       {
         "kind": "update_docker_base_image",
-        "general_idea": "Switch the Docker base image from an OpenJ9 JDK 11 variant to an AdoptOpenJDK 16 variant to align with the target JDK version.",
+        "general_idea": "Switch the Maven Docker image from an OpenJ9 JDK 11 variant to an AdoptOpenJDK 16 variant to align with the target JDK version.",
         "human_impl": "export MAVEN_IMAGE=brunoe/maven:3.8.2-adoptopenjdk-16",
         "bucket": "breaking"
       },
@@ -111,19 +262,19 @@
       },
       {
         "kind": "add_ssh_volume_mount",
-        "general_idea": "Mount the host's SSH directory into the container to enable secure Git operations or artifact uploads.",
+        "general_idea": "Mount the local SSH directory into the container to enable secure Git operations or artifact retrieval.",
         "human_impl": "--volume ~/.ssh:/home/user/.ssh",
         "bucket": "polishment"
       },
       {
         "kind": "add_gitconfig_volume_mount",
-        "general_idea": "Mount the host's git configuration into the container to preserve user identity and settings for Git commands.",
+        "general_idea": "Mount the local Git configuration into the container to preserve user-specific Git settings.",
         "human_impl": "--volume ~/.gitconfig:/home/user/.gitconfig",
         "bucket": "polishment"
       },
       {
         "kind": "change_user_execution_strategy",
-        "general_idea": "Replace the direct user ID mapping with environment variables and run the Maven command as a specific non-root user using runuser to improve security and compatibility with the new image.",
+        "general_idea": "Replace the direct user ID mapping with PUID/PGID environment variables and run Maven as a specific container user to fix permission issues in the new image.",
         "human_impl": "--env PUID=`id -u` -e PGID=`id -g` ... runuser --user user --group user -- mvn",
         "bucket": "breaking"
       }

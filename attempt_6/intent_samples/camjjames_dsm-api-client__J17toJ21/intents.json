@@ -10,7 +10,7 @@
     "src/main/java/org/flaad/dsm/client/request/AuthRequest.java": [
       {
         "kind": "rename_fields_to_camel_case",
-        "general_idea": "Rename fields from snake_case to camelCase to adhere to Java naming conventions.",
+        "general_idea": "Rename fields with underscores to camelCase to adhere to Java naming conventions.",
         "human_impl": "String enable_syno_token; -> String enableSynoToken;",
         "bucket": "polishment"
       },
@@ -18,13 +18,13 @@
         "kind": "add_feign_param_annotations",
         "general_idea": "Add @Param annotations to map renamed camelCase fields to their original snake_case query parameters for Feign client compatibility.",
         "human_impl": "@Param(\"enable_syno_token\") String enableSynoToken;",
-        "bucket": "polishment"
+        "bucket": "breaking"
       }
     ],
     "src/test/java/org/flaad/dsm/client/AuthApiClientTest.java": [],
     "pom.xml": [
       {
-        "kind": "upgrade_spring_boot_parent",
+        "kind": "upgrade_parent_pom",
         "general_idea": "Upgrade Spring Boot parent from 2.7.0 to 3.3.6 to align with Java 21 and modern Spring ecosystem.",
         "human_impl": "<version>3.3.6</version>",
         "bucket": "breaking"
@@ -36,122 +36,122 @@
         "bucket": "breaking"
       },
       {
-        "kind": "upgrade_commons_io",
-        "general_idea": "Update commons-io dependency to version 2.18.0.",
+        "kind": "upgrade_dependency",
+        "general_idea": "Upgrade commons-io to version 2.18.0.",
         "human_impl": "<commons-io.version>2.18.0</commons-io.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_feign_jackson",
-        "general_idea": "Update feign-jackson dependency to version 13.5.",
+        "kind": "upgrade_dependency",
+        "general_idea": "Upgrade feign-jackson to version 13.5.",
         "human_impl": "<feign-jackson.version>13.5</feign-jackson.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_spring_cloud",
-        "general_idea": "Update Spring Cloud BOM to version 2023.0.6.",
+        "kind": "upgrade_dependency",
+        "general_idea": "Upgrade Spring Cloud BOM to version 2023.0.6.",
         "human_impl": "<spring-cloud.version>2023.0.6</spring-cloud.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_spring_cloud_openfeign",
-        "general_idea": "Update Spring Cloud OpenFeign starter to version 4.1.4.",
+        "kind": "upgrade_dependency",
+        "general_idea": "Upgrade spring-cloud-openfeign to version 4.1.4.",
         "human_impl": "<spring-cloud-openfeign.version>4.1.4</spring-cloud-openfeign.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_spring_cloud_stub_runner",
-        "general_idea": "Update Spring Cloud Contract Stub Runner to version 4.1.4.",
+        "kind": "upgrade_dependency",
+        "general_idea": "Upgrade spring-cloud-starter-contract-stub-runner to version 4.1.4.",
         "human_impl": "<spring-cloud-starter-contract-stub-runner.version>4.1.4</spring-cloud-starter-contract-stub-runner.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_wiremock",
-        "general_idea": "Update WireMock dependency to version 3.9.2.",
+        "kind": "upgrade_dependency",
+        "general_idea": "Upgrade wiremock to version 3.9.2.",
         "human_impl": "<wiremock.version>3.9.2</wiremock.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_maven_version",
-        "general_idea": "Update the managed Maven version property to 3.9.0.",
+        "kind": "upgrade_build_tool",
+        "general_idea": "Update Maven version property to 3.9.0.",
         "human_impl": "<maven.version>3.9.0</maven.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_checkstyle",
-        "general_idea": "Update Checkstyle to version 10.21.0.",
+        "kind": "upgrade_dependency",
+        "general_idea": "Upgrade Checkstyle to version 10.21.0.",
         "human_impl": "<checkstyle.version>10.21.0</checkstyle.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_spring_javaformat",
-        "general_idea": "Update Spring Java Format Checkstyle plugin to version 0.0.47.",
+        "kind": "upgrade_dependency",
+        "general_idea": "Upgrade spring-javaformat-checkstyle to version 0.0.47.",
         "human_impl": "<spring-javaformat-checkstyle.version>0.0.47</spring-javaformat-checkstyle.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_git_commit_plugin",
-        "general_idea": "Update git-commit-maven-plugin to version 7.0.1.",
+        "kind": "upgrade_plugin",
+        "general_idea": "Upgrade git-commit-maven-plugin to version 7.0.1.",
         "human_impl": "<git-commit-maven.plugin>7.0.1</git-commit-maven.plugin>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_exec_plugin",
-        "general_idea": "Update exec-maven-plugin to version 3.5.0.",
+        "kind": "upgrade_plugin",
+        "general_idea": "Upgrade exec-maven-plugin to version 3.5.0.",
         "human_impl": "<exec-maven.plugin>3.5.0</exec-maven.plugin>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_checkstyle_plugin",
-        "general_idea": "Update maven-checkstyle-plugin to version 3.5.0.",
+        "kind": "upgrade_plugin",
+        "general_idea": "Upgrade maven-checkstyle-plugin to version 3.5.0.",
         "human_impl": "<maven-checkstyle.plugin>3.5.0</maven-checkstyle.plugin>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_dependency_plugin",
-        "general_idea": "Update maven-dependency-plugin to version 3.8.1.",
+        "kind": "upgrade_plugin",
+        "general_idea": "Upgrade maven-dependency-plugin to version 3.8.1.",
         "human_impl": "<maven-dependency.plugin>3.8.1</maven-dependency.plugin>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_jacoco_plugin",
-        "general_idea": "Update maven-jacoco-plugin to version 0.8.12.",
+        "kind": "upgrade_plugin",
+        "general_idea": "Upgrade maven-jacoco-plugin to version 0.8.12.",
         "human_impl": "<maven-jacoco.plugin>0.8.12</maven-jacoco.plugin>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_surefire_plugin",
-        "general_idea": "Update maven-surefire-plugin to version 3.5.2.",
+        "kind": "upgrade_plugin",
+        "general_idea": "Upgrade maven-surefire-plugin to version 3.5.2.",
         "human_impl": "<maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_sonar_plugin",
-        "general_idea": "Update sonar-maven-plugin to version 4.0.0.4121.",
+        "kind": "upgrade_plugin",
+        "general_idea": "Upgrade sonar-maven-plugin to version 4.0.0.4121.",
         "human_impl": "<sonar-maven.plugin>4.0.0.4121</sonar-maven.plugin>",
         "bucket": "polishment"
       },
       {
-        "kind": "upgrade_dependency_check_plugin",
-        "general_idea": "Update dependency-check-maven to version 11.1.0.",
+        "kind": "upgrade_plugin",
+        "general_idea": "Upgrade dependency-check-maven to version 11.1.0.",
         "human_impl": "<dependency-check-maven.version>11.1.0</dependency-check-maven.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "exclude_bouncycastle",
-        "general_idea": "Exclude legacy Bouncy Castle provider from OpenFeign dependency to resolve conflicts or security issues.",
+        "kind": "exclude_dependency",
+        "general_idea": "Exclude bcprov-jdk15on from spring-cloud-starter-openfeign to resolve potential conflicts or security issues.",
         "human_impl": "<exclusion><groupId>org.bouncycastle</groupId><artifactId>bcprov-jdk15on</artifactId></exclusion>",
         "bucket": "polishment"
       },
       {
-        "kind": "add_spring_webmvc",
-        "general_idea": "Explicitly add spring-webmvc dependency, likely required due to Spring Boot 3 dependency management changes.",
+        "kind": "add_dependency",
+        "general_idea": "Explicitly add spring-webmvc dependency.",
         "human_impl": "<dependency><groupId>org.springframework</groupId><artifactId>spring-webmvc</artifactId></dependency>",
-        "bucket": "breaking"
+        "bucket": "polishment"
       },
       {
-        "kind": "update_wiremock_group_id",
-        "general_idea": "Update WireMock groupId from com.github.tomakehurst to org.wiremock to match the new artifact coordinates in version 3.x.",
+        "kind": "update_dependency_coordinates",
+        "general_idea": "Update WireMock groupId from com.github.tomakehurst to org.wiremock to match the new artifact location in version 3.x.",
         "human_impl": "<groupId>org.wiremock</groupId>",
         "bucket": "breaking"
       }
@@ -159,14 +159,14 @@
     ".circleci/config.yml": [
       {
         "kind": "update_ci_jdk_image",
-        "general_idea": "Upgrade the CircleCI Docker image from OpenJDK 11 to OpenJDK 17 to align with the target Java version.",
-        "human_impl": "image: cimg/openjdk:17.0",
+        "general_idea": "Upgrade the CircleCI Docker image from OpenJDK 11 to OpenJDK 17 to align with the project's Java version migration.",
+        "human_impl": "- image: cimg/openjdk:11.0\n+ image: cimg/openjdk:17.0",
         "bucket": "breaking"
       },
       {
         "kind": "update_sonar_orb_version",
-        "general_idea": "Bump the SonarCloud orb version to a newer release.",
-        "human_impl": "sonarcloud: sonarsource/sonarcloud@1.1.1",
+        "general_idea": "Bump the SonarCloud orb version to 1.1.1 to ensure compatibility and access to latest features.",
+        "human_impl": "- sonarcloud: sonarsource/sonarcloud@1.0.2\n+ sonarcloud: sonarsource/sonarcloud@1.1.1",
         "bucket": "polishment"
       }
     ],
@@ -195,7 +195,7 @@
     "mvnw": [
       {
         "kind": "chmod_executable",
-        "general_idea": "Set the executable permission bit on the Maven wrapper script to ensure it can be run directly from the command line.",
+        "general_idea": "Make the Maven wrapper script executable to allow direct execution from the command line.",
         "human_impl": "old mode 100644 -> new mode 100755",
         "bucket": "polishment"
       }
@@ -210,7 +210,7 @@
       {
         "kind": "add_sonar_test_properties",
         "general_idea": "Add explicit SonarQube properties for test binaries and libraries to ensure test code is analyzed correctly.",
-        "human_impl": "Added sonar.java.test.binaries and sonar.java.test.libraries properties",
+        "human_impl": "Added sonar.java.test.binaries=target/test-classes and sonar.java.test.libraries=target/test-classes",
         "bucket": "polishment"
       }
     ]

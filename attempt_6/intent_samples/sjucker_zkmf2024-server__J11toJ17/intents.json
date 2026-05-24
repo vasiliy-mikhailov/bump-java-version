@@ -10,63 +10,63 @@
     "pom.xml": [
       {
         "kind": "bump_spring_boot_parent",
-        "general_idea": "Upgrade Spring Boot parent version to 2.6.2 to support Java 17.",
+        "general_idea": "Upgrade Spring Boot parent version to 2.6.2 to support Java 17 features and security patches.",
         "human_impl": "<version>2.6.2</version>",
         "bucket": "breaking"
       },
       {
         "kind": "set_java_version_property",
-        "general_idea": "Update the Java version property to 17.",
+        "general_idea": "Update the Maven property to target Java 17 for compilation.",
         "human_impl": "<java.version>17</java.version>",
         "bucket": "breaking"
       },
       {
-        "kind": "add_mapstruct_dependency",
-        "general_idea": "Add MapStruct dependency for object mapping.",
-        "human_impl": "<artifactId>mapstruct</artifactId>",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "add_lombok_mapstruct_binding",
-        "general_idea": "Add Lombok-MapStruct binding to resolve annotation processor conflicts.",
-        "human_impl": "<artifactId>lombok-mapstruct-binding</artifactId>",
+        "kind": "add_spring_security_dependency",
+        "general_idea": "Include Spring Security starter to enable authentication and authorization features.",
+        "human_impl": "<artifactId>spring-boot-starter-security</artifactId>",
         "bucket": "polishment"
       },
       {
         "kind": "add_firebase_admin_dependency",
-        "general_idea": "Add Firebase Admin SDK dependency for authentication support.",
+        "general_idea": "Add Firebase Admin SDK for server-side Firebase integration.",
         "human_impl": "<artifactId>firebase-admin</artifactId>",
         "bucket": "polishment"
       },
       {
-        "kind": "add_mail_dependency",
-        "general_idea": "Add JavaMail API dependency for sending emails.",
+        "kind": "add_javax_mail_dependency",
+        "general_idea": "Add JavaMail API dependency to support sending emails.",
         "human_impl": "<artifactId>mail</artifactId>",
         "bucket": "polishment"
       },
       {
-        "kind": "add_activation_dependency",
+        "kind": "add_javax_activation_dependency",
         "general_idea": "Add Java Activation Framework dependency required by JavaMail.",
         "human_impl": "<artifactId>activation</artifactId>",
         "bucket": "polishment"
       },
       {
-        "kind": "add_security_starter",
-        "general_idea": "Add Spring Security starter for authentication and authorization.",
-        "human_impl": "<artifactId>spring-boot-starter-security</artifactId>",
+        "kind": "add_lombok_dependency",
+        "general_idea": "Add Lombok dependency to reduce boilerplate code in entities and DTOs.",
+        "human_impl": "<artifactId>lombok</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mapstruct_dependency",
+        "general_idea": "Add MapStruct dependency for type-safe bean mapping.",
+        "human_impl": "<artifactId>mapstruct</artifactId>",
         "bucket": "polishment"
       },
       {
         "kind": "configure_maven_compiler_plugin",
-        "general_idea": "Configure Maven compiler plugin with source/target 17 and annotation processors for Lombok and MapStruct.",
+        "general_idea": "Configure Maven compiler plugin with Java 17 source/target and annotation processors for Lombok and MapStruct.",
         "human_impl": "<source>${java.version}</source> ... <annotationProcessorPaths>...",
         "bucket": "breaking"
       },
       {
         "kind": "restore_spring_boot_maven_plugin",
-        "general_idea": "Restore the Spring Boot Maven plugin configuration which was previously removed or misconfigured.",
+        "general_idea": "Re-add the Spring Boot Maven plugin which was previously excluded or misconfigured.",
         "human_impl": "<artifactId>spring-boot-maven-plugin</artifactId>",
-        "bucket": "polishment"
+        "bucket": "breaking"
       }
     ],
     ".gitignore": [

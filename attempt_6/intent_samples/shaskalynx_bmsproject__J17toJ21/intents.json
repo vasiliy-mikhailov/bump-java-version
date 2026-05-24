@@ -15,32 +15,26 @@
         "bucket": "polishment"
       },
       {
-        "kind": "add_primary_stage_field",
+        "kind": "store_primary_stage",
         "general_idea": "Added a static field to store the primary JavaFX Stage for global access.",
         "human_impl": "private static Stage primaryStage;",
         "bucket": "polishment"
       },
       {
-        "kind": "change_initial_fxml",
-        "general_idea": "Changed the initial FXML file loaded from Login.fxml to Dashboard.fxml.",
+        "kind": "change_initial_view",
+        "general_idea": "Changed the initial FXML view loaded on startup from Login to Dashboard.",
         "human_impl": "FXMLLoader loader = new FXMLLoader(getClass().getResource(\"/Dashboard.fxml\"));",
         "bucket": "polishment"
       },
       {
-        "kind": "assign_primary_stage",
-        "general_idea": "Assigned the passed Stage instance to the static primaryStage field in the start method.",
-        "human_impl": "primaryStage = stage;",
-        "bucket": "polishment"
-      },
-      {
         "kind": "add_application_context_getter",
-        "general_idea": "Added a public static getter method to access the Spring application context.",
+        "general_idea": "Added a public static getter for the Spring ApplicationContext to allow dependency injection access from other classes.",
         "human_impl": "public static ConfigurableApplicationContext getApplicationContext() { return applicationContext; }",
         "bucket": "polishment"
       },
       {
         "kind": "add_primary_stage_getter",
-        "general_idea": "Added a public static getter method to access the primary JavaFX Stage.",
+        "general_idea": "Added a public static getter for the primary Stage to allow UI manipulation from other classes.",
         "human_impl": "public static Stage getPrimaryStage() { return primaryStage; }",
         "bucket": "polishment"
       }
@@ -54,8 +48,8 @@
       },
       {
         "kind": "add_jdbc_dependency",
-        "general_idea": "Include the Spring Boot JDBC starter to enable database connectivity features required by the application logic.",
-        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-jdbc</artifactId></dependency>",
+        "general_idea": "Include the Spring Boot JDBC starter to enable database connectivity features required by the application.",
+        "human_impl": "<artifactId>spring-boot-starter-jdbc</artifactId>",
         "bucket": "polishment"
       }
     ],
@@ -104,7 +98,7 @@
       },
       {
         "kind": "add_registration_prompt_text",
-        "general_idea": "Added text prompting users to register if they don't have an account.",
+        "general_idea": "Added text prompting users who don't have an account to register.",
         "human_impl": "<Text ... text=\"Don't have an account?\" />",
         "bucket": "polishment"
       },

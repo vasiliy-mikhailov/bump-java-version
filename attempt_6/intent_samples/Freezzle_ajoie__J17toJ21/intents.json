@@ -17,40 +17,46 @@
       },
       {
         "kind": "javadoc_formatting",
-        "general_idea": "Update Javadoc block comment style to use explicit <p> tag for paragraph separation.",
+        "general_idea": "Update Javadoc comment style to use explicit <p> tag for paragraph separation.",
         "human_impl": "changed ' *' to ' * <p>' in class javadoc",
         "bucket": "polishment"
       },
       {
         "kind": "annotation_formatting",
         "general_idea": "Reformat @Pointcut annotation to use single-line string concatenation instead of multi-line block.",
-        "human_impl": "collapsed @Pointcut definition into fewer lines with trailing concatenation",
+        "human_impl": "collapsed multi-line @Pointcut definition into single lines",
         "bucket": "polishment"
       },
       {
         "kind": "javadoc_alignment",
-        "general_idea": "Align @param tag descriptions in Javadoc for consistent formatting.",
+        "general_idea": "Align @param tags in Javadoc for consistent formatting.",
         "human_impl": "added spaces to @param e to align with previous param",
         "bucket": "polishment"
       },
       {
         "kind": "method_call_formatting",
-        "general_idea": "Reformat logger.error method calls to use single-line or fewer lines for arguments.",
-        "human_impl": "collapsed multi-line logger.error calls into single lines or fewer lines",
+        "general_idea": "Reformat logger.error method calls to use single-line arguments instead of multi-line blocks.",
+        "human_impl": "collapsed multi-line logger.error calls into single lines",
         "bucket": "polishment"
       },
       {
         "kind": "method_call_formatting",
-        "general_idea": "Reformat log.debug and log.error method calls to split arguments across lines for readability.",
-        "human_impl": "split log.debug and log.error arguments onto new lines",
+        "general_idea": "Reformat log.debug method call to use single-line arguments instead of multi-line block.",
+        "human_impl": "collapsed multi-line log.debug call into single lines",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "method_call_formatting",
+        "general_idea": "Reformat log.error method call to use single-line arguments instead of multi-line block.",
+        "human_impl": "collapsed multi-line log.error call into single lines",
         "bucket": "polishment"
       }
     ],
     "src/main/java/ch/salon/config/AsyncConfiguration.java": [
       {
         "kind": "reorder_imports",
-        "general_idea": "Moved the java.util.concurrent.Executor import from the top of the file to after the third-party imports to conform to a specific import ordering style.",
-        "human_impl": "Moved 'import java.util.concurrent.Executor;' from line 3 to line 17.",
+        "general_idea": "Move the java.util.concurrent.Executor import to the end of the import block to comply with standard Java import ordering conventions.",
+        "human_impl": "Moved 'import java.util.concurrent.Executor;' from the top of the import list to after the third-party imports.",
         "bucket": "polishment"
       }
     ],
@@ -69,7 +75,7 @@
       },
       {
         "kind": "reorder_imports",
-        "general_idea": "Move java.util imports to after third-party imports, likely due to IDE auto-formatting rules.",
+        "general_idea": "Move java.util imports to after third-party and Spring imports, likely due to IDE auto-formatting rules.",
         "human_impl": "import org.springframework...;\\n\\nimport java.util...;",
         "bucket": "polishment"
       }
@@ -77,47 +83,47 @@
     "src/main/java/ch/salon/config/CacheConfiguration.java": [
       {
         "kind": "import_cleanup",
-        "general_idea": "Replaced wildcard imports with explicit imports and reordered them for better readability and maintainability.",
-        "human_impl": "Replaced 'import org.ehcache.config.builders.*;' with explicit imports for CacheConfigurationBuilder, ExpiryPolicyBuilder, and ResourcePoolsBuilder.",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "code_formatting",
-        "general_idea": "Reformatted the cache configuration builder chain to use a different indentation style.",
-        "human_impl": "Changed the multi-line indentation of the CacheConfigurationBuilder.newCacheConfigurationBuilder call.",
+        "general_idea": "Replaced wildcard imports with explicit imports and reordered them for better code clarity.",
+        "human_impl": "import org.ehcache.config.builders.CacheConfigurationBuilder;\nimport org.ehcache.config.builders.ExpiryPolicyBuilder;\nimport org.ehcache.config.builders.ResourcePoolsBuilder;",
         "bucket": "polishment"
       },
       {
         "kind": "field_reordering",
         "general_idea": "Moved the jcacheConfiguration field declaration to the top of the class for better organization.",
-        "human_impl": "Moved 'private final javax.cache.configuration.Configuration<Object, Object> jcacheConfiguration;' above gitProperties and buildProperties.",
+        "human_impl": "private final javax.cache.configuration.Configuration<Object, Object> jcacheConfiguration;\n    private GitProperties gitProperties;",
         "bucket": "polishment"
       },
       {
-        "kind": "cache_config_removal",
-        "general_idea": "Removed the cache configuration for the Authority entity, likely because it is no longer needed or handled differently.",
-        "human_impl": "Removed the line 'createCache(cm, ch.salon.domain.Authority.class.getName());' from the JCacheManagerCustomizer bean.",
+        "kind": "code_formatting",
+        "general_idea": "Reformatted the cache configuration builder chain to use a different indentation style.",
+        "human_impl": "CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class,\n                                                 ResourcePoolsBuilder.heap(ehcache.getMaxEntries())).withExpiry(",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "cache_entry_removal",
+        "general_idea": "Removed the cache entry for Authority class, likely because it is no longer needed or handled differently.",
+        "human_impl": "-            createCache(cm, ch.salon.domain.Authority.class.getName());",
         "bucket": "polishment"
       }
     ],
     "src/main/java/ch/salon/config/Constants.java": [
       {
         "kind": "formatting_regex_constant",
-        "general_idea": "Reformat the LOGIN_REGEX string constant to span multiple lines for improved readability.",
-        "human_impl": "Split the single-line string assignment into a multi-line assignment.",
+        "general_idea": "Reformatted the LOGIN_REGEX string literal to span multiple lines for improved readability.",
+        "human_impl": "Split the LOGIN_REGEX assignment across two lines.",
         "bucket": "polishment"
       },
       {
         "kind": "formatting_constructor_body",
-        "general_idea": "Reformat the private constructor body to use braces on separate lines.",
-        "human_impl": "Change 'private Constants() {}' to 'private Constants() {\\n    }'.",
+        "general_idea": "Changed the style of the private constructor body from a single-line empty block to a multi-line block.",
+        "human_impl": "Expanded 'private Constants() {}' to 'private Constants() {\\n    }'.",
         "bucket": "polishment"
       }
     ],
     "src/main/java/ch/salon/config/DatabaseConfiguration.java": [
       {
         "kind": "formatting_cleanup",
-        "general_idea": "Adjust whitespace and brace placement to conform to standard Java coding conventions.",
+        "general_idea": "Adjust whitespace and brace placement to conform to standard Java code style conventions.",
         "human_impl": "Removed space inside annotation braces and moved class closing brace to a new line.",
         "bucket": "polishment"
       }
@@ -135,20 +141,14 @@
     "src/main/java/ch/salon/config/LoggingConfiguration.java": [
       {
         "kind": "refactor_imports",
-        "general_idea": "Replaced wildcard static import with explicit static imports for LoggingUtils methods.",
-        "human_impl": "import static tech.jhipster.config.logging.LoggingUtils.addContextListener;",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "refactor_imports",
-        "general_idea": "Reordered import statements to group java.util imports together.",
-        "human_impl": "import java.util.HashMap;\nimport java.util.Map;",
+        "general_idea": "Reorganize imports to group standard library, third-party, and static imports separately for better readability.",
+        "human_impl": "Moved java.util imports and static LoggingUtils imports to distinct blocks.",
         "bucket": "polishment"
       },
       {
         "kind": "refactor_formatting",
-        "general_idea": "Reformatted constructor signature to place parameters on subsequent lines.",
-        "human_impl": "public LoggingConfiguration(@Value(\"${spring.application.name}\") String appName,\n            @Value(\"${server.port}\") String serverPort, ...",
+        "general_idea": "Adjust constructor parameter formatting to fit on fewer lines or follow a different style guide.",
+        "human_impl": "Changed multi-line constructor arguments to a more compact format.",
         "bucket": "polishment"
       }
     ],

@@ -10,9 +10,9 @@
     "src/test/java/org/acme/quickstart/NativeGreetingResourceIT.java": [
       {
         "kind": "rename_test_annotation",
-        "general_idea": "Replace deprecated SubstrateTest annotation with NativeImageTest to align with Quarkus naming conventions.",
+        "general_idea": "Replace deprecated SubstrateTest annotation with NativeImageTest to align with updated Quarkus testing APIs.",
         "human_impl": "@NativeImageTest",
-        "bucket": "polishment"
+        "bucket": "breaking"
       }
     ],
     "pom.xml": [
@@ -30,37 +30,37 @@
       },
       {
         "kind": "add_compiler_parameters",
-        "general_idea": "Enable parameter name retention in compiled class files, often required by frameworks like Quarkus.",
+        "general_idea": "Enable parameter name retention in compiled class files, often required by modern frameworks like Quarkus.",
         "human_impl": "<maven.compiler.parameters>true</maven.compiler.parameters>",
         "bucket": "polishment"
       },
       {
         "kind": "update_quarkus_bom",
-        "general_idea": "Switch from quarkus-bom to quarkus-universe-bom and update version to 1.5.2.Final to align with newer Quarkus ecosystem standards.",
+        "general_idea": "Switch from the deprecated quarkus-bom to the new quarkus-universe-bom for dependency management.",
         "human_impl": "<artifactId>${quarkus.platform.artifact-id}</artifactId>\n<version>${quarkus.platform.version}</version>",
-        "bucket": "polishment"
+        "bucket": "breaking"
       },
       {
-        "kind": "update_quarkus_plugin_version",
-        "general_idea": "Update the Quarkus Maven plugin version to match the new platform version.",
-        "human_impl": "<version>${quarkus-plugin.version}</version>",
-        "bucket": "polishment"
+        "kind": "update_quarkus_version",
+        "general_idea": "Upgrade the Quarkus platform version from 0.22.0 to 1.5.2.Final.",
+        "human_impl": "<quarkus.platform.version>1.5.2.Final</quarkus.platform.version>",
+        "bucket": "breaking"
       },
       {
-        "kind": "update_surefire_plugin_version",
-        "general_idea": "Bump the Maven Surefire plugin version from 2.22.0 to 2.22.1 for minor bug fixes and compatibility.",
+        "kind": "update_surefire_version",
+        "general_idea": "Bump the maven-surefire-plugin version from 2.22.0 to 2.22.1.",
         "human_impl": "<surefire-plugin.version>2.22.1</surefire-plugin.version>",
         "bucket": "polishment"
       },
       {
-        "kind": "modernize_surefire_config",
-        "general_idea": "Replace deprecated systemProperties configuration with systemPropertyVariables in Surefire and Failsafe plugins.",
+        "kind": "fix_surefire_config_syntax",
+        "general_idea": "Replace deprecated systemProperties configuration element with systemPropertyVariables in surefire and failsafe plugins.",
         "human_impl": "<systemPropertyVariables>\n  <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>\n</systemPropertyVariables>",
         "bucket": "polishment"
       },
       {
         "kind": "refactor_native_profile",
-        "general_idea": "Remove redundant native-image goal configuration from the native profile in favor of Quarkus property-based configuration.",
+        "general_idea": "Remove explicit native-image goal configuration from the native profile in favor of Quarkus plugin defaults.",
         "human_impl": "<quarkus.package.type>native</quarkus.package.type>",
         "bucket": "polishment"
       }

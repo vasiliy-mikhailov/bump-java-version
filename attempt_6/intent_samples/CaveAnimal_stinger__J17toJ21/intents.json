@@ -34,7 +34,7 @@
       },
       {
         "kind": "configure_surefire_plugin",
-        "general_idea": "Configure maven-surefire-plugin to set system properties for test result directory.",
+        "general_idea": "Configure Maven Surefire plugin to set system properties for test result directories.",
         "human_impl": "<artifactId>maven-surefire-plugin</artifactId>",
         "bucket": "polishment"
       }
@@ -42,7 +42,7 @@
     "README.md": [
       {
         "kind": "update_readme_package_path",
-        "general_idea": "Update the README documentation to reflect the new package namespace after refactoring.",
+        "general_idea": "Update the README documentation to reflect the new package namespace after refactoring from com.caveanimal to com.codecounter.",
         "human_impl": "Changed 'java/com/caveanimal/stinger/' to 'java/com/codecounter/stinger/' in the directory tree diagram.",
         "bucket": "polishment"
       }
@@ -67,37 +67,31 @@
       {
         "kind": "add_navigation_history",
         "general_idea": "Implement back/forward navigation stack to allow users to traverse directory history.",
-        "human_impl": "Added `historyStack` and `forwardStack` arrays and `goBack()` function.",
+        "human_impl": "let historyStack = []; let forwardStack = []; function goToPath(path, pushHistory = true) { ... }",
         "bucket": "polishment"
       },
       {
-        "kind": "refactor_navigation_logic",
-        "general_idea": "Centralize path navigation into a single `goToPath` function to manage state and history consistently.",
-        "human_impl": "Created `goToPath(path, pushHistory)` and updated `navigateBtn`, `keypress`, and `navigateToDirectory` to use it.",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "switch_to_sse_analysis",
-        "general_idea": "Replace synchronous directory analysis with Server-Sent Events (SSE) for real-time progress updates.",
-        "human_impl": "Replaced `analyzeDirectory` call with `analyzeDirectoryStream` using `EventSource` to listen for `start`, `directory`, `file`, and `result` events.",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "modernize_event_binding",
-        "general_idea": "Replace inline `onclick` attributes with programmatic event listeners for better security and maintainability.",
-        "human_impl": "Removed `onclick` from HTML generation in `displayFiles` and added `addEventListener` calls for `.file-item` and `#parentDirItem`.",
+        "kind": "refactor_event_binding",
+        "general_idea": "Replace inline onclick attributes with data attributes and event delegation for cleaner DOM manipulation.",
+        "human_impl": "fileList.querySelectorAll('.file-item[data-directory=\"true\"]').forEach(item => { item.addEventListener('click', ...); });",
         "bucket": "polishment"
       },
       {
         "kind": "fix_drive_root_navigation",
-        "general_idea": "Correctly handle navigation to the root of a Windows drive (e.g., C:\\) when moving up from a drive letter.",
-        "human_impl": "Added check in `navigateToParent` for single-part paths matching drive letters to return `C:\\` instead of empty string.",
+        "general_idea": "Correctly handle parent directory navigation for Windows drive roots (e.g., C:\\).",
+        "human_impl": "if (parts.length === 1 && /^[A-Za-z]:$/.test(parts[0])) { parentPath = parts[0] + separator; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "migrate_to_sse_analysis",
+        "general_idea": "Replace synchronous directory analysis with Server-Sent Events (SSE) for real-time progress updates.",
+        "human_impl": "const es = new EventSource(`/api/analyze-stream?path=${encodeURIComponent(path)}`);",
         "bucket": "polishment"
       },
       {
         "kind": "add_null_safety_display",
-        "general_idea": "Ensure analysis results display correctly even if specific fields are missing or null.",
-        "human_impl": "Used nullish coalescing `?? 0` in `displayAnalysisResults` for all numeric fields like `totalFolders` and `totalFiles`.",
+        "general_idea": "Ensure analysis result fields are safely handled if undefined or null before display.",
+        "human_impl": "${formatNumber(results.totalFolders ?? 0)}",
         "bucket": "polishment"
       }
     ],

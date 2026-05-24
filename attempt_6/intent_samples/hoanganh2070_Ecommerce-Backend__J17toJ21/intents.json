@@ -22,7 +22,7 @@
       },
       {
         "kind": "remove_todo_comment",
-        "general_idea": "Removed an auto-generated TODO comment from the method body.",
+        "general_idea": "Removed an auto-generated TODO comment stub from the method body.",
         "human_impl": "-// TODO Auto-generated method stub",
         "bucket": "polishment"
       }
@@ -36,7 +36,7 @@
       },
       {
         "kind": "update_endpoint_path",
-        "general_idea": "Changed the GET endpoint path from /category to /api/category to align with a new API versioning or routing structure.",
+        "general_idea": "Changed the REST endpoint path from /category to /api/category to align with API versioning or routing standards.",
         "human_impl": "Changed `@GetMapping(\"/category\")` to `@GetMapping(\"/api/category\")`.",
         "bucket": "breaking"
       }
@@ -50,13 +50,13 @@
       },
       {
         "kind": "update_lombok_config",
-        "general_idea": "Explicitly set Lombok version and change scope to provided.",
+        "general_idea": "Pin Lombok version and change scope to provided for better build hygiene.",
         "human_impl": "<version>1.18.30</version>\n<scope>provided</scope>",
         "bucket": "polishment"
       },
       {
         "kind": "add_openapi_dependency",
-        "general_idea": "Add SpringDoc OpenAPI starter for documentation generation.",
+        "general_idea": "Add SpringDoc OpenAPI starter to enable API documentation generation.",
         "human_impl": "<dependency>\n    <groupId>org.springdoc</groupId>\n    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>\n    <version>2.3.0</version>\n</dependency>",
         "bucket": "polishment"
       }
@@ -64,7 +64,7 @@
     ".gitignore": [
       {
         "kind": "add_gitignore_entry",
-        "general_idea": "Ignore .fake files in the repository to prevent them from being tracked by Git.",
+        "general_idea": "Ignore .fake files in the repository.",
         "human_impl": ".fake",
         "bucket": "polishment"
       }

@@ -18,32 +18,20 @@
     "junit/src/test/java/com/telusko/learning/ShapesTest.java": [
       {
         "kind": "add_test_instance_lifecycle",
-        "general_idea": "Configure the test class to use a single instance per class lifecycle to allow constructor initialization.",
+        "general_idea": "Configure test instance lifecycle to PER_CLASS to allow constructor initialization for shared state.",
         "human_impl": "@TestInstance(TestInstance.Lifecycle.PER_CLASS)",
         "bucket": "polishment"
       },
       {
-        "kind": "add_constructor_initialization",
-        "general_idea": "Initialize the shared Shapes object in the constructor instead of within individual test methods.",
-        "human_impl": "ShapesTest(){ s = new Shapes(); }",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "refactor_nested_test_class",
-        "general_idea": "Encapsulate square area tests within a nested class for better organization.",
+        "kind": "refactor_test_structure",
+        "general_idea": "Restructure tests into nested classes for better organization and reuse of the Shapes instance.",
         "human_impl": "@Nested class ComputeSquareAreaTests { ... }",
         "bucket": "polishment"
       },
       {
-        "kind": "add_circle_area_test",
-        "general_idea": "Add a new test case for computing the area of a circle.",
-        "human_impl": "void shouldReturnCorrectResultWhenProvidedValueIsCorrect() { ... s.computeCircleArea(4); ... }",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "add_after_all_hook",
-        "general_idea": "Add a static method annotated with @AfterAll to execute cleanup or logging after all tests.",
-        "human_impl": "@AfterAll static void finish(){ ... }",
+        "kind": "add_lifecycle_hooks",
+        "general_idea": "Add @AfterAll hook to execute cleanup or logging after all tests in the class finish.",
+        "human_impl": "@AfterAll static void finish() { ... }",
         "bucket": "polishment"
       }
     ],

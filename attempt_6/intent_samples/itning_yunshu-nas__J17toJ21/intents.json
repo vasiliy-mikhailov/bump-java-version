@@ -15,8 +15,8 @@
         "bucket": "polishment"
       },
       {
-        "kind": "derive_auth_flag",
-        "general_idea": "Derive the enable flag from the presence of the config object instead of storing it explicitly.",
+        "kind": "derive_enable_flag",
+        "general_idea": "Derive the enable flag from the presence of the configuration object instead of storing a separate boolean.",
         "human_impl": "Removed `enableBasicAuth` field and added `isEnableBasicAuth()` method checking `Objects.nonNull(basicAuth)`.",
         "bucket": "polishment"
       },
@@ -27,9 +27,15 @@
         "bucket": "polishment"
       },
       {
+        "kind": "ignore_derived_property",
+        "general_idea": "Exclude the derived enable flag from JSON serialization to avoid redundancy.",
+        "human_impl": "Added `@JsonIgnore` annotation to the `isEnableBasicAuth()` method.",
+        "bucket": "polishment"
+      },
+      {
         "kind": "remove_spring_annotations",
-        "general_idea": "Remove Spring-specific annotations likely moved to a separate configuration class.",
-        "human_impl": "Removed `@ConfigurationProperties` and `@Component` annotations from `NasProperties`.",
+        "general_idea": "Remove Spring-specific component and configuration property annotations from the class.",
+        "human_impl": "Removed `@Component` and `@ConfigurationProperties(prefix = \"nas\")` annotations.",
         "bucket": "polishment"
       }
     ],
@@ -91,14 +97,14 @@
         "bucket": "polishment"
       },
       {
-        "kind": "conditional_etag_headers",
+        "kind": "conditional_caching_headers",
         "general_idea": "Only set ETag, Last-Modified, and Expires response headers when 304 status return is enabled.",
         "human_impl": "if (enable304StatusReturn) { response.setHeader(ETAG, fileName); ... }",
         "bucket": "polishment"
       },
       {
         "kind": "update_javadoc_tag",
-        "general_idea": "Change Javadoc @date tag to @since for better standard compliance.",
+        "general_idea": "Change the Javadoc @date tag to @since to follow standard Java documentation conventions.",
         "human_impl": "@since 2020/9/13 0:44",
         "bucket": "polishment"
       }
@@ -106,7 +112,7 @@
     "nas-common/src/main/java/top/itning/yunshunas/common/util/Tuple2.java": [
       {
         "kind": "refactor_to_record",
-        "general_idea": "Replace the traditional class with a Java record to leverage concise syntax for immutable data carriers.",
+        "general_idea": "Replace the traditional class with a Java record to leverage concise syntax and built-in value-based semantics.",
         "human_impl": "public record Tuple2<T1, T2>(T1 t1, T2 t2) {}",
         "bucket": "polishment"
       },
@@ -125,8 +131,20 @@
         "bucket": "polishment"
       },
       {
+        "kind": "change_parameter_type_to_wrapper",
+        "general_idea": "Change method parameter from primitive int to wrapper Integer to support null values.",
+        "human_impl": "public static Optional<String> getMediaType(Integer type)",
+        "bucket": "polishment"
+      },
+      {
         "kind": "add_extension_field",
         "general_idea": "Add a new 'ext' field to the enum to store file extensions alongside media types.",
+        "human_impl": "private final String ext;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_enum_initialization",
+        "general_idea": "Update enum constant definitions to include the new extension string argument.",
         "human_impl": "FLAC(1, \"audio/flac\", \"flac\")",
         "bucket": "polishment"
       },
@@ -145,8 +163,8 @@
         "bucket": "breaking"
       },
       {
-        "kind": "javadoc_tag_update",
-        "general_idea": "Update Javadoc tag from @date to @since for better semantic clarity.",
+        "kind": "javadoc_tag_rename",
+        "general_idea": "Rename the @date Javadoc tag to @since for better semantic clarity and standard compliance.",
         "human_impl": "@since 2019/7/14 18:48",
         "bucket": "polishment"
       }
@@ -177,14 +195,14 @@
         "bucket": "polishment"
       },
       {
-        "kind": "debug_endpoint_addition",
-        "general_idea": "Add a test endpoint to manually resolve and attach URIs for music, lyrics, and covers using TencentCosDataSource.",
+        "kind": "utility_endpoint_addition",
+        "general_idea": "Add a test endpoint that retrieves music URIs from a Tencent COS data source and attaches them to music DTOs.",
         "human_impl": "@GetMapping(\"/test\") public ResponseEntity<RestModel<List<MusicDTO>>> test()...",
         "bucket": "polishment"
       },
       {
-        "kind": "maintenance_endpoint_addition",
-        "general_idea": "Add an endpoint to trigger re-initialization of the search service index.",
+        "kind": "utility_endpoint_addition",
+        "general_idea": "Add an endpoint to re-initialize the lyric search index via the SearchService.",
         "human_impl": "@GetMapping(\"/reInitLyric\") public ResponseEntity<RestModel<Void>> reInitLyric()...",
         "bucket": "polishment"
       },
@@ -195,23 +213,23 @@
         "bucket": "polishment"
       },
       {
-        "kind": "javadoc_modernization",
-        "general_idea": "Replace @date tag with @since tag in class documentation to follow modern JavaDoc conventions.",
+        "kind": "documentation_update",
+        "general_idea": "Update Javadoc tag from @date to @since for better semantic clarity.",
         "human_impl": "@since 2020/9/5 11:25",
         "bucket": "polishment"
       }
     ],
     "nas-music/src/main/java/top/itning/yunshunas/music/converter/MusicConverter.java": [
       {
-        "kind": "add_method",
-        "general_idea": "Add a new MapStruct conversion method to convert Music entity to MusicManageDTO.",
-        "human_impl": "MusicManageDTO music2ManageDto(Music music);",
+        "kind": "add_mapping_method",
+        "general_idea": "Add a new MapStruct conversion method to transform Music entity to MusicManageDTO.",
+        "human_impl": "Added method `MusicManageDTO music2ManageDto(Music music)` with `@Mappings({})` annotation.",
         "bucket": "polishment"
       },
       {
-        "kind": "update_javadoc",
-        "general_idea": "Replace the deprecated @date tag with the standard @since tag in the class Javadoc.",
-        "human_impl": "@since 2020/9/5 11:32",
+        "kind": "update_javadoc_tag",
+        "general_idea": "Replace the deprecated `@date` Javadoc tag with the standard `@since` tag.",
+        "human_impl": "Changed `@date 2020/9/5 11:32` to `@since 2020/9/5 11:32` in the class Javadoc.",
         "bucket": "polishment"
       }
     ],
@@ -238,8 +256,20 @@
       },
       {
         "kind": "add_dependency",
-        "general_idea": "Add Spring Framework dependency to support collection utility methods.",
+        "general_idea": "Add Spring Framework utility dependency to support collection checking.",
         "human_impl": "import org.springframework.util.CollectionUtils;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add standard Java IO dependency for file handling.",
+        "human_impl": "import java.io.File;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_annotation",
+        "general_idea": "Add Lombok ToString annotation to the class to enable automatic toString generation.",
+        "human_impl": "import lombok.ToString;",
         "bucket": "polishment"
       },
       {
@@ -250,8 +280,14 @@
       },
       {
         "kind": "add_annotation",
-        "general_idea": "Exclude base64 and binaryData fields from the generated toString method to prevent large output.",
+        "general_idea": "Exclude the base64 field from the generated toString method to avoid verbose output.",
         "human_impl": "@ToString.Exclude private String base64;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_annotation",
+        "general_idea": "Exclude the binaryData field from the generated toString method to avoid verbose output.",
+        "human_impl": "@ToString.Exclude private byte[] binaryData;",
         "bucket": "polishment"
       },
       {
@@ -263,20 +299,20 @@
     ],
     "nas-music/src/main/java/top/itning/yunshunas/music/entity/Music.java": [
       {
-        "kind": "remove_jpa_annotations",
-        "general_idea": "Remove JPA entity annotations to migrate from Hibernate/JPA persistence to a different data access layer or plain POJO usage.",
+        "kind": "remove_javax_persistence_annotations",
+        "general_idea": "Remove JPA annotations to migrate from Hibernate/JPA persistence to a non-annotated entity model (likely switching to MyBatis or similar).",
         "human_impl": "Removed @Entity, @Table, @Id, @GeneratedValue, @Column, @CreationTimestamp, and @UpdateTimestamp annotations.",
         "bucket": "breaking"
       },
       {
-        "kind": "update_type_nullability",
-        "general_idea": "Change the type field from primitive int to Integer to allow null values, likely due to removal of JPA default handling or schema change.",
+        "kind": "change_type_to_nullable",
+        "general_idea": "Change the 'type' field from primitive int to Integer to allow null values, aligning with the removal of @Column(nullable = false).",
         "human_impl": "Changed 'private int type;' to 'private Integer type;'.",
         "bucket": "polishment"
       },
       {
-        "kind": "update_javadoc_tag",
-        "general_idea": "Modernize Javadoc by replacing the non-standard @date tag with the standard @since tag.",
+        "kind": "update_javadoc_since_tag",
+        "general_idea": "Update the Javadoc comment to use the standard @since tag instead of the custom @date tag.",
         "human_impl": "Changed '@date 2020/9/5 11:08' to '@since 2020/9/5 11:08'.",
         "bucket": "polishment"
       }
@@ -295,8 +331,8 @@
         "bucket": "breaking"
       },
       {
-        "kind": "javadoc_modernization",
-        "general_idea": "Replace the non-standard @date Javadoc tag with the standard @since tag.",
+        "kind": "javadoc_tag_update",
+        "general_idea": "Change Javadoc @date tag to @since for better semantic clarity regarding the class introduction date.",
         "human_impl": "* @since 2020/9/5 12:41",
         "bucket": "polishment"
       },

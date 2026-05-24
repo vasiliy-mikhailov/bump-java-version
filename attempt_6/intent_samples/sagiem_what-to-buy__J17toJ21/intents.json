@@ -10,13 +10,13 @@
     "pom.xml": [
       {
         "kind": "java_version_upgrade",
-        "general_idea": "Upgrade the target Java version from 17 to 21 to align with the migration goal.",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the migration goal.",
         "human_impl": "<java.version>21</java.version>",
         "bucket": "breaking"
       },
       {
-        "kind": "spring_boot_upgrade",
-        "general_idea": "Bump Spring Boot parent version from 3.1.0 to 3.1.5.",
+        "kind": "spring_boot_version_bump",
+        "general_idea": "Upgrade the Spring Boot parent version from 3.1.0 to 3.1.5 to use the latest patch release.",
         "human_impl": "<version>3.1.5</version>",
         "bucket": "polishment"
       },
@@ -28,67 +28,79 @@
       },
       {
         "kind": "logging_framework_switch",
-        "general_idea": "Replace default Logback logging with Log4j2 by excluding starter-logging and adding starter-log4j2.",
-        "human_impl": "<exclusion><artifactId>spring-boot-starter-logging</artifactId></exclusion> ... <dependency><artifactId>spring-boot-starter-log4j2</artifactId></dependency>",
+        "general_idea": "Replace the default Logback logging starter with Log4j2 for better performance or specific feature requirements.",
+        "human_impl": "<artifactId>spring-boot-starter-log4j2</artifactId>",
         "bucket": "polishment"
       },
       {
-        "kind": "dependency_add_validation",
-        "general_idea": "Add Spring Boot starter validation for bean validation support.",
-        "human_impl": "<dependency><artifactId>spring-boot-starter-validation</artifactId></dependency>",
+        "kind": "dependency_addition",
+        "general_idea": "Add Bean Validation starter to support JSR-380 validation annotations.",
+        "human_impl": "<artifactId>spring-boot-starter-validation</artifactId>",
         "bucket": "polishment"
       },
       {
-        "kind": "dependency_add_swagger",
-        "general_idea": "Add Swagger annotations for API documentation.",
-        "human_impl": "<dependency><artifactId>swagger-annotations</artifactId></dependency>",
+        "kind": "dependency_addition",
+        "general_idea": "Add Swagger annotations for API documentation generation.",
+        "human_impl": "<artifactId>swagger-annotations</artifactId>",
         "bucket": "polishment"
       },
       {
-        "kind": "dependency_add_jjwt",
-        "general_idea": "Add JJWT dependencies for JWT token handling.",
-        "human_impl": "<dependency><artifactId>jjwt-api</artifactId></dependency> ...",
+        "kind": "dependency_addition",
+        "general_idea": "Add JJWT API dependency for JSON Web Token handling.",
+        "human_impl": "<artifactId>jjwt-api</artifactId>",
         "bucket": "polishment"
       },
       {
-        "kind": "dependency_add_springdoc",
-        "general_idea": "Add SpringDoc OpenAPI starter for automatic OpenAPI documentation generation.",
-        "human_impl": "<dependency><artifactId>springdoc-openapi-starter-webmvc-ui</artifactId></dependency>",
+        "kind": "dependency_addition",
+        "general_idea": "Add JJWT implementation dependency for JSON Web Token handling.",
+        "human_impl": "<artifactId>jjwt-impl</artifactId>",
         "bucket": "polishment"
       },
       {
-        "kind": "dependency_add_mapstruct",
-        "general_idea": "Add MapStruct dependency for object mapping.",
-        "human_impl": "<dependency><artifactId>mapstruct</artifactId></dependency>",
+        "kind": "dependency_addition",
+        "general_idea": "Add JJWT Jackson dependency for JSON serialization in JWTs.",
+        "human_impl": "<artifactId>jjwt-jackson</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add SpringDoc OpenAPI starter for automatic OpenAPI documentation UI.",
+        "human_impl": "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add MapStruct dependency for type-safe bean mapping.",
+        "human_impl": "<artifactId>mapstruct</artifactId>",
         "bucket": "polishment"
       },
       {
         "kind": "lombok_version_pin",
-        "general_idea": "Pin Lombok version to 1.18.30 and set scope to provided.",
-        "human_impl": "<dependency><artifactId>lombok</artifactId><version>1.18.30</version><scope>provided</scope></dependency>",
+        "general_idea": "Explicitly pin the Lombok version to 1.18.30 and set scope to provided.",
+        "human_impl": "<version>1.18.30</version>",
         "bucket": "polishment"
       },
       {
         "kind": "compiler_plugin_config",
-        "general_idea": "Configure maven-compiler-plugin with annotation processors for MapStruct and Lombok.",
-        "human_impl": "<plugin><artifactId>maven-compiler-plugin</artifactId><configuration><annotationProcessorPaths>...</annotationProcessorPaths></configuration></plugin>",
+        "general_idea": "Configure maven-compiler-plugin to include annotation processors for MapStruct, Lombok, and their binding.",
+        "human_impl": "<annotationProcessorPaths>...</annotationProcessorPaths>",
         "bucket": "polishment"
       },
       {
-        "kind": "springdoc_plugin_add",
-        "general_idea": "Add springdoc-openapi-maven-plugin to generate OpenAPI specs during build.",
-        "human_impl": "<plugin><artifactId>springdoc-openapi-maven-plugin</artifactId></plugin>",
+        "kind": "build_plugin_addition",
+        "general_idea": "Add springdoc-openapi-maven-plugin to generate OpenAPI specs during the build.",
+        "human_impl": "<artifactId>springdoc-openapi-maven-plugin</artifactId>",
         "bucket": "polishment"
       },
       {
         "kind": "build_goal_change",
-        "general_idea": "Set default Maven goal to clean package.",
+        "general_idea": "Set the default Maven build goal to clean package.",
         "human_impl": "<defaultGoal>clean package</defaultGoal>",
         "bucket": "polishment"
       },
       {
-        "kind": "jvm_args_add",
-        "general_idea": "Add JVM argument to enable Spring Boot admin.",
+        "kind": "jvm_argument_addition",
+        "general_idea": "Enable Spring Boot Admin client via JVM argument in the build plugin configuration.",
         "human_impl": "<jvmArguments>-Dspring.application.admin.enabled=true</jvmArguments>",
         "bucket": "polishment"
       }

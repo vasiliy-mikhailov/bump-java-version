@@ -10,7 +10,7 @@
     "src/main/java/org/isaqb/onlinetrainer/BuildInfo.java": [
       {
         "kind": "javax_to_jakarta_migration",
-        "general_idea": "Replace javax.annotation imports with jakarta.annotation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "general_idea": "Replace javax.annotation import with jakarta.annotation to comply with Jakarta EE namespace changes required by Spring Boot 3.",
         "human_impl": "import jakarta.annotation.Generated;",
         "bucket": "breaking"
       },
@@ -22,40 +22,34 @@
       },
       {
         "kind": "version_bump",
-        "general_idea": "Update the hardcoded version string to the new release candidate version.",
+        "general_idea": "Update the hardcoded version string to the new snapshot version.",
         "human_impl": "private static final String VERSION = \"0.6-SNAPSHOT\";",
         "bucket": "polishment"
       },
       {
         "kind": "timestamp_update",
-        "general_idea": "Update the build timestamp to reflect the current migration date.",
+        "general_idea": "Update the hardcoded build timestamp to the current date.",
         "human_impl": "private static final String BUILD_TIMESTAMP = \"2024.01.05 08:00\";",
         "bucket": "polishment"
       },
       {
         "kind": "git_metadata_update",
-        "general_idea": "Update the git commit hash and message to reflect the latest commit in the migration branch.",
+        "general_idea": "Update hardcoded git commit hash, message, and timestamp to reflect the current state.",
         "human_impl": "private static final String GIT_COMMIT_SHORTHASH = \"b8c50a2\";",
         "bucket": "polishment"
       },
       {
         "kind": "text_block_modernization",
-        "general_idea": "Use Java 15+ text blocks for multi-line string literals to improve readability.",
+        "general_idea": "Use Java 15+ text blocks for the multi-line git commit message string.",
         "human_impl": "private static final String GIT_COMMIT_MESSAGE = \"\"\" change to latest 2.x SpringBoot \"\"\";",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "timestamp_format_update",
-        "general_idea": "Update the git commit timestamp format to include timezone information.",
-        "human_impl": "private static final String GIT_COMMIT_TSTAMP = \"2024-01-05T08:02:31+0100\";",
         "bucket": "polishment"
       }
     ],
     "src/main/java/org/isaqb/onlinetrainer/Config.java": [
       {
         "kind": "use_text_blocks",
-        "general_idea": "Replace string concatenation with Java 15+ text blocks for improved readability of multi-line HTML content.",
-        "human_impl": "Replaced '\"...\" + \"...\"' concatenation with \"\"\"...\"\"\" text block syntax.",
+        "general_idea": "Replace string concatenation with Java 15+ text blocks for improved readability of multi-line HTML strings.",
+        "human_impl": "Replaced '\"<!-- ... -->\" + \"<script ...>\"' with a triple-quoted text block \"\"\"...\"\"\".",
         "bucket": "polishment"
       }
     ],
@@ -68,7 +62,7 @@
       },
       {
         "kind": "add_skip_flag",
-        "general_idea": "Add a boolean flag to allow skipping task definitions in the configuration model.",
+        "general_idea": "Add a boolean flag to allow skipping task definitions during configuration processing.",
         "human_impl": "private boolean skip = false;",
         "bucket": "polishment"
       },
@@ -90,7 +84,7 @@
     "src/main/java/org/isaqb/onlinetrainer/cache/CacheEntry.java": [
       {
         "kind": "javax_to_jakarta_migration",
-        "general_idea": "Migrate JPA annotations from javax.persistence to jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
         "human_impl": "import jakarta.persistence.Entity;",
         "bucket": "breaking"
       }
@@ -106,48 +100,36 @@
     "src/main/java/org/isaqb/onlinetrainer/loader/TaskMapLoader.java": [
       {
         "kind": "refactor_inject_parser_chain",
-        "general_idea": "Replace single TaskParser dependency with a chain of specific parsers (Asciidoc and YAML) to support multiple task definition formats.",
+        "general_idea": "Replace single TaskParser dependency with specific Asciidoc and YAML parsers to support multiple formats.",
         "human_impl": "private final AsciidocTaskParser adocParser; private final YamlTaskParser yamlParser;",
         "bucket": "polishment"
       },
       {
-        "kind": "refactor_constructor_annotation",
-        "general_idea": "Switch from @AllArgsConstructor to @RequiredArgsConstructor to align with explicit final field injection.",
-        "human_impl": "@RequiredArgsConstructor",
+        "kind": "refactor_switch_to_required_args",
+        "general_idea": "Switch from @AllArgsConstructor to @RequiredArgsConstructor and add final modifiers to fields for better immutability.",
+        "human_impl": "@RequiredArgsConstructor ... private final DataConfiguration config;",
         "bucket": "polishment"
       },
       {
-        "kind": "refactor_url_generation",
-        "general_idea": "Simplify URL generation logic by moving it from stream mapping to a direct method call on the configuration object.",
-        "human_impl": "var tasks = entry.getValue().generateUrls()",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "refactor_parsing_logic",
-        "general_idea": "Extract URL-to-Task conversion into a dedicated method that dynamically selects the parser based on file extension.",
+        "kind": "refactor_extract_url_to_task",
+        "general_idea": "Extract URL loading and parsing logic into a dedicated method to decouple format detection from the main stream.",
         "human_impl": "private Optional<Task> url2task(String url) { ... }",
         "bucket": "polishment"
       },
       {
-        "kind": "feature_parser_selection",
-        "general_idea": "Implement logic to guess the correct parser (Asciidoc, YAML, or Chain) based on the file suffix.",
+        "kind": "feature_add_format_detection",
+        "general_idea": "Implement logic to guess the parser based on file extension (adoc/yaml) or fallback to a chain.",
         "human_impl": "private TaskParser guessParser(String url) { ... switch (suffix) ... }",
         "bucket": "polishment"
       },
       {
-        "kind": "refactor_import_cleanup",
-        "general_idea": "Update imports to reflect the new package structure for task parsers and remove unused imports.",
-        "human_impl": "import org.isaqb.onlinetrainer.taskparser.TaskParser;",
+        "kind": "refactor_simplify_url_generation",
+        "general_idea": "Simplify the stream pipeline by calling generateUrls directly on the config object instead of mapping intermediate objects.",
+        "human_impl": "var tasks = entry.getValue().generateUrls()",
         "bucket": "polishment"
       },
       {
-        "kind": "refactor_field_finality",
-        "general_idea": "Mark injected dependencies as final to enforce immutability and align with @RequiredArgsConstructor.",
-        "human_impl": "private final DataConfiguration config;",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "enhance_logging",
+        "kind": "polishment_add_logging",
         "general_idea": "Add informational logging to report the number of tasks configured per topic.",
         "human_impl": "log.info(\"Task topic '{}' configured with {} tasks.\", topic, tasks.size());",
         "bucket": "polishment"
@@ -184,7 +166,7 @@
       },
       {
         "kind": "use_pattern_matching_instanceof",
-        "general_idea": "Replace manual casting after instanceof check with pattern matching for instanceof introduced in Java 16.",
+        "general_idea": "Replace manual casting after instanceof check with pattern matching syntax introduced in Java 16.",
         "human_impl": "if (value instanceof String) { String asString = (String) value; ... } -> if (value instanceof String asString) { ... }",
         "bucket": "polishment"
       }
@@ -206,9 +188,9 @@
       },
       {
         "kind": "add_column_annotation",
-        "general_idea": "Add @Column annotations to explicitly map entity fields to database columns, likely to avoid reserved keyword conflicts (e.g., 'key', 'value') in newer database drivers like H2.",
+        "general_idea": "Add @Column annotations to explicitly map fields to database columns, likely to avoid reserved keyword conflicts (e.g., 'key', 'value') in newer H2 versions.",
         "human_impl": "@Column(name=\"stat-key\")\nprivate String key;",
-        "bucket": "polishment"
+        "bucket": "breaking"
       }
     ]
   }

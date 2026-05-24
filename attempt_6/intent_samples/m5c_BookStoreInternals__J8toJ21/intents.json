@@ -10,20 +10,20 @@
     "src/main/java/eu/kartoffelquadrat/bookstoreinternals/Assortment.java": [
       {
         "kind": "refactor_javadoc",
-        "general_idea": "Simplified and clarified the class-level documentation to better describe the interface's purpose.",
-        "human_impl": "Replaced verbose DAO description with 'Represents the catalogue of all indexed books.' and added author tag.",
+        "general_idea": "Simplified and updated the class-level JavaDoc description to better reflect the interface's purpose.",
+        "human_impl": "Changed comment from 'A DAO for indexed books...' to 'Represents the catalogue of all indexed books.'",
         "bucket": "polishment"
       },
       {
         "kind": "refactor_javadoc",
-        "general_idea": "Corrected typos and improved wording in method documentation.",
+        "general_idea": "Updated method-level JavaDoc to correct typos and improve clarity.",
         "human_impl": "Changed 'knwon' to 'indexed' and 'list off known isbns' to 'list off registered isbns'.",
         "bucket": "polishment"
       },
       {
         "kind": "refactor_return_type",
-        "general_idea": "Changed the return type of getBookDetails to a concrete implementation class instead of an interface.",
-        "human_impl": "Changed return type from BookDetails to BookDetailsImpl.",
+        "general_idea": "Changed the return type of getBookDetails from the interface BookDetails to the implementation class BookDetailsImpl.",
+        "human_impl": "Changed return type from BookDetails to BookDetailsImpl in getBookDetails method signature.",
         "bucket": "breaking"
       },
       {
@@ -36,19 +36,19 @@
     "src/main/java/eu/kartoffelquadrat/bookstoreinternals/AssortmentImpl.java": [
       {
         "kind": "refactor_constructor_visibility",
-        "general_idea": "Changed constructor from public to private to enforce singleton pattern and remove unused populate flag.",
+        "general_idea": "Changed constructor from public to private to enforce singleton pattern and remove unused overloaded constructor.",
         "human_impl": "private AssortmentImpl() { ... }",
         "bucket": "polishment"
       },
       {
         "kind": "refactor_type_narrowing",
-        "general_idea": "Narrowed field and method return types from interface BookDetails to implementation BookDetailsImpl.",
+        "general_idea": "Narrowed field and method return types from interface BookDetails to concrete implementation BookDetailsImpl.",
         "human_impl": "Map<Long, BookDetailsImpl> assortmentMap; public BookDetailsImpl getBookDetails(...)",
         "bucket": "polishment"
       },
       {
         "kind": "add_method",
-        "general_idea": "Added new method to allow adding books to the assortment at runtime.",
+        "general_idea": "Added new method to allow adding books to the assortment with duplicate ISBN checking.",
         "human_impl": "public void addBookToAssortment(BookDetailsImpl bookDetails) { ... }",
         "bucket": "polishment"
       },
@@ -60,7 +60,7 @@
       },
       {
         "kind": "update_javadoc",
-        "general_idea": "Updated and expanded JavaDoc comments for class and methods to improve documentation quality.",
+        "general_idea": "Updated and expanded Javadoc comments for class and methods to improve documentation clarity.",
         "human_impl": "/** * Implementation of the Assortment interface. ... */",
         "bucket": "polishment"
       },
@@ -72,8 +72,14 @@
       },
       {
         "kind": "refactor_string_formatting",
-        "general_idea": "Improved toString output format and used string concatenation for long dummy data strings.",
+        "general_idea": "Improved toString() output format with decorative borders and updated loop variable type.",
         "human_impl": "StringBuilder sb = new StringBuilder(\"\\n **************\\n * Assortment * \\n **************\\n\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_string_literals",
+        "general_idea": "Wrapped long string literals in dummy data initialization to comply with line length limits.",
+        "human_impl": "\"Harry Potter and the deathly \" + \"hallows\"",
         "bucket": "polishment"
       }
     ],
@@ -87,13 +93,13 @@
       {
         "kind": "add_default_constructor",
         "general_idea": "Added a public no-argument constructor to support JSON deserialization frameworks.",
-        "human_impl": "Added 'public BookDetailsImpl() {}' method.",
+        "human_impl": "Added 'public BookDetailsImpl() {}' constructor.",
         "bucket": "polishment"
       },
       {
         "kind": "add_javadoc",
         "general_idea": "Added comprehensive Javadoc comments to the class and all public methods.",
-        "human_impl": "Added block comments describing fields, constructors, and getters.",
+        "human_impl": "Added class-level and method-level Javadoc blocks describing fields and parameters.",
         "bucket": "polishment"
       },
       {
@@ -106,19 +112,19 @@
     "src/main/java/eu/kartoffelquadrat/bookstoreinternals/Comments.java": [
       {
         "kind": "refactor_indentation",
-        "general_idea": "Changed indentation style from 4 spaces to 2 spaces to align with modern Java coding standards.",
+        "general_idea": "Changed indentation style from 4 spaces to 2 spaces to align with modern Java coding conventions.",
         "human_impl": "Replaced leading whitespace in method signatures and javadoc blocks from 4-space tabs to 2-space indentation.",
         "bucket": "polishment"
       },
       {
-        "kind": "update_javadoc_class",
+        "kind": "update_javadoc",
         "general_idea": "Simplified the class-level javadoc description and added an author tag.",
-        "human_impl": "Replaced detailed singleton implementation notes with 'Offers access to all Comments of all Books.' and added '@author Maximilian Schiedermeier'.",
+        "human_impl": "Replaced detailed DAO singleton description with 'Offers access to all Comments of all Books.' and added '@author Maximilian Schiedermeier'.",
         "bucket": "polishment"
       },
       {
-        "kind": "update_javadoc_method",
-        "general_idea": "Standardized punctuation in method-level javadoc descriptions.",
+        "kind": "update_javadoc",
+        "general_idea": "Minor punctuation and formatting adjustments in method javadoc comments.",
         "human_impl": "Added missing periods to the end of javadoc summary sentences for deleteComment and removeAllCommentsForBook.",
         "bucket": "polishment"
       }
@@ -126,7 +132,7 @@
     "src/main/java/eu/kartoffelquadrat/bookstoreinternals/CommentsImpl.java": [
       {
         "kind": "refactor_constructor_visibility",
-        "general_idea": "Changed constructor from public to private to enforce singleton pattern and removed overloaded constructor.",
+        "general_idea": "Changed constructor from public to private to enforce singleton pattern and removed overloaded constructor logic.",
         "human_impl": "private CommentsImpl() { ... }",
         "bucket": "polishment"
       },
@@ -139,12 +145,12 @@
       {
         "kind": "update_javadoc",
         "general_idea": "Updated class and method documentation to reflect implementation details and add author tag.",
-        "human_impl": "/** Full implementation Implementation of the Comments interface. * @author Maximilian Schiedermeier */",
+        "human_impl": "/** * Full implementation Implementation of the Comments interface. * @author Maximilian Schiedermeier */",
         "bucket": "polishment"
       },
       {
         "kind": "replace_deprecated_api",
-        "general_idea": "Replaced Long.valueOf(String) with Long.parseLong(String) for parsing string literals to long.",
+        "general_idea": "Replaced Long.valueOf(String) with Long.parseLong(String) for parsing ISBN strings.",
         "human_impl": "addComment(Long.parseLong(\"9780739360385\"), \"Amazing book!\");",
         "bucket": "polishment"
       },
@@ -170,26 +176,26 @@
       },
       {
         "kind": "add_constructor",
-        "general_idea": "Added an explicit default constructor to the class, likely to satisfy serialization or framework requirements in the newer environment.",
+        "general_idea": "Added an explicit default constructor to the class, likely to satisfy serialization or framework requirements.",
         "human_impl": "Added public DesktopLauncher() {}",
         "bucket": "polishment"
       },
       {
         "kind": "update_javadoc",
-        "general_idea": "Updated class and method documentation to reflect the new structure and clarify intent.",
+        "general_idea": "Updated class and method documentation to reflect the new structure and purpose.",
         "human_impl": "Changed class comment to 'Legacy launcher...' and added javadoc for main/printData",
         "bucket": "polishment"
       },
       {
         "kind": "fix_output_logic",
-        "general_idea": "Corrected the main method to actually print the retrieved data instances instead of just a header.",
+        "general_idea": "Implemented the actual printing of data objects which was previously missing or incomplete.",
         "human_impl": "Added System.out.print(assortment), print(stock), print(comments)",
         "bucket": "polishment"
       },
       {
         "kind": "update_text_content",
-        "general_idea": "Updated the console output message to accurately describe the data as 'persisted' rather than 'initialized'.",
-        "human_impl": "Changed string literal to 'Here is a listing of the persisted data:'",
+        "general_idea": "Changed the descriptive text in the output from 'initialized' to 'persisted' to better reflect the data state.",
+        "human_impl": "Changed 'initialized data' to 'persisted data'",
         "bucket": "polishment"
       }
     ],
@@ -228,62 +234,80 @@
     "src/main/java/eu/kartoffelquadrat/bookstoreinternals/GlobalStockImpl.java": [
       {
         "kind": "add_import",
-        "general_idea": "Added import for java.util.Collection to support the new getStoreLocations method return type.",
+        "general_idea": "Added import for java.util.Collection to support the return type of the new getStoreLocations method.",
         "human_impl": "import java.util.Collection;",
         "bucket": "polishment"
       },
       {
         "kind": "add_javadoc",
-        "general_idea": "Added class-level Javadoc documentation describing the implementation and author.",
-        "human_impl": "/** Implementation for the GlobalStock interface. @author Maximilian Schiedermeier */",
+        "general_idea": "Added class-level Javadoc documentation describing the GlobalStockImpl class and its author.",
+        "human_impl": "/**\n * Implementation for the GlobalStock interface.\n *\n * @author Maximilian Schiedermeier\n */",
         "bucket": "polishment"
       },
       {
         "kind": "refactor_constructor",
-        "general_idea": "Removed overloaded constructors and consolidated initialization into a single private constructor that always populates dummy data.",
-        "human_impl": "private GlobalStockImpl() { stocksPerCity = new LinkedHashMap<>(); populateWithDummyData(); }",
+        "general_idea": "Consolidated multiple constructors into a single private default constructor that initializes the map and populates dummy data, enforcing the singleton pattern.",
+        "human_impl": "private GlobalStockImpl() {\n    stocksPerCity = new LinkedHashMap<>();\n    populateWithDummyData();\n}",
         "bucket": "polishment"
       },
       {
-        "kind": "add_method",
-        "general_idea": "Implemented getStoreLocations method to return the set of cities with local stock.",
-        "human_impl": "public Collection<String> getStoreLocations() { return stocksPerCity.keySet(); }",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "add_method",
-        "general_idea": "Implemented getEntireStoreStock method to return the full stock map for a specific city.",
-        "human_impl": "public Map<Long, Integer> getEntireStoreStock(String city) { return stocksPerCity.get(city).getEntireStock(); }",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "add_method",
-        "general_idea": "Implemented toString method to provide a human-readable summary of all stock data.",
-        "human_impl": "public String toString() { ... sb.append(city).append(stocksPerCity.get(city)); ... }",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "modernize_api",
-        "general_idea": "Replaced deprecated Long.valueOf(String) with Long.parseLong(String) for parsing ISBN strings.",
-        "human_impl": "Long.parseLong(\"9780739360385\")",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "add_override_annotation",
-        "general_idea": "Added @Override annotations to methods implementing the GlobalStock interface for better compile-time safety.",
-        "human_impl": "@Override public int getStock(...)",
+        "kind": "update_singleton_logic",
+        "general_idea": "Updated the getInstance method to use the new private default constructor instead of the removed boolean-argument constructor.",
+        "human_impl": "singletonReference = new GlobalStockImpl();",
         "bucket": "polishment"
       },
       {
         "kind": "add_javadoc",
-        "general_idea": "Added detailed Javadoc comments to all public and private methods.",
-        "human_impl": "/** Returns the amount in stock... */",
+        "general_idea": "Added Javadoc documentation for the getStock method.",
+        "human_impl": "/**\n * Returns the amount in stock of a given book in a given city.\n *\n * @param city for the city of interest\n * @param isbn for book id of interest\n * @return the amount in stock\n */",
         "bucket": "polishment"
       },
       {
-        "kind": "format_code",
-        "general_idea": "Reformatted code indentation and brace style to comply with checkstyle rules.",
-        "human_impl": "Changed indentation from 4 spaces to 2 spaces and adjusted brace placement.",
+        "kind": "add_override_annotation",
+        "general_idea": "Added @Override annotation to getStock method to ensure it correctly implements the interface method.",
+        "human_impl": "@Override\npublic int getStock(String city, Long isbn)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Added Javadoc documentation for the setStock method.",
+        "human_impl": "/**\n * Updates the stock for a given city.\n *\n * @param city   for the city of interest\n * @param isbn   for book id of interest\n * @param amount for the new amount in stock\n */",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_override_annotation",
+        "general_idea": "Added @Override annotation to setStock method to ensure it correctly implements the interface method.",
+        "human_impl": "@Override\npublic void setStock(String city, Long isbn, Integer amount)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method",
+        "general_idea": "Added getStoreLocations method to return the collection of all cities with local stock.",
+        "human_impl": "@Override\npublic Collection<String> getStoreLocations() {\n    return stocksPerCity.keySet();\n}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method",
+        "general_idea": "Added getEntireStoreStock method to return the entire stock map for a specific city.",
+        "human_impl": "@Override\npublic Map<Long, Integer> getEntireStoreStock(String city) {\n    return stocksPerCity.get(city).getEntireStock();\n}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Added Javadoc documentation for the populateWithDummyData helper method.",
+        "human_impl": "/**\n * Helper method to add some dummy stock data for all local branches. Should be invoked upon\n * creation of this class.\n */",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_api_usage",
+        "general_idea": "Replaced deprecated Long.valueOf(String) with Long.parseLong(String) for parsing ISBN strings in dummy data initialization.",
+        "human_impl": "Long.parseLong(\"9780739360385\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method",
+        "general_idea": "Added toString method to provide a human-readable representation of the global stock.",
+        "human_impl": "@Override\npublic String toString() {\n    StringBuilder sb = new StringBuilder(\"\\n **************\\n *    Stock   * \\n **************\\n\");\n    for (String city : stocksPerCity.keySet()) {\n      sb.append(city).append(\":\\n\");\n      sb.append(stocksPerCity.get(city));\n    }\n    return sb.toString();\n}",
         "bucket": "polishment"
       }
     ],
@@ -311,6 +335,12 @@
         "general_idea": "Reordered interface methods to place getEntireStock after setAmount.",
         "human_impl": "Moved setAmount before getEntireStock in declaration order.",
         "bucket": "polishment"
+      },
+      {
+        "kind": "fix_indentation",
+        "general_idea": "Standardized indentation from 4 spaces to 2 spaces for interface members.",
+        "human_impl": "Changed indentation of getAmount, setAmount, and getEntireStock to 2 spaces.",
+        "bucket": "polishment"
       }
     ],
     "src/main/java/eu/kartoffelquadrat/bookstoreinternals/LocalStockImpl.java": [
@@ -322,8 +352,8 @@
       },
       {
         "kind": "add_javadoc",
-        "general_idea": "Added class-level Javadoc documentation describing the implementation.",
-        "human_impl": "/**\n * Implementation for the LocalStock interface.\n *\n * @author Maximilian Schiedermeier\n */",
+        "general_idea": "Added class-level Javadoc documentation describing the implementation and author.",
+        "human_impl": "/** Implementation for the LocalStock interface. @author Maximilian Schiedermeier */",
         "bucket": "polishment"
       },
       {
@@ -333,44 +363,44 @@
         "bucket": "polishment"
       },
       {
-        "kind": "add_javadoc",
-        "general_idea": "Added Javadoc for the default constructor.",
-        "human_impl": "/**\n * Default constructor.\n */",
+        "kind": "add_method_javadoc",
+        "general_idea": "Added Javadoc to the default constructor.",
+        "human_impl": "/** Default constructor. */",
         "bucket": "polishment"
       },
       {
         "kind": "add_override_annotation",
         "general_idea": "Added @Override annotation to getAmount method to ensure it correctly implements the interface.",
-        "human_impl": "@Override\npublic int getAmount(long isbn)",
+        "human_impl": "@Override public int getAmount(long isbn)",
         "bucket": "polishment"
       },
       {
-        "kind": "add_javadoc",
-        "general_idea": "Added detailed Javadoc for the getAmount method explaining parameters and return value.",
-        "human_impl": "/**\n * Tells the amount in stock for a given book id (isbn)...",
+        "kind": "add_method_javadoc",
+        "general_idea": "Added detailed Javadoc to getAmount method explaining parameters and return value.",
+        "human_impl": "/** Tells the amount in stock for a given book id (isbn)... */",
         "bucket": "polishment"
       },
       {
         "kind": "remove_assortment_check",
-        "general_idea": "Removed the runtime check against AssortmentImpl in getAmount to simplify logic and remove dependency.",
+        "general_idea": "Removed the runtime check against AssortmentImpl in getAmount, simplifying logic to just check map containment.",
         "human_impl": "if (!stockByBook.containsKey(isbn)) { return 0; }",
         "bucket": "polishment"
       },
       {
         "kind": "add_override_annotation",
         "general_idea": "Added @Override annotation to setAmount method to ensure it correctly implements the interface.",
-        "human_impl": "@Override\npublic void setAmount(long isbn, int amount)",
+        "human_impl": "@Override public void setAmount(long isbn, int amount)",
         "bucket": "polishment"
       },
       {
-        "kind": "add_javadoc",
-        "general_idea": "Added detailed Javadoc for the setAmount method explaining parameters.",
-        "human_impl": "/**\n * Update the amount of books in local stock...",
+        "kind": "add_method_javadoc",
+        "general_idea": "Added detailed Javadoc to setAmount method explaining parameters.",
+        "human_impl": "/** Update the amount of books in local stock... */",
         "bucket": "polishment"
       },
       {
         "kind": "remove_assortment_check",
-        "general_idea": "Removed the runtime check against AssortmentImpl in setAmount to simplify logic and remove dependency.",
+        "general_idea": "Removed the runtime check against AssortmentImpl in setAmount, simplifying logic to direct map update.",
         "human_impl": "stockByBook.put(isbn, amount);",
         "bucket": "polishment"
       },
@@ -381,21 +411,27 @@
         "bucket": "polishment"
       },
       {
-        "kind": "add_javadoc",
-        "general_idea": "Added Javadoc for the new getEntireStock method.",
-        "human_impl": "/**\n * Returns the entire stock of this location, as an immutable map...",
+        "kind": "add_method_javadoc",
+        "general_idea": "Added Javadoc to getEntireStock method.",
+        "human_impl": "/** Returns the entire stock of this location, as an immutable map. */",
         "bucket": "polishment"
       },
       {
         "kind": "add_method",
         "general_idea": "Added toString method to provide a human-readable string representation of the stock.",
-        "human_impl": "public String toString() { ... }",
+        "human_impl": "public String toString() { StringBuilder sb = new StringBuilder(); ... return sb.toString(); }",
         "bucket": "polishment"
       },
       {
-        "kind": "add_javadoc",
-        "general_idea": "Added Javadoc for the toString method.",
-        "human_impl": "/**\n * Overrides default toString method...",
+        "kind": "add_method_javadoc",
+        "general_idea": "Added Javadoc to toString method.",
+        "human_impl": "/** Overrides default toString method to serialize instances... */",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reformat_code",
+        "general_idea": "Reformatted indentation and spacing to comply with checkstyle rules.",
+        "human_impl": "Changed indentation from 4 spaces to 2 spaces and adjusted brace placement.",
         "bucket": "polishment"
       }
     ],
@@ -425,19 +461,13 @@
         "bucket": "polishment"
       },
       {
-        "kind": "fix_code_style",
-        "general_idea": "Adjusted brace placement to comply with checkstyle warnings.",
-        "human_impl": "public void testSingleton() {",
-        "bucket": "polishment"
-      },
-      {
         "kind": "add_test_add_book",
         "general_idea": "Added a test case to verify that new books can be added to the assortment.",
         "human_impl": "@Test\npublic void testIndexNewBook() { ... }",
         "bucket": "polishment"
       },
       {
-        "kind": "add_test_reject_duplicate",
+        "kind": "add_test_duplicate_rejection",
         "general_idea": "Added a test case to verify that adding a book with an existing ISBN throws a RuntimeException.",
         "human_impl": "@Test(expected = RuntimeException.class)\npublic void testRejectExistingIsbn() { ... }",
         "bucket": "polishment"
@@ -445,7 +475,7 @@
       {
         "kind": "add_reflection_helper",
         "general_idea": "Implemented a helper method using reflection to instantiate the class with a private constructor for isolated testing.",
-        "human_impl": "private Assortment getNewAssortmentInstance() { ... constructor.setAccessible(true); ... }",
+        "human_impl": "private Assortment getNewAssortmentInstance() {\n    Constructor<AssortmentImpl> constructor = AssortmentImpl.class.getDeclaredConstructor();\n    constructor.setAccessible(true);\n    return constructor.newInstance();\n}",
         "bucket": "polishment"
       }
     ],
@@ -453,19 +483,19 @@
       {
         "kind": "add_javadoc_author",
         "general_idea": "Added Javadoc block with author attribution to the test class.",
-        "human_impl": "Added /** @author Maximilian Schiedermeier */ before class declaration.",
+        "human_impl": "Added /** @author Maximilian Schiedermeier */ block above class declaration.",
         "bucket": "polishment"
       },
       {
         "kind": "refine_type_usage",
-        "general_idea": "Changed variable type from interface to implementation class to match updated API or test requirements.",
-        "human_impl": "Changed 'BookDetails details' to 'BookDetailsImpl details'.",
+        "general_idea": "Changed variable declaration from interface to implementation class to match concrete return type or test intent.",
+        "human_impl": "Changed `BookDetails details` to `BookDetailsImpl details`.",
         "bucket": "polishment"
       },
       {
         "kind": "add_constructor_test",
-        "general_idea": "Added a test case to verify the default constructor of the implementation class works without throwing exceptions.",
-        "human_impl": "Added @Test method defaultConstructor() instantiating new BookDetailsImpl().",
+        "general_idea": "Added a test case to verify the default constructor of the implementation class does not throw exceptions.",
+        "human_impl": "Added `@Test public void defaultConstructor() { BookDetailsImpl bd = new BookDetailsImpl(); }`.",
         "bucket": "polishment"
       }
     ]

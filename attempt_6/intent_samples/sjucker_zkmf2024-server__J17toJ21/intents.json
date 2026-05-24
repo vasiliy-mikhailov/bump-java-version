@@ -10,53 +10,59 @@
     "src/main/java/ch/zkmf2024/server/ServerApplication.java": [
       {
         "kind": "enable_scheduling",
-        "general_idea": "Enable Spring's scheduling support to allow the use of @Scheduled annotations for background tasks.",
-        "human_impl": "Added @EnableScheduling annotation to ServerApplication class",
+        "general_idea": "Enable Spring's scheduling support to allow the use of @Scheduled annotations.",
+        "human_impl": "Added @EnableScheduling annotation and import to ServerApplication class.",
         "bucket": "polishment"
       }
     ],
     "src/main/java/ch/zkmf2024/server/configuration/SecurityConfiguration.java": [
       {
-        "kind": "migrate_security_config_class",
-        "general_idea": "Replace deprecated WebSecurityConfigurerAdapter with a standalone SecurityFilterChain bean to comply with Spring Security 6+ requirements for Java 21.",
-        "human_impl": "public class SecurityConfiguration { ... @Bean public SecurityFilterChain configure(HttpSecurity http) ... }",
+        "kind": "remove_deprecated_base_class",
+        "general_idea": "Remove inheritance from WebSecurityConfigurerAdapter which was deprecated in Spring Security 5.7 and removed in 6.0.",
+        "human_impl": "Changed class declaration from 'extends WebSecurityConfigurerAdapter' to a standalone class with @EnableWebSecurity.",
         "bucket": "breaking"
       },
       {
-        "kind": "update_auth_filter_injection",
-        "general_idea": "Switch from Firebase-specific pre-authentication components to a generic JWT request filter for authentication.",
-        "human_impl": "private final JwtRequestFilter jwtRequestFilter; ... addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)",
+        "kind": "enable_method_security",
+        "general_idea": "Enable method-level security annotations using the new @EnableMethodSecurity annotation required in Spring Security 6.",
+        "human_impl": "Added @EnableMethodSecurity(securedEnabled = true) annotation to the configuration class.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_to_security_filter_chain",
+        "general_idea": "Replace the deprecated configure(HttpSecurity) method override with a SecurityFilterChain bean definition.",
+        "human_impl": "Defined a @Bean method returning SecurityFilterChain that configures HttpSecurity via the builder pattern.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_authorize_api",
+        "general_idea": "Update authorization configuration to use the new authorizeHttpRequests API instead of the deprecated authorizeRequests.",
+        "human_impl": "Replaced .authorizeRequests() with .authorizeHttpRequests(registry -> { ... }) and updated matchers to requestMatchers.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_filter_registration",
+        "general_idea": "Update filter registration to use the new addFilterBefore API with UsernamePasswordAuthenticationFilter.",
+        "human_impl": "Replaced custom preAuthFilter logic with .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class).",
         "bucket": "breaking"
       },
       {
         "kind": "add_cors_configuration",
-        "general_idea": "Explicitly configure CORS settings via a dedicated CorsFilter bean to replace implicit or legacy handling.",
-        "human_impl": "@Bean public CorsFilter corsFilter() { ... config.addAllowedOrigin(\"*\"); ... }",
+        "general_idea": "Explicitly configure CORS support using a dedicated CorsFilter bean and HttpSecurity cors configuration.",
+        "human_impl": "Added corsFilter bean and .cors(withDefaults()) to the SecurityFilterChain configuration.",
         "bucket": "polishment"
       },
       {
         "kind": "add_password_encoder",
-        "general_idea": "Introduce a PasswordEncoder bean using the delegating factory, likely required for new security features or compliance.",
-        "human_impl": "@Bean public PasswordEncoder passwordEncoder() { return PasswordEncoderFactories.createDelegatingPasswordEncoder(); }",
+        "general_idea": "Add a PasswordEncoder bean definition, likely required by the new security context or future password handling.",
+        "human_impl": "Added @Bean public PasswordEncoder passwordEncoder() returning PasswordEncoderFactories.createDelegatingPasswordEncoder().",
         "bucket": "polishment"
       },
       {
-        "kind": "enable_method_security",
-        "general_idea": "Enable method-level security annotations using the modern EnableMethodSecurity configuration.",
-        "human_impl": "@EnableMethodSecurity(securedEnabled = true)",
+        "kind": "refactor_authentication_provider",
+        "general_idea": "Remove the explicit PreAuthenticatedAuthenticationProvider bean as authentication is now handled by the JwtRequestFilter.",
+        "human_impl": "Removed preAuthProvider bean and associated FirebaseTokenUserDetailsService dependency.",
         "bucket": "polishment"
-      },
-      {
-        "kind": "modernize_http_security_api",
-        "general_idea": "Refactor HttpSecurity configuration to use the new lambda-based DSL and AbstractHttpConfigurer for disabling features.",
-        "human_impl": "http.httpBasic(AbstractHttpConfigurer::disable).csrf(AbstractHttpConfigurer::disable)...",
-        "bucket": "breaking"
-      },
-      {
-        "kind": "update_authorization_rules",
-        "general_idea": "Migrate authorization rules from the old authorizeRequests() API to the new authorizeHttpRequests() API with lambda syntax.",
-        "human_impl": ".authorizeHttpRequests(registry -> { registry.requestMatchers(...).permitAll(); ... })",
-        "bucket": "breaking"
       }
     ],
     "src/main/java/ch/zkmf2024/server/repository/UserRepository.java": [
@@ -69,87 +75,268 @@
     ],
     "src/main/java/ch/zkmf2024/server/rest/AuthEndpoint.java": [
       {
-        "kind": "replace_firebase_auth",
-        "general_idea": "Remove Firebase Authentication dependency and replace with custom JWT-based authentication logic.",
-        "human_impl": "Removed FirebaseAuth imports and logic; added JwtService, PasswordEncoder, and custom login endpoint.",
+        "kind": "replace_logging_framework",
+        "general_idea": "Replace manual SLF4J logger instantiation with Lombok @Slf4j annotation for cleaner code.",
+        "human_impl": "Removed 'private static final Logger logger...' and added '@Slf4j' annotation, changing 'logger.info' to 'log.info'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_import_package",
+        "general_idea": "Update validation imports from javax.validation to jakarta.validation to comply with Jakarta EE 9+ standards required by Spring Boot 3/Java 21.",
+        "human_impl": "Changed 'import javax.validation.Valid' to 'import jakarta.validation.Valid'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_dto_classes",
+        "general_idea": "Rename DTO classes to follow standard naming conventions (ending in DTO instead of RequestDto).",
+        "human_impl": "Renamed RegisterHelperRequestDto to RegisterHelperRequestDTO, RegisterNewsletterRequestDto to RegisterNewsletterRequestDTO, and added LoginRequestDTO/LoginResponseDTO.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_firebase_dependency",
+        "general_idea": "Remove Firebase Auth integration as the authentication mechanism is being migrated to a local database-backed JWT system.",
+        "human_impl": "Removed imports for com.google.firebase.auth and deleted the registerBand method that used FirebaseAuth.",
         "bucket": "breaking"
       },
       {
         "kind": "add_login_endpoint",
-        "general_idea": "Implement a new login endpoint that validates credentials against the database and issues JWTs.",
-        "human_impl": "Added POST /public/auth endpoint handling LoginRequestDTO and returning LoginResponseDTO with JWT.",
-        "bucket": "breaking"
+        "general_idea": "Implement a new login endpoint that authenticates users against the local database and issues JWTs.",
+        "human_impl": "Added POST /public/auth endpoint accepting LoginRequestDTO, checking password with PasswordEncoder, and returning LoginResponseDTO with JWT.",
+        "bucket": "polishment"
       },
       {
-        "kind": "add_impersonation_support",
-        "general_idea": "Enable admin impersonation of users via a master password check during login.",
-        "human_impl": "Added check for applicationProperties.getEncodedMasterPassword() to set impersonation flag in JWT.",
+        "kind": "add_impersonation_feature",
+        "general_idea": "Add support for admin impersonation using a master password configuration.",
+        "human_impl": "Added logic in login endpoint to check against applicationProperties.getEncodedMasterPassword() and set impersonation flag in JWT.",
         "bucket": "polishment"
       },
       {
         "kind": "implement_helper_registration",
-        "general_idea": "Replace stub helper registration with actual service call and proper error handling.",
-        "human_impl": "Called helperRegistrationService.register() and used switch expression to return appropriate HTTP status.",
+        "general_idea": "Replace placeholder helper registration logic with actual service integration.",
+        "human_impl": "Replaced TODO comment and empty response with call to helperRegistrationService.register() and switch expression for results.",
         "bucket": "polishment"
       },
       {
         "kind": "implement_newsletter_registration",
-        "general_idea": "Replace stub newsletter registration with actual service call and proper error handling.",
-        "human_impl": "Called newsletterService.register() and used switch expression to return appropriate HTTP status.",
+        "general_idea": "Replace placeholder newsletter registration logic with actual service integration.",
+        "human_impl": "Replaced TODO comment and empty response with call to newsletterService.register() and switch expression for results.",
         "bucket": "polishment"
       },
       {
-        "kind": "migrate_to_jakarta_validation",
-        "general_idea": "Update validation annotations from javax to jakarta namespace for Java 21 compatibility.",
-        "human_impl": "Added import jakarta.validation.Valid and applied @Valid to request body parameters.",
-        "bucket": "breaking"
-      },
-      {
-        "kind": "modernize_logging",
-        "general_idea": "Replace manual Logger instantiation with Lombok @Slf4j annotation.",
-        "human_impl": "Removed static Logger field and LoggerFactory call; added @Slf4j annotation.",
+        "kind": "add_service_dependencies",
+        "general_idea": "Inject new services required for the updated authentication and registration flows.",
+        "human_impl": "Added fields and constructor parameters for NewsletterService, HelperRegistrationService, JwtService, PasswordEncoder, and ApplicationProperties.",
         "bucket": "polishment"
-      },
-      {
-        "kind": "update_dto_naming",
-        "general_idea": "Rename DTO classes to follow standard naming conventions (ending in DTO).",
-        "human_impl": "Changed imports from RegisterRequestDto to RegisterHelperRequestDTO, etc.",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "add_dependency_injection",
-        "general_idea": "Inject new services required for authentication and registration logic.",
-        "human_impl": "Added NewsletterService, HelperRegistrationService, JwtService, PasswordEncoder, and ApplicationProperties to constructor.",
-        "bucket": "breaking"
       }
     ],
     "src/main/java/ch/zkmf2024/server/rest/secured/SecuredAuthEndpoint.java": [
       {
         "kind": "refactor_imports",
-        "general_idea": "Replace domain entity import with a dedicated DTO import for UserRole.",
+        "general_idea": "Replace domain entity imports with DTO imports to decouple the REST layer from persistence models.",
         "human_impl": "import ch.zkmf2024.server.dto.UserRole;",
         "bucket": "polishment"
       },
       {
-        "kind": "remove_unused_import",
-        "general_idea": "Remove unused import for javax.persistence.EntityNotFoundException.",
+        "kind": "remove_javax_import",
+        "general_idea": "Remove unused javax.persistence import as part of cleaning up dependencies or preparing for Jakarta EE migration.",
         "human_impl": "-import javax.persistence.EntityNotFoundException;",
         "bucket": "polishment"
       },
       {
         "kind": "refactor_logic",
-        "general_idea": "Update user role retrieval to map from POJO role string to DTO enum instead of calling a method on the User entity.",
+        "general_idea": "Update user role retrieval logic to map from POJO role string to UserRole enum instead of calling a method on the User entity.",
         "human_impl": ".map(pojo -> UserRole.valueOf(pojo.getRole()))",
         "bucket": "polishment"
       },
       {
         "kind": "simplify_exception",
-        "general_idea": "Simplify the orElseThrow call by removing the explicit exception constructor, relying on the default NoSuchElementException.",
-        "human_impl": ".orElseThrow()",
+        "general_idea": "Simplify the exception throwing syntax by removing the explicit constructor reference.",
+        "human_impl": ".orElseThrow();",
         "bucket": "polishment"
       }
     ],
-    "pom.xml": [],
+    "pom.xml": [
+      {
+        "kind": "upgrade_spring_boot",
+        "general_idea": "Upgrade Spring Boot parent from 2.6.2 to 3.2.0 to support Java 21 and modern Spring features.",
+        "human_impl": "<version>3.2.0</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the Java version property from 17 to 21 to target the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "switch_db_driver",
+        "general_idea": "Replace MySQL connector with PostgreSQL driver to match the new database backend.",
+        "human_impl": "<artifactId>postgresql</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "switch_testcontainers_db",
+        "general_idea": "Replace MySQL testcontainers with PostgreSQL testcontainers for integration tests.",
+        "human_impl": "<artifactId>postgresql</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jooq_dependency",
+        "general_idea": "Add Spring Boot starter for jOOQ to replace or supplement JPA for data access.",
+        "human_impl": "<artifactId>spring-boot-starter-jooq</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_webflux_dependency",
+        "general_idea": "Add Spring WebFlux starter for reactive web capabilities.",
+        "human_impl": "<artifactId>spring-boot-starter-webflux</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation_dependency",
+        "general_idea": "Add Spring Boot starter for Bean Validation support.",
+        "human_impl": "<artifactId>spring-boot-starter-validation</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mail_dependency",
+        "general_idea": "Add Spring Boot starter for sending emails.",
+        "human_impl": "<artifactId>spring-boot-starter-mail</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_thymeleaf_dependency",
+        "general_idea": "Add Spring Boot starter for Thymeleaf templating engine.",
+        "human_impl": "<artifactId>spring-boot-starter-thymeleaf</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_poi_dependency",
+        "general_idea": "Add Apache POI library for Excel file processing.",
+        "human_impl": "<artifactId>poi</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_poi_ooxml_dependency",
+        "general_idea": "Add Apache POI OOXML library for modern Excel format support.",
+        "human_impl": "<artifactId>poi-ooxml</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_commons_lang3_dependency",
+        "general_idea": "Add Apache Commons Lang3 for utility methods.",
+        "human_impl": "<artifactId>commons-lang3</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jjwt_api_dependency",
+        "general_idea": "Add JJWT API for JWT token handling.",
+        "human_impl": "<artifactId>jjwt-api</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jjwt_impl_dependency",
+        "general_idea": "Add JJWT implementation for runtime JWT processing.",
+        "human_impl": "<artifactId>jjwt-impl</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jjwt_jackson_dependency",
+        "general_idea": "Add JJWT Jackson module for JSON serialization.",
+        "human_impl": "<artifactId>jjwt-jackson</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_mapstruct",
+        "general_idea": "Upgrade MapStruct version to 1.5.5.Final for compatibility with newer Java/Spring.",
+        "human_impl": "<mapstruct.version>1.5.5.Final</mapstruct.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_frontend_maven_plugin",
+        "general_idea": "Add frontend-maven-plugin to build the Angular frontend during the Maven build.",
+        "human_impl": "<artifactId>frontend-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_typescript_generator_plugin",
+        "general_idea": "Add typescript-generator-maven-plugin to generate TypeScript DTOs from Java classes.",
+        "human_impl": "<artifactId>typescript-generator-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jooq_codegen_plugin",
+        "general_idea": "Add jOOQ code generation plugin to generate Java classes from the database schema.",
+        "human_impl": "<artifactId>jooq-codegen-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_flyway_plugin",
+        "general_idea": "Add Flyway Maven plugin for database migration management.",
+        "human_impl": "<artifactId>flyway-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sonar_plugin",
+        "general_idea": "Add SonarQube Maven plugin for code quality analysis.",
+        "human_impl": "<artifactId>sonar-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_plugin",
+        "general_idea": "Add JaCoCo Maven plugin for code coverage reporting.",
+        "human_impl": "<artifactId>jacoco-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_surefire_plugin",
+        "general_idea": "Upgrade Maven Surefire plugin to 3.2.2 for better test execution support.",
+        "human_impl": "<version>${maven-surefire-plugin.version}</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_compiler_plugin",
+        "general_idea": "Upgrade Maven Compiler plugin to 3.11.0 for Java 21 support.",
+        "human_impl": "<version>${maven-compiler-plugin.version}</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_artifact",
+        "general_idea": "Rename the artifact ID from 'server' to 'zkmf2024-server' for clarity.",
+        "human_impl": "<artifactId>zkmf2024-server</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_version",
+        "general_idea": "Update project version from 0.0.1-SNAPSHOT to 1.0.0-SNAPSHOT.",
+        "human_impl": "<version>1.0.0-SNAPSHOT</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_db_properties",
+        "general_idea": "Add database connection properties for local development.",
+        "human_impl": "<db.url>jdbc:postgresql://localhost:5432/zkmf2024</db.url>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sonar_properties",
+        "general_idea": "Add SonarCloud organization and project key properties.",
+        "human_impl": "<sonar.organization>sjucker</sonar.organization>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_frontend_profiles",
+        "general_idea": "Add Maven profiles for production and staging frontend builds.",
+        "human_impl": "<profile><id>production</id>...</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_resources",
+        "general_idea": "Configure resource filtering and static asset copying in the build section.",
+        "human_impl": "<resources>...</resources>",
+        "bucket": "polishment"
+      }
+    ],
     ".gitignore": [],
     ".idea/codeStyles/Project.xml": [],
     ".mvn/wrapper/maven-wrapper.jar": [],
@@ -178,62 +365,56 @@
     "mvnw": [
       {
         "kind": "update_wrapper_version",
-        "general_idea": "Upgrade the Maven Wrapper script from version 0.5.6 to 3.2.0 to align with modern Maven standards.",
-        "human_impl": "Changed header comment to 'Apache Maven Wrapper startup batch script, version 3.2.0' and updated download URLs to point to org/apache/maven/wrapper/maven-wrapper/3.2.0.",
+        "general_idea": "Upgrade the Maven Wrapper script to version 3.2.0 to align with modern Maven standards.",
+        "human_impl": "Updated header comment to 'Apache Maven Wrapper startup batch script, version 3.2.0' and changed download URLs to point to org/apache/maven/wrapper/maven-wrapper/3.2.0.",
         "bucket": "polishment"
       },
       {
         "kind": "modernize_shell_syntax",
         "general_idea": "Replace deprecated backtick command substitution with modern $() syntax for better readability and nesting support.",
-        "human_impl": "Replaced instances of `command` with $(command) throughout the script, e.g., `uname` to $(uname).",
+        "human_impl": "Changed instances like `uname` to $(uname) and `java-config --jre-home` to $(java-config --jre-home).",
         "bucket": "polishment"
       },
       {
         "kind": "remove_m2_home_dependency",
-        "general_idea": "Remove reliance on the deprecated M2_HOME environment variable, as modern Maven wrappers do not require a pre-installed Maven distribution.",
-        "human_impl": "Removed logic that resolved M2_HOME from symlinks and removed -Dmaven.home from the final exec command.",
+        "general_idea": "Remove reliance on the deprecated M2_HOME environment variable, relying instead on the wrapper jar location.",
+        "human_impl": "Removed logic resolving M2_HOME and removed -Dmaven.home=${M2_HOME} from the final exec command.",
         "bucket": "polishment"
       },
       {
-        "kind": "add_sha256_validation",
-        "general_idea": "Introduce SHA-256 checksum validation for the downloaded maven-wrapper.jar to ensure integrity and security.",
-        "human_impl": "Added logic to read wrapperSha256Sum from properties and verify the jar using sha256sum or shasum before execution.",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "improve_error_handling",
-        "general_idea": "Enhance robustness by adding error checks for directory changes and command availability.",
-        "human_impl": "Added '|| exit 1' to cd commands and improved fallback logic for downloading the wrapper jar.",
+        "kind": "add_checksum_validation",
+        "general_idea": "Add SHA-256 checksum verification for the downloaded Maven Wrapper JAR to ensure integrity.",
+        "human_impl": "Added logic to read wrapperSha256Sum from properties and validate the JAR using sha256sum or shasum.",
         "bucket": "polishment"
       },
       {
         "kind": "fix_windows_crlf_handling",
-        "general_idea": "Fix issues with Windows line endings (CRLF) when reading configuration files in Git Bash environments.",
-        "human_impl": "Added tr -d '\\r' when reading wrapperUrl and tr -s '\\r\\n' ' ' in concat_lines to strip carriage returns.",
+        "general_idea": "Improve robustness on Windows by handling carriage returns in configuration files and paths.",
+        "human_impl": "Added tr -d '\\r' when reading properties and improved path handling in cygwin/mingw blocks.",
         "bucket": "polishment"
       },
       {
-        "kind": "update_download_urls",
-        "general_idea": "Update the Maven Wrapper JAR download URL to use the official Apache Maven group ID instead of the legacy Takari group ID.",
-        "human_impl": "Changed jarUrl from io/takari/maven-wrapper/0.5.6 to org/apache/maven/wrapper/maven-wrapper/3.2.0.",
+        "kind": "improve_error_handling",
+        "general_idea": "Add explicit error handling for directory changes and command failures to prevent silent failures.",
+        "human_impl": "Added || exit 1 to cd commands and || rm -f to download commands to clean up on failure.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_launcher_class",
+        "general_idea": "Switch to the new official Maven Wrapper launcher class.",
+        "human_impl": "Changed WRAPPER_LAUNCHER from org.codehaus.plexus.classworlds.launcher.Launcher to org.apache.maven.wrapper.MavenWrapperMain.",
         "bucket": "polishment"
       },
       {
         "kind": "add_verbose_logging",
-        "general_idea": "Centralize and improve logging output for debugging wrapper initialization steps.",
-        "human_impl": "Introduced a log() function that prints messages only if MVNW_VERBOSE is true, replacing scattered echo statements.",
+        "general_idea": "Introduce a centralized logging mechanism for verbose output.",
+        "human_impl": "Added a log() function and replaced direct echo statements with log calls when MVNW_VERBOSE is true.",
         "bucket": "polishment"
       },
       {
-        "kind": "fix_argument_passing",
-        "general_idea": "Correctly pass command-line arguments to the Maven process by using $* instead of $@ in MAVEN_CMD_LINE_ARGS.",
-        "human_impl": "Changed MAVEN_CMD_LINE_ARGS=\"$MAVEN_CONFIG $@\" to MAVEN_CMD_LINE_ARGS=\"$MAVEN_CONFIG $*\".",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "add_debug_opts_support",
-        "general_idea": "Allow passing additional debug options to the JVM via MAVEN_DEBUG_OPTS.",
-        "human_impl": "Added $MAVEN_DEBUG_OPTS to the final exec command arguments.",
+        "kind": "fix_arg_expansion",
+        "general_idea": "Fix argument expansion to correctly handle arguments with spaces.",
+        "human_impl": "Changed MAVEN_CMD_LINE_ARGS assignment from $@ to $* and adjusted the final exec command.",
         "bucket": "polishment"
       }
     ]

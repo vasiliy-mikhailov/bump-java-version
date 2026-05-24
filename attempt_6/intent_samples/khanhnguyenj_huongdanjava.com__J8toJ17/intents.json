@@ -17,7 +17,7 @@
       {
         "kind": "refactor_field_renaming",
         "general_idea": "Simplify the student model by replacing separate name fields with a single 'name' field and adding a 'code' field.",
-        "human_impl": "Replaced firstName, middleName, lastName with name; added code field.",
+        "human_impl": "Replaced firstName, middleName, lastName with name; added code.",
         "bucket": "polishment"
       },
       {
@@ -46,13 +46,13 @@
       {
         "kind": "reorder_imports",
         "general_idea": "Reorder import statements to group java.* imports before third-party imports.",
-        "human_impl": "Moved 'import java.math.BigDecimal;' before 'import com.huongdanjava...'",
+        "human_impl": "moved 'import java.math.BigDecimal;' before 'import com.huongdanjava...'",
         "bucket": "polishment"
       },
       {
         "kind": "fix_indentation",
         "general_idea": "Adjust code indentation from 4 spaces to 2 spaces to match project style.",
-        "human_impl": "Changed indentation of main method body from 4 spaces to 2 spaces.",
+        "human_impl": "changed indentation of main method body from 4 spaces to 2 spaces",
         "bucket": "polishment"
       }
     ],
@@ -60,14 +60,14 @@
     "spring-jdbc-transaction-management/src/main/java/com/huongdanjava/springjdbctransactionmanagement/dao/impl/AccountDAOImpl.java": [
       {
         "kind": "import_reordering",
-        "general_idea": "Reorder imports to group java.* imports before third-party imports, adhering to standard Java coding conventions.",
-        "human_impl": "Moved java.math.BigDecimal, java.sql.ResultSet, and java.sql.SQLException imports above org.springframework imports.",
+        "general_idea": "Reorder imports to group java.* packages before third-party packages.",
+        "human_impl": "Moved java.math.BigDecimal, java.sql.ResultSet, java.sql.SQLException before org.springframework.* imports.",
         "bucket": "polishment"
       },
       {
         "kind": "indentation_normalization",
-        "general_idea": "Standardize code indentation to use 2 spaces instead of 4 spaces for consistent formatting.",
-        "human_impl": "Changed indentation of class members and method bodies from 4 spaces to 2 spaces.",
+        "general_idea": "Standardize code indentation to use 2 spaces instead of 4 spaces.",
+        "human_impl": "Changed indentation of class body and method contents from 4 spaces to 2 spaces.",
         "bucket": "polishment"
       }
     ],
@@ -82,14 +82,14 @@
       {
         "kind": "adjust_indentation",
         "general_idea": "Change code indentation from 4 spaces to 2 spaces to match a new coding style.",
-        "human_impl": "replaced 4-space indents with 2-space indents for fields and method bodies",
+        "human_impl": "replaced 4-space indents with 2-space indents for class body and method body",
         "bucket": "polishment"
       }
     ],
     "freemarker-hello-world/pom.xml": [
       {
-        "kind": "dependency_version_bump",
-        "general_idea": "Upgrade the Freemarker library version from 2.3.26-incubating to 2.3.27-incubating.",
+        "kind": "bump_freemarker_version",
+        "general_idea": "Upgrade the Freemarker library dependency from version 2.3.26-incubating to 2.3.27-incubating.",
         "human_impl": "<version>2.3.27-incubating</version>",
         "bucket": "polishment"
       }
@@ -110,8 +110,8 @@
     ],
     "spring-component-scan/pom.xml": [
       {
-        "kind": "dependency_version_upgrade",
-        "general_idea": "Upgrade spring-context dependency from 4.3.6.RELEASE to 5.3.20 to ensure compatibility with Java 17.",
+        "kind": "dependency_version_bump",
+        "general_idea": "Upgrade Spring Context dependency from 4.3.6.RELEASE to 5.3.20 to ensure compatibility with Java 17.",
         "human_impl": "<version>5.3.20</version>",
         "bucket": "breaking"
       }

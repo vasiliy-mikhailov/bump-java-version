@@ -37,20 +37,20 @@
       },
       {
         "kind": "add_entity_fields",
-        "general_idea": "Added specific fields (nombre, visible, descripcion, etc.) to the Pelicula entity that were likely previously in the parent class or missing.",
-        "human_impl": "private String nombre; private boolean visible; ...",
+        "general_idea": "Added specific database columns and fields to the Pelicula entity to store detailed movie information.",
+        "human_impl": "private String nombre; private boolean visible; private String descripcion; private String imagen; private String a\u00f1o; private String actores; private String link;",
         "bucket": "polishment"
       },
       {
         "kind": "add_many_to_many_relation",
-        "general_idea": "Added a ManyToMany relationship with Categoria to associate movies with categories.",
-        "human_impl": "@ManyToMany ... private List<Categoria> categorias",
+        "general_idea": "Established a many-to-many relationship between Pelicula and Categoria using a join table.",
+        "human_impl": "@ManyToMany(cascade = CascadeType.ALL) @JoinTable(name = \"pelicula_categoria\", ...) private List<Categoria> categorias",
         "bucket": "polishment"
       },
       {
         "kind": "add_many_to_many_relation",
-        "general_idea": "Added a ManyToMany relationship with Familia to associate movies with families.",
-        "human_impl": "@ManyToMany ... private List<Familia> familia",
+        "general_idea": "Established a many-to-many relationship between Pelicula and Familia using a join table.",
+        "human_impl": "@ManyToMany(cascade = CascadeType.ALL) @JoinTable(name = \"pelicula_familia\", ...) private List<Familia> familia",
         "bucket": "polishment"
       }
     ],
@@ -70,13 +70,13 @@
       {
         "kind": "rename_join_column",
         "general_idea": "Updated the join column name in the watchlist_serie relationship from usuario_id to perfil_id to reflect the entity name.",
-        "human_impl": "Changed joinColumns = @JoinColumn(name = \"usuario_id\") to joinColumns = @JoinColumn(name = \"perfil_id\") in @JoinTable for series",
+        "human_impl": "Changed joinColumns = @JoinColumn(name = \"usuario_id\") to joinColumns = @JoinColumn(name = \"perfil_id\")",
         "bucket": "breaking"
       },
       {
         "kind": "rename_join_column",
         "general_idea": "Updated the join column name in the watchlist_pelicula relationship from usuario_id to perfil_id to reflect the entity name.",
-        "human_impl": "Changed joinColumns = @JoinColumn(name = \"usuario_id\") to joinColumns = @JoinColumn(name = \"perfil_id\") in @JoinTable for peliculas",
+        "human_impl": "Changed joinColumns = @JoinColumn(name = \"usuario_id\") to joinColumns = @JoinColumn(name = \"perfil_id\")",
         "bucket": "breaking"
       }
     ],
@@ -94,21 +94,21 @@
         "bucket": "breaking"
       },
       {
-        "kind": "remove_entity_field",
-        "general_idea": "Removed the temporadas field from the Serie entity, likely moving it to a different entity or removing the feature.",
-        "human_impl": "- private int temporadas;",
-        "bucket": "breaking"
-      },
-      {
         "kind": "add_many_to_many_relation",
         "general_idea": "Added a many-to-many relationship with Categoria to categorize series.",
-        "human_impl": "@ManyToMany ... private List<Categoria> categorias",
+        "human_impl": "@ManyToMany(cascade = CascadeType.ALL) private List<Categoria> categorias",
         "bucket": "breaking"
       },
       {
         "kind": "add_many_to_many_relation",
         "general_idea": "Added a many-to-many relationship with Familia to group series into families.",
-        "human_impl": "@ManyToMany ... private List<Familia> familia",
+        "human_impl": "@ManyToMany(cascade = CascadeType.ALL) private List<Familia> familia",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_field",
+        "general_idea": "Removed the temporadas field from the Serie entity.",
+        "human_impl": "- private int temporadas;",
         "bucket": "breaking"
       }
     ],
@@ -116,7 +116,7 @@
       {
         "kind": "remove_field",
         "general_idea": "Remove the 'capitulos' field and its JPA column annotation from the Temporada entity.",
-        "human_impl": "Removed '@Column(name = \"capitulos\") private int capitulos;' block.",
+        "human_impl": "- @Column(name = \"capitulos\")\n- private int capitulos;",
         "bucket": "breaking"
       }
     ]

@@ -30,14 +30,14 @@
         "bucket": "polishment"
       },
       {
-        "kind": "implement_java_config_main",
-        "general_idea": "Replace the simple print statement with logic that initializes an AnnotationConfigApplicationContext and retrieves a bean.",
+        "kind": "implement_java_config_bootstrapping",
+        "general_idea": "Replace the simple print statement with code that initializes the Spring container using AnnotationConfigApplicationContext and retrieves a bean.",
         "human_impl": "ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);\nAlien obj = (Alien)context.getBean(Alien.class);\nobj.code();",
         "bucket": "polishment"
       },
       {
         "kind": "add_xml_config_comments",
-        "general_idea": "Add commented-out code demonstrating XML-based configuration for reference or future use.",
+        "general_idea": "Add commented-out code demonstrating XML-based configuration as a reference or alternative approach.",
         "human_impl": "// ApplicationContext context = new ClassPathXmlApplicationContext(\"spring.xml\");",
         "bucket": "polishment"
       }
