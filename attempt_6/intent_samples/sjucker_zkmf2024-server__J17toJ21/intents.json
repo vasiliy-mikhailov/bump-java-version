@@ -1,0 +1,410 @@
+{
+  "meta": {
+    "repo": "sjucker/zkmf2024-server",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "49f65773a7968803c36813bcd8f6191797cf0a37",
+    "sha_to": "522afe14bc4036bf22b6c54aec85633a45fd2451"
+  },
+  "by_file": {
+    "src/main/java/ch/zkmf2024/server/ServerApplication.java": [
+      {
+        "kind": "enable_scheduling",
+        "general_idea": "Enable Spring's scheduling support to allow the use of @Scheduled annotations for background tasks.",
+        "human_impl": "Added @EnableScheduling annotation to ServerApplication class",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/zkmf2024/server/configuration/SecurityConfiguration.java": [
+      {
+        "kind": "migrate_security_config_class",
+        "general_idea": "Replace deprecated WebSecurityConfigurerAdapter with a standalone class using SecurityFilterChain bean to comply with Spring Security 6+ requirements for Java 21.",
+        "human_impl": "public class SecurityConfiguration { @Bean public SecurityFilterChain configure(HttpSecurity http) ... }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "enable_method_security",
+        "general_idea": "Add @EnableMethodSecurity annotation to enable method-level security pre-post annotations, replacing the deprecated @EnableGlobalMethodSecurity.",
+        "human_impl": "@EnableMethodSecurity(securedEnabled = true)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_authorize_syntax",
+        "general_idea": "Update HTTP security configuration to use the new authorizeHttpRequests lambda API instead of the deprecated authorizeRequests builder.",
+        "human_impl": ".authorizeHttpRequests(registry -> { registry.requestMatchers(...).permitAll(); ... })",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_filter_registration",
+        "general_idea": "Register the custom JWT filter using the new HttpSecurity builder API instead of the old addFilterBefore with specific filter classes.",
+        "human_impl": ".addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_cors_filter",
+        "general_idea": "Explicitly define a CorsFilter bean and enable CORS in HttpSecurity to handle cross-origin requests, replacing implicit or previous configurations.",
+        "human_impl": "@Bean public CorsFilter corsFilter() { ... } .cors(withDefaults())",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_password_encoder",
+        "general_idea": "Introduce a PasswordEncoder bean using PasswordEncoderFactories, likely required for new security features or compliance with stricter Spring Security defaults.",
+        "human_impl": "@Bean public PasswordEncoder passwordEncoder() { return PasswordEncoderFactories.createDelegatingPasswordEncoder(); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "switch_auth_provider",
+        "general_idea": "Replace Firebase-specific pre-authentication provider and filter with a generic JwtRequestFilter, simplifying the authentication chain.",
+        "human_impl": "private final JwtRequestFilter jwtRequestFilter; ... addFilterBefore(jwtRequestFilter, ...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/zkmf2024/server/repository/UserRepository.java": [
+      {
+        "kind": "replace_jpa_with_jooq",
+        "general_idea": "Migrate the UserRepository from Spring Data JPA to jOOQ for database access.",
+        "human_impl": "Changed class from interface extending JpaRepository to class using DSLContext and Zkmf2024UserDao.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/ch/zkmf2024/server/rest/AuthEndpoint.java": [
+      {
+        "kind": "replace_logging_framework",
+        "general_idea": "Replace manual SLF4J logger instantiation with Lombok @Slf4j annotation for cleaner code.",
+        "human_impl": "Removed 'private static final Logger logger...' and added '@Slf4j' annotation, changing 'logger.info' to 'log.info'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_import_package",
+        "general_idea": "Update validation imports from javax.validation to jakarta.validation to comply with Jakarta EE 9+ standards required by Spring Boot 3/Java 21.",
+        "human_impl": "Changed 'import javax.validation.Valid' to 'import jakarta.validation.Valid'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_external_auth_provider",
+        "general_idea": "Remove dependency on Firebase Authentication in favor of internal JWT-based authentication.",
+        "human_impl": "Removed imports for 'com.google.firebase.auth.*' and deleted the Firebase-specific registration logic.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_internal_auth_logic",
+        "general_idea": "Implement new login endpoint using internal UserRepository, PasswordEncoder, and JwtService.",
+        "human_impl": "Added '/public/auth' POST endpoint that validates password against DB and returns JWT via 'jwtService.createJwt'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "implement_helper_registration",
+        "general_idea": "Replace stub helper registration with actual service call and switch expression for response handling.",
+        "human_impl": "Called 'helperRegistrationService.register(request)' and used 'switch (result)' to return appropriate HTTP status codes.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "implement_newsletter_registration",
+        "general_idea": "Replace stub newsletter registration with actual service call and switch expression for response handling.",
+        "human_impl": "Called 'newsletterService.register(request)' and used 'switch (result)' to return appropriate HTTP status codes.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation_annotation",
+        "general_idea": "Add @Valid annotation to request bodies to enable Bean Validation.",
+        "human_impl": "Added '@Valid' before '@RequestBody' in registerHelper and registerNewsletter methods.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_dto_classes",
+        "general_idea": "Rename DTO classes to follow standard naming conventions (ending in DTO).",
+        "human_impl": "Changed imports and usage from 'RegisterHelperRequestDto' to 'RegisterHelperRequestDTO', etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_injection",
+        "general_idea": "Inject new services required for the refactored authentication and registration logic.",
+        "human_impl": "Added fields and constructor parameters for NewsletterService, HelperRegistrationService, JwtService, PasswordEncoder, and ApplicationProperties.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/zkmf2024/server/rest/secured/SecuredAuthEndpoint.java": [
+      {
+        "kind": "refactor_role_mapping",
+        "general_idea": "Replace direct domain object method call with explicit enum valueOf conversion to decouple from the User entity structure.",
+        "human_impl": ".map(pojo -> UserRole.valueOf(pojo.getRole()))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove import for javax.persistence.EntityNotFoundException as it is no longer used in the code.",
+        "human_impl": "-import javax.persistence.EntityNotFoundException;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_import_path",
+        "general_idea": "Update import for UserRole to point to the new DTO package instead of the domain package.",
+        "human_impl": "+import ch.zkmf2024.server.dto.UserRole;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_exception_throwing",
+        "general_idea": "Use the no-argument orElseThrow() method instead of explicitly passing the EntityNotFoundException constructor reference.",
+        "human_impl": ".orElseThrow()",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "upgrade_spring_boot",
+        "general_idea": "Upgrade Spring Boot parent from 2.6.2 to 3.2.0 to support Java 21 and modern Spring features.",
+        "human_impl": "<version>3.2.0</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_artifact",
+        "general_idea": "Rename the Maven artifact ID to match the new project naming convention.",
+        "human_impl": "<artifactId>zkmf2024-server</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_version",
+        "general_idea": "Bump the project version to 1.0.0-SNAPSHOT.",
+        "human_impl": "<version>1.0.0-SNAPSHOT</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_mapstruct",
+        "general_idea": "Upgrade MapStruct dependency to a version compatible with newer Java/Spring.",
+        "human_impl": "<mapstruct.version>1.5.5.Final</mapstruct.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jjwt_dependency",
+        "general_idea": "Add JJWT dependencies for JWT handling, replacing or supplementing previous auth mechanisms.",
+        "human_impl": "<artifactId>jjwt-api</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_poi_dependency",
+        "general_idea": "Add Apache POI dependencies for Excel file processing.",
+        "human_impl": "<artifactId>poi</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_poi_ooxml_dependency",
+        "general_idea": "Add Apache POI OOXML dependencies for modern Excel format support.",
+        "human_impl": "<artifactId>poi-ooxml</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_frontend_plugin",
+        "general_idea": "Add frontend-maven-plugin to build the Angular frontend during the Maven build process.",
+        "human_impl": "<artifactId>frontend-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_typescript_generator_plugin",
+        "general_idea": "Add typescript-generator-maven-plugin to generate TypeScript definitions from Java DTOs.",
+        "human_impl": "<artifactId>typescript-generator-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sonar_plugin",
+        "general_idea": "Add SonarQube Maven plugin for code quality analysis.",
+        "human_impl": "<artifactId>sonar-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_plugin",
+        "general_idea": "Add JaCoCo Maven plugin for code coverage reporting.",
+        "human_impl": "<artifactId>jacoco-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_surefire_plugin",
+        "general_idea": "Add explicit Maven Surefire plugin version for test execution.",
+        "human_impl": "<artifactId>maven-surefire-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_db_properties",
+        "general_idea": "Add database connection properties for local development.",
+        "human_impl": "<db.url>jdbc:postgresql://localhost:5432/zkmf2024</db.url>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sonar_properties",
+        "general_idea": "Add SonarCloud organization and project key properties.",
+        "human_impl": "<sonar.organization>sjucker</sonar.organization>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_web_starter",
+        "general_idea": "Add Spring Boot Web starter for REST API support.",
+        "human_impl": "<artifactId>spring-boot-starter-web</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation_starter",
+        "general_idea": "Add Spring Boot Validation starter for bean validation.",
+        "human_impl": "<artifactId>spring-boot-starter-validation</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mail_starter",
+        "general_idea": "Add Spring Boot Mail starter for email sending capabilities.",
+        "human_impl": "<artifactId>spring-boot-starter-mail</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_thymeleaf_starter",
+        "general_idea": "Add Spring Boot Thymeleaf starter for server-side templating.",
+        "human_impl": "<artifactId>spring-boot-starter-thymeleaf</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_webflux_starter",
+        "general_idea": "Add Spring Boot WebFlux starter for reactive web support.",
+        "human_impl": "<artifactId>spring-boot-starter-webflux</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jooq_starter",
+        "general_idea": "Add Spring Boot jOOQ starter for type-safe SQL queries.",
+        "human_impl": "<artifactId>spring-boot-starter-jooq</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_commons_lang3",
+        "general_idea": "Add Apache Commons Lang3 for utility methods.",
+        "human_impl": "<artifactId>commons-lang3</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "switch_db_driver",
+        "general_idea": "Switch database driver from MySQL to PostgreSQL.",
+        "human_impl": "<artifactId>postgresql</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_testcontainers",
+        "general_idea": "Update Testcontainers dependencies to use PostgreSQL instead of MySQL.",
+        "human_impl": "<artifactId>postgresql</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_firebase",
+        "general_idea": "Remove Firebase Admin SDK dependency as it is no longer used.",
+        "human_impl": "<artifactId>firebase-admin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_javax_mail",
+        "general_idea": "Remove legacy javax.mail dependency in favor of Spring Boot Mail starter.",
+        "human_impl": "<artifactId>mail</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_javax_activation",
+        "general_idea": "Remove legacy javax.activation dependency.",
+        "human_impl": "<artifactId>activation</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_jdbc_starter",
+        "general_idea": "Remove Spring Boot JDBC starter as jOOQ is now used.",
+        "human_impl": "<artifactId>spring-boot-starter-data-jdbc</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_jpa_starter",
+        "general_idea": "Remove Spring Boot JPA starter as jOOQ is now used.",
+        "human_impl": "<artifactId>spring-boot-starter-data-jpa</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_rest_starter",
+        "general_idea": "Remove Spring Boot Data REST starter.",
+        "human_impl": "<artifactId>spring-boot-starter-data-rest</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_production_profile",
+        "general_idea": "Add a Maven profile for production builds that includes frontend building.",
+        "human_impl": "<profile><id>production</id>",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [],
+    ".idea/codeStyles/Project.xml": [],
+    ".mvn/wrapper/maven-wrapper.jar": [],
+    ".mvn/wrapper/maven-wrapper.properties": [
+      {
+        "kind": "upgrade_maven_wrapper",
+        "general_idea": "Update the Maven Wrapper JAR to version 3.2.0 to align with modern build tooling standards.",
+        "human_impl": "wrapperUrl=.../maven-wrapper/3.2.0/maven-wrapper-3.2.0.jar",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_maven_distribution",
+        "general_idea": "Upgrade the bundled Maven distribution to version 3.9.6 to ensure compatibility with Java 21 and modern plugin features.",
+        "human_impl": "distributionUrl=.../apache-maven/3.9.6/apache-maven-3.9.6-bin.zip",
+        "bucket": "polishment"
+      }
+    ],
+    ".run/ServerApplication.run.xml": [
+      {
+        "kind": "set_jdk_version",
+        "general_idea": "Configure the IDE run configuration to explicitly use Java 21 as the execution runtime.",
+        "human_impl": "<option name=\"ALTERNATIVE_JRE_PATH\" value=\"21\"/> <option name=\"ALTERNATIVE_JRE_PATH_ENABLED\" value=\"true\"/>",
+        "bucket": "polishment"
+      }
+    ],
+    "mvnw": [
+      {
+        "kind": "update_wrapper_version",
+        "general_idea": "Upgrade the Maven Wrapper script from version 0.5.6 to 3.2.0 to align with modern Maven standards.",
+        "human_impl": "Changed header comment to 'Apache Maven Wrapper startup batch script, version 3.2.0' and updated download URLs to point to org/apache/maven/wrapper/maven-wrapper/3.2.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_shell_syntax",
+        "general_idea": "Replace deprecated backtick command substitution with modern $() syntax for better readability and nesting support.",
+        "human_impl": "Replaced instances of `command` with $(command) throughout the script, e.g., `uname` to $(uname).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_windows_crlf_handling",
+        "general_idea": "Ensure the wrapper script works correctly on Windows with Git Bash auto-CRLF by stripping carriage returns from configuration values.",
+        "human_impl": "Added tr -s '\\r\\n' ' ' in concat_lines and logic to remove '\\r' from values read from wrapper properties.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "improve_error_handling",
+        "general_idea": "Add explicit error handling for directory changes to prevent silent failures in path resolution.",
+        "human_impl": "Changed cd commands to include '|| exit 1' or similar error checks, e.g., cd \"$wdir/..\" || exit 1.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_java_home_detection",
+        "general_idea": "Modernize Java home detection logic to use standard command resolution instead of legacy M2_HOME resolution.",
+        "human_impl": "Removed M2_HOME resolution logic and updated JAVA_HOME detection to use $(/usr/libexec/java_home) and $(command -v java).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_verbose_logging",
+        "general_idea": "Introduce a structured logging function to support verbose output controlled by MVNW_VERBOSE.",
+        "human_impl": "Added log() function that prints only if MVNW_VERBOSE is true, replacing direct echo statements.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_license_url",
+        "general_idea": "Update the Apache License URL from https to http to match the specific version referenced in the wrapper template.",
+        "human_impl": "Changed license URL from https://www.apache.org/licenses/LICENSE-2.0 to http://www.apache.org/licenses/LICENSE-2.0.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}
