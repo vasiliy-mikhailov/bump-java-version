@@ -101,7 +101,9 @@ def run_phase(work_dir, recipes_dir, out_log, phase, jdk, build_tool, stage_reci
            "-v", f"{work_dir}:/work/src",
            "-v", f"{recipes_dir}:/recipes:ro",
            "-v", f"{out_dir}:/out",
-           "--network", "host",
+           "--network", "mvn-cache",
+           "-v", "/home/vmihaylov/.m2-fitness:/root/.m2",
+           "-v", "/home/vmihaylov/maven-config/settings.xml:/root/.m2/settings.xml:ro",
            "-v", f"{HERE}/attempt_6/tools/run_one_stage_v2.sh:/entry.sh:ro",
            *env_args,
            "--entrypoint", "bash", IMAGE, "/entry.sh"]
@@ -151,12 +153,17 @@ def process_stage(stage, idx, total):
         rc = run_phase(work_dir, recipes_dir, log, "build_post", jt, build_tool)
         result["build_post"] = (rc == 0)
 
-        # keep tail of log for debugging
+        # keep tail of log for debugging, also append FULL log to /tmp/ff1_stages.log
+        # so Vector (which tails /tmp/*.log) can feed it to the compactor.
         try:
             with open(log) as f:
                 lines = f.readlines()
             result["log_tail"] = "".join(lines[-25:])
-        except Exception:
+            header = "\n=== " + label + " sha=" + sha_from[:8] + " ===\n"
+            with open("/tmp/ff1_stages.log", "a") as out:
+                out.write(header)
+                out.writelines(lines)
+        except Exception as _e:
             pass
 
         print(f"  [{idx}/{total}] {label}: pre={result['build_pre']} recipe={result['recipe_applied']} post={result['build_post']}",
