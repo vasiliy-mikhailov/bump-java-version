@@ -7,7 +7,7 @@
 1. **Fitness (recipe):** find an OpenRewrite recipe composition that converges each repo in `java21-migration-dataset.json` to the form humans committed.
     - **Why:** help humans spend less time upgrading Java projects to a new Java version.
     - **Constraints:** declarative YAML only; each adjacent step in a lineage is its own stage; each stage runs under the JDK matching its output level, accepts exactly one input level, and its source+pom edits persist into the next stage's working tree; emits per (repo, stage) cells with build outcome and recipe-output, consumed by item 7 (failing cells as its input set) and item 11 (recipe-output for intent extraction).
-    - **Search:** per stage, draw from the recipe catalog, community migration guidance, and the diff between the candidate's output and the human's commit at that stage's output level.
+    - **Search:** per stage, draw from the recipe catalog, community migration guidance, the corpus's empirical human-intent catalog (item 6), and the diff between the candidate's output and the human's commit at that stage's output level.
     - **Reward:** per stage, fraction of the corpus that builds on the stage's JDK, jointly with intent overlap with the human's commit at that level (item 11), with regressions weighted heavier than non-improvements.
     - **Repeat:** ralph loop per stage; on plateau, drop into item 7.
 2. **Workdir:** `$HOME/java_8_11_17_to_java_21`.
@@ -20,8 +20,8 @@
     - **Reward:** consuming items report uninterrupted service.
     - **Repeat:** on any consumer reporting degraded service.
 6. **Fitness (dataset rediscovery):** curate a corpus of lineages — repos tracked across their Java-version history.
-    - **Why:** the recipe loop and intent measurement need a representative corpus of real human migrations to measure against.
-    - **Constraints:** each entry is one repo with `commit_sha` recorded at every observed Java version, each commit baseline-buildable on its matching JDK; distinct-owner sampling per (oldest-Java-version × dependency family) cell; contract with items 1 and 11 — emits `java21-migration-dataset.json` whose entries are the corpus item 1 measures recipes against and the ground-truth commits item 11 extracts human-intents from.
+    - **Why:** the recipe loop and intent measurement need a representative corpus of real human migrations to measure against, and a catalog of the intents humans actually expressed in those migrations.
+    - **Constraints:** each entry is one repo with `commit_sha` recorded at every observed Java version, each commit baseline-buildable on its matching JDK; distinct-owner sampling per (oldest-Java-version × dependency family) cell; contract with items 1 and 11 — emits `java21-migration-dataset.json` whose entries are the corpus item 1 measures recipes against, plus per (repo, stage) human-intent extracts (kind, general_idea, human_impl, bucket) that item 1 draws from as search priors and item 11 uses as the reference side of intent overlap.
     - **Search:** ralph loop over candidate repos, widening discovery on under-represented (oldest-Java-version × family) cells.
     - **Reward:** coverage in under-represented cells; fraction of entries where every commit is baseline-buildable.
     - **Repeat:** continuous; paused when downstream items are saturated on the current corpus.
@@ -56,6 +56,6 @@
 11. **Fitness (intent coverage):** measure recipe-vs-human as overlap of intents, per stage.
     - **Why:** byte-level match would punish equivalent implementations; intent-level overlap lets the recipe converge on what humans actually need, not on cosmetic identity.
     - **Constraints:** intents are typed atoms extracted from diffs of each side against the same source baseline; each intent is bucketed as breaking (build won't pass without it on the target JDK) or polishment (build passes without it); not bytes; contract with item 1 — per (repo, stage) intent overlap is emitted with breaking and polishment coverage reported separately, consumable by item 1's reward.
-    - **Search:** per stage, extract recipe-intents and human-intents with their buckets; intersect; surface recipe-only and human-only sets; on the intersection, compare implementations.
+    - **Search:** per stage, extract recipe-intents and human-intents with their buckets; intersect; surface recipe-only and human-only sets; on the intersection, compare implementations; aggregate per-stage across the corpus to surface the most-requested breaking intents and the least-covered ones.
     - **Reward:** breaking-intent coverage first, polishment second; minimize recipe-intent rejection rate; minimize implementation divergence on shared intents.
     - **Repeat:** alongside item 1's loop; recompute on every composition mutation.
