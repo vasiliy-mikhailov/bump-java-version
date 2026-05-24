@@ -1,0 +1,239 @@
+{
+  "meta": {
+    "repo": "esign-consulting/logistics",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "5721baac46c0189ffb2681da29b4be00284ebe51",
+    "sha_to": "89f0c829b1a3586866541fc4ec936f48221307d7"
+  },
+  "by_file": {
+    "logistics-ejb/src/main/java/br/com/esign/logistics/core/Place.java": [
+      {
+        "kind": "update_morphia_imports",
+        "general_idea": "Update Morphia library imports from the legacy org.mongodb.morphia package to the new dev.morphia package.",
+        "human_impl": "import dev.morphia.annotations.Entity;\nimport dev.morphia.annotations.Transient;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_annotation_from_embedded_to_entity",
+        "general_idea": "Replace the @Embedded annotation with @Entity to align with the new Morphia API structure.",
+        "human_impl": "@Entity\npublic class Place implements Comparable<Place> {",
+        "bucket": "breaking"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/core/Route.java": [
+      {
+        "kind": "dependency_migration",
+        "general_idea": "Migrate from legacy org.mongodb.morphia to modern dev.morphia package namespace.",
+        "human_impl": "import dev.morphia.annotations.Entity;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "annotation_update",
+        "general_idea": "Replace @Embedded with @Entity to align with new Morphia version semantics.",
+        "human_impl": "@Entity",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "annotation_removal",
+        "general_idea": "Remove @Embedded annotations from fields as they are no longer required or valid in the new library version.",
+        "human_impl": "private Place origin;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "interface_removal",
+        "general_idea": "Remove Iterable<Route> interface implementation from the class declaration.",
+        "human_impl": "public class Route implements Comparable<Route> {",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "method_removal",
+        "general_idea": "Remove the iterator() method implementation corresponding to the removed Iterable interface.",
+        "human_impl": "public Iterator<Route> iterator() { ... }",
+        "bucket": "breaking"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/core/RoutesMap.java": [
+      {
+        "kind": "dependency_migration_morphia",
+        "general_idea": "Migrate Morphia annotations from the legacy org.mongodb.morphia package to the modern dev.morphia package.",
+        "human_impl": "import dev.morphia.annotations.Entity;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "annotation_api_update",
+        "general_idea": "Update @Entity annotation usage to match the new Morphia API which uses a single value parameter instead of named attributes.",
+        "human_impl": "@Entity(\"routesMap\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "annotation_removal_embedded",
+        "general_idea": "Remove @Embedded annotations as the new Morphia version likely infers embedded status or handles it differently for Set fields.",
+        "human_impl": "private final Set<Place> places = new HashSet<>();",
+        "bucket": "breaking"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/dao/RoutesMapDAO.java": [
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Change method signatures to accept a String name instead of a RoutesMap object instance.",
+        "human_impl": "public void removeRoutesMap(String name);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Change method signatures to accept a String name instead of a RoutesMap object instance.",
+        "human_impl": "public void addPlaceToMap(String name, Place place);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Change method signatures to accept a String name instead of a RoutesMap object instance.",
+        "human_impl": "public void addRouteToMap(String name, Route route);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Change method signatures to accept a String name instead of a RoutesMap object instance.",
+        "human_impl": "public void removeRouteFromMap(String name, Route route);",
+        "bucket": "breaking"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/dao/impl/DatastoreAdapter.java": [
+      {
+        "kind": "update_mongo_driver_imports",
+        "general_idea": "Replace deprecated com.mongodb.MongoClient imports with the modern com.mongodb.client package to align with the new MongoDB Java Driver API.",
+        "human_impl": "import com.mongodb.client.MongoClient; import com.mongodb.client.MongoClients;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_mongo_client_instantiation",
+        "general_idea": "Switch from the deprecated MongoClient constructor to the static MongoClients.create factory method required by the new driver.",
+        "human_impl": "MongoClient mongoClient = MongoClients.create(connectionURI);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_morphia_imports",
+        "general_idea": "Update Morphia imports from the legacy org.mongodb.morphia package to the new dev.morphia package namespace.",
+        "human_impl": "import dev.morphia.Datastore; import dev.morphia.Morphia;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_morphia_instantiation",
+        "general_idea": "Replace the custom MorphiaAdapter injection with direct static Morphia.createDatastore calls to match the new library API.",
+        "human_impl": "datastore = Morphia.createDatastore(mongoClient, \"logistics\");",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_morphia_package_mapping",
+        "general_idea": "Explicitly map the core package for Morphia entity scanning, replacing the implicit configuration previously handled by the adapter.",
+        "human_impl": "datastore.getMapper().mapPackage(\"br.com.esign.logistics.core\");",
+        "bucket": "breaking"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/dao/impl/RoutesMapDAOImpl.java": [
+      {
+        "kind": "migrate_morphia_api",
+        "general_idea": "Refactor DAO implementation to use the modern dev.morphia API instead of the legacy org.mongodb.morphia package.",
+        "human_impl": "import dev.morphia.Datastore; import dev.morphia.query.Query; import dev.morphia.query.experimental.filters.Filters;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_base_class_dependency",
+        "general_idea": "Remove inheritance from BasicDAO to decouple from legacy Morphia base classes and manage Datastore manually.",
+        "human_impl": "public class RoutesMapDAOImpl implements RoutesMapDAO { private Datastore datastore; }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_query_api",
+        "general_idea": "Replace legacy find/get methods with the new Query builder API using Filters.",
+        "human_impl": "datastore.find(RoutesMap.class).filter(Filters.eq(\"name\", name));",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_update_api",
+        "general_idea": "Replace legacy UpdateOperations and DBObject updates with the new UpdateOperators API.",
+        "human_impl": "datastore.find(...).update(UpdateOperators.addToSet(\"places\", place)).execute();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_delete_api",
+        "general_idea": "Replace legacy delete methods with the new delete API using DeleteOptions.",
+        "human_impl": "datastore.find(RoutesMap.class).delete(new DeleteOptions().multi(true));",
+        "bucket": "breaking"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/dao/impl/RoutesMapDAOImplAdapter.java": [
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Change method parameters from entity object to String identifier to decouple adapter from domain model.",
+        "human_impl": "public void removeRoutesMap(String name) { dao.removeRoutesMap(name); }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Change method parameters from entity object to String identifier to decouple adapter from domain model.",
+        "human_impl": "public void addPlaceToMap(String name, Place place) { dao.addPlaceToMap(name, place); }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Change method parameters from entity object to String identifier to decouple adapter from domain model.",
+        "human_impl": "public void addRouteToMap(String name, Route route) { dao.addRouteToMap(name, route); }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Change method parameters from entity object to String identifier to decouple adapter from domain model.",
+        "human_impl": "public void removeRouteFromMap(String name, Route route) { dao.removeRouteFromMap(name, route); }",
+        "bucket": "breaking"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/ejb/impl/RoutesMapEJBImpl.java": [
+      {
+        "kind": "refactor_api_signature",
+        "general_idea": "Update DAO method calls to pass the map name string instead of the full RoutesMap object instance.",
+        "human_impl": "dao.removeRoutesMap(routesMap.getName())",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_api_signature",
+        "general_idea": "Update DAO method calls to pass the map name string instead of the full RoutesMap object instance.",
+        "human_impl": "dao.addPlaceToMap(routesMap.getName(), place)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_api_signature",
+        "general_idea": "Update DAO method calls to pass the map name string instead of the full RoutesMap object instance.",
+        "human_impl": "dao.addRouteToMap(routesMap.getName(), route)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_api_signature",
+        "general_idea": "Update DAO method calls to pass the map name string instead of the full RoutesMap object instance.",
+        "human_impl": "dao.removeRouteFromMap(routesMap.getName(), route)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_type_parameter",
+        "general_idea": "Add explicit generic type parameter to RouteChooser instantiation to match updated interface definition.",
+        "human_impl": "new RouteChooserImpl<ChosenRoute>(...)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_import",
+        "general_idea": "Import the ChosenRoute class required for the new generic type parameter.",
+        "human_impl": "import br.com.esign.logistics.core.impl.ChosenRoute;",
+        "bucket": "breaking"
+      }
+    ],
+    "logistics-ejb/src/test/java/br/com/esign/logistics/ejb/impl/RoutesMapEJBImplTest.java": [
+      {
+        "kind": "update_mock_signature",
+        "general_idea": "Update Mockito stubs to match the new DAO method signatures that accept String names instead of object instances.",
+        "human_impl": "Changed `dao.addPlaceToMap(routesMap, ...)` to `dao.addPlaceToMap(routesMap.getName(), ...)` in mocks.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

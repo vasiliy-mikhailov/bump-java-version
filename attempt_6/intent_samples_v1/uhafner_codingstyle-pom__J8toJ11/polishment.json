@@ -1,0 +1,411 @@
+{
+  "meta": {
+    "repo": "uhafner/codingstyle-pom",
+    "stage": "J8->J11",
+    "family": "junit4-mockito",
+    "sha_from": "1752da743fe338fc0bcd106073786d3b744b5c56",
+    "sha_to": "abf08d8490520dddb299da77bb8fc07711d6d5ff"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_spotbugs_version",
+        "general_idea": "Bump SpotBugs and its Maven plugin to versions compatible with JDK 11.",
+        "human_impl": "<spotbugs.version>4.7.2</spotbugs.version> ... <spotbugs-maven-plugin.version>4.7.2.0</spotbugs-maven-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_checkstyle_version",
+        "general_idea": "Bump Checkstyle and its Maven plugin to versions compatible with JDK 11.",
+        "human_impl": "<checkstyle.version>10.3.2</checkstyle.version> ... <maven-checkstyle-plugin.version>3.2.0</maven-checkstyle-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_pmd_version",
+        "general_idea": "Bump PMD and its Maven plugin to versions compatible with JDK 11.",
+        "human_impl": "<pmd.version>6.48.0</pmd.version> ... <maven-pmd-plugin.version>3.19.0</maven-pmd-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_junit_version",
+        "general_idea": "Bump JUnit 5 dependencies to a newer version.",
+        "human_impl": "<junit.version>5.9.0</junit.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_mockito_version",
+        "general_idea": "Bump Mockito to a version compatible with JDK 11.",
+        "human_impl": "<mockito.version>4.8.0</mockito.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_assertj_version",
+        "general_idea": "Bump AssertJ to a newer version.",
+        "human_impl": "<assertj.version>3.23.1</assertj.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_archunit_version",
+        "general_idea": "Bump ArchUnit to a newer version.",
+        "human_impl": "<archunit.version>0.23.1</archunit.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_error_prone_version",
+        "general_idea": "Bump Error Prone to a version compatible with JDK 11.",
+        "human_impl": "<error-prone.version>2.15.0</error-prone.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_nullaway_version",
+        "general_idea": "Bump NullAway to a newer version.",
+        "human_impl": "<nullaway.version>0.9.10</nullaway.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_commons_lang_version",
+        "general_idea": "Bump Apache Commons Lang to a newer version.",
+        "human_impl": "<commons.lang.version>3.12.0</commons.lang.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_compiler_plugin",
+        "general_idea": "Bump maven-compiler-plugin to a newer version.",
+        "human_impl": "<maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_surefire_plugin",
+        "general_idea": "Bump maven-surefire-plugin to a newer version.",
+        "human_impl": "<maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_javadoc_plugin",
+        "general_idea": "Bump maven-javadoc-plugin to a newer version.",
+        "human_impl": "<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_source_plugin",
+        "general_idea": "Bump maven-source-plugin to a newer version.",
+        "human_impl": "<maven-source-plugin.version>3.2.1</maven-source-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_resources_plugin",
+        "general_idea": "Bump maven-resources-plugin to a newer version.",
+        "human_impl": "<maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_jar_plugin",
+        "general_idea": "Bump maven-jar-plugin to a newer version.",
+        "human_impl": "<maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_deploy_plugin",
+        "general_idea": "Bump maven-deploy-plugin to a newer version.",
+        "human_impl": "<maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_install_plugin",
+        "general_idea": "Bump maven-install-plugin to a newer version.",
+        "human_impl": "<maven-install-plugin.version>3.0.1</maven-install-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_clean_plugin",
+        "general_idea": "Bump maven-clean-plugin to a newer version.",
+        "human_impl": "<maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_site_plugin",
+        "general_idea": "Bump maven-site-plugin to a newer version.",
+        "human_impl": "<maven-site-plugin.version>3.12.1</maven-site-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_gpg_plugin",
+        "general_idea": "Bump maven-gpg-plugin to a newer version.",
+        "human_impl": "<maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_nexus_staging_plugin",
+        "general_idea": "Bump nexus-staging-maven-plugin to a newer version.",
+        "human_impl": "<nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_revapi_plugin",
+        "general_idea": "Bump revapi-maven-plugin and related dependencies to newer versions.",
+        "human_impl": "<revapi-maven-plugin.version>0.14.7</revapi-maven-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jacoco_plugin",
+        "general_idea": "Bump jacoco-maven-plugin to a newer version.",
+        "human_impl": "<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_pitest_plugin",
+        "general_idea": "Bump pitest-maven-plugin and its JUnit 5 plugin to newer versions.",
+        "human_impl": "<maven-pitest-plugin.version>1.9.5</maven-pitest-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sl4j_simple",
+        "general_idea": "Add slf4j-simple dependency for test logging.",
+        "human_impl": "<artifactId>slf4j-simple</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_equalsverifier",
+        "general_idea": "Add equalsverifier dependency for testing equals/hashCode implementations.",
+        "human_impl": "<artifactId>equalsverifier</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_pioneer",
+        "general_idea": "Add junit-pioneer dependency for additional JUnit 5 test utilities.",
+        "human_impl": "<artifactId>junit-pioneer</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_streamex",
+        "general_idea": "Add streamex dependency for enhanced Java Stream utilities.",
+        "human_impl": "<artifactId>streamex</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_codingstyle_library",
+        "general_idea": "Add codingstyle library dependency to provide shared code samples.",
+        "human_impl": "<artifactId>codingstyle</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_assertj_generator",
+        "general_idea": "Add assertj-assertions-generator-maven-plugin to generate assertion classes.",
+        "human_impl": "<artifactId>assertj-assertions-generator-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_depgraph_plugin",
+        "general_idea": "Add depgraph-maven-plugin to visualize dependency graphs.",
+        "human_impl": "<artifactId>depgraph-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_maven_dependency_plugin",
+        "general_idea": "Add maven-dependency-plugin to manage dependencies.",
+        "human_impl": "<artifactId>maven-dependency-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_maven_failsafe_plugin",
+        "general_idea": "Add maven-failsafe-plugin for integration testing.",
+        "human_impl": "<artifactId>maven-failsafe-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_sonatype_url",
+        "general_idea": "Update Sonatype Nexus URLs to the new s01 endpoint.",
+        "human_impl": "<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_artifact_id",
+        "general_idea": "Rename artifact ID from codingstyle to codingstyle-pom to reflect its role as a parent POM.",
+        "human_impl": "<artifactId>codingstyle-pom</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_packaging",
+        "general_idea": "Change packaging from jar to pom as this is now a parent POM.",
+        "human_impl": "<packaging>pom</packaging>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_scm_urls",
+        "general_idea": "Update SCM URLs to point to the new repository name.",
+        "human_impl": "<connection>scm:git:git://github.com/uhafner/codingstyle-pom.git</connection>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_description",
+        "general_idea": "Update project description to reflect the new purpose as a parent POM.",
+        "human_impl": "<description>Each Java project should follow a given coding style...</description>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_dependency_management",
+        "general_idea": "Move common dependencies to dependencyManagement section.",
+        "human_impl": "<dependencyManagement>...</dependencyManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_plugin_config",
+        "general_idea": "Refactor plugin configurations to use external config files from codingstyle library.",
+        "human_impl": "<configLocation>checkstyle-configuration.xml</configLocation>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_revapi_config",
+        "general_idea": "Update RevAPI configuration to use new reporter and difference handling.",
+        "human_impl": "<revapi.reporter.json>...</revapi.reporter.json>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_pmd_config",
+        "general_idea": "Update PMD configuration to exclude generated sources.",
+        "human_impl": "<excludeRoot>target/generated-test-sources/test-annotations</excludeRoot>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_checkstyle_config",
+        "general_idea": "Update Checkstyle configuration to exclude generated sources.",
+        "human_impl": "<excludes>**/*Assert*.java,**/*_jmh*</excludes>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_spotbugs_config",
+        "general_idea": "Update SpotBugs configuration to use external filter file.",
+        "human_impl": "<excludeFilterFile>spotbugs-exclusion-filter.xml</excludeFilterFile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_javadoc_config",
+        "general_idea": "Update Javadoc plugin configuration to set source version and quiet mode.",
+        "human_impl": "<source>${java.version}</source> <quiet>true</quiet>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_surefire_config",
+        "general_idea": "Update Surefire plugin configuration to trim stack traces and exclude integration tests.",
+        "human_impl": "<trimStackTrace>false</trimStackTrace> <excludes><exclude>**/*ITest.*</exclude></excludes>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_failsafe_config",
+        "general_idea": "Update Failsafe plugin configuration to include integration tests.",
+        "human_impl": "<includes><include>**/*ITest.*</include></includes>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_release_plugin",
+        "general_idea": "Update release plugin configuration to use versioned tag format.",
+        "human_impl": "<tagNameFormat>v@{project.version}</tagNameFormat>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_enforcer_plugin",
+        "general_idea": "Update enforcer plugin to require module.name property to diverge from default.",
+        "human_impl": "<requirePropertyDiverges><property>module.name</property><regex>undefined</regex></requirePropertyDiverges>",
+        "bucket": "polishment"
+      }
+    ],
+    ".github/release-drafter.yml": [
+      {
+        "kind": "update_release_naming_convention",
+        "general_idea": "Changed release name and tag templates to use resolved version with 'v' prefix instead of patch version.",
+        "human_impl": "name-template: 'v$RESOLVED_VERSION \ud83c\udf81'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_changelog_categories",
+        "general_idea": "Restructured changelog categories by splitting features/improvements and updating emoji/titles.",
+        "human_impl": "- title: \ud83d\ude80 New features and improvements\n+ - title: \ud83d\ude80 New Features\n+ - title: \u2728 Improvements",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_version_resolver",
+        "general_idea": "Added semantic versioning resolver to automatically determine major/minor/patch based on labels.",
+        "human_impl": "version-resolver:\n  major:\n    labels:\n      - 'removed'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_issue_link_replacer",
+        "general_idea": "Added regex replacer to automatically link JENKINS issue numbers in the changelog.",
+        "human_impl": "replacers:\n  - search: '/\\[*JENKINS-(\\d+)\\]*\\s*-*/g'\n    replace: '[JENKINS-$1](https://issues.jenkins.io/browse/JENKINS-$1) - '",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_exclude_labels",
+        "general_idea": "Removed the exclude-labels configuration block from the release drafter config.",
+        "human_impl": "-exclude-labels:\n-  - reverted",
+        "bucket": "polishment"
+      }
+    ],
+    ".github/workflows/assign-pr.yml": [
+      {
+        "kind": "rename_workflow",
+        "general_idea": "Renamed the workflow from 'Auto Assign' to 'Auto Assign PR' for clarity.",
+        "human_impl": "name: 'Auto Assign PR'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_trigger_event",
+        "general_idea": "Changed the trigger from 'pull_request' to 'pull_request_target' to allow the action to run with permissions on the target branch.",
+        "human_impl": "on: pull_request_target",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_action_version",
+        "general_idea": "Updated the auto-assign-action to version 1.2.3 to pick up bug fixes and improvements.",
+        "human_impl": "uses: kentaro-m/auto-assign-action@v1.2.3",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "add_node_ignore",
+        "general_idea": "Add node and node_modules to gitignore to exclude Node.js artifacts.",
+        "human_impl": "+node\n+node_modules",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_maven_release_ignore",
+        "general_idea": "Add Maven release plugin backup files to gitignore.",
+        "human_impl": "+pom.xml.versionsBackup\n+pom.xml.releaseBackup\n+release.properties",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_package_lock_ignore",
+        "general_idea": "Add package-lock.json to gitignore to exclude NPM lock file.",
+        "human_impl": "+/package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_redundant_ignore",
+        "general_idea": "Remove redundant node_modules entry and comment block from gitignore.",
+        "human_impl": "-# Project exclude paths\n-/node_modules/",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_badge_url",
+        "general_idea": "Update the GitHub Actions badge URL to reflect the renamed workflow from 'GitHub Actions' to 'GitHub CI' and add branch specification.",
+        "human_impl": "Changed badge URL from .../workflows/GitHub%20Actions/badge.svg to .../workflows/GitHub%20CI/badge.svg?branch=master",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_typo",
+        "general_idea": "Correct the capitalization of 'pom' to 'POM' in the documentation text for consistency.",
+        "human_impl": "Changed 'parent of you own pom' to 'parent of you own POM'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_tool_reference",
+        "general_idea": "Remove the reference to 'AssertJ Custom Assertions Generator' from the list of configured tools, likely because it was removed or deprecated in the migration.",
+        "human_impl": "Removed line '- [AssertJ Custom Assertions Generator](https://joel-costigliola.github.io/assertj/assertj-assertions-generator.html)'",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

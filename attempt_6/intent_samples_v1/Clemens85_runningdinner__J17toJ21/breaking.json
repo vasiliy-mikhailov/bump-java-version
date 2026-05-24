@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "repo": "Clemens85/runningdinner",
+    "stage": "J17->J21",
+    "family": "hibernate-5",
+    "sha_from": "6da9736bf67e1a5015f71446893b42ff2c8db6af",
+    "sha_to": "13acb210341a8ff1c52d2e21640718caec254799"
+  },
+  "by_file": {
+    "runningdinner-backend/src/main/java/org/owasp/AntiSamyFilter.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.servlet imports with jakarta.servlet to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.servlet.*;",
+        "bucket": "breaking"
+      }
+    ],
+    "runningdinner-backend/src/main/java/org/payment/paypal/PaypalHttpClientApache.java": [
+      {
+        "kind": "javax_to_jakarta_namespace_migration",
+        "general_idea": "Migrated the PreDestroy annotation import from javax.annotation to jakarta.annotation to comply with Jakarta EE 9+ standards required by the target JDK/Spring Boot version.",
+        "human_impl": "import jakarta.annotation.PreDestroy;",
+        "bucket": "breaking"
+      }
+    ],
+    "runningdinner-backend/src/main/java/org/runningdinner/admin/ReSendRunningDinnerCreatedMessage.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Migrate validation imports from javax.validation to jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.validation.Valid;\nimport jakarta.validation.constraints.Email;",
+        "bucket": "breaking"
+      }
+    ],
+    "runningdinner-backend/src/main/java/org/runningdinner/admin/RunningDinnerService.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replaced javax.persistence import with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Java 21/Spring Boot 3.",
+        "human_impl": "import jakarta.persistence.EntityNotFoundException;",
+        "bucket": "breaking"
+      }
+    ],
+    "runningdinner-backend/src/main/java/org/runningdinner/admin/activity/Activity.java": [
+      {
+        "kind": "migrate_javax_to_jakarta_persistence",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Java 21 environments.",
+        "human_impl": "import jakarta.persistence.Column;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

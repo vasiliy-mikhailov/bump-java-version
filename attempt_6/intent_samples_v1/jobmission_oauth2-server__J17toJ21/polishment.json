@@ -1,0 +1,289 @@
+{
+  "meta": {
+    "repo": "jobmission/oauth2-server",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "8d63920d7acc80d3edf6fe505615a226e3419f78",
+    "sha_to": "45278a9c88d1b433c2046664594d6cc4fac4ccea"
+  },
+  "by_file": {
+    "src/main/java/com/revengemission/sso/oauth2/server/config/AuthorizationServerConfig.java": [
+      {
+        "kind": "update_order_annotation",
+        "general_idea": "Update the @Order annotation to use a specific integer value instead of the deprecated Ordered.HIGHEST_PRECEDENCE constant.",
+        "human_impl": "Changed @Order(Ordered.HIGHEST_PRECEDENCE) to @Order(1).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_registered_client_repository_bean",
+        "general_idea": "Define a bean for RegisteredClientRepository using a custom implementation that likely integrates with the application's persistence layer and caching.",
+        "human_impl": "Added @Bean method registeredClientRepository returning new RegisteredClientRepositoryImpl(oauthClientRepository, cacheManager).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_client_registration_repository_bean",
+        "general_idea": "Define a bean for ClientRegistrationRepository to support OAuth2 client registration features, using a custom JDBC-based implementation.",
+        "human_impl": "Added @Bean method clientRegistrationRepository returning new JdbcClientRegistrationRepository(oauthClientRepository).",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/revengemission/sso/oauth2/server/config/CaffeineCacheConfiguration.java": [
+      {
+        "kind": "refactor_cache_manager",
+        "general_idea": "Replace manual SimpleCacheManager with Spring's CaffeineCacheManager to leverage built-in cache registration and configuration features.",
+        "human_impl": "new CaffeineCacheManager() ... cacheManager.registerCustomCache(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_null_value_restriction",
+        "general_idea": "Explicitly disable null values in the cache manager to prevent potential runtime issues or unexpected behavior with null entries.",
+        "human_impl": "cacheManager.setAllowNullValues(false);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "handle_zero_ttl",
+        "general_idea": "Add logic to handle cache entries with zero or negative TTL by omitting expiration settings, ensuring valid Caffeine configuration.",
+        "human_impl": "if (cachesEnum.getTtl() <= 0) { ... } else { ... expireAfterWrite ... }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/revengemission/sso/oauth2/server/config/CustomAuthenticationFailureHandler.java": [
+      {
+        "kind": "charset_api_modernization",
+        "general_idea": "Replace string-based charset encoding with StandardCharsets.UTF_8 to remove checked exception handling.",
+        "human_impl": "URLEncoder.encode(exception.getMessage(), StandardCharsets.UTF_8);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "logging_formatting",
+        "general_idea": "Switch from string concatenation to placeholder-based logging for better performance and readability.",
+        "human_impl": "log.debug(\"{} try to login\", username);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "feature_enhancement",
+        "general_idea": "Capture and store client_id in login history for better audit trails.",
+        "human_impl": "loginHistory.setClientId(clientId);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/revengemission/sso/oauth2/server/config/CustomAuthenticationProvider.java": [
+      {
+        "kind": "use_pattern_matching_instanceof",
+        "general_idea": "Replace explicit cast after instanceof check with Java 16+ pattern matching for cleaner code.",
+        "human_impl": "if (details instanceof CustomWebAuthenticationDetails customWebAuthenticationDetails)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "replace_stringutils_with_strings_ci",
+        "general_idea": "Replace Apache Commons StringUtils.equalsIgnoreCase with org.apache.commons.lang3.Strings.CI.equals for case-insensitive comparison.",
+        "human_impl": "Strings.CI.equals(customWebAuthenticationDetails.getInputVerificationCode(), captcha)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_redundant_null_check",
+        "general_idea": "Remove manual null check for loadUserByUsername result, relying on Spring Security's internal exception handling for null returns.",
+        "human_impl": "return userService.loadUserByUsername(username);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_debug_logging",
+        "general_idea": "Remove debug log statements for authentication failures, likely to reduce noise or rely on exception stack traces.",
+        "human_impl": "Removed this.logger.debug(\"Authentication failed: no credentials provided\");",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/revengemission/sso/oauth2/server/config/CustomAuthenticationSuccessHandler.java": [
+      {
+        "kind": "feature_enhancement",
+        "general_idea": "Extract client_id from the saved request parameters to include it in the login history record.",
+        "human_impl": "String clientId = savedRequest.getParameterValues(\"client_id\") != null && savedRequest.getParameterValues(\"client_id\").length > 0 ? Objects.requireNonNull(savedRequest.getParameterValues(\"client_id\"))[0] : \"\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "feature_enhancement",
+        "general_idea": "Add client_id to the LoginHistory entity for better audit tracking.",
+        "human_impl": "loginHistory.setClientId(clientId);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "feature_enhancement",
+        "general_idea": "Enrich login history remarks with AJAX status and redirect URL for debugging purposes.",
+        "human_impl": "loginHistory.setRemarks(\"isAjax:\" + isAjax + \",redirectUrl:\" + redirectUrl);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_refactoring",
+        "general_idea": "Move isAjax calculation earlier in the method to allow its value to be used in the login history remarks.",
+        "human_impl": "boolean isAjax = \"XMLHttpRequest\".equals(request.getHeader(\"X-Requested-With\")) || \"apiLogin\".equals(request.getHeader(\"api-login\"));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "error_handling_simplification",
+        "general_idea": "Remove redundant logger check before throwing an exception, relying on the exception message for context.",
+        "human_impl": "throw new HttpMessageNotWritableException(\"Could not write JSON: \" + ex.getMessage(), ex);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/revengemission/sso/oauth2/server/config/DefaultSecurityConfig.java": [
+      {
+        "kind": "feature_add_oauth2_login",
+        "general_idea": "Add OAuth2 Login configuration to the security filter chain, likely to support new authentication flows in the updated Spring Boot version.",
+        "human_impl": "http.oauth2Login(oauth2Login -> oauth2Login.loginPage(\"/signIn\").successHandler(...))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_security_matcher",
+        "general_idea": "Explicitly define the security matcher for the filter chain to scope it to specific paths, replacing implicit global application.",
+        "human_impl": "http.securityMatcher(\"/management/**\", \"/assets/**\", ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_remove_unused_imports",
+        "general_idea": "Remove imports for classes no longer used in the configuration class after migrating away from custom AuthenticationDetailsSource and AuthenticationProvider beans.",
+        "human_impl": "Removed import jakarta.servlet.http.HttpServletRequest; Removed import org.springframework.security.authentication.AuthenticationDetailsSource;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_remove_unused_field",
+        "general_idea": "Remove the autowired AuthenticationDetailsSource field as it is no longer injected into the formLogin configuration.",
+        "human_impl": "Removed @Autowired AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_remove_unused_bean",
+        "general_idea": "Remove the custom AuthenticationProvider bean definition which is no longer referenced in the security configuration.",
+        "human_impl": "Removed @Bean AuthenticationProvider authenticationProvider() { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_add_order_annotation",
+        "general_idea": "Add @Order annotation to the SecurityFilterChain bean to explicitly control its precedence relative to other security configurations.",
+        "human_impl": "@Order(2) @Bean SecurityFilterChain defaultSecurityFilterChain(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_extract_handler",
+        "general_idea": "Extract the authentication success handler logic into a private method for cleaner configuration code.",
+        "human_impl": "private AuthenticationSuccessHandler authenticationSuccessHandler() { return new FederatedIdentityAuthenticationSuccessHandler(); }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/revengemission/sso/oauth2/server/controller/CaptchaController.java": [
+      {
+        "kind": "add_secondary_verification_endpoint",
+        "general_idea": "Add a new endpoint for secondary verification, currently returning false as a placeholder.",
+        "human_impl": "Added `check2Captcha` method mapped to `/check2`.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/revengemission/sso/oauth2/server/controller/ManageClientController.java": [
+      {
+        "kind": "refactor_pagination_params",
+        "general_idea": "Simplified pagination logic by replacing DataTables-specific parameters (draw, start, length) with standard offset/limit parameters.",
+        "human_impl": "Changed @RequestParam names from 'draw', 'start', 'length' to 'offset', 'limit' and updated calculation to `offset / limit + 1`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_client_auth_methods_param",
+        "general_idea": "Added support for the 'clientAuthenticationMethods' field in the client management API.",
+        "human_impl": "Added @RequestParam for 'clientAuthenticationMethods' and logic to set it on the OauthClient object during create/update.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_validation_logic",
+        "general_idea": "Corrected validation logic to exclude 'authorities' from required fields for new client creation, aligning with the new parameter set.",
+        "human_impl": "Removed 'authorities' from the `StringUtils.isAnyEmpty` check in the else branch.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "explicit_null_id",
+        "general_idea": "Explicitly set ID to null when creating a new client to ensure proper entity state management.",
+        "human_impl": "Added `object.setId(null);` before setting other properties in the create branch.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_success_status",
+        "general_idea": "Ensured the response status is explicitly set to SUCCESS after successful create or update operations.",
+        "human_impl": "Added `responseResult.setStatus(GlobalConstant.SUCCESS);` after service calls.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/revengemission/sso/oauth2/server/controller/ManageUserController.java": [
+      {
+        "kind": "refactor_imports",
+        "general_idea": "Replace wildcard import with explicit imports for Spring annotations to improve code clarity.",
+        "human_impl": "import org.springframework.web.bind.annotation.GetMapping; ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_api_params",
+        "general_idea": "Simplify pagination parameters by removing unused 'draw' and 'start' fields in favor of 'offset' and 'limit'.",
+        "human_impl": "@RequestParam(value = \"offset\", defaultValue = \"0\") int offset, @RequestParam(value = \"limit\", defaultValue = \"20\") int limit",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_logic",
+        "general_idea": "Update pagination calculation to use the new offset/limit parameters instead of start/length.",
+        "human_impl": "int pageNum = offset / limit + 1;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_feature",
+        "general_idea": "Add support for updating user roles by parsing a comma-separated string into Role objects.",
+        "human_impl": "object.getRoles().clear(); if (StringUtils.isNotEmpty(roles)) { ... object.getRoles().add(role); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_feature",
+        "general_idea": "Add support for creating new users via the same endpoint when id is 0.",
+        "human_impl": "} else if (id == 0) { ... userAccountService.create(object); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_feature",
+        "general_idea": "Add username parameter to the update/create handler to allow setting or updating the username.",
+        "human_impl": "@RequestParam(value = \"username\", required = false) String username",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/revengemission/sso/oauth2/server/controller/SignInAndUpController.java": [
+      {
+        "kind": "remove_captcha_dependency",
+        "general_idea": "Remove the CaptchaService dependency and its associated import to decouple the controller from the captcha logic.",
+        "human_impl": "Removed `@Autowired CaptchaService captchaService;` and the corresponding import statement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Clean up imports that are no longer used after removing the captcha functionality.",
+        "human_impl": "Removed imports for `CachesEnum`, `CaptchaService`, and `OauthClientService`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_sign_up_signature",
+        "general_idea": "Simplify the handleSignUp method signature by removing parameters related to captcha verification.",
+        "human_impl": "Removed `verificationCode` and `graphId` parameters from the `handleSignUp` method definition.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_input_validation",
+        "general_idea": "Adjust input validation logic to reflect the removal of captcha-related fields.",
+        "human_impl": "Changed `StringUtils.isAnyBlank(graphId, username, password)` to `StringUtils.isAnyBlank(username, password)`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_captcha_verification_logic",
+        "general_idea": "Eliminate the code block responsible for retrieving and validating the captcha code.",
+        "human_impl": "Removed the block calling `captchaService.getCaptcha` and checking `verificationCode` against it.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_captcha_cleanup_logic",
+        "general_idea": "Remove the code responsible for deleting the captcha from the cache after successful signup.",
+        "human_impl": "Removed the call to `captchaService.removeCaptcha` inside the try block.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

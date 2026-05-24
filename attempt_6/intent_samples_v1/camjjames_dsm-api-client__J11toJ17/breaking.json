@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "repo": "camjjames/dsm-api-client",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "591fcebd6f722f149beaf579f1717eda7e398ae3",
+    "sha_to": "01d14082e51d2397e1fde666ef51bc7e6cc286b7"
+  },
+  "by_file": {
+    "src/main/java/org/flaad/dsm/client/client/DsmSurveillanceClient.java": [
+      {
+        "kind": "refactor_api_endpoint",
+        "general_idea": "Changed the base API endpoint from query.cgi to entry.cgi to align with DSM API standards.",
+        "human_impl": "path = \"/webapi/entry.cgi?api=SYNO.SurveillanceStation.Info\"",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_parameter_binding",
+        "general_idea": "Replaced individual @RequestParam annotations with a single @SpringQueryMap object to handle request parameters.",
+        "human_impl": "@SpringQueryMap DsmRequest cameraRequest",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/flaad/dsm/client/model/SurveillanceStationInfo.java": [
+      {
+        "kind": "change_field_type_is_license_enough",
+        "general_idea": "Changes the type of isLicenseEnough from boolean to int to match the API response format.",
+        "human_impl": "Changed private boolean isLicenseEnough to int isLicenseEnough;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

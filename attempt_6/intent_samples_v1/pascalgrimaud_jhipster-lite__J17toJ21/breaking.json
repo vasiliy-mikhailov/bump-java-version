@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "repo": "pascalgrimaud/jhipster-lite",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "384193208ad9ca22038f11e37d7e2275f338b76a",
+    "sha_to": "c755f4631940af509b4cd43f6b6821824896d640"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_java_version",
+        "general_idea": "Update the project's Java version property and Maven enforcer rules to require Java 21.",
+        "human_impl": "<java.version>21</java.version> ... <version>[21,22)</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_spring_boot",
+        "general_idea": "Upgrade the Spring Boot parent dependency from version 2.5.6 to 3.2.0-RC2.",
+        "human_impl": "<parent> ... <version>3.2.0-RC2</version> ... </parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_spring_milestones_repo",
+        "general_idea": "Add the Spring Milestones repository to resolve dependencies for the Spring Boot 3.2.0-RC2 release candidate.",
+        "human_impl": "<repository> ... <id>spring-milestones</id> ... </repository>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_swagger_with_openapi",
+        "general_idea": "Replace deprecated Springfox Swagger dependencies with SpringDoc OpenAPI starter dependencies compatible with Spring Boot 3.",
+        "human_impl": "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

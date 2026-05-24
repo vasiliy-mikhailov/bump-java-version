@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "LeooZeballos/fast-food",
+    "stage": "J8->J17",
+    "family": "spring-boot-2",
+    "sha_from": "bbf8aaca5bd7fd78d26cae2525850e3663499d32",
+    "sha_to": "9871510129fe0e657d780c81f378556ed4d4f8a4"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the Maven property to target Java 17 instead of Java 8.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

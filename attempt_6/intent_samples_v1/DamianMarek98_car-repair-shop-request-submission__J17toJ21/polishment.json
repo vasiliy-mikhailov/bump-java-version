@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "repo": "DamianMarek98/car-repair-shop-request-submission",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "6757994e7f545abacbc53ed539795ae33a35924e",
+    "sha_to": "8f412bb857f263f54f71c5c409741e7e7b3ae8f3"
+  },
+  "by_file": {
+    "car-repair-shop-backend/shop/src/main/java/car/repair/shop/ShopApplication.java": [
+      {
+        "kind": "enable_scheduling",
+        "general_idea": "Enable Spring's scheduling support to allow the application to process scheduled tasks.",
+        "human_impl": "Added @EnableScheduling annotation and imported org.springframework.scheduling.annotation.EnableScheduling.",
+        "bucket": "polishment"
+      }
+    ],
+    "car-repair-shop-backend/shop/pom.xml": [
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade Spring Boot parent version to 3.3.1 to align with Java 21 support and latest features.",
+        "human_impl": "<version>3.3.1</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_security_dependency",
+        "general_idea": "Add Spring Security starter to enable authentication and authorization features.",
+        "human_impl": "+ <artifactId>spring-boot-starter-security</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation_api_dependency",
+        "general_idea": "Add explicit dependency for Java Validation API.",
+        "human_impl": "+ <artifactId>validation-api</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jjwt_api_dependency",
+        "general_idea": "Add JJWT API dependency for JWT token handling.",
+        "human_impl": "+ <artifactId>jjwt-api</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jjwt_impl_dependency",
+        "general_idea": "Add JJWT implementation dependency for runtime JWT processing.",
+        "human_impl": "+ <artifactId>jjwt-impl</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jjwt_jackson_dependency",
+        "general_idea": "Add JJWT Jackson dependency for JSON serialization of JWTs.",
+        "human_impl": "+ <artifactId>jjwt-jackson</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_aws_dynamodb_sdk_dependency",
+        "general_idea": "Add AWS Java SDK for DynamoDB to interact with the new database.",
+        "human_impl": "+ <artifactId>aws-java-sdk-dynamodb</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_spring_data_dynamodb_dependency",
+        "general_idea": "Add Spring Data DynamoDB library to simplify DynamoDB data access.",
+        "human_impl": "+ <artifactId>spring-data-dynamodb</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jetbrains_annotations_dependency",
+        "general_idea": "Add JetBrains annotations for static analysis support.",
+        "human_impl": "+ <artifactId>annotations</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_testcontainers_dependency",
+        "general_idea": "Add Testcontainers core library for integration testing.",
+        "human_impl": "+ <artifactId>testcontainers</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_localstack_testcontainer_dependency",
+        "general_idea": "Add Localstack module for Testcontainers to mock AWS services in tests.",
+        "human_impl": "+ <artifactId>localstack</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_spring_security_test_dependency",
+        "general_idea": "Add Spring Security test support for unit testing security configurations.",
+        "human_impl": "+ <artifactId>spring-security-test</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jackson_jsr310_dependency",
+        "general_idea": "Add Jackson JSR310 module for Java 8+ date/time type serialization.",
+        "human_impl": "+ <artifactId>jackson-datatype-jsr310</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_aws_serverless_springboot_dependency",
+        "general_idea": "Add AWS Serverless Java Container for Spring Boot 3 to enable Lambda deployment.",
+        "human_impl": "+ <artifactId>aws-serverless-java-container-springboot3</artifactId>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

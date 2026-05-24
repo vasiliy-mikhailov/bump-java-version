@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "repo": "psalek/common-base-module",
+    "stage": "J8->J21",
+    "family": "spring-boot-2",
+    "sha_from": "372aae457902c05765e7a475b8ecb58f5ca8e893",
+    "sha_to": "4721aab0e078f386c3a3e93175addcccb4ce4507"
+  },
+  "by_file": {
+    "common-base-service/src/main/java/edu/miu/common/config/CommonServiceConfig.java": [
+      {
+        "kind": "remove_bean_annotation",
+        "general_idea": "Removed @Bean annotation from RestTemplate method to change its registration scope or lifecycle management.",
+        "human_impl": "Changed '@Bean public RestTemplate restTemplate()' to '//@LoadBalanced RestTemplate restTemplate()'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_bean_annotation",
+        "general_idea": "Removed @Bean annotation from MapperFactory method to change its registration scope or lifecycle management.",
+        "human_impl": "Changed '@Bean public MapperFactory mapperFactory()' to 'MapperFactory mapperFactory()'.",
+        "bucket": "breaking"
+      }
+    ],
+    "common-base-service/src/main/java/edu/miu/common/exception/ResourceNotFoundException.java": [
+      {
+        "kind": "change_exception_type",
+        "general_idea": "Changed the exception class to extend RuntimeException instead of Exception to allow unchecked exception handling.",
+        "human_impl": "Changed 'extends Exception' to 'extends RuntimeException'.",
+        "bucket": "breaking"
+      }
+    ],
+    "common-base-service/src/main/java/edu/miu/common/repository/search/EntitySpecification.java": [
+      {
+        "kind": "import_migration_javax_to_jakarta",
+        "general_idea": "Migrate JPA criteria API imports from javax.persistence to jakarta.persistence to align with Jakarta EE 9+ standards required by newer Spring Boot versions.",
+        "human_impl": "import jakarta.persistence.criteria.CriteriaBuilder;",
+        "bucket": "breaking"
+      }
+    ],
+    "common-base-service/src/main/java/edu/miu/common/service/BaseReadService.java": [
+      {
+        "kind": "remove_throws_declaration",
+        "general_idea": "Remove throws ResourceNotFoundException from findById method signature, likely moving exception handling to implementation or changing contract.",
+        "human_impl": "R findById(I id);",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

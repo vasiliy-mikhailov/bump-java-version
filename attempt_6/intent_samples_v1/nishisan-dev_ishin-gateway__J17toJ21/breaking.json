@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "nishisan-dev/ishin-gateway",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "412286b3edf94a5d8d59d162d2ed2e994cee5aa4",
+    "sha_to": "f6688b49200399d8bc3000ea0085227a42d6f8a2"
+  },
+  "by_file": {
+    "src/main/java/dev/nishisan/operation/inventory/adapter/http/HttpProxyManager.java": [
+      {
+        "kind": "fix_thread_safety_bindings",
+        "general_idea": "Replace shared mutable Binding with a local ProtectedBinding instance to resolve thread-safety race conditions in Groovy execution.",
+        "human_impl": "ProtectedBinding localBindings = new ProtectedBinding(); ... gse.run(runningScript, localBindings);",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

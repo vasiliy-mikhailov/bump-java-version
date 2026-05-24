@@ -1,0 +1,339 @@
+{
+  "meta": {
+    "repo": "1190782/odsoft-project-1190782-1230183-1230164",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "9850fd56f86058fff7d361477868ec787eb42d9d",
+    "sha_to": "a94f1b9c0cee085aa30f0c17396d2e2d25302a9d"
+  },
+  "by_file": {
+    "src/test/java/pt/psoft/g1/psoftg1/PsoftG1ApplicationTests.java": [
+      {
+        "kind": "add_assertion_to_empty_test",
+        "general_idea": "Add a trivial assertion to the context load test to satisfy test framework requirements or linters.",
+        "human_impl": "assertTrue(true);",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Data JPA starter for database persistence support.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-data-jpa</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Boot Test starter for testing utilities.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-test</artifactId><scope>test</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add H2 in-memory database driver for runtime testing.",
+        "human_impl": "<dependency><groupId>com.h2database</groupId><artifactId>h2</artifactId><scope>runtime</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Security starter for authentication and authorization.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-security</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Security Test for security-related testing.",
+        "human_impl": "<dependency><groupId>org.springframework.security</groupId><artifactId>spring-security-test</artifactId><scope>test</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add OAuth2 Resource Server starter for OAuth2 support.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-oauth2-resource-server</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Lombok for boilerplate code reduction.",
+        "human_impl": "<dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><optional>true</optional></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add SpringDoc OpenAPI for API documentation.",
+        "human_impl": "<dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-starter-webmvc-ui</artifactId><version>2.3.0</version></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Boot Validation starter for request validation.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-validation</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add MapStruct for object mapping.",
+        "human_impl": "<dependency><groupId>org.mapstruct</groupId><artifactId>mapstruct</artifactId><version>1.5.5.Final</version></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add OWASP Java HTML Sanitizer for security.",
+        "human_impl": "<dependency><groupId>com.googlecode.owasp-java-html-sanitizer</groupId><artifactId>owasp-java-html-sanitizer</artifactId><version>20220608.1</version></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add JUnit for testing.",
+        "human_impl": "<dependency><groupId>junit</groupId><artifactId>junit</artifactId><scope>test</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring WebFlux starter for reactive web support.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-webflux</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_compiler",
+        "general_idea": "Configure Maven compiler plugin with annotation processors for Lombok and MapStruct.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><configuration><release>17</release><annotationProcessorPaths>...</annotationProcessorPaths></configuration></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add JaCoCo plugin for code coverage.",
+        "human_impl": "<plugin><groupId>org.jacoco</groupId><artifactId>jacoco-maven-plugin</artifactId><version>0.8.8</version>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add Checkstyle plugin for code style enforcement.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-checkstyle-plugin</artifactId><version>3.1.1</version>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add SonarQube scanner plugin for static analysis.",
+        "human_impl": "<plugin><groupId>org.sonarsource.scanner.maven</groupId><artifactId>sonar-maven-plugin</artifactId><version>3.9.1.2184</version></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add Surefire plugin configuration for test execution.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.1.2</version>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_properties",
+        "general_idea": "Explicitly set Java version and compiler properties to 17.",
+        "human_impl": "<properties><java.version>17</java.version><maven.compiler.source>17</maven.compiler.source>...</properties>",
+        "bucket": "polishment"
+      }
+    ],
+    "Docs/GlobalArtifacts/Aggregates/Author.md": [
+      {
+        "kind": "link_refinement",
+        "general_idea": "Updated the Photo attribute to link to its specific Entity documentation instead of being a plain text item.",
+        "human_impl": "- Photo\n+ - [Photo](../Entities/Photo.md)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "content_expansion",
+        "general_idea": "Populated the Relevant Use Cases section with specific work package requirements for Phase 1 and Phase 2.",
+        "human_impl": "-    - (WP#1A.xxx : As Librarian ...)\n+    - (WP#1A.3 : As Librarian I want to register an author (name, short bio))\n+    - (WP#1A.4 : As Librarian I want to update an author\u2019s data)\n+    - (WP#1A.5 : As Librarian or Reader I want to know an author\u2019s detail given its author number)\n+    - (WP#1A.6 : As Librarian or Reader I want to search authors by name)\n+- ### Phase 2\n+    - (WP#1B.3 : As Librarian I want to register an author with an optional photo)\n+    - (WP#1B.4 : As Reader I want to know the books of an Author)\n+    - (WP#1B.5 : As Reader I want to know the co-authors of an author and their respective books)\n+    - (WP#1B.6 : As Reader I want to know the Top 5 authors (which have the most lent books))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "content_expansion",
+        "general_idea": "Added a new customer clarification Q&A regarding which author information can be altered by the librarian.",
+        "human_impl": "+> [Q: Que informa\u00e7\u00f5es do autor \u00e9 que o bibliotec\u00e1rio pode alterar?](https://moodle.isep.ipp.pt/mod/forum/discuss.php?d=28948#p36577)\n+>\n+>A: \u00e0 exce\u00e7\u00e3o do \"author number\" pode alterar qualquer informa\u00e7\u00e3o",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "formatting_fix",
+        "general_idea": "Fixed typo in existing customer clarification question and improved markdown blockquote formatting.",
+        "human_impl": "-[Q: Aproveito e pergunto sobre o n\u00famero do autor, se este \u00e9 apenas um numero e como este \u00e9 formado?](https://moodle.isep.ipp.pt/mod/forum/discuss.php?d=28907#p36504)\n+> [Q: Aproveito e pergunto sobre o n\u00famero do autor, se este \u00e9 apenas um numero e como este \u00e9 formado?](https://moodle.isep.ipp.pt/mod/forum/discuss.php?d=28907#p36504)\n+>\n+>A: o numero do autor \u00e9 um n\u00famero sequencial gerado pelo sistema",
+        "bucket": "polishment"
+      }
+    ],
+    "Docs/GlobalArtifacts/Aggregates/Book.md": [
+      {
+        "kind": "refactor_link_case",
+        "general_idea": "Corrected the file extension/case in the ISBN link to match the new naming convention.",
+        "human_impl": "- [ISBN](../ValueObjects/ISBN.md) -> + [ISBN](../ValueObjects/Isbn)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_link_explicit",
+        "general_idea": "Converted the plain text 'Title' attribute into a linked reference to its ValueObject documentation.",
+        "human_impl": "- Title -> + [Title](../ValueObjects/Title.md)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_link_explicit",
+        "general_idea": "Converted the plain text 'Description' attribute into a linked reference to its ValueObject documentation.",
+        "human_impl": "- Description -> + [Description](../ValueObjects/Description.md)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_attribute",
+        "general_idea": "Added a new 'Photo' attribute to the Book aggregate, linking to the Photo entity.",
+        "human_impl": "+ [Photo](../Entities/Photo.md)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_requirement",
+        "general_idea": "Added a new work package requirement for librarians to view the top 5 genres.",
+        "human_impl": "+  - WP#2B.10 : As Librarian I want to know the Top 5 genres",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_clarification",
+        "general_idea": "Added customer clarification regarding the single-genre constraint for books.",
+        "human_impl": "+>A: Quando o Librarian regista um novo livro vai indicar **em que gen\u00e9ro** esse livro se classifica. s\u00f3 poder\u00e1 indicar um dos g\u00e9neros previamente registados no sistema",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_clarification",
+        "general_idea": "Added customer clarification specifying photo format and size constraints for book covers.",
+        "human_impl": "+>A: this is a refinement of the existing use case. the user may choose to add a photo of the book cover. the photo must be in the jpeg or png format and at most 20 KB",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_clarification",
+        "general_idea": "Added customer clarification detailing the prefix search functionality for book titles.",
+        "human_impl": "+>A: The ability to search by title entering the first letters of the title",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_clarification",
+        "general_idea": "Added customer clarification defining the scope and sorting for the top 5 lent books report.",
+        "human_impl": "+>A: returns the list of the 5 books that have been lent the most in the last year. it must return for each book, the number of times the book has been lent. the result must be sorted descending order.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_clarification",
+        "general_idea": "Added customer clarification defining the scope and sorting for the top 5 genres report.",
+        "human_impl": "+>A: returns the 5 genres that the librarian possesses more books of. it must return the number of books per genre. the result must be sorted descending order",
+        "bucket": "polishment"
+      }
+    ],
+    "Docs/GlobalArtifacts/Aggregates/Reader.md": [
+      {
+        "kind": "add_aggregate_composition",
+        "general_idea": "Include Photo entity as a component of the Reader aggregate in the documentation.",
+        "human_impl": "- [Photo](../Entities/Photo.md)",
+        "bucket": "polishment"
+      }
+    ],
+    "Docs/GlobalArtifacts/DomainModel.puml": [
+      {
+        "kind": "refactor_domain_model",
+        "general_idea": "Simplified the domain model by removing Value Objects (like ISBN, Title, Email) and flattening their attributes directly into Entity classes.",
+        "human_impl": "Removed classes ISBN, Title, Description, PhoneNr, Email, Name, ReaderNumber; added fields isbn, title, description, email, phoneNumber directly to Book, Reader, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_inheritance_hierarchy",
+        "general_idea": "Restructured the class hierarchy to explicitly define inheritance relationships between User, Librarian, and Reader.",
+        "human_impl": "Added 'Reader \"1\" -up- \"1\" User : > is' and 'Librarian \"1\" -up- \"1\" User : > is' associations; removed separate Username class.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_associations",
+        "general_idea": "Updated class associations to reflect the new flattened structure and corrected relationship multiplicities.",
+        "human_impl": "Changed 'Lending \"1\" o-up- \"0..*\" ISBN' to 'Lending \"0..*\" - \"1\" Book'; updated Book-Genre and Lending-Fine links.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_domain_attributes",
+        "general_idea": "Added new specific attributes to domain classes to better represent business requirements.",
+        "human_impl": "Added 'photo' to Book and Author; added 'readerNumber', 'marketingConsent', 'thirdPartySharing' to Reader; added 'lendingNumber', 'fineValuePerDay' to Lending.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "clean_up_comments",
+        "general_idea": "Removed temporary development notes and questions from the PlantUML diagram.",
+        "human_impl": "Deleted comments like '/'temos que implementar alguma valida\u00e7\u00e3o?'/', '/'regras?'/', and '/'perguntar '/'.",
+        "bucket": "polishment"
+      }
+    ],
+    "Docs/GlobalArtifacts/Entities/Fine.md": [
+      {
+        "kind": "refactor_entity_model",
+        "general_idea": "Update the Fine entity documentation to reflect a change in its internal structure, replacing a direct Lending reference with a LendingNumber value object and adding Value and Paid attributes.",
+        "human_impl": "Replaced `- [Lending](Lending.md)` with `- [LendingNumber](../ValueObjects/LendingNumber.md)`, `- Value`, and `- Paid` in the Attributes section.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_doc_grammar",
+        "general_idea": "Correct the phrasing of the Fine entity description for better grammatical accuracy.",
+        "human_impl": "Changed 'Appears when a Lending is overdue.' to 'Applied when a Lending is overdue.'",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "add_server_port_config",
+        "general_idea": "Configure the application to listen on port 8082.",
+        "human_impl": "server.port=8082",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_active_profile",
+        "general_idea": "Activate the 'bootstrap' Spring profile.",
+        "human_impl": "spring.profiles.active=bootstrap",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_openapi",
+        "general_idea": "Enable and configure paths for SpringDoc OpenAPI documentation.",
+        "human_impl": "springdoc.api-docs.enabled=true\nspringdoc.api-docs.path=/api-docs\nspringdoc.swagger-ui.path=/swagger-ui",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_jwt_keys",
+        "general_idea": "Define classpath locations for JWT private and public keys.",
+        "human_impl": "jwt.private.key=classpath:rsa.private.key\njwt.public.key=classpath:rsa.public.key",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_h2_datasource",
+        "general_idea": "Set up H2 database connection details including URL, driver, and credentials.",
+        "human_impl": "spring.datasource.url=jdbc:h2:tcp://localhost/~/psoft-g1;IGNORECASE=TRUE\nspring.datasource.driverClassName=org.h2.Driver\nspring.datasource.username=mysqluser\nspring.datasource.password=mysqlpass",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_jpa_settings",
+        "general_idea": "Configure JPA SQL logging and schema generation behavior.",
+        "human_impl": "spring.jpa.show-sql=false\nspring.jpa.generate-ddl=true\nspring.jpa.hibernate.ddl-auto=update",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_h2_console",
+        "general_idea": "Enable the H2 web console for development purposes.",
+        "human_impl": "spring.h2.console.enabled=true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_multipart_uploads",
+        "general_idea": "Enable and configure limits for multipart file uploads.",
+        "human_impl": "spring.servlet.multipart.enabled=true\nspring.servlet.multipart.file-size-threshold=2KB\nspring.servlet.multipart.max-file-size=200MB\nspring.servlet.multipart.max-request-size=215MB",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_file_storage",
+        "general_idea": "Define custom properties for file upload directory and photo size limits.",
+        "human_impl": "file.upload-dir=uploads-psoft-g1\nfile.photo_max_size=20000",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_api_key_config",
+        "general_idea": "Add configuration property for the Api Ninjas API key.",
+        "human_impl": "my.ninjas-key=a5nSlaa4JxIubY09H+NYuQ==cY9FegnFmAvYi6fN",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

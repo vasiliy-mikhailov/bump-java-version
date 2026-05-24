@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "repo": "MoisesNEY/ControlExpedientes",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "483770b83586b649c2766f7c908e2d88bab386bb",
+    "sha_to": "326331e60129c4f2b0bf8a72932826e19472eab9"
+  },
+  "by_file": {
+    "backend/pom.xml": [
+      {
+        "kind": "update_java_version_property",
+        "general_idea": "Updates the Maven property defining the Java source and target version from 17 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "backend/.devcontainer/Dockerfile": [
+      {
+        "kind": "update_base_image_version",
+        "general_idea": "Update the development container base image to use Java 21 instead of Java 17.",
+        "human_impl": "ARG VARIANT=\"21\"",
+        "bucket": "breaking"
+      }
+    ],
+    "backend/.devcontainer/devcontainer.json": [
+      {
+        "kind": "update_devcontainer_java_version",
+        "general_idea": "Update the development container configuration to use Java 21 instead of Java 17.",
+        "human_impl": "\"VARIANT\": \"21-bullseye\"",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "meta": {
+    "repo": "guanyang/spring-base-parent",
+    "stage": "J8->J21",
+    "family": "jakarta-ee-javax",
+    "sha_from": "c651ed75b066cd43bfa7a03749468dce2a53501b",
+    "sha_to": "0c27daa8b2f56f132ed32accd8647f0107083266"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_java_version",
+        "general_idea": "Update the Java compiler source and target properties from 1.8 to 21 to support the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_spring_boot",
+        "general_idea": "Migrate from Spring Boot 2.6.0 to 3.5.5, which requires Java 17+ and Jakarta EE.",
+        "human_impl": "<spring-boot.version>3.5.5</spring-boot.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_to_jakarta_namespace",
+        "general_idea": "Replace javax.servlet-api with jakarta.servlet-api to comply with Spring Boot 3 requirements.",
+        "human_impl": "<artifactId>jakarta.servlet-api</artifactId>",
+        "bucket": "breaking"
+      }
+    ],
+    "spring-base-core/pom.xml": [
+      {
+        "kind": "update_group_id",
+        "general_idea": "Changed the parent groupId from org.gy.framework to io.github.guanyang to align with the new repository namespace.",
+        "human_impl": "<groupId>io.github.guanyang</groupId>",
+        "bucket": "breaking"
+      }
+    ],
+    "spring-base-lock/pom.xml": [
+      {
+        "kind": "update_group_id",
+        "general_idea": "Changed the parent groupId from org.gy.framework to io.github.guanyang to align with the new repository namespace.",
+        "human_impl": "<groupId>io.github.guanyang</groupId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Added spring-base-core dependency to access core framework utilities.",
+        "human_impl": "<artifactId>spring-base-core</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Added hutool-all dependency to utilize the Hutool utility library.",
+        "human_impl": "<artifactId>hutool-all</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Added redisson-spring-boot-starter to enable Redisson-based distributed locking capabilities.",
+        "human_impl": "<artifactId>redisson-spring-boot-starter</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_dependency",
+        "general_idea": "Replaced spring-boot-starter-data-redis with spring-boot-starter-aop, likely shifting from direct Redis operations to AOP-based locking mechanisms.",
+        "human_impl": "<artifactId>spring-boot-starter-aop</artifactId>",
+        "bucket": "breaking"
+      }
+    ],
+    "spring-base-sign/pom.xml": [
+      {
+        "kind": "update_group_id",
+        "general_idea": "Changed the parent groupId from org.gy.framework to io.github.guanyang to align with the new repository namespace.",
+        "human_impl": "<groupId>io.github.guanyang</groupId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_internal_dependency",
+        "general_idea": "Removed the dependency on spring-base-util, likely due to refactoring or removal of shared utilities.",
+        "human_impl": "- <artifactId>spring-base-util</artifactId>",
+        "bucket": "breaking"
+      }
+    ],
+    "spring-base-util/pom.xml": [
+      {
+        "kind": "migrate_servlet_api",
+        "general_idea": "Replace javax.servlet-api with jakarta.servlet-api to support Spring Boot 3 and Jakarta EE 9+ namespace requirements.",
+        "human_impl": "<dependency>\n  <groupId>jakarta.servlet</groupId>\n  <artifactId>jakarta.servlet-api</artifactId>\n  <scope>provided</scope>\n</dependency>",
+        "bucket": "breaking"
+      }
+    ],
+    "spring-base-xss/pom.xml": [
+      {
+        "kind": "update_parent_group_id",
+        "general_idea": "Changed the parent POM groupId to reflect a new organization or namespace.",
+        "human_impl": "<groupId>io.github.guanyang</groupId>",
+        "bucket": "breaking"
+      }
+    ],
+    "spring-base-csrf/src/main/resources/META-INF/spring.factories": [
+      {
+        "kind": "package_rename",
+        "general_idea": "Update the auto-configuration class reference in spring.factories to reflect the new package name.",
+        "human_impl": "Changed 'org.gy.framework.csrf.config.CsrfConfiguration' to 'io.github.guanyang.csrf.config.CsrfConfiguration'",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

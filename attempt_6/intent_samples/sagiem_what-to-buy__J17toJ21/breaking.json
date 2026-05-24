@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "repo": "sagiem/what-to-buy",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "8d5d101b8961389e1d2155236d76781f07948f3e",
+    "sha_to": "9bcf351f7866cc14b66601f2d472719e29a41c96"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the Java source and target version property from 17 to 21 to align with the new JDK.",
+        "before": "<java.version>17</java.version>",
+        "after": "<java.version>21</java.version>",
+        "bucket": "breaking",
+        "why_exists": "Compilation will fail or produce bytecode incompatible with JDK 21 if the source level is not updated to match the target runtime."
+      }
+    ]
+  }
+}

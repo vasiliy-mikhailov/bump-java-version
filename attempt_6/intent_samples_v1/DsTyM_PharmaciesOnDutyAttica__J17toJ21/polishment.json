@@ -1,0 +1,259 @@
+{
+  "meta": {
+    "repo": "DsTyM/PharmaciesOnDutyAttica",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "7df08a9b6e7c41f93c6cd69b6bb75da4e25431d2",
+    "sha_to": "0157b89006dd23c5cff1e753f4a48b8fe4f3c6df"
+  },
+  "by_file": {
+    "src/main/java/com/dstym/pharmaciesondutyattica/config/EhcacheConfiguration.java": [
+      {
+        "kind": "add_cache_manager_bean",
+        "general_idea": "Introduce a programmatic Ehcache CacheManager bean to define cache configurations explicitly.",
+        "human_impl": "@Bean public CacheManager EhcacheManager() { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "define_working_hour_cache",
+        "general_idea": "Configure a specific cache for WorkingHour entities with offheap memory and idle expiration.",
+        "human_impl": "cacheManager.createCache(\"workingHourCache\", ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "define_working_hours_cache",
+        "general_idea": "Configure a specific cache for paginated WorkingHour results with offheap memory and idle expiration.",
+        "human_impl": "cacheManager.createCache(\"workingHoursCache\", ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "define_pharmacy_cache",
+        "general_idea": "Configure a specific cache for Pharmacy entities with offheap memory and idle expiration.",
+        "human_impl": "cacheManager.createCache(\"pharmacyCache\", ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "define_pharmacies_cache",
+        "general_idea": "Configure a specific cache for paginated Pharmacy lists with larger offheap memory and idle expiration.",
+        "human_impl": "cacheManager.createCache(\"pharmaciesCache\", ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "define_available_pharmacies_cache",
+        "general_idea": "Configure a specific cache for available Pharmacy lists with offheap memory and idle expiration.",
+        "human_impl": "cacheManager.createCache(\"availablePharmaciesCache\", ...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/dstym/pharmaciesondutyattica/controller/AvailablePharmacyRestController.java": [
+      {
+        "kind": "replace_autowired_with_lombok",
+        "general_idea": "Replace explicit constructor injection with Lombok's @RequiredArgsConstructor annotation to reduce boilerplate.",
+        "human_impl": "Removed @Autowired constructor and added @RequiredArgsConstructor annotation.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/dstym/pharmaciesondutyattica/controller/PharmacyRestController.java": [
+      {
+        "kind": "replace_autowired_with_lombok",
+        "general_idea": "Replace explicit @Autowired constructor injection with Lombok's @RequiredArgsConstructor annotation to reduce boilerplate.",
+        "human_impl": "import lombok.RequiredArgsConstructor; @RequiredArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_primitive_to_wrapper",
+        "general_idea": "Change path variable type from primitive int to Integer wrapper to handle nullability or API consistency.",
+        "human_impl": "@PathVariable Integer pharmacyId",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/dstym/pharmaciesondutyattica/controller/WorkingHourRestController.java": [
+      {
+        "kind": "replace_autowired_with_lombok",
+        "general_idea": "Replace explicit @Autowired constructor injection with Lombok's @RequiredArgsConstructor to reduce boilerplate.",
+        "human_impl": "import lombok.RequiredArgsConstructor; @RequiredArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_primitive_to_wrapper",
+        "general_idea": "Change path variable type from primitive int to Integer wrapper to handle nullability or API consistency.",
+        "human_impl": "@PathVariable Integer workingHourId",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/dstym/pharmaciesondutyattica/entity/AvailablePharmacy.java": [
+      {
+        "kind": "add_lombok_annotations",
+        "general_idea": "Introduce Lombok annotations to replace boilerplate getters, setters, constructors, and toString methods.",
+        "human_impl": "@Getter @Setter @ToString @RequiredArgsConstructor @AllArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_boilerplate_methods",
+        "general_idea": "Delete manual getter, setter, constructor, and toString implementations now handled by Lombok.",
+        "human_impl": "removed public long getId() { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_equals_hashcode",
+        "general_idea": "Simplify equals and hashCode logic to rely solely on the ID field using Hibernate utilities, removing dependency on other mutable fields.",
+        "human_impl": "return id != null && Objects.equals(id, that.id);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "primitive_to_wrapper_conversion",
+        "general_idea": "Change primitive long and int fields to their wrapper classes Long and Integer to support nullability in JPA entities.",
+        "human_impl": "private Long id; private Integer pulledVersion;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/dstym/pharmaciesondutyattica/entity/Pharmacy.java": [
+      {
+        "kind": "add_lombok_annotations",
+        "general_idea": "Introduce Lombok annotations to replace boilerplate getters, setters, constructors, and toString methods.",
+        "human_impl": "@Getter @Setter @ToString @RequiredArgsConstructor @AllArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_boilerplate_methods",
+        "general_idea": "Delete manual getter, setter, constructor, and toString implementations now handled by Lombok.",
+        "human_impl": "- public int getId() { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_id_type_to_wrapper",
+        "general_idea": "Change the primary key field from primitive int to Integer to support nullability checks in equals/hashCode.",
+        "human_impl": "private Integer id;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_equals_method",
+        "general_idea": "Refactor equals method to use Hibernate utility for class checking and compare only the ID field.",
+        "human_impl": "if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false; ... return id != null && Objects.equals(id, pharmacy.id);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_hashcode_method",
+        "general_idea": "Replace custom hash code calculation with getClass().hashCode() to align with ID-only equality.",
+        "human_impl": "return getClass().hashCode();",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/dstym/pharmaciesondutyattica/entity/WorkingHour.java": [
+      {
+        "kind": "add_lombok_annotations",
+        "general_idea": "Introduce Lombok annotations to replace boilerplate getters, setters, constructors, and toString methods.",
+        "human_impl": "@Getter @Setter @ToString @RequiredArgsConstructor @AllArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_boilerplate_methods",
+        "general_idea": "Delete explicit getter, setter, constructor, and toString implementations now handled by Lombok.",
+        "human_impl": "- public int getId() { ... } - public void setId(int id) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_id_type_to_wrapper",
+        "general_idea": "Change the ID field from primitive int to Integer to support nullability checks in equals/hashCode.",
+        "human_impl": "private Integer id;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_equals_implementation",
+        "general_idea": "Refactor equals method to use Hibernate utility for class comparison and Objects.equals for safe null handling.",
+        "human_impl": "if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false; return id != null && Objects.equals(id, that.id);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_hashcode_implementation",
+        "general_idea": "Simplify hashCode implementation to rely on the class identity rather than field values.",
+        "human_impl": "return getClass().hashCode();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_hibernate_import",
+        "general_idea": "Add Hibernate import to support the updated equals method logic.",
+        "human_impl": "import org.hibernate.Hibernate;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_objects_import",
+        "general_idea": "Add Objects import to support the updated equals method logic.",
+        "human_impl": "import java.util.Objects;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/dstym/pharmaciesondutyattica/repository/AvailablePharmacyRepository.java": [
+      {
+        "kind": "primitive_to_wrapper",
+        "general_idea": "Changed method parameter from primitive int to Integer to allow null values for optional filtering.",
+        "human_impl": "@Param(\"pulledVersion\") Integer pulledVersion",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/dstym/pharmaciesondutyattica/scheduler/Scheduler.java": [
+      {
+        "kind": "refactor_dependency_injection",
+        "general_idea": "Replace manual constructor injection with Lombok's @RequiredArgsConstructor to reduce boilerplate code.",
+        "human_impl": "Added @RequiredArgsConstructor and removed explicit constructor definition.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_service_abstraction",
+        "general_idea": "Switch dependency from concrete AvailablePharmacyScraper to abstract ScraperService interface for better decoupling.",
+        "human_impl": "Changed field type and import from AvailablePharmacyScraper to ScraperService.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_method_calls",
+        "general_idea": "Update method invocations to use the new ScraperService instance instead of the old scraper.",
+        "human_impl": "Replaced availablePharmacyScraper.save... with scraperService.save... in scheduled methods.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/dstym/pharmaciesondutyattica/service/AvailablePharmacyService.java": [
+      {
+        "kind": "interface_to_class_migration",
+        "general_idea": "Refactored the service from a plain interface to a concrete Spring-managed class to enable dependency injection and business logic implementation.",
+        "human_impl": "Changed `public interface AvailablePharmacyService` to `@Service @RequiredArgsConstructor public class AvailablePharmacyService` and added `AvailablePharmacyRepository` field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_caching_annotation",
+        "general_idea": "Added Spring Cache annotation to the query method to improve performance by caching results based on region, date, and pagination.",
+        "human_impl": "Added `@Cacheable(value = \"availablePharmaciesCache\", key = \"{#region, #date, #pageable}\")` to `findAllByRegionAndDate`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_input_decoding",
+        "general_idea": "Implemented URL decoding for the region parameter to handle encoded characters correctly in the query.",
+        "human_impl": "Added `URLDecoder.decode(r.trim(), StandardCharsets.UTF_8)` inside `Optional` mapping for the region parameter.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_default_date_logic",
+        "general_idea": "Implemented logic to default the date parameter to the current date if not provided, using utility methods.",
+        "human_impl": "Added `Optional.ofNullable(date).orElse(DateUtils.stringDateToInstant(...))` to handle null dates.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_version_filtering",
+        "general_idea": "Added logic to fetch the latest pulled version for a given date and filter results by it, ensuring data consistency.",
+        "human_impl": "Added `getLastPulledVersion` helper and passed `lastPulledVersion` to `availablePharmacyRepository.findAllByLastPulledVersion`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_error_handling",
+        "general_idea": "Added explicit error handling to throw HTTP 404 exceptions when data is not found, replacing implicit null/empty returns.",
+        "human_impl": "Added `throw new ResponseStatusException(HttpStatus.NOT_FOUND, ...)` in `getLastPulledVersion`, `findAllByRegionAndDate`, and `findById`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_parameter_types",
+        "general_idea": "Changed ID parameters from primitive `long` to wrapper `Long` to align with standard Spring Data JPA repository conventions and allow nullability checks.",
+        "human_impl": "Changed `findById(long theId)` to `findById(Long theId)` and `deleteById(long theId)` to `deleteById(Long theId)`.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

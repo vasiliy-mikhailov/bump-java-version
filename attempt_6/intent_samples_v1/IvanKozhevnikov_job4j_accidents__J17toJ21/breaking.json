@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "repo": "IvanKozhevnikov/job4j_accidents",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "51bfe80de33038c71c23d276d0f37b2a29e6ac68",
+    "sha_to": "ae177f0c9f92346bf140410c2c335843ce1b570e"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "set_jdk_version",
+        "general_idea": "Update Maven compiler source and target properties from Java 17 to Java 21.",
+        "human_impl": "<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jakarta_servlet_api",
+        "general_idea": "Add Jakarta Servlet API 6.1.0 to replace javax.servlet for Java EE/Jakarta EE migration.",
+        "human_impl": "<dependency>\n    <groupId>jakarta.servlet</groupId>\n    <artifactId>jakarta.servlet-api</artifactId>\n    <version>6.1.0</version>\n    <scope>provided</scope>\n</dependency>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jakarta_persistence_api",
+        "general_idea": "Add Jakarta Persistence API 3.2.0 to replace javax.persistence for JPA 3.1 support.",
+        "human_impl": "<dependency>\n    <groupId>jakarta.persistence</groupId>\n    <artifactId>jakarta.persistence-api</artifactId>\n    <version>3.2.0</version>\n</dependency>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jakarta_activation_api",
+        "general_idea": "Add Jakarta Activation API 2.1.3 to replace javax.activation for content handling.",
+        "human_impl": "<dependency>\n    <groupId>jakarta.activation</groupId>\n    <artifactId>jakarta.activation-api</artifactId>\n    <version>2.1.3</version>\n</dependency>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_maven_compiler_plugin",
+        "general_idea": "Configure Maven Compiler Plugin explicitly for Java 21.",
+        "human_impl": "<plugin>\n    <artifactId>maven-compiler-plugin</artifactId>\n    <version>3.8.1</version>\n    <configuration>\n        <source>21</source>\n        <target>21</target>\n    </configuration>\n</plugin>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

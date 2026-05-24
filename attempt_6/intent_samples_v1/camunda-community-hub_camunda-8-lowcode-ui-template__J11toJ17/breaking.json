@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "repo": "camunda-community-hub/camunda-8-lowcode-ui-template",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "10ea5ae2749326860a0df83be0882743715ad572",
+    "sha_to": "516bfaab651ff7f302f6748f31a9574cd03f4ec7"
+  },
+  "by_file": {
+    "src/main/java/org/example/camunda/process/solution/ProcessApplication.java": [
+      {
+        "kind": "exclude_security_autoconfig",
+        "general_idea": "Disable Spring Security auto-configuration to allow the application to start without a security context, likely due to changes in Spring Boot 2.7+ default security behavior.",
+        "human_impl": "@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_deployment_annotation",
+        "general_idea": "Replace the deprecated @ZeebeDeployment annotation with the new @Deployment annotation required by the upgraded Zeebe Spring client library.",
+        "human_impl": "@Deployment(resources = \"classpath*:/models/*.*\")",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/example/camunda/process/solution/facade/AuthenticationController.java": [
+      {
+        "kind": "update_endpoint_path",
+        "general_idea": "Changed the base request mapping path from /authentication to /api/auth.",
+        "human_impl": "@RequestMapping(\"/api/auth\")",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/example/camunda/process/solution/facade/FormsController.java": [
+      {
+        "kind": "change_endpoint",
+        "general_idea": "Change the base request mapping path for the controller.",
+        "human_impl": "@RequestMapping(\"/api/forms\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_logic",
+        "general_idea": "Replace TaskListService call with BpmnService to retrieve embedded form schema.",
+        "human_impl": "String schema = bpmnService.getEmbeddedFormSchema(processName, processDefinitionId, formId);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_logic",
+        "general_idea": "Change form lookup method from findFormJsonFileByFormKey to findByName.",
+        "human_impl": "Form form = formService.findByName(formKey);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_logic",
+        "general_idea": "Change form lookup method in getInstanciationFormSchema from findFormJsonFileByFormKey to findByName.",
+        "human_impl": "Form form = formService.findByName(bpmnProcessId);",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/example/camunda/process/solution/facade/SimulationController.java": [
+      {
+        "kind": "refactor_service_injection",
+        "general_idea": "Replace UserService with OrganizationService to align with updated domain model structure.",
+        "human_impl": "@Autowired private OrganizationService organizationService;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_method_call",
+        "general_idea": "Update method call to use the new service's API for retrieving users.",
+        "human_impl": "Collection<User> users = organizationService.allUsers();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_import_path",
+        "general_idea": "Update import statement to reflect the new package location of the User model class.",
+        "human_impl": "import org.example.camunda.process.solution.jsonmodel.User;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_api_endpoint",
+        "general_idea": "Change the base request mapping path to follow new API conventions.",
+        "human_impl": "@RequestMapping(\"/api/simul\")",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/example/camunda/process/solution/facade/TaskController.java": [
+      {
+        "kind": "add_security_annotation",
+        "general_idea": "Added @IsAuthenticated annotation to enforce authentication on endpoints.",
+        "human_impl": "@IsAuthenticated\n  @GetMapping()",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_endpoint_path",
+        "general_idea": "Changed the base request mapping path for the controller.",
+        "human_impl": "@RequestMapping(\"/api/tasks\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_endpoint",
+        "general_idea": "Removed the dedicated endpoint for retrieving unassigned tasks.",
+        "human_impl": "-  @GetMapping(\"/unassigned\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_endpoint",
+        "general_idea": "Removed the dedicated endpoint for retrieving completed tasks by user ID.",
+        "human_impl": "-  @GetMapping(\"/myArchivedTasks/{userId}\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_endpoint",
+        "general_idea": "Removed the dedicated endpoint for retrieving opened tasks by user ID.",
+        "human_impl": "-  @GetMapping(\"/myOpenedTasks/{userId}\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_endpoint",
+        "general_idea": "Removed the dedicated endpoint for retrieving tasks by group.",
+        "human_impl": "-  @GetMapping(\"/groupTasks/{group}\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Added a new search endpoint to replace multiple specific task retrieval endpoints.",
+        "human_impl": "@PostMapping(\"/search\")\n  public List<Task> searchTasks(@RequestBody TaskSearch taskSearch)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_endpoint_path",
+        "general_idea": "Removed userId from the claim task endpoint path, relying on authentication context instead.",
+        "human_impl": "@GetMapping(\"/{taskId}/claim\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_logic",
+        "general_idea": "Updated claim task logic to retrieve username from the authenticated session rather than path variable.",
+        "human_impl": "String username = getAuthenticatedUsername();",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

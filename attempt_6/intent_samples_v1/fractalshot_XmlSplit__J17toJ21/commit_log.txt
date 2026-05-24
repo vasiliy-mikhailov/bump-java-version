@@ -1,0 +1,5 @@
+6716e62 updates for publication
+a41fb0e Remove IDE and build artifacts from repository
+6add1ff output directory, counter with delimiter
+3d1d1c8 fix utf-8
+a5cafba fix environment

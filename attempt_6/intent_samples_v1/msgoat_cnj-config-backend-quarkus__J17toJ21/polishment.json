@@ -1,0 +1,601 @@
+{
+  "meta": {
+    "repo": "msgoat/cnj-config-backend-quarkus",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "62d15b5a4771fa0b6c55740f43595f0633b2fd68",
+    "sha_to": "6777642c619f3bbcfda75c0006e83e0e44af70ab"
+  },
+  "by_file": {
+    "src/main/java/group/msg/at/cloud/cloudtrain/adapter/rest/HelloResource.java": [
+      {
+        "kind": "import_reorganization",
+        "general_idea": "Reordered import statements to group them logically or alphabetically, removing unnecessary blank lines.",
+        "human_impl": "import group.msg.at.cloud.cloudtrain.core.entity.Message; // moved up",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/group/msg/at/cloud/cloudtrain/core/boundary/HelloWorld.java": [
+      {
+        "kind": "cdi_scope_upgrade",
+        "general_idea": "Changed the CDI bean scope from Dependent to ApplicationScoped to align with modern best practices for stateless boundary classes.",
+        "human_impl": "@ApplicationScoped",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "field_visibility_cleanup",
+        "general_idea": "Removed explicit private modifiers from injected fields, relying on default package-private visibility which is sufficient for injection targets.",
+        "human_impl": "String configStringValue; int configNumericValue;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "message_construction_refactor",
+        "general_idea": "Refactored the Message object creation from a single constructor call to a builder-like pattern using setters to allow setting additional properties like locale.",
+        "human_impl": "Message result = new Message(UUID.randomUUID()); result.setCode(\"hello\"); result.setText(...); result.setLocale(Locale.GERMAN); return result;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "response_text_update",
+        "general_idea": "Updated the welcome message text to explicitly mention Quarkus and improved the formatting of the injected configuration values.",
+        "human_impl": "String.format(\"Welcome to Cloud Native Java with Quarkus! Got values configStringValue=[%s] configNumericValue=[%d]\", ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "locale_initialization",
+        "general_idea": "Added explicit initialization of the message locale to German, requiring the addition of the java.util.Locale import.",
+        "human_impl": "result.setLocale(Locale.GERMAN);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/group/msg/at/cloud/cloudtrain/core/entity/Message.java": [
+      {
+        "kind": "add_field",
+        "general_idea": "Added a new 'locale' field to the Message entity to support internationalization.",
+        "human_impl": "private Locale locale;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_imports",
+        "general_idea": "Updated imports to remove unused Objects and add Locale for the new field.",
+        "human_impl": "import java.util.Locale;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_javadoc",
+        "general_idea": "Removed the class-level Javadoc comment.",
+        "human_impl": "- /**\n-  * Simple {@code Entity} that represents a welcome messages.\n-  */",
+        "bucket": "polishment"
+      }
+    ],
+    "src/test/java/group/msg/at/cloud/cloudtrain/adapter/rest/HelloEndpointSystemTest.java": [
+      {
+        "kind": "refactor_test_assertion",
+        "general_idea": "Migrated test assertions from RestAssured's inline Hamcrest matchers to explicit AssertJ assertions on a deserialized object for better readability and maintainability.",
+        "human_impl": "Replaced `.body(\"text\", response -> startsWith(...))` with `assertThat(welcomeMessage.getText()).startsWith(...)` and added null checks for other fields.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_test_visibility",
+        "general_idea": "Changed test method visibility from public to package-private to follow modern JUnit 5 best practices.",
+        "human_impl": "Changed `public void testGetWelcomeMessage()` to `void testGetWelcomeMessage()`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_test_content",
+        "general_idea": "Updated the expected welcome message text to reflect the migration from a generic Java framework to Quarkus.",
+        "human_impl": "Changed expected string prefix from \"Welcome to Cloud Native Java with \" to \"Welcome to Cloud Native Java with Quarkus\".",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "add_hibernate_validator",
+        "general_idea": "Added Hibernate Validator dependency, likely replacing implicit validation or ensuring compatibility with new Quarkus version.",
+        "human_impl": "<artifactId>quarkus-hibernate-validator</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_slf4j",
+        "general_idea": "Upgraded SLF4J to version 2.x to support Java 21 and modern logging frameworks.",
+        "human_impl": "<slf4j.version>2.0.11</slf4j.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_log4j_dependency",
+        "general_idea": "Added explicit Log4j 2 dependency, likely for specific logging implementation or bridge requirements.",
+        "human_impl": "<log4j.version>2.22.1</log4j.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_junit",
+        "general_idea": "Upgraded JUnit Jupiter to version 5.10.1 for better Java 21 support and bug fixes.",
+        "human_impl": "<junit.version>5.10.1</junit.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_assertj_dependency",
+        "general_idea": "Added AssertJ as a testing assertion library to improve test readability.",
+        "human_impl": "<artifactId>assertj-core</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_restassured",
+        "general_idea": "Upgraded RestAssured to version 5.x to ensure compatibility with newer Java versions and HTTP clients.",
+        "human_impl": "<restassured.version>5.4.0</restassured.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jackson_dependency",
+        "general_idea": "Added explicit Jackson dependency version management for JSON processing.",
+        "human_impl": "<jackson.version>2.15.3</jackson.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_flyway_dependency",
+        "general_idea": "Added Flyway dependency for database migration management.",
+        "human_impl": "<flyway.version>9.19.1</flyway.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_postgres_jdbc_dependency",
+        "general_idea": "Added PostgreSQL JDBC driver dependency for database connectivity.",
+        "human_impl": "<postgres.jdbc.version>42.6.0</postgres.jdbc.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_common_rest_dependency",
+        "general_idea": "Updated the internal common REST library version to 1.2.0.",
+        "human_impl": "<cnj.common.rest.version>1.2.0</cnj.common.rest.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_common_persistence_dependency",
+        "general_idea": "Added internal common persistence JPA library dependency.",
+        "human_impl": "<cnj.common.persistence.jpa.version>1.2.0</cnj.common.persistence.jpa.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_common_observability_dependency",
+        "general_idea": "Added internal common observability library dependency.",
+        "human_impl": "<cnj.common.observability.version>1.2.0</cnj.common.observability.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_common_test_core_dependency",
+        "general_idea": "Updated the internal common test core library version to 1.2.0.",
+        "human_impl": "<cnj.common.test.core.version>1.2.0</cnj.common.test.core.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_quarkus_mockito_dependency",
+        "general_idea": "Added Quarkus JUnit5 Mockito integration for mocking in tests.",
+        "human_impl": "<artifactId>quarkus-junit5-mockito</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_junit_engine_dependency",
+        "general_idea": "Removed explicit JUnit Jupiter Engine dependency, relying on Quarkus or other transitive dependencies.",
+        "human_impl": "<artifactId>junit-jupiter-engine</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_maven_compiler_plugin",
+        "general_idea": "Upgraded Maven Compiler Plugin to 3.11.0 for Java 21 support.",
+        "human_impl": "<maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_maven_surefire_plugin",
+        "general_idea": "Upgraded Maven Surefire Plugin to 3.2.1 for better test execution on Java 21.",
+        "human_impl": "<maven.surefire.plugin.version>3.2.1</maven.surefire.plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_maven_failsafe_plugin",
+        "general_idea": "Upgraded Maven Failsafe Plugin to 3.2.1 for integration test execution.",
+        "human_impl": "<maven.failsafe.plugin.version>3.2.1</maven.failsafe.plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_maven_docker_plugin",
+        "general_idea": "Upgraded Fabric8 Docker Maven Plugin to 0.43.4.",
+        "human_impl": "<maven.docker.plugin.version>0.43.4</maven.docker.plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_maven_compose_plugin",
+        "general_idea": "Upgraded Compose Maven Plugin to 5.1.0.",
+        "human_impl": "<maven.compose.plugin.version>5.1.0</maven.compose.plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_maven_helm_plugin",
+        "general_idea": "Upgraded Helm Maven Plugin to 5.0.0.",
+        "human_impl": "<maven.helm.plugin.version>5.0.0</maven.helm.plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_owasp_dependency_check",
+        "general_idea": "Added OWASP Dependency Check plugin for security vulnerability scanning.",
+        "human_impl": "<artifactId>dependency-check-maven</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_jacoco_plugin",
+        "general_idea": "Upgraded JaCoCo Maven Plugin to 0.8.11 for code coverage.",
+        "human_impl": "<maven.jacoco.plugin.version>0.8.11</maven.jacoco.plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_sonar_plugin",
+        "general_idea": "Upgraded SonarQube Maven Plugin to 3.10.0.2594.",
+        "human_impl": "<maven.sonar.plugin.version>3.10.0.2594</maven.sonar.plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_docker_platforms_property",
+        "general_idea": "Added multi-architecture support for Docker builds (AMD64 and ARM64).",
+        "human_impl": "<docker.platforms>linux/amd64,linux/arm64/v8</docker.platforms>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_k8s_namespace",
+        "general_idea": "Changed Kubernetes namespace from 'default' to 'cloudtrain' for better isolation.",
+        "human_impl": "<k8s.cluster.namespace>cloudtrain</k8s.cluster.namespace>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_k8s_ingress_host",
+        "general_idea": "Updated Kubernetes ingress host to a specific development domain.",
+        "human_impl": "<k8s.ingress.host>train2023-dev.k8s.cloudtrain.aws.msgoat.eu</k8s.ingress.host>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_surefire_config",
+        "general_idea": "Configured Surefire to exclude system tests and set logging manager.",
+        "human_impl": "<exclude>**/*SystemTest.java</exclude>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_failsafe_config",
+        "general_idea": "Configured Failsafe to include system tests and set target route.",
+        "human_impl": "<include>**/*SystemTest.java</include>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_docker_build_execution",
+        "general_idea": "Added explicit execution for building Docker images during the package phase.",
+        "human_impl": "<goal>build</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_docker_push_execution",
+        "general_idea": "Added explicit execution for pushing Docker images during the deploy phase.",
+        "human_impl": "<goal>push</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_compose_start_execution",
+        "general_idea": "Added execution to start Docker Compose containers before integration tests.",
+        "human_impl": "<goal>upWithLogs</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_compose_stop_execution",
+        "general_idea": "Added execution to stop Docker Compose containers after integration tests.",
+        "human_impl": "<goal>down</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_agent_copy",
+        "general_idea": "Added execution to copy JaCoCo agent to Docker resources for coverage in containers.",
+        "human_impl": "<goal>copy</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_helm_lint_execution",
+        "general_idea": "Added execution to lint Helm charts during package phase.",
+        "human_impl": "<goal>lint</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_helm_package_execution",
+        "general_idea": "Added execution to package Helm charts during package phase.",
+        "human_impl": "<goal>package</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_helm_push_execution",
+        "general_idea": "Added execution to push Helm charts during deploy phase.",
+        "human_impl": "<goal>push</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_owasp_check_execution",
+        "general_idea": "Added execution to run OWASP dependency check during verify phase.",
+        "human_impl": "<goal>check</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sonar_analysis_execution",
+        "general_idea": "Added execution to run SonarQube analysis during verify phase.",
+        "human_impl": "<goal>sonar</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_prepare_agent",
+        "general_idea": "Added execution to prepare JaCoCo agent for unit tests.",
+        "human_impl": "<goal>prepare-agent</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_prepare_agent_integration",
+        "general_idea": "Added execution to prepare JaCoCo agent for integration tests.",
+        "human_impl": "<goal>prepare-agent-integration</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_dump",
+        "general_idea": "Added execution to dump JaCoCo data from containers.",
+        "human_impl": "<goal>dump</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_report",
+        "general_idea": "Added execution to generate JaCoCo report for unit tests.",
+        "human_impl": "<goal>report</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_report_integration",
+        "general_idea": "Added execution to generate JaCoCo report for integration tests.",
+        "human_impl": "<goal>report-integration</goal>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_resources_copy_docker",
+        "general_idea": "Added execution to copy Docker resources for image building.",
+        "human_impl": "<id>copy-docker-resources</id>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_resources_copy_compose",
+        "general_idea": "Added execution to copy Compose resources for container orchestration.",
+        "human_impl": "<id>copy-compose-resources</id>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_resources_copy_helm",
+        "general_idea": "Added execution to copy Helm resources for chart packaging.",
+        "human_impl": "<id>copy-helm-resources</id>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_local_dev_profile",
+        "general_idea": "Removed the 'local-stage' Maven profile to simplify the build configuration.",
+        "human_impl": "<profile><id>local-stage</id>...</profile> removed",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_pre_commit_profile",
+        "general_idea": "Replaced complex plugin executions in 'pre-commit-stage' with simple property skips for Sonar, dependency-check, and Jacoco.",
+        "human_impl": "<properties><sonar.skip>true</sonar.skip>...</properties> added",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_docker_buildx",
+        "general_idea": "Configured the docker-maven-plugin to use Buildx for multi-platform image building in the 'commit-stage' profile.",
+        "human_impl": "<buildx><platforms><platform>${docker.platforms}</platform></platforms></buildx> added",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_docker_push_execution",
+        "general_idea": "Removed the explicit 'push-docker-image' execution from the 'commit-stage' profile, likely delegating push to CI or other mechanisms.",
+        "human_impl": "<execution><id>push-docker-image</id>...</execution> removed",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_jacoco_plugin_config",
+        "general_idea": "Removed the jacoco-maven-plugin configuration from the 'commit-stage' profile, relying on property skips instead.",
+        "human_impl": "<plugin>...jacoco-maven-plugin...</plugin> removed",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_sonar_plugin_config",
+        "general_idea": "Removed the sonar-maven-plugin configuration from the 'commit-stage' profile, relying on property skips instead.",
+        "human_impl": "<plugin>...sonar-maven-plugin...</plugin> removed",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_integration_test_profile",
+        "general_idea": "Replaced complex plugin executions in 'integration-test-stage' with simple property skips for Sonar, compose, docker, dependency-check, and Jacoco.",
+        "human_impl": "<properties><sonar.skip>true</sonar.skip>...</properties> added",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_helm_deployment",
+        "general_idea": "Simplified Helm deployment in 'integration-test-stage' by removing manual resource copying and uninstall steps, using only pull and deploy goals.",
+        "human_impl": "Replaced maven-resources-plugin and helm-maven-plugin uninstall with simplified helm-maven-plugin pull/deploy",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_failsafe_config",
+        "general_idea": "Moved failsafe plugin configuration to global configuration block in 'integration-test-stage' instead of explicit executions.",
+        "human_impl": "<configuration>...systemPropertyVariables...</configuration> moved to plugin level",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_cloudtrain_plugin_repo",
+        "general_idea": "Added the CloudTrain Maven repository as a plugin repository to resolve custom plugins.",
+        "human_impl": "<pluginRepositories>...cloudtrain-maven-repository...</pluginRepositories> added",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_cloudtrain_dependency_repo",
+        "general_idea": "Added the CloudTrain Maven repository as a dependency repository to resolve custom dependencies.",
+        "human_impl": "<repositories>...cloudtrain-maven-repository...</repositories> added",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "ignore_flattened_pom",
+        "general_idea": "Add the flattened POM artifact to .gitignore to prevent committing generated build files.",
+        "human_impl": ".gitignore += .flattened-pom.xml",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_project_description",
+        "general_idea": "Refined the project title and description to accurately reflect its purpose as a MicroProfile Config demonstration.",
+        "human_impl": "Changed header to 'Cloud native Java backend based demonstrating application configuration with MicroProfile Config'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_docker_arch_info",
+        "general_idea": "Added documentation regarding the supported multi-architecture Docker image platforms.",
+        "human_impl": "Added list of supported platforms: linux/amd64, linux/arm64/v8",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_config_documentation",
+        "general_idea": "Added detailed explanation of MicroProfile Config sources, precedence, and injection mechanisms.",
+        "human_impl": "Added sections explaining properties, system properties, env vars, and @ConfigProperty usage",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_code_examples",
+        "general_idea": "Inserted Java code snippets demonstrating configuration injection and programmatic access.",
+        "human_impl": "Added code blocks for @ConfigProperty and Config object injection",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_build_instructions",
+        "general_idea": "Added specific Maven commands for local building of the application.",
+        "human_impl": "Added 'mvn clean verify -P pre-commit-stage' instruction",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_docker_compose_instructions",
+        "general_idea": "Added instructions for running and stopping the application locally using Docker Compose.",
+        "human_impl": "Added docker compose up/down commands",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_demo_instructions",
+        "general_idea": "Added steps to demonstrate the application, including endpoints and expected JSON response.",
+        "human_impl": "Added GET request example to /api/v1/hello with sample JSON output",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_release_info",
+        "general_idea": "Added links to changelog and build status badges.",
+        "human_impl": "Added Status badge and Release Information section",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_pull_commands",
+        "general_idea": "Added commands for pulling the Docker image and Helm chart from the registry.",
+        "human_impl": "Added docker pull and helm pull commands",
+        "bucket": "polishment"
+      }
+    ],
+    "buildspec.yml": [
+      {
+        "kind": "add_env_variable",
+        "general_idea": "Add environment variable for the artifact ID to be used in git operations.",
+        "human_impl": "CNJ_ARTIFACT_ID: cnj-config-backend-quarkus",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_env_variable",
+        "general_idea": "Add environment variable for the git tag user name.",
+        "human_impl": "CLOUDTRAIN_CODEBUILD_GIT_TAG_USER: \"CLOUDTRAIN_CODEBUILD_GIT_TAG_USER\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_env_variable",
+        "general_idea": "Add environment variable for the git tag user email.",
+        "human_impl": "CLOUDTRAIN_CODEBUILD_GIT_TAG_EMAIL: \"CLOUDTRAIN_CODEBUILD_GIT_TAG_EMAIL\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_env_variable",
+        "general_idea": "Add environment variable to control OWASP dependency check skipping.",
+        "human_impl": "CLOUDTRAIN_CODEBUILD_OWASP_SCAN_SKIPPED: \"CLOUDTRAIN_CODEBUILD_OWASP_SCAN_SKIPPED\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_secret",
+        "general_idea": "Add GitHub token secret for authenticated git operations.",
+        "human_impl": "GITHUB_TOKEN: \"cloudtrain-codebuild-github:msgoat_pat\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_secret",
+        "general_idea": "Add NIST NVD API key secret for vulnerability scanning.",
+        "human_impl": "NIST_NVD_API_KEY: \"cloudtrain-codebuild-nvd-api-key:apiKey\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_version_logic",
+        "general_idea": "Refactor version string construction to use dynamic branch and revision variables instead of hardcoded branch.",
+        "human_impl": "export GIT_BRANCH=${CODEBUILD_WEBHOOK_HEAD_REF:11}; export VERSION_REVISION=$(grep -m 1 '<revision>' pom.xml ...); export PROJECT_VERSION=$VERSION_REVISION.$VERSION_CHANGELIST.$VERSION_SHA1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_maven_goal",
+        "general_idea": "Change the main build phase from 'install' to 'deploy' to publish artifacts.",
+        "human_impl": "mvn clean deploy -f pom.xml ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_property",
+        "general_idea": "Update SonarQube authentication property from 'sonar.login' to 'sonar.token'.",
+        "human_impl": "-Dsonar.token=$SONARQUBE_TOKEN",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_maven_property",
+        "general_idea": "Add property to skip OWASP dependency check based on environment variable.",
+        "human_impl": "-Ddependency-check.skip=$CLOUDTRAIN_CODEBUILD_OWASP_SCAN_SKIPPED",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_git_tagging",
+        "general_idea": "Add steps to configure git, create an annotated tag with the project version, and push it to the remote repository.",
+        "human_impl": "git config user.name ...; git tag -a $PROJECT_VERSION ...; git push origin HEAD:$VERSION_CHANGELIST $PROJECT_VERSION",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/docker/Dockerfile": [
+      {
+        "kind": "gc_tuning_update",
+        "general_idea": "Update JVM garbage collection flags to use ZGC with generational support, which is optimized for Java 21.",
+        "human_impl": "-XX:+UseZGC -XX:+ZGenerational",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "encoding_explicit",
+        "general_idea": "Explicitly set the file encoding to UTF-8 via JVM options to ensure consistent character handling.",
+        "human_impl": "-Dfile.encoding=UTF-8",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "legacy_flag_removal",
+        "general_idea": "Remove the explicit Metaspace size setting as it is less relevant or handled differently with the new GC and JDK version.",
+        "human_impl": "Removed -XX:MetaspaceSize=256m",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/helm/cnj-config-backend-quarkus/Chart.yaml": [
+      {
+        "kind": "helm_version_parametrization",
+        "general_idea": "Replace hardcoded Helm chart version with a Maven property placeholder to enable dynamic versioning during the build process.",
+        "human_impl": "version: ${revision}",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

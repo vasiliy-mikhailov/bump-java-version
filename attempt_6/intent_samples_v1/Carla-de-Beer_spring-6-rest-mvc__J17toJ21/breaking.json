@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "Carla-de-Beer/spring-6-rest-mvc",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "2e3e627597b827347433f801361a6f8fe86487ce",
+    "sha_to": "cd1e0f0f0c972f01405d17debb0e267e3c6c7ee5"
+  },
+  "by_file": {
+    "src/main/java/dev/cadebe/spring6restmvc/bootstrap/BootstrapData.java": [
+      {
+        "kind": "refactor_resource_loading",
+        "general_idea": "Replace deprecated ResourceUtils.getFile with ClassPathResource to handle classpath resources correctly in JAR environments.",
+        "human_impl": "new ClassPathResource(\"csvdata/beers.csv\").getInputStream()",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/dev/cadebe/spring6restmvc/services/BeerCsvServiceImpl.java": [
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Changed the method parameter from File to Reader to improve abstraction and remove checked exception handling.",
+        "human_impl": "public List<BeerCsv> convertCsv(Reader csvReader)",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

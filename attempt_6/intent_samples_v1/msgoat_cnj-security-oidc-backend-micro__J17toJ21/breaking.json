@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "repo": "msgoat/cnj-security-oidc-backend-micro",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "8c35ce4ccf593cb3701efab41e698a36352711a8",
+    "sha_to": "7fe0c13b91e494755a18ae92ea72717a7594aef8"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the project's target Java version from 17 to 21 to align with the new JDK baseline.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_jakarta_ee_version",
+        "general_idea": "Upgrade Jakarta EE API from version 9 to 10 to support Java 21 and modernize the enterprise stack.",
+        "human_impl": "<jakartaee.version>10.0.0</jakartaee.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_payara_version",
+        "general_idea": "Update Payara Micro server version to a release compatible with Java 21 and Jakarta EE 10.",
+        "human_impl": "<payara.version>6.2024.2</payara.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_microprofile_version",
+        "general_idea": "Upgrade MicroProfile specification version to 6.1 to match the new Jakarta EE 10 runtime.",
+        "human_impl": "<microprofile.version>6.1</microprofile.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/docker/Dockerfile": [
+      {
+        "kind": "update_base_image",
+        "general_idea": "Switch the Docker base image from a JRE 17 Alpine variant to a JRE 21 Alpine variant to align with the target JDK version.",
+        "human_impl": "FROM docker.cloudtrain.aws.msgoat.eu/cloudtrain/cnj-docker-jre21-alpine:latest",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

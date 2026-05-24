@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-mongodb",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "9a52505168c68f52be2ee507bcde347c29c7ef00",
+    "sha_to": "27bc606c41bb43157c4c4b891fa64e8acd7578ee"
+  },
+  "by_file": {
+    "src/main/java/io/github/jhipster/sample/config/CRLFLogConverter.java": [
+      {
+        "kind": "api_migration_marker_list",
+        "general_idea": "Replace deprecated single marker access with the new marker list API to comply with SLF4J 2.x requirements in Java 21 environments.",
+        "human_impl": "List<Marker> markers = event.getMarkerList(); if ((markers != null && !markers.isEmpty() && markers.get(0).contains(CRLF_SAFE_MARKER)) ...",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/DatabaseConfiguration.java": [
+      {
+        "kind": "import_package_rename",
+        "general_idea": "Update import statement to reflect the package restructuring of MongoAutoConfiguration in newer Spring Boot versions.",
+        "human_impl": "import org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LoggingConfiguration.java": [
+      {
+        "kind": "replace_jackson_import",
+        "general_idea": "Replace com.fasterxml.jackson imports with tools.jackson to align with the new Jackson distribution used in the target framework version.",
+        "human_impl": "import tools.jackson.core.JacksonException; import tools.jackson.databind.ObjectMapper;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_exception_type",
+        "general_idea": "Update the method signature to throw JacksonException instead of JsonProcessingException to match the new library API.",
+        "human_impl": ") throws JacksonException {",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java": [
+      {
+        "kind": "remove_deprecated_annotation",
+        "general_idea": "Remove @EnableWebSecurity annotation which is no longer required in Spring Security 6+ as it is enabled by default.",
+        "human_impl": "-@EnableWebSecurity",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_api_usage",
+        "general_idea": "Update HttpSecurity configuration to use the new lambda DSL and withDefaults() for CORS, required for Spring Security 6 compatibility.",
+        "human_impl": ".cors(withDefaults())",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_api_usage",
+        "general_idea": "Refactor frameOptions configuration to use the new FrameOptionsConfig functional interface style.",
+        "human_impl": ".frameOptions(FrameOptionsConfig::sameOrigin)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_api_usage",
+        "general_idea": "Rename permissionsPolicy method to permissionsPolicyHeader to align with Spring Security 6 API changes.",
+        "human_impl": ".permissionsPolicyHeader(permissions ->",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_api_usage",
+        "general_idea": "Update oauth2ResourceServer configuration to use jwt(withDefaults()) for Spring Security 6 compatibility.",
+        "human_impl": ".oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()));",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/SecurityJwtConfiguration.java": [
+      {
+        "kind": "remove_deprecated_bean",
+        "general_idea": "Removed the jwtAuthenticationConverter bean, likely because Spring Security 6+ handles JWT authority conversion differently or automatically.",
+        "human_impl": "-@Bean\n-public JwtAuthenticationConverter jwtAuthenticationConverter() {\n-    JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();\n-    grantedAuthoritiesConverter.setAuthorityPrefix(\"\");\n-    grantedAuthoritiesConverter.setAuthoritiesClaimName(AUTHORITIES_KEY);\n-    JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();\n-    jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);\n-    return jwtAuthenticationConverter;\n-}",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/WebConfigurer.java": [
+      {
+        "kind": "import_migration",
+        "general_idea": "Update import for ConfigurableServletWebServerFactory to the new package structure in Spring Boot 3.x.",
+        "human_impl": "import org.springframework.boot.web.server.servlet.ConfigurableServletWebServerFactory;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "api_compliance",
+        "general_idea": "Remove throws ServletException from onStartup to match the ServletContextInitializer interface signature in newer Jakarta EE versions.",
+        "human_impl": "public void onStartup(ServletContext servletContext) {",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

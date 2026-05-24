@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "JasonHHouse/gaps",
+    "stage": "J8->J11",
+    "family": "spring-boot-2",
+    "sha_from": "3d43d1fa6c8788dcc46ab1daab354e0de91df81a",
+    "sha_to": "71df517c7d0af44d7861b8dae11bfd3b965fc866"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the target Java version property from 1.8 to 11 to align with the migration goal.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jaxb_dependency",
+        "general_idea": "Add JAXB API dependency which was removed from the JDK standard library starting in Java 11.",
+        "human_impl": "<jaxb.api.version>2.3.0</jaxb.api.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "repo": "andrei-punko/spring-boot-2-jsonb",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "10f80857d9a88fe0e8b8ee74030b4bf58d69b9e7",
+    "sha_to": "07af3ca60bebc371ea0518ffed5efb56bf2234df"
+  },
+  "by_file": {}
+}

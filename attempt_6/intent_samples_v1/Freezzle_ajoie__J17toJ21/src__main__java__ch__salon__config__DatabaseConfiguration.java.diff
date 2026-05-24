@@ -1,0 +1,15 @@
+diff --git a/src/main/java/ch/salon/config/DatabaseConfiguration.java b/src/main/java/ch/salon/config/DatabaseConfiguration.java
+index 3632325..7a245be 100644
+--- a/src/main/java/ch/salon/config/DatabaseConfiguration.java
++++ b/src/main/java/ch/salon/config/DatabaseConfiguration.java
+@@ -6,7 +6,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+ import org.springframework.transaction.annotation.EnableTransactionManagement;
+ 
+ @Configuration
+-@EnableJpaRepositories({ "ch.salon.repository" })
++@EnableJpaRepositories({"ch.salon.repository"})
+ @EnableJpaAuditing(auditorAwareRef = "springSecurityAuditorAware")
+ @EnableTransactionManagement
+-public class DatabaseConfiguration {}
++public class DatabaseConfiguration {
++}

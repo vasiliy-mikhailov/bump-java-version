@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "sean-o-sullivan/ise-comp-org-project",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "2faf6951b78cd8e13a22050042a4b213a893664b",
+    "sha_to": "49b78f4229af422c10cfdd9866a54d0e2de588bd"
+  },
+  "by_file": {
+    "oshi/pom.xml": [
+      {
+        "kind": "bump_jdk_version",
+        "general_idea": "Update Maven compiler source, target, and release properties from Java 17 to Java 21.",
+        "human_impl": "<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>\n<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_plugin",
+        "general_idea": "Configure maven-compiler-plugin to explicitly use Java 21 for compilation.",
+        "human_impl": "<plugin>\n    <groupId>org.apache.maven.plugins</groupId>\n    <artifactId>maven-compiler-plugin</artifactId>\n    <version>3.13.0</version>\n    <configuration>\n        <source>21</source>\n        <target>21</target>\n        <release>21</release>\n    </configuration>\n</plugin>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

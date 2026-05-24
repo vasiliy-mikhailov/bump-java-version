@@ -9,122 +9,152 @@
   "by_file": {
     "pom.xml": [
       {
-        "kind": "bump_spring_boot_parent",
-        "general_idea": "Upgrade Spring Boot parent version to 2.6.2 to support Java 17 features and security patches.",
-        "human_impl": "<version>2.6.2</version>",
-        "bucket": "breaking"
+        "kind": "bump_parent_version",
+        "general_idea": "Upgrade Spring Boot parent to 2.6.2 to support Java 17.",
+        "before": "<version>2.4.3</version>",
+        "after": "<version>2.6.2</version>",
+        "bucket": "breaking",
+        "why_exists": "Spring Boot 2.4.x does not support Java 17; compilation or runtime failures occur due to unsupported bytecode version or removed APIs."
       },
       {
-        "kind": "set_java_version_property",
-        "general_idea": "Update the Maven property to target Java 17 for compilation.",
-        "human_impl": "<java.version>17</java.version>",
-        "bucket": "breaking"
+        "kind": "set_java_version",
+        "general_idea": "Configure the project to compile and run with Java 17.",
+        "before": "<java.version>11</java.version>",
+        "after": "<java.version>17</java.version>",
+        "bucket": "breaking",
+        "why_exists": "Without this change, the compiler targets Java 11, which is incompatible with the target JDK 17 environment or intended bytecode version."
       },
       {
-        "kind": "add_spring_security_dependency",
-        "general_idea": "Include Spring Security starter to enable authentication and authorization features.",
-        "human_impl": "<artifactId>spring-boot-starter-security</artifactId>",
-        "bucket": "polishment"
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Security starter for authentication and authorization.",
+        "before": "",
+        "after": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-security</artifactId></dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "add_firebase_admin_dependency",
-        "general_idea": "Add Firebase Admin SDK for server-side Firebase integration.",
-        "human_impl": "<artifactId>firebase-admin</artifactId>",
-        "bucket": "polishment"
+        "kind": "add_dependency",
+        "general_idea": "Add Firebase Admin SDK for backend services.",
+        "before": "",
+        "after": "<dependency><groupId>com.google.firebase</groupId><artifactId>firebase-admin</artifactId><version>${firebase-admin.version}</version></dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "add_javax_mail_dependency",
-        "general_idea": "Add JavaMail API dependency to support sending emails.",
-        "human_impl": "<artifactId>mail</artifactId>",
-        "bucket": "polishment"
+        "kind": "add_dependency",
+        "general_idea": "Add JavaMail API for sending emails.",
+        "before": "",
+        "after": "<dependency><groupId>javax.mail</groupId><artifactId>mail</artifactId><version>${mail.version}</version></dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "add_javax_activation_dependency",
-        "general_idea": "Add Java Activation Framework dependency required by JavaMail.",
-        "human_impl": "<artifactId>activation</artifactId>",
-        "bucket": "polishment"
+        "kind": "add_dependency",
+        "general_idea": "Add Java Activation Framework for MIME types.",
+        "before": "",
+        "after": "<dependency><groupId>javax.activation</groupId><artifactId>activation</artifactId><version>${activation.version}</version><scope>runtime</scope></dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "add_lombok_dependency",
-        "general_idea": "Add Lombok dependency to reduce boilerplate code in entities and DTOs.",
-        "human_impl": "<artifactId>lombok</artifactId>",
-        "bucket": "polishment"
+        "kind": "add_dependency",
+        "general_idea": "Add MapStruct for object mapping.",
+        "before": "",
+        "after": "<dependency><groupId>org.mapstruct</groupId><artifactId>mapstruct</artifactId><version>${mapstruct.version}</version></dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "add_mapstruct_dependency",
-        "general_idea": "Add MapStruct dependency for type-safe bean mapping.",
-        "human_impl": "<artifactId>mapstruct</artifactId>",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "configure_maven_compiler_plugin",
+        "kind": "configure_compiler_plugin",
         "general_idea": "Configure Maven compiler plugin with Java 17 source/target and annotation processors for Lombok and MapStruct.",
-        "human_impl": "<source>${java.version}</source> ... <annotationProcessorPaths>...",
-        "bucket": "breaking"
+        "before": "<plugin><groupId>org.springframework.boot</groupId><artifactId>spring-boot-maven-plugin</artifactId><configuration><excludes>...</excludes></configuration></plugin>",
+        "after": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.8.1</version><configuration><source>${java.version}</source><target>${java.version}</target><annotationProcessorPaths>...</annotationProcessorPaths></configuration></plugin>",
+        "bucket": "breaking",
+        "why_exists": "Without explicit source/target 17 and annotation processor configuration, the project may fail to compile due to missing generated code from Lombok/MapStruct or incorrect bytecode version."
       },
       {
-        "kind": "restore_spring_boot_maven_plugin",
-        "general_idea": "Re-add the Spring Boot Maven plugin which was previously excluded or misconfigured.",
-        "human_impl": "<artifactId>spring-boot-maven-plugin</artifactId>",
-        "bucket": "breaking"
+        "kind": "restore_boot_plugin",
+        "general_idea": "Re-add Spring Boot Maven plugin which was inadvertently removed during refactoring.",
+        "before": "",
+        "after": "<plugin><groupId>org.springframework.boot</groupId><artifactId>spring-boot-maven-plugin</artifactId></plugin>",
+        "bucket": "breaking",
+        "why_exists": "Without the Spring Boot Maven plugin, the application cannot be packaged as an executable JAR or run via 'mvn spring-boot:run'."
       }
     ],
     ".gitignore": [
       {
-        "kind": "gitignore_unignore_code_styles",
-        "general_idea": "Explicitly include IntelliJ code style configurations in version control while ignoring other IDE metadata.",
-        "human_impl": "!./.idea/codeStyles/",
-        "bucket": "polishment"
+        "kind": "gitignore_unignore",
+        "general_idea": "Unignore IntelliJ code styles to allow sharing formatting configurations.",
+        "before": "",
+        "after": "!./.idea/codeStyles/",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "gitignore_local_properties",
-        "general_idea": "Exclude local application properties from version control to prevent committing environment-specific settings.",
-        "human_impl": "/src/main/resources/application-local.properties",
-        "bucket": "polishment"
+        "kind": "gitignore_add",
+        "general_idea": "Ignore local application properties to prevent committing environment-specific configuration.",
+        "before": "",
+        "after": "/src/main/resources/application-local.properties",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "gitignore_firebase_credentials",
-        "general_idea": "Exclude Firebase admin SDK JSON credentials from version control to prevent leaking sensitive service account keys.",
-        "human_impl": "/src/main/resources/zkmf2024-firebase-adminsdk-7jv3o-f5b6169b48.json",
-        "bucket": "polishment"
+        "kind": "gitignore_add",
+        "general_idea": "Ignore Firebase admin SDK JSON key file to prevent committing sensitive credentials.",
+        "before": "",
+        "after": "/src/main/resources/zkmf2024-firebase-adminsdk-7jv3o-f5b6169b48.json",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "src/main/resources/application.properties": [
       {
         "kind": "externalize_db_url",
-        "general_idea": "Replace hardcoded database URL with an environment variable placeholder for security and deployment flexibility.",
-        "human_impl": "spring.datasource.url=${SPRING_DATASOURCE_URL}",
-        "bucket": "polishment"
+        "general_idea": "Replace hardcoded database URL with an environment variable placeholder.",
+        "before": "spring.datasource.url=jdbc:mysql://localhost:3306/zkmf2024",
+        "after": "spring.datasource.url=${SPRING_DATASOURCE_URL}",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "externalize_db_username",
         "general_idea": "Replace hardcoded database username with an environment variable placeholder.",
-        "human_impl": "spring.datasource.username=${SPRING_DATASOURCE_USERNAME}",
-        "bucket": "polishment"
+        "before": "spring.datasource.username=root",
+        "after": "spring.datasource.username=${SPRING_DATASOURCE_USERNAME}",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "externalize_db_password",
         "general_idea": "Replace hardcoded database password with an environment variable placeholder.",
-        "human_impl": "spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}",
-        "bucket": "polishment"
+        "before": "spring.datasource.password=",
+        "after": "spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_gcp_credentials_config",
-        "general_idea": "Add configuration property to load Google Application Credentials from an environment variable.",
-        "human_impl": "config.google.application.credentials=${GOOGLE_APPLICATION_CREDENTIALS}",
-        "bucket": "polishment"
+        "general_idea": "Add configuration for Google Application Credentials via environment variable.",
+        "before": "",
+        "after": "config.google.application.credentials=${GOOGLE_APPLICATION_CREDENTIALS}",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_smtp_user_config",
-        "general_idea": "Add configuration property to load SMTP user credentials from an environment variable for logging/mail.",
-        "human_impl": "logging.mail.smtp.user=${LOGGING_MAIL_SMTP_USER}",
-        "bucket": "polishment"
+        "general_idea": "Add configuration for SMTP user via environment variable for logging/mail.",
+        "before": "",
+        "after": "logging.mail.smtp.user=${LOGGING_MAIL_SMTP_USER}",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_smtp_password_config",
-        "general_idea": "Add configuration property to load SMTP password credentials from an environment variable for logging/mail.",
-        "human_impl": "logging.mail.smtp.password=${LOGGING_MAIL_SMTP_PASSWORD}",
-        "bucket": "polishment"
+        "general_idea": "Add configuration for SMTP password via environment variable for logging/mail.",
+        "before": "",
+        "after": "logging.mail.smtp.password=${LOGGING_MAIL_SMTP_PASSWORD}",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ]
   }

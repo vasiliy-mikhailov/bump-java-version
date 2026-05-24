@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "repo": "abhikgh/SpringConversionFactor",
+    "stage": "J8->J17",
+    "family": "spring-boot-2",
+    "sha_from": "461399469f664398a15eb20ba0ef831e3e8b53d1",
+    "sha_to": "61206da2ee273adb7b39f1b5fb083f7ea5a7fd41"
+  },
+  "by_file": {
+    "src/main/java/com/example/SpringConversionFactor/controller/SpringConversionFactorController.java": [
+      {
+        "kind": "remove_hystrix_annotation",
+        "general_idea": "Removed the Hystrix command annotation from the endpoint, likely due to library removal or deprecation in the target environment.",
+        "human_impl": "Removed @HystrixCommand(fallbackMethod=\"getDataFallBack\") from addConversionFactor.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_entity_constructor",
+        "general_idea": "Updated the fallback entity creation to use a constructor that no longer requires an ID field, suggesting a change in the entity definition.",
+        "human_impl": "Changed new CurrencyConversion(5478,\"USA\",1.00) to new CurrencyConversion(\"USA\",1.00).",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/SpringConversionFactor/entity/CurrencyConversion.java": [
+      {
+        "kind": "remove_javax_persistence_annotations",
+        "general_idea": "Removed JPA annotations (@Entity, @Table, @Id, @GeneratedValue, @Column) to strip persistence metadata from the class.",
+        "human_impl": "Removed imports for javax.persistence.* and annotations @Entity, @Table, @Id, @GeneratedValue, @Column.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_validation_annotations",
+        "general_idea": "Removed validation constraints (@NotEmpty, @NotNull) and their associated imports.",
+        "human_impl": "Removed imports for javax.validation.constraints.NotEmpty and com.sun.istack.NotNull, and removed annotations from fields.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_entity_fields",
+        "general_idea": "Removed the 'id' field and its associated JPA annotations, effectively changing the class from an entity to a simple DTO.",
+        "human_impl": "Removed private Integer id field and its @Id and @GeneratedValue annotations.",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent version to 2.7.17 to support Java 17.",
+        "human_impl": "<version>2.7.17</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the Java version property to 17.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_spring_cloud_version",
+        "general_idea": "Update Spring Cloud dependencies to version 2021.0.8 compatible with Spring Boot 2.7.",
+        "human_impl": "<version>2021.0.8</version>",
+        "bucket": "breaking"
+      }
+    ],
+    "Dockerfile": [
+      {
+        "kind": "update_jar_filename",
+        "general_idea": "The JAR file name was updated to match the new version (0.0.2-SNAPSHOT) and a different naming convention (springconversionfactor.jar).",
+        "human_impl": "ADD target/SpringConversionFactor-0.0.2-SNAPSHOT.jar springconversionfactor.jar",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_entrypoint",
+        "general_idea": "The entrypoint was updated to use the new JAR file name (springconversionfactor.jar) instead of the old one (app.jar).",
+        "human_impl": "ENTRYPOINT [\"java\",\"-jar\",\"springconversionfactor.jar\"]",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

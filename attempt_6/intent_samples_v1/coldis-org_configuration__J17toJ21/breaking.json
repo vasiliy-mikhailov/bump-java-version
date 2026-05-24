@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "repo": "coldis-org/configuration",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "e5ba71d1310fa6891749072c0c86db62a38c122b",
+    "sha_to": "c90da2cc973874bbc7e9b4f4b7c4fbcba148d1ef"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_spring_boot",
+        "general_idea": "Upgrade Spring Boot from 2.x to 3.x, which is required for Java 21 support and introduces breaking API changes.",
+        "human_impl": "<spring.boot.version>3.1.5</spring.boot.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_hibernate",
+        "general_idea": "Upgrade Hibernate from 5.x to 6.x to align with Spring Boot 3 and Java 21 requirements.",
+        "human_impl": "<hibernate.version>6.2.7.Final</hibernate.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_tomcat",
+        "general_idea": "Upgrade Tomcat to version 10.1.x to support Jakarta EE 9+ namespaces required by Spring Boot 3.",
+        "human_impl": "<tomcat.version>10.1.14</tomcat.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_slf4j",
+        "general_idea": "Upgrade SLF4J to 2.x to match the logging API changes in Spring Boot 3 and Java 21 ecosystem.",
+        "human_impl": "<slf4j.version>2.0.7</slf4j.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_spring_oauth",
+        "general_idea": "Remove Spring Boot OAuth dependency as it is deprecated/removed in Spring Boot 3.",
+        "human_impl": "-<spring.boot.oauth.version>2.5.0.RELEASE</spring.boot.oauth.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_spring_social",
+        "general_idea": "Remove Spring Boot Social dependency as it is deprecated/removed in Spring Boot 3.",
+        "human_impl": "-<spring.boot.social.version>2.1.6.RELEASE</spring.boot.social.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

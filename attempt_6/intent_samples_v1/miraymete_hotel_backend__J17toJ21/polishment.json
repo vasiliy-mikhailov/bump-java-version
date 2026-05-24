@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "repo": "miraymete/hotel_backend",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "d3fd49c956caa4b8d3144a4b6075c1f832c95ad6",
+    "sha_to": "85342e60819921543c3a9151531560141eff2031"
+  },
+  "by_file": {
+    "src/main/java/com/example/jwtsecurity/security/JwtAuthFilter.java": [
+      {
+        "kind": "add_dependency_injection",
+        "general_idea": "Inject CustomUserDetailsService to enable proper user loading during authentication.",
+        "human_impl": "private final CustomUserDetailsService userDetailsService; public JwtAuthFilter(CustomUserDetailsService userDetailsService) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "expand_public_endpoints",
+        "general_idea": "Add Swagger UI and API docs paths to the list of endpoints that bypass JWT authentication.",
+        "human_impl": "if (path.startsWith(\"/api/auth/\") || path.startsWith(\"/swagger-ui\") || path.startsWith(\"/v3/api-docs\"))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_authentication_logic",
+        "general_idea": "Replace static empty authorities with dynamic user details loaded from the service to support proper role-based access.",
+        "human_impl": "var userDetails = userDetailsService.loadUserByUsername(username); var auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove the unused java.util.Collections import after refactoring the authentication token creation.",
+        "human_impl": "-import java.util.Collections;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "clean_up_code_style",
+        "general_idea": "Remove Turkish comments and simplify variable naming for cleaner code.",
+        "human_impl": "Removed comments like '// 1) /api/auth/** alt\u0131ndakileri ge\u00e7:' and renamed filterChain to chain.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/jwtsecurity/security/SecurityConfig.java": [
+      {
+        "kind": "add_method_security_annotation",
+        "general_idea": "Enable method-level security annotations to support @PreAuthorize and similar features.",
+        "human_impl": "@EnableMethodSecurity",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jwt_filter_bean",
+        "general_idea": "Explicitly define the JWT authentication filter as a Spring Bean for dependency injection.",
+        "human_impl": "@Bean public JwtAuthFilter jwtAuthFilter(CustomUserDetailsService userDetailsService) { return new JwtAuthFilter(userDetailsService); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_password_encoder_bean",
+        "general_idea": "Define a BCrypt password encoder bean for secure password hashing.",
+        "human_impl": "@Bean public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_authentication_provider_bean",
+        "general_idea": "Configure and register a DaoAuthenticationProvider to handle user authentication logic.",
+        "human_impl": "@Bean public AuthenticationProvider authenticationProvider(...) { DaoAuthenticationProvider provider = new DaoAuthenticationProvider(); ... return provider; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_authentication_manager_bean",
+        "general_idea": "Expose the AuthenticationManager bean to allow programmatic authentication or injection into other components.",
+        "human_impl": "@Bean public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception { return config.getAuthenticationManager(); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "inject_authentication_provider",
+        "general_idea": "Inject the configured AuthenticationProvider into the SecurityFilterChain to enable the authentication flow.",
+        "human_impl": ".authenticationProvider(authenticationProvider)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "allow_swagger_endpoints",
+        "general_idea": "Permit unauthenticated access to Swagger UI and API documentation endpoints.",
+        "human_impl": ".requestMatchers(\"/swagger-ui/**\", \"/v3/api-docs/**\").permitAll()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "clean_up_http_security_config",
+        "general_idea": "Remove commented-out code and unnecessary comments to clean up the HttpSecurity configuration.",
+        "human_impl": "Removed comments like '// csrf tamamen kapat' and commented out H2 console matcher.",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add SpringDoc OpenAPI starter for API documentation generation.",
+        "human_impl": "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add PostgreSQL driver dependency for database connectivity.",
+        "human_impl": "<artifactId>postgresql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Remove H2 in-memory database dependency, likely replaced by PostgreSQL.",
+        "human_impl": "<artifactId>h2</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add duplicate Spring Boot Data JPA dependency (likely cleanup artifact).",
+        "human_impl": "<artifactId>spring-boot-starter-data-jpa</artifactId>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

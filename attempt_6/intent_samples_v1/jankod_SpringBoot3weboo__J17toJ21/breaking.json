@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "jankod/SpringBoot3weboo",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "7a98ce9ee71978eab418cd32e291f8429cfa4394",
+    "sha_to": "c5de085b7a97ee78eb3d58913d3c491bae17ef74"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "set_java_version_property",
+        "general_idea": "Update the Java version property from 17 to 21 to target the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "configure_compiler_for_jdk21",
+        "general_idea": "Explicitly configure the Maven compiler plugin to use source/target 21 and enable preview features.",
+        "human_impl": "<source>21</source><target>21</target><compilerArgs>--enable-preview</compilerArgs>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

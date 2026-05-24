@@ -1,0 +1,195 @@
+{
+  "meta": {
+    "repo": "miw-upm/iwvg-devops",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "8327206e729f3f238c331d37c7289ebf7b46ae22",
+    "sha_to": "991b95ff09fc3ac36aa10d57ff334dcccbb683d5"
+  },
+  "by_file": {
+    "src/main/java/es/upm/miw/iwvg_devops/code/DecimalCollectionWithStream.java": [
+      {
+        "kind": "add_final_modifier",
+        "general_idea": "Mark the instance field as final to enforce immutability of the reference.",
+        "human_impl": "private final List<Double> collection;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/es/upm/miw/iwvg_devops/code/Flow.java": [
+      {
+        "kind": "use_stream_of",
+        "general_idea": "Replace Arrays.asList().stream() with Stream.of() for creating streams from varargs.",
+        "human_impl": "return Stream.of(\"0\", \"1\", \"2\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "use_stream_to_list",
+        "general_idea": "Replace Collectors.toList() with Stream.toList() introduced in Java 16.",
+        "human_impl": "return stream.toList();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "replace_peek_with_foreach",
+        "general_idea": "Replace peek() with forEach() for side-effect debugging to ensure execution and change return type to void.",
+        "human_impl": "stream.forEach(LogManager.getLogger(this.getClass())::debug);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/es/upm/miw/iwvg_devops/code/Searches.java": [
+      {
+        "kind": "remove_side_effect_logging",
+        "general_idea": "Removed debug logging statements using peek() to clean up the stream pipeline.",
+        "human_impl": "Removed .peek(x -> LogManager.getLogger(this.getClass()).info(...)) calls.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "use_static_method_reference",
+        "general_idea": "Replaced lambda null check with Objects::nonNull for cleaner code.",
+        "human_impl": "Changed .filter(i -> null != i) to .filter(Objects::nonNull).",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/es/upm/miw/iwvg_devops/rest/SystemResource.java": [
+      {
+        "kind": "refactor_request_mapping",
+        "general_idea": "Changed the class-level request mapping from a specific path to the root path and removed the static constant.",
+        "human_impl": "@RequestMapping(\"/\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_constant",
+        "general_idea": "Removed the static constant for the app-info endpoint as the endpoint logic was moved.",
+        "human_impl": "removed static final String APP_INFO = \"/app-info\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_constant",
+        "general_idea": "Removed the static constant for the system path as it is no longer used in the mapping.",
+        "human_impl": "removed static final String SYSTEM = \"/system\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_endpoint_logic",
+        "general_idea": "Moved the application info logic to the root endpoint and expanded the response to include links to other services.",
+        "human_impl": "@GetMapping public String applicationInfo() { ... return appInfo; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_badge_provider",
+        "general_idea": "Updated the badge generation to use 'Render' instead of 'Heroku' as the provider name.",
+        "human_impl": "new Badge().generateBadge(\"Render\", \"v\" + buildVersion)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/test/java/es/upm/miw/iwvg_devops/code/FlowTest.java": [
+      {
+        "kind": "replace_collectors_to_list",
+        "general_idea": "Replace deprecated Stream.collect(Collectors.toList()) with the modern Stream.toList() method introduced in Java 16.",
+        "human_impl": "new Flow().filterPositives(stream).toList()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_debug_test",
+        "general_idea": "Remove unnecessary assertion on the debug method call, likely because the method signature changed to void or the test intent shifted to just execution.",
+        "human_impl": "new Flow().debug(Stream.of(\"0\", \"1\"));",
+        "bucket": "polishment"
+      }
+    ],
+    "src/test/java/es/upm/miw/iwvg_devops/rest/SystemResourceIT.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Removed the unused static import for assertEquals to clean up the code.",
+        "human_impl": "removed import static org.junit.jupiter.api.Assertions.assertEquals;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_uri_construction",
+        "general_idea": "Simplified the URI construction in testReadBadge by removing the redundant SYSTEM prefix constant.",
+        "human_impl": "changed .uri(SystemResource.SYSTEM + SystemResource.VERSION_BADGE) to .uri(SystemResource.VERSION_BADGE)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_uri_construction",
+        "general_idea": "Simplified the URI construction in testReadInfo by replacing the constant concatenation with a literal root path.",
+        "human_impl": "changed .uri(SystemResource.SYSTEM + SystemResource.APP_INFO) to .uri(\"/\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_assertion",
+        "general_idea": "Removed the specific assertion checking the body format (splitting by '::') from testReadInfo, keeping only the null check.",
+        "human_impl": "removed .value(body -> assertEquals(3, body.split(\"::\").length));",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_project_version",
+        "general_idea": "Update the project artifact version to 1.9.0-SNAPSHOT.",
+        "human_impl": "<version>1.9.0-SNAPSHOT</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_encoding_properties",
+        "general_idea": "Remove redundant encoding variable and inline UTF-8 values for cleaner configuration.",
+        "human_impl": "<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_surefire_plugin",
+        "general_idea": "Upgrade maven-surefire-plugin to 3.5.2 for compatibility with newer JDKs and test frameworks.",
+        "human_impl": "<maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_failsafe_plugin",
+        "general_idea": "Upgrade maven-failsafe-plugin to 3.5.2 to match surefire and ensure integration test compatibility.",
+        "human_impl": "<maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_junit_platform_surefire_provider",
+        "general_idea": "Remove explicit dependency on junit-platform-surefire-provider as it is no longer needed with modern surefire.",
+        "human_impl": "- <junit-platform-surefire-provider-version>1.3.2</junit-platform-surefire-provider-version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_actuator_dependency",
+        "general_idea": "Add Spring Boot Actuator starter to enable health and info endpoints.",
+        "human_impl": "<artifactId>spring-boot-starter-actuator</artifactId>",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_ci_badge",
+        "general_idea": "Update the GitHub Actions badge to point to the new CI workflow file name.",
+        "human_impl": "Changed badge URL from `test-sonar.yml` to `ci.yml`",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_deprecated_badges",
+        "general_idea": "Remove badges for services that are no longer used or relevant (BetterCodeHub, Heroku).",
+        "human_impl": "Removed lines for BetterCodeHub and Heroku badges",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_tech_stack",
+        "general_idea": "Reflect the migration from Heroku to Railway in the technology list.",
+        "human_impl": "Replaced `Heroku` with `Railway` in the technologies section",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_version_numbers",
+        "general_idea": "Update the project version references in the assignment instructions to match the new major version.",
+        "human_impl": "Changed version references from `3.x.x` to `4.x.x`",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_sprint_scope",
+        "general_idea": "Adjust the number of stories in Sprint 1 to reflect the removal of the Heroku deployment task.",
+        "human_impl": "Changed story count from 4 to 2 and removed Heroku deployment story",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

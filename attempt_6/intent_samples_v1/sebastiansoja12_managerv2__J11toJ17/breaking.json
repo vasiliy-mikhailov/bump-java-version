@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "sebastiansoja12/managerv2",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "a4e3cce731fca8e54802f74f1c00aa624f8ef98a",
+    "sha_to": "c7cafc4053cacbcef91f120e428bc0087b1a59ca"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_java_version",
+        "general_idea": "Update the Java version property from 11 to 17 to target the new JDK.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_spring_boot",
+        "general_idea": "Upgrade Spring Boot parent version from 2.3.4.RELEASE to 2.7.1 to support Java 17.",
+        "human_impl": "<version>2.7.1</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

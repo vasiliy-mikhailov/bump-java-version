@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "BjoernKW/Schematic",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "4ff60cc001b2c95aa569ac7e8f785e83f8d5aac2",
+    "sha_to": "9add851ab781d26e1a8112447f4fc56622b9efd8"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_spring_boot",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.8 to 3.0.0 to align with Java 17 baseline and modern Spring ecosystem.",
+        "human_impl": "<version>3.0.0</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the managed Java version property from 11 to 17 to enforce JDK 17 compilation.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

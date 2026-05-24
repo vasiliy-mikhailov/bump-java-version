@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "repo": "Vinniemoks/eazepay",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "bdd830e68a9276a66423820aaabcafb4678f3ca4",
+    "sha_to": "aa4cf2f1e8108129b38f9b38d1c4fe7db6f6a9e1"
+  },
+  "by_file": {
+    "services/transaction-service/pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade the Spring Boot parent version from 3.1.5 to 3.5.0 to support Java 21 and access newer features.",
+        "human_impl": "<version>3.5.0</version>",
+        "bucket": "breaking"
+      }
+    ],
+    "docker-compose.yml": [
+      {
+        "kind": "config_fix",
+        "general_idea": "Correct database port configuration for identity-service to match standard PostgreSQL port.",
+        "human_impl": "DB_PORT=5433 -> DB_PORT=5432",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "config_fix",
+        "general_idea": "Correct database port configuration for biometric-service to match standard PostgreSQL port.",
+        "human_impl": "DB_PORT=5433 -> DB_PORT=5432",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "config_fix",
+        "general_idea": "Correct database URL port for transaction-service to match standard PostgreSQL port.",
+        "human_impl": "jdbc:postgresql://postgresql:5433 -> jdbc:postgresql://postgresql:5432",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "config_fix",
+        "general_idea": "Correct database port configuration for wallet-service to match standard PostgreSQL port.",
+        "human_impl": "DB_PORT=5433 -> DB_PORT=5432",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "config_fix",
+        "general_idea": "Correct database port configuration for ussd-service to match standard PostgreSQL port.",
+        "human_impl": "DB_PORT=5433 -> DB_PORT=5432",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "volume_path_update",
+        "general_idea": "Update volume mount path for ussd-service to match the renamed service directory.",
+        "human_impl": "./services/ussd-gateway:/app -> ./services/ussd-service:/app",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "config_fix",
+        "general_idea": "Correct database port configuration for agent-service to match standard PostgreSQL port.",
+        "human_impl": "DB_PORT=5433 -> DB_PORT=5432",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update api-gateway dependencies to include renamed and new services.",
+        "human_impl": "Replaced 'ussd-gateway' with 'ussd-service' and added portal services.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

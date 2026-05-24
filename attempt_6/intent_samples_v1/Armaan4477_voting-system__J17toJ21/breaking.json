@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "Armaan4477/voting-system",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "4aedafce49f056eade130bcd03041f966aa87a87",
+    "sha_to": "a79910e27c66fb9c23210b5e1cb326ebfe099c82"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_compiler_target",
+        "general_idea": "Update the Maven compiler release property to target Java 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add the missing JavaFX graphics dependency required for the application to run.",
+        "human_impl": "<artifactId>javafx-graphics</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_main_class",
+        "general_idea": "Update the JavaFX plugin configuration to point to the new Launcher class instead of Main.",
+        "human_impl": "<mainClass>hellofx/org.main.voting.Launcher</mainClass>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "repo": "in28minutes/spring-boot-examples",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "ef3ee95ff4f4b6bbe31d2e0137bfae1863df4add",
+    "sha_to": "643d9741f232e2430514b994a3171ff2ac7662f6"
+  },
+  "by_file": {
+    "spring-boot-2-jpa-spring-data-rest/src/main/java/com/in28minutes/springboot/jpa/spring/data/rest/example/student/Student.java": [
+      {
+        "kind": "migrate_javax_to_jakarta",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to comply with Spring Boot 3 namespace requirements.",
+        "human_impl": "import jakarta.persistence.Entity;",
+        "bucket": "breaking"
+      }
+    ],
+    "spring-boot-2-jpa-spring-data-rest/src/main/java/com/in28minutes/springboot/jpa/spring/data/rest/example/student/StudentDataRestRepository.java": [
+      {
+        "kind": "add_jspecify_nonnull_annotation",
+        "general_idea": "Add @NonNull annotations to generic type parameters to satisfy stricter null-safety requirements in the upgraded Spring Data ecosystem.",
+        "human_impl": "extends PagingAndSortingRepository<@NonNull Student, @NonNull Long>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jspecify_dependency_import",
+        "general_idea": "Import the @NonNull annotation from the org.jspecify library to support the new null-safety annotations.",
+        "human_impl": "import org.jspecify.annotations.NonNull;",
+        "bucket": "breaking"
+      }
+    ],
+    "spring-boot-2-jpa-with-hibernate-and-h2/src/main/java/com/in28minutes/springboot/jpa/hibernate/h2/example/student/Student.java": [
+      {
+        "kind": "replace_javax_with_jakarta",
+        "general_idea": "Migrate JPA annotations from javax.persistence to jakarta.persistence to comply with Spring Boot 3 namespace requirements.",
+        "human_impl": "import jakarta.persistence.Entity;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

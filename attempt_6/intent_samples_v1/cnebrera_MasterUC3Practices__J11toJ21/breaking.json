@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "cnebrera/MasterUC3Practices",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "238efebfd731f669a41dcafb9d22d64a1b364a94",
+    "sha_to": "2395028c3a75e31026977d1af3c390bd9bae554f"
+  },
+  "by_file": {
+    "Lesson7/src/main/java/com/imdg/practicas/P1VolumeControl.java": [
+      {
+        "kind": "update_import_path",
+        "general_idea": "Update the import statement for IMap to use the new package structure in newer Hazelcast versions.",
+        "human_impl": "Changed 'import com.hazelcast.core.IMap;' to 'import com.hazelcast.map.IMap;'.",
+        "bucket": "breaking"
+      }
+    ],
+    "Lesson7/src/main/java/com/imdg/practicas/P2VolumeProcessing.java": [
+      {
+        "kind": "update_import_path",
+        "general_idea": "Update the import statement for IMap to use the new package structure introduced in newer Hazelcast versions.",
+        "human_impl": "Changed import from com.hazelcast.core.IMap to com.hazelcast.map.IMap.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

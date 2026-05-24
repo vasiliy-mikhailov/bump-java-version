@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "repo": "mpalourdio/SpringBootTemplate",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "466118e0a62aadc532459273c3b8e60b6bf85a39",
+    "sha_to": "771d64cc9738a475bb9f75f3b8de645130c3cc87"
+  },
+  "by_file": {
+    "src/main/java/app/config/WebSecurityConfig.java": [
+      {
+        "kind": "add_web_condition",
+        "general_idea": "Add ConditionalOnWebApplication annotation to ensure security configuration only applies in web environments.",
+        "human_impl": "@ConditionalOnWebApplication",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/mpalourdio/springboottemplate/controllers/ExceptionController.java": [
+      {
+        "kind": "use_var_for_local_variable",
+        "general_idea": "Replace explicit type declaration with 'var' for local variable initialization to modernize code style.",
+        "human_impl": "var httpEntity = new HttpEntity<>(httpHeaders);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/mpalourdio/springboottemplate/controllers/ForwarderController.java": [
+      {
+        "kind": "add_generic_type_parameters",
+        "general_idea": "Replace raw Map type with parameterized Map<String, Boolean> to resolve unchecked assignment warnings and comply with stricter Java 17 compiler checks.",
+        "human_impl": "public Map<String, Boolean> forwardedPoint() {",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/mpalourdio/springboottemplate/controllers/HomeController.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove unused import for the Task entity class.",
+        "human_impl": "-import com.mpalourdio.springboottemplate.model.entities.Task;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove unused import for the List interface.",
+        "human_impl": "-import java.util.List;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "use_var_keyword",
+        "general_idea": "Replace explicit List type with var to leverage local variable type inference.",
+        "human_impl": "-List task = taskRepository.findByTaskStatus(TASK_STATUS_ACTIVE);\n+var task = taskRepository.findByTaskStatus(TASK_STATUS_ACTIVE);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/mpalourdio/springboottemplate/controllers/MiscController.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove the unused import for ResponseEntity to clean up the code.",
+        "human_impl": "import org.springframework.http.ResponseEntity;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "use_var_keyword",
+        "general_idea": "Replace explicit type declaration with 'var' for local variable inference, a feature available since Java 10.",
+        "human_impl": "var httpEntity = new HttpEntity<>(account);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/mpalourdio/springboottemplate/controllers/PoiController.java": [
+      {
+        "kind": "unused_import_cleanup",
+        "general_idea": "Remove unused Apache POI HSSF imports that were no longer referenced in the controller logic.",
+        "human_impl": "-import org.apache.poi.hssf.usermodel.HSSFCell;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/mpalourdio/springboottemplate/model/entities/Task.java": [
+      {
+        "kind": "remove_hibernate_internal_dependency",
+        "general_idea": "Remove dependency on internal Hibernate class CurrentTimestampFunction which is not part of the public API.",
+        "human_impl": "removed import org.hibernate.query.criteria.internal.expression.function.CurrentTimestampFunction;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "use_literal_for_column_default",
+        "general_idea": "Replace programmatic reference to current timestamp function with a literal string to avoid internal API usage.",
+        "human_impl": "@ColumnDefault(\"current_timestamp\") // replaced @ColumnDefault(CurrentTimestampFunction.NAME)",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

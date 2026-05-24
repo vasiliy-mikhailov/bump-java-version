@@ -1,0 +1,75 @@
+diff --git a/junit/src/test/java/com/telusko/learning/ShapesTest.java b/junit/src/test/java/com/telusko/learning/ShapesTest.java
+index 1f22e36..465f10e 100644
+--- a/junit/src/test/java/com/telusko/learning/ShapesTest.java
++++ b/junit/src/test/java/com/telusko/learning/ShapesTest.java
+@@ -2,25 +2,55 @@ package com.telusko.learning;
+ 
+ import static org.junit.jupiter.api.Assertions.*;
+ 
+-import org.junit.jupiter.api.Assertions;
+-import org.junit.jupiter.api.DisplayName;
+-import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.*;
+ 
++@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+ class ShapesTest
+ {
++	Shapes s;
++	ShapesTest(){
++		s = new Shapes();
++		System.out.println("Init Shapes Variable only once!");
++	}
+ 
+-	@Test
+-	@DisplayName("Calcula a área de um quadrado")
+-	void shouldReturnCorrectResultWhenProvidedValueIsCorrect()
+-	{
+-		// arrange
+-		Shapes s = new Shapes();
+-		double expected = Math.pow(3.3,2);
++	@Nested
++	@DisplayName("Square Area Tests")
++	class ComputeSquareAreaTests {
++		@Test
++		@DisplayName("Calcula a área de um quadrado")
++		void shouldReturnCorrectResultWhenProvidedValueIsCorrect()
++		{
++			// arrange
++			double expected = Math.pow(3.3,2);
+ 
+-		//act
+-		double actual = s.computeSquareArea(3.3);
++			//act
++			double actual = s.computeSquareArea(3.3);
+ 
+-		// assert
+-		Assertions.assertEquals(expected,actual);
++			// assert
++			Assertions.assertEquals(expected,actual);
++		}
+ 	}
++
++	@Nested
++	@DisplayName("Circle Area Tests")
++	class ComputeCircleAreaTests{
++		@Test
++		@DisplayName("Calcula a área de um Círculo")
++		void shouldReturnCorrectResultWhenProvidedValueIsCorrect()
++		{
++			// arrange
++			double expected = Math.PI * 4 * 4;
++
++			//act
++			double actual = s.computeCircleArea(4);
++
++			// assert
++			Assertions.assertEquals(expected,actual, "Error Message, it's like a printstacktrace");
++		}
++	}
++	@AfterAll
++	static void finish(){
++		System.out.println("Finished all tests!");
++	}
++
+ }
+\ No newline at end of file

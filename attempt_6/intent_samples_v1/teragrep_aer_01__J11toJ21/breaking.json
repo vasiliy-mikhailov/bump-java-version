@@ -1,0 +1,195 @@
+{
+  "meta": {
+    "repo": "teragrep/aer_01",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "de16d61e267eab4b62dbcb0a76b05241edd6ee16",
+    "sha_to": "dc18ec845aade755339953ed4b6398aa25f0315d"
+  },
+  "by_file": {
+    "src/main/java/com/teragrep/aer_01/DefaultOutput.java": [
+      {
+        "kind": "refactor_connection_pooling",
+        "general_idea": "Replace single-threaded RelpConnection with a thread-safe connection pool to support concurrent access.",
+        "human_impl": "private final Pool<IManagedRelpConnection> relpConnectionPool;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_config_abstraction",
+        "general_idea": "Update configuration dependency from RelpConfig to RelpConnectionConfig to align with new library API.",
+        "human_impl": "import com.teragrep.aer_01.config.RelpConnectionConfig;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_ssl_context_injection",
+        "general_idea": "Add SSLContextSupplier parameter to constructor to support external SSL context management.",
+        "human_impl": "final SSLContextSupplier sslContextSupplier",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_batch_api",
+        "general_idea": "Change accept method signature to take RelpBatch instead of byte[] to delegate batching to caller.",
+        "human_impl": "public void accept(final RelpBatch batch)",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/teragrep/aer_01/Main.java": [
+      {
+        "kind": "migrate_to_managed_identity",
+        "general_idea": "Replace DefaultAzureCredential with ManagedIdentityCredential for Azure authentication.",
+        "human_impl": "Replaced DefaultAzureCredentialBuilder with ManagedIdentityCredentialBuilder using clientId.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_config_accessors",
+        "general_idea": "Update configuration object usage to use getter methods instead of public fields.",
+        "human_impl": "Changed azureConfig.blobStorageEndpoint to azureConfig.blobStorageEndpoint() and similar fields.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_to_batch_processing",
+        "general_idea": "Switch EventProcessorClient from single event processing to batch processing.",
+        "human_impl": "Replaced .processEvent(PARTITION_PROCESSOR) with .processEventBatch(PARTITION_PROCESSOR, MAX_BATCH_SIZE).",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_consumer_instantiation",
+        "general_idea": "Refactor the event consumer instantiation to support the new plugin and metrics architecture.",
+        "human_impl": "Replaced EventContextConsumer with EventBatchConsumer wrapping ParsedEventConsumer and DefaultOutput.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/teragrep/aer_01/Output.java": [
+      {
+        "kind": "update_interface_signature",
+        "general_idea": "Change the Output interface to consume RelpBatch instead of raw byte arrays to align with the new NLF_01 dependency version.",
+        "human_impl": "extends Consumer<RelpBatch>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Import the RelpBatch class required for the new interface signature.",
+        "human_impl": "import com.teragrep.rlp_01.RelpBatch;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/com/teragrep/aer_01/ConfigTest.java": [
+      {
+        "kind": "rename_config_class",
+        "general_idea": "Replace the old RelpConfig class with the new RelpConnectionConfig class to align with refactored configuration structure.",
+        "human_impl": "Replaced import and usage of 'RelpConfig' with 'RelpConnectionConfig'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_to_record_accessors",
+        "general_idea": "Update test assertions to use Java record accessor methods instead of direct public field access, reflecting a migration from classes to records.",
+        "human_impl": "Changed 'azureConfig.namespaceName' to 'azureConfig.namespaceName()', 'syslogConfig.hostname' to 'syslogConfig.hostName()', and 'relpConfig.destinationPort' to 'relpConfig.relpPort()'.",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update Maven compiler source and target properties from Java 11 to Java 21 to enable compilation for the new JDK.",
+        "human_impl": "<java.version>21</java.version>\n<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_plugin_config",
+        "general_idea": "Update maven-compiler-plugin configuration to use source and target 21 instead of 8.",
+        "human_impl": "<source>21</source>\n<target>21</target>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_javadoc_plugin_config",
+        "general_idea": "Update maven-javadoc-plugin configuration to use source 21 instead of 8.",
+        "human_impl": "<source>21</source>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "enforce_java_version",
+        "general_idea": "Add maven-enforcer-plugin rule to require Java version 21.",
+        "human_impl": "<requireJavaVersion>\n  <version>[21,22)</version>\n</requireJavaVersion>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_nlf_01_dependency",
+        "general_idea": "Update nlf_01 dependency from version 3.11.0 to 4.0.0.",
+        "human_impl": "<artifactId>nlf_01</artifactId>\n<version>4.0.0</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_rlp_01_dependency",
+        "general_idea": "Update rlp_01 dependency from version 3.0.1 to 5.0.0.",
+        "human_impl": "<artifactId>rlp_01</artifactId>\n<version>5.0.0</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_gson_with_jakarta_json",
+        "general_idea": "Replace Gson dependency with Jakarta JSON API and Parsson implementation.",
+        "human_impl": "<artifactId>jakarta.json-api</artifactId>\n<artifactId>parsson</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_httpcore5_dependency",
+        "general_idea": "Add httpcore5 dependency, likely required by updated Azure or other libraries.",
+        "human_impl": "<artifactId>httpcore5</artifactId>\n<version>5.4.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_azure_keyvault_jca_dependency",
+        "general_idea": "Add azure-security-keyvault-jca dependency for client-side SSL support.",
+        "human_impl": "<artifactId>azure-security-keyvault-jca</artifactId>\n<version>2.11.0</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_azure_eventhubs_dependency",
+        "general_idea": "Update azure-messaging-eventhubs dependency from 5.15.0 to 5.21.3.",
+        "human_impl": "<artifactId>azure-messaging-eventhubs</artifactId>\n<version>5.21.3</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_azure_checkpointstore_dependency",
+        "general_idea": "Update azure-messaging-eventhubs-checkpointstore-blob dependency from 1.16.1 to 1.21.5.",
+        "human_impl": "<artifactId>azure-messaging-eventhubs-checkpointstore-blob</artifactId>\n<version>1.21.5</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_azure_identity_dependency",
+        "general_idea": "Update azure-identity dependency from 1.8.0 to 1.18.2.",
+        "human_impl": "<artifactId>azure-identity</artifactId>\n<version>1.18.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_prometheus_simpleclient",
+        "general_idea": "Replace deprecated prometheus simpleclient dependencies with new prometheus-metrics instrumentation and exporter libraries.",
+        "human_impl": "<artifactId>prometheus-metrics-instrumentation-dropwizard</artifactId>\n<artifactId>prometheus-metrics-exporter-servlet-jakarta</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_jetty_dependency",
+        "general_idea": "Update Jetty dependency from jetty-servlet 10.0.15 to jetty-ee10-servlet 12.1.8 to support Jakarta EE 10.",
+        "human_impl": "<artifactId>jetty-ee10-servlet</artifactId>\n<version>12.1.8</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_junit_dependency",
+        "general_idea": "Update JUnit Jupiter and Platform dependencies to version 6.0.3.",
+        "human_impl": "<junit.version>6.0.3</junit.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_log4j2_dependency",
+        "general_idea": "Update Log4j2 dependencies to version 2.25.4.",
+        "human_impl": "<log4j2.version>2.25.4</log4j2.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_sl4j_dependency",
+        "general_idea": "Update SLF4J API dependency from 2.0.7 to 2.0.17.",
+        "human_impl": "<artifactId>slf4j-api</artifactId>\n<version>2.0.17</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

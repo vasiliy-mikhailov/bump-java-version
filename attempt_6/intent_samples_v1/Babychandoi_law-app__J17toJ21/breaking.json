@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "Babychandoi/law-app",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "25feb1b51e15b6be329bf436dcbfb228cbfa21c5",
+    "sha_to": "0101c070694f0d0609c46491588b42b2a6c3f56a"
+  },
+  "by_file": {
+    "backend/src/main/java/org/law_app/backend/service/ServiceService.java": [
+      {
+        "kind": "add_parameter",
+        "general_idea": "Modified getServices method to accept a title string for filtering.",
+        "human_impl": "List<ServiceResponse> getServices(String title);",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

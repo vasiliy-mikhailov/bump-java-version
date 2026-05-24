@@ -1,0 +1,151 @@
+diff --git a/oshi/pom.xml b/oshi/pom.xml
+index 72a8434..a3d821c 100644
+--- a/oshi/pom.xml
++++ b/oshi/pom.xml
+@@ -1,38 +1,113 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+-
+ <project xmlns="http://maven.apache.org/POM/4.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+-  <modelVersion>4.0.0</modelVersion>
+-
+-  <groupId>com.example</groupId>
+-  <artifactId>oshi-demo</artifactId>
+-  <version>1.0.0</version>
+-
+-  <name>oshi-demo</name>
+-
+-  <properties>
+-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+-    <maven.compiler.source>17</maven.compiler.source>
+-    <maven.compiler.target>17</maven.compiler.target>
+-  </properties>
+-
+-  <dependencies>
+-    <!-- OSHI dependency -->
+-    <dependency>
+-      <groupId>com.github.oshi</groupId>
+-      <artifactId>oshi-core</artifactId>
+-      <version>6.9.1</version>
+-    </dependency>
+-
+-    <!-- Optional: JUnit for testing -->
+-    <dependency>
+-      <groupId>junit</groupId>
+-      <artifactId>junit</artifactId>
+-      <version>4.13.2</version>
+-      <scope>test</scope>
+-    </dependency>
+-  </dependencies>
++         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
++    <modelVersion>4.0.0</modelVersion>
++
++    <groupId>com.example</groupId>
++    <artifactId>oshi-network-info</artifactId>
++    <version>1.0.0</version>
++    <packaging>jar</packaging>
++
++    <name>OSHI Network Information</name>
++    <description>A Java application to display network information using OSHI library</description>
++
++    <properties>
++        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
++        <maven.compiler.source>21</maven.compiler.source>
++        <maven.compiler.target>21</maven.compiler.target>
++        <maven.compiler.release>21</maven.compiler.release>
++        <oshi.version>6.6.5</oshi.version>
++    </properties>
++
++    <dependencies>
++        <!-- OSHI - Operating System and Hardware Information -->
++        <dependency>
++            <groupId>com.github.oshi</groupId>
++            <artifactId>oshi-core</artifactId>
++            <version>${oshi.version}</version>
++        </dependency>
++
++        <!-- SLF4J API -->
++        <dependency>
++            <groupId>org.slf4j</groupId>
++            <artifactId>slf4j-api</artifactId>
++            <version>2.0.16</version>
++        </dependency>
++
++        <!-- SLF4J Simple Implementation -->
++        <dependency>
++            <groupId>org.slf4j</groupId>
++            <artifactId>slf4j-simple</artifactId>
++            <version>2.0.16</version>
++        </dependency>
++
++        <!-- JUnit 5 for testing -->
++        <dependency>
++            <groupId>org.junit.jupiter</groupId>
++            <artifactId>junit-jupiter</artifactId>
++            <version>5.11.3</version>
++            <scope>test</scope>
++        </dependency>
++    </dependencies>
++
++    <build>
++        <plugins>
++            <!-- Maven Compiler Plugin -->
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-compiler-plugin</artifactId>
++                <version>3.13.0</version>
++                <configuration>
++                    <source>21</source>
++                    <target>21</target>
++                    <release>21</release>
++                </configuration>
++            </plugin>
++
++            <!-- Maven Surefire Plugin for running tests -->
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-surefire-plugin</artifactId>
++                <version>3.5.2</version>
++            </plugin>
++
++            <!-- Maven Jar Plugin for creating executable JAR -->
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-jar-plugin</artifactId>
++                <version>3.4.2</version>
++                <configuration>
++                    <archive>
++                        <manifest>
++                            <mainClass>com.example.NetworkInfo</mainClass>
++                        </manifest>
++                    </archive>
++                </configuration>
++            </plugin>
+ 
++            <!-- Maven Shade Plugin for creating fat JAR with dependencies -->
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-shade-plugin</artifactId>
++                <version>3.6.0</version>
++                <executions>
++                    <execution>
++                        <phase>package</phase>
++                        <goals>
++                            <goal>shade</goal>
++                        </goals>
++                        <configuration>
++                            <transformers>
++                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
++                                    <mainClass>com.example.NetworkInfo</mainClass>
++                                </transformer>
++                            </transformers>
++                            <finalName>${project.artifactId}-${project.version}-fat</finalName>
++                        </configuration>
++                    </execution>
++                </executions>
++            </plugin>
++        </plugins>
++    </build>
+ </project>

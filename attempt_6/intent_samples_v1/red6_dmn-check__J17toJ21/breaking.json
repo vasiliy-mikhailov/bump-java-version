@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "repo": "red6/dmn-check",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "2bb3105e37c7b339df89cc2c78d73ebef7f86ba1",
+    "sha_to": "846539f22888c74f392218993e1f1b983045c33c"
+  },
+  "by_file": {}
+}

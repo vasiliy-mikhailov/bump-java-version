@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "repo": "adorsys/keycloak-config-cli",
+    "stage": "J8->J11",
+    "family": "junit4-mockito",
+    "sha_from": "711e58f53988f13cc383dceca7e9ca25d872eaff",
+    "sha_to": "c7cfd4de48375023189dd9c27f638fd5ac7be227"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "compiler_target_upgrade",
+        "general_idea": "Update Maven compiler source and target properties from Java 8 to Java 11 to enforce compilation for the new JDK version.",
+        "human_impl": "<maven.compiler.source>11</maven.compiler.source>\n<maven.compiler.target>11</maven.compiler.target>",
+        "bucket": "breaking"
+      }
+    ],
+    "Dockerfile": [
+      {
+        "kind": "base_image_upgrade",
+        "general_idea": "Switch the Docker base image from an OpenJDK 8 variant to a Java 11 variant to align with the target JDK version.",
+        "human_impl": "FROM adorsys/openjdk-jre-base:8-minideb -> FROM adorsys/java:11",
+        "bucket": "breaking"
+      }
+    ],
+    "docker-compose.yml": [
+      {
+        "kind": "upgrade_keycloak_image",
+        "general_idea": "Upgrade the Keycloak container image from version 3.2.1.Final to 9.0.0 to align with the Java 11 migration and new feature requirements.",
+        "human_impl": "Changed image from 'jboss/keycloak:3.2.1.Final' to 'jboss/keycloak:9.0.0'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_keycloak_url",
+        "general_idea": "Update the Keycloak URL environment variable to remove the '/auth' context path, reflecting changes in Keycloak 9.0 routing.",
+        "human_impl": "Changed KEYCLOAK_URL from 'http://keycloak:8080/auth' to 'http://keycloak:8080'.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

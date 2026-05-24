@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "hoanganh2070/Ecommerce-Backend",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "571f797bbf0c2f25d56e797da58556b2789ddc04",
+    "sha_to": "5237f7e7ff99a1002f16bc2306d60d2b949d2bf2"
+  },
+  "by_file": {
+    "src/main/java/com/example/demo/controller/CategoryController.java": [
+      {
+        "kind": "update_endpoint_path",
+        "general_idea": "Changed the REST endpoint path from /category to /api/category to align with API versioning or routing standards.",
+        "human_impl": "Changed `@GetMapping(\"/category\")` to `@GetMapping(\"/api/category\")`.",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the Maven property to target Java 21 instead of Java 17.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

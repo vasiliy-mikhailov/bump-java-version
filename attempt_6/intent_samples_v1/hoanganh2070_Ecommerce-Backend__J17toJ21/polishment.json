@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "repo": "hoanganh2070/Ecommerce-Backend",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "571f797bbf0c2f25d56e797da58556b2789ddc04",
+    "sha_to": "5237f7e7ff99a1002f16bc2306d60d2b949d2bf2"
+  },
+  "by_file": {
+    "src/main/java/com/example/demo/config/DataRestConfig.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Removed the import for ProductCategory as it is no longer referenced in the configuration logic.",
+        "human_impl": "-import com.example.demo.entity.ProductCategory;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_exposure_config",
+        "general_idea": "Removed the Spring Data REST exposure configuration blocks for Product and ProductCategory entities.",
+        "human_impl": "-config.getExposureConfiguration().forDomainType(Product.class)...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_todo_comment",
+        "general_idea": "Removed an auto-generated TODO comment stub from the method body.",
+        "human_impl": "-// TODO Auto-generated method stub",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/controller/CategoryController.java": [
+      {
+        "kind": "remove_cross_origin_annotation",
+        "general_idea": "Removed the @CrossOrigin annotation and its import, likely delegating CORS configuration to a global filter or security configuration.",
+        "human_impl": "Removed `@CrossOrigin(value= {\"http://localhost:4200\", \"http://localhost:3000\"})` and the corresponding import.",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_lombok_config",
+        "general_idea": "Pin Lombok version and change scope to provided for better build hygiene.",
+        "human_impl": "<version>1.18.30</version>\n<scope>provided</scope>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_openapi_dependency",
+        "general_idea": "Add SpringDoc OpenAPI starter to enable API documentation generation.",
+        "human_impl": "<dependency>\n    <groupId>org.springdoc</groupId>\n    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>\n    <version>2.3.0</version>\n</dependency>",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "add_gitignore_entry",
+        "general_idea": "Ignore .fake files in the repository.",
+        "human_impl": ".fake",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "rename_database",
+        "general_idea": "Updated the database URL to point to a new database name 'e_commerce' instead of 'full-stack-ecommerce'.",
+        "human_impl": "spring.datasource.url=jdbc:mysql://localhost:3306/e_commerce",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_legacy_dialect",
+        "general_idea": "Removed the explicit Hibernate MySQL dialect property, likely relying on auto-detection or newer default behavior in the target environment.",
+        "human_impl": "-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "disable_open_in_view",
+        "general_idea": "Disabled the Open Session In View pattern to improve performance and avoid lazy loading issues, a common best practice recommendation.",
+        "human_impl": "+spring.jpa.open-in-view=false",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

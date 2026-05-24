@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "repo": "hendisantika/spring-boot-kafka-test",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "73c01c43767e0cbac1bbe43100fd2aefa54b09e9",
+    "sha_to": "b216da5ff201960eec13f7245267d375cb5a367e"
+  },
+  "by_file": {
+    "src/main/java/com/hendisantika/springbootkafkatest/SpringBootKafkaTestApplication.java": [
+      {
+        "kind": "explicit_scan_base_package",
+        "general_idea": "Explicitly define the base package for component scanning to ensure correct component discovery during the Spring Boot upgrade.",
+        "human_impl": "@SpringBootApplication(scanBasePackages = \"com.hendisantika.springbootkafkatest\")",
+        "bucket": "polishment"
+      }
+    ],
+    "src/test/java/com/hendisantika/springbootkafkatest/SpringBootKafkaTestApplicationTests.java": [
+      {
+        "kind": "add_testcontainers_integration",
+        "general_idea": "Integrate Testcontainers to spin up a real Kafka instance for integration testing instead of relying on embedded or mocked brokers.",
+        "human_impl": "Added @Testcontainers, @Container KafkaContainer, and @DynamicPropertySource to configure bootstrap servers dynamically.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_integration_test_logic",
+        "general_idea": "Replace the trivial context load test with a functional integration test that verifies end-to-end Kafka message production and consumption.",
+        "human_impl": "Replaced contextLoads() with testProduceAndConsumeKafkaMessage() using @Autowired producer and @MockBean service.",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "add_web_starter",
+        "general_idea": "Add the Spring Boot Web Starter dependency to enable web application capabilities.",
+        "human_impl": "<artifactId>spring-boot-starter-web</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_kafka_dependency",
+        "general_idea": "Add the Spring Kafka dependency to support Kafka messaging integration.",
+        "human_impl": "<artifactId>spring-kafka</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation_starter",
+        "general_idea": "Add the Spring Boot Validation Starter to enable bean validation features.",
+        "human_impl": "<artifactId>spring-boot-starter-validation</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jpa_starter",
+        "general_idea": "Add the Spring Boot Data JPA Starter to enable database persistence capabilities.",
+        "human_impl": "<artifactId>spring-boot-starter-data-jpa</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mysql_connector",
+        "general_idea": "Add the MySQL Connector/J driver for runtime database connectivity.",
+        "human_impl": "<artifactId>mysql-connector-j</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_flyway_core",
+        "general_idea": "Add Flyway Core dependency for database migration management.",
+        "human_impl": "<artifactId>flyway-core</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_flyway_mysql",
+        "general_idea": "Add Flyway MySQL dependency to support MySQL-specific migrations.",
+        "human_impl": "<artifactId>flyway-mysql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_openapi_ui",
+        "general_idea": "Add SpringDoc OpenAPI UI dependency to generate API documentation.",
+        "human_impl": "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javafaker",
+        "general_idea": "Add JavaFaker dependency to generate fake data for testing or seeding.",
+        "human_impl": "<artifactId>javafaker</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_kafka_test",
+        "general_idea": "Add Spring Kafka Test dependency to support unit and integration testing of Kafka components.",
+        "human_impl": "<artifactId>spring-kafka-test</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_testcontainers_base",
+        "general_idea": "Add Testcontainers base dependency to enable containerized testing infrastructure.",
+        "human_impl": "<artifactId>testcontainers</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_testcontainers_mysql",
+        "general_idea": "Add Testcontainers MySQL module to spin up MySQL containers for testing.",
+        "human_impl": "<artifactId>mysql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_testcontainers_junit",
+        "general_idea": "Add Testcontainers JUnit Jupiter module to integrate Testcontainers with JUnit 5 tests.",
+        "human_impl": "<artifactId>junit-jupiter</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_testcontainers_kafka",
+        "general_idea": "Add Testcontainers Kafka module to spin up Kafka containers for testing.",
+        "human_impl": "<artifactId>kafka</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_h2_database",
+        "general_idea": "Add H2 in-memory database dependency for lightweight testing scenarios.",
+        "human_impl": "<artifactId>h2</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_flyway_maven_plugin",
+        "general_idea": "Add the Flyway Maven plugin to execute database migrations during the build process.",
+        "human_impl": "<artifactId>flyway-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_readme_content",
+        "general_idea": "Replace minimal project title with comprehensive documentation including setup instructions, API usage, and testing details.",
+        "human_impl": "Replaced '# spring-boot-kafka-test' with detailed sections on running docker-compose, starting the app, and interacting with APIs.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "lucabritten/FIT-Combiner-Tool",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "36326e18d2d02a288258da3f472dae6b589bd5a3",
+    "sha_to": "98b2fa05e0226d2c418ebcac755f9b6224afd4fd"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the target Java version from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

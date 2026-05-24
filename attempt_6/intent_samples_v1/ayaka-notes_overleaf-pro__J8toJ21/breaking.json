@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "repo": "ayaka-notes/overleaf-pro",
+    "stage": "J8->J21",
+    "family": "junit4-mockito",
+    "sha_from": "3389615ef69d7cae836767d6efba618691a6df29",
+    "sha_to": "3e81e212f38e3af35fee9f3578ac97201ec155c7"
+  },
+  "by_file": {
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/application/config/Config.java": [
+      {
+        "kind": "remove_config_field",
+        "general_idea": "Remove username and password fields from Config as they are no longer used in this service configuration.",
+        "human_impl": "- private String username;\n- private String password;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_json_parsing",
+        "general_idea": "Update fromJSON method to parse new configuration fields and remove parsing for removed fields.",
+        "human_impl": "bindIp = getElement(configObject, \"bindIp\").getAsString();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_constructor",
+        "general_idea": "Update Config constructor to accept new fields and remove parameters for deleted fields.",
+        "human_impl": "public Config(int port, String bindIp, int idleTimeout, ...)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_sanitised_method",
+        "general_idea": "Update asSanitised method to include new fields and exclude removed fields in the sanitized copy.",
+        "human_impl": "return new Config(config.port, config.bindIp, ...)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_getter",
+        "general_idea": "Remove getter methods for deleted configuration fields.",
+        "human_impl": "- public String getUsername() { return username; }",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

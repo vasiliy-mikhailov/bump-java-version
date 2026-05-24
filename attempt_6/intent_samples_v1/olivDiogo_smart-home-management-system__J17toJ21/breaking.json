@@ -1,0 +1,179 @@
+{
+  "meta": {
+    "repo": "olivDiogo/smart-home-management-system",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "9b5f6e4f80149c5220fc9169c6f5ef6dd4368933",
+    "sha_to": "3bc4fb5f713e49f00505501e20a8b0192dc5a057"
+  },
+  "by_file": {
+    "src/main/java/SmartHome/controller/AddSensorToDeviceController.java": [
+      {
+        "kind": "refactor_class_rename",
+        "general_idea": "Rename the Catalogue dependency to CatalogueSensors to reflect its specific domain responsibility.",
+        "human_impl": "private final CatalogueSensors _catalogue;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_mapping_logic",
+        "general_idea": "Replace the old RoomMapper utility with a new RoomAssembler class for domain-to-DTO conversion.",
+        "human_impl": "_roomsDTOAndRooms = RoomAssembler.domain2DTOMap(rooms);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Change getDevicesFromRoom to return a list of DeviceDTOs instead of raw Device objects.",
+        "human_impl": "public List<DeviceDTO> getDevicesFromRoom(RoomDTO roomDTO)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_mapping_logic",
+        "general_idea": "Implement DeviceDTO mapping using a new DeviceAssembler class within getDevicesFromRoom.",
+        "human_impl": "_devicesDTOAndDevices = DeviceAssembler.domain2DTOMapper(room.getDevices());",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_method_signature",
+        "general_idea": "Update addSensorToDevice to accept DeviceDTO and return SensorDTO instead of raw domain objects.",
+        "human_impl": "public SensorDTO addSensorToDevice(DeviceDTO deviceDTO, String strSensorModel)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_dependency_injection",
+        "general_idea": "Inject a SensorFactory into the addSensorToDevice method to handle sensor creation.",
+        "human_impl": "device.addSensor(strSensorModel, this._catalogue, new SensorFactory());",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_mapping_logic",
+        "general_idea": "Convert the created Sensor domain object to SensorDTO using SensorAssembler before returning.",
+        "human_impl": "return SensorAssembler.domain2DTO(sensor);",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/SmartHome/controller/DefineHouseLocationController.java": [
+      {
+        "kind": "change_method_signature",
+        "general_idea": "Expanded the defineHouseLocation method signature to accept more specific location details.",
+        "human_impl": "public LocationDTO defineHouseLocation(String street, String zipCode, int doorNumber, double latitude, double longitude)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_exception_type",
+        "general_idea": "Changed the thrown exception from InstantiationException to IllegalArgumentException.",
+        "human_impl": "throws IllegalArgumentException",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_method_call",
+        "general_idea": "Updated the call to _house.defineLocation to pass the new expanded arguments.",
+        "human_impl": "Location location = _house.defineLocation(street, zipCode, doorNumber, latitude, longitude);",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/SmartHome/domain/Device.java": [
+      {
+        "kind": "refactor_add_sensor_signature",
+        "general_idea": "Updated addSensor method signature to accept CatalogueSensors and SensorFactory instead of Catalogue.",
+        "human_impl": "public Sensor addSensor(String strModel, CatalogueSensors catalogue, SensorFactory sensorFactory) ...",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/SmartHome/domain/Location.java": [
+      {
+        "kind": "refactor_class_structure",
+        "general_idea": "Replace primitive string fields with composite Address and Gps objects to improve domain modeling.",
+        "human_impl": "Replaced `String _strStreet` and `String _strPostalCode` with `Address _address` and `Gps _gpsLocation`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_injection",
+        "general_idea": "Introduce factory dependencies to decouple object creation from the Location class.",
+        "human_impl": "Added `AddressFactory _addressFactory` and `GpsFactory _gpsFactory` fields and constructor parameters.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_constructor_signature",
+        "general_idea": "Expand constructor to accept all necessary data for creating composite objects via factories.",
+        "human_impl": "Changed constructor to accept `street`, `zipCode`, `doorNumber`, `latitude`, `longitude`, and factory instances.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_exception_type",
+        "general_idea": "Switch from checked InstantiationException to unchecked IllegalArgumentException for validation errors.",
+        "human_impl": "Changed `throws InstantiationException` to `throws IllegalArgumentException` in constructor signature.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_validation_logic",
+        "general_idea": "Delegate validation responsibility to the factory classes instead of handling it in the domain object.",
+        "human_impl": "Removed `isValidConstructorArguments` method and manual null/empty checks.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_accessors",
+        "general_idea": "Update getter methods to return the new composite types instead of primitive strings.",
+        "human_impl": "Replaced `getStreet()` and `getPostalCode()` with `getAddress()` and `getGpsLocation()`.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/SmartHome/dto/LocationDTO.java": [
+      {
+        "kind": "rename_field",
+        "general_idea": "Renamed the street field to _address to reflect a broader address concept.",
+        "human_impl": "public final String _address;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_field",
+        "general_idea": "Removed the postalCode field as it is no longer part of the DTO structure.",
+        "human_impl": "- public final String postalCode;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Added a new _gps field to store GPS location data.",
+        "human_impl": "public final String _gps;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_constructor_logic",
+        "general_idea": "Updated constructor to map the new _address field from location.getAddress().toString().",
+        "human_impl": "this._address = location.getAddress().toString();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_constructor_logic",
+        "general_idea": "Updated constructor to map the new _gps field from location.getGpsLocation().toString().",
+        "human_impl": "this._gps = location.getGpsLocation().toString();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_constructor_logic",
+        "general_idea": "Removed constructor assignment for the deleted street field.",
+        "human_impl": "- this.street = location.getStreet();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_constructor_logic",
+        "general_idea": "Removed constructor assignment for the deleted postalCode field.",
+        "human_impl": "- this.postalCode = location.getPostalCode();",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/SmartHome/sensors/GA100K.java": [
+      {
+        "kind": "rename_import",
+        "general_idea": "Update import statement to reflect the renaming of the Catalogue class to CatalogueSensors.",
+        "human_impl": "import SmartHome.domain.CatalogueSensors;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_constructor_parameter",
+        "general_idea": "Change the constructor parameter type from Catalogue to CatalogueSensors to match the renamed class.",
+        "human_impl": "public GA100K(CatalogueSensors catalogue) throws InstantiationException",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

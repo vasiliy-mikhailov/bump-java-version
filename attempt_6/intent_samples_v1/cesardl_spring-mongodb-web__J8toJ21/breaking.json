@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "repo": "cesardl/spring-mongodb-web",
+    "stage": "J8->J21",
+    "family": null,
+    "sha_from": "8109bb26421dee2018b5bcc7cd52610d28dd271d",
+    "sha_to": "96d7342fab9171b6043d473d21d042ed7f42fb58"
+  },
+  "by_file": {
+    "src/main/java/com/springmvc/springmongodbweb/controllers/ProductController.java": [
+      {
+        "kind": "migrate_api",
+        "general_idea": "Replaced deprecated Spring Data `findOne` with `findById` returning Optional to comply with modern Spring Data standards.",
+        "human_impl": "productRepository.findById(id).orElseThrow()",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/springmvc/springmongodbweb/repositories/ProductRepository.java": [
+      {
+        "kind": "replace_base_repository_interface",
+        "general_idea": "Replaced the generic CrudRepository with MongoRepository to access MongoDB-specific features and remove deprecated methods.",
+        "human_impl": "extends MongoRepository<Product, String>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_deprecated_method",
+        "general_idea": "Removed the deprecated findOne method which was overridden from CrudRepository.",
+        "human_impl": "Removed: Product findOne(String id);",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_parent_version",
+        "general_idea": "Upgrade Spring Boot parent from 1.5.7.RELEASE to 3.4.12 to support Java 21.",
+        "human_impl": "<parent>...<version>3.4.12</version>...",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_java_version",
+        "general_idea": "Set the target Java version property to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

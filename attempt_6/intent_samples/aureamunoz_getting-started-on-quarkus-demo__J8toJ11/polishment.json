@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "repo": "aureamunoz/getting-started-on-quarkus-demo",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "c99954f1fe952fa25bd306c9aeef2772c70d6483",
+    "sha_to": "2c413b84f4dfb1c99740170e1c9c13c5f39860c6"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "add_compiler_plugin_explicitly",
+        "general_idea": "Explicitly add the maven-compiler-plugin to ensure Java 11 compilation settings are applied.",
+        "before": "",
+        "after": "<plugin>\n        <artifactId>maven-compiler-plugin</artifactId>\n        <version>${compiler-plugin.version}</version>\n      </plugin>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_compiler_parameters_property",
+        "general_idea": "Enable parameter name retention in compiled classes for Java 11.",
+        "before": "",
+        "after": "<maven.compiler.parameters>true</maven.compiler.parameters>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "update_quarkus_bom_to_universe",
+        "general_idea": "Switch Quarkus dependency management from quarkus-bom to quarkus-universe-bom.",
+        "before": "<groupId>io.quarkus</groupId>\n-        <artifactId>quarkus-bom</artifactId>\n-        <version>${quarkus.version}</version>",
+        "after": "<groupId>${quarkus.platform.group-id}</groupId>\n+        <artifactId>${quarkus.platform.artifact-id}</artifactId>\n+        <version>${quarkus.platform.version}</version>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "update_quarkus_plugin_version",
+        "general_idea": "Update the Quarkus Maven plugin version to match the new platform version.",
+        "before": "<version>${quarkus.version}</version>",
+        "after": "<version>${quarkus-plugin.version}</version>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "update_surefire_plugin_version",
+        "general_idea": "Bump the Maven Surefire plugin version to 2.22.1.",
+        "before": "<surefire-plugin.version>2.22.0</surefire-plugin.version>",
+        "after": "<surefire-plugin.version>2.22.1</surefire-plugin.version>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "rename_surefire_system_properties",
+        "general_idea": "Rename deprecated systemProperties configuration to systemPropertyVariables in Surefire plugin.",
+        "before": "<systemProperties>",
+        "after": "<systemPropertyVariables>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "remove_native_profile_plugin_config",
+        "general_idea": "Remove explicit native-image goal configuration from the native profile, relying on plugin defaults.",
+        "before": "<plugin>\n            <groupId>io.quarkus</groupId>\n            <artifactId>quarkus-maven-plugin</artifactId>\n            <version>${quarkus.version}</version>\n            <executions>\n              <execution>\n                <goals>\n                  <goal>native-image</goal>\n                </goals>\n                <configuration>\n                  <enableHttpUrlHandler>true</enableHttpUrlHandler>\n                </configuration>\n              </execution>\n            </executions>\n          </plugin>",
+        "after": "",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_native_package_type_property",
+        "general_idea": "Add quarkus.package.type property to the native profile to specify native packaging.",
+        "before": "",
+        "after": "<properties>\n        <quarkus.package.type>native</quarkus.package.type>\n      </properties>",
+        "bucket": "polishment",
+        "why_exists": ""
+      }
+    ]
+  }
+}

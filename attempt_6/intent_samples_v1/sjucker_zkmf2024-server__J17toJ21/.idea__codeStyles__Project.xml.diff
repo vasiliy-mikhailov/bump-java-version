@@ -1,0 +1,46 @@
+diff --git a/.idea/codeStyles/Project.xml b/.idea/codeStyles/Project.xml
+index d1c43af..edd646c 100644
+--- a/.idea/codeStyles/Project.xml
++++ b/.idea/codeStyles/Project.xml
+@@ -1,11 +1,40 @@
+ <component name="ProjectCodeStyleConfiguration">
+   <code_scheme name="Project" version="173">
++    <option name="LINE_SEPARATOR" value="&#13;&#10;" />
++    <option name="RIGHT_MARGIN" value="200" />
++    <option name="DO_NOT_FORMAT">
++      <list>
++        <fileSet type="globPattern" pattern="*.properties" />
++      </list>
++    </option>
+     <JavaCodeStyleSettings>
+       <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
+       <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
++      <option name="IMPORT_LAYOUT_TABLE">
++        <value>
++          <package name="" withSubpackages="true" static="false" />
++          <emptyLine />
++          <package name="jakarta" withSubpackages="true" static="false" />
++          <package name="javax" withSubpackages="true" static="false" />
++          <package name="java" withSubpackages="true" static="false" />
++          <emptyLine />
++          <package name="" withSubpackages="true" static="true" />
++        </value>
++      </option>
+     </JavaCodeStyleSettings>
++    <TypeScriptCodeStyleSettings version="0">
++      <option name="IMPORT_SORT_MODULE_NAME" value="true" />
++    </TypeScriptCodeStyleSettings>
+     <codeStyleSettings language="JAVA">
++      <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
++      <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
++      <option name="KEEP_BLANK_LINES_BETWEEN_PACKAGE_DECLARATION_AND_HEADER" value="1" />
++      <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="1" />
+       <option name="ALIGN_MULTILINE_CHAINED_METHODS" value="true" />
++      <option name="ALIGN_MULTILINE_PARAMETERS_IN_CALLS" value="true" />
++    </codeStyleSettings>
++    <codeStyleSettings language="TypeScript">
++      <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+     </codeStyleSettings>
+   </code_scheme>
+ </component>
+\ No newline at end of file

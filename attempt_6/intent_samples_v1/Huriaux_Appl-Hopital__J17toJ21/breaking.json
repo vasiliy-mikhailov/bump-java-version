@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "Huriaux/Appl-Hopital",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "8d67890813ab38cc91611d30ea85ccb7f5a822cc",
+    "sha_to": "44511adfc41f1f1255ae1354359f0927acced121"
+  },
+  "by_file": {
+    "Back-end/ECF_Appli_Hopital/pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the new JDK environment.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

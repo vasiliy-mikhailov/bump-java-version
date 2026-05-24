@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "repo": "thomasdarimont/keycloak-project-example",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "a401ea32e50ad809952c58313c3c1f95d1ef6861",
+    "sha_to": "5e8290673fde6aef1730ee13b37f55539addfe9c"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the project's Java source and target compatibility from version 11 to 17.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_keycloak_version",
+        "general_idea": "Upgrade the Keycloak dependency from version 12.0.4 to 22.0.0 to align with the new Java version and feature set.",
+        "human_impl": "<keycloak.version>22.0.0</keycloak.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_testcontainers_keycloak_version",
+        "general_idea": "Update the testcontainers-keycloak library to version 3.0.0 to support the newer Keycloak version.",
+        "human_impl": "<testcontainers-keycloak.version>3.0.0</testcontainers-keycloak.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_resteasy_dependency",
+        "general_idea": "Add RestEasy 6.2.4.Final as a managed dependency, likely required for Keycloak 22.x extensions.",
+        "human_impl": "<resteasy.version>6.2.4.Final</resteasy.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

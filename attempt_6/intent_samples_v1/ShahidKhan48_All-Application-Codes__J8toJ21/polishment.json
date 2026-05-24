@@ -1,0 +1,285 @@
+{
+  "meta": {
+    "repo": "ShahidKhan48/All-Application-Codes",
+    "stage": "J8->J21",
+    "family": "spring-boot-2",
+    "sha_from": "e99ec495182fc2f93c62619c17b8837398bd7cf4",
+    "sha_to": "18fe7f4f18a9e5c437adf03748d911e71af117cc"
+  },
+  "by_file": {
+    "java-app/pom.xml": [
+      {
+        "kind": "remove_mysql_connector",
+        "general_idea": "Remove MySQL connector dependency as the project switches to MongoDB.",
+        "human_impl": "<dependency><groupId>mysql</groupId><artifactId>mysql-connector-java</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_spring_data_jpa",
+        "general_idea": "Remove Spring Data JPA starter as the project switches to MongoDB.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-data-jpa</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_spring_webflux",
+        "general_idea": "Remove Spring WebFlux starter as the project appears to stick to standard Web MVC.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-webflux</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_spring_cloud_vault",
+        "general_idea": "Remove Spring Cloud Vault config dependency, likely simplifying configuration management.",
+        "human_impl": "<dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-starter-vault-config</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_spring_cloud_dependencies",
+        "general_idea": "Remove Spring Cloud dependency management BOM as specific cloud starters are removed.",
+        "human_impl": "<dependencyManagement>...<artifactId>spring-cloud-dependencies</artifactId>...</dependencyManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_archaius",
+        "general_idea": "Remove Netflix Archaius dependency, likely replacing it with standard Spring Boot configuration.",
+        "human_impl": "<dependency><groupId>com.netflix.archaius</groupId><artifactId>archaius-core</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_commons_lang3",
+        "general_idea": "Remove explicit Apache Commons Lang3 dependency, relying on transitive or removing usage.",
+        "human_impl": "<dependency><groupId>org.apache.commons</groupId><artifactId>commons-lang3</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_commons_collections4",
+        "general_idea": "Remove explicit Apache Commons Collections4 dependency.",
+        "human_impl": "<dependency><groupId>org.apache.commons</groupId><artifactId>commons-collections4</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_micrometer_prometheus",
+        "general_idea": "Remove explicit Micrometer Prometheus registry dependency, relying on Actuator defaults or removing.",
+        "human_impl": "<dependency><groupId>io.micrometer</groupId><artifactId>micrometer-registry-prometheus</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_mapstruct",
+        "general_idea": "Remove MapStruct dependency, likely simplifying object mapping or removing usage.",
+        "human_impl": "<dependency><groupId>org.mapstruct</groupId><artifactId>mapstruct</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_reactor_test",
+        "general_idea": "Remove Reactor Test dependency as WebFlux is removed.",
+        "human_impl": "<dependency><groupId>io.projectreactor</groupId><artifactId>reactor-test</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_springdoc_openapi",
+        "general_idea": "Remove SpringDoc OpenAPI UI dependency, likely removing API documentation generation.",
+        "human_impl": "<dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-ui</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_reflections",
+        "general_idea": "Remove Reflections library dependency.",
+        "human_impl": "<dependency><groupId>org.reflections</groupId><artifactId>reflections</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_firebase_admin",
+        "general_idea": "Remove Firebase Admin SDK dependency.",
+        "human_impl": "<dependency><groupId>com.google.firebase</groupId><artifactId>firebase-admin</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_guava",
+        "general_idea": "Remove explicit Guava dependency.",
+        "human_impl": "<dependency><groupId>com.google.guava</groupId><artifactId>guava</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jobrunr_starter",
+        "general_idea": "Add JobRunr Spring Boot 3 starter for job scheduling.",
+        "human_impl": "<dependency><groupId>org.jobrunr</groupId><artifactId>jobrunr-spring-boot-3-starter</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mongodb_starter",
+        "general_idea": "Add Spring Boot Data MongoDB starter for database persistence.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-data-mongodb</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_project_metadata",
+        "general_idea": "Update groupId, artifactId, name, and description to reflect the new service identity.",
+        "human_impl": "<groupId>com.ninja</groupId><artifactId>nc-platform-scheduler</artifactId>",
+        "bucket": "polishment"
+      }
+    ],
+    "java-app/.gitignore": [
+      {
+        "kind": "remove_ide_artifacts",
+        "general_idea": "Removed IDE-specific ignore patterns for STS, IntelliJ, NetBeans, and VS Code to simplify the configuration.",
+        "human_impl": "Deleted blocks for .apt_generated, .idea, /nbproject, .vscode, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_build_artifacts",
+        "general_idea": "Removed Maven and Gradle build output ignore patterns.",
+        "human_impl": "Deleted target/, build/, and wrapper exceptions.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_doc_artifacts",
+        "general_idea": "Removed documentation file ignore pattern.",
+        "human_impl": "Deleted HELP.md.",
+        "bucket": "polishment"
+      }
+    ],
+    "java-app/Dockerfile": [
+      {
+        "kind": "add_build_caching",
+        "general_idea": "Optimize Docker build performance by caching Maven dependencies in a separate layer.",
+        "human_impl": "COPY pom.xml . \nRUN mvn -B -ntp -DskipTests dependency:go-offline",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workdir",
+        "general_idea": "Explicitly set working directories for build and runtime stages to improve clarity and reliability.",
+        "human_impl": "WORKDIR /build",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_copy_strategy",
+        "general_idea": "Refine file copying to separate sources from dependencies and use specific artifact patterns.",
+        "human_impl": "COPY src ./src \nCOPY --from=builder /build/target/nc-platform-scheduler-*.jar /app.jar",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_start_script_handling",
+        "general_idea": "Copy the start script explicitly and ensure it has executable permissions.",
+        "human_impl": "COPY start-app.sh /start-app.sh \nRUN chmod +x /start-app.sh",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_otel_agent_version",
+        "general_idea": "Update the OpenTelemetry Java agent to a newer version compatible with the new JDK.",
+        "human_impl": "RUN wget -q https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.26.0/opentelemetry-javaagent.jar -O /opentelemetry-javaagent.jar",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "expose_ports",
+        "general_idea": "Explicitly declare exposed ports for documentation and container networking.",
+        "human_impl": "EXPOSE 8080 8000",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_cmd_syntax",
+        "general_idea": "Switch CMD to exec form for better signal handling and clarity.",
+        "human_impl": "CMD [\"/start-app.sh\"]",
+        "bucket": "polishment"
+      }
+    ],
+    "java-app/src/main/resources/application.properties": [
+      {
+        "kind": "rename_application",
+        "general_idea": "Changed the Spring Boot application name to reflect the new service identity.",
+        "human_impl": "spring.application.name=nc-platform-scheduler",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_server_port",
+        "general_idea": "Updated the default server port to 8080.",
+        "human_impl": "server.port=8080",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_context_path",
+        "general_idea": "Changed the servlet context path to /scheduler.",
+        "human_impl": "server.servlet.context-path=/scheduler",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_actuator",
+        "general_idea": "Exposed all management endpoints and configured health details visibility.",
+        "human_impl": "management.endpoints.web.exposure.include=*",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "disable_vault_health",
+        "general_idea": "Explicitly disabled the Vault health indicator.",
+        "human_impl": "management.health.vault.enabled=false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_logging",
+        "general_idea": "Set specific logging levels for root, application, and JobRunr packages.",
+        "human_impl": "logging.level.root=INFO",
+        "bucket": "polishment"
+      }
+    ],
+    "java-app/start-app.sh": [
+      {
+        "kind": "add_shebang",
+        "general_idea": "Added a POSIX shell shebang to ensure the script is executed by the correct interpreter.",
+        "human_impl": "#!/usr/bin/env sh",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_error_handling",
+        "general_idea": "Enabled strict error handling to exit immediately if any command fails.",
+        "human_impl": "set -e",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "parameterize_service_name",
+        "general_idea": "Extracted the OpenTelemetry service name into a configurable environment variable with a default value.",
+        "human_impl": ": \"${SERVICE_NAME:=nc-platform-scheduler}\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "parameterize_spring_profile",
+        "general_idea": "Extracted the Spring profile into a configurable environment variable with a default value.",
+        "human_impl": ": \"${SPRING_PROFILE:=default}\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "parameterize_java_heap",
+        "general_idea": "Extracted the Java heap size setting into a configurable environment variable with a default value.",
+        "human_impl": ": \"${JAVA_HEAP:=-Xmx2G}\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "parameterize_timezone",
+        "general_idea": "Extracted the user timezone setting into a configurable environment variable with a default value.",
+        "human_impl": ": \"${TIMEZONE:=UTC}\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_java_opts_composition",
+        "general_idea": "Refactored the command line arguments into a composable JAVA_OPTS variable to allow external overrides and cleaner structure.",
+        "human_impl": "JAVA_OPTS=\"${JAVA_OPTS} ...\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "use_exec_for_replacement",
+        "general_idea": "Used exec to replace the shell process with the Java process, improving resource management and signal handling.",
+        "human_impl": "exec java ${JAVA_OPTS} -jar /app.jar",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_agent_path",
+        "general_idea": "Changed the OpenTelemetry agent path to an absolute path to ensure it is found regardless of the working directory.",
+        "human_impl": "-javaagent:/opentelemetry-javaagent.jar",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_app_path",
+        "general_idea": "Changed the application jar path to an absolute path to ensure it is found regardless of the working directory.",
+        "human_impl": "-jar /app.jar",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

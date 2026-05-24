@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "andrei-punko/spring-boot-2-jsonb",
+    "stage": "J8->J11",
+    "family": "spring-boot-2",
+    "sha_from": "6c95ff50d27fb26ed197868280b24e616175b085",
+    "sha_to": "cd6fc5b6e9ce004f25e695d36cef6247b9e09f59"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the Java source and target version property from 1.8 to 11 to align with the migration target.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_plugin",
+        "general_idea": "Configure the Maven compiler plugin to use the new Java version and set up annotation processor paths for MapStruct and Lombok.",
+        "human_impl": "<plugin>...<source>${java.version}</source>...<annotationProcessorPaths>...</annotationProcessorPaths>...</plugin>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "timmaxx/topjava34",
+    "stage": "J8->J21",
+    "family": null,
+    "sha_from": "517b4a823a02e113933702f9aa9a45c2c88dec1e",
+    "sha_to": "14de5d4aa1af93f7d8d018ea075d9338223bcb7e"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the Java source and target version property from 1.8 to 21 to align with the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_plugin",
+        "general_idea": "Update the maven-compiler-plugin version to 3.13.0 to ensure compatibility with Java 21.",
+        "human_impl": "<version>3.13.0</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_javax_annotation_api",
+        "general_idea": "Add the javax.annotation-api dependency to provide annotations removed from the JDK module system in newer Java versions.",
+        "human_impl": "<artifactId>javax.annotation-api</artifactId>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "repo": "RawSanj/spring-redis-websocket",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "4fbc1a0d152851b412552466cf9cca4bab00a6e4",
+    "sha_to": "dc8a5e5b2e12f0e35920bc9398bc75b87f0f3de0"
+  },
+  "by_file": {
+    "src/main/java/com/github/rawsanj/config/RuntimeHintsConfig.java": [
+      {
+        "kind": "register_serialization_hint",
+        "general_idea": "Register the new Platform class for serialization in GraalVM native image runtime hints to ensure it works correctly at runtime.",
+        "human_impl": "hints.serialization().registerType(Platform.class)",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the project's target Java version from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade the Spring Boot parent dependency from 3.0.1 to 3.4.4 to support Java 21 and access newer features.",
+        "human_impl": "<version>3.4.4</version>",
+        "bucket": "breaking"
+      }
+    ],
+    ".github/workflows/codeql-analysis.yml": [
+      {
+        "kind": "add_jdk_setup",
+        "general_idea": "Explicitly configure the runner to use JDK 21, which is required for the application to compile and run on the target platform.",
+        "human_impl": "uses: actions/setup-java@v4\nwith:\n    distribution: temurin\n    java-version: 21",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/docker/docker-compose.yml": [
+      {
+        "kind": "update_env_var_prefixes",
+        "general_idea": "Updated environment variable prefixes from 'SPRING_REDIS_' to 'SPRING_DATA_REDIS_' to match Spring Boot 3.x configuration property naming conventions.",
+        "human_impl": "Changed 'SPRING_REDIS_HOST' to 'SPRING_DATA_REDIS_HOST' and 'SPRING_REDIS_PASSWORD' to 'SPRING_DATA_REDIS_PASSWORD'.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/k8s/configMap.yaml": [
+      {
+        "kind": "rename_env_prefix",
+        "general_idea": "Update environment variable prefixes from SPRING_REDIS to SPRING_DATA_REDIS to align with Spring Boot 3.x property binding conventions.",
+        "human_impl": "SPRING_REDIS_HOST -> SPRING_DATA_REDIS_HOST",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

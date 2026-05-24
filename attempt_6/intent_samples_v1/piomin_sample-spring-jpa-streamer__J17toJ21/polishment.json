@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "repo": "piomin/sample-spring-jpa-streamer",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "568fa454f1fa5b4d32b8357f5edb2a5a72167776",
+    "sha_to": "6d106c09e65784dd6a211b9a62431f090efeb121"
+  },
+  "by_file": {
+    "src/main/java/pl/piomin/samples/spring/jpastreamer/model/Employee.java": [
+      {
+        "kind": "unused_import_cleanup",
+        "general_idea": "Remove unused Jackson annotation imports that were no longer referenced in the class.",
+        "human_impl": "-import com.fasterxml.jackson.annotation.JsonBackReference;\n-import com.fasterxml.jackson.annotation.JsonManagedReference;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/pl/piomin/samples/spring/jpastreamer/model/Organization.java": [
+      {
+        "kind": "unused_import_removal",
+        "general_idea": "Remove unused Jackson annotation import to clean up the codebase.",
+        "human_impl": "-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "add_sonar_properties",
+        "general_idea": "Add SonarCloud configuration properties for code quality analysis.",
+        "human_impl": "<sonar.projectKey>piomin_sample-spring-jpa-streamer</sonar.projectKey>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_lombok",
+        "general_idea": "Update Lombok dependency to version 1.18.30 for compatibility and bug fixes.",
+        "human_impl": "<version>1.18.30</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_maven_compiler_plugin",
+        "general_idea": "Upgrade maven-compiler-plugin to 3.11.0 to ensure proper Java 21 compilation support.",
+        "human_impl": "<version>3.11.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_build_helper_plugin",
+        "general_idea": "Update build-helper-maven-plugin to version 3.5.0.",
+        "human_impl": "<version>3.5.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_plugin",
+        "general_idea": "Integrate JaCoCo Maven plugin for code coverage reporting.",
+        "human_impl": "<plugin>...<artifactId>jacoco-maven-plugin</artifactId>...",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

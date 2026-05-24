@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "khanhnguyenj/huongdanjava.com",
+    "stage": "J8->J17",
+    "family": null,
+    "sha_from": "2f9c38221b5072a94c9f9f16a36698ec154e3ac0",
+    "sha_to": "9bedfbcec6c790f2a4460cee1d8feb940beff438"
+  },
+  "by_file": {
+    "spring-component-scan/pom.xml": [
+      {
+        "kind": "dependency_version_bump",
+        "general_idea": "Upgrade Spring Context dependency from 4.3.6.RELEASE to 5.3.20 to ensure compatibility with Java 17.",
+        "human_impl": "<version>5.3.20</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

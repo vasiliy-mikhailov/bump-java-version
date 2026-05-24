@@ -1,0 +1,261 @@
+{
+  "meta": {
+    "repo": "red6/dmn-check",
+    "stage": "J11->J17",
+    "family": "junit4-mockito",
+    "sha_from": "f5c52471f4bed09e692549d1846ad20216a842ef",
+    "sha_to": "2bb3105e37c7b339df89cc2c78d73ebef7f86ba1"
+  },
+  "by_file": {
+    "core/src/main/java/de/redsix/dmncheck/drg/RequirementGraph.java": [
+      {
+        "kind": "add_transient_modifier",
+        "general_idea": "Mark the definitions field as transient to exclude it from serialization, likely to prevent serialization issues or reduce overhead in Java 17.",
+        "human_impl": "private final transient Definitions definitions;",
+        "bucket": "polishment"
+      }
+    ],
+    "core/src/main/java/de/redsix/dmncheck/validators/core/ValidationContext.java": [
+      {
+        "kind": "add_nullness_annotation",
+        "general_idea": "Add Checker Framework @NonNull annotation to function parameter to enforce null-safety checks.",
+        "human_impl": "import org.checkerframework.checker.nullness.qual.NonNull; ... Function<Class<T>, @NonNull U> function",
+        "bucket": "polishment"
+      }
+    ],
+    "maven-plugin/src/main/java/de/redsix/dmncheck/CheckerMain.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Removed import for a utility class that is no longer used in the file.",
+        "human_impl": "-import de.redsix.dmncheck.util.ProjectClassLoader;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_imports",
+        "general_idea": "Replaced specific java.net and java.util imports with broader java.io and java.util imports to support new implementation.",
+        "human_impl": "-import java.net.MalformedURLException; ... +import java.io.File; +import java.util.*;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_field_modifiers",
+        "general_idea": "Removed 'private' modifier from Maven plugin parameters to allow default access, likely for testing or framework compatibility.",
+        "human_impl": "-private String[] excludes; +String[] excludes;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin_parameter",
+        "general_idea": "Added a new configuration parameter 'failOnWarning' to control plugin behavior.",
+        "human_impl": "+@Parameter( defaultValue = \"false\", readonly = true ) +Boolean failOnWarning;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin_parameter",
+        "general_idea": "Added a new configuration parameter 'classpath' to allow explicit classpath definition.",
+        "human_impl": "+@Parameter(defaultValue = \"${classpaths}\") +String[] classpath;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_method_call",
+        "general_idea": "Renamed the method call in execute() to reflect the new classpath loading logic.",
+        "human_impl": "-loadProjectclasspath(); +loadClasspath();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "implement_interface_method",
+        "general_idea": "Implemented the failOnWarning() method required by the PluginBase interface.",
+        "human_impl": "+@Override +public boolean failOnWarning() { +return this.failOnWarning; +}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_classpath_loading",
+        "general_idea": "Refactored classpath loading to use Java Streams and File paths instead of URLClassLoader, removing dependency on ProjectClassLoader.",
+        "human_impl": "-ProjectClassLoader.instance.classLoader = new URLClassLoader(...); +loadProjectClasspath(project.getArtifacts().stream()...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_setter_methods",
+        "general_idea": "Removed explicit setter methods for plugin parameters, relying on Maven's default injection or direct field access.",
+        "human_impl": "-void setExcludes(...) ... -void setProject(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "maven-plugin/src/test/java/de/redsix/dmncheck/CheckerMainTest.java": [
+      {
+        "kind": "refactor_test_structure",
+        "general_idea": "Restructure test class using JUnit 5 @Nested classes to group tests by context (no artifacts vs. with artifacts).",
+        "human_impl": "Wrapped existing tests in `@Nested class TestsWithNoArtifacts` and added `@TempDir` for new tests.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_test_api_usage",
+        "general_idea": "Update test code to use direct field assignment instead of setter methods, reflecting changes in the production code's encapsulation.",
+        "human_impl": "Changed `testee.setProject(...)` to `testee.project = ...` and `testee.setExcludes(...)` to `testee.excludes = ...`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_test_logic",
+        "general_idea": "Correct the implementation of `shouldSkipFileIfIsNotOnSearchPath` to actually verify the file list is empty rather than just calling execute.",
+        "human_impl": "Replaced `testee.execute()` with `testee.fetchFilesToTestFromSearchPaths(...)` and asserted `isEmpty()`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_test_coverage",
+        "general_idea": "Add a new test case to verify that project artifacts are correctly added to the project classloader.",
+        "human_impl": "Added `shouldAddArtifactsFromProjectToProjectClassloader` using Mockito and `@TempDir`.",
+        "bucket": "polishment"
+      }
+    ],
+    "plugin-base/src/main/java/de/redsix/dmncheck/plugin/PluginBase.java": [
+      {
+        "kind": "add_fail_on_warning_method",
+        "general_idea": "Introduce a method to configure whether warnings should be treated as failures during validation.",
+        "human_impl": "boolean failOnWarning();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_validation_severity_check",
+        "general_idea": "Modify the validation logic to fail on warnings if the failOnWarning flag is enabled.",
+        "human_impl": "if (failOnWarning()) { errors.add(Severity.WARNING); } ... .anyMatch(result -> errors.contains(result.getSeverity()));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_project_classpath_loader",
+        "general_idea": "Add a method to load the project classpath into a custom class loader for plugin execution.",
+        "human_impl": "default void loadProjectClasspath(List<String> projectClasspath) { ... ProjectClassLoader.INSTANCE.classLoader = new URLClassLoader(urlProjectClasspath); }",
+        "bucket": "polishment"
+      }
+    ],
+    "plugin-base/src/main/java/de/redsix/dmncheck/plugin/PrettyPrintValidationResults.java": [
+      {
+        "kind": "remove_checker_framework_imports",
+        "general_idea": "Remove unused imports from the Checker Framework library.",
+        "human_impl": "Removed `import org.checkerframework.checker.nullness.qual.PolyNull;` and `import org.checkerframework.framework.qual.HasQualifierParameter;`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_final_to_fields",
+        "general_idea": "Mark fields as final to enforce immutability where they are only assigned in the constructor.",
+        "human_impl": "Changed `protected Consumer<CharSequence> info;` to `protected final Consumer<CharSequence> info;` (and similarly for warn/error).",
+        "bucket": "polishment"
+      }
+    ],
+    "plugin-base/src/test/java/de/redsix/dmncheck/plugin/PluginBaseTest.java": [
+      {
+        "kind": "add_final_modifier",
+        "general_idea": "Add final modifier to test instance fields to enforce immutability and follow modern Java best practices.",
+        "human_impl": "private final PluginBase testee = Mockito.spy(PluginBase.class);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_null_check_before_mkdirs",
+        "general_idea": "Add existence check before creating directories to prevent potential issues or redundant calls, improving robustness.",
+        "human_impl": "if (!file.getParentFile().exists()) { Assertions.assertTrue(file.getParentFile().mkdirs()); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_test_for_dmn_1_3",
+        "general_idea": "Add a new test case to verify support for DMN 1.3 standard examples.",
+        "human_impl": "void shouldAcceptDishDecisionDmnStandard13Example() { Assertions.assertFalse(testee.testFiles(Collections.singletonList(getFile(\"dish-decision-1-3.dmn\")))); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_assertion",
+        "general_idea": "Remove unnecessary intermediate variable in assertion to make the test code more concise.",
+        "human_impl": "Assertions.assertTrue(testee.testFiles(Collections.singletonList(getFile(\"empty.dmn\"))));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_test_for_loop_detection",
+        "general_idea": "Add a new test case to verify that loops in diagrams are correctly detected.",
+        "human_impl": "void shouldDetectLoopsInDiagrams() { Assertions.assertTrue(testee.testFiles(Collections.singletonList(getFile(\"diagram-with-a-loop.dmn\")))); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_test_for_fail_on_warning_true",
+        "general_idea": "Add a new test case to verify behavior when failOnWarning is set to true.",
+        "human_impl": "void shouldFailOnWarningIfFailOnWarningIsTrue() { when(testee.failOnWarning()).thenReturn(true); Assertions.assertTrue(testee.testFiles(Collections.singletonList(getFile(\"no-decision.dmn\")))); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_test_for_fail_on_warning_false",
+        "general_idea": "Add a new test case to verify behavior when failOnWarning is set to false.",
+        "human_impl": "void shouldSucceedOnWarningIfFailOnWarningIsFalse() { when(testee.failOnWarning()).thenReturn(false); Assertions.assertFalse(testee.testFiles(Collections.singletonList(getFile(\"no-decision.dmn\")))); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_test_for_classloader",
+        "general_idea": "Add a new test case to verify that external artifacts are correctly added to the project classloader.",
+        "human_impl": "void shouldAddExternalArtifactsFromProjectToProjectClassloader() throws IOException { ... Assertions.assertEquals(new URL(\"file:/foo.jar\"), ((URLClassLoader) ProjectClassLoader.INSTANCE.classLoader).getURLs()[0]); }",
+        "bucket": "polishment"
+      }
+    ],
+    "server/src/main/java/de/redsix/dmncheck/server/ValidationServer.java": [
+      {
+        "kind": "add_cli_argument_parsing",
+        "general_idea": "Integrate JCommander to allow configuring the server port via command-line arguments instead of hardcoding it.",
+        "human_impl": "import com.beust.jcommander.JCommander; ... @Parameter(names = \"-port\") public Integer portNumber = 42000; ... JCommander.newBuilder().addObject(validationServer).build().parse(args);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_structured_logging",
+        "general_idea": "Replace raw stack trace printing with SLF4J logger calls for better error handling and observability.",
+        "human_impl": "import org.slf4j.Logger; ... final Logger logger = LoggerFactory.getLogger(ValidationServer.class); ... logger.error(nullsafeError(e.getMessage()));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "extract_error_handling_helper",
+        "general_idea": "Extract the logic for providing a default error message into a dedicated static helper method to reduce duplication.",
+        "human_impl": "private static String nullsafeError(@Nullable String message) { return Optional.ofNullable(message).orElse(\"Unknown Error\"); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_stream_chaining",
+        "general_idea": "Reformat the stream processing chain in validationResultsToJson for improved readability and consistent indentation.",
+        "human_impl": "return new JSONObject().put(\"items\", validationResults.stream().map(vr -> new JSONObject() ...).collect(Collectors.toList()));",
+        "bucket": "polishment"
+      }
+    ],
+    "validators/src/main/java/de/redsix/dmncheck/feel/FeelParser.java": [
+      {
+        "kind": "add_helper_method",
+        "general_idea": "Introduce a helper method to determine if an expression language corresponds to FEEL based on namespace constants or string value.",
+        "human_impl": "private static boolean expressionLanguageIsFeel(final String expressionLanguage) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_overloaded_parse_method",
+        "general_idea": "Add an overloaded parse method that accepts an Expression object, checks the language, and delegates to the existing parser or returns a warning.",
+        "human_impl": "public static Either<ValidationResult.Builder.ElementStep, FeelExpression> parse(final Expression expression) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_imports",
+        "general_idea": "Add necessary imports for the new helper method and overloaded parse method logic.",
+        "human_impl": "import de.redsix.dmncheck.result.Severity; import de.redsix.dmncheck.util.Expression; import org.camunda.bpm.model.dmn.impl.DmnModelConstants; import java.util.Arrays;",
+        "bucket": "polishment"
+      }
+    ],
+    "validators/src/main/java/de/redsix/dmncheck/feel/FeelTypecheck.java": [
+      {
+        "kind": "add_unary_operator",
+        "general_idea": "Add support for the subtraction operator in unary expressions to expand language coverage.",
+        "human_impl": "Stream.of(..., Operator.SUB)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_either_api",
+        "general_idea": "Replace deprecated or legacy Either chaining methods with modern functional equivalents for cleaner code.",
+        "human_impl": "check(...).or(() -> check(...)).orElse(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "validators/src/main/java/de/redsix/dmncheck/util/ProjectClassLoader.java": [
+      {
+        "kind": "rename_enum_constant",
+        "general_idea": "Rename the enum constant from lowercase 'instance' to uppercase 'INSTANCE' to comply with Java naming conventions for constants.",
+        "human_impl": "instance; -> INSTANCE;",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

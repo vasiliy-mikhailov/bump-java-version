@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "repo": "hantsy/vertx-sandbox",
+    "stage": "J17->J21",
+    "family": "hibernate-5",
+    "sha_from": "2ef23969d4a9cfa5fc55bc4506a2b34789576021",
+    "sha_to": "fa9d8df06b0c21a01e8f96b189733b500b5a016d"
+  },
+  "by_file": {
+    "graphql-webclient/src/main/java/com/example/demo/MainVerticle.java": [
+      {
+        "kind": "api_migration_websocket",
+        "general_idea": "Migrate WebSocket creation from the deprecated HttpClient API to the dedicated WebSocketClient API introduced in newer Vert.x versions.",
+        "human_impl": "Replaced `HttpClientOptions` with `WebSocketClientOptions` and changed `vertx.createHttpClient(...).webSocket(...)` to `vertx.createWebSocketClient(...).connect(...)`.",
+        "bucket": "breaking"
+      }
+    ],
+    "graphql/src/main/java/com/example/demo/DataInitializer.java": [
+      {
+        "kind": "refactor_data_access_layer",
+        "general_idea": "Replace high-level repository abstractions with direct Vert.x SQL client usage to simplify the data initialization logic.",
+        "human_impl": "Removed imports for PostRepository, CommentRepository, AuthorRepository and replaced them with io.vertx.sqlclient.Pool and Tuple.",
+        "bucket": "breaking"
+      }
+    ],
+    "graphql/src/main/java/com/example/demo/MainVerticle.java": [
+      {
+        "kind": "refactor_data_loader_registration",
+        "general_idea": "Update DataLoaderRegistry registration to use the beforeExecute callback pattern required by newer GraphQL Java versions.",
+        "human_impl": ".beforeExecute(e -> e.builder().dataLoaderRegistry(buildDataLoaderRegistry(dataLoaders).apply(e.context())).build())",
+        "bucket": "breaking"
+      }
+    ],
+    "graphql/src/main/java/com/example/demo/gql/CustomDataFetchingExceptionHandler.java": [
+      {
+        "kind": "update_method_signature",
+        "general_idea": "Update the exception handler method signature to return a CompletableFuture as required by the newer GraphQL Java API.",
+        "human_impl": "public CompletableFuture<DataFetcherExceptionHandlerResult> handleException(...)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_method",
+        "general_idea": "Rename the handler method from onException to handleException to match the updated interface contract.",
+        "human_impl": "handleException(DataFetcherExceptionHandlerParameters handlerParameters)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "wrap_return_value",
+        "general_idea": "Wrap the synchronous result in a completed CompletableFuture to satisfy the new async return type.",
+        "human_impl": "return CompletableFuture.completedFuture(...)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_delegate_call",
+        "general_idea": "Update the call to the default handler to use the new method name handleException.",
+        "human_impl": "return defaultHandler.handleException(handlerParameters);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_import",
+        "general_idea": "Add the missing import for CompletableFuture required by the new return type.",
+        "human_impl": "import java.util.concurrent.CompletableFuture;",
+        "bucket": "breaking"
+      }
+    ],
+    "graphql/src/main/java/com/example/demo/gql/DataFetchers.java": [
+      {
+        "kind": "refactor_data_fetcher_return_type",
+        "general_idea": "Replace Vertx-specific DataFetcher wrapper with standard GraphQL DataFetcher returning CompletionStage.",
+        "human_impl": "Changed return type from VertxDataFetcher<List<Post>> to DataFetcher<CompletionStage<List<Post>>> and updated implementation.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_data_fetcher_return_type",
+        "general_idea": "Replace Vertx-specific DataFetcher wrapper with standard GraphQL DataFetcher returning CompletionStage.",
+        "human_impl": "Changed return type from VertxDataFetcher<Post> to DataFetcher<CompletionStage<Post>> and updated implementation.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_data_fetcher_return_type",
+        "general_idea": "Replace Vertx-specific DataFetcher wrapper with standard GraphQL DataFetcher returning CompletionStage.",
+        "human_impl": "Changed return type from VertxDataFetcher<UUID> to DataFetcher<CompletionStage<UUID>> and updated implementation.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_data_fetcher_return_type",
+        "general_idea": "Replace Vertx-specific DataFetcher wrapper with standard GraphQL DataFetcher returning CompletionStage.",
+        "human_impl": "Changed return type from VertxDataFetcher<UUID> to DataFetcher<CompletionStage<UUID>> and updated implementation.",
+        "bucket": "breaking"
+      }
+    ],
+    "graphql/src/main/java/com/example/demo/gql/DataLoaders.java": [
+      {
+        "kind": "replace_vertx_dataloader",
+        "general_idea": "Replace Vert.x-specific DataLoader wrappers with standard Dataloader library interfaces to decouple from Vert.x specific implementations.",
+        "human_impl": "Replaced VertxBatchLoader and VertxMappedBatchLoader with BatchLoaderWithContext and MappedBatchLoaderWithContext.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "use_completionstage",
+        "general_idea": "Adopt CompletionStage as the return type for batch loaders to align with modern asynchronous Java standards.",
+        "human_impl": "Added .toCompletionStage() to the return values of the load methods.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "use_dataloader_factory",
+        "general_idea": "Switch to DataLoaderFactory for creating DataLoader instances to support the new loader interfaces.",
+        "human_impl": "Replaced DataLoader.newDataLoader and DataLoader.newMappedDataLoader with DataLoaderFactory.newDataLoader and DataLoaderFactory.newMappedDataLoader.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

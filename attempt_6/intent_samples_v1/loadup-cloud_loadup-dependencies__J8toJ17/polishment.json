@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "repo": "loadup-cloud/loadup-dependencies",
+    "stage": "J8->J17",
+    "family": "spring-boot-2",
+    "sha_from": "5da76e0052e76825b6ebfc062803d67ea71904b9",
+    "sha_to": "ca596e914d7f02ba7527e1865ffa4faa56fadc00"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "add_cola_dependency",
+        "general_idea": "Add Alibaba COLA framework BOM to dependency management.",
+        "human_impl": "<dependency><groupId>com.alibaba.cola</groupId><artifactId>cola-components-bom</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_guava_dependency",
+        "general_idea": "Add Google Guava library to dependency management.",
+        "human_impl": "<dependency><groupId>com.google.guava</groupId><artifactId>guava</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_commons_lang3_dependency",
+        "general_idea": "Add Apache Commons Lang3 to dependency management.",
+        "human_impl": "<dependency><groupId>org.apache.commons</groupId><artifactId>commons-lang3</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_commons_collections4_dependency",
+        "general_idea": "Add Apache Commons Collections4 to dependency management.",
+        "human_impl": "<dependency><groupId>org.apache.commons</groupId><artifactId>commons-collections4</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_commons_io_dependency",
+        "general_idea": "Add Apache Commons IO to dependency management.",
+        "human_impl": "<dependency><groupId>commons-io</groupId><artifactId>commons-io</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_commons_csv_dependency",
+        "general_idea": "Add Apache Commons CSV to dependency management.",
+        "human_impl": "<dependency><groupId>org.apache.commons</groupId><artifactId>commons-csv</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_commons_codec_dependency",
+        "general_idea": "Add Apache Commons Codec to dependency management.",
+        "human_impl": "<dependency><groupId>commons-codec</groupId><artifactId>commons-codec</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_commons_crypto_dependency",
+        "general_idea": "Add Apache Commons Crypto to dependency management.",
+        "human_impl": "<dependency><groupId>org.apache.commons</groupId><artifactId>commons-crypto</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_json_dependency",
+        "general_idea": "Add org.json library to dependency management.",
+        "human_impl": "<dependency><groupId>org.json</groupId><artifactId>json</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_velocity_dependency",
+        "general_idea": "Add Apache Velocity Engine Core to dependency management.",
+        "human_impl": "<dependency><groupId>org.apache.velocity</groupId><artifactId>velocity-engine-core</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_license_plugin",
+        "general_idea": "Add license-maven-plugin to enforce MIT license headers on source files.",
+        "human_impl": "<plugin><artifactId>license-maven-plugin</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_versions_plugin",
+        "general_idea": "Add versions-maven-plugin to facilitate dependency version management.",
+        "human_impl": "<plugin><artifactId>versions-maven-plugin</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_github_repo_profile",
+        "general_idea": "Add Maven profile to resolve dependencies from GitHub Packages.",
+        "human_impl": "<profile><id>github</id>...<url>https://maven.pkg.github.com/...</url>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_aliyun_repo_profile",
+        "general_idea": "Add Maven profile to resolve dependencies from Aliyun Maven mirror.",
+        "human_impl": "<profile><id>default</id>...<url>https://maven.aliyun.com/...</url>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_distribution_id",
+        "general_idea": "Rename distribution management repository ID from 'loadup-github' to 'github' for consistency.",
+        "human_impl": "<id>github</id>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

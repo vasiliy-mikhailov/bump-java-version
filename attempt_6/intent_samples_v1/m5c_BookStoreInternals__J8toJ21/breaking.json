@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "m5c/BookStoreInternals",
+    "stage": "J8->J21",
+    "family": "junit4-mockito",
+    "sha_from": "83e8ddee4fa836075bb26b1bfe2378579404b4f7",
+    "sha_to": "88b1ce2d666082139915e746db2582fb271940e3"
+  },
+  "by_file": {
+    "src/main/java/eu/kartoffelquadrat/bookstoreinternals/Assortment.java": [
+      {
+        "kind": "refactor_return_type",
+        "general_idea": "Changed the return type of getBookDetails from the interface BookDetails to the implementation class BookDetailsImpl.",
+        "human_impl": "Changed return type from BookDetails to BookDetailsImpl in getBookDetails method signature.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_method",
+        "general_idea": "Added a new method to allow adding books to the assortment.",
+        "human_impl": "Added void addBookToAssortment(BookDetailsImpl bookDetails) method.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

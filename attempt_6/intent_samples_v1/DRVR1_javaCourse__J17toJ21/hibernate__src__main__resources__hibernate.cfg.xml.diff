@@ -1,0 +1,18 @@
+diff --git a/hibernate/src/main/resources/hibernate.cfg.xml b/hibernate/src/main/resources/hibernate.cfg.xml
+index 958e24a..64889eb 100644
+--- a/hibernate/src/main/resources/hibernate.cfg.xml
++++ b/hibernate/src/main/resources/hibernate.cfg.xml
+@@ -6,7 +6,10 @@
+         <property name="hibernate.connection.username">postgres</property>
+         <property name="hibernate.connection.password">clave123</property>
+ 
+-        <property name="hibernate.hbm2ddl.auto">update</property>
+-
++        <!-- Esto es un comentario en XML -->
++        <property name="hibernate.hbm2ddl.auto">create</property>
++        <property name="hibernate.show_sql">true</property>
++        <property name="hibernate.format_sql">true</property>
++        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+     </session-factory>
+ </hibernate-configuration>
+\ No newline at end of file

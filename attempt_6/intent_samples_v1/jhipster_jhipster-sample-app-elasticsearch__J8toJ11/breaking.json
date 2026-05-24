@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-elasticsearch",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "d53d5779f990051a2a6d422772af4e79bd47915b",
+    "sha_to": "0916195efda5b5d224b5408d7fe0409500d7709a"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Configure the Maven compiler plugin to target Java 11 for compilation.",
+        "human_impl": "<source>${java.version}</source>\n<target>${java.version}</target>",
+        "bucket": "breaking"
+      }
+    ],
+    "package.json": [
+      {
+        "kind": "migrate_frontend_framework",
+        "general_idea": "Replace the legacy Grunt-based build system and AngularJS dependencies with Angular 11 and the Angular CLI.",
+        "human_impl": "Removed grunt, karma, and angularjs deps; added @angular/core, @angular/cli, and webpack.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_angular_dependencies",
+        "general_idea": "Add core Angular 11 framework libraries required for the application to compile and run.",
+        "human_impl": "\"@angular/core\": \"11.0.5\", \"@angular/common\": \"11.0.5\", ...",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_angular_cli_dependencies",
+        "general_idea": "Add Angular CLI and compiler tools necessary for building the Angular application.",
+        "human_impl": "\"@angular/cli\": \"11.0.4\", \"@angular/compiler-cli\": \"11.0.5\"",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_webpack_dependencies",
+        "general_idea": "Add Webpack and related plugins to replace Grunt as the module bundler and build tool.",
+        "human_impl": "\"webpack\": \"4.44.2\", \"copy-webpack-plugin\": \"6.4.1\", ...",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_testing_framework",
+        "general_idea": "Replace Karma/Jasmine with Jest for unit testing, adding necessary Jest dependencies and reporters.",
+        "human_impl": "\"jest\": \"26.6.3\", \"@angular-builders/jest\": \"11.0.0-beta.4\", ...",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_typescript_support",
+        "general_idea": "Add TypeScript compiler and type definitions to support the migration from JavaScript to TypeScript.",
+        "human_impl": "\"typescript\": \"4.0.5\", \"@types/node\": \"13.13.4\"",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/config/application-dev.yml": [
+      {
+        "kind": "datasource_migration",
+        "general_idea": "Migrate datasource configuration from legacy JdbcDataSource to HikariCP and update H2 connection string.",
+        "human_impl": "Set 'spring.datasource.type' to 'com.zaxxer.hikari.HikariDataSource' and updated URL to 'jdbc:h2:mem:jhipsterelasticsearchsampleapplication'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "jpa_dialect_update",
+        "general_idea": "Update Hibernate dialect class path to reflect the new JHipster 6 domain package structure.",
+        "human_impl": "Changed 'spring.jpa.database-platform' from 'com.mycompany.myapp.domain.util.FixedH2Dialect' to 'tech.jhipster.domain.util.FixedH2Dialect'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "elasticsearch_config_migration",
+        "general_idea": "Migrate Elasticsearch configuration from legacy transport client properties to REST client properties.",
+        "human_impl": "Replaced 'spring.data.elasticsearch.cluster-nodes' with 'spring.data.elasticsearch.rest.uris: http://localhost:9200'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "cache_config_migration",
+        "general_idea": "Migrate cache configuration from root-level properties to the new 'jhipster.cache' namespace.",
+        "human_impl": "Moved 'cache.timeToLiveSeconds' and 'cache.ehcache.maxBytesLocalHeap' to 'jhipster.cache.ehcache.time-to-live-seconds' and 'max-entries'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "security_config_migration",
+        "general_idea": "Migrate security and JWT configuration to the new 'jhipster.security' namespace.",
+        "human_impl": "Added 'jhipster.security.authentication.jwt' section with base64-secret and token validity settings.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "thymeleaf_config_update",
+        "general_idea": "Update Thymeleaf configuration to remove XHTML mode which is deprecated/removed in newer versions.",
+        "human_impl": "Removed 'spring.thymeleaf.mode: XHTML' and kept 'cache: false'.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/config/application-prod.yml": [
+      {
+        "kind": "datasource_migration",
+        "general_idea": "Migrate from legacy MySQL JDBC driver to HikariCP connection pool with updated JDBC URL parameters required for modern MySQL drivers.",
+        "human_impl": "Changed `dataSourceClassName` to `com.zaxxer.hikari.HikariDataSource` and updated `url` to include `useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "elasticsearch_migration",
+        "general_idea": "Update Elasticsearch configuration from legacy transport client properties to Spring Data Elasticsearch REST client properties.",
+        "human_impl": "Replaced `spring.data.elasticsearch.cluster-nodes` with `spring.elasticsearch.rest.uris`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "hibernate_naming_strategy_update",
+        "general_idea": "Remove deprecated Hibernate naming strategy property which is incompatible with newer Hibernate versions used in Java 11/JHipster 6.",
+        "human_impl": "Removed `hibernate.naming-strategy: org.hibernate.cfg.EJB3NamingStrategy`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "metrics_migration",
+        "general_idea": "Replace legacy Dropwizard metrics configuration with Spring Boot Actuator Micrometer configuration.",
+        "human_impl": "Replaced `metrics.spark` and `metrics.graphite` blocks with `management.metrics.export.prometheus`.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/config/application.yml": [
+      {
+        "kind": "migrate_actuator_config",
+        "general_idea": "Replace deprecated Spring Boot 1.x actuator properties with Spring Boot 2.x management endpoint configuration.",
+        "human_impl": "management.endpoints.web.exposure.include: ['health', 'info', ...]",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_task_config",
+        "general_idea": "Update async task execution configuration to use Spring Boot 2.x spring.task.execution namespace.",
+        "human_impl": "spring.task.execution.pool.core-size: 2",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_jpa_config",
+        "general_idea": "Refactor JPA and Hibernate properties to align with Spring Boot 2.x and JHipster 6.x standards.",
+        "human_impl": "spring.jpa.hibernate.ddl-auto: none",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

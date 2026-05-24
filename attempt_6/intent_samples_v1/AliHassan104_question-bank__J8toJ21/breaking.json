@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "AliHassan104/question-bank",
+    "stage": "J8->J21",
+    "family": "spring-boot-2",
+    "sha_from": "bdee64f03dce9f84c33ed8573c3a45c7ed1b9061",
+    "sha_to": "1187c5bbb8d4ef2afaa46726377ac3b3dc28a1ac"
+  },
+  "by_file": {
+    "question-bank-backed/pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the project's Java version property and compiler source/target settings from 1.8 to 21.",
+        "human_impl": "<java.version>21</java.version>\n<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jaxb_dependencies",
+        "general_idea": "Add JAXB API and runtime dependencies which were removed from the JDK in Java 11+.",
+        "human_impl": "<dependency>\n    <groupId>javax.xml.bind</groupId>\n    <artifactId>jaxb-api</artifactId>\n    <version>2.3.1</version>\n</dependency>\n<dependency>\n    <groupId>org.glassfish.jaxb</groupId>\n    <artifactId>jaxb-runtime</artifactId>\n    <version>2.3.1</version>\n</dependency>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

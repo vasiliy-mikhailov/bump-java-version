@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "repo": "ucsb-cs156-f24/proj-courses-f24-02",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "eee04445e84239b940cd32494d1dfa23a170e5e5",
+    "sha_to": "877451cd2d7e3d920fe0f855a66353bc05737afb"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 11 to 17 to align with the migration goal.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot starter parent from 2.4.3 to 2.6.2 to support Java 17 and newer dependencies.",
+        "human_impl": "<version>2.6.2</version>",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "set_ant_path_matcher_strategy",
+        "general_idea": "Explicitly set the path matching strategy to ANT_PATH_MATCHER to maintain compatibility with older Spring MVC features or specific routing requirements, often necessary when migrating between Spring Boot versions that changed default matching strategies.",
+        "human_impl": "spring.mvc.pathmatch.matching-strategy = ANT_PATH_MATCHER",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

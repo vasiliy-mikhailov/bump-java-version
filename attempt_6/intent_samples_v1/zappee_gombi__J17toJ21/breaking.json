@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "zappee/gombi",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "92c4b6200fe362ef2ba6801a8e525a4b72060bbd",
+    "sha_to": "3493a183940ab64a0afe525ef77694f532a2e63d"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Update Maven compiler source and target properties from Java 17 to Java 21 to enable compilation for the new JDK version.",
+        "human_impl": "<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      }
+    ],
+    "docker/build.sh": [
+      {
+        "kind": "update_setenv_args",
+        "general_idea": "Update the setenv.sh sourcing to pass an additional domain argument required for the new build configuration.",
+        "human_impl": ". \"$IMAGE_SRC/setenv.sh\" \"slim\" \"false\" \"remal.com\"",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

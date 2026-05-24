@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "ralscha/eds-starter6-jpa",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "6c2f6013a6294ac588b97ddcdace057bbaa561eb",
+    "sha_to": "33f876512c8c8c6410eba8fa901973130abe36a9"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the project's target Java version property from 17 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

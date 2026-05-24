@@ -1,0 +1,197 @@
+{
+  "meta": {
+    "repo": "mentorpiece/mentorpiece_ftb",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "a7bf08efc5d928de6ad5e61a1c7a5514a3023901",
+    "sha_to": "b37c5b2183ab3a2070a2f95f909e26ef15f5be5b"
+  },
+  "by_file": {
+    "src/main/java/com/aerotravel/flightticketbooking/FlightticketbookingApplication.java": [
+      {
+        "kind": "add_user_role",
+        "general_idea": "Introduce a new ROLE_USER entity to support a multi-user architecture with distinct permissions.",
+        "human_impl": "var userRole = Role.builder().name(\"ROLE_USER\").build();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_security_schemes",
+        "general_idea": "Define OpenAPI security schemes for Basic Auth, Bearer JWT, and Session Cookies to document authentication methods.",
+        "human_impl": "@SecurityScheme(name = \"basicAuth\", ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_api_metadata",
+        "general_idea": "Update API version and contact information to reflect the new release and support details.",
+        "human_impl": "version = \"00.07\", contact = @Contact(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "inject_user_data_service",
+        "general_idea": "Inject UserDataInitializationService to handle per-user data initialization in the new multi-user architecture.",
+        "human_impl": "@Autowired UserDataInitializationService userDataInitializationService;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "migrate_existing_users",
+        "general_idea": "Update existing users to have all roles (USER, ADMIN, AGENT) to ensure compatibility with the new multi-role system.",
+        "human_impl": "updateExistingUsersWithBothRoles(roles);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_user_creation",
+        "general_idea": "Refactor user creation logic to assign appropriate roles based on user type (USER vs ADMIN/AGENT).",
+        "human_impl": "if (\"USER\".equals(roleSign)) { ... } else { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "per_user_data_init",
+        "general_idea": "Initialize sample data per admin user instead of globally, supporting the multi-user architecture.",
+        "human_impl": "userDataInitializationService.initializeUserData(adminUser);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/config/WebSecurityConfig.java": [
+      {
+        "kind": "add_jwt_filter",
+        "general_idea": "Integrated a custom JWT authentication filter into the security chain to support stateless API authentication.",
+        "human_impl": ".addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_session_management",
+        "general_idea": "Explicitly configured session management policy to allow sessions if required, supporting hybrid web/API usage.",
+        "human_impl": ".sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "customize_http_basic_entry_point",
+        "general_idea": "Customized the HTTP Basic authentication entry point to return JSON errors for API requests instead of redirecting to a login page.",
+        "human_impl": ".httpBasic(basic -> basic.authenticationEntryPoint((request, response, authException) -> { ... }))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "expand_public_endpoints",
+        "general_idea": "Added new public endpoints for registration, Swagger UI, and OAuth/JWT auth flows to the permitAll list.",
+        "human_impl": ".requestMatchers(\"/register\", \"/login\", \"/swagger-ui/**\", \"/api/auth/login\").permitAll()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refine_role_access",
+        "general_idea": "Refined role-based access control to include AGENT and USER roles for specific API and web endpoints.",
+        "human_impl": ".requestMatchers(\"/api/**\").hasAnyRole(\"ADMIN\", \"AGENT\")",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/controller/FlightsGuiController.java": [
+      {
+        "kind": "security_enforcement",
+        "general_idea": "Restrict access to the new flight page to users with the ADMIN role.",
+        "human_impl": "@PreAuthorize(\"hasRole('ADMIN')\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "security_enforcement",
+        "general_idea": "Restrict access to the save flight endpoint to users with the ADMIN role.",
+        "human_impl": "@PreAuthorize(\"hasRole('ADMIN')\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "security_enforcement",
+        "general_idea": "Restrict access to the delete flight endpoint to users with the ADMIN role.",
+        "human_impl": "@PreAuthorize(\"hasRole('ADMIN')\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "business_logic_update",
+        "general_idea": "Update flight retrieval logic to filter results based on the current user's permissions or context.",
+        "human_impl": "flightService.getCurrentUserFlightsByAirportAndDepartureTime(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/controller/MainController.java": [
+      {
+        "kind": "add_security_annotation",
+        "general_idea": "Add @PreAuthorize annotation to restrict airport management endpoints to ADMIN role.",
+        "human_impl": "@PreAuthorize(\"hasRole('ADMIN')\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_security_annotation",
+        "general_idea": "Add @PreAuthorize annotation to restrict aircraft management endpoints to ADMIN role.",
+        "human_impl": "@PreAuthorize(\"hasRole('ADMIN')\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_endpoint",
+        "general_idea": "Remove the custom login page endpoint, likely delegating to Spring Security's default login mechanism.",
+        "human_impl": "Removed @GetMapping(\"/login\") method",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/Aircraft.java": [
+      {
+        "kind": "add_owner_field",
+        "general_idea": "Add a ManyToOne relationship to a User entity to support multi-user architecture where aircraft have an owner.",
+        "human_impl": "@ManyToOne\n@JoinColumn(name = \"user_id\")\nprivate User owner;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/Airport.java": [
+      {
+        "kind": "add_owner_relationship",
+        "general_idea": "Add a ManyToOne relationship to a User entity to support multi-user architecture where airports have an owner.",
+        "human_impl": "@ManyToOne\n@JoinColumn(name = \"user_id\")\nprivate User owner;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/Flight.java": [
+      {
+        "kind": "field_addition",
+        "general_idea": "Add an owner field to the Flight model to support multi-user architecture by linking flights to a specific user.",
+        "human_impl": "@ManyToOne\n    @JoinColumn(name = \"user_id\")\n    private User owner;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/Passenger.java": [
+      {
+        "kind": "add_owner_field",
+        "general_idea": "Add a ManyToOne relationship to a User entity to support multiuser architecture by tracking passenger ownership.",
+        "human_impl": "@ManyToOne\n@JoinColumn(name = \"user_id\")\nprivate User owner;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/User.java": [
+      {
+        "kind": "add_user_enabled_flag",
+        "general_idea": "Add an 'enabled' boolean field to the User model to support account activation status.",
+        "human_impl": "private Boolean enabled = true;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_account_non_expired_flag",
+        "general_idea": "Add an 'accountNonExpired' boolean field to the User model to support account expiration status.",
+        "human_impl": "private Boolean accountNonExpired = true;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_account_non_locked_flag",
+        "general_idea": "Add an 'accountNonLocked' boolean field to the User model to support account lock status.",
+        "human_impl": "private Boolean accountNonLocked = true;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_credentials_non_expired_flag",
+        "general_idea": "Add a 'credentialsNonExpired' boolean field to the User model to support credential expiration status.",
+        "human_impl": "private Boolean credentialsNonExpired = true;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_current_role_field",
+        "general_idea": "Add a 'currentRole' string field to the User model to store the active role of the user.",
+        "human_impl": "private String currentRole = \"ROLE_AGENT\";",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

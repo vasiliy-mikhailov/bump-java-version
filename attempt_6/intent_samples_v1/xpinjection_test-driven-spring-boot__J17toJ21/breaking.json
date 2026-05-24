@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "repo": "xpinjection/test-driven-spring-boot",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "32568112774ad88745f66fdafdd8ca4bc1db6f52",
+    "sha_to": "c6b68e801e3bbe5097b91b4c09a14cd477881766"
+  },
+  "by_file": {
+    "src/main/java/com/xpinjection/library/adaptors/api/BookRestController.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replaced javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/xpinjection/library/adaptors/api/ExpertRestController.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replaced javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/xpinjection/library/adaptors/persistence/entity/ExpertEntity.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replaced javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.persistence.*;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/xpinjection/library/config/ActuatorBasicSecurityConfig.java": [
+      {
+        "kind": "replace_web_security_configurer_adapter",
+        "general_idea": "Replace the deprecated WebSecurityConfigurerAdapter with a SecurityFilterChain bean to comply with Spring Security 6 requirements.",
+        "human_impl": "public class ActuatorBasicSecurityConfig { @Bean public SecurityFilterChain filterChain(HttpSecurity http) ... }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_authorize_requests_api",
+        "general_idea": "Update authorization configuration from the legacy authorizeRequests/antMatchers API to the new authorizeHttpRequests/requestMatchers lambda API.",
+        "human_impl": "http.authorizeHttpRequests(requests -> requests.requestMatchers(...).permitAll())",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_http_basic_api",
+        "general_idea": "Update HTTP Basic authentication configuration to use the new Customizer.withDefaults() pattern.",
+        "human_impl": ".httpBasic(withDefaults())",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_session_management_api",
+        "general_idea": "Update session management configuration to use the new lambda-based DSL.",
+        "human_impl": ".sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_csrf_api",
+        "general_idea": "Update CSRF disable configuration to use the new method reference pattern.",
+        "human_impl": ".csrf(AbstractHttpConfigurer::disable)",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/xpinjection/library/config/LibrarySettings.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replaced javax.validation import with jakarta.validation to comply with Jakarta EE namespace changes required by Spring Boot 3.x and Java 21.",
+        "human_impl": "import jakarta.validation.constraints.Min;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/xpinjection/library/domain/Book.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replaced javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.x.",
+        "human_impl": "import jakarta.persistence.*;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/com/xpinjection/library/adaptors/api/AbstractApiTest.java": [
+      {
+        "kind": "update_import_package",
+        "general_idea": "Update import for LocalServerPort to reflect Spring Boot 3.0 package restructuring.",
+        "human_impl": "import org.springframework.boot.test.web.server.LocalServerPort;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

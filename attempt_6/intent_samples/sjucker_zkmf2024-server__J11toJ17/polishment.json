@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "repo": "sjucker/zkmf2024-server",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "6a81b4de8daf8de9689cfa49e149aeb857a0eb32",
+    "sha_to": "49f65773a7968803c36813bcd8f6191797cf0a37"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Security starter for authentication and authorization.",
+        "before": "",
+        "after": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-security</artifactId></dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Firebase Admin SDK for backend services.",
+        "before": "",
+        "after": "<dependency><groupId>com.google.firebase</groupId><artifactId>firebase-admin</artifactId><version>${firebase-admin.version}</version></dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add JavaMail API for sending emails.",
+        "before": "",
+        "after": "<dependency><groupId>javax.mail</groupId><artifactId>mail</artifactId><version>${mail.version}</version></dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Java Activation Framework for MIME types.",
+        "before": "",
+        "after": "<dependency><groupId>javax.activation</groupId><artifactId>activation</artifactId><version>${activation.version}</version><scope>runtime</scope></dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add MapStruct for object mapping.",
+        "before": "",
+        "after": "<dependency><groupId>org.mapstruct</groupId><artifactId>mapstruct</artifactId><version>${mapstruct.version}</version></dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "gitignore_unignore",
+        "general_idea": "Unignore IntelliJ code styles to allow sharing formatting configurations.",
+        "before": "",
+        "after": "!./.idea/codeStyles/",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "gitignore_add",
+        "general_idea": "Ignore local application properties to prevent committing environment-specific configuration.",
+        "before": "",
+        "after": "/src/main/resources/application-local.properties",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "gitignore_add",
+        "general_idea": "Ignore Firebase admin SDK JSON key file to prevent committing sensitive credentials.",
+        "before": "",
+        "after": "/src/main/resources/zkmf2024-firebase-adminsdk-7jv3o-f5b6169b48.json",
+        "bucket": "polishment",
+        "why_exists": ""
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "externalize_db_url",
+        "general_idea": "Replace hardcoded database URL with an environment variable placeholder.",
+        "before": "spring.datasource.url=jdbc:mysql://localhost:3306/zkmf2024",
+        "after": "spring.datasource.url=${SPRING_DATASOURCE_URL}",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "externalize_db_username",
+        "general_idea": "Replace hardcoded database username with an environment variable placeholder.",
+        "before": "spring.datasource.username=root",
+        "after": "spring.datasource.username=${SPRING_DATASOURCE_USERNAME}",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "externalize_db_password",
+        "general_idea": "Replace hardcoded database password with an environment variable placeholder.",
+        "before": "spring.datasource.password=",
+        "after": "spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_gcp_credentials_config",
+        "general_idea": "Add configuration for Google Application Credentials via environment variable.",
+        "before": "",
+        "after": "config.google.application.credentials=${GOOGLE_APPLICATION_CREDENTIALS}",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_smtp_user_config",
+        "general_idea": "Add configuration for SMTP user via environment variable for logging/mail.",
+        "before": "",
+        "after": "logging.mail.smtp.user=${LOGGING_MAIL_SMTP_USER}",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_smtp_password_config",
+        "general_idea": "Add configuration for SMTP password via environment variable for logging/mail.",
+        "before": "",
+        "after": "logging.mail.smtp.password=${LOGGING_MAIL_SMTP_PASSWORD}",
+        "bucket": "polishment",
+        "why_exists": ""
+      }
+    ]
+  }
+}

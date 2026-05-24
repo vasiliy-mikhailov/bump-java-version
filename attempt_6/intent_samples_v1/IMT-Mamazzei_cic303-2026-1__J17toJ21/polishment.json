@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "repo": "IMT-Mamazzei/cic303-2026-1",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "84bc2edfa64fd5d97cf0a235cee1426131524672",
+    "sha_to": "468ee778db2cb5e331a4002788586e1b0ea25c94"
+  },
+  "by_file": {
+    "fase01-o-caos-das-strings/src/test/java/br/maua/cic303/ValidadorFase1Test.java": [
+      {
+        "kind": "add_test_scoring_logic",
+        "general_idea": "Introduce a static counter and a final test method to manually track and print the score of passed tests.",
+        "human_impl": "private static int contadorPontos = 0; ... contadorPontos += 2; ... System.out.println(\"Pontos Fase 1: \" + contadorPontos + \"/10\");",
+        "bucket": "polishment"
+      }
+    ],
+    "fase01-o-caos-das-strings/README.md": [
+      {
+        "kind": "add_alternative_checking_section",
+        "general_idea": "Add documentation explaining an alternative method for verifying solutions via GitHub Actions on forks.",
+        "human_impl": "Added '## Chegagem alternativa' section with instructions and an image.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_missing_newline",
+        "general_idea": "Fix the missing newline at the end of the file to comply with POSIX standards.",
+        "human_impl": "Added newline after 'mvn test' command block.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "repo": "JStec0312/Component_Programing",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "314423089e5054dfd7e80f89ae68fa9282ab1cde",
+    "sha_to": "54c705235bd35d99e62ccc05ce1506afd05e7744"
+  },
+  "by_file": {
+    "src/main/java/stec/App.java": [
+      {
+        "kind": "refactor_solver_instantiation",
+        "general_idea": "Refactored the main method to use a BacktrackingSudokuSolver instance passed to the SudokuBoard constructor instead of filling the board directly.",
+        "human_impl": "SudokuSolver solver = new BacktrackingSudokuSolver(); SudokuBoard board = new SudokuBoard(solver);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_solve_method_call",
+        "general_idea": "Changed the board interaction from fillBoard() to solveGame() to align with the new solver-based architecture.",
+        "human_impl": "board.solveGame();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_javadoc_punctuation",
+        "general_idea": "Added a missing period to the Javadoc comment for the App class.",
+        "human_impl": "/** * Hello world!. */",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/stec/SudokuBoard.java": [
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Removed imports for Random, ArrayList, and List that are no longer used after refactoring.",
+        "human_impl": "-import java.util.Random;\n-import java.util.ArrayList;\n-import java.util.List;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_field",
+        "general_idea": "Added a field to hold a reference to the SudokuSolver strategy.",
+        "human_impl": "+    private SudokuSolver sudokuSolver;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_constructor",
+        "general_idea": "Changed constructor to accept a SudokuSolver dependency instead of initializing board only.",
+        "human_impl": "public SudokuBoard(SudokuSolver solver) {\n        board = new int[SIZE][SIZE];\n        this.sudokuSolver = solver;\n    }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_delegation_method",
+        "general_idea": "Added a method to delegate the solving process to the injected solver.",
+        "human_impl": "public void solveGame() {\n        sudokuSolver.solve(this, 0, 0);\n    }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_legacy_solver_logic",
+        "general_idea": "Removed the internal backtracking solver logic (fillBoard, solve, generateRandomNumbers) as it was moved to a separate class.",
+        "human_impl": "-    public boolean fillBoard() {\n-        return solve(0, 0);\n-    }\n-    private boolean solve(int row, int col) { ... }\n-    private int[] generateRandomNumbers() { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_board_accessors",
+        "general_idea": "Added getter and setter methods for board cells to allow the external solver to read and write values.",
+        "human_impl": "public int getNum(int row, int col) { return board[row][col]; }\npublic void setNum(int row, int col, int val) { board[row][col] = val; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_method_visibility",
+        "general_idea": "Changed validation methods from private to public to allow the external solver to check validity.",
+        "human_impl": "-    private boolean isValid(int row, int col, int num) {\n+    public boolean isValid(int row, int col, int num) {",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_braces",
+        "general_idea": "Added braces to if-statements for better code style and safety.",
+        "human_impl": "if (board[row][i] == num) {\n    return false;\n}",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_junit_version",
+        "general_idea": "Upgrade JUnit Jupiter engine to a newer version compatible with the new JDK.",
+        "human_impl": "<artifactId>junit-jupiter-engine</artifactId> ... <version>5.10.2</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_junit_api_dep",
+        "general_idea": "Remove explicit JUnit Jupiter API dependency, likely relying on transitive dependencies or engine inclusion.",
+        "human_impl": "Removed <dependency> ... junit-jupiter-api ... </dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_compiler_plugin",
+        "general_idea": "Explicitly define the Maven compiler plugin version to ensure compatibility with Java 21.",
+        "human_impl": "<plugin> ... maven-compiler-plugin ... <version>3.12.1</version> ... </plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_surefire_plugin",
+        "general_idea": "Upgrade Maven Surefire plugin to a version that supports Java 21 test execution.",
+        "human_impl": "<artifactId>maven-surefire-plugin</artifactId> ... <version>3.2.5</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_site_plugin",
+        "general_idea": "Add Maven Site plugin to enable project site generation.",
+        "human_impl": "<plugin> ... maven-site-plugin ... <version>4.0.0-M13</version> ... </plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_checkstyle_plugin",
+        "general_idea": "Integrate Checkstyle plugin for code quality enforcement during the build.",
+        "human_impl": "<plugin> ... maven-checkstyle-plugin ... <version>3.3.1</version> ... </plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_plugin",
+        "general_idea": "Integrate JaCoCo plugin for code coverage measurement and enforcement.",
+        "human_impl": "<plugin> ... jacoco-maven-plugin ... <version>0.8.11</version> ... </plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_reporting_section",
+        "general_idea": "Configure the Maven reporting section to generate documentation and quality reports.",
+        "human_impl": "<reporting> ... <plugins> ... </plugins> ... </reporting>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_developer_info",
+        "general_idea": "Add developer metadata to the POM for project identification.",
+        "human_impl": "<developers> ... <developer> ... </developer> ... </developers>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_project_description",
+        "general_idea": "Add a description field to the POM to identify the project context.",
+        "human_impl": "<description>Project for laboratory group WW_WED_0830_06</description>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

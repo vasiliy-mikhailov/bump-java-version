@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "repo": "Zeus-2-0/account-processor-service",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "34cc1d668918fadd4595419bb5db1124ccee8dd7",
+    "sha_to": "eedf12ea0c9a7604a418a47d133761fb21fc355d"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_spring_boot_parent",
+        "general_idea": "Upgraded the Spring Boot parent version from 2.7.5 to 3.2.0 to align with Java 21 support.",
+        "human_impl": "<version>3.2.0</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_java_version_property",
+        "general_idea": "Updated the java.version property from 17 to 21 to target the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_source_property",
+        "general_idea": "Updated the maven.compiler.source property from 17 to 21.",
+        "human_impl": "<maven.compiler.source>21</maven.compiler.source>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_target_property",
+        "general_idea": "Updated the maven.compiler.target property from 17 to 21.",
+        "human_impl": "<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_zeus_library",
+        "general_idea": "Upgraded the internal zeus-library dependency from 1.0.60 to 2.0.21.",
+        "human_impl": "<version>2.0.21</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_springdoc_ui",
+        "general_idea": "Commented out the old springdoc-openapi-ui dependency incompatible with Spring Boot 3.",
+        "human_impl": "<!-- <artifactId>springdoc-openapi-ui</artifactId> -->",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_hibernate_validator",
+        "general_idea": "Added hibernate-validator dependency version 8.0.0.Final required for Spring Boot 3.",
+        "human_impl": "<artifactId>hibernate-validator</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_springdoc_starter",
+        "general_idea": "Added springdoc-openapi-starter-webmvc-ui dependency version 2.2.0 to replace the old UI dependency.",
+        "human_impl": "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_plugin_source",
+        "general_idea": "Updated the maven-compiler-plugin source configuration from 17 to 21.",
+        "human_impl": "<source>21</source>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_plugin_target",
+        "general_idea": "Updated the maven-compiler-plugin target configuration from 17 to 21.",
+        "human_impl": "<target>21</target>",
+        "bucket": "breaking"
+      }
+    ],
+    ".circleci/config.yml": [
+      {
+        "kind": "update_docker_image",
+        "general_idea": "Changed the CircleCI Docker image from OpenJDK 17 to OpenJDK 21 to support the new Java version.",
+        "human_impl": "- image: cimg/openjdk:17.0\n+ image: cimg/openjdk:21.0",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

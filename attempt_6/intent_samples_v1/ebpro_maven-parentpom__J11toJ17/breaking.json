@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "repo": "ebpro/maven-parentpom",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "9a950b4124a866a670ff167ce0d211945f58e865",
+    "sha_to": "604e1e174ff3583cdbda35909fbdfb15462780b7"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Update the Java compiler source and target properties to version 17 to align with the new JDK requirement.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_jaxb",
+        "general_idea": "Add Jakarta XML Binding (JAXB) dependencies to replace the module removed from the JDK in Java 11.",
+        "human_impl": "<artifactId>jakarta.xml.bind-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_jpa",
+        "general_idea": "Add Jakarta Persistence API dependencies to replace the javax.persistence package removed from the JDK.",
+        "human_impl": "<artifactId>jakarta.persistence-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_jaxrs",
+        "general_idea": "Add Jakarta RESTful Web Services (JAX-RS) dependencies to replace the javax.ws.rs package.",
+        "human_impl": "<artifactId>jakarta.ws.rs-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_validation",
+        "general_idea": "Add Jakarta Bean Validation dependencies to replace the javax.validation package.",
+        "human_impl": "<artifactId>hibernate-validator</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_websocket",
+        "general_idea": "Add Jakarta WebSocket dependencies to replace the javax.websocket package.",
+        "human_impl": "<artifactId>tyrus-server</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_migration_el",
+        "general_idea": "Add Jakarta Expression Language dependencies required by newer Jakarta EE specs.",
+        "human_impl": "<artifactId>jakarta.el</artifactId>",
+        "bucket": "breaking"
+      }
+    ],
+    "build/build.sh": [
+      {
+        "kind": "remove_bintray_args",
+        "general_idea": "Removed build arguments for Bintray credentials as the artifact repository was migrated away from Bintray.",
+        "human_impl": "Removed --build-arg BINTRAY_USERNAME and --build-arg BINTRAY_API_KEY",
+        "bucket": "breaking"
+      }
+    ],
+    "mvn.sh": [
+      {
+        "kind": "update_docker_base_image",
+        "general_idea": "Switch the Maven Docker image from an OpenJ9 JDK 11 variant to an AdoptOpenJDK 16 variant to align with the target JDK version.",
+        "human_impl": "export MAVEN_IMAGE=brunoe/maven:3.8.2-adoptopenjdk-16",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_user_execution_strategy",
+        "general_idea": "Replace the direct user ID mapping with PUID/PGID environment variables and run Maven as a specific container user to fix permission issues in the new image.",
+        "human_impl": "--env PUID=`id -u` -e PGID=`id -g` ... runuser --user user --group user -- mvn",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

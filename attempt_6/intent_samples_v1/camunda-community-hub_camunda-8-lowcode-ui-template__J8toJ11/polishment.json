@@ -1,0 +1,211 @@
+{
+  "meta": {
+    "repo": "camunda-community-hub/camunda-8-lowcode-ui-template",
+    "stage": "J8->J11",
+    "family": "spring-boot-2",
+    "sha_from": "08478ef8b93e2d1e42da6f12a0c1f86d2adc5690",
+    "sha_to": "10ea5ae2749326860a0df83be0882743715ad572"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "spring_boot_upgrade",
+        "general_idea": "Upgrade the Spring Boot parent version from 2.6.7 to 2.7.3 to align with Java 11 support and newer dependencies.",
+        "human_impl": "<version>2.7.3</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "artifact_id_rename",
+        "general_idea": "Rename the project artifact ID to reflect a shift towards a low-code UI solution.",
+        "human_impl": "<artifactId>camunda-lowcode-ui-solution</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Spring Boot WebSocket starter to support real-time communication features.",
+        "human_impl": "<artifactId>spring-boot-starter-websocket</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Spring Boot Data JPA starter to enable database persistence capabilities.",
+        "human_impl": "<artifactId>spring-boot-starter-data-jpa</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update springdoc-openapi-ui to version 1.6.11 for API documentation improvements.",
+        "human_impl": "<version>1.6.11</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Camunda Tasklist Java client to interact with the Tasklist component.",
+        "human_impl": "<artifactId>camunda-tasklist-client-java</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add OkHttp client library for HTTP communication needs.",
+        "human_impl": "<artifactId>okhttp</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Camunda Operate Java client to interact with the Operate component.",
+        "human_impl": "<artifactId>camunda-operate-client-java</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Camunda Google Web Services Java client for integration with Google services.",
+        "human_impl": "<artifactId>camunda-google-ws-java</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Jakarta Mail dependency to support email functionality.",
+        "human_impl": "<artifactId>jakarta.mail</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add H2 database as a runtime dependency for in-memory database support.",
+        "human_impl": "<artifactId>h2</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Spring Boot Test starter for unit and integration testing.",
+        "human_impl": "<artifactId>spring-boot-starter-test</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Spring Zeebe Test Testcontainer for container-based testing of Zeebe processes.",
+        "human_impl": "<artifactId>spring-zeebe-test-testcontainer</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_addition",
+        "general_idea": "Add Spotify FMT Maven plugin to enforce Google Java code formatting standards.",
+        "human_impl": "<artifactId>fmt-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_version_explicit",
+        "general_idea": "Explicitly set the Spring Boot Maven plugin version to ensure build consistency.",
+        "human_impl": "<version>2.6.7</version>",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "ignore_h2_db_files",
+        "general_idea": "Add H2 database files to .gitignore to prevent committing local database state.",
+        "human_impl": "Added 'h2/db.mv.db' and 'h2/db.trace.db' to .gitignore",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "ignore_react_artifacts",
+        "general_idea": "Add React build artifacts and dependencies to .gitignore to keep the repository clean.",
+        "human_impl": "Added 'src/main/react/node_modules' and 'src/main/react/build' to .gitignore",
+        "bucket": "polishment"
+      }
+    ],
+    "docker-compose-core.yaml": [
+      {
+        "kind": "bump_zeebe_version",
+        "general_idea": "Update the default Zeebe image version to 8.0.5 to align with the newer platform release.",
+        "human_impl": "image: camunda/zeebe:${CAMUNDA_PLATFORM_VERSION:-8.0.5}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_operate_version",
+        "general_idea": "Update the default Operate image version to 8.0.5 to align with the newer platform release.",
+        "human_impl": "image: camunda/operate:${CAMUNDA_PLATFORM_VERSION:-8.0.5}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_tasklist_version",
+        "general_idea": "Update the default Tasklist image version to 8.0.5 to align with the newer platform release.",
+        "human_impl": "image: camunda/tasklist:${CAMUNDA_PLATFORM_VERSION:-8.0.5}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "disable_elasticsearch_security",
+        "general_idea": "Disable X-Pack security in Elasticsearch to allow insecure connections, likely for local development simplicity.",
+        "human_impl": "- xpack.security.enabled=false",
+        "bucket": "polishment"
+      }
+    ],
+    "docker-compose.yaml": [
+      {
+        "kind": "bump_zeebe_version",
+        "general_idea": "Update Zeebe image version to 8.0.5 to align with the new platform release.",
+        "human_impl": "image: camunda/zeebe:${CAMUNDA_PLATFORM_VERSION:-8.0.5}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_operate_version",
+        "general_idea": "Update Operate image version to 8.0.5 to align with the new platform release.",
+        "human_impl": "image: camunda/operate:${CAMUNDA_PLATFORM_VERSION:-8.0.5}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_tasklist_version",
+        "general_idea": "Update Tasklist image version to 8.0.5 to align with the new platform release.",
+        "human_impl": "image: camunda/tasklist:${CAMUNDA_PLATFORM_VERSION:-8.0.5}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_optimize_version",
+        "general_idea": "Update Optimize image version to 3.8.5 to align with the new platform release.",
+        "human_impl": "image: camunda/optimize:${CAMUNDA_OPTIMIZE_VERSION:-3.8.5}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "mount_optimize_config",
+        "general_idea": "Mount a custom environment configuration file for Optimize to handle specific deployment settings.",
+        "human_impl": "- \"./.optimize/environment-config.yaml:/optimize/config/environment-config.yaml\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_identity_version",
+        "general_idea": "Update Identity image version to 8.0.5 to align with the new platform release.",
+        "human_impl": "image: camunda/identity:${CAMUNDA_PLATFORM_VERSION:-8.0.5}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_identity_retry_delay",
+        "general_idea": "Add a retry delay configuration for Identity to improve startup stability.",
+        "human_impl": "IDENTITY_RETRY_DELAY_SECONDS: 30",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_keycloak_healthcheck",
+        "general_idea": "Add a health check for the Keycloak service to ensure it is ready before dependent services start.",
+        "human_impl": "test: [ \"CMD\", \"curl\", \"-f\", \"http://localhost:9990/health\" ]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_keycloak_dependency",
+        "general_idea": "Define a dependency on the PostgreSQL service for Keycloak to ensure correct startup order.",
+        "human_impl": "depends_on: - postgres",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "disable_elasticsearch_security",
+        "general_idea": "Disable Elasticsearch security features to allow insecure connections, likely for local development simplicity.",
+        "human_impl": "- xpack.security.enabled=false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_postgres_volume",
+        "general_idea": "Define a named volume for PostgreSQL data persistence.",
+        "human_impl": "postgres:",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

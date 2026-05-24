@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "repo": "Confitura/monorepo",
+    "stage": "J8->J21",
+    "family": null,
+    "sha_from": "44884d05fb22e342b0675a6fdaea19b3a81ed347",
+    "sha_to": "232bd363b0c4603fdc38b220ba44f3ba568c6656"
+  },
+  "by_file": {
+    "jelatyna-backend/pom.xml": [
+      {
+        "kind": "upgrade_spring_boot",
+        "general_idea": "Upgrade Spring Boot parent from 1.5.1 to 2.7.18 to support Java 21 and modern Spring features.",
+        "human_impl": "<parent><version>2.7.18</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the target Java version property from 1.8 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jakarta_validation",
+        "general_idea": "Add Jakarta Validation API, replacing javax.validation for newer Java EE/Jakarta EE standards.",
+        "human_impl": "<artifactId>jakarta.validation-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_javax_annotation",
+        "general_idea": "Add javax.annotation-api explicitly, as it was removed from the JDK in Java 11+.",
+        "human_impl": "<artifactId>javax.annotation-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "configure_compiler_plugin",
+        "general_idea": "Explicitly configure maven-compiler-plugin to use the new Java version.",
+        "human_impl": "<source>${java.version}</source><target>${java.version}</target>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

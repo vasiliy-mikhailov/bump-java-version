@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "repo": "abhikgh/SpringConversionFactor",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "61206da2ee273adb7b39f1b5fb083f7ea5a7fd41",
+    "sha_to": "53cd1d10917225342a638982361977dc0379357b"
+  },
+  "by_file": {
+    "src/main/java/com/example/SpringConversionFactor/controller/SpringConversionFactorController.java": [
+      {
+        "kind": "change_return_type",
+        "general_idea": "Changed the endpoint return type from a primitive Double to a CurrencyConversion object to provide richer data.",
+        "human_impl": "public ResponseEntity<CurrencyConversion> getConversionFactor(@PathVariable String countryCode)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_response_body",
+        "general_idea": "Updated the response construction to return the full CurrencyConversion object instead of just the conversion factor.",
+        "human_impl": "return ResponseEntity.status(HttpStatus.OK).body(currencyConversion);",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "upgrade_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.17 to 3.2.7 to align with Java 21 support and modern Spring ecosystem.",
+        "human_impl": "<version>3.2.7</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_21",
+        "general_idea": "Update the project's Java version property from 17 to 21 to target the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_spring_cloud_dependencies",
+        "general_idea": "Upgrade Spring Cloud dependencies from 2021.0.8 to 2023.0.0 to ensure compatibility with Spring Boot 3.x.",
+        "human_impl": "<version>2023.0.0</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

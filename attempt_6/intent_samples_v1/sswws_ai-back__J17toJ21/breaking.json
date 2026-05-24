@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "sswws/ai-back",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "3d5ed08100cc571d76cc3b39ad368783b0fb2c36",
+    "sha_to": "e959c7f5810702d1a211e54c07e97cfca1c922d3"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "downgrade_spring_boot",
+        "general_idea": "Downgrade Spring Boot parent from 4.0.2 to 3.2.3 to align with a stable release compatible with the migration context.",
+        "human_impl": "<version>3.2.3</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21 to enforce compilation for the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_plugin",
+        "general_idea": "Update maven-compiler-plugin configuration to explicitly set source/target to Java 21 and pin Lombok annotation processor version.",
+        "human_impl": "<source>${java.version}</source>\n<target>${java.version}</target>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "repo": "Genc/spring-boot-boilerplate",
+    "stage": "J8->J11",
+    "family": "spring-boot-2",
+    "sha_from": "0bbbe64dab4e4ddac9118dafa81be279d27ee8cd",
+    "sha_to": "d425f683e25a52b1388dfdac5a41f0b71f65ad94"
+  },
+  "by_file": {
+    "src/main/java/design/boilerplate/springboot/configuration/SecurityConfiguration.java": [
+      {
+        "kind": "remove_deprecated_adapter",
+        "general_idea": "Removed inheritance from WebSecurityConfigurerAdapter which is deprecated in Spring Security 5.7+ and removed in 6.0.",
+        "human_impl": "Changed class declaration from 'extends WebSecurityConfigurerAdapter' to a standalone class.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_security_filter_chain",
+        "general_idea": "Replaced the deprecated configure(HttpSecurity) method with a SecurityFilterChain bean definition.",
+        "human_impl": "Created a @Bean method returning SecurityFilterChain that builds and returns the HttpSecurity configuration.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_authentication_manager",
+        "general_idea": "Updated AuthenticationManager bean to use AuthenticationConfiguration instead of super.authenticationManagerBean().",
+        "human_impl": "Changed bean method to accept AuthenticationConfiguration and call getAuthenticationManager().",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_user_details_config",
+        "general_idea": "Replaced the deprecated globalUserDetails method with AuthenticationManagerBuilder configuration inside the filter chain or separate bean (implied by removal of old method and lack of replacement in this specific file, likely moved or handled differently, but the removal of the old deprecated hook is the key change here).",
+        "human_impl": "Removed the @Autowired globalUserDetails method that configured UserDetailsService and PasswordEncoder.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/design/boilerplate/springboot/configuration/SwaggerConfiguration.java": [
+      {
+        "kind": "replace_swagger_lib",
+        "general_idea": "Migrate from Springfox (Swagger 2) to SpringDoc OpenAPI (Swagger 3) to support OpenAPI 3.0 specification.",
+        "human_impl": "Replaced imports from `springfox.documentation.*` with `io.swagger.v3.oas.models.*` and changed bean return type from `Docket` to `OpenAPI`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_api_info_builder",
+        "general_idea": "Replace Springfox's builder pattern for API info with direct object instantiation for OpenAPI 3.0 `Info` object.",
+        "human_impl": "Replaced `new ApiInfoBuilder()...build()` with `new Info()` and explicit setters for title, version, description, license, and contact.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_security_scheme",
+        "general_idea": "Define Bearer JWT security scheme explicitly in the OpenAPI components instead of using global operation parameters.",
+        "human_impl": "Added `Components` with `SecurityScheme` of type `HTTP` and scheme `bearer`, and added `SecurityRequirement` to the `OpenAPI` object.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/design/boilerplate/springboot/security/jwt/JwtTokenManager.java": [
+      {
+        "kind": "replace_jwt_library",
+        "general_idea": "Migrated JWT handling from io.jsonwebtoken (jjwt) to com.auth0.jwt to align with the new dependency set.",
+        "human_impl": "Replaced imports of io.jsonwebtoken.* with com.auth0.jwt.* and updated method calls from Jwts.builder() to JWT.create().",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_token_generation_api",
+        "general_idea": "Adapted token generation logic to use the Auth0 JWT API syntax and configuration properties.",
+        "human_impl": "Changed Jwts.builder().setClaims()...signWith() to JWT.create().withSubject()...sign(Algorithm.HMAC256(...)).",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_token_parsing_api",
+        "general_idea": "Adapted token parsing and verification logic to use the Auth0 JWT API syntax.",
+        "human_impl": "Replaced Jwts.parser().parseClaimsJws() with JWT.require(Algorithm.HMAC256(...)).build().verify() returning DecodedJWT.",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_parent_version",
+        "general_idea": "Upgrade Spring Boot parent to 2.7.4 to align with Java 11 support and modernize the framework baseline.",
+        "human_impl": "<version>2.7.4</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Configure the project to compile and run on Java 11.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "switch_jwt_library",
+        "general_idea": "Replace io.jsonwebtoken jjwt with com.auth0 java-jwt to support the new versioning scheme.",
+        "human_impl": "<groupId>com.auth0</groupId><artifactId>java-jwt</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_swagger_library",
+        "general_idea": "Replace deprecated Springfox Swagger dependencies with SpringDoc OpenAPI UI.",
+        "human_impl": "<groupId>org.springdoc</groupId><artifactId>springdoc-openapi-ui</artifactId>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

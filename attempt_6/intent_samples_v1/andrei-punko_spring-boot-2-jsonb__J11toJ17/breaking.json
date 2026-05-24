@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "repo": "andrei-punko/spring-boot-2-jsonb",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "cd6fc5b6e9ce004f25e695d36cef6247b9e09f59",
+    "sha_to": "10f80857d9a88fe0e8b8ee74030b4bf58d69b9e7"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot starter parent to a version compatible with JDK 17.",
+        "human_impl": "<version>2.5.12</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_property",
+        "general_idea": "Update the Java version property to target JDK 17.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_mapstruct_version",
+        "general_idea": "Upgrade MapStruct to a version that supports JDK 17.",
+        "human_impl": "<mapstruct.version>1.5.3.Final</mapstruct.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_lombok_version",
+        "general_idea": "Upgrade Lombok to a version that supports JDK 17.",
+        "human_impl": "<lombok.version>1.18.26</lombok.version>",
+        "bucket": "breaking"
+      }
+    ],
+    ".github/workflows/maven.yml": [
+      {
+        "kind": "upgrade_ci_jdk_version",
+        "general_idea": "Update the GitHub Actions workflow to use JDK 17 instead of JDK 9 to match the project's target runtime.",
+        "human_impl": "Changed 'Set up JDK 1.9' to 'Set up JDK 17' and updated java-version from 9 to 17.",
+        "bucket": "breaking"
+      }
+    ],
+    "Dockerfile": [
+      {
+        "kind": "base_image_upgrade",
+        "general_idea": "Update the Docker base image from OpenJDK 15 to OpenJDK 17 to align with the target Java version.",
+        "human_impl": "FROM openjdk:17-jdk-alpine",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

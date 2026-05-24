@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "Sov1etB0mb3/mono-ecom",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "c161dc6b4db10168c60bf897fc47cc6ef94b1114",
+    "sha_to": "608d766d86bd18dc6e9881d17954f4a95b9e23ff"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the project's target Java version from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

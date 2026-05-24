@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "erikrz/java-restful-spring-workshop",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "27e03e18f2fd323a024f86f24523099152afc561",
+    "sha_to": "8ed3f4301d3ed08b9add94fa0ee452c88285a4b4"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Update Maven compiler source and target properties from Java 17 to Java 21.",
+        "human_impl": "<java.version>21</java.version>\n<maven.compiler.target>21</maven.compiler.target>\n<maven.compiler.source>21</maven.compiler.source>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

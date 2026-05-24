@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "repo": "uhafner/codingstyle",
+    "stage": "J8->J11",
+    "family": "junit4-mockito",
+    "sha_from": "cd61708e30ca7cefca23f806b59392c72fe04a4b",
+    "sha_to": "963c64cb8dbc1857c19ee8d5e2cdbadce84f9236"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the project's target Java version from 8 to 11 to align with the new baseline.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "enforce_java_version",
+        "general_idea": "Add maven-enforcer-plugin to strictly require JDK 11 for building the project.",
+        "human_impl": "<requireJavaVersion><version>11</version></requireJavaVersion>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_config",
+        "general_idea": "Switch maven-compiler-plugin from source/target to release flag and add JDK 11 module exports for Error Prone.",
+        "human_impl": "<release>${java.version}</release> ... <arg>-J--add-exports=jdk.compiler/...</arg>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_javax_annotation_api",
+        "general_idea": "Add explicit dependency for javax.annotation-api which was removed from the JDK in Java 11.",
+        "human_impl": "<artifactId>javax.annotation-api</artifactId>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

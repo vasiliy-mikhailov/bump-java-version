@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "repo": "jinhua10/ai-reviewer-base-file-rag",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "0ebea226fb1ff4dab4b6da6a2ab5abd604bbac0f",
+    "sha_to": "88751d8ddfffb759edb642a58ee39310f7105376"
+  },
+  "by_file": {
+    "src/main/java/top/yumbo/ai/rag/api/controller/DocumentController.java": [
+      {
+        "kind": "refactor_import_path",
+        "general_idea": "Update import statement to reflect the new package location of the LocalFileRAG class.",
+        "human_impl": "import top.yumbo.ai.rag.service.LocalFileRAG;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/top/yumbo/ai/rag/monitor/HealthCheckService.java": [
+      {
+        "kind": "import_refactor",
+        "general_idea": "Update import statement to reflect the new package structure of the LocalFileRAG class.",
+        "human_impl": "import top.yumbo.ai.rag.service.LocalFileRAG;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/top/yumbo/ai/rag/spring/boot/autoconfigure/LocalFileRAGAutoConfiguration.java": [
+      {
+        "kind": "refactor_import_path",
+        "general_idea": "Update import statement to reflect the new package location of the LocalFileRAG class.",
+        "human_impl": "import top.yumbo.ai.rag.service.LocalFileRAG;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/top/yumbo/ai/rag/spring/boot/autoconfigure/SimpleRAGService.java": [
+      {
+        "kind": "update_import_package",
+        "general_idea": "Update import for LocalFileRAG to reflect its new package location in the service module.",
+        "human_impl": "import top.yumbo.ai.rag.service.LocalFileRAG;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_javax_to_jakarta",
+        "general_idea": "Replace javax.annotation with jakarta.annotation to comply with Jakarta EE 9+ namespace requirements in newer Spring Boot versions.",
+        "human_impl": "import jakarta.annotation.PreDestroy;",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "spring_boot_upgrade",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.x to 3.2.x to support Java 21 and Jakarta EE namespace.",
+        "human_impl": "<parent><version>3.2.1</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "java_version_upgrade",
+        "general_idea": "Configure Maven compiler and project properties to target Java 21.",
+        "human_impl": "<java.version>21</java.version> ... <source>21</source>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace javax.annotation-api with jakarta.annotation-api to comply with Spring Boot 3 requirements.",
+        "human_impl": "<groupId>jakarta.annotation</groupId><artifactId>jakarta.annotation-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_version_upgrade",
+        "general_idea": "Upgrade Apache Tika to 3.2.3 to align with Spring Boot 3 dependencies.",
+        "human_impl": "<tika.version>3.2.3</tika.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

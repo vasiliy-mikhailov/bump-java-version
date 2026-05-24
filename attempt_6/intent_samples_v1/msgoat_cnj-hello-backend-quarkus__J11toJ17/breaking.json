@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "repo": "msgoat/cnj-hello-backend-quarkus",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "e5d0d53529214f634f4ac8c7187a5062e68051f3",
+    "sha_to": "8c1a85eab2ee3a373c387acfa3a609f306a1ad43"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 11 to 17 to align with the new JDK baseline.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_quarkus_version",
+        "general_idea": "Upgrade the Quarkus platform version to 2.14.0.Final to support Java 17 and access newer features.",
+        "human_impl": "<quarkus.version>2.14.0.Final</quarkus.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/docker/Dockerfile": [
+      {
+        "kind": "base_image_upgrade",
+        "general_idea": "Update the Docker base image from Eclipse Temurin 11 to Eclipse Temurin 17 to align with the target JDK version.",
+        "human_impl": "FROM eclipse-temurin:17-jre",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

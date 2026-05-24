@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "repo": "zuisong/vertx-server-push",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "9917f4fc20a7ceaff99e32d4a8a6a26c2d8d626a",
+    "sha_to": "e2b0edfa7b40041c773cdb53fd721937341ec36c"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_java_version",
+        "general_idea": "Update the target Java version property from 11 to 21 to align with the new JDK baseline.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_spring_boot_plugin",
+        "general_idea": "Upgrade Spring Boot Maven Plugin from 2.5.5 to 3.2.2, which is required for native image support and JDK 21 compatibility.",
+        "human_impl": "<artifactId>spring-boot-maven-plugin</artifactId> ... <version>3.2.2</version>",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/cn/mmooo/Main.kt": [
+      {
+        "kind": "remove_coroutine_dependency",
+        "general_idea": "Removed the import for io.vertx.kotlin.coroutines to eliminate dependency on the deprecated or removed coroutine integration library.",
+        "human_impl": "-import io.vertx.kotlin.coroutines.*",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_main_signature",
+        "general_idea": "Changed main function from suspend to standard fun to align with standard JVM entry points and remove coroutine context requirement.",
+        "human_impl": "-suspend fun main() { ... +fun main() {",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "switch_to_virtual_threads",
+        "general_idea": "Configured Vert.x to use Java 21 Virtual Threads via ThreadingModel.VIRTUAL_THREAD for improved concurrency performance.",
+        "human_impl": "+it.threadingModel = ThreadingModel.VIRTUAL_THREAD",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/cn/mmooo/verticle/StompBridgeVerticle.kt": [
+      {
+        "kind": "remove_coroutine_verticle",
+        "general_idea": "Remove dependency on io.vertx.kotlin.coroutines by switching from CoroutineVerticle to AbstractVerticle.",
+        "human_impl": "class StompBridgeVerticle : AbstractVerticle() { override fun start() { ... } }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_body_access_api",
+        "general_idea": "Update Vert.x API usage for accessing request body from getBodyAsString to body().asString().",
+        "human_impl": "val body = rc.body().asString(Charsets.UTF_8.displayName())",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

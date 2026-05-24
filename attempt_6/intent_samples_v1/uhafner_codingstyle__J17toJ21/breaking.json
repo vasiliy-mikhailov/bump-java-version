@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "repo": "uhafner/codingstyle",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "0920baefea04ba861831547851712af0908f6adc",
+    "sha_to": "40492c79cdd9ebc60d9b6a72c32e3acb10bc00c2"
+  },
+  "by_file": {
+    "src/main/java/edu/hm/hafner/util/FilteredLog.java": [
+      {
+        "kind": "add_serial_annotation",
+        "general_idea": "Annotate serialVersionUID with @Serial to satisfy Java 14+ serial field validation rules.",
+        "human_impl": "@Serial private static final long serialVersionUID = ...",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_serial_annotation",
+        "general_idea": "Annotate readResolve method with @Serial to satisfy Java 14+ serial method validation rules.",
+        "human_impl": "@Serial protected Object readResolve() { ... }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "use_string_formatted",
+        "general_idea": "Replace String.format with String.formatted to use Java 15+ string template features.",
+        "human_impl": "logInfo(format.formatted(args))",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "use_string_formatted",
+        "general_idea": "Replace String.format with String.formatted to use Java 15+ string template features.",
+        "human_impl": "logError(format.formatted(args))",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "use_string_formatted",
+        "general_idea": "Replace String.format with String.formatted to use Java 15+ string template features.",
+        "human_impl": "logErrorWithGuard(format.formatted(args))",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/edu/hm/hafner/util/LineRangeList.java": [
+      {
+        "kind": "use_pattern_matching_instanceof",
+        "general_idea": "Use Java 16+ pattern matching for instanceof to simplify casting logic.",
+        "human_impl": "if (o instanceof final LineRange other) {",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/edu/hm/hafner/util/SecureXmlParserFactory.java": [
+      {
+        "kind": "add_serial_annotation",
+        "general_idea": "Annotate serialVersionUID with @Serial to comply with Java 21 serialization checks.",
+        "human_impl": "@Serial private static final long serialVersionUID = ...",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

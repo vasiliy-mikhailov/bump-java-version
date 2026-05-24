@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "repo": "ACANX/MetaOpen",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "03ae1927c7b3b695fff3311ac851d2c9a654b7df",
+    "sha_to": "c0648b7e5bf80444f36e205c83973b843394dfa2"
+  },
+  "by_file": {
+    "meta-model/pom.xml": [
+      {
+        "kind": "parent_pom_migration",
+        "general_idea": "Switch parent POM from os-dependencies to meta-open to align with new project structure.",
+        "human_impl": "<parent><artifactId>meta-open</artifactId><version>${revision}</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "version_property_migration",
+        "general_idea": "Replace hardcoded version with ${revision} property for unified version management.",
+        "human_impl": "<version>${revision}</version>",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Upgrade the target Java version from 11 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>\n<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_junit_jupiter",
+        "general_idea": "Upgrade JUnit Jupiter to version 6.x which is required for Java 21 support.",
+        "human_impl": "<junit-jupiter.version>6.0.2</junit-jupiter.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_lombok",
+        "general_idea": "Upgrade Lombok to a version that supports Java 21 bytecode generation.",
+        "human_impl": "<lombok.version>1.18.42</lombok.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,173 @@
+{
+  "meta": {
+    "repo": "alliance-genome/agr_mati",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "d61f50f26860a2ba3d8475e7d9842ff6f124b09b",
+    "sha_to": "9b2f477b6f2a3ae26e486183ec35c28b3f9b3531"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-agroal dependency for connection pooling support.",
+        "human_impl": "<artifactId>quarkus-agroal</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-jdbc-postgresql dependency for PostgreSQL database connectivity.",
+        "human_impl": "<artifactId>quarkus-jdbc-postgresql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-flyway dependency for database migration management.",
+        "human_impl": "<artifactId>quarkus-flyway</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-config-yaml dependency to support YAML-based configuration files.",
+        "human_impl": "<artifactId>quarkus-config-yaml</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-hibernate-orm-rest-data-panache dependency for REST data exposure via Panache.",
+        "human_impl": "<artifactId>quarkus-hibernate-orm-rest-data-panache</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-resteasy-jsonb dependency for JSON-B serialization in REST endpoints.",
+        "human_impl": "<artifactId>quarkus-resteasy-jsonb</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-smallrye-jwt dependency for JWT authentication support.",
+        "human_impl": "<artifactId>quarkus-smallrye-jwt</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-smallrye-openapi dependency for OpenAPI documentation generation.",
+        "human_impl": "<artifactId>quarkus-smallrye-openapi</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add lombok dependency to reduce boilerplate code in Java entities.",
+        "human_impl": "<artifactId>lombok</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-hibernate-validator dependency for Bean Validation support.",
+        "human_impl": "<artifactId>quarkus-hibernate-validator</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-hibernate-orm-panache dependency for simplified Hibernate ORM usage.",
+        "human_impl": "<artifactId>quarkus-hibernate-orm-panache</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add quarkus-test-common dependency for testing utilities.",
+        "human_impl": "<artifactId>quarkus-test-common</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add testcontainers jdbc dependency for integration testing with databases.",
+        "human_impl": "<artifactId>jdbc</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add testcontainers postgresql dependency for integration testing with PostgreSQL.",
+        "human_impl": "<artifactId>postgresql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add maven-source-plugin to attach source JARs during the build.",
+        "human_impl": "<artifactId>maven-source-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add maven-javadoc-plugin to attach Javadoc JARs during the build.",
+        "human_impl": "<artifactId>maven-javadoc-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add nexus-staging-maven-plugin to automate deployment to Maven Central.",
+        "human_impl": "<artifactId>nexus-staging-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add maven-gpg-plugin to sign artifacts for Maven Central release.",
+        "human_impl": "<artifactId>maven-gpg-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_project_metadata",
+        "general_idea": "Update groupId, artifactId, and version to reflect the new project identity (agr_mati).",
+        "human_impl": "<groupId>org.alliancegenome</groupId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_distribution_management",
+        "general_idea": "Configure distribution management URLs for deploying snapshots and releases to OSSRH.",
+        "human_impl": "<distributionManagement>...</distributionManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_scm_config",
+        "general_idea": "Add SCM configuration to link the project to its Git repository.",
+        "human_impl": "<scm>...</scm>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_license_info",
+        "general_idea": "Add MIT License metadata to the POM.",
+        "human_impl": "<licenses>...</licenses>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_developer_info",
+        "general_idea": "Add developer metadata to the POM.",
+        "human_impl": "<developers>...</developers>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_surefire_version",
+        "general_idea": "Update surefire-plugin version to 3.0.0-M7 for better compatibility with newer JDKs.",
+        "human_impl": "<surefire-plugin.version>3.0.0-M7</surefire-plugin.version>",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "documentation_overhaul",
+        "general_idea": "Replaced generic Quarkus boilerplate documentation with project-specific setup, testing, and deployment instructions.",
+        "human_impl": "Removed 'Provided Code' and 'Native executable' sections; added 'Test MaTI', 'Creating new subdomains', and 'Releases' sections.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/META-INF/resources/index.html": [
+      {
+        "kind": "update_metadata",
+        "general_idea": "Update the displayed GroupId in the index.html to reflect the actual project organization.",
+        "human_impl": "<li>GroupId: <code>org.alliancegenome</code></li>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

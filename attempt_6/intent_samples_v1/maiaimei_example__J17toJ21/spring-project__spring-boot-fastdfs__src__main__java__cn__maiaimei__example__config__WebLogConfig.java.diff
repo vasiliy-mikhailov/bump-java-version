@@ -1,0 +1,30 @@
+diff --git a/spring-project/spring-boot-fastdfs/src/main/java/cn/maiaimei/example/config/WebLogConfig.java b/spring-project/spring-boot-fastdfs/src/main/java/cn/maiaimei/example/config/WebLogConfig.java
+index 419ad54..9743866 100644
+--- a/spring-project/spring-boot-fastdfs/src/main/java/cn/maiaimei/example/config/WebLogConfig.java
++++ b/spring-project/spring-boot-fastdfs/src/main/java/cn/maiaimei/example/config/WebLogConfig.java
+@@ -1,6 +1,6 @@
+ package cn.maiaimei.example.config;
+ 
+-import cn.maiaimei.framework.spring.boot.web.filter.RequestResponseLoggingFilter;
++import cn.maiaimei.framework.web.http.RequestResponseLoggingFilter;
+ import org.springframework.boot.web.servlet.FilterRegistrationBean;
+ import org.springframework.context.annotation.Bean;
+ import org.springframework.context.annotation.Configuration;
+@@ -14,10 +14,6 @@ public class WebLogConfig {
+     public FilterRegistrationBean requestResponseLoggingFilter() {
+         RequestResponseLoggingFilter requestResponseLoggingFilter = new RequestResponseLoggingFilter();
+         requestResponseLoggingFilter.setExcludeUris(Arrays.asList("/swagger", "/h2-console"));
+-        requestResponseLoggingFilter.setIncludeRemoteHost(true);
+-        requestResponseLoggingFilter.setIncludeDevice(true);
+-        requestResponseLoggingFilter.setIncludeOs(true);
+-        //requestResponseLoggingFilter.setIncludeResponseBody(true);
+ 
+         FilterRegistrationBean bean = new FilterRegistrationBean();
+         bean.setFilter(requestResponseLoggingFilter);
+@@ -26,4 +22,4 @@ public class WebLogConfig {
+         bean.addUrlPatterns("/*");
+         return bean;
+     }
+-}
+\ No newline at end of file
++}

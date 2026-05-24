@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "repo": "ucsb-cs156-s25/proj-rec-s25-13",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "877451cd2d7e3d920fe0f855a66353bc05737afb",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent version from 2.6.2 to 3.3.4 to support Java 21 and modern Spring features.",
+        "human_impl": "<parent><version>3.3.4</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_property",
+        "general_idea": "Explicitly set the Java version property to 21 to ensure compilation and runtime compatibility with JDK 21.",
+        "human_impl": "<properties><java.version>21</java.version></properties>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_swagger_with_springdoc",
+        "general_idea": "Replace deprecated springfox-swagger dependencies with springdoc-openapi-starter, which is required for Spring Boot 3 compatibility.",
+        "human_impl": "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_spring_cloud_gateway",
+        "general_idea": "Update spring-cloud-gateway-mvc version to 4.1.3 to align with Spring Boot 3 dependencies.",
+        "human_impl": "<artifactId>spring-cloud-gateway-mvc</artifactId><version>4.1.3</version>",
+        "bucket": "breaking"
+      }
+    ],
+    "Dockerfile": [
+      {
+        "kind": "base_image_upgrade",
+        "general_idea": "Switch base image from Maven JDK 11 to Liberica OpenJDK 21 Alpine to support Java 21.",
+        "human_impl": "FROM bellsoft/liberica-openjdk-alpine:21",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "package_manager_migration",
+        "general_idea": "Replace apt-get with apk to align with the new Alpine Linux base image.",
+        "human_impl": "RUN apk add curl",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_installation",
+        "general_idea": "Install Maven explicitly since the base image no longer includes it.",
+        "human_impl": "RUN apk add maven",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

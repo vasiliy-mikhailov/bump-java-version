@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "cnebrera/MasterUC3Practices",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "c87a329714375049b1dc75c2c7c9e6ae5289e3c4",
+    "sha_to": "238efebfd731f669a41dcafb9d22d64a1b364a94"
+  },
+  "by_file": {
+    "Lesson1/pom.xml": [
+      {
+        "kind": "remove_jdk_version_config",
+        "general_idea": "Removed explicit source and target 1.8 configuration from the maven-compiler-plugin to allow the build to default to the JDK version of the build environment (JDK 11).",
+        "human_impl": "<configuration>\n\t\t\t\t<source>1.8</source>\n\t\t\t\t<target>1.8</target>\n\t\t\t</configuration>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "repo": "ozgen/binance-telegram-bot",
+    "stage": "J11->J21",
+    "family": "junit4-mockito",
+    "sha_from": "076613e9d0a03a00115ea78fc5db2a083607a912",
+    "sha_to": "23b2ee247155d5ee130753ea7ef8e96b9c4d964d"
+  },
+  "by_file": {
+    "src/main/java/com/ozgen/telegrambinancebot/adapters/events/IncomingTradingSignalEventListener.java": [
+      {
+        "kind": "refactor_package_path",
+        "general_idea": "Update import statement to reflect the new package structure of the BinanceTradingSignalManager class.",
+        "human_impl": "import com.ozgen.telegrambinancebot.manager.binance.BinanceTradingSignalManager;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/ozgen/telegrambinancebot/adapters/telegram/TelegramBinanceBot.java": [
+      {
+        "kind": "replace_javax_with_jakarta",
+        "general_idea": "Replace javax.annotation.PostConstruct with jakarta.annotation.PostConstruct to comply with Jakarta EE namespace changes in Spring Boot 3.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/ozgen/telegrambinancebot/model/binance/OpenOrder.java": [
+      {
+        "kind": "migrate_javax_to_jakarta",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ standards required by modern Spring Boot versions.",
+        "human_impl": "import jakarta.persistence.Entity;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_id_type_to_string",
+        "general_idea": "Change the primary key type from UUID to String to align with Hibernate's UUIDGenerator strategy.",
+        "human_impl": "private String id;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "configure_hibernate_uuid_generator",
+        "general_idea": "Explicitly configure Hibernate's UUIDGenerator for the ID field to ensure proper UUID generation with the String type.",
+        "human_impl": "@GeneratedValue(generator = \"UUID\") @GenericGenerator(name = \"UUID\", strategy = \"org.hibernate.id.UUIDGenerator\")",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/ozgen/telegrambinancebot/model/binance/OpenOrderDetail.java": [
+      {
+        "kind": "migrate_javax_to_jakarta",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to align with Jakarta EE 9+ standards required by modern Spring Boot versions.",
+        "human_impl": "import jakarta.persistence.Entity;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_id_type_to_string",
+        "general_idea": "Change the primary key field type from UUID to String to store the UUID as a string representation.",
+        "human_impl": "private String id;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

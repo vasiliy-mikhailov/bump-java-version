@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "repo": "didclab/Transfer-Service",
+    "stage": "J11->J21",
+    "family": "spring-boot-2",
+    "sha_from": "f1e29ebea799f38bfc384d2a078f16c1b4f79274",
+    "sha_to": "f9509fcaaea144a3d026f76ec4351853a49b4460"
+  },
+  "by_file": {
+    "src/main/java/org/onedatashare/transferservice/odstransferservice/OdsTransferService.java": [
+      {
+        "kind": "remove_eureka_dependency",
+        "general_idea": "Removed the deprecated Eureka client annotation to align with modern Spring Cloud versions that no longer bundle Netflix Eureka by default.",
+        "human_impl": "Removed import and annotation for org.springframework.cloud.netflix.eureka.EnableEurekaClient",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "enable_discovery_client",
+        "general_idea": "Explicitly enabled the generic Spring Cloud Discovery Client to replace the specific Eureka client functionality.",
+        "human_impl": "Added @EnableDiscoveryClient annotation to the main application class",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/onedatashare/transferservice/odstransferservice/model/FilePart.java": [
+      {
+        "kind": "change_field_type",
+        "general_idea": "Changed the type of the 'size' field from long to int to reduce memory footprint or align with API constraints.",
+        "human_impl": "long size; -> int size;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/onedatashare/transferservice/odstransferservice/model/MetaDataDTO.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Migrate JPA annotations from javax.persistence to jakarta.persistence to align with Jakarta EE 9+ standards required by modern Spring Boot versions.",
+        "human_impl": "import jakarta.persistence.Entity;\nimport jakarta.persistence.Id;\nimport jakarta.persistence.Table;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/onedatashare/transferservice/odstransferservice/model/TransferJobRequest.java": [
+      {
+        "kind": "remove_field_job_id",
+        "general_idea": "Removed the jobId field from the request model, possibly moving its generation or handling to a different layer.",
+        "human_impl": "-@NonNull private String jobId;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_field_priority",
+        "general_idea": "Removed the priority field from the request model.",
+        "human_impl": "-private int priority;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_field_chunk_size_to_connection_buffer_size",
+        "general_idea": "Renamed chunkSize to connectionBufferSize to better reflect its purpose or align with new naming conventions.",
+        "human_impl": "-@NonNull private int chunkSize;\n+private int connectionBufferSize;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_field_cred_id_to_destination",
+        "general_idea": "Added a credId field to the Destination inner class to store credential identifiers.",
+        "human_impl": "+String credId;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_field_parent_info_to_file_destination_path",
+        "general_idea": "Replaced the parentInfo EntityInfo field with a simple String fileDestinationPath in the Destination class.",
+        "human_impl": "-private EntityInfo parentInfo;\n+private String fileDestinationPath;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_field_cred_id_to_source",
+        "general_idea": "Added a credId field to the Source inner class to store credential identifiers.",
+        "human_impl": "+String credId;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_field_parent_info_to_file_source_path",
+        "general_idea": "Replaced the parentInfo EntityInfo field with a simple String fileSourcePath in the Source class.",
+        "human_impl": "-@NonNull private EntityInfo parentInfo;\n+private String fileSourcePath;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

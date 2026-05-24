@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "TalaatHarb/oauth2-example",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "39ff78fc77bc152974f4b7c9fd544c88408209c7",
+    "sha_to": "83b331cfd1d8e1f7f63e1dcd40b450306de46384"
+  },
+  "by_file": {
+    "oauth2-example-backend/pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "repo": "TheAbsdag/Motel_management",
+    "stage": "J8->J17",
+    "family": null,
+    "sha_from": "780c0b3017e2974e00c7cf041c773a7b0d10383c",
+    "sha_to": "40eff4a8947b998704c2525cd1c752e2a1cac762"
+  },
+  "by_file": {
+    "Motel_management/src/main/java/controller/Controller.java": [
+      {
+        "kind": "simplify_controller_logic",
+        "general_idea": "Replace complex UI state management and business logic delegation with a simple call to make the interface visible.",
+        "human_impl": "userInterface.setVisible(true);",
+        "bucket": "breaking"
+      }
+    ],
+    "Motel_management/src/main/java/model/MotelManagement.java": [
+      {
+        "kind": "remove_class_implementation",
+        "general_idea": "The entire implementation of the MotelManagement class was removed, leaving only the package declaration and class signature.",
+        "human_impl": "Removed all fields, constructor, and methods from MotelManagement.java",
+        "bucket": "breaking"
+      }
+    ],
+    "Motel_management/src/main/java/model/Turn.java": [
+      {
+        "kind": "remove_class_implementation",
+        "general_idea": "The entire implementation of the Turn class was removed, leaving only the package declaration and class shell.",
+        "human_impl": "Removed all fields, constructors, and methods from Turn.java",
+        "bucket": "breaking"
+      }
+    ],
+    "Motel_management/src/main/java/view/UserGUI.java": [
+      {
+        "kind": "remove_card_layout_navigation",
+        "general_idea": "Removed the CardLayout-based multi-view navigation system and all associated view components.",
+        "human_impl": "Deleted CardLayout, mainPanel, and all view fields (TurnSelectView, FloorView, etc.) and their initialization logic.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_view_switching_methods",
+        "general_idea": "Removed public methods used to switch between different UI views.",
+        "human_impl": "Deleted setFloorView(), setTurnSelectView(), setRoomView(), and other navigation setters.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_view_getters",
+        "general_idea": "Removed getter methods for the various view components.",
+        "human_impl": "Deleted getTurnSelectView(), getFloorView(), getRoomView(), etc.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_date_time_sync_logic",
+        "general_idea": "Removed the logic for synchronizing date and time labels across different views.",
+        "human_impl": "Deleted timeLabels/dateLabels maps, updateDateTime(), and getCurrentCard() logic.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_floor_setup_method",
+        "general_idea": "Removed the method for configuring floor buttons dynamically.",
+        "human_impl": "Deleted setupFloors(int[] arr) method.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_view_state_checkers",
+        "general_idea": "Removed methods that checked which view was currently visible.",
+        "human_impl": "Deleted isFloorShown(), isRoomShown(), isRoomChangeShown().",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_print_confirmation_dialog",
+        "general_idea": "Removed the utility method for confirming receipt printing.",
+        "human_impl": "Deleted confirmPrinting() method and its JOptionPane usage.",
+        "bucket": "breaking"
+      }
+    ],
+    "Motel_management/pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Update Maven compiler source and target properties from Java 8 to Java 17 to enable compilation for the new JDK version.",
+        "human_impl": "<maven.compiler.source>17</maven.compiler.source>\n<maven.compiler.target>17</maven.compiler.target>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

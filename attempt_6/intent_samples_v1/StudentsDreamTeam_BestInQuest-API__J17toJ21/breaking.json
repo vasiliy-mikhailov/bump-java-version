@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "StudentsDreamTeam/BestInQuest-API",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "fadf56b7829afcf8c7d91bbef055703d369f9447",
+    "sha_to": "0990147973050a57f100ff96880bd94bdb00febc"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Bump the target Java version property from 17 to 21 to align with the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

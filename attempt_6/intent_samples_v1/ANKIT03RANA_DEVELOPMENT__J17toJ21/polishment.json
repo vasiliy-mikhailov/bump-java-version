@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "repo": "ANKIT03RANA/DEVELOPMENT",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "b17a05535c8bf7e43157efa80aba1472799b0d66",
+    "sha_to": "229f3449f9700cb21efabd68af00a3a2439ed206"
+  },
+  "by_file": {
+    "demo/src/main/java/com/devspring/demo/DemoApplication.java": [
+      {
+        "kind": "add_service_usage",
+        "general_idea": "Replace legacy Alien bean usage with new LaptopService and Laptop bean retrieval and method invocation.",
+        "human_impl": "LaptopService service = context.getBean(LaptopService.class); Laptop lap = context.getBean(Laptop.class); service.addLaptop(lap);",
+        "bucket": "polishment"
+      }
+    ],
+    "spring1/src/main/java/com/devspring/App.java": [
+      {
+        "kind": "add_spring_context_imports",
+        "general_idea": "Add imports for Spring ApplicationContext and AnnotationConfigApplicationContext to enable Java-based configuration.",
+        "human_impl": "import org.springframework.context.ApplicationContext;\nimport org.springframework.context.annotation.AnnotationConfigApplicationContext;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_appconfig_import",
+        "general_idea": "Import the custom AppConfig class to be used for Java-based bean configuration.",
+        "human_impl": "import com.devspring.config.AppConfig;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "implement_java_config_bootstrapping",
+        "general_idea": "Replace the simple print statement with code that initializes the Spring container using AnnotationConfigApplicationContext and retrieves a bean.",
+        "human_impl": "ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);\nAlien obj = (Alien)context.getBean(Alien.class);\nobj.code();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_xml_config_comments",
+        "general_idea": "Add commented-out code demonstrating XML-based configuration as a reference or alternative approach.",
+        "human_impl": "// ApplicationContext context = new ClassPathXmlApplicationContext(\"spring.xml\");",
+        "bucket": "polishment"
+      }
+    ],
+    "spring1/pom.xml": [
+      {
+        "kind": "add_spring_context_dependency",
+        "general_idea": "Add the Spring Context library to enable Spring Framework features like dependency injection and application context management.",
+        "human_impl": "<dependency>\n  <groupId>org.springframework</groupId>\n  <artifactId>spring-context</artifactId>\n  <version>6.1.2</version>\n</dependency>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

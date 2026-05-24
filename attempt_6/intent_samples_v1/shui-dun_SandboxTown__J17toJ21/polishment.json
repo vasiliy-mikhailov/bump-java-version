@@ -1,0 +1,393 @@
+{
+  "meta": {
+    "repo": "shui-dun/SandboxTown",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "c173ad4390a9f165dca48ca93601f213a14cd5dd",
+    "sha_to": "c7caa52e0b9c02963b7d5e36ebaf346847d2af2c"
+  },
+  "by_file": {
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/bean/Point.java": [
+      {
+        "kind": "add_private_modifier",
+        "general_idea": "Add private access modifier to class fields to enforce encapsulation.",
+        "human_impl": "private int x;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reorder_annotations",
+        "general_idea": "Reorder Lombok annotations for consistency or style preference.",
+        "human_impl": "@NoArgsConstructor\n@AllArgsConstructor",
+        "bucket": "polishment"
+      }
+    ],
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/config/SaTokenConfiguration.java": [
+      {
+        "kind": "add_auth_exclusion",
+        "general_idea": "Exclude the /user/getUsername endpoint from Sa-Token login verification to allow public access.",
+        "human_impl": ".notMatch(\"/user/getUsername\")",
+        "bucket": "polishment"
+      }
+    ],
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/config/WebSocketConfig.java": [
+      {
+        "kind": "rename_websocket_handler",
+        "general_idea": "Rename the WebSocket handler class from EventWebSocketHandler to MyWebSocketHandler to reflect a more generic or updated naming convention.",
+        "human_impl": "import com.shuidun.sandbox_town_backend.websocket.MyWebSocketHandler;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_websocket_interceptor",
+        "general_idea": "Rename the WebSocket interceptor class from EventWebSocketInterceptor to MyWebSocketInterceptor to align with the handler rename.",
+        "human_impl": "import com.shuidun.sandbox_town_backend.websocket.MyWebSocketInterceptor;",
+        "bucket": "polishment"
+      }
+    ],
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/controller/BuildingController.java": [
+      {
+        "kind": "remove_deprecated_endpoint",
+        "general_idea": "Removed the /getAllBuildingTypes endpoint as part of API cleanup.",
+        "human_impl": "Deleted the @GetMapping(\"/getAllBuildingTypes\") method and its implementation.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_response_type",
+        "general_idea": "Replaced generic RestResponse with typed RestResponseVo for better type safety.",
+        "human_impl": "Changed return type from RestResponse<?> to RestResponseVo<List<BuildingDo>>.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation_annotation",
+        "general_idea": "Added @Validated annotation to enable Spring validation on the controller.",
+        "human_impl": "Added @Validated annotation to the BuildingController class.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_imports",
+        "general_idea": "Updated imports to reflect the new response type and removed unused ones.",
+        "human_impl": "Replaced import of RestResponse with RestResponseVo and BuildingDo.",
+        "bucket": "polishment"
+      }
+    ],
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/controller/GameMapController.java": [
+      {
+        "kind": "refactor_response_type",
+        "general_idea": "Replace generic RestResponse with typed RestResponseVo to improve type safety and API clarity.",
+        "human_impl": "public RestResponseVo<GameMapVo> getGameMap() { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_data_transfer",
+        "general_idea": "Introduce GameMapVo and conversion logic to separate domain objects from view objects.",
+        "human_impl": "GameMapVo.fromGameMapDo(gameMapService.getGameMap())",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation",
+        "general_idea": "Enable Spring validation on the controller to enforce parameter constraints.",
+        "human_impl": "@Validated",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_parameter_constraint",
+        "general_idea": "Add @NotNull annotation to enforce non-null input for the building count parameter.",
+        "human_impl": "@NotNull int nBuildings",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_endpoint",
+        "general_idea": "Rename the initialization endpoint to better reflect its purpose of creating the environment.",
+        "human_impl": "@GetMapping(\"/createEnvironment\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_role_constant",
+        "general_idea": "Update the role check annotation to use the correct uppercase constant for admin role.",
+        "human_impl": "@SaCheckRole(\"ADMIN\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_service_method",
+        "general_idea": "Rename the service method to align with the new endpoint name and semantic meaning.",
+        "human_impl": "gameMapService.createEnvironment(nBuildings)",
+        "bucket": "polishment"
+      }
+    ],
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/controller/ItemController.java": [
+      {
+        "kind": "refactor_response_type",
+        "general_idea": "Replace generic RestResponse with typed RestResponseVo for better type safety and API clarity.",
+        "human_impl": "import com.shuidun.sandbox_town_backend.bean.RestResponseVo; ... return new RestResponseVo<>(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation",
+        "general_idea": "Enable Bean Validation on the controller to enforce parameter constraints.",
+        "human_impl": "@Validated ... @NotNull String itemId",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Inject SpriteService to handle sprite-related logic triggered by item usage.",
+        "human_impl": "private final SpriteService spriteService; ... public ItemController(..., SpriteService spriteService)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to list all items owned by the current user.",
+        "human_impl": "@GetMapping(\"/listMyItems\") public RestResponseVo<List<ItemWithTypeAndLabelsBo>> listMyItems()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to list items currently in the user's backpack.",
+        "human_impl": "@GetMapping(\"/listMyItemsInBackpack\") public RestResponseVo<List<ItemWithTypeAndLabelsBo>> listMyItemsInBackpack()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to list items currently equipped by the user.",
+        "human_impl": "@GetMapping(\"/listMyItemsInEquipment\") public RestResponseVo<List<ItemWithTypeAndLabelsBo>> listMyItemsInEquipment()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to list items currently in the user's quick-access item bar.",
+        "human_impl": "@GetMapping(\"/listMyItemsInItemBar\") public RestResponseVo<List<ItemWithTypeAndLabelsBo>> listMyItemsInItemBar()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_communication",
+        "general_idea": "Switch item usage response from HTTP return to WebSocket broadcast for real-time updates.",
+        "human_impl": "WSMessageSender.addResponses(spriteService.useItem(...)); return new RestResponseVo<>(StatusCodeEnum.SUCCESS);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to retrieve detailed information about a specific item.",
+        "human_impl": "@GetMapping(\"/itemDetail\") public RestResponseVo<ItemDetailBo> detail(@NotNull String itemId)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to retrieve detailed information about a specific item type.",
+        "human_impl": "@GetMapping(\"/itemTypeDetail\") public RestResponseVo<ItemTypeDetailBo> detailByItemType(@NotNull ItemTypeEnum itemType)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to retrieve brief information about a specific item type.",
+        "human_impl": "@GetMapping(\"/itemTypeBrief\") public RestResponseVo<ItemTypeDo> briefByItemType(@NotNull ItemTypeEnum itemType)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to hold an item, broadcasting the state change via WebSocket.",
+        "human_impl": "@PostMapping(\"/hold\") ... WSMessageSender.addResponses(itemService.hold(...))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to put an item into the item bar, broadcasting the state change via WebSocket.",
+        "human_impl": "@PostMapping(\"/putInItemBar\") ... WSMessageSender.addResponses(itemService.putInItemBar(...))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to equip an item, broadcasting the state change via WebSocket.",
+        "human_impl": "@PostMapping(\"/equip\") ... WSMessageSender.addResponses(itemService.equip(...))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to put an item into the backpack, broadcasting the state change via WebSocket.",
+        "human_impl": "@PostMapping(\"/putInBackpack\") ... WSMessageSender.addResponses(itemService.putInBackpack(...))",
+        "bucket": "polishment"
+      }
+    ],
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/controller/SpriteController.java": [
+      {
+        "kind": "refactor_response_type",
+        "general_idea": "Replace generic RestResponse with typed RestResponseVo to improve type safety and API clarity.",
+        "human_impl": "import com.shuidun.sandbox_town_backend.bean.RestResponseVo; ... public RestResponseVo<SpriteDetailBo> getSpriteById(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_service_call",
+        "general_idea": "Update service method calls to use new naming conventions (selectByIdWithDetail) and return types.",
+        "human_impl": "spriteService.selectByIdWithDetail(id)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation_annotation",
+        "general_idea": "Add @Validated annotation to enable Spring validation on controller methods.",
+        "human_impl": "@Validated @Slf4j @RestController",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_dependency_injection",
+        "general_idea": "Switch from constructor injection of @Value to field injection for mapId to simplify constructor.",
+        "human_impl": "@Value(\"${mapId}\") private String mapId; public SpriteController(SpriteService spriteService)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add new endpoint to retrieve all online sprites.",
+        "human_impl": "@GetMapping(\"/listAllOnline\") public RestResponseVo<List<SpriteDo>> getAllOnlineSprite()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add new endpoint to retrieve combined info for the current user and their pet.",
+        "human_impl": "@GetMapping(\"myAndMyPetInfo\") public RestResponseVo<MyAndMyPetInfoVo> getMyAndMyPetInfo()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_imports",
+        "general_idea": "Update imports to reflect new bean classes and remove unused ones.",
+        "human_impl": "import com.shuidun.sandbox_town_backend.bean.MyAndMyPetInfoVo; import com.shuidun.sandbox_town_backend.bean.SpriteDetailBo;",
+        "bucket": "polishment"
+      }
+    ],
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/controller/StoreController.java": [
+      {
+        "kind": "replace_generic_endpoint",
+        "general_idea": "Replaced a placeholder generic endpoint with a specific endpoint to list store items.",
+        "human_impl": "@GetMapping(\"/listByStore\") public RestResponseVo<List<StoreItemTypeWithTypeAndLabelsBo>> listByStore(@NotNull String store)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_buy_endpoint",
+        "general_idea": "Added a new endpoint to handle buying items from a store.",
+        "human_impl": "@PostMapping(\"/buy\") public RestResponseVo<Void> buy(@NotNull String store, @NotNull ItemTypeEnum item, @NotNull Integer amount)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_detail_endpoint",
+        "general_idea": "Added a new endpoint to retrieve detailed information about a specific store item.",
+        "human_impl": "@GetMapping(\"/getByStoreAndItemType\") public RestResponseVo<StoreItemTypeDetailBo> getByStoreAndItem(@NotNull String store, @NotNull ItemTypeEnum itemType)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sold_price_endpoint",
+        "general_idea": "Added a new endpoint to calculate the selling price for items.",
+        "human_impl": "@GetMapping(\"/soldPrice\") public RestResponseVo<Integer> soldPrice(@NotNull String store, @NotNull String itemId)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sell_endpoint",
+        "general_idea": "Added a new endpoint to handle selling items to a store.",
+        "human_impl": "@PostMapping(\"/sell\") public RestResponseVo<Void> sell(@NotNull String store, @NotNull String itemId, @NotNull Integer amount, @NotNull Integer perPrice)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_parameter_validation",
+        "general_idea": "Added @Validated and @NotNull annotations to enforce parameter validation on controller methods.",
+        "human_impl": "@Validated ... @NotNull String store",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_authentication_integration",
+        "general_idea": "Integrated Sa-Token authentication to retrieve the current user's login ID for buy and sell operations.",
+        "human_impl": "storeService.buy(StpUtil.getLoginIdAsString(), ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "standardize_response_wrapper",
+        "general_idea": "Wrapped all endpoint return values in a standard RestResponseVo object for consistent API responses.",
+        "human_impl": "return new RestResponseVo<>(StatusCodeEnum.SUCCESS, ...)",
+        "bucket": "polishment"
+      }
+    ],
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/controller/TreeController.java": [
+      {
+        "kind": "rename_response_class",
+        "general_idea": "Rename the response wrapper class from RestResponse to RestResponseVo to align with new naming conventions.",
+        "human_impl": "import com.shuidun.sandbox_town_backend.bean.RestResponseVo; ... return new RestResponseVo<>(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_parameter_validation",
+        "general_idea": "Enable Spring validation on the controller and add @NotNull constraints to endpoint parameters.",
+        "human_impl": "@Validated ... @NotNull String treeId",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_api_endpoint",
+        "general_idea": "Add a new GET endpoint to check if an apple can be picked from a tree.",
+        "human_impl": "@GetMapping(\"/canPickApple\") public RestResponseVo<Void> canPickApple(@NotNull String treeId) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_method_signature",
+        "general_idea": "Update the pickApple method signature to use the new response type and validated parameter.",
+        "human_impl": "public RestResponseVo<Void> pickApple(@NotNull String treeId)",
+        "bucket": "polishment"
+      }
+    ],
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/controller/UserController.java": [
+      {
+        "kind": "refactor_response_type",
+        "general_idea": "Replace generic RestResponse with strongly typed RestResponseVo to improve type safety and API clarity.",
+        "human_impl": "import com.shuidun.sandbox_town_backend.bean.RestResponseVo; ... return new RestResponseVo<>(StatusCodeEnum.SUCCESS);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_parameter_validation",
+        "general_idea": "Enable Bean Validation on the controller and add @NotNull annotations to enforce non-null input parameters.",
+        "human_impl": "@Validated ... @NotNull String username",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_business_logic",
+        "general_idea": "Move login, signup, and password change business logic from the controller to the service layer to separate concerns.",
+        "human_impl": "userService.login(username, password); ... userService.signup(usernameSuffix, password);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_role_constant",
+        "general_idea": "Update SaCheckRole annotation to use the correct uppercase role constant 'ADMIN' instead of lowercase 'admin'.",
+        "human_impl": "@SaCheckRole(\"ADMIN\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_api_endpoint",
+        "general_idea": "Add a new endpoint to handle game entry logic, specifically for updating online status and receiving rewards.",
+        "human_impl": "@PostMapping(\"/enterGameToReceiveReward\") public RestResponseVo<Integer> enterGameToReceiveReward() { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_null_handling",
+        "general_idea": "Add explicit check for login status in getUsername to return null safely instead of potentially failing or returning unexpected data.",
+        "human_impl": "if (StpUtil.isLogin()) { ... } else { return new RestResponseVo<>(StatusCodeEnum.SUCCESS, null); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Remove imports for classes that are no longer used in the controller after logic refactoring.",
+        "human_impl": "-import com.shuidun.sandbox_town_backend.bean.User; -import com.shuidun.sandbox_town_backend.utils.PasswordEncryptor;",
+        "bucket": "polishment"
+      }
+    ],
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/enumeration/SpriteStatus.java": [
+      {
+        "kind": "refactor_enum_values",
+        "general_idea": "Replace generic status constants with more descriptive, domain-specific states to improve code clarity.",
+        "human_impl": "Changed enum values from STOP/FINDING_PATH to IDLE/GO_TO_SPRITE/GO_TO_COORDINATE/GO_TO_BUILDING/INTERACTING",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_lombok_annotations",
+        "general_idea": "Remove Lombok annotations from the enum to simplify dependencies or adhere to new coding standards.",
+        "human_impl": "Removed @AllArgsConstructor and @Getter annotations and their imports",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_deprecation_comment",
+        "general_idea": "Add a comment indicating that the enum is currently unused and unmaintained.",
+        "human_impl": "Added Javadoc comment: '\u8fd9\u4e2a\u4e1c\u897f\u76ee\u524d\u6ca1\u6709\u7528\u4e0a\uff0c\u6ca1\u6709\u8fdb\u884c\u7ef4\u62a4'",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

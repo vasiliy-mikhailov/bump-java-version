@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "repo": "gal16v8d/earthquake-svc",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "a9d0caba3cb0ad50b038ff535cbcac02fcc86b17",
+    "sha_to": "8084a994c31f702d4063ed3ffd04117f57223203"
+  },
+  "by_file": {
+    "src/main/java/com/gsdd/earthquake/bean/EarthquakeBean.java": [
+      {
+        "kind": "migrate_to_reactive",
+        "general_idea": "Convert synchronous service call to reactive subscribe pattern.",
+        "human_impl": "getEarthquakeSvc().earthquakeCountQuery(request).subscribe((EarthquakeCount response) -> { ... });",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/gsdd/earthquake/service/EarthquakeService.java": [
+      {
+        "kind": "refactor_to_interface",
+        "general_idea": "Converted the concrete service class into an interface to define the contract without implementation details.",
+        "human_impl": "Changed `public class EarthquakeService` to `public interface EarthquakeService` and removed all fields and methods.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Removed dependency on Spring Web's RestTemplate and related HTTP utilities.",
+        "human_impl": "Removed imports for `RestTemplate`, `HttpEntity`, `HttpHeaders`, `HttpMethod`, and `MediaType`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Added dependency on Project Reactor for reactive programming support.",
+        "human_impl": "Added import for `reactor.core.publisher.Mono`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_method_signature",
+        "general_idea": "Updated the earthquake count query method to return a reactive Mono instead of a blocking object.",
+        "human_impl": "Changed return type of `earthquakeCountQuery` from `EarthquakeCount` to `Mono<EarthquakeCount>`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_implementation",
+        "general_idea": "Removed the concrete implementation logic for querying earthquakes.",
+        "human_impl": "Removed the body of `earthquakeQuery` and `earthquakeCountQuery` methods, leaving only signatures in the interface.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_helper_methods",
+        "general_idea": "Removed private helper methods used for date formatting and parameter construction.",
+        "human_impl": "Removed `setUpDateFormat`, `setUpStartTime`, `setUpEndTime`, and `defineQueryParams` methods.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_constants",
+        "general_idea": "Removed static constants defining the USGS API URLs and parameters.",
+        "human_impl": "Removed `USGS_BASE_URL`, `USGS_COMMON_PARAMS`, `URL_USGS_QUERY`, and `URL_USGS_COUNT` constants.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_initialization_logic",
+        "general_idea": "Removed the constructor and initialization logic for the RestTemplate headers.",
+        "human_impl": "Removed the `@Autowired` constructor and the `initRestConsumption` method.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

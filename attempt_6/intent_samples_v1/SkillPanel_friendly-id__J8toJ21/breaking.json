@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "SkillPanel/friendly-id",
+    "stage": "J8->J21",
+    "family": "junit4-mockito",
+    "sha_from": "87ef6621539e33e7e5a6c0296b7508bdea14a7b3",
+    "sha_to": "fbf8c1c6dcd1236af4a7c12a5e5c478f9ad74786"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Update Maven compiler source and target properties from Java 8 to Java 21.",
+        "human_impl": "<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "spring_boot_upgrade",
+        "general_idea": "Upgrade Spring Boot dependency management to version 3.4.1, which requires Java 17+.",
+        "human_impl": "<spring-boot.version>3.4.1</spring-boot.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

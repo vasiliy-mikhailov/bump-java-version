@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "repo": "acurro9/API-Tellix",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "0204d0aa8304f3ca4c67fb0b007f02d673c7b10b",
+    "sha_to": "d197144de8233114c51dbab22005cd1a208e8bc1"
+  },
+  "by_file": {
+    "src/main/java/com/api/tellix/entities/Capitulo.java": [
+      {
+        "kind": "add_field_descripcion",
+        "general_idea": "Add a 'descripcion' field to the Capitulo entity to store chapter description.",
+        "human_impl": "@Column(name = \"descripcion\") private String descripcion;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_link",
+        "general_idea": "Add a 'link' field to the Capitulo entity to store a URL or reference link.",
+        "human_impl": "@Column(name = \"link\") private String link;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/api/tellix/entities/Pelicula.java": [
+      {
+        "kind": "add_entity_fields",
+        "general_idea": "Added specific database columns and fields to the Pelicula entity to store detailed movie information.",
+        "human_impl": "private String nombre; private boolean visible; private String descripcion; private String imagen; private String a\u00f1o; private String actores; private String link;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_many_to_many_relation",
+        "general_idea": "Established a many-to-many relationship between Pelicula and Categoria using a join table.",
+        "human_impl": "@ManyToMany(cascade = CascadeType.ALL) @JoinTable(name = \"pelicula_categoria\", ...) private List<Categoria> categorias",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_many_to_many_relation",
+        "general_idea": "Established a many-to-many relationship between Pelicula and Familia using a join table.",
+        "human_impl": "@ManyToMany(cascade = CascadeType.ALL) @JoinTable(name = \"pelicula_familia\", ...) private List<Familia> familia",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/api/tellix/entities/Perfil.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Removed the unused java.sql.Blob import to clean up the code.",
+        "human_impl": "Removed 'import java.sql.Blob;'",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

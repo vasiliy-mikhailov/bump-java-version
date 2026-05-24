@@ -1,0 +1,147 @@
+{
+  "meta": {
+    "repo": "piomin/sample-hazelcast-spring-datagrid",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "9471308a950b2c193736fb4254138b1a8e63b431",
+    "sha_to": "56d8a0e118acd804d37e84b003110233ab3d251f"
+  },
+  "by_file": {
+    "employee-service/src/main/java/pl/piomin/services/datagrid/employee/EmployeeApplication.java": [
+      {
+        "kind": "api_migration_cluster_config",
+        "general_idea": "Replace deprecated GroupConfig API with the new setClusterName method required by newer Hazelcast versions.",
+        "human_impl": "config.setClusterName(\"dev\");",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "api_migration_management_center",
+        "general_idea": "Update ManagementCenterConfig to use the new setConsoleEnabled API instead of the old URL-based configuration.",
+        "human_impl": "new ManagementCenterConfig().setConsoleEnabled(true);",
+        "bucket": "breaking"
+      }
+    ],
+    "employee-service/src/main/java/pl/piomin/services/datagrid/employee/model/Employee.java": [
+      {
+        "kind": "import_namespace_migration",
+        "general_idea": "Migrate JPA annotations from javax.persistence to jakarta.persistence to comply with Jakarta EE 9+ standards required by Spring Boot 3.",
+        "human_impl": "import jakarta.persistence.Entity;\nimport jakarta.persistence.GeneratedValue;\nimport jakarta.persistence.Id;",
+        "bucket": "breaking"
+      }
+    ],
+    "employee-service/src/main/java/pl/piomin/services/datagrid/employee/service/EmployeeService.java": [
+      {
+        "kind": "javax_to_jakarta_namespace",
+        "general_idea": "Migrate annotation imports from javax.annotation to jakarta.annotation to comply with Jakarta EE 9+ standards required by Spring Boot 3.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "hazelcast_api_migration",
+        "general_idea": "Update Hazelcast index creation API to use explicit IndexType enum instead of boolean flag.",
+        "human_impl": "map.addIndex(IndexType.HASH, \"company\");",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "hazelcast_query_api_migration",
+        "general_idea": "Replace deprecated Predicates utility class with PredicateBuilder API for constructing query predicates.",
+        "human_impl": "PredicateBuilder.EntryObject eo = new PredicateBuilderImpl().getEntryObject(); Predicate predicate = eo.get(\"personId\").equal(personId);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "spring_data_api_migration",
+        "general_idea": "Replace deprecated Repository.findOne() method with findById().orElseThrow() to align with Spring Data JPA 2.4+ standards.",
+        "human_impl": "e = repository.findById(id).orElseThrow();",
+        "bucket": "breaking"
+      }
+    ],
+    "employee-service/src/test/java/pl/piomin/services/datagrid/employee/data/AddEmployeeRepositoryTest.java": [
+      {
+        "kind": "migrate_to_junit5",
+        "general_idea": "Replace JUnit 4 annotations and runner with JUnit 5 equivalents to align with Spring Boot 3 requirements.",
+        "human_impl": "Replaced @RunWith(SpringRunner.class) and org.junit.Test with org.junit.jupiter.api.Test and removed the runner annotation.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_testcontainers_mysql",
+        "general_idea": "Introduce Testcontainers to provide a dynamic MySQL instance for integration tests, replacing static or external database dependencies.",
+        "human_impl": "Added @Testcontainers, @Container MySQLContainer, and @DynamicPropertySource to configure the datasource URL dynamically.",
+        "bucket": "breaking"
+      }
+    ],
+    "person-service/src/main/java/pl/piomin/services/datagrid/person/PersonApplication.java": [
+      {
+        "kind": "refactor_hazelcast_bean",
+        "general_idea": "Change the Hazelcast bean definition to return ClientConfig instead of HazelcastInstance, likely to delegate instance creation to Spring Boot auto-configuration.",
+        "human_impl": "@Bean ClientConfig clientConfig() { ... return config; }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_manual_cache_manager",
+        "general_idea": "Remove the manual CacheManager bean definition, relying on Spring Boot's auto-configuration for Hazelcast caching.",
+        "human_impl": "// @Bean // CacheManager cacheManager() { ... }",
+        "bucket": "breaking"
+      }
+    ],
+    "person-service/src/main/java/pl/piomin/services/datagrid/person/api/PersonController.java": [
+      {
+        "kind": "javax_to_jakarta_namespace_migration",
+        "general_idea": "Migrate annotation import from javax.annotation to jakarta.annotation to comply with Spring Boot 3 / Jakarta EE 9+ standards.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "deprecated_api_removal",
+        "general_idea": "Replace deprecated CrudRepository.findOne() with the standard Optional-based findById() method required in newer Spring Data versions.",
+        "human_impl": "return repository.findById(id).orElseThrow();",
+        "bucket": "breaking"
+      }
+    ],
+    "person-service/src/main/java/pl/piomin/services/datagrid/person/model/Person.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.persistence.Entity;\nimport jakarta.persistence.GeneratedValue;\nimport jakarta.persistence.Id;",
+        "bucket": "breaking"
+      }
+    ],
+    "person-service/src/test/java/pl/piomin/services/datagrid/person/data/AddPersonRepositoryTest.java": [
+      {
+        "kind": "migrate_to_junit5",
+        "general_idea": "Replace JUnit 4 annotations and runner with JUnit 5 equivalents to align with Spring Boot 3 requirements.",
+        "human_impl": "import org.junit.jupiter.api.Test; @Test",
+        "bucket": "breaking"
+      }
+    ],
+    "employee-kubernetes-service/pom.xml": [
+      {
+        "kind": "change_parent_pom",
+        "general_idea": "Switched the Maven parent from spring-boot-starter-parent to a custom internal parent POM.",
+        "human_impl": "<parent><groupId>pl.piomin.services</groupId><artifactId>sample-hazelcast-spring-datagrid</artifactId></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_lombok_dependency",
+        "general_idea": "Removed the Lombok dependency, requiring manual getter/setter/constructor implementation.",
+        "human_impl": "Removed <artifactId>lombok</artifactId>",
+        "bucket": "breaking"
+      }
+    ],
+    "employee-service/pom.xml": [
+      {
+        "kind": "remove_hazelcast_client",
+        "general_idea": "Remove the Hazelcast client dependency, likely switching to embedded or server mode.",
+        "human_impl": "<dependency><groupId>com.hazelcast</groupId><artifactId>hazelcast-client</artifactId></dependency>",
+        "bucket": "breaking"
+      }
+    ],
+    "person-service/pom.xml": [
+      {
+        "kind": "replace_hazelcast_hibernate5",
+        "general_idea": "Replace hazelcast-hibernate5 with hazelcast-spring to align with Spring Boot 3 integration patterns.",
+        "human_impl": "- <artifactId>hazelcast-hibernate5</artifactId> + <artifactId>hazelcast-spring</artifactId>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

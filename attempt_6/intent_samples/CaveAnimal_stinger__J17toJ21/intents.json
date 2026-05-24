@@ -9,98 +9,156 @@
   "by_file": {
     "pom.xml": [
       {
-        "kind": "update_group_id",
-        "general_idea": "Refactor the Maven groupId to reflect the new package namespace.",
-        "human_impl": "<groupId>com.codecounter</groupId>",
-        "bucket": "polishment"
+        "kind": "rebrand_group_id",
+        "general_idea": "Update Maven groupId to reflect the new package namespace.",
+        "before": "<groupId>com.caveanimal</groupId>",
+        "after": "<groupId>com.codecounter</groupId>",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "upgrade_java_version",
+        "kind": "bump_java_version",
         "general_idea": "Update Maven compiler source and target properties to Java 21.",
-        "human_impl": "<java.version>21</java.version>",
-        "bucket": "breaking"
+        "before": "<java.version>17</java.version>\n        <maven.compiler.source>17</maven.compiler.source>\n        <maven.compiler.target>17</maven.compiler.target>",
+        "after": "<java.version>21</java.version>\n        <maven.compiler.source>21</maven.compiler.source>\n        <maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking",
+        "why_exists": "Compilation fails if source code uses Java 21 features (e.g., virtual threads, pattern matching enhancements) while the compiler target remains at 17."
       },
       {
         "kind": "add_selenium_dependency",
         "general_idea": "Add Selenium Java dependency for end-to-end UI testing.",
-        "human_impl": "<artifactId>selenium-java</artifactId>",
-        "bucket": "polishment"
+        "before": "",
+        "after": "<dependency>\n            <groupId>org.seleniumhq.selenium</groupId>\n            <artifactId>selenium-java</artifactId>\n            <version>4.14.0</version>\n            <scope>test</scope>\n        </dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_webdrivermanager_dependency",
-        "general_idea": "Add WebDriverManager dependency to handle browser driver management.",
-        "human_impl": "<artifactId>webdrivermanager</artifactId>",
-        "bucket": "polishment"
+        "general_idea": "Add WebDriverManager dependency to handle browser driver binaries.",
+        "before": "",
+        "after": "<dependency>\n            <groupId>io.github.bonigarcia</groupId>\n            <artifactId>webdrivermanager</artifactId>\n            <version>5.4.1</version>\n            <scope>test</scope>\n        </dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "configure_surefire_plugin",
-        "general_idea": "Configure Maven Surefire plugin to set system properties for test result directories.",
-        "human_impl": "<artifactId>maven-surefire-plugin</artifactId>",
-        "bucket": "polishment"
-      }
-    ],
-    "README.md": [
-      {
-        "kind": "update_readme_package_path",
-        "general_idea": "Update the README documentation to reflect the new package namespace after refactoring from com.caveanimal to com.codecounter.",
-        "human_impl": "Changed 'java/com/caveanimal/stinger/' to 'java/com/codecounter/stinger/' in the directory tree diagram.",
-        "bucket": "polishment"
+        "general_idea": "Configure Maven Surefire plugin to set system properties for test result directory.",
+        "before": "",
+        "after": "<plugin>\n                <groupId>org.apache.maven.plugins</groupId>\n                <artifactId>maven-surefire-plugin</artifactId>\n                <version>3.1.2</version>\n                <configuration>\n                    <!-- Ensure tests write results to target/test-results instead of repo-level ./results -->\n                    <systemPropertyVariables>\n                        <stinger.results.dir>${project.build.directory}/test-results</stinger.results.dir>\n                    </systemPropertyVariables>\n                </configuration>\n            </plugin>",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "src/main/resources/application.properties": [
       {
         "kind": "update_logging_package",
         "general_idea": "Update the logging level configuration to match the new package name after refactoring.",
-        "human_impl": "logging.level.com.codecounter.stinger=INFO",
-        "bucket": "polishment"
+        "before": "logging.level.com.caveanimal.stinger=INFO",
+        "after": "logging.level.com.codecounter.stinger=INFO",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "src/main/resources/static/css/style.css": [
       {
-        "kind": "add_live_analysis_styles",
-        "general_idea": "Add CSS styles for a new live analysis log component to display file analysis events.",
-        "human_impl": ".analysis-live { margin-top: 12px; } .analysis-log { list-style: none; padding: 10px; border: 1px solid #e6e6e6; ... }",
-        "bucket": "polishment"
+        "kind": "add_css_styles",
+        "general_idea": "Add CSS styles for a new live analysis log UI component.",
+        "before": "",
+        "after": ".analysis-live {\n    margin-top: 12px;\n}\n\n.analysis-live-header {\n    font-weight: 700;\n    margin-bottom: 8px;\n}\n\n.analysis-log {\n    list-style: none;\n    padding: 10px;\n    border: 1px solid #e6e6e6;\n    border-radius: 6px;\n    max-height: 320px;\n    overflow-y: auto;\n    background: #fff;\n}\n\n.analysis-log .analysis-event {\n    padding: 6px 8px;\n    border-bottom: 1px solid #f2f2f2;\n    font-family: monospace;\n    font-size: 0.9em;\n    color: #333;\n}\n\n.analysis-log .analysis-event.directory {\n    color: #0b5ed7;\n}\n\n.analysis-log .analysis-event.file {\n    color: #333;\n}",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "src/main/resources/static/js/app.js": [
       {
-        "kind": "add_navigation_history",
-        "general_idea": "Implement back/forward navigation stack to allow users to traverse directory history.",
-        "human_impl": "let historyStack = []; let forwardStack = []; function goToPath(path, pushHistory = true) { ... }",
-        "bucket": "polishment"
+        "kind": "add_navigation_state",
+        "general_idea": "Introduce history and forward stacks to support back/forward navigation in the file browser.",
+        "before": "let currentPath = '';",
+        "after": "let currentPath = '';\nlet historyStack = [];\nlet forwardStack = [];",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "refactor_event_binding",
-        "general_idea": "Replace inline onclick attributes with data attributes and event delegation for cleaner DOM manipulation.",
-        "human_impl": "fileList.querySelectorAll('.file-item[data-directory=\"true\"]').forEach(item => { item.addEventListener('click', ...); });",
-        "bucket": "polishment"
+        "kind": "add_back_button_handler",
+        "general_idea": "Wire up the back button to trigger the new goBack function.",
+        "before": "",
+        "after": "const backBtn = document.getElementById('backBtn');\n...\nbackBtn.addEventListener('click', () => {\n    goBack();\n});",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "refactor_navigation_logic",
+        "general_idea": "Consolidate path navigation into a single goToPath function that manages history and UI updates.",
+        "before": "navigateBtn.addEventListener('click', () => {\n    currentPath = pathInput.value;\n    loadDirectory(currentPath);\n});",
+        "after": "navigateBtn.addEventListener('click', () => {\n    goToPath(pathInput.value);\n});\n...\nfunction goToPath(path, pushHistory = true) {\n    if (pushHistory && currentPath && currentPath !== path) {\n        historyStack.push(currentPath);\n        if (historyStack.length > 20) historyStack.shift();\n        updateHistoryList();\n    }\n    currentPath = path;\n    document.getElementById('currentPath').value = path;\n    loadDirectory(path);\n}",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "implement_back_functionality",
+        "general_idea": "Implement the goBack function to pop from history stack and navigate to the previous path.",
+        "before": "",
+        "after": "function goBack() {\n    if (historyStack.length > 0) {\n        const prevPath = historyStack.pop();\n        forwardStack.push(currentPath);\n        goToPath(prevPath, false);\n        updateHistoryList();\n    }\n}",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_history_ui_renderer",
+        "general_idea": "Add a function to render the history list in the UI, with safety checks for missing DOM elements.",
+        "before": "",
+        "after": "function updateHistoryList() {\n    const historyList = document.getElementById('historyList');\n    if (!historyList) return;\n    historyList.innerHTML = '';\n    historyStack.slice().reverse().forEach((path, idx) => {\n        const li = document.createElement('li');\n        li.textContent = path;\n        li.className = 'history-item';\n        li.onclick = () => {\n            goToPath(path);\n        };\n        historyList.appendChild(li);\n    });\n}",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "migrate_to_event_delegation",
+        "general_idea": "Replace inline onclick handlers with event delegation for file and directory navigation to improve security and maintainability.",
+        "before": "<div class=\"file-item\" onclick=\"navigateToParent('${path}')\">",
+        "after": "<div class=\"file-item\" id=\"parentDirItem\" data-path=\"${escapeHtml(path)}\">\n...\nfileList.querySelectorAll('.file-item[data-directory=\"true\"]').forEach(item => {\n    item.addEventListener('click', function() {\n        const path = this.getAttribute('data-path');\n        if (path) navigateToDirectory(path);\n    });\n});",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "fix_drive_root_navigation",
-        "general_idea": "Correctly handle parent directory navigation for Windows drive roots (e.g., C:\\).",
-        "human_impl": "if (parts.length === 1 && /^[A-Za-z]:$/.test(parts[0])) { parentPath = parts[0] + separator; }",
-        "bucket": "polishment"
+        "general_idea": "Correctly handle navigation to the root of a drive (e.g., C:\\) when moving up from a drive letter directory.",
+        "before": "if (parts.length === 0) {\n    parentPath = separator;\n} else {\n    parentPath = parts.join(separator);",
+        "after": "if (parts.length === 0) {\n    parentPath = separator;\n} else if (parts.length === 1 && /^[A-Za-z]:$/.test(parts[0])) {\n    parentPath = parts[0] + separator;\n} else {\n    parentPath = parts.join(separator);",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "migrate_to_sse_analysis",
-        "general_idea": "Replace synchronous directory analysis with Server-Sent Events (SSE) for real-time progress updates.",
-        "human_impl": "const es = new EventSource(`/api/analyze-stream?path=${encodeURIComponent(path)}`);",
-        "bucket": "polishment"
+        "kind": "switch_to_sse_analysis",
+        "general_idea": "Replace the synchronous directory analysis with a Server-Sent Events (SSE) stream for real-time progress updates.",
+        "before": "analyzeBtn.addEventListener('click', () => {\n    currentPath = pathInput.value;\n    analyzeDirectory(currentPath);\n});",
+        "after": "analyzeBtn.addEventListener('click', () => {\n    currentPath = pathInput.value;\n    analyzeDirectoryStream(currentPath);\n});\n...\nfunction analyzeDirectoryStream(path) {\n    const es = new EventSource(`/api/analyze-stream?path=${encodeURIComponent(path)}`);\n    ...",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "add_null_safety_display",
-        "general_idea": "Ensure analysis result fields are safely handled if undefined or null before display.",
-        "human_impl": "${formatNumber(results.totalFolders ?? 0)}",
-        "bucket": "polishment"
+        "kind": "add_null_safety_to_stats",
+        "general_idea": "Add null-coalescing operators to analysis result fields to prevent display errors if data is missing.",
+        "before": "<div class=\"stat-value\">${results.totalFolders}</div>",
+        "after": "<div class=\"stat-value\">${formatNumber(results.totalFolders ?? 0)}</div>",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "src/main/resources/templates/index.html": [
       {
-        "kind": "add_back_button",
-        "general_idea": "Add a UI button to allow users to navigate back in the directory history.",
-        "human_impl": "<button id=\"backBtn\" class=\"btn btn-secondary\">Back</button>",
-        "bucket": "polishment"
+        "kind": "add_ui_control",
+        "general_idea": "Add a Back button to the path navigation section for improved user experience.",
+        "before": "",
+        "after": "<button id=\"backBtn\" class=\"btn btn-secondary\">Back</button>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_comment",
+        "general_idea": "Add a comment indicating that browse history is hidden and kept internal.",
+        "before": "",
+        "after": "<!-- Browse history hidden (kept internal) -->",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ]
   }

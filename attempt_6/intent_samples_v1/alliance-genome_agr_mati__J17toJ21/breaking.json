@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "repo": "alliance-genome/agr_mati",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "9b2f477b6f2a3ae26e486183ec35c28b3f9b3531",
+    "sha_to": "32b2ae07f5405b68fd17d537ca72271a35355e43"
+  },
+  "by_file": {
+    "src/main/java/org/alliancegenome/mati/configuration/ConstraintViolationExceptionMapper.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.* imports with jakarta.* equivalents to align with Jakarta EE 9+ standards required by newer Quarkus versions on Java 21.",
+        "human_impl": "import jakarta.validation.ConstraintViolationException;\nimport jakarta.ws.rs.core.Response;\nimport jakarta.ws.rs.ext.ExceptionMapper;\nimport jakarta.ws.rs.ext.Provider;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/alliancegenome/mati/configuration/ErrorResponse.java": [
+      {
+        "kind": "remove_no_arg_constructors",
+        "general_idea": "Removed no-argument constructors from ErrorResponse and ErrorMessage classes to enforce explicit initialization.",
+        "human_impl": "Deleted `public ErrorResponse() {}` and `public ErrorMessage() {}` methods.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/alliancegenome/mati/configuration/RestApplication.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.ws.rs imports with jakarta.ws.rs equivalents to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.ws.rs.ApplicationPath; import jakarta.ws.rs.core.Application;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/alliancegenome/mati/configuration/ThrowableMapper.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.ws.rs imports with jakarta.ws.rs to comply with Jakarta EE 9+ namespace requirements in Java 21/Quarkus 3.",
+        "human_impl": "import jakarta.ws.rs.core.Response;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/alliancegenome/mati/controller/IdentifierFinder.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.* imports with jakarta.* equivalents to comply with Jakarta EE 9+ namespace requirements in Java 21/Quarkus 3.",
+        "human_impl": "import jakarta.inject.Inject; import jakarta.enterprise.context.RequestScoped; import jakarta.ws.rs.core.Response;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/alliancegenome/mati/controller/IdentifierResource.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.ws.rs and javax.inject imports with jakarta equivalents to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.ws.rs.Path; import jakarta.inject.Inject;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/alliancegenome/mati/controller/SubdomainResource.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.ws.rs imports with jakarta.ws.rs to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.ws.rs.PathParam;\nimport jakarta.ws.rs.core.Response;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/alliancegenome/mati/entity/SubdomainEntity.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to align with Jakarta EE 9+ standards required by newer Quarkus versions.",
+        "human_impl": "import jakarta.persistence.*;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to align with Jakarta EE 9+ standards required by newer Quarkus versions.",
+        "human_impl": "import jakarta.validation.constraints.NotEmpty;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/alliancegenome/mati/interfaces/IdentifierFinderRESTInterface.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.ws.rs and javax.validation imports with jakarta equivalents to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.ws.rs.*; import jakarta.validation.constraints.NotNull;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

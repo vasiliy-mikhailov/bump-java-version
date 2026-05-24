@@ -1,0 +1,34 @@
+diff --git a/nas-music/src/main/java/top/itning/yunshunas/music/converter/MusicConverter.java b/nas-music/src/main/java/top/itning/yunshunas/music/converter/MusicConverter.java
+index 8e22b3f..d4c911e 100644
+--- a/nas-music/src/main/java/top/itning/yunshunas/music/converter/MusicConverter.java
++++ b/nas-music/src/main/java/top/itning/yunshunas/music/converter/MusicConverter.java
+@@ -4,12 +4,13 @@ import org.mapstruct.Mapper;
+ import org.mapstruct.Mappings;
+ import org.mapstruct.factory.Mappers;
+ import top.itning.yunshunas.music.dto.MusicDTO;
++import top.itning.yunshunas.music.dto.MusicManageDTO;
+ import top.itning.yunshunas.music.entity.Music;
+ 
+ 
+ /**
+  * @author itning
+- * @date 2020/9/5 11:32
++ * @since 2020/9/5 11:32
+  */
+ @Mapper
+ public interface MusicConverter {
+@@ -24,4 +25,13 @@ public interface MusicConverter {
+      */
+     @Mappings({})
+     MusicDTO entity2dto(Music music);
++
++    /**
++     * Music转MusicManageDTO
++     *
++     * @param music MusicDTO
++     * @return DTO
++     */
++    @Mappings({})
++    MusicManageDTO music2ManageDto(Music music);
+ }
+\ No newline at end of file

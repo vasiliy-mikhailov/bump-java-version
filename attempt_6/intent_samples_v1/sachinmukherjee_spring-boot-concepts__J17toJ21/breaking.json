@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "sachinmukherjee/spring-boot-concepts",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "5f8439388db5249fa1f466ba0670698fdf2f9e27",
+    "sha_to": "99e960b5c42fc0facd91fcd4f72048186df0371d"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the project's target Java version from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

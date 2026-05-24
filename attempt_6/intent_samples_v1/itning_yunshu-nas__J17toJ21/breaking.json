@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "repo": "itning/yunshu-nas",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "77900e4114e77a9e4482a877ee90b98e279ceac7",
+    "sha_to": "aa2ea6cfb6825479cda624b306e234c199fd793d"
+  },
+  "by_file": {
+    "nas-common/src/main/java/top/itning/yunshunas/common/util/MultipartFileSender.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.servlet imports with jakarta.servlet to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.servlet.http.HttpServletRequest;",
+        "bucket": "breaking"
+      }
+    ],
+    "nas-music/src/main/java/top/itning/yunshunas/music/controller/FileController.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.servlet and javax.validation imports with jakarta equivalents to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.servlet.http.HttpServletRequest;",
+        "bucket": "breaking"
+      }
+    ],
+    "nas-music/src/main/java/top/itning/yunshunas/music/controller/MusicController.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotEmpty;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "api_signature_simplification",
+        "general_idea": "Remove Pageable parameters from search endpoints to return full result lists instead of paginated results.",
+        "human_impl": "public ResponseEntity<RestModel<List<MusicDTO>>> search(@NotEmpty(message = \"\u5173\u952e\u5b57\u4e0d\u80fd\u4e3a\u7a7a\") String keyword)",
+        "bucket": "breaking"
+      }
+    ],
+    "nas-music/src/main/java/top/itning/yunshunas/music/entity/Music.java": [
+      {
+        "kind": "remove_javax_persistence_annotations",
+        "general_idea": "Remove JPA annotations to migrate from Hibernate/JPA persistence to a non-annotated entity model (likely switching to MyBatis or similar).",
+        "human_impl": "Removed @Entity, @Table, @Id, @GeneratedValue, @Column, @CreationTimestamp, and @UpdateTimestamp annotations.",
+        "bucket": "breaking"
+      }
+    ],
+    "nas-music/src/main/java/top/itning/yunshunas/music/exception/ExceptionResolver.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.servlet and javax.validation imports with jakarta equivalents to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.servlet.http.HttpServletResponse;\nimport jakarta.validation.ConstraintViolationException;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "import_refactoring",
+        "general_idea": "Update import path for RestModel to reflect a package restructuring from music.dto to common.model.",
+        "human_impl": "import top.itning.yunshunas.common.model.RestModel;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

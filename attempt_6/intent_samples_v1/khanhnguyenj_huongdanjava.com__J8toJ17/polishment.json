@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "repo": "khanhnguyenj/huongdanjava.com",
+    "stage": "J8->J17",
+    "family": null,
+    "sha_from": "2f9c38221b5072a94c9f9f16a36698ec154e3ac0",
+    "sha_to": "9bedfbcec6c790f2a4460cee1d8feb940beff438"
+  },
+  "by_file": {
+    "lombok-introduction/src/main/java/com/huongdanjava/lombok/Student.java": [
+      {
+        "kind": "refactor_lombok_annotations",
+        "general_idea": "Replace the monolithic @Data annotation with explicit @Getter, @Setter, @NoArgsConstructor, and @AllArgsConstructor to gain finer control over generated code.",
+        "human_impl": "Removed @Data; added @Getter, @Setter, @NoArgsConstructor, @AllArgsConstructor.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_field_renaming",
+        "general_idea": "Simplify the student model by replacing separate name fields with a single 'name' field and adding a 'code' field.",
+        "human_impl": "Replaced firstName, middleName, lastName with name; added code.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Add a dateOfBirth field to the Student class to track birth dates.",
+        "human_impl": "Added private Date dateOfBirth;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constructor",
+        "general_idea": "Introduce a specific single-argument constructor for the Student class.",
+        "human_impl": "Added public Student(String name) { this.name = name; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_field",
+        "general_idea": "Remove the country field as it is no longer part of the Student model.",
+        "human_impl": "Removed private String country;",
+        "bucket": "polishment"
+      }
+    ],
+    "spring-jdbc-transaction-management/src/main/java/com/huongdanjava/springjdbctransactionmanagement/Application.java": [
+      {
+        "kind": "reorder_imports",
+        "general_idea": "Reorder import statements to group java.* imports before third-party imports.",
+        "human_impl": "moved 'import java.math.BigDecimal;' before 'import com.huongdanjava...'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_indentation",
+        "general_idea": "Adjust code indentation from 4 spaces to 2 spaces to match project style.",
+        "human_impl": "changed indentation of main method body from 4 spaces to 2 spaces",
+        "bucket": "polishment"
+      }
+    ],
+    "spring-jdbc-transaction-management/src/main/java/com/huongdanjava/springjdbctransactionmanagement/dao/impl/AccountDAOImpl.java": [
+      {
+        "kind": "import_reordering",
+        "general_idea": "Reorder imports to group java.* packages before third-party packages.",
+        "human_impl": "Moved java.math.BigDecimal, java.sql.ResultSet, java.sql.SQLException before org.springframework.* imports.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "indentation_normalization",
+        "general_idea": "Standardize code indentation to use 2 spaces instead of 4 spaces.",
+        "human_impl": "Changed indentation of class body and method contents from 4 spaces to 2 spaces.",
+        "bucket": "polishment"
+      }
+    ],
+    "spring-jdbc-transaction-management/src/main/java/com/huongdanjava/springjdbctransactionmanagement/service/impl/AccountServiceImpl.java": [
+      {
+        "kind": "reorder_imports",
+        "general_idea": "Reorder import statements to group java.* imports before third-party and local imports.",
+        "human_impl": "moved 'import java.math.BigDecimal;' before 'import org.springframework...'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "adjust_indentation",
+        "general_idea": "Change code indentation from 4 spaces to 2 spaces to match a new coding style.",
+        "human_impl": "replaced 4-space indents with 2-space indents for class body and method body",
+        "bucket": "polishment"
+      }
+    ],
+    "freemarker-hello-world/pom.xml": [
+      {
+        "kind": "bump_freemarker_version",
+        "general_idea": "Upgrade the Freemarker library dependency from version 2.3.26-incubating to 2.3.27-incubating.",
+        "human_impl": "<version>2.3.27-incubating</version>",
+        "bucket": "polishment"
+      }
+    ],
+    "spark-hello-world/pom.xml": [
+      {
+        "kind": "dependency_version_bump",
+        "general_idea": "Upgrade spark-core library to a newer version.",
+        "human_impl": "<version>2.9.1</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "build_plugin_addition",
+        "general_idea": "Add maven-compiler-plugin to explicitly configure Java source and target levels.",
+        "human_impl": "<plugin>...<artifactId>maven-compiler-plugin</artifactId>...</plugin>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

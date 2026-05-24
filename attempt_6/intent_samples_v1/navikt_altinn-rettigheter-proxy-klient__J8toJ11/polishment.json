@@ -1,0 +1,161 @@
+{
+  "meta": {
+    "repo": "navikt/altinn-rettigheter-proxy-klient",
+    "stage": "J8->J11",
+    "family": "junit4-mockito",
+    "sha_from": "4e85035b8d63e3062ddedad9a7165ee62cda806e",
+    "sha_to": "dba04679c1ad521da29a6b69c552ea00ae09d0e2"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "enable_kotlin_spring_plugin",
+        "general_idea": "Uncomment the Kotlin Spring compiler plugin to enable Spring support in Kotlin.",
+        "human_impl": "<compilerPlugins> <plugin>spring</plugin> </compilerPlugins>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_assembly_plugin",
+        "general_idea": "Remove the maven-assembly-plugin configuration, likely replaced by Spring Boot repackaging.",
+        "human_impl": "<!-- removed maven-assembly-plugin block -->",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_jcenter_repository",
+        "general_idea": "Remove the deprecated JCenter repository from the project configuration.",
+        "human_impl": "<!-- removed jcenter repository block -->",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_oidc_test_support",
+        "general_idea": "Add oidc-test-support dependency for testing OIDC functionality.",
+        "human_impl": "<artifactId>oidc-test-support</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mockito_dependency",
+        "general_idea": "Add Mockito core dependency for unit testing.",
+        "human_impl": "<artifactId>mockito-core</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "downgrade_wiremock_version",
+        "general_idea": "Downgrade WireMock version, possibly for compatibility with new test dependencies.",
+        "human_impl": "<version>2.24.1</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reset_project_version",
+        "general_idea": "Reset the project version to 0.0.1-SNAPSHOT.",
+        "human_impl": "<version>0.0.1-SNAPSHOT</version>",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_readme_dependency_coords",
+        "general_idea": "Update the Maven dependency coordinates in the README to reflect the new artifact ID and version property naming convention.",
+        "human_impl": "<artifactId>altinnrettigheter.proxy.klient</artifactId>\n<version>${altinnrettigheter.proxy.klient.version}</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_readme_usage_examples",
+        "general_idea": "Remove detailed Java/Kotlin usage examples and instantiation code from the README to simplify documentation.",
+        "human_impl": "Removed code blocks showing AltinnrettigheterProxyKlientConfig and klient.hentOrganisasjoner usage.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refine_readme_description",
+        "general_idea": "Refine the introductory description and build instructions for clarity and conciseness.",
+        "human_impl": "Changed 'Bibliotek som tilbyr en Http klient...' to 'Biblioteket som tilbyr en klient...' and removed jar file output details.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/kotlin/no/nav/arbeidsgiver/altinnrettigheter/proxy/klient/AltinnrettigheterProxyKlient.kt": [
+      {
+        "kind": "implement_uri_builder",
+        "general_idea": "Implement URI construction using Spring's UriComponentsBuilder instead of string concatenation.",
+        "human_impl": "Added `getAltinnRettigheterProxyURI` and `getAltinnURI` methods using `UriComponentsBuilder`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "implement_header_helpers",
+        "general_idea": "Create helper methods to construct HTTP headers for different endpoints.",
+        "human_impl": "Added `getAuthHeadersForInnloggetBruker` and `getHeaderEntityForAltinn` methods.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_error_handling",
+        "general_idea": "Simplify error handling logic by relying on RestTemplate's exception propagation and basic status code checks.",
+        "human_impl": "Replaced complex Fuel result parsing with simple `if (respons.statusCode != HttpStatus.OK)` checks and try-catch blocks.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_logger_class",
+        "general_idea": "Update the logger to reference the new error handler class.",
+        "human_impl": "Changed `LoggerFactory.getLogger(this::class.java)` to `LoggerFactory.getLogger(RestTemplateProxyErrorHandler::class.java)`.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/kotlin/no/nav/arbeidsgiver/altinnrettigheter/proxy/klient/model/Api.kt": [
+      {
+        "kind": "remove_unused_data_class",
+        "general_idea": "Remove the unused Subject data class to clean up the model.",
+        "human_impl": "Removed `data class Subject(val value: String)`",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_data_class",
+        "general_idea": "Rename AltinnReportee to AltinnOrganisasjon to better reflect its semantic meaning.",
+        "human_impl": "Renamed `data class AltinnReportee` to `data class AltinnOrganisasjon`",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/kotlin/no/nav/arbeidsgiver/altinnrettigheter/proxy/klient/utils/CorrelationIdUtils.kt": [
+      {
+        "kind": "visibility_change",
+        "general_idea": "Changed the visibility of a constant from private to public to allow external access.",
+        "human_impl": "private const val CORRELATION_ID_MDC_NAME = \"correlationId\" -> val CORRELATION_ID_MDC_NAME = \"correlationId\"",
+        "bucket": "polishment"
+      }
+    ],
+    "src/test/kotlin/no/nav/arbeidsgiver/altinnrettigheter/proxy/klient/AltinnrettigheterProxyKlientIntegrationTest.kt": [
+      {
+        "kind": "refactor_imports",
+        "general_idea": "Consolidate WireMock client imports into a wildcard import for brevity.",
+        "human_impl": "import com.github.tomakehurst.wiremock.client.WireMock.*",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_imports",
+        "general_idea": "Move ISSUER_SELVBETJENING constant import to a new utility package location.",
+        "human_impl": "import no.nav.arbeidsgiver.altinnrettigheter.proxy.klient.tilgangskontroll.TilgangskontrollUtils.Companion.ISSUER_SELVBETJENING",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_imports",
+        "general_idea": "Consolidate JUnit imports into a wildcard import.",
+        "human_impl": "import org.junit.*",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_test_logic",
+        "general_idea": "Remove obsolete test cases related to fallback logic and error handling that are no longer applicable or tested differently.",
+        "human_impl": "Removed multiple @Test methods for fallback and error scenarios",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_test_logic",
+        "general_idea": "Rewrite remaining test to use inline WireMock stubs and verify requests directly instead of utility functions.",
+        "human_impl": "wireMockServer.stubFor(get(urlEqualTo(...)).willReturn(...))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_test_cleanup",
+        "general_idea": "Remove unused constants and static token context from companion object.",
+        "human_impl": "Removed FNR_INNLOGGET_BRUKER, SYKEFRAV\u00c6R_SERVICE_CODE, tokenContext",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

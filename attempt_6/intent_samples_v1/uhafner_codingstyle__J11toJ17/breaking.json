@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "repo": "uhafner/codingstyle",
+    "stage": "J11->J17",
+    "family": "junit4-mockito",
+    "sha_from": "963c64cb8dbc1857c19ee8d5e2cdbadce84f9236",
+    "sha_to": "0920baefea04ba861831547851712af0908f6adc"
+  },
+  "by_file": {}
+}

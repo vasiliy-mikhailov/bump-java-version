@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "repo": "Genc/spring-boot-boilerplate",
+    "stage": "J8->J11",
+    "family": "spring-boot-2",
+    "sha_from": "0bbbe64dab4e4ddac9118dafa81be279d27ee8cd",
+    "sha_to": "d425f683e25a52b1388dfdac5a41f0b71f65ad94"
+  },
+  "by_file": {
+    "src/main/java/design/boilerplate/springboot/configuration/SecurityConfiguration.java": [
+      {
+        "kind": "update_swagger_endpoints",
+        "general_idea": "Updated permitted URL patterns to match OpenAPI 3.0 (Swagger 3) endpoints instead of Swagger 2.",
+        "human_impl": "Changed antMatchers to include '/v3/api-docs/**' and '/swagger-ui/**' instead of '/v2/api-docs' and '/swagger-resources/**'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "cleanup_unused_imports",
+        "general_idea": "Removed imports for classes no longer used after the security configuration refactoring.",
+        "human_impl": "Removed imports for UserDetailsServiceImpl, AuthenticationManagerBuilder, WebSecurityConfigurerAdapter, BCryptPasswordEncoder, and Autowired.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_formatter_comments",
+        "general_idea": "Added formatter off/on comments to preserve the fluent API style of the HttpSecurity builder.",
+        "human_impl": "Added //@formatter:off and //@formatter:on around the http.cors()...build() chain.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/design/boilerplate/springboot/configuration/SwaggerConfiguration.java": [
+      {
+        "kind": "update_config_annotation",
+        "general_idea": "Switch configuration property binding from manual `@Value` injections to Spring Boot's `@ConfigurationProperties` for cleaner code.",
+        "human_impl": "Added `@ConfigurationProperties(prefix = \"swagger\")` and `@Getter`/`@Setter` annotations, removing individual `@Value` annotations and `@PropertySource`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_license_field",
+        "general_idea": "Rename field `licence` to `appLicense` to align with standard naming conventions and new property binding.",
+        "human_impl": "Changed private field `private String licence;` to `private String appLicense;`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_license_url_field",
+        "general_idea": "Rename field `licenceUrl` to `appLicenseUrl` to align with standard naming conventions and new property binding.",
+        "human_impl": "Changed private field `private String licenceUrl;` to `private String appLicenseUrl;`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_contact_email_field",
+        "general_idea": "Rename field `contactEmail` to `contactMail` to match the expected property key or internal naming preference.",
+        "human_impl": "Changed private field `private String contactEmail;` to `private String contactMail;`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_global_params",
+        "general_idea": "Remove the legacy method for adding global header parameters as this is now handled by the security scheme definition.",
+        "human_impl": "Deleted the `getHeaderParams()` method and its usage in the `api()` bean definition.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/design/boilerplate/springboot/security/jwt/JwtAuthenticationFilter.java": [
+      {
+        "kind": "add_final_modifier",
+        "general_idea": "Added the 'final' keyword to a local variable declaration to enforce immutability.",
+        "human_impl": "UserDetails userDetails -> final UserDetails userDetails",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_whitespace",
+        "general_idea": "Corrected missing whitespace after a comma in a method argument list for better readability.",
+        "human_impl": "null,userDetails.getAuthorities() -> null, userDetails.getAuthorities()",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/design/boilerplate/springboot/security/jwt/JwtTokenManager.java": [
+      {
+        "kind": "externalize_jwt_config",
+        "general_idea": "Replaced hardcoded security constants with a dedicated properties class to support configuration-driven settings.",
+        "human_impl": "Removed static import of SecurityConstants and injected JwtProperties via @RequiredArgsConstructor to access issuer, secret, and expiration.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/design/boilerplate/springboot/security/jwt/JwtTokenService.java": [
+      {
+        "kind": "fix_log_format_string",
+        "general_idea": "Remove leading whitespace in SLF4J log format string to ensure correct parameter substitution and cleaner output.",
+        "human_impl": "Changed log.info(\" {} has successfully logged in!\", ...) to log.info(\"{} has successfully logged in!\", ...)",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_project_version",
+        "general_idea": "Increment project version to 2.0.0 to reflect the major migration.",
+        "human_impl": "<version>2.0.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_description",
+        "general_idea": "Update project description to reflect the new Spring Boot version.",
+        "human_impl": "Spring Boot(2.7.4)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_jwt_version",
+        "general_idea": "Upgrade JWT library version to 4.0.0.",
+        "human_impl": "<jwt.version>4.0.0</jwt.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_mapstruct_version",
+        "general_idea": "Upgrade MapStruct to 1.5.2.Final for better Java 11 compatibility and features.",
+        "human_impl": "<mapstruct.version>1.5.2.Final</mapstruct.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_apache_commons_version",
+        "general_idea": "Upgrade Apache Commons Lang to 3.12.0.",
+        "human_impl": "<apache-commons.version>3.12.0</apache-commons.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_openapi_swagger_version",
+        "general_idea": "Define version property for the new OpenAPI Swagger library.",
+        "human_impl": "<openapi-swagger.version>1.6.11</openapi-swagger.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_springfox_swagger_version",
+        "general_idea": "Remove property for the deprecated Springfox Swagger library.",
+        "human_impl": "removed <springfox-swagger2.version>2.9.2</springfox-swagger2.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_maven_plugin_version",
+        "general_idea": "Remove explicit Maven plugin version property, likely relying on parent or defaults.",
+        "human_impl": "removed <apache-maven-plugin.version>3.8.1</apache-maven-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_lombok_version",
+        "general_idea": "Remove explicit Lombok version to inherit it from the Spring Boot parent BOM.",
+        "human_impl": "removed <version>${lombok.version}</version>",
+        "bucket": "polishment"
+      }
+    ],
+    "docker-compose.yml": [
+      {
+        "kind": "bump_compose_version",
+        "general_idea": "Update Docker Compose file version to 3.8 to align with newer Docker Compose specifications.",
+        "human_impl": "version: '3.8'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "quote_port_mapping",
+        "general_idea": "Quote the port mapping string to prevent YAML interpretation issues and adhere to stricter syntax standards.",
+        "human_impl": "- \"5432:5432\"",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

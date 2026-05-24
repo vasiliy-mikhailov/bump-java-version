@@ -9,103 +9,97 @@
   "by_file": {
     "clean-architecture-example/configuration/src/main/java/com/huongdanjava/cleanarchitecture/Application.java": [],
     "clean-architecture-example/configuration/src/main/java/com/huongdanjava/cleanarchitecture/configuration/UseCaseConfiguration.java": [],
-    "clean-architecture-example/db/src/main/java/com/huongdanjava/cleanarchitecture/db/StudentAdapterImpl.java": [
-      {
-        "kind": "indentation_normalization",
-        "general_idea": "Replaced tab-based indentation with spaces to align with modern Java coding standards.",
-        "human_impl": "Changed leading tabs to spaces in class body and method definitions.",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "import_cleanup",
-        "general_idea": "Removed an unnecessary blank line between import statements to clean up the file structure.",
-        "human_impl": "Deleted empty line after 'import org.springframework.beans.factory.annotation.Autowired;'.",
-        "bucket": "polishment"
-      }
-    ],
+    "clean-architecture-example/db/src/main/java/com/huongdanjava/cleanarchitecture/db/StudentAdapterImpl.java": [],
     "clean-architecture-example/db/src/main/java/com/huongdanjava/cleanarchitecture/db/StudentRepository.java": [],
     "clean-architecture-example/db/src/main/java/com/huongdanjava/cleanarchitecture/db/mapper/StudentMapper.java": [
       {
         "kind": "refactor_constructor_usage",
-        "general_idea": "Replace setter-based object initialization with a constructor call to improve conciseness.",
-        "human_impl": "Student student = new Student(model.getName(), model.getAge());",
-        "bucket": "polishment"
+        "general_idea": "Replace manual setter calls with a constructor call to instantiate the Student entity.",
+        "before": "Student student = new Student();\n\t\tstudent.setName(model.getName());\n\t\tstudent.setAge(model.getAge());",
+        "after": "Student student = new Student(model.getName(), model.getAge());",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "formatting_indentation",
-        "general_idea": "Normalize code indentation from tabs to spaces.",
-        "human_impl": "Changed leading whitespace from tabs to 2 spaces.",
-        "bucket": "polishment"
+        "kind": "fix_indentation",
+        "general_idea": "Change indentation from tabs to spaces to match project style.",
+        "before": "\tpublic static Student toEntity(StudentModel model) {\n\t\tif (model == null) {",
+        "after": "  public static Student toEntity(StudentModel model) {\n    if (model == null) {",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "clean-architecture-example/db/src/main/java/com/huongdanjava/cleanarchitecture/db/model/StudentModel.java": [
       {
-        "kind": "migrate_javax_to_jakarta",
-        "general_idea": "Replace javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements.",
-        "human_impl": "import jakarta.persistence.Column;",
-        "bucket": "breaking"
+        "kind": "import_migration_javax_to_jakarta",
+        "general_idea": "Migrate JPA annotations from javax.persistence to jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in newer JDKs/servers.",
+        "before": "import javax.persistence.Column;\nimport javax.persistence.Entity;\nimport javax.persistence.GeneratedValue;\nimport javax.persistence.Id;\nimport javax.persistence.Table;",
+        "after": "import jakarta.persistence.Column;\nimport jakarta.persistence.Entity;\nimport jakarta.persistence.GeneratedValue;\nimport jakarta.persistence.Id;\nimport jakarta.persistence.Table;",
+        "bucket": "breaking",
+        "why_exists": "Compile error: package javax.persistence does not exist in Jakarta EE 9+ environments (e.g., Spring Boot 3.x, Tomcat 10+), which are standard for JDK 21 migrations."
       },
       {
-        "kind": "remove_lombok_annotation",
-        "general_idea": "Remove the @Data annotation from Lombok to manually define getters and setters.",
-        "human_impl": "@Data removed",
-        "bucket": "polishment"
+        "kind": "remove_lombok_data_annotation",
+        "general_idea": "Remove Lombok @Data annotation and manually implement getters and setters to decouple from Lombok or align with explicit code style.",
+        "before": "@Data",
+        "after": "",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "add_manual_getters_setters",
-        "general_idea": "Implement explicit getter and setter methods for fields previously handled by Lombok.",
-        "human_impl": "public Long getId() { return id; }",
-        "bucket": "polishment"
+        "kind": "add_explicit_getters_setters",
+        "general_idea": "Add explicit getter and setter methods for fields previously handled by Lombok @Data.",
+        "before": "",
+        "after": "public Long getId() { return id; }\npublic void setId(Long id) { this.id = id; }\npublic String getName() { return name; }\npublic void setName(String name) { this.name = name; }\npublic int getAge() { return age; }\npublic void setAge(int age) { this.age = age; }",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "fix_indentation",
-        "general_idea": "Standardize code indentation from tabs to spaces.",
-        "human_impl": "private Long id; ->   private Long id;",
-        "bucket": "polishment"
+        "kind": "indentation_normalization",
+        "general_idea": "Normalize indentation from tabs to spaces for consistent code formatting.",
+        "before": "\tprivate static final long serialVersionUID = 1L;",
+        "after": "  private static final long serialVersionUID = 1L;",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "clean-architecture-example/entities/src/main/java/com/huongdanjava/cleanarchitecture/entities/Student.java": [
       {
         "kind": "refactor_to_record",
-        "general_idea": "Replace a standard POJO class with fields and manual getters/setters with a Java record to leverage concise data carrier syntax.",
-        "human_impl": "public record Student(String name, int age) {}",
-        "bucket": "polishment"
+        "general_idea": "Replace a standard POJO class with a Java record to leverage concise syntax and built-in immutability features introduced in modern Java versions.",
+        "before": "public class Student { private String name; private int age; public String getName() { return name; } public void setName(String name) { this.name = name; } public int getAge() { return age; } public void setAge(int age) { this.age = age; } }",
+        "after": "public record Student(String name, int age) { }",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
-    "clean-architecture-example/rest/src/main/java/com/huongdanjava/cleanarchitecture/rest/StudentController.java": [
-      {
-        "kind": "indentation_normalization",
-        "general_idea": "Replaced tab-based indentation with spaces to align with modern Java coding standards.",
-        "human_impl": "Changed leading whitespace from tabs to 2 spaces in method bodies and field declarations.",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "import_cleanup",
-        "general_idea": "Removed an unnecessary blank line between import groups to tighten the file structure.",
-        "human_impl": "Deleted the empty line separating Spring imports from local package imports.",
-        "bucket": "polishment"
-      }
-    ],
+    "clean-architecture-example/rest/src/main/java/com/huongdanjava/cleanarchitecture/rest/StudentController.java": [],
     "clean-architecture-example/rest/src/main/java/com/huongdanjava/cleanarchitecture/rest/dto/StudentDto.java": [
       {
-        "kind": "migrate_to_record",
-        "general_idea": "Replace a Lombok-annotated POJO with a Java record to leverage built-in immutability and reduce boilerplate.",
-        "human_impl": "public record StudentDto(String name, int age) {}",
-        "bucket": "polishment"
+        "kind": "refactor_to_record",
+        "general_idea": "Replace a Lombok-annotated class with a Java record to leverage built-in data carrier features.",
+        "before": "@Data\npublic class StudentDto {\n    private String name;\n    private int age;\n}",
+        "after": "public record StudentDto(String name, int age) {}",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "clean-architecture-example/rest/src/main/java/com/huongdanjava/cleanarchitecture/rest/mapper/StudentMapper.java": [
       {
         "kind": "refactor_constructor_usage",
-        "general_idea": "Replace manual setter calls with a constructor that accepts the entity's data, likely leveraging Java 21 record features or a new DTO constructor.",
-        "human_impl": "StudentDto studentDto = new StudentDto(entity.name(), entity.age());",
-        "bucket": "polishment"
+        "general_idea": "Replace manual setter calls with a constructor that accepts the entity's data, likely leveraging Java 14+ records or a new constructor added to the DTO.",
+        "before": "StudentDto studentDto = new StudentDto();\n        studentDto.setName(entity.getName());\n        studentDto.setAge(entity.getAge());",
+        "after": "StudentDto studentDto = new StudentDto(entity.name(), entity.age());",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "fix_indentation",
-        "general_idea": "Normalize code indentation from mixed tabs/spaces to consistent spaces.",
-        "human_impl": "Changed indentation from tabs to 2 spaces.",
-        "bucket": "polishment"
+        "kind": "refactor_indentation",
+        "general_idea": "Normalize indentation from mixed tabs/spaces to consistent spaces.",
+        "before": "\tpublic static StudentDto toDto(Student entity) {\n\t\tif (entity == null) {\n\t\t\treturn null;\n\t\t}\n\n        StudentDto studentDto = new StudentDto();\n        studentDto.setName(entity.getName());\n        studentDto.setAge(entity.getAge());\n\n        return studentDto;\n    }",
+        "after": "  public static StudentDto toDto(Student entity) {\n    if (entity == null) {\n      return null;\n    }\n\n    StudentDto studentDto = new StudentDto(entity.name(), entity.age());\n\n    return studentDto;\n  }",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "clean-architecture-example/use-cases/src/main/java/com/huongdanjava/cleanarchitecture/usecases/adapter/StudentAdapter.java": [],

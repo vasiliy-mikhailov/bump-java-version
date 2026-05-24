@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "sineverba/online-banking-backend",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "ca5e5863ecd7434422b41708fb55db6a5f5b77ac",
+    "sha_to": "20ad989fc2f64eb2b3f3f0b0a03113e9b510b8b7"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent version from 2.6.3 to 3.1.9 to align with Java 21 support.",
+        "human_impl": "<version>3.1.9</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_21",
+        "general_idea": "Explicitly set the Java version property to 21 for the build.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

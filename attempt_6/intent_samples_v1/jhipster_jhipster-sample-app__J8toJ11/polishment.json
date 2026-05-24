@@ -1,0 +1,575 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "7ef35d947783e058274f3d7ee346842822700a73",
+    "sha_to": "fc3864a13371b77c9a6dc5602dba9bc5b4cd6f7e"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "add_mapstruct_dependency",
+        "general_idea": "Add MapStruct dependencies for type-safe bean mapping, a standard practice in modern JHipster applications.",
+        "human_impl": "<artifactId>mapstruct</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jhipster_framework",
+        "general_idea": "Add the JHipster Framework dependency to utilize shared utilities and configurations provided by the JHipster ecosystem.",
+        "human_impl": "<artifactId>jhipster-framework</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_testcontainers",
+        "general_idea": "Add Testcontainers for MySQL to enable robust integration testing with real database instances.",
+        "human_impl": "<artifactId>mysql</artifactId> <scope>test</scope>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_packaging",
+        "general_idea": "Change project packaging from WAR to JAR to align with the standard executable JAR format of modern Spring Boot applications.",
+        "human_impl": "<packaging>jar</packaging>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_plugins",
+        "general_idea": "Update Maven plugin versions (compiler, surefire, etc.) to versions compatible with Java 11 and modern build standards.",
+        "human_impl": "<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_management",
+        "general_idea": "Introduce JHipster Dependencies BOM to centralize and manage transitive dependency versions.",
+        "human_impl": "<artifactId>jhipster-dependencies</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Boot Thymeleaf starter for server-side rendering support.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-thymeleaf</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Boot Web starter for web application support.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "exclude_dependency",
+        "general_idea": "Exclude JUnit Vintage engine from Spring Boot Test to enforce JUnit 5 usage.",
+        "human_impl": "<exclusions><exclusion><groupId>org.junit.vintage</groupId><artifactId>junit-vintage-engine</artifactId></exclusion></exclusions>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Boot Test dependency for testing utilities.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-test</artifactId><scope>test</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Security Test dependency for security testing.",
+        "human_impl": "<dependency><groupId>org.springframework.security</groupId><artifactId>spring-security-test</artifactId><scope>test</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add ArchUnit JUnit 5 API for architectural testing.",
+        "human_impl": "<dependency><groupId>com.tngtech.archunit</groupId><artifactId>archunit-junit5-api</artifactId><scope>test</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add ArchUnit JUnit 5 Engine for architectural testing execution.",
+        "human_impl": "<dependency><groupId>com.tngtech.archunit</groupId><artifactId>archunit-junit5-engine</artifactId><scope>test</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Zalando Problem Spring Web for standardized error responses.",
+        "human_impl": "<dependency><groupId>org.zalando</groupId><artifactId>problem-spring-web</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add JJWT API for JSON Web Token handling.",
+        "human_impl": "<dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-api</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add JJWT Implementation for JSON Web Token handling.",
+        "human_impl": "<dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-impl</artifactId><scope>runtime</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add JJWT Jackson module for JSON serialization.",
+        "human_impl": "<dependency><groupId>io.jsonwebtoken</groupId><artifactId>jjwt-jackson</artifactId><scope>runtime</scope></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Security Data for security domain object support.",
+        "human_impl": "<dependency><groupId>org.springframework.security</groupId><artifactId>spring-security-data</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Micrometer Prometheus registry for metrics export.",
+        "human_impl": "<dependency><groupId>io.micrometer</groupId><artifactId>micrometer-registry-prometheus</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Dropwizard Metrics Core for metrics collection.",
+        "human_impl": "<dependency><groupId>io.dropwizard.metrics</groupId><artifactId>metrics-core</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Remove Spring Cloud Cloud Foundry connector as it is deprecated/unused.",
+        "human_impl": "<dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-cloudfoundry-connector</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Remove Spring Cloud Spring Service connector as it is deprecated/unused.",
+        "human_impl": "<dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-spring-service-connector</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Remove Spring Cloud Local Config connector as it is deprecated/unused.",
+        "human_impl": "<dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-localconfig-connector</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Remove Spark Metrics Reporter as it is replaced by Micrometer.",
+        "human_impl": "<dependency><groupId>fr.ippon.spark.metrics</groupId><artifactId>metrics-spark-reporter</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add Jib Maven Plugin for container image building without Docker daemon.",
+        "human_impl": "<plugin><groupId>com.google.cloud.tools</groupId><artifactId>jib-maven-plugin</artifactId></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_plugin_config",
+        "general_idea": "Update Liquibase plugin to use Hibernate 5 and Spring Boot 2 dependencies.",
+        "human_impl": "<dependency><groupId>org.liquibase.ext</groupId><artifactId>liquibase-hibernate5</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add JaCoCo Maven Plugin for code coverage reporting.",
+        "human_impl": "<plugin><groupId>org.jacoco</groupId><artifactId>jacoco-maven-plugin</artifactId></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add Checkstyle Maven Plugin for code style enforcement.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-checkstyle-plugin</artifactId></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add Failsafe Maven Plugin for integration test execution.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-failsafe-plugin</artifactId></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add Git Commit ID Plugin to generate git properties.",
+        "human_impl": "<plugin><groupId>pl.project13.maven</groupId><artifactId>git-commit-id-plugin</artifactId></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_plugin",
+        "general_idea": "Add Properties Maven Plugin to read sonar-project.properties.",
+        "human_impl": "<plugin><groupId>org.codehaus.mojo</groupId><artifactId>properties-maven-plugin</artifactId></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_plugin_config",
+        "general_idea": "Configure Surefire Plugin to exclude integration tests and set report directory.",
+        "human_impl": "<excludes><exclude>**/*IT*</exclude><exclude>**/*IntTest*</exclude></excludes>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_plugin_config",
+        "general_idea": "Configure Failsafe Plugin to include integration tests and set report directory.",
+        "human_impl": "<includes><include>**/*IT*</include><include>**/*IntTest*</include></includes>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_plugin_config",
+        "general_idea": "Configure Spring Boot Maven Plugin to repackage and set main class.",
+        "human_impl": "<executions><execution><goals><goal>repackage</goal></goals></execution></executions>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_plugin_config",
+        "general_idea": "Configure Resources Plugin to filter YAML config files.",
+        "human_impl": "<resources><resource><directory>src/main/resources/</directory><filtering>true</filtering><includes><include>config/*.yml</include></includes></resource></resources>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_plugin_config",
+        "general_idea": "Configure WAR Plugin to include static resources and disable web.xml requirement.",
+        "human_impl": "<failOnMissingWebXml>false</failOnMissingWebXml><warSourceDirectory>target/classes/static/</warSourceDirectory>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_plugin",
+        "general_idea": "Remove SortPom plugin as it is no longer needed.",
+        "human_impl": "<plugin><groupId>com.google.code.sortpom</groupId><artifactId>maven-sortpom-plugin</artifactId></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_plugin",
+        "general_idea": "Remove Eclipse Lifecycle Mapping plugin configuration.",
+        "human_impl": "<plugin><groupId>org.eclipse.m2e</groupId><artifactId>lifecycle-mapping</artifactId></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "replace_web_server",
+        "general_idea": "Switch the embedded web server from Tomcat to Undertow to align with JHipster 6.x defaults and improve performance.",
+        "human_impl": "Replaced 'spring-boot-starter-tomcat' with 'spring-boot-starter-undertow' in dev, prod, and eclipse profiles.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_devtools",
+        "general_idea": "Enable Spring Boot DevTools in the development profile to support faster restarts and live reload during development.",
+        "human_impl": "Added 'spring-boot-devtools' dependency to the 'dev' profile.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_build_info",
+        "general_idea": "Generate Spring Boot Actuator build information during the Maven build process for production monitoring.",
+        "human_impl": "Added 'build-info' goal execution to 'spring-boot-maven-plugin' in the 'prod' profile.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_git_commit_id",
+        "general_idea": "Include Git commit details in the application properties for better traceability in production.",
+        "human_impl": "Added 'git-commit-id-plugin' to the 'prod' profile build plugins.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_war_profile",
+        "general_idea": "Provide a dedicated Maven profile to package the application as a WAR file for deployment to external servlet containers.",
+        "human_impl": "Added 'war' profile with 'maven-war-plugin' configuration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_ide_profile",
+        "general_idea": "Configure dependencies required for IDE-based annotation processing, specifically for MapStruct and Hibernate Metamodel generation.",
+        "human_impl": "Added 'IDE' profile with 'mapstruct-processor' and 'hibernate-jpamodelgen' dependencies.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_eclipse_profile",
+        "general_idea": "Configure Maven lifecycle mappings to suppress warnings in Eclipse IDE regarding plugin executions that are not supported by m2e.",
+        "human_impl": "Added 'eclipse' profile with 'lifecycle-mapping' plugin configuration to ignore jacoco and frontend-maven-plugin executions.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_e2e_profile",
+        "general_idea": "Create a specific build profile for End-to-End testing that ensures the application is repackaged correctly.",
+        "human_impl": "Added 'e2e' profile with 'spring-boot-maven-plugin' repackage execution.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_profiles",
+        "general_idea": "Restructure Maven profiles to separate concerns (dev, prod, webpack, tls, api-docs) and manage Spring active profiles via properties.",
+        "human_impl": "Renamed 'fast' to 'api-docs', added 'webpack', 'tls', 'no-liquibase' profiles, and updated 'spring.profiles.active' properties.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_clean_paths",
+        "general_idea": "Update the Maven clean plugin configuration to remove the new static resource directory structure used by Webpack.",
+        "human_impl": "Changed maven-clean-plugin filesets from 'src/main/webapp/dist' to 'target/classes/static/'.",
+        "bucket": "polishment"
+      }
+    ],
+    ".editorconfig": [
+      {
+        "kind": "refactor_editorconfig_structure",
+        "general_idea": "Reorganize .editorconfig to group file-specific overrides and update glob patterns for modern web development file types.",
+        "human_impl": "Moved indent settings to specific globs like [*.{ts,tsx,js,jsx,json,css,scss,yml,html}] and removed obsolete {package,bower}.json rule.",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitattributes": [
+      {
+        "kind": "replace_gitattributes",
+        "general_idea": "Replace the minimal .gitattributes configuration with a comprehensive community-standard template to handle line endings and binary detection for a wider variety of file types.",
+        "human_impl": "Replaced simple `* text eol=lf` and specific extensions with a detailed list including `* text=auto`, specific CRLF/LF rules for scripts, and extensive binary definitions for media, fonts, and archives.",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "gitignore_restructure",
+        "general_idea": "Replace minimal custom .gitignore with a comprehensive, categorized template to cover IDEs, build tools, and OS artifacts.",
+        "human_impl": "Replaced 15 lines of specific ignores with a 148-line structured file containing sections for Node, Eclipse, IntelliJ, Maven, Gradle, etc.",
+        "bucket": "polishment"
+      }
+    ],
+    ".yo-rc.json": [
+      {
+        "kind": "update_jhipster_version",
+        "general_idea": "Update the JHipster generator version to 7.0.0-beta.0 to align with Java 11 support.",
+        "human_impl": "\"jhipsterVersion\": \"7.0.0-beta.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_package_name",
+        "general_idea": "Change the application package name to the standard JHipster sample namespace.",
+        "human_impl": "\"packageName\": \"io.github.jhipster.sample\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_base_name",
+        "general_idea": "Rename the base application name to jhipsterSampleApplication.",
+        "human_impl": "\"baseName\": \"jhipsterSampleApplication\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_authentication_type",
+        "general_idea": "Switch authentication mechanism from cookie-based to JWT.",
+        "human_impl": "\"authenticationType\": \"jwt\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_frontend_framework",
+        "general_idea": "Migrate frontend builder from Grunt to AngularX with npm.",
+        "human_impl": "\"clientFramework\": \"angularX\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_test_frameworks",
+        "general_idea": "Add Gatling and Protractor to the test frameworks configuration.",
+        "human_impl": "\"testFrameworks\": [\"gatling\", \"protractor\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_cache_provider",
+        "general_idea": "Explicitly set the cache provider to ehcache with Hibernate cache enabled.",
+        "human_impl": "\"cacheProvider\": \"ehcache\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_entities",
+        "general_idea": "Define the initial set of entities for the sample application.",
+        "human_impl": "\"entities\": [\"BankAccount\", \"Label\", \"Operation\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_boolean_flags",
+        "general_idea": "Normalize boolean configuration values to strict JSON booleans.",
+        "human_impl": "\"clusteredHttpSession\": false",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_readme_content",
+        "general_idea": "Replace the generic placeholder README with the standard JHipster 7.0.0-beta.0 documentation template.",
+        "human_impl": "Replaced 'README for jhipster' with detailed sections on Development, PWA, Dependencies, Angular CLI, Production, Testing, Docker, and CI.",
+        "bucket": "polishment"
+      }
+    ],
+    "package.json": [
+      {
+        "kind": "update_node_engine_requirement",
+        "general_idea": "Update the required Node.js version to 14.15.0 to align with modern tooling and JDK 11 era build environments.",
+        "human_impl": "\"engines\": { \"node\": \">=14.15.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_test_framework",
+        "general_idea": "Switch frontend testing from Karma/Jasmine to Jest for better performance and modern Angular integration.",
+        "human_impl": "Removed karma, jasmine; Added jest, @angular-builders/jest",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_linting_tools",
+        "general_idea": "Replace JSHint with ESLint and Prettier for standardized code formatting and linting.",
+        "human_impl": "Removed jshint-stylish; Added eslint, prettier, @typescript-eslint/eslint-plugin",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_e2e_testing",
+        "general_idea": "Update end-to-end testing tools to Protractor 7 and Selenium WebDriver 4 compatible versions.",
+        "human_impl": "Updated protractor to 7.0.0, webdriver-manager to 12.1.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jhipster_generator",
+        "general_idea": "Upgrade the JHipster generator dependency to version 7.0.0-beta.0 to support the new project structure.",
+        "human_impl": "\"generator-jhipster\": \"7.0.0-beta.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_ci_scripts",
+        "general_idea": "Add comprehensive npm scripts for CI/CD pipelines including backend testing, e2e preparation, and docker management.",
+        "human_impl": "Added scripts like ci:backend:test, ci:e2e:prepare, docker:db:up",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_metadata",
+        "general_idea": "Update package metadata including name, version, and license to reflect the new application identity.",
+        "human_impl": "\"name\": \"jhipster-sample-application\", \"version\": \"0.0.1-SNAPSHOT\"",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/.h2.server.properties": [
+      {
+        "kind": "update_h2_db_alias",
+        "general_idea": "Rename the H2 database alias from 'JHipster H2 (Embedded)' to 'JHipster H2 (Memory)' to reflect the in-memory nature of the database.",
+        "human_impl": "0=JHipster H2 (Memory)|org.h2.Driver|jdbc\\:h2\\:mem\\:jhipstersampleapplication|jhipsterSampleApplication",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_h2_db_name",
+        "general_idea": "Change the H2 in-memory database name from 'jhipster' to 'jhipstersampleapplication' to match the application context.",
+        "human_impl": "jdbc\\:h2\\:mem\\:jhipstersampleapplication",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_h2_db_user",
+        "general_idea": "Set the H2 database user to 'jhipsterSampleApplication' instead of leaving it empty.",
+        "human_impl": "|jhipsterSampleApplication",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_h2_web_console",
+        "general_idea": "Enable remote access to the H2 web console by setting webAllowOthers to true.",
+        "human_impl": "webAllowOthers=true",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/banner.txt": [
+      {
+        "kind": "update_banner_art",
+        "general_idea": "Replace the old ASCII art banner with the standard JHipster Spring Boot banner including ANSI color codes.",
+        "human_impl": "Replaced custom ASCII art with JHipster's standard colored banner template.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/config/application-dev.yml": [
+      {
+        "kind": "add_devtools_config",
+        "general_idea": "Add Spring Boot DevTools configuration to enable automatic restart and exclude static resources from reloading.",
+        "human_impl": "spring.devtools.restart.enabled: true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_liquibase_config",
+        "general_idea": "Add Liquibase context configuration to enable loading of sample data in the development profile.",
+        "human_impl": "spring.liquibase.contexts: dev, faker",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jhipster_properties",
+        "general_idea": "Introduce JHipster-specific configuration properties for cache, CORS, security, and mail settings.",
+        "human_impl": "jhipster.cache.ehcache.time-to-live-seconds: 3600",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_logging_config",
+        "general_idea": "Update logging configuration to use standard Spring Boot logging levels and add JHipster-specific logging options.",
+        "human_impl": "logging.level.ROOT: DEBUG",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_mail_config",
+        "general_idea": "Refactor mail configuration to use standard Spring Boot properties and add JHipster-specific base URL.",
+        "human_impl": "spring.mail.host: localhost",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_thymeleaf_config",
+        "general_idea": "Simplify Thymeleaf configuration by removing mode setting and keeping cache disabled for development.",
+        "human_impl": "spring.thymeleaf.cache: false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_api_docs_profile",
+        "general_idea": "Include the api-docs profile in the active profiles to enable Swagger documentation in development.",
+        "human_impl": "spring.profiles.include: - api-docs",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_h2_console_config",
+        "general_idea": "Explicitly disable the H2 console in the development profile configuration.",
+        "human_impl": "spring.h2.console.enabled: false",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/config/application-prod.yml": [
+      {
+        "kind": "add_server_compression",
+        "general_idea": "Enable HTTP response compression in the server configuration for performance optimization.",
+        "human_impl": "Added 'server.compression.enabled: true' and mime-types configuration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_graceful_shutdown",
+        "general_idea": "Configure graceful shutdown for the Spring Boot application server.",
+        "human_impl": "Added 'server.shutdown: graceful' property.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_logging_config",
+        "general_idea": "Restructure logging configuration to use standard Spring Boot 'logging.level' properties.",
+        "human_impl": "Replaced custom logging settings with 'logging.level.ROOT: INFO' and package-specific levels.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_devtools_config",
+        "general_idea": "Explicitly disable Spring Boot DevTools in the production profile to prevent accidental activation.",
+        "human_impl": "Added 'spring.devtools.restart.enabled: false' and 'livereload.enabled: false'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_mail_config",
+        "general_idea": "Move mail base URL configuration to the JHipster-specific namespace.",
+        "human_impl": "Moved 'baseUrl' from 'spring.mail' to 'jhipster.mail.base-url'.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/config/application.yml": [
+      {
+        "kind": "add_server_config",
+        "general_idea": "Add standard Spring Boot 2.x server servlet session cookie security settings.",
+        "human_impl": "server.servlet.session.cookie.http-only: true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_info_config",
+        "general_idea": "Configure application info and ribbon display profiles for development environments.",
+        "human_impl": "info.display-ribbon-on-profiles: 'dev'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jhipster_config",
+        "general_idea": "Define JHipster-specific client application properties and metadata.",
+        "human_impl": "jhipster.clientApp.name: 'jhipsterSampleApplicationApp'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_spring_app_config",
+        "general_idea": "Set standard Spring application name and profile activation placeholders.",
+        "human_impl": "spring.application.name: jhipsterSampleApplication",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

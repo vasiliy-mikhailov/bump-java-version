@@ -1,0 +1,131 @@
+{
+  "meta": {
+    "repo": "felix-murcia/OAuth2Server",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "44377a62b85ad4079b7757a0a908ae9e70daadc2",
+    "sha_to": "48b8091f8bc334fd9e4890dd9e51f8b014556403"
+  },
+  "by_file": {
+    "src/main/java/com/oauth/rest/config/SwaggerConfig.java": [
+      {
+        "kind": "migrate_swagger_to_openapi3",
+        "general_idea": "Replace deprecated Springfox Swagger 2 configuration with native SpringDoc OpenAPI 3 specification to ensure compatibility with Java 17 and modern Spring Boot versions.",
+        "human_impl": "Removed @EnableSwagger2 and Docket beans; added OpenAPI bean using io.swagger.v3.oas.models classes.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/oauth/rest/model/UserEntity.java": [
+      {
+        "kind": "migrate_javax_to_jakarta",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Java 17.",
+        "human_impl": "import jakarta.persistence.Column;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/oauth/rest/security/SecurityConfig.java": [
+      {
+        "kind": "migrate_security_config_class",
+        "general_idea": "Remove inheritance from deprecated WebSecurityConfigurerAdapter to comply with Spring Security 5.7+ / Java 17 ecosystem standards.",
+        "human_impl": "Changed class declaration from 'extends WebSecurityConfigurerAdapter' to standalone class.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_http_security_configuration",
+        "general_idea": "Replace deprecated method chaining API with lambda-based DSL for HttpSecurity configuration.",
+        "human_impl": "Replaced '.csrf().disable()' and '.authorizeRequests()' with '.csrf(csrf -> ...)' and '.authorizeHttpRequests(authorize -> ...)' inside a SecurityFilterChain bean.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_authentication_manager",
+        "general_idea": "Update AuthenticationManager bean definition to use AuthenticationConfiguration instead of overriding protected methods.",
+        "human_impl": "Replaced 'super.authenticationManagerBean()' with 'config.getAuthenticationManager()' using injected AuthenticationConfiguration.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_authorization_rules",
+        "general_idea": "Update request matcher syntax from antMatchers to requestMatchers to align with new Spring Security API.",
+        "human_impl": "Replaced '.antMatchers(...)' with '.requestMatchers(...)' inside the authorizeHttpRequests lambda.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/oauth/rest/security/oauth2/OAuth2AuthorizationServer.java": [
+      {
+        "kind": "migrate_oauth2_server_config",
+        "general_idea": "Replace deprecated Spring Security OAuth2 Authorization Server adapter with the new Spring Authorization Server configuration using SecurityFilterChain.",
+        "human_impl": "Removed AuthorizationServerConfigurerAdapter and @EnableAuthorizationServer; added SecurityFilterChain bean with OAuth2AuthorizationServerConfiguration.applyDefaultSecurity.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_client_registration",
+        "general_idea": "Replace legacy ClientDetailsServiceConfigurer with RegisteredClientRepository using the new OAuth2.1 model.",
+        "human_impl": "Replaced in-memory client configuration with RegisteredClient builder and InMemoryRegisteredClientRepository.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_jwt_key_management",
+        "general_idea": "Replace static JWT signing key string with dynamic RSA key pair generation and JWK source.",
+        "human_impl": "Replaced JwtAccessTokenConverter with JWKSource<SecurityContext> bean generating RSA keys via KeyPairGenerator.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_jwt_decoder",
+        "general_idea": "Replace legacy TokenStore and JwtAccessTokenConverter with standard JwtDecoder bean.",
+        "human_impl": "Added JwtDecoder bean using OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource()).",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/oauth/rest/security/oauth2/OAuth2ResourceServer.java": [
+      {
+        "kind": "migrate_security_config_api",
+        "general_idea": "Refactor Spring Security configuration from deprecated class-based inheritance to modern lambda DSL required for Spring Security 5.7+/6.x compatibility.",
+        "human_impl": "Removed extends ResourceServerConfigurerAdapter and @EnableResourceServer; replaced .authorizeRequests() with .authorizeHttpRequests() and chained lambda configurations.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_oauth2_resource_server_config",
+        "general_idea": "Explicitly configure OAuth2 Resource Server with JWT support to replace implicit configuration from removed ResourceServerConfigurerAdapter.",
+        "human_impl": "Added .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> { })) to the HttpSecurity chain.",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "upgrade_parent_pom",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.18 to 3.2.5 to align with Java 17 and modern Spring ecosystem.",
+        "human_impl": "<version>3.2.5</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the target Java version property from 11 to 17.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_oauth2_resource_server",
+        "general_idea": "Replace the deprecated Spring Security OAuth2 autoconfigure with the native Spring Boot 3 OAuth2 Resource Server starter.",
+        "human_impl": "<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_oauth2_authorization_server",
+        "general_idea": "Add the Spring Security OAuth2 Authorization Server dependency required for Boot 3.x authorization flows.",
+        "human_impl": "<artifactId>spring-security-oauth2-authorization-server</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_swagger_with_springdoc",
+        "general_idea": "Replace Springfox Swagger dependencies with Springdoc OpenAPI, which is compatible with Spring Boot 3.",
+        "human_impl": "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_flyway_version",
+        "general_idea": "Update Flyway core to version 10.7.1 to ensure compatibility with Java 17 and Spring Boot 3.",
+        "human_impl": "<version>10.7.1</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

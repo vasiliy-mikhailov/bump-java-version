@@ -1,0 +1,315 @@
+{
+  "meta": {
+    "repo": "ayaka-notes/overleaf-pro",
+    "stage": "J8->J21",
+    "family": "junit4-mockito",
+    "sha_from": "3389615ef69d7cae836767d6efba618691a6df29",
+    "sha_to": "3e81e212f38e3af35fee9f3578ac97201ec155c7"
+  },
+  "by_file": {
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/Main.java": [
+      {
+        "kind": "add_startup_logging",
+        "general_idea": "Add logging of command-line arguments at application startup for better observability.",
+        "human_impl": "Log.info(\"Git Bridge started with args: \" + Arrays.toString(args));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_class_documentation",
+        "general_idea": "Replace the old Javadoc-style comment with a more detailed block comment explaining the application architecture.",
+        "human_impl": "Replaced /** ... */ with /* ... */ containing architectural description.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Import java.util.Arrays to support the new logging statement.",
+        "human_impl": "import java.util.Arrays;",
+        "bucket": "polishment"
+      }
+    ],
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/application/GitBridgeApp.java": [
+      {
+        "kind": "import_cleanup",
+        "general_idea": "Remove unused import and reorder imports to standard conventions.",
+        "human_impl": "Removed `import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;` and moved `java.io`/`javax.servlet` imports to the top.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "javadoc_conversion",
+        "general_idea": "Convert Javadoc comments to standard block comments to reduce noise or fix formatting.",
+        "human_impl": "Changed `/** ... */` to `/* ... */` for class and method descriptions.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "usage_message_update",
+        "general_idea": "Update usage message to indicate config file is optional or clarify syntax.",
+        "human_impl": "Changed `USAGE_MESSAGE` from `\"usage: writelatex-git-bridge config_file\"` to `\"usage: writelatex-git-bridge [config_file]\"`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "field_modifier_cleanup",
+        "general_idea": "Remove redundant private modifier from field declaration.",
+        "human_impl": "Changed `private Config config;` to `Config config;`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "exception_handling_simplification",
+        "general_idea": "Remove handling for an exception type that is no longer thrown or relevant.",
+        "human_impl": "Removed `catch (InvalidRootDirectoryPathException e)` block from constructor.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "logging_enhancement",
+        "general_idea": "Add informational logging for config file loading path.",
+        "human_impl": "Added `Log.info(\"Loading config file at path: \" + configFilePath);` in `loadConfigFile()`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_formatting",
+        "general_idea": "Reformat code indentation and string concatenation style.",
+        "human_impl": "Changed indentation from 4 spaces to 2 spaces and simplified string concatenation in error logs.",
+        "bucket": "polishment"
+      }
+    ],
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/application/config/Config.java": [
+      {
+        "kind": "add_config_field",
+        "general_idea": "Add bindIp configuration field to allow specifying the network interface for the server.",
+        "human_impl": "private String bindIp;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_config_field",
+        "general_idea": "Add idleTimeout configuration field to control connection timeout settings.",
+        "human_impl": "private int idleTimeout;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_config_field",
+        "general_idea": "Add userPasswordEnabled boolean flag to control user password authentication feature.",
+        "human_impl": "private boolean userPasswordEnabled;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_config_field",
+        "general_idea": "Add RepoStoreConfig field to support repository storage configuration.",
+        "human_impl": "private RepoStoreConfig repoStore;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_config_field",
+        "general_idea": "Add SwapStoreConfig field to support swap store configuration.",
+        "human_impl": "private SwapStoreConfig swapStore;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_config_field",
+        "general_idea": "Add SwapJobConfig field to support swap job configuration.",
+        "human_impl": "private SwapJobConfig swapJob;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_config_field",
+        "general_idea": "Add sqliteHeapLimitBytes field to configure SQLite memory usage limits.",
+        "human_impl": "private int sqliteHeapLimitBytes = 0;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_getter",
+        "general_idea": "Add getter methods for new configuration fields.",
+        "human_impl": "public String getBindIp() { return bindIp; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_optional_getter",
+        "general_idea": "Add Optional-based getters for nullable configuration objects to improve API safety.",
+        "human_impl": "public Optional<RepoStoreConfig> getRepoStore() { return Optional.ofNullable(repoStore); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_nullable_annotation",
+        "general_idea": "Add @Nullable annotations to fields that can be null to improve static analysis.",
+        "human_impl": "@Nullable private Oauth2 oauth2;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reformat_code",
+        "general_idea": "Reformat code indentation and style to match new project standards.",
+        "human_impl": "Changed indentation from 4 spaces to 2 spaces.",
+        "bucket": "polishment"
+      }
+    ],
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/application/config/Oauth2.java": [
+      {
+        "kind": "indentation_normalization",
+        "general_idea": "Reformat code indentation from 4 spaces to 2 spaces to align with project style guidelines.",
+        "human_impl": "Changed leading whitespace in class body from 4 spaces to 2 spaces.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "javadoc_style_change",
+        "general_idea": "Change Javadoc comment style to standard block comment style.",
+        "human_impl": "Changed '/**' to '/*' for the class header comment.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "multiline_to_single_line_refactor",
+        "general_idea": "Consolidate multi-line method calls into single lines for brevity.",
+        "human_impl": "Collapsed the 'new Oauth2(...)' call in 'asSanitised' from multiple lines to a single line.",
+        "bucket": "polishment"
+      }
+    ],
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/application/exception/ArgsException.java": [
+      {
+        "kind": "javadoc_style_change",
+        "general_idea": "Changed the Javadoc comment block to a standard multi-line comment block.",
+        "human_impl": "Changed '/**' to '/*' in the class header comment.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "brace_style_change",
+        "general_idea": "Moved the closing brace of the class to the same line as the declaration.",
+        "human_impl": "Changed 'public class ArgsException extends Exception {\\n}' to 'public class ArgsException extends Exception {}'",
+        "bucket": "polishment"
+      }
+    ],
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/application/exception/ConfigFileException.java": [
+      {
+        "kind": "indentation_normalization",
+        "general_idea": "Refactor indentation from 4 spaces to 2 spaces to align with project coding standards.",
+        "human_impl": "Changed leading whitespace from 4 spaces to 2 spaces for fields and methods.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "javadoc_style_change",
+        "general_idea": "Change class-level comment from Javadoc style to standard block comment.",
+        "human_impl": "Replaced '/**' with '/*' for the class header comment.",
+        "bucket": "polishment"
+      }
+    ],
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/data/CandidateSnapshot.java": [
+      {
+        "kind": "implement_auto_closeable",
+        "general_idea": "Implement AutoCloseable interface to enable try-with-resources pattern for resource management.",
+        "human_impl": "class CandidateSnapshot implements AutoCloseable { ... @Override public void close() throws IOException { deleteServletFiles(); } }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_file_writing",
+        "general_idea": "Update file writing logic to use unique identifiers instead of default paths.",
+        "human_impl": "file.writeToDiskWithName(attsDirectory, file.getUniqueIdentifier());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_json_url_generation",
+        "general_idea": "Update JSON URL generation to use unique identifiers for file paths.",
+        "human_impl": "String identifier = file.getUniqueIdentifier(); String url = projectURL + \"/\" + identifier + \"?key=\" + postbackKey;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reformat_code_style",
+        "general_idea": "Reformat code indentation and structure to match new project style guidelines.",
+        "human_impl": "Changed indentation from 4 spaces to 2 spaces and adjusted brace placement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reorder_imports",
+        "general_idea": "Reorder import statements to follow standard Java import ordering conventions.",
+        "human_impl": "Moved java.* imports before uk.ac.* imports.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_javadoc_style",
+        "general_idea": "Change Javadoc comment style to standard block comment style.",
+        "human_impl": "Changed /** ... */ to /* ... */",
+        "bucket": "polishment"
+      }
+    ],
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/data/LockAllWaiter.java": [
+      {
+        "kind": "remove_public_modifier",
+        "general_idea": "Remove redundant public modifier from interface method to adhere to modern Java style conventions.",
+        "human_impl": "void threadsRemaining(int threads);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_javadoc_syntax",
+        "general_idea": "Correct malformed Javadoc comment by changing opening tag from /** to /*.",
+        "human_impl": "/*\n * Created by Winston on 21/02/15.\n */",
+        "bucket": "polishment"
+      }
+    ],
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/data/ServletFile.java": [
+      {
+        "kind": "add_uuid_field",
+        "general_idea": "Add a UUID field to ServletFile to provide a unique identifier for each instance.",
+        "human_impl": "private String uuid; ... this.uuid = UUID.randomUUID().toString();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_uuid_getter",
+        "general_idea": "Expose the unique identifier via a getter method.",
+        "human_impl": "public String getUniqueIdentifier() { return uuid; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_size_method",
+        "general_idea": "Implement a size() method returning the content length, likely to satisfy an interface contract or provide convenience.",
+        "human_impl": "@Override public long size() { return getContents().length; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "indentation_cleanup",
+        "general_idea": "Reformat code indentation from 4 spaces to 2 spaces for consistency.",
+        "human_impl": "Changed indentation style throughout the class.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "javadoc_to_comment",
+        "general_idea": "Replace Javadoc block comment with a standard multi-line comment.",
+        "human_impl": "Changed /** ... */ to /* ... */",
+        "bucket": "polishment"
+      }
+    ],
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/data/filestore/GitDirectoryContents.java": [
+      {
+        "kind": "refactor_constructor_delegation",
+        "general_idea": "Refactor constructor to accept primitive fields directly and delegate the Snapshot-based constructor to it.",
+        "human_impl": "Added constructor taking String/Date args; modified Snapshot constructor to call this(files, rootGitDirectory, projectName, snapshot.getUserName(), ...).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reformat_imports",
+        "general_idea": "Reorder imports to place java.* packages before project-specific packages.",
+        "human_impl": "Moved java.io.File, java.io.IOException, java.util.Date, java.util.List before uk.ac.ic.wlgitbridge imports.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reformat_whitespace",
+        "general_idea": "Adjust indentation and spacing to conform to a new code style (likely 2-space indent).",
+        "human_impl": "Changed indentation from 4 spaces to 2 spaces and adjusted brace placement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_javadoc_tag",
+        "general_idea": "Remove the Javadoc opening tag from the class comment.",
+        "human_impl": "Changed '/**' to '/*' for the class-level comment.",
+        "bucket": "polishment"
+      }
+    ],
+    "services/git-bridge/src/main/java/uk/ac/ic/wlgitbridge/data/filestore/RawDirectory.java": [
+      {
+        "kind": "indentation_normalization",
+        "general_idea": "Changed indentation from 4 spaces to 2 spaces to align with project coding standards.",
+        "human_impl": "Replaced 4-space indents with 2-space indents for fields and methods.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "javadoc_style_change",
+        "general_idea": "Changed the class-level comment from a Javadoc block to a standard multi-line comment.",
+        "human_impl": "Changed '/**' to '/*' for the class header comment.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

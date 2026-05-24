@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "twimart/java-apirest",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "eba614906944319f6bdaba48cb3e0ef4538ad751",
+    "sha_to": "565ecc0b8652cb1c7fb8dc5598b87e990b0a331f"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the project's target Java version from 17 to 21 in properties.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "configure_compiler_plugin",
+        "general_idea": "Explicitly configure maven-compiler-plugin to target Java 21.",
+        "human_impl": "<source>21</source>\n<target>21</target>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

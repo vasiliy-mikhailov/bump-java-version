@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "7ef35d947783e058274f3d7ee346842822700a73",
+    "sha_to": "fc3864a13371b77c9a6dc5602dba9bc5b4cd6f7e"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the Java source and target version properties from 1.8 to 11 to align with the target JDK.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jaxb_dependency",
+        "general_idea": "Add explicit JAXB runtime dependency because it was removed from the JDK standard library in Java 11.",
+        "human_impl": "<artifactId>jaxb-runtime</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_annotation_api_dependency",
+        "general_idea": "Add explicit javax.annotation-api dependency because java.annotation packages were removed from the JDK in Java 11.",
+        "human_impl": "<artifactId>javax.annotation-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_spring_boot_version",
+        "general_idea": "Upgrade Spring Boot from 1.2.0.RELEASE to 2.3.7.RELEASE to support Java 11 and modernize the framework stack.",
+        "human_impl": "<spring-boot.version>2.3.7.RELEASE</spring-boot.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_hibernate_version",
+        "general_idea": "Upgrade Hibernate from 4.3.6.Final to 5.4.25.Final to align with Spring Boot 2.x and Java 11 compatibility.",
+        "human_impl": "<hibernate.version>5.4.25.Final</hibernate.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_liquibase_version",
+        "general_idea": "Upgrade Liquibase from 3.3.2 to 4.2.2 to ensure compatibility with newer Hibernate and Java versions.",
+        "human_impl": "<liquibase.version>4.2.2</liquibase.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_joda_time_with_jsr310",
+        "general_idea": "Replace Joda-Time dependencies with Java 8+ java.time (JSR-310) support, as Joda-Time is deprecated and unnecessary in modern Java.",
+        "human_impl": "<artifactId>jackson-datatype-jsr310</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_hibernate_jackson_module",
+        "general_idea": "Switch Jackson Hibernate module from version 4 to version 5 to match the upgraded Hibernate version.",
+        "human_impl": "<artifactId>jackson-datatype-hibernate5</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_swagger_to_springfox",
+        "general_idea": "Replace legacy swagger-springmvc with Springfox to support OpenAPI 3.0 and modern Spring Boot versions.",
+        "human_impl": "<artifactId>springfox-oas</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_cache_provider",
+        "general_idea": "Switch from Hibernate Ehcache integration to Hibernate JCache (JSR-107) to align with modern Spring Boot caching abstractions.",
+        "human_impl": "<artifactId>hibernate-jcache</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_plugin_config",
+        "general_idea": "Configure Maven Compiler Plugin with Java 11 source/target and annotation processors.",
+        "human_impl": "<configuration><source>${java.version}</source><target>${java.version}</target><annotationProcessorPaths>...</annotationProcessorPaths></configuration>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_plugin_config",
+        "general_idea": "Configure Maven Enforcer Plugin to require Java 8-15 and specific Maven version.",
+        "human_impl": "<requireJavaVersion><version>[1.8,16)</version></requireJavaVersion>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_frontend_build",
+        "general_idea": "Replace the legacy Yeoman/Grunt build process with Webpack managed by the frontend-maven-plugin to support modern frontend tooling.",
+        "human_impl": "Removed 'yeoman-maven-plugin' and added 'frontend-maven-plugin' executions for node/npm install and webpack builds.",
+        "bucket": "breaking"
+      }
+    ],
+    "package.json": [
+      {
+        "kind": "migrate_frontend_framework",
+        "general_idea": "Replace the legacy Grunt/Bower/AngularJS stack with a modern Angular 11 and Webpack build pipeline.",
+        "human_impl": "Removed grunt, bower, karma; Added @angular/core, webpack, @angular/cli",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/config/application-dev.yml": [
+      {
+        "kind": "update_datasource_config",
+        "general_idea": "Migrate datasource configuration from legacy BoneCP-style properties to standard HikariCP properties required by Spring Boot 2.x.",
+        "human_impl": "spring.datasource.type: com.zaxxer.hikari.HikariDataSource",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_jpa_dialect",
+        "general_idea": "Replace the deprecated Hibernate H2 dialect with a custom fixed dialect to ensure compatibility with newer Hibernate versions.",
+        "human_impl": "spring.jpa.database-platform: tech.jhipster.domain.util.FixedH2Dialect",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/config/application-prod.yml": [
+      {
+        "kind": "update_datasource_config",
+        "general_idea": "Migrate datasource configuration from legacy MySQL JDBC driver properties to HikariCP standard properties.",
+        "human_impl": "Changed 'type' to 'com.zaxxer.hikari.HikariDataSource' and moved cache properties under 'hikari.data-source-properties'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_jpa_dialect",
+        "general_idea": "Update JPA configuration to use modern Hibernate dialect and remove deprecated naming strategy.",
+        "human_impl": "Removed 'database-platform' and 'naming-strategy' properties, relying on auto-detection or newer defaults.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_cache_config",
+        "general_idea": "Migrate cache configuration from root-level 'cache' properties to JHipster-specific 'jhipster.cache' namespace.",
+        "human_impl": "Moved 'timeToLiveSeconds' and 'ehcache' settings into 'jhipster.cache.ehcache'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_management_metrics",
+        "general_idea": "Replace legacy metrics exporters (Spark, Graphite) with Spring Boot Actuator Prometheus configuration.",
+        "human_impl": "Removed 'metrics.spark' and 'metrics.graphite', added 'management.metrics.export.prometheus'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jhipster_security_config",
+        "general_idea": "Add JHipster-specific security and JWT configuration properties required for the new version.",
+        "human_impl": "Added 'jhipster.security.authentication.jwt' block with base64-secret and validity settings.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/config/application.yml": [
+      {
+        "kind": "migrate_management_config",
+        "general_idea": "Replace deprecated Spring Boot 1.x management properties with Spring Boot 2.x Actuator configuration structure.",
+        "human_impl": "management.endpoints.web.exposure.include: ['health', 'info', ...]",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_async_config",
+        "general_idea": "Update custom async thread pool configuration to use standard Spring Boot 2.x task execution properties.",
+        "human_impl": "spring.task.execution.pool.core-size: 2",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_mail_config",
+        "general_idea": "Move mail configuration from custom root level to standard Spring Boot 2.x spring.mail namespace.",
+        "human_impl": "jhipster.mail.from: jhipsterSampleApplication@localhost",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_jpa_config",
+        "general_idea": "Update JPA and Hibernate properties to align with Spring Boot 2.x and Hibernate 5.3+ defaults.",
+        "human_impl": "spring.jpa.hibernate.naming.physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_swagger_config",
+        "general_idea": "Replace legacy Swagger 2.x configuration with Springdoc OpenAPI 3.x compatible properties.",
+        "human_impl": "jhipster.api-docs.title: jhipsterSampleApplication API",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_security_config",
+        "general_idea": "Remove deprecated Spring Security 4.x basic auth and Jolokia endpoint settings.",
+        "human_impl": "Removed security.basic.enabled and endpoints.jolokia.enabled",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

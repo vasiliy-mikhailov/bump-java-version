@@ -1,0 +1,241 @@
+{
+  "meta": {
+    "repo": "ralscha/eds-starter6-jpa",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "e52353a7e3f6de2bd25af3eabec27c64631e5839",
+    "sha_to": "4b4b70253ea4fec6f917ba348a7e47e5bc9c6201"
+  },
+  "by_file": {
+    "src/main/java/ch/rasc/eds/starter/config/DevelopmentConfig.java": [
+      {
+        "kind": "remove_resource_handler_override",
+        "general_idea": "Remove the addResourceHandlers override method as the class no longer extends WebMvcConfigurerAdapter.",
+        "human_impl": "-\t@Override\n-\tpublic void addResourceHandlers(ResourceHandlerRegistry registry) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_view_controller_override",
+        "general_idea": "Remove the addViewControllers override method as the class no longer extends WebMvcConfigurerAdapter.",
+        "human_impl": "-\t@Override\n-\tpublic void addViewControllers(ViewControllerRegistry registry) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_enum_code_generation",
+        "general_idea": "Add functionality to generate ExtJS constant and store files from Java enums during application startup.",
+        "human_impl": "private static void writeEnums(Path clientDir) throws IOException { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_collectors_import",
+        "general_idea": "Add import for java.util.stream.Collectors to support the new enum generation logic.",
+        "human_impl": "import java.util.stream.Collectors;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_string_utils_import",
+        "general_idea": "Add import for org.springframework.util.StringUtils to support string manipulation in enum generation.",
+        "human_impl": "import org.springframework.util.StringUtils;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_authority_import",
+        "general_idea": "Add import for the Authority entity to be used in the new enum generation logic.",
+        "human_impl": "import ch.rasc.eds.starter.entity.Authority;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/rasc/eds/starter/config/Startup.java": [
+      {
+        "kind": "remove_autowired_annotation",
+        "general_idea": "Remove explicit @Autowired annotation from constructor to align with Spring Boot 2.0+ convention of single-constructor auto-injection.",
+        "human_impl": "Removed '@Autowired' before 'public Startup(...)'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_default_login",
+        "general_idea": "Change default admin login name from email format to a simple username string.",
+        "human_impl": "Changed 'adminUser.setLoginName(\"admin@starter.com\")' to 'adminUser.setLoginName(\"admin\")'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_default_login",
+        "general_idea": "Change default normal user login name from email format to a simple username string.",
+        "human_impl": "Changed 'normalUser.setLoginName(\"user@starter.com\")' to 'normalUser.setLoginName(\"user\")'",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/rasc/eds/starter/config/WebConfig.java": [
+      {
+        "kind": "add_mustache_compiler_bean",
+        "general_idea": "Register a Mustache compiler bean to enable template rendering in the Spring context.",
+        "human_impl": "@Bean public Mustache.Compiler mustacheCompiler() { return Mustache.compiler(); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_max_retries_config",
+        "general_idea": "Remove explicit max retries configuration, likely relying on default behavior or library defaults.",
+        "human_impl": "config.setMaxRetries(0);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/rasc/eds/starter/config/security/CustomPersistentRememberMeServices.java": [
+      {
+        "kind": "remove_autowired_annotation",
+        "general_idea": "Remove the @Autowired annotation from the constructor to align with Spring Boot's single-constructor injection rules.",
+        "human_impl": "-\t@Autowired\n \tpublic CustomPersistentRememberMeServices(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_null_check",
+        "general_idea": "Add a null check for the lastUsed timestamp to prevent NullPointerExceptions during token validation.",
+        "human_impl": "if (lastUsed != null && lastUsed.plusSeconds(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/rasc/eds/starter/config/security/JpaUserDetails.java": [
+      {
+        "kind": "remove_field_and_accessors",
+        "general_idea": "Remove the screenLocked field and its associated getter and setter methods from the JpaUserDetails class.",
+        "human_impl": "Deleted 'private boolean screenLocked;' field and 'isScreenLocked()'/'setScreenLocked()' methods.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/rasc/eds/starter/config/security/JpaUserDetailsService.java": [
+      {
+        "kind": "remove_autowired_annotation",
+        "general_idea": "Remove the @Autowired annotation from the constructor to rely on Spring's implicit single-constructor injection, which is standard in modern Spring Boot applications.",
+        "human_impl": "Removed `@Autowired` before `public JpaUserDetailsService(JPAQueryFactory jpaQueryFactory)`",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/rasc/eds/starter/config/security/JsonAuthSuccessHandler.java": [
+      {
+        "kind": "remove_autowired_annotation",
+        "general_idea": "Remove the @Autowired annotation from the constructor to align with Spring Boot's single-constructor injection convention.",
+        "human_impl": "- @Autowired\n  public JsonAuthSuccessHandler(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_csrf_controller_import",
+        "general_idea": "Add import for CsrfController to support the new CSRF token retrieval logic.",
+        "human_impl": "+ import ch.rasc.eds.starter.web.CsrfController;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_indentation",
+        "general_idea": "Correct the indentation of the method signature throws clause.",
+        "human_impl": "- throws IOException, ServletException {\n+ throws IOException, ServletException {",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/rasc/eds/starter/config/security/RequireAnyAuthority.java": [
+      {
+        "kind": "relax_security_constraint",
+        "general_idea": "Changed the pre-authorization requirement from specific roles to general authentication.",
+        "human_impl": "@PreAuthorize(\"isAuthenticated()\")",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/rasc/eds/starter/config/security/SecurityConfig.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove import for BCryptPasswordEncoder as the bean definition is removed.",
+        "human_impl": "removed import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove import for Bean annotation as the bean method is removed.",
+        "human_impl": "removed import org.springframework.context.annotation.Bean;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove import for CsrfFilter as the filter configuration is removed.",
+        "human_impl": "removed import org.springframework.security.web.csrf.CsrfFilter;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for Environment to support profile-based configuration.",
+        "human_impl": "added import org.springframework.core.env.Environment;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for Profiles to check active profiles.",
+        "human_impl": "added import org.springframework.core.env.Profiles;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for HttpStatus to use in entry point.",
+        "human_impl": "added import org.springframework.http.HttpStatus;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for WebSecurity to override configure method.",
+        "human_impl": "added import org.springframework.security.config.annotation.web.builders.WebSecurity;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for HttpStatusEntryPoint to replace custom entry point.",
+        "human_impl": "added import org.springframework.security.web.authentication.HttpStatusEntryPoint;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_bean_definition",
+        "general_idea": "Remove explicit PasswordEncoder bean definition, likely relying on Spring Boot auto-configuration or external definition.",
+        "human_impl": "removed @Bean public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(12); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_injection",
+        "general_idea": "Inject Environment to determine active profiles for security configuration.",
+        "human_impl": "added @Autowired private Environment environment;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_security_configuration",
+        "general_idea": "Override configure(WebSecurity) to ignore static resources based on active profile (development vs production).",
+        "human_impl": "added @Override public void configure(WebSecurity web) { ... web.ignoring().antMatchers(...) }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_security_rule",
+        "general_idea": "Add /csrf endpoint to permitted URLs, likely for CSRF token retrieval.",
+        "human_impl": "changed .antMatchers(\"/index.html\", \"/\", \"/router\") to .antMatchers(\"/index.html\", \"/csrf\", \"/\", \"/router\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "replace_security_component",
+        "general_idea": "Replace custom Http401UnauthorizedEntryPoint with standard HttpStatusEntryPoint.",
+        "human_impl": "changed .authenticationEntryPoint(new Http401UnauthorizedEntryPoint()) to .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_security_filter",
+        "general_idea": "Remove custom CsrfCookieFilter and associated CSRF disable comment, simplifying CSRF handling.",
+        "human_impl": "removed .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class) and commented out .csrf().disable()",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/ch/rasc/eds/starter/config/security/UserAuthErrorHandler.java": [
+      {
+        "kind": "remove_autowired_annotation",
+        "general_idea": "Remove the @Autowired annotation from the constructor to align with Spring Boot's single-constructor injection rules.",
+        "human_impl": "- @Autowired\n  public UserAuthErrorHandler(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_line_wrapping",
+        "general_idea": "Reformat multi-line logger calls into single lines for cleaner code style.",
+        "human_impl": "Application.logger.warn(\"Unknown user login attempt: {}\", principal);",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "repo": "daxyonis/pdi-fundraising",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "196450dc463938eb6e7d6e1de6faf5302fd73ef3",
+    "sha_to": "1dfd6b2ac0a1c7d95bbae08bcbe2160591f06f68"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent version from 2.4.2 to 3.0.13 to align with the Java 17 migration target.",
+        "human_impl": "<version>3.0.13</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_17",
+        "general_idea": "Update the Java version property from 11 to 17 to enforce compilation for the new JDK.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_thymeleaf_security_extra",
+        "general_idea": "Replace thymeleaf-extras-springsecurity5 with springsecurity6 to support Spring Security 6 in Spring Boot 3.",
+        "human_impl": "<artifactId>thymeleaf-extras-springsecurity6</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_mysql_connector_artifact",
+        "general_idea": "Switch from the legacy mysql-connector-java to the new mysql-connector-j artifact required by newer Spring Boot versions.",
+        "human_impl": "<artifactId>mysql-connector-j</artifactId>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "repo": "mkrimaro13/SoftwareEmpresarial-CambioMonedasAPI-",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "a644d4bfacccc15ccd5a719fb2127b3065a4f635",
+    "sha_to": "44b25ccda17c7fb79e12b09d9bf58ea3d7082740"
+  },
+  "by_file": {
+    "apimonedas/pom.xml": [
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Project Lombok dependency to reduce boilerplate code.",
+        "before": "",
+        "after": "<dependency>\n\t\t\t<groupId>org.projectlombok</groupId>\n\t\t\t<artifactId>lombok</artifactId>\n\t\t\t<version>1.18.34</version>\n\t\t\t<scope>provided</scope>\n\t\t</dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
+      }
+    ]
+  }
+}

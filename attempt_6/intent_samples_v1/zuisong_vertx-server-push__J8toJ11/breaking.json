@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "zuisong/vertx-server-push",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "252a36b93f0dcca36d4a3367ea7025df8ffdf467",
+    "sha_to": "9917f4fc20a7ceaff99e32d4a8a6a26c2d8d626a"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the target Java version property from 1.8 to 11 to align with the migration goal.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

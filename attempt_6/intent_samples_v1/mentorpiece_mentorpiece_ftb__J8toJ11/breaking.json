@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "repo": "mentorpiece/mentorpiece_ftb",
+    "stage": "J8->J11",
+    "family": "spring-boot-2",
+    "sha_from": "a2993e47cc6b044f8a98ff47c72dcaeb9735fe2c",
+    "sha_to": "5e58fb39ecad2f83fb6a6dd1195a1ca2229b73ca"
+  },
+  "by_file": {
+    "src/main/java/com/aerotravel/flightticketbooking/model/Aircraft.java": [
+      {
+        "kind": "remove_field",
+        "general_idea": "Remove the airport relationship field from the Aircraft model.",
+        "human_impl": "- @ManyToOne private Airport airport;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/Airport.java": [
+      {
+        "kind": "change_id_type",
+        "general_idea": "Change the primary key type from int to long to support larger identifiers.",
+        "human_impl": "Changed private int airportId to private long airportId",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Add a new field to store the airport name.",
+        "human_impl": "Added private String airportName",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_field",
+        "general_idea": "Remove the aircrafts collection from the Airport entity.",
+        "human_impl": "Removed List<Aircraft> aircrafts and its mapping",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "implement_interface",
+        "general_idea": "Make the entity implement a common IdedEntity interface.",
+        "human_impl": "Added implements IdedEntity and @Override getId()",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_constructor",
+        "general_idea": "Update the constructor signature to match the new fields and types.",
+        "human_impl": "Changed constructor params to exclude id and include airportName",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/com/aerotravel/flightticketbooking/FlightticketbookingApplicationTests.java": [
+      {
+        "kind": "migrate_junit4_to_junit5",
+        "general_idea": "Replace JUnit 4 annotations and runner with JUnit 5 equivalents to align with Spring Boot 2.2+ default testing framework.",
+        "human_impl": "Replaced 'import org.junit.Test' with 'import org.junit.jupiter.api.Test' and removed '@RunWith(SpringRunner.class)' and related imports.",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent version to 2.7.2 to align with Java 11 support and modern Spring ecosystem.",
+        "human_impl": "<version>2.7.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the Java source and target version property from 1.8 to 11.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

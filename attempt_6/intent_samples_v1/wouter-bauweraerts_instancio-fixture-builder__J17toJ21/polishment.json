@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "repo": "wouter-bauweraerts/instancio-fixture-builder",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "36bb472d3058335bb85347b6189db6ad9a8e89ce",
+    "sha_to": "ae543ab82ff71e0c69d0419f51b815b928ea5a72"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "project_restructure",
+        "general_idea": "Convert the project from a single JAR module to a multi-module parent POM structure.",
+        "human_impl": "<packaging>pom</packaging>\n<modules>\n    <module>instancio-fixture-builder</module>\n    <module>instancio-fixture-builder-tests</module>\n</modules>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_management_migration",
+        "general_idea": "Move dependency declarations from the root <dependencies> block to <dependencyManagement> to allow child modules to define their own usage.",
+        "human_impl": "<dependencyManagement>\n    <dependencies>\n        <!-- moved dependencies -->\n    </dependencies>\n</dependencyManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_management_migration",
+        "general_idea": "Move plugin configurations from the root <plugins> block to <pluginManagement> to allow child modules to inherit versions without forced execution.",
+        "human_impl": "<pluginManagement>\n    <plugins>\n        <!-- moved plugins -->\n    </plugins>\n</pluginManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "release_tool_migration",
+        "general_idea": "Replace the central-publishing-maven-plugin and manual GPG signing with JReleaser for automated release management.",
+        "human_impl": "<plugin>\n    <groupId>org.jreleaser</groupId>\n    <artifactId>jreleaser-maven-plugin</artifactId>\n    ...\n</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_version_bump",
+        "general_idea": "Update the Instancio library version to 5.3.0.",
+        "human_impl": "<instancio.version>5.3.0</instancio.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_version_bump",
+        "general_idea": "Update the AssertJ library version to 3.27.3.",
+        "human_impl": "<assertj.version>3.27.3</assertj.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_cleanup",
+        "general_idea": "Remove unused or commented-out dependencies such as Roaster, ByteBuddy, and various plugin version properties.",
+        "human_impl": "<!-- removed roaster, byte-buddy, and various plugin version properties -->",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reporting_configuration",
+        "general_idea": "Move Javadoc plugin configuration from build plugins to the reporting section for site generation.",
+        "human_impl": "<reporting>\n    <plugins>\n        <plugin>\n            <artifactId>maven-javadoc-plugin</artifactId>\n            ...\n        </plugin>\n    </plugins>\n</reporting>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "profile_addition",
+        "general_idea": "Add a 'publication' profile to handle source and javadoc jar attachment specifically for release builds.",
+        "human_impl": "<profile>\n    <id>publication</id>\n    ...\n</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "metadata_update",
+        "general_idea": "Update the project artifact ID, version, and license year to reflect the new release cycle.",
+        "human_impl": "<artifactId>instancio-fixture-builder-parent</artifactId>\n<version>5.3.0.1</version>\n<comments>Copyright 2025 Wouter Bauweraerts</comments>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

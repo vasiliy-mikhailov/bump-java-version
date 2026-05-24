@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "repo": "red6/dmn-check",
+    "stage": "J8->J11",
+    "family": "junit4-mockito",
+    "sha_from": "ea88a2b836915cf84d64a29cdba21ad9b303b809",
+    "sha_to": "f5c52471f4bed09e692549d1846ad20216a842ef"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "refactor_project_structure",
+        "general_idea": "Convert the project from a single maven-plugin module to a multi-module POM structure.",
+        "human_impl": "<packaging>pom</packaging> ... <modules>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_group_id",
+        "general_idea": "Rename the Maven group ID to reflect a new domain or organization identity.",
+        "human_impl": "<groupId>de.redsix</groupId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_project_metadata",
+        "general_idea": "Add standard project metadata such as description, organization, developers, and licenses.",
+        "human_impl": "<description>...<organization>...<developers>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_scm_config",
+        "general_idea": "Configure Source Code Management (SCM) connection details for GitHub.",
+        "human_impl": "<scm>...<connection>scm:git:git@github.com:red6/dmn-check.git</connection>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_distribution_mgmt",
+        "general_idea": "Configure distribution management for deploying snapshots and releases to Sonatype OSSRH.",
+        "human_impl": "<distributionManagement>...<snapshotRepository>...<repository>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_surefire_plugin",
+        "general_idea": "Add and configure the Maven Surefire plugin for running tests.",
+        "human_impl": "<plugin>...<artifactId>maven-surefire-plugin</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_coveralls_plugin",
+        "general_idea": "Add the Coveralls Maven plugin for code coverage reporting.",
+        "human_impl": "<plugin>...<artifactId>coveralls-maven-plugin</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_plugin",
+        "general_idea": "Add the JaCoCo Maven plugin for code coverage measurement, excluding generated code.",
+        "human_impl": "<plugin>...<artifactId>jacoco-maven-plugin</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_build_helper_plugin",
+        "general_idea": "Add the Build Helper Maven plugin to include generated sources in the compilation path.",
+        "human_impl": "<plugin>...<artifactId>build-helper-maven-plugin</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_checkerframework_profile",
+        "general_idea": "Add a Maven profile to enable Checker Framework static analysis with specific annotation processors.",
+        "human_impl": "<profile>...<id>checkerframework</id>...<annotationProcessors>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_release_profile",
+        "general_idea": "Add a Maven profile for releasing artifacts, including Nexus staging, source, javadoc, and GPG signing plugins.",
+        "human_impl": "<profile>...<id>release</id>...<nexus-staging-maven-plugin>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_platform_launcher",
+        "general_idea": "Add JUnit Platform Launcher dependency for test execution.",
+        "human_impl": "<dependency>...<artifactId>junit-platform-launcher</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_jupiter_engine",
+        "general_idea": "Add JUnit Jupiter Engine dependency for JUnit 5 test execution.",
+        "human_impl": "<dependency>...<artifactId>junit-jupiter-engine</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_jupiter_api",
+        "general_idea": "Add JUnit Jupiter API dependency for writing JUnit 5 tests.",
+        "human_impl": "<dependency>...<artifactId>junit-jupiter-api</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_jupiter_params",
+        "general_idea": "Add JUnit Jupiter Params dependency for parameterized tests.",
+        "human_impl": "<dependency>...<artifactId>junit-jupiter-params</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_pioneer",
+        "general_idea": "Add JUnit Pioneer dependency for additional JUnit 5 extensions.",
+        "human_impl": "<dependency>...<artifactId>junit-pioneer</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_hamcrest_all",
+        "general_idea": "Add Hamcrest All dependency for matchers in tests.",
+        "human_impl": "<dependency>...<artifactId>hamcrest-all</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_checker_qual",
+        "general_idea": "Add Checker Framework Qual dependency for type annotations.",
+        "human_impl": "<dependency>...<artifactId>checker-qual</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_findbugs_annotations",
+        "general_idea": "Add FindBugs Annotations dependency for nullability and other annotations.",
+        "human_impl": "<dependency>...<artifactId>annotations</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_derive4j",
+        "general_idea": "Add derive4j dependency for code generation.",
+        "human_impl": "<dependency>...<artifactId>derive4j</artifactId>...",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "repo": "quarkusio/code.quarkus.io",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "c8d3fa499635f0073d633e476f6b276dfa1cd208",
+    "sha_to": "3333a64716dd8624546c4c244951ff4b5125882f"
+  },
+  "by_file": {
+    "api/src/test/resources/__snapshots__/QuarkusProjectServiceTest/testCustom/src_main_java_com_test_TestResource.java": [
+      {
+        "kind": "fix_missing_newline",
+        "general_idea": "Add a missing newline at the end of the file to comply with POSIX standards and linter rules.",
+        "human_impl": "}",
+        "bucket": "polishment"
+      }
+    ],
+    "api/src/test/resources/__snapshots__/QuarkusProjectServiceTest/testDefault/src_main_java_org_acme_GreetingResource.java": [
+      {
+        "kind": "add_trailing_newline",
+        "general_idea": "Ensure the file ends with a newline character to comply with POSIX standards and linter rules.",
+        "human_impl": "}",
+        "bucket": "polishment"
+      }
+    ],
+    "api/src/test/resources/__snapshots__/QuarkusProjectServiceTest/testDefaultZip/src_main_java_org_acme_GreetingResource.java": [
+      {
+        "kind": "add_trailing_newline",
+        "general_idea": "Ensure the file ends with a newline character to comply with POSIX standards and linter rules.",
+        "human_impl": "}",
+        "bucket": "polishment"
+      }
+    ],
+    "acceptance-test/pom.xml": [
+      {
+        "kind": "bump_playwright_version",
+        "general_idea": "Update the Playwright dependency version from 1.26.0 to 1.29.0 to ensure compatibility with the updated Quarkus version.",
+        "human_impl": "<playwright.version>1.29.0</playwright.version>",
+        "bucket": "polishment"
+      }
+    ],
+    "api/pom.xml": [
+      {
+        "kind": "bump_assertj",
+        "general_idea": "Upgrade AssertJ testing library to version 3.24.2.",
+        "human_impl": "<assertj.version>3.24.2</assertj.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_quarkus_jgit",
+        "general_idea": "Upgrade Quarkus JGit extension to version 2.3.1.",
+        "human_impl": "<quarkus.jgit.version>2.3.1</quarkus.jgit.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mockito_dependency",
+        "general_idea": "Add Quarkus JUnit5 Mockito extension for improved test mocking capabilities.",
+        "human_impl": "<artifactId>quarkus-junit5-mockito</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_snapshot_version",
+        "general_idea": "Correct the snapshot override version for Quarkus devtools in the profile activation.",
+        "human_impl": "<quarkus.devtools.version>2.15.3.Final</quarkus.devtools.version>",
+        "bucket": "polishment"
+      }
+    ],
+    ".github/workflows/frontend.tests.actions.yml": [
+      {
+        "kind": "add_node_setup",
+        "general_idea": "Add explicit Node.js 18 setup step to the CI workflow to ensure the correct runtime environment is available for frontend tests.",
+        "human_impl": "- uses: actions/setup-node@v2\n  with:\n    node-version: '18.x'",
+        "bucket": "polishment"
+      }
+    ],
+    ".github/workflows/library.publish.actions.yml": [
+      {
+        "kind": "bump_node_version",
+        "general_idea": "Update the Node.js version in the CI workflow from 14.x to 18.x to align with the project's migration to newer runtime standards.",
+        "human_impl": "node-version: '18.x'",
+        "bucket": "polishment"
+      }
+    ],
+    ".github/workflows/quarkus-ecosystem.actions.yml": [
+      {
+        "kind": "update_ci_java_version",
+        "general_idea": "Update the Java version used in the CI workflow from 11 to 21 to align with the target JDK migration.",
+        "human_impl": "JAVA_VERSION: 21",
+        "bucket": "polishment"
+      }
+    ],
+    "Makefile": [
+      {
+        "kind": "refactor_dev_workflow",
+        "general_idea": "Replace the monolithic 'dev' target with granular targets for frontend, library watching, and combined development to support a more modular development experience.",
+        "human_impl": "Removed 'dev: cd api && mvn quarkus:dev' and added 'dev-frontend', 'watch-lib', 'dev-lib', and 'dev-lib-staging' targets.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

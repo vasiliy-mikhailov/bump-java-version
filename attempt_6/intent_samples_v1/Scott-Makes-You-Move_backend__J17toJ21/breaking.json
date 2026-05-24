@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "Scott-Makes-You-Move/backend",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "394edb26df27b4f1bb3b35932c9aa7a2f5011074",
+    "sha_to": "969992746d262a85d20ed780fe6bbfbb5629333b"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Updated the Java source and target version properties from 17 to 21 to enable compilation for the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "compiler_config_update",
+        "general_idea": "Explicitly set the Maven compiler plugin source and target to 21 to ensure bytecode compatibility with JDK 21.",
+        "human_impl": "<source>21</source>\n<target>21</target>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "framework_upgrade",
+        "general_idea": "Upgraded the Spring Boot parent version from 3.4.2 to 3.5.5 to align with JDK 21 support and latest features.",
+        "human_impl": "<version>3.5.5</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

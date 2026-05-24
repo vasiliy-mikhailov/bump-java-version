@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "repo": "making/oauth2-sso-demo",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "3505271157d28efe8920f1f4ebdd9776c77a631e",
+    "sha_to": "679c5a1cecb915a5a77729785a322b65a6e4298a"
+  },
+  "by_file": {
+    "todo-api/src/main/java/lol/maki/dev/todo/TodoController.java": [
+      {
+        "kind": "refactor_auth_claim",
+        "general_idea": "Switch from JWT subject to email claim for user identification.",
+        "human_impl": "jwt.getClaimAsString(\"email\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_error_handling",
+        "general_idea": "Throw ResponseStatusException instead of returning empty Optional for missing resources.",
+        "human_impl": "orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ...))",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_http_method",
+        "general_idea": "Change update endpoint from PUT to PATCH to support partial updates.",
+        "human_impl": "@PatchMapping(path = \"/{todoId}\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_partial_update",
+        "general_idea": "Implement partial update logic that only modifies fields present in the request body.",
+        "human_impl": "if (todo.todoTitle() != null) { builder.todoTitle(todo.todoTitle()); touched = true; }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_record_access",
+        "general_idea": "Update code to use record accessor methods instead of bean getters/setters.",
+        "human_impl": "todo.todoTitle() instead of todo.getTodoTitle()",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_builder_pattern",
+        "general_idea": "Use TodoBuilder to construct and modify Todo records instead of direct setter calls.",
+        "human_impl": "TodoBuilder.from(todo).todoId(...).build()",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_repository_api",
+        "general_idea": "Update repository calls to use standard Spring Data methods like save and findById.",
+        "human_impl": "this.todoRepository.save(initialized)",
+        "bucket": "breaking"
+      }
+    ],
+    "authorization/pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent from 2.3.0.RELEASE to 3.4.0-RC1 to align with Java 21 and modern Spring ecosystem.",
+        "human_impl": "<parent><version>3.4.0-RC1</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_21",
+        "general_idea": "Update the project's Java version property from 11 to 21 to target the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_oauth2_auth_server_dep",
+        "general_idea": "Replace the deprecated spring-security-oauth2-autoconfigure with the modern spring-boot-starter-oauth2-authorization-server.",
+        "human_impl": "<artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_spring_security_starter",
+        "general_idea": "Add explicit spring-boot-starter-security dependency required by Spring Boot 3 authorization server setup.",
+        "human_impl": "<artifactId>spring-boot-starter-security</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_zipkin_tracing_deps",
+        "general_idea": "Update tracing dependencies from spring-cloud-starter-zipkin to micrometer-tracing-bridge-brave and zipkin-reporter-brave for Spring Boot 3 compatibility.",
+        "human_impl": "<artifactId>micrometer-tracing-bridge-brave</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_spring_milestones_repo",
+        "general_idea": "Add Spring Milestones repository to resolve pre-release dependencies like Spring Boot 3.4.0-RC1.",
+        "human_impl": "<repository><id>spring-milestones</id>...</repository>",
+        "bucket": "breaking"
+      }
+    ],
+    "todo-api/pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent from 2.3.0.RELEASE to 3.4.0-RC1 to align with Java 21 and modern Spring ecosystem.",
+        "human_impl": "<parent><version>3.4.0-RC1</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_property",
+        "general_idea": "Explicitly set the Java version property to 21 to ensure the build targets the correct JDK.",
+        "human_impl": "<properties><java.version>21</java.version></properties>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_spring_cloud_bom",
+        "general_idea": "Remove the Spring Cloud dependency management BOM as it is no longer used or compatible with the new setup.",
+        "human_impl": "Removed <dependencyManagement> block containing spring-cloud-dependencies",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_zipkin_dependency",
+        "general_idea": "Replace the deprecated spring-cloud-starter-zipkin with explicit Micrometer Tracing and Zipkin Reporter dependencies.",
+        "human_impl": "Added micrometer-tracing-bridge-brave and zipkin-reporter-brave, removed spring-cloud-starter-zipkin",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_spring_milestones_repo",
+        "general_idea": "Add the Spring Milestones repository to resolve the RC version of Spring Boot.",
+        "human_impl": "Added <repositories> and <pluginRepositories> with spring-milestones",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

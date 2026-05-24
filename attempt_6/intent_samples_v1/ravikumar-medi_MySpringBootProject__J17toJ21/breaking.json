@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "ravikumar-medi/MySpringBootProject",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "a973ffea6bc858e0a1ee0ccf215ad046654dff5c",
+    "sha_to": "cdac3c7753903681d39491a9a4e09f54ee4dea31"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the project's target Java version from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade the Spring Boot parent dependency from version 3.5.6 to 4.0.2.",
+        "human_impl": "<version>4.0.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_plugin",
+        "general_idea": "Configure the Maven compiler plugin to explicitly release for Java 21 and remove Lombok-specific annotation processor exclusions.",
+        "human_impl": "<release>21</release>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

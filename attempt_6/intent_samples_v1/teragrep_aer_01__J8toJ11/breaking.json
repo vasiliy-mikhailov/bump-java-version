@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "teragrep/aer_01",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "2189a8c2a3599f971cee8f134a8a5384a0c17ff2",
+    "sha_to": "de16d61e267eab4b62dbcb0a76b05241edd6ee16"
+  },
+  "by_file": {
+    "src/main/java/com/teragrep/aer_01/Output.java": [
+      {
+        "kind": "refactor_class_to_interface",
+        "general_idea": "The Output class was refactored into an interface, removing all implementation details, fields, and methods.",
+        "human_impl": "Changed 'final class Output implements Consumer<byte[]>, AutoCloseable' to 'public interface Output extends Consumer<byte[]>, AutoCloseable' and removed all body content.",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_jdk_version",
+        "general_idea": "Update Maven compiler source and target properties from Java 8 to Java 11 to align with the migration.",
+        "human_impl": "<java.version>11</java.version>\n<maven.compiler.source>11</maven.compiler.source>\n<maven.compiler.target>11</maven.compiler.target>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

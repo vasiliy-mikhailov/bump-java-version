@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "repo": "W1LDN16H7/h2-orm",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "906730f4e4af5581de5eebe47b895047345d70d0",
+    "sha_to": "6290aaa862641e8c75d4b4d1cd9f8798e8846e65"
+  },
+  "by_file": {
+    "src/main/java/h2/orm/core/TransactionManager.java": [
+      {
+        "kind": "remove_premature_cleanup",
+        "general_idea": "Removed the finally block from the isActive method to prevent closing the EntityManager while the transaction state is being checked.",
+        "human_impl": "Removed 'finally { EntityManagerProvider.closeEntityManager(); }' from the isActive method.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/h2/orm/example/SpringBootStyleExample.java": [
+      {
+        "kind": "import_refactor",
+        "general_idea": "Update import statement to reflect the new package structure of the JpaRepository class.",
+        "human_impl": "import h2.orm.core.repository.JpaRepository;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/h2/orm/example/SuperSimpleExample.java": [
+      {
+        "kind": "import_refactor",
+        "general_idea": "Update import statement to reflect a package restructuring of the JpaRepository class.",
+        "human_impl": "import h2.orm.core.repository.JpaRepository;",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "downgrade_jdk_target",
+        "general_idea": "Change the Maven compiler source and target from JDK 24 to JDK 21 to align with the migration goal.",
+        "human_impl": "<maven.compiler.target>21</maven.compiler.target>\n<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      }
+    ],
+    ".idea/copilotDiffState.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Update Maven compiler source and target properties from 17 to 21 to align with the new JDK version.",
+        "human_impl": "<maven.compiler.target>21</maven.compiler.target>\n<maven.compiler.source>21</maven.compiler.source>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

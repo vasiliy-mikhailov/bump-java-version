@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "repo": "hbz/to.science.forms.v2",
+    "stage": "J11->J21",
+    "family": "spring-boot-2",
+    "sha_from": "a76420127095e20d932b2818660feef88b7eeef7",
+    "sha_to": "d2c7af30445fd95a98d1bb8621defefb366aa9d9"
+  },
+  "by_file": {
+    "src/main/java/de/hbz/nrw/to/science/forms/v2/controller/ArticleController.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/de/hbz/nrw/to/science/forms/v2/controller/AutoCompletionController.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.servlet import with jakarta.servlet to comply with Jakarta EE namespace changes required for Spring Boot 3 and Java 21 compatibility.",
+        "human_impl": "import jakarta.servlet.http.HttpServletRequest;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/de/hbz/nrw/to/science/forms/v2/controller/ResearchdataController.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation import with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/de/hbz/nrw/to/science/forms/v2/model/forms/Article.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/de/hbz/nrw/to/science/forms/v2/model/forms/Researchdata.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

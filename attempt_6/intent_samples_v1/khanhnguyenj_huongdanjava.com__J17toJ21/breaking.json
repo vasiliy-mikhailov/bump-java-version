@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "khanhnguyenj/huongdanjava.com",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "9bedfbcec6c790f2a4460cee1d8feb940beff438",
+    "sha_to": "ec337e78f7dd1ebc43257f2301d48fa184a827c1"
+  },
+  "by_file": {
+    "clean-architecture-example/db/src/main/java/com/huongdanjava/cleanarchitecture/db/model/StudentModel.java": [
+      {
+        "kind": "migrate_javax_to_jakarta",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements.",
+        "human_impl": "import jakarta.persistence.Column;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "repo": "msgoat/cnj-hello-backend-spring",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "6759b14c608fc714b5cfb6277b234f196dc12c56",
+    "sha_to": "31a6b5dc26fedc2a5200f28418b63bed3b7edfd1"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 11 to 17 to align with the migration goal.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    ".drone.yml": [
+      {
+        "kind": "upgrade_ci_image",
+        "general_idea": "Upgrade the Docker image used for the commit stage to version 3.0.0 to support the new Java version.",
+        "human_impl": "image: docker.cloudtrain.aws.msgoat.eu/cloudtrain/cnj-drone-build:3.0.0",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_ci_image",
+        "general_idea": "Upgrade the Docker image used for the integration test stage to version 3.0.0 to support the new Java version.",
+        "human_impl": "image: docker.cloudtrain.aws.msgoat.eu/cloudtrain/cnj-drone-build:3.0.0",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/docker/Dockerfile": [
+      {
+        "kind": "base_image_upgrade",
+        "general_idea": "Switch the base Docker image from Eclipse Temurin 11 to Eclipse Temurin 17 Alpine to align with the target JDK version.",
+        "human_impl": "FROM eclipse-temurin:17-jre-alpine",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "alpine_compat_fix",
+        "general_idea": "Update user and group creation commands to use Alpine Linux compatible flags (-S, -g, -u, -G) instead of Debian-style flags.",
+        "human_impl": "addgroup -S spring -g 1000 && adduser -S spring -u 1000 -G spring",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

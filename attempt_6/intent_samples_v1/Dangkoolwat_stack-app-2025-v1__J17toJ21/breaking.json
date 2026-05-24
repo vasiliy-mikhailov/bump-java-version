@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "repo": "Dangkoolwat/stack-app-2025-v1",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "4d29f13cdc299934d060845bebcd0eed6e13c31a",
+    "sha_to": "27ce6a4c2caed3045fade696cad6920a232aec4f"
+  },
+  "by_file": {
+    "src/main/java/com/daangcool/stack/StackApp.java": [
+      {
+        "kind": "import_migration_liquibase",
+        "general_idea": "Update LiquibaseProperties import to match Spring Boot 4 package structure changes.",
+        "human_impl": "import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/CacheConfiguration.java": [
+      {
+        "kind": "import_migration",
+        "general_idea": "Update Spring Boot auto-configuration imports to match Spring Boot 4 package structure.",
+        "human_impl": "import org.springframework.boot.cache.autoconfigure.JCacheManagerCustomizer;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "import_migration",
+        "general_idea": "Update Hibernate auto-configuration imports to match Spring Boot 4 package structure.",
+        "human_impl": "import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/InitDataConfiguration.java": [
+      {
+        "kind": "add_jakarta_annotation_import",
+        "general_idea": "Replace javax.annotation with jakarta.annotation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3/4.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/daangcool/stack/config/JacksonConfiguration.java": [
+      {
+        "kind": "remove_manual_jackson_modules",
+        "general_idea": "Remove manual registration of JavaTimeModule, Jdk8Module, and Hibernate6Module beans to rely on Spring Boot 4's auto-configuration for Jackson 3.",
+        "human_impl": "Deleted @Bean methods for JavaTimeModule, Jdk8Module, and Hibernate6Module and added a comment explaining the switch to auto-configuration.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

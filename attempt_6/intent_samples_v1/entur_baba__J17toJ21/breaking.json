@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "repo": "entur/baba",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "a6789111d9e76a5fb9f08c8eaee8571de213d2b4",
+    "sha_to": "ccb2710b1d61c53f695de304ce8d99b30aa9ff57"
+  },
+  "by_file": {
+    "src/main/java/no/rutebanken/baba/config/Auth0ClientConfiguration.java": [
+      {
+        "kind": "migrate_to_builder_api",
+        "general_idea": "Replace deprecated direct constructor of AuthAPI with the new builder pattern required by the updated Auth0 Java client library.",
+        "human_impl": "return AuthAPI.newBuilder(domain, clientId, clientSecret).withHttpClient(auth0HttpClient).build();",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/baba/config/JerseyConfig.java": [
+      {
+        "kind": "migrate_swagger_to_openapi",
+        "general_idea": "Replace legacy Swagger 2.x configuration with OpenAPI 3.x resource registration to align with modern Jakarta EE standards.",
+        "human_impl": "Replaced `configureSwagger()` method calls and `BeanConfig` setup with `register(OpenApiResource.class)`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_swagger_imports",
+        "general_idea": "Update imports from `io.swagger.jaxrs` (v2) to `io.swagger.v3.jaxrs2` (v3) to match the new OpenAPI library.",
+        "human_impl": "Changed `import io.swagger.jaxrs.config.BeanConfig` to `import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource`.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/baba/exceptions/ReferentialAlreadyExistException.java": [
+      {
+        "kind": "migrate_javax_to_jakarta",
+        "general_idea": "Replace javax.ws.rs imports with jakarta.ws.rs to align with Jakarta EE 9+ namespace requirements for Java 21 and Spring Boot 3.",
+        "human_impl": "import jakarta.ws.rs.ClientErrorException;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/baba/filter/CorsResponseFilter.java": [
+      {
+        "kind": "namespace_migration",
+        "general_idea": "Migrate JAX-RS imports from javax.ws.rs to jakarta.ws.rs to comply with Jakarta EE 9+ requirements in Spring Boot 3 and Java 21.",
+        "human_impl": "import jakarta.ws.rs.container.ContainerRequestContext;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/baba/organisation/model/CodeSpace.java": [
+      {
+        "kind": "migrate_persistence_imports",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to align with Jakarta EE 9+ standards required by Spring Boot 3 and Java 21.",
+        "human_impl": "import jakarta.persistence.Column;\nimport jakarta.persistence.Entity;\nimport jakarta.persistence.Table;\nimport jakarta.persistence.UniqueConstraint;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_validation_imports",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to align with Jakarta EE 9+ standards required by Spring Boot 3 and Java 21.",
+        "human_impl": "import jakarta.validation.constraints.NotNull;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/baba/organisation/model/CodeSpaceEntity.java": [
+      {
+        "kind": "migrate_javax_persistence_to_jakarta",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Java 21/Spring Boot 3.",
+        "human_impl": "import jakarta.persistence.JoinColumn;\nimport jakarta.persistence.ManyToOne;\nimport jakarta.persistence.MappedSuperclass;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_javax_validation_to_jakarta",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Java 21/Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotNull;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/baba/organisation/model/VersionedEntity.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace javax.persistence and javax.validation imports with jakarta equivalents to comply with Jakarta EE 9+ standards required by Spring Boot 3 and Java 21.",
+        "human_impl": "import jakarta.persistence.*;\nimport jakarta.validation.constraints.NotNull;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/baba/organisation/model/organisation/AdministrativeZone.java": [
+      {
+        "kind": "javax_to_jakarta_persistence",
+        "general_idea": "Migrate JPA annotations from javax.persistence to jakarta.persistence to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.persistence.Entity;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "javax_to_jakarta_validation",
+        "general_idea": "Migrate validation annotations from javax.validation to jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotNull;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "repo": "Mashirofate/ticket-project",
+    "stage": "J8->J21",
+    "family": "spring-boot-2",
+    "sha_from": "6277274fdbb50aaf715bacc1f62483a1528b345b",
+    "sha_to": "6a6f5d1c40f1941385c933979f5f7a3256b8accc"
+  },
+  "by_file": {
+    "src/main/java/com/tickets/controller/DeviceController.java": [
+      {
+        "kind": "swagger_annotation_migration",
+        "general_idea": "Replace deprecated Swagger 2 annotations with OpenAPI 3 annotations to support modern API documentation standards.",
+        "human_impl": "import io.swagger.v3.oas.annotations.Operation; @Operation(summary = \"...\")",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/tickets/controller/EntranceManagementController.java": [
+      {
+        "kind": "swagger_annotation_migration",
+        "general_idea": "Replace deprecated Swagger 2 annotations with OpenAPI 3 annotations to support modern API documentation standards.",
+        "human_impl": "import io.swagger.v3.oas.annotations.Operation; import io.swagger.v3.oas.annotations.tags.Tag; @Tag(name = \"...\") @Operation(summary = \"...\")",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/tickets/controller/FaceController.java": [
+      {
+        "kind": "replace_javax_servlet",
+        "general_idea": "Replace javax.servlet.http.HttpServletRequest with jakarta.servlet.http.HttpServletRequest to comply with Jakarta EE 9+ namespace changes required by Spring Boot 3.",
+        "human_impl": "import jakarta.servlet.http.HttpServletRequest;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_swagger_annotations",
+        "general_idea": "Replace io.swagger.annotations (Swagger 2) with io.swagger.v3.oas.annotations (OpenAPI 3) to align with SpringDoc OpenAPI used in Spring Boot 3.",
+        "human_impl": "import io.swagger.v3.oas.annotations.Operation;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

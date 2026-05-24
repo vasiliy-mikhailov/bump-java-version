@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "repo": "aws-samples/java-on-aws",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "c641437df6874cba951f87c2629d3346a6d4e62d",
+    "sha_to": "2e85da4f57a729252df5c6684bf16c17a70531b0"
+  },
+  "by_file": {
+    "labs/unicorn-store/infrastructure/cdk/src/main/java/com/unicorn/UnicornStoreApp.java": [
+      {
+        "kind": "api_migration_builder_pattern",
+        "general_idea": "Replace deprecated no-argument constructor with builder pattern for AwsSolutionsChecks to comply with updated CDK-NAG library API.",
+        "human_impl": "Aspects.of(app).add(AwsSolutionsChecks.Builder.create().build());",
+        "bucket": "breaking"
+      }
+    ],
+    "labs/unicorn-store/infrastructure/cdk/src/main/java/com/unicorn/UnicornStoreLambdaStack.java": [
+      {
+        "kind": "update_lambda_runtime",
+        "general_idea": "Update the AWS Lambda function runtime configuration from Java 17 to Java 21 to align with the target JDK version.",
+        "human_impl": ".runtime(Runtime.JAVA_21)",
+        "bucket": "breaking"
+      }
+    ],
+    "labs/unicorn-store/infrastructure/cdk/pom.xml": [
+      {
+        "kind": "set_java_source_target_21",
+        "general_idea": "Set Java source and target compatibility to version 21.",
+        "human_impl": "<source>21</source>\n<target>21</target>",
+        "bucket": "breaking"
+      }
+    ],
+    "labs/unicorn-store/infrastructure/db-setup/pom.xml": [
+      {
+        "kind": "bump_java_source_target",
+        "general_idea": "Update Maven compiler plugin source and target levels from Java 17 to Java 21 to enable compilation for the new JDK version.",
+        "human_impl": "<source>21</source>\n<target>21</target>",
+        "bucket": "breaking"
+      }
+    ],
+    "labs/unicorn-store/software/unicorn-store-spring/pom.xml": [
+      {
+        "kind": "set_java_version_property",
+        "general_idea": "Update the Maven property to target Java 21 for compilation.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

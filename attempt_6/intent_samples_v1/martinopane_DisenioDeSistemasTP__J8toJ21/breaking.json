@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "martinopane/DisenioDeSistemasTP",
+    "stage": "J8->J21",
+    "family": null,
+    "sha_from": "3d33d6ff881bf477cebec611bb9cfd0a7818d4e8",
+    "sha_to": "0d971c335eff86475a0173b6df0a1b3e48c3c2df"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_jdk_version",
+        "general_idea": "Update Maven compiler source, target, and release properties from Java 8 to Java 21.",
+        "human_impl": "<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>\n<release>21</release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_compiler_plugin",
+        "general_idea": "Add and configure maven-compiler-plugin to version 3.11.0 to support Java 21 compilation.",
+        "human_impl": "<plugin>\n    <groupId>org.apache.maven.plugins</groupId>\n    <artifactId>maven-compiler-plugin</artifactId>\n    <version>3.11.0</version>\n    <configuration>\n        <release>21</release>\n    </configuration>\n</plugin>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

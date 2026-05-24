@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "repo": "finnyb/javampd",
+    "stage": "J11->J17",
+    "family": "junit4-mockito",
+    "sha_from": "a9b42728f2757bb3e5e0885e70a96b08162eb4ab",
+    "sha_to": "a964df187baeea6f19d8788faa00d0f0120806df"
+  },
+  "by_file": {
+    "src/main/java/org/bff/javampd/admin/Admin.java": [
+      {
+        "kind": "feature_api_change",
+        "general_idea": "Change updateDatabase methods to return job IDs instead of void, allowing asynchronous tracking of database updates.",
+        "human_impl": "Changed `void updateDatabase()` to `int updateDatabase()` and `void updateDatabase(String path)` to `int updateDatabase(String path)`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "feature_api_addition",
+        "general_idea": "Add a new rescan method to the Admin interface to support rescanning unmodified files.",
+        "human_impl": "Added `int rescan();` method declaration.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_api_removal",
+        "general_idea": "Remove the getDaemonUpTime method from the Admin interface, likely moving it to a status object or deprecating it.",
+        "human_impl": "Removed `long getDaemonUpTime();` method declaration.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/bff/javampd/admin/AdminProperties.java": [
+      {
+        "kind": "rename_property_key",
+        "general_idea": "Rename the property key for the REFRESH command from 'admin.refresh' to 'admin.update' to align with MPD protocol terminology.",
+        "human_impl": "REFRESH(\"admin.update\"),",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/bff/javampd/album/AlbumConverter.java": [
+      {
+        "kind": "widen_return_type",
+        "general_idea": "Change the return type of the functional interface method from List to Collection to allow more flexible implementations.",
+        "human_impl": "Collection<MPDAlbum> convertResponseToAlbum(List<String> list);",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

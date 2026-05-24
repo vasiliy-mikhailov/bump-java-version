@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "repo": "IoT-DC3/dc3-parent",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "c8d3cb8b3cae6ecb38fd4e860263245a490d74ca",
+    "sha_to": "48b3020f554ccf983abc30a32b9e5a9da0ce976a"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "java_version_upgrade",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the new JDK baseline.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "spring_boot_upgrade",
+        "general_idea": "Upgrade Spring Boot from 2.7.x to 3.2.x, which requires Jakarta EE namespaces and is incompatible with Java 17 in this context.",
+        "human_impl": "<spring.boot.version>3.2.5</spring.boot.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "spring_cloud_upgrade",
+        "general_idea": "Upgrade Spring Cloud to 2023.0.1 to match the Spring Boot 3.x release train.",
+        "human_impl": "<spring.cloud.version>2023.0.1</spring.cloud.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace javax.annotation dependencies with jakarta.annotation to comply with Spring Boot 3 / Jakarta EE 9+ standards.",
+        "human_impl": "<artifactId>jakarta.annotation-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "jakarta_validation_migration",
+        "general_idea": "Replace javax.validation dependencies with jakarta.validation to comply with Spring Boot 3 / Jakarta EE 9+ standards.",
+        "human_impl": "<artifactId>jakarta.validation-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "jakarta_json_migration",
+        "general_idea": "Update Jakarta JSON API dependency to use the correct Jakarta namespace and version.",
+        "human_impl": "<artifactId>jakarta.json-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "jakarta_activation_migration",
+        "general_idea": "Replace javax.activation with jakarta.activation-api to comply with Jakarta EE 9+ standards.",
+        "human_impl": "<artifactId>jakarta.activation-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "mybatis_plus_spring_boot3_migration",
+        "general_idea": "Switch MyBatis-Plus starter to the Spring Boot 3 compatible artifact.",
+        "human_impl": "<artifactId>mybatis-plus-spring-boot3-starter</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "grpc_spring_boot_upgrade",
+        "general_idea": "Upgrade gRPC Spring Boot starter to version 3.x which supports Spring Boot 3.",
+        "human_impl": "<grpc.spring.boot.version>3.1.0.RELEASE</grpc.spring.boot.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "hibernate_validator_upgrade",
+        "general_idea": "Upgrade Hibernate Validator to 8.0.1 to support Jakarta Validation API.",
+        "human_impl": "<hibernate.validator.version>8.0.1.Final</hibernate.validator.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

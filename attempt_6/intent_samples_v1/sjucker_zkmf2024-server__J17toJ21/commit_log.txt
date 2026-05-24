@@ -1,0 +1,240 @@
+522afe1 Upgrade dependencies, switch to Java 21
+ec6f471 Add location images and 360-view
+28cad04 Fix image link
+f37bfe6 Upload and delete from Cloudflare
+b81dffd Switch to Cloudflare image provider
+2fffad2 Switch to Cloudflare image provider
+d390a59 Switch to Cloudflare image provider
+c899a7d Migrate images to Cloudflare
+00ba624 Load location by identifier
+27a8d6a Add identifier for locations
+de256ea Create judge reports
+a5a55bc Only send errata mail to confirmed Vereine
+4caf950 Send errata mail
+7856e72 Fix queries
+35d443a Load public Verein-details using the identifier
+51c4086 Add human readable identifier for Vereine
+15c7b12 Add verein-ID to DTOs
+18f8752 Update rest.ts
+9834876 Add sort-order for locations for Zeitplan
+0e5dcb7 Introduce errata
+b63b4fc Fix README
+eaede17 Improve competition naming
+2ae2052 Add type to timetable entry
+5f868fb Timetable entries for Vereine
+8037384 Fix test setup
+521f26e Add possibility to impersonate a Verein
+87e68f9 Edit timetable entry
+6d433bb Add modul G and H to timetable
+7ba05cc Always show health details
+ca8dc2b Show health details when authorized
+48c9220 Add Platzkonzert locations
+9eb9682 Fix formatTime
+1dab06c Add log statement
+f69e514 Address Sonar issues
+a4851ee Public timetable
+aebebbb Add default values for booleans in programm
+038f8d2 Introduce verein-presentation
+c662ffb Update dependencies
+f2371f6 Introduce broadcast
+9425fd5 Document Database Backup
+8cc9125 Fix timetable entry creation
+ec2bb38 Improve chat layout for small screens
+dbb6f90 Fix whitespace problem
+edd482e Add sponsors to mails
+2b484a2 Introduce chat-notification recipient
+ea3daa6 Introduce messages to chat with Verein
+0be5da5 Track programm last updated
+10c9593 Add auto-filter for modul-export
+2aecda2 Do not log ExpiredJwtException on error-level
+0163650 Add arrangeur to titel in admin-UI
+5c56131 Add arrangeur to titel in export
+d2d90b2 Switch to timestamp without time zone
+07433a2 Switch to heroku hosted postgres db
+72ccea2 Add title
+00cb5a2 Prov. Einsatz in Admin and Export
+8570efb New prov Einsatz
+e5c8eae Change Timetable
+c82df42 Fix phase2 confirmed
+4b1861e Fix ngClass
+3478e7e Confirmed also in Excel export
+6f9ab4b Color confirmed
+16b6079 Fix typo
+688c9c8 Fix logic
+76d9e6f Upgrade
+6d57773 Make sure we only update programm if not yet confirmed
+144af82 Confirm phase2
+27604db Confirm phase2
+4040abb Report summary
+23d9207 Delete TODOs
+29e1fdc Revert "Add git-commit-id-maven-plugin"
+259a03e Add git-commit-id-maven-plugin
+7c1bc5c Social media
+06b456c Social media vereine
+f9b1b33 Generate jooq code from prod-DB
+615e174 Increase max length for moderation info
+3b0f7bc Add phase1/2 to export
+11a52f4 Fix sort order of ablauf
+2bb642d Fix export for Doppeleinsatz
+2069947 Add remaining module to export
+9303419 Improve performance of export query
+5005f97 Add info-texts
+a57ae15 Do not query DB if no ID given
+5b8d2d3 Try to debug performance issues
+d35e44d Fix inefficient code
+a00878f Revert slow find
+9e5226f Add modul A programm export as example
+0e3547d Add overall ratings
+5b8f5fe Add overall ratings
+884b99f Add grad to detail-view
+b202d42 Add null-check
+7a6e55e Revert phase2-limit
+732ab82 Fix unique constraint
+3d81fae Improve layout
+d7671fa Limit Vereine that can be selected
+309c91e Handle null values
+99b9499 Create timetable entry
+39b18cb Timetable entry v1
+d8f2cff Jury v1
+4131575 Create jury login from admin-UI
+98191c7 Jury v1
+9d7e3b4 Add Doppeleinsatz to export
+0ebf872 Introduce DoppelEinsatz service
+230e116 Introduce DoppelEinsatz entity
+a9580d6 Make sure only admin-users can access it
+e44ad14 Make sure admin-endpoint is only available for admin-users
+1bda5b4 Fix comment display
+e091ffd Always use DateUtil.now()
+5130a27 Display icons differently, if there are comments
+f1d6e12 Code cleanup
+afdb2cc Display VereinProgramm, add comments per Verein
+72653a5 Add mailchimp sample requests
+38de3cf Add locations
+394d0d2 Add active profile to mail subject
+f289389 Update dependencies
+e48201e Enable phase 2
+5031ccf Add simple email validation
+f77b6b9 Add log statement for finish of job
+d30a477 Fix log statement
+34a38fe Phase 2 disabled
+f77908a Add missing annotation
+1bc2f37 Add job to update status (in case rules for status calculation changed)
+d951f59 Calculate total time according to current Ablauf
+d0d0e5f Do not use costy toDTO() in a loop
+9be0e8f Try to improve performance of export
+bae6410 Add export for Vereine
+11bf80b Phase 2: Programm
+6b70df8 Add MODERATION
+d463e2b Introduce Wettspielkategorien for Modul G (Tambouren)
+dda3264 Add homepage to Vereine
+ba62fa3 Return confirmed Vereine in alphabetical order
+4a71f8d Add public endpoint for registered Vereine
+a4540fa Revert "Add active profile to email subject"
+1e317cb Revert "Add public endpoint for registered Vereine"
+c0b3db3 Add public endpoint for registered Vereine
+13bda20 Add active profile to email subject
+bebe41f Add new newsletter recipients to Mailchimp
+6932103 Add email to login-URL
+675d4a1 Add Klasse and Besetzung to program, so it is easier to assign later to timetable
+634c1fe Re-calculate total duration in backend
+45dfcf8 Add Jury role
+ea346d3 Resolve TODO
+611a352 Add jury role
+0b2e2cb Phase 2: Programm erfassen
+511c391 Registration confirmation
+0e85cb9 Add cursor pointer to clickable div
+54746cb Display uploaded images in detail-view
+4c4ac57 Add Verein-detail view to admin
+ecfcca7 Test authentication
+1aff432 Introduce basic endpoint integration test
+054615c Introduce basic test setup including Testcontainers
+2b20833 Add info-step
+2d16689 Address Sonar bug-issues
+b065b57 Introduce SonarCloud integration
+9aca3d9 Fix typo
+691da60 Make BCC email configurable
+a5e0c55 Update dependencies
+f5eee64 Make Vereinsadresse optional
+89c4092 Make sure to update the overall status after saving
+0dbbf04 Allow deletion of Vereinsbilder
+29a979a Do not create JWT without expiration date
+f93d454 Fix run config
+301bb87 Add Doppeleinsatz selection
+f0629cf Add login-link to registration email
+f9631f9 Update frontend dependencies and fix sorting
+c566ccb Output Klasse formatted
+21034a9 Update dependencies
+5599881 Remove unnecessary userDetails from log-statement
+41fc2c1 Add MDC and output userId in log
+4a2b3f4 Make error mails fully configurable
+2804a01 Add active profile to error-mail subject and endpoint to test errors
+d4b54b9 New Aufgaben for helpers
+8b56dcf Enable info-endpoint
+72451cc Tambouren-Besetzung only available if Modul G selected
+841cc6a Make sure we do not navigate to login if already there
+7cdaed6 Besetzung "Tambouren" only possible for Modul G
+d0a96a8 Add Vereine-overview in admin UI
+d6ba5f7 Make phase1 not-nullable
+57ffe26 Adjust Anmeldung in backend so only selected what is allowed
+36a5e43 Introduce website text for band
+235c2f1 Update phase1 status on save
+d06da7c Make sure correct timezone is used
+d3bde0b Rename table user to avoid conflict with reserved keyword in postgres
+c22f416 Fix frontend
+f1fb440 Introduce password reset
+acb5c79 Fix update
+31547c1 Switch to jOOQ
+827595d Add CC and BCC
+5551b40 Change favicon
+2266262 Fix helper admin-page
+e4b0c51 Remove redundant dependency
+fd65bbe Band details
+0ad12fc Send helper-registration mail
+64afa1f Make helfer-page first page for now
+3a5a17f Update rest.ts
+746cfe6 Introduce new helper registration
+6e33720 Make mvnw executable
+4f045b9 Make mvnw executable
+719c7e3 Update dependencies
+3382205 Switch to Apache Maven Wrapper
+aafa53d Fixes after rebase
+a488732 Upgrade to Spring Boot 3
+7e7aa74 Public endpoint for images
+b2dc215 Add image upload
+cee7001 Improve registration workflow
+35a6218 Add email verification and use MJML
+19dd2d3 Basic Verein-update functionality
+2fbbfd7 Send registration email
+cd0223e Add Verein-registration
+4976ebb Add band-endpoint
+15f2a59 Update SecurityConfiguration
+ff79b2c Properly handle 401/403 responses
+2e98a23 Update JavaScript dependencies
+0f14046 Updates and clean-ups
+33d9d19 Add missing MySQL dependency for FlyWay
+f102f7c Update JavaScript dependencies
+bcbcf97 Update Java dependencies
+3ecce5e Add mobile to table
+7cea4cf Fix naming of Flyway-file
+e9baeef Add mobile to helper registration
+b9713e8 Fix pom
+891792c Introduce staging setup
+602cac0 Update dependencies
+d5270f9 Move Modulauswahl next to Stärkeklasse
+bff5e3b Improve Admin UX
+244adbd Small code cleanup
+1c7c250 Add export for Umfrage results
+f09e143 Add Vorname
+b6834eb Add Zusage-Kommentar for Survey
+ae957a8 Add Absage-flag
+021a2ef Secure admin-UI
+16031d7 Newsletter, Helfer
+20a3eaf Increase budget
+7e54b62 Admin: Konsultativumfrage
+f17390f useHash in routes
+69fb3f6 Konsultativumfrage
+0a29cd9 Helper registration
+44270d4 Add newsletter registration
+a08632d Introduce typescript-generator-maven-plugin
+e0f3bc7 Introduce PrimeNG
+6d9839f Initial Angular setup

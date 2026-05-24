@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "ddellspe/escapegenai",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "bacd10e64fac115e4178502ef0c5e0d6385d6443",
+    "sha_to": "4aa170e7ba41e623ded03bb651cea9eee1446a5a"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    ".github/workflows/build.yml": [
+      {
+        "kind": "update_ci_jdk_version",
+        "general_idea": "Update the Java version in GitHub Actions workflows from 17 to 21 to align with the target runtime.",
+        "human_impl": "java-version: \"21\"",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

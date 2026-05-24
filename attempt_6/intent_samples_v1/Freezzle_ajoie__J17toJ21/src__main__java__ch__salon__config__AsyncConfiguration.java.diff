@@ -1,0 +1,20 @@
+diff --git a/src/main/java/ch/salon/config/AsyncConfiguration.java b/src/main/java/ch/salon/config/AsyncConfiguration.java
+index 9452554..5043b25 100644
+--- a/src/main/java/ch/salon/config/AsyncConfiguration.java
++++ b/src/main/java/ch/salon/config/AsyncConfiguration.java
+@@ -1,6 +1,5 @@
+ package ch.salon.config;
+ 
+-import java.util.concurrent.Executor;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+@@ -15,6 +14,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
+ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+ import tech.jhipster.async.ExceptionHandlingAsyncTaskExecutor;
+ 
++import java.util.concurrent.Executor;
++
+ @Configuration
+ @EnableAsync
+ @EnableScheduling

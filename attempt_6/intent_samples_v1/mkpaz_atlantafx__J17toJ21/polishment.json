@@ -1,0 +1,431 @@
+{
+  "meta": {
+    "repo": "mkpaz/atlantafx",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "5169b3de7bd94345c3527b116887244a9a5b3a25",
+    "sha_to": "f64f6c55a809a660bd0d0459234a2fa3c37d3ddb"
+  },
+  "by_file": {
+    "base/src/main/java/atlantafx/base/controls/BehaviorBase.java": [
+      {
+        "kind": "add_license_header",
+        "general_idea": "Add Oracle copyright and license header to comply with upstream JavaFX source attribution.",
+        "human_impl": "Added block comment with SPDX-License-Identifier and Oracle copyright notice.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_class_javadoc",
+        "general_idea": "Document the purpose and usage of the BehaviorBase class.",
+        "human_impl": "Added Javadoc block describing behavior interaction logic and event resolution.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_abstract_modifier",
+        "general_idea": "Change class from abstract to concrete to allow direct instantiation as per JavaFX API.",
+        "human_impl": "Removed 'abstract' keyword from class declaration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method_javadoc",
+        "general_idea": "Document the constructor parameters and purpose.",
+        "human_impl": "Added Javadoc for constructor with @param tags.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method_javadoc",
+        "general_idea": "Document the getControl method.",
+        "human_impl": "Added Javadoc for getControl with @return tag.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method_javadoc",
+        "general_idea": "Document the getSkin method.",
+        "human_impl": "Added Javadoc for getSkin with @return tag.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_javadoc",
+        "general_idea": "Standardize Javadoc formatting for the dispose method.",
+        "human_impl": "Converted single-line comment to multi-line Javadoc block.",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/BehaviorSkinBase.java": [
+      {
+        "kind": "add_copyright_header",
+        "general_idea": "Add Oracle copyright and license header to comply with licensing requirements for the excerpted JavaFX code.",
+        "human_impl": "Added block comment with SPDX-License-Identifier and Oracle copyright notice.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Add comprehensive Javadoc comments to the class and its public/protected members to improve documentation.",
+        "human_impl": "Added class-level description and Javadoc for constructor, createDefaultBehavior, getControl, and getBehavior.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "formatting_change",
+        "general_idea": "Adjust whitespace formatting for the empty method body to match coding standards.",
+        "human_impl": "Changed 'protected void unregisterListeners() { }' to use a newline inside the braces.",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/Breadcrumbs.java": [
+      {
+        "kind": "refactor_data_model",
+        "general_idea": "Replace javafx.scene.control.TreeItem with a custom BreadCrumbItem class to support position-aware rendering (first/last) and remove dependency on TreeItem-specific APIs.",
+        "human_impl": "public static class BreadCrumbItem<T> extends TreeItem<T> { protected boolean first; protected boolean last; ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_node_factory",
+        "general_idea": "Change the crumb node factory to return ButtonBase instead of Button, allowing for more flexible node types like Hyperlink.",
+        "human_impl": "protected final Callback<BreadCrumbItem<T>, ButtonBase> defaultCrumbNodeFactory = item -> new Hyperlink(item.getStringValue());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_divider_factory",
+        "general_idea": "Introduce a divider factory property to allow customization of the separators between breadcrumbs, replacing hardcoded or implicit divider logic.",
+        "human_impl": "protected final Callback<BreadCrumbItem<T>, ? extends Node> defaultDividerFactory = item -> item != null && !item.isLast() ? new Label(\"/\") : null;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_custom_shape",
+        "general_idea": "Remove the custom BreadCrumbButton class and its associated Path-based arrow shape logic, simplifying the control to use standard JavaFX nodes.",
+        "human_impl": "Removed class BreadCrumbButton extends Button { ... private Path createButtonShape() { ... } }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_event_model",
+        "general_idea": "Update BreadCrumbActionEvent to use BreadCrumbItem instead of TreeItem to align with the new data model.",
+        "human_impl": "public static class BreadCrumbActionEvent<T> extends Event { private final BreadCrumbItem<T> selectedCrumb; ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_size_hints",
+        "general_idea": "Set preferred and maximum size hints to USE_COMPUTED_SIZE and USE_PREF_SIZE to ensure the control sizes correctly based on its content.",
+        "human_impl": "setPrefWidth(Region.USE_COMPUTED_SIZE); setMaxWidth(Region.USE_PREF_SIZE);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_style_class",
+        "general_idea": "Rename the default style class from 'bread-crumb-bar' to 'breadcrumbs' for consistency.",
+        "human_impl": "protected static final String DEFAULT_STYLE_CLASS = \"breadcrumbs\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Add comprehensive Javadoc comments to the class, methods, and properties to improve documentation.",
+        "human_impl": "/** A bread crumb bar. This control is useful to visualize and navigate ... */",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_nullability_annotations",
+        "general_idea": "Add @Nullable annotations to parameters and fields to indicate optional values.",
+        "human_impl": "import org.jetbrains.annotations.Nullable; public Breadcrumbs(@Nullable BreadCrumbItem<T> selectedCrumb)",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/BreadcrumbsSkin.java": [
+      {
+        "kind": "refactor_pseudo_classes",
+        "general_idea": "Migrate from string-based style classes to PseudoClass API for better CSS state management.",
+        "human_impl": "protected static final PseudoClass FIRST = PseudoClass.getPseudoClass(\"first\"); ... crumb.pseudoClassStateChanged(FIRST, treeItem.isFirst());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_node_type",
+        "general_idea": "Change crumb node type from Button to ButtonBase to allow more flexible styling and subtypes.",
+        "human_impl": "import javafx.scene.control.ButtonBase; ... ButtonBase crumb = createCrumb(treeItem);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "feature_dividers",
+        "general_idea": "Add support for custom divider nodes between breadcrumbs via a factory pattern.",
+        "human_impl": "protected Node createDivider(BreadCrumbItem<T> treeItem) { ... getSkinnable().getDividerFactory().call(treeItem); ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_layout_logic",
+        "general_idea": "Simplify layoutChildren by removing manual overlap calculations and relying on standard resizing.",
+        "human_impl": "node.resizeRelocate(nodeX, nodeY, nodeWidth, nodeHeight); ... nodeX += nodeWidth;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_visibility",
+        "general_idea": "Change method and field visibility from private to protected to allow subclassing.",
+        "human_impl": "protected void updateSelectedPath(...) ... protected List<BreadCrumbItem<T>> constructFlatPath(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/CaptionMenuItem.java": [
+      {
+        "kind": "add_named_arg_annotation",
+        "general_idea": "Add @NamedArg annotation to constructor parameter to support named arguments in JavaFX builders.",
+        "human_impl": "@NamedArg(\"text\") String text",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_nullable_annotation",
+        "general_idea": "Add @Nullable annotation to indicate the text parameter can be null.",
+        "human_impl": "@Nullable @NamedArg(\"text\") String text",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Add Javadoc comments to the class and its public members for better documentation.",
+        "human_impl": "/** ... */ public class CaptionMenuItem ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_field_visibility",
+        "general_idea": "Change the visibility of the title field from private to protected to allow subclass access.",
+        "human_impl": "protected final Label title = new Label();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "replace_style_constant",
+        "general_idea": "Replace the custom Styles constant with a hardcoded CSS class name string.",
+        "human_impl": "getStyleClass().addAll(\"caption-menu-item\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reorder_methods",
+        "general_idea": "Move the titleProperty method to follow JavaBeans convention (property method after getter/setter or grouped logically).",
+        "human_impl": "public StringProperty titleProperty() { ... }",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/CustomTextField.java": [
+      {
+        "kind": "refactor_code_structure",
+        "general_idea": "Reorder class members to place the createDefaultSkin method before property definitions and move field declarations below their accessor methods.",
+        "human_impl": "Moved createDefaultSkin() block up and left/right field declarations down.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_javadoc",
+        "general_idea": "Modernize Javadoc comments to use standard JavaDoc tags and phrasing.",
+        "human_impl": "Changed '@return' descriptions to 'Represents' or 'Returns' and added '@param' tags.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_suppression",
+        "general_idea": "Remove the @SuppressWarnings annotation as it is no longer needed or desired.",
+        "human_impl": "Removed @SuppressWarnings(\"unused\") from class declaration.",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/CustomTextFieldSkin.java": [
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Add a class-level Javadoc comment to document the purpose of the CustomTextFieldSkin class.",
+        "human_impl": "Added /** The default skin for the {@link CustomTextField} control. */ before the class declaration.",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/Popover.java": [
+      {
+        "kind": "import_cleanup",
+        "general_idea": "Replace wildcard imports with explicit imports and reorder them to comply with stricter code style or static analysis rules.",
+        "human_impl": "import javafx.beans.property.BooleanProperty; ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "javadoc_enhancement",
+        "general_idea": "Add a code example to the class-level Javadoc to improve documentation quality.",
+        "human_impl": "<pre>{@code var textFlow = new TextFlow(...); ... }</pre>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_structure_refactoring",
+        "general_idea": "Reorganize class members into logical sections (Listeners, API, Properties) with separator comments for better readability.",
+        "human_impl": "///////////////////////////////////////////////////////////////////////////// // Listeners // ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "null_check_improvement",
+        "general_idea": "Add a runtime check to ensure the owner node is part of the scene graph before calculating bounds, preventing potential NPEs or invalid state.",
+        "human_impl": "if (bounds == null) { throw new IllegalStateException(...); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "exception_message_update",
+        "general_idea": "Update exception messages to be more descriptive and consistent with modern Java conventions.",
+        "human_impl": "throw new NullPointerException(\"Owner Node cannot be null!\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "logic_simplification",
+        "general_idea": "Simplify the mouse click handler logic by combining conditions into a single if-statement.",
+        "human_impl": "if (mouseEvent.getTarget().equals(getScene().getRoot()) && !isDetached()) { hide(); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "switch_expression_modernization",
+        "general_idea": "Refactor switch statements to use arrow syntax and remove unnecessary parentheses for cleaner code.",
+        "human_impl": "case LEFT_TOP, RIGHT_TOP -> getCornerRadius() + ...;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "property_definition_restructuring",
+        "general_idea": "Move property field declarations to follow their accessor methods or group them logically, improving code navigation.",
+        "human_impl": "private final ObjectProperty<Node> contentNode = ...;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "validation_logic_update",
+        "general_idea": "Change validation in property setters to throw NullPointerException instead of IllegalArgumentException for null values.",
+        "human_impl": "if (node == null) { throw new NullPointerException(\"Node cannot be null!\"); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "javadoc_formatting",
+        "general_idea": "Standardize Javadoc formatting, including parameter descriptions and return value descriptions.",
+        "human_impl": "@param owner The owner of the popover.",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/PopoverSkin.java": [
+      {
+        "kind": "import_restructuring",
+        "general_idea": "Reorganize imports to group static imports at the top and replace wildcard imports with explicit class imports.",
+        "human_impl": "import static atlantafx.base.controls.Popover.ArrowLocation;\nimport static java.lang.Double.MAX_VALUE;\n...\nimport javafx.scene.shape.Circle;\nimport javafx.scene.shape.HLineTo;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "javadoc_addition",
+        "general_idea": "Add a class-level Javadoc comment to describe the purpose of the PopoverSkin class.",
+        "human_impl": "/**\n * The default skin for the {@link Popover} control.\n */\npublic class PopoverSkin implements Skin<Popover> {",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "suppression_annotation",
+        "general_idea": "Add a suppression annotation to silence warnings about missing cases in an enum switch statement.",
+        "human_impl": "@SuppressWarnings(\"MissingCasesInEnumSwitch\")\npublic PopoverSkin(final Popover popover) {",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_formatting",
+        "general_idea": "Reformat indentation and line breaks in binding expressions and switch statements to improve readability.",
+        "human_impl": "stackPane.minWidthProperty().bind(\n    Bindings.add(Bindings.multiply(2, popover.arrowSizeProperty()),\n        Bindings.add(\n            Bindings.multiply(2, popover.cornerRadiusProperty()),\n            Bindings.multiply(2, popover.arrowIndentProperty())\n        )\n    )\n);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "method_body_formatting",
+        "general_idea": "Change the empty dispose method from a single-line brace style to a multi-line brace style.",
+        "human_impl": "public void dispose() {\n}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "variable_finality",
+        "general_idea": "Add the 'final' modifier to local DoubleProperty variables to enforce immutability of the references.",
+        "human_impl": "final DoubleProperty centerYProperty = new SimpleDoubleProperty();\nfinal DoubleProperty centerXProperty = new SimpleDoubleProperty();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_formatting",
+        "general_idea": "Reformat complex binding expressions by breaking them into multiple lines for better clarity.",
+        "human_impl": "lineHTop.xProperty().bind(Bindings.subtract(\n    Bindings.subtract(rightEdgeMinusRadiusProperty, arrowIndentProperty),\n    Bindings.multiply(arrowSizeProperty, 2)\n));",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/Spacer.java": [
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Add comprehensive Javadoc comments to the Spacer class and its constructors to improve documentation.",
+        "human_impl": "Added class-level description and @param/@return tags for all constructors.",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/ToggleSwitch.java": [
+      {
+        "kind": "implement_toggle_interface",
+        "general_idea": "Refactor ToggleSwitch to implement the Toggle interface to support grouping and standard toggle behavior.",
+        "human_impl": "public class ToggleSwitch extends Labeled implements Toggle",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_toggle_group_support",
+        "general_idea": "Add toggleGroupProperty to allow the switch to be part of a ToggleGroup.",
+        "human_impl": "public final ObjectProperty<ToggleGroup> toggleGroupProperty()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_label_position_property",
+        "general_idea": "Add a styleable labelPosition property to control the side of the text label.",
+        "human_impl": "public final ObjectProperty<HorizontalDirection> labelPositionProperty()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_css_metadata",
+        "general_idea": "Implement getControlCssMetaData to expose the new labelPosition property to CSS.",
+        "human_impl": "public List<CssMetaData<? extends Styleable, ?>> getControlCssMetaData()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_selected_logic",
+        "general_idea": "Update selectedProperty invalidation to handle ToggleGroup selection logic and accessibility attributes.",
+        "human_impl": "if (tg != null) { if (selected) { tg.selectToggle(ToggleSwitch.this); } ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_pseudo_class_right",
+        "general_idea": "Add a 'right' pseudo-class to support styling when the label is on the right.",
+        "human_impl": "protected static final PseudoClass PSEUDO_CLASS_RIGHT = PseudoClass.getPseudoClass(\"right\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Add comprehensive Javadoc comments to the class and its public methods.",
+        "human_impl": "/** * A control that provides users with the ability to choose between two distinct values. ... */",
+        "bucket": "polishment"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/ToggleSwitchSkin.java": [
+      {
+        "kind": "refactor_styleable_properties",
+        "general_idea": "Move CSS metadata definition into a nested static class to follow modern JavaFX styleable property patterns.",
+        "human_impl": "Moved THUMB_MOVE_ANIMATION_TIME and STYLEABLES into static class StyleableProperties",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_label_positioning_support",
+        "general_idea": "Implement logic to position the label relative to the thumb area based on HorizontalDirection.",
+        "human_impl": "Added calculations for labelX and thumbAreaX using c.getLabelPosition()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_animation_duration_binding",
+        "general_idea": "Ensure the animation transition duration updates dynamically when the styleable property changes.",
+        "human_impl": "Added invalidated() override in StyleableDoubleProperty to update transition.setDuration()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "extract_constant",
+        "general_idea": "Extract magic number for animation time into a named constant for clarity.",
+        "human_impl": "Defined DEFAULT_ANIMATION_TIME = Duration.millis(200)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_syntax",
+        "general_idea": "Use var keyword for local variable declarations to reduce verbosity.",
+        "human_impl": "Changed 'final ToggleSwitchSkin skin' to 'final var skin'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Add class-level Javadoc documentation.",
+        "human_impl": "Added /** The default skin for the {@link ToggleSwitch} control. */",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_brace_style",
+        "general_idea": "Add braces to if-statement body for consistency and safety.",
+        "human_impl": "Added braces around selectedStateChanged() call",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

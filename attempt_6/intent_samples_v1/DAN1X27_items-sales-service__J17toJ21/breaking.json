@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "DAN1X27/items-sales-service",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "fffd027c3b0bb0a8c06564ca9e52c0042534266a",
+    "sha_to": "8387118e4ecb076c4b8b21d4df6609f80939eb37"
+  },
+  "by_file": {
+    "users-service/src/main/java/danix/app/users_service/dto/ResponseUserDTO.java": [
+      {
+        "kind": "remove_field",
+        "general_idea": "Remove the comments field from the ResponseUserDTO class.",
+        "human_impl": "private List<ResponseCommentDTO> comments;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

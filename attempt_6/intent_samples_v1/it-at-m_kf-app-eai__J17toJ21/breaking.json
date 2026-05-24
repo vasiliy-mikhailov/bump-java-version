@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "repo": "it-at-m/kf-app-eai",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "47f4dab24a7bcf1b491bd814b14e63908095f8d4",
+    "sha_to": "4c397b23fb0c1f6314a3d4473a1b7042b30b954a"
+  },
+  "by_file": {
+    "src/main/java/de/muenchen/rbs/kitafindereai/api/KitaAppApiController.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ standards required by Spring Boot 3 on Java 21.",
+        "human_impl": "import jakarta.validation.ConstraintViolation;",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "set_java_version",
+        "general_idea": "Configure Maven compiler source and target to Java 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    ".github/workflows/build.yaml": [
+      {
+        "kind": "add_build_job",
+        "general_idea": "Add a dedicated build job that sets up JDK 21 and runs Maven tests and install.",
+        "human_impl": "jobs: build: uses: actions/setup-java@v4 with: java-version: '21'",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

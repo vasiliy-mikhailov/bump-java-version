@@ -1,0 +1,33 @@
+7c7f718 chore: update to 2.8.2.Final + java 17
+a75dcbd Merge pull request #11 from aureamunoz/upgrade-quarkus
+1300852 align test with code
+cf8af4f Merge pull request #10 from aureamunoz/upgrade-quarkus
+8838ee0 refactor and update for Conf.IT
+4bb1f1c Merge pull request #9 from aureamunoz/upgrade-quarkus
+83c9375 refactor: add final code and some refactors
+154450c Merge pull request #8 from aureamunoz/upgrade-quarkus
+0e3553c refactor: upgrade Quarkus version to latest + refactors
+84946d4 Merge pull request #7 from aureamunoz/upgrade-quarkus
+54e48ee refactor: upgrade Quarkus version to latest + refactors
+c46fd7f Merge pull request #6 from rhfauri/update-quarkus-version
+90aaa54 chore: update to Quarkus 1.13.2.Final
+68d5581 fix: fix command in readme
+297a08c fix: fix syntax yaml
+a8ef163 fix: fix CI
+2216314 fix: fix the executable name
+f638a6c chore: upgrade quarkus version and update the readme accordingly
+9ac2f54 chore: upgrade quarkus version
+76be3b6 chore: bump quarkus version
+70e72c1 Merge pull request #4 from rhfauri/update-quarkus-version
+098e682 chore: update Quarkus version
+1cb0819 chore: bump quarkus version
+24a45be refactor: rename artifact in command
+e8b9155 refactor: rename artifact
+9ad49af refactor: format and update quarkus version
+f9199be chore: bump Quarkus version to 1.7.2.Final
+ed5ec6a chore: bump quarkus version
+d986cc0 refactor
+a26add5 update readme
+2f840e8 add slides
+05f9779 fix typo
+83f74c9 add slides and readme

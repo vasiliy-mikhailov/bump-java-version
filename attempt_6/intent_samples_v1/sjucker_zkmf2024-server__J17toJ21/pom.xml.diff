@@ -1,0 +1,431 @@
+diff --git a/pom.xml b/pom.xml
+index 6f84f86..a4656eb 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -5,23 +5,41 @@
+     <parent>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-parent</artifactId>
+-        <version>2.6.2</version>
++        <version>3.2.0</version>
+         <relativePath/> <!-- lookup parent from repository -->
+     </parent>
+     <groupId>ch.zkmf2024</groupId>
+-    <artifactId>server</artifactId>
+-    <version>0.0.1-SNAPSHOT</version>
++    <artifactId>zkmf2024-server</artifactId>
++    <version>1.0.0-SNAPSHOT</version>
+     <name>server</name>
+     <description>ZKMF 2024 Server</description>
+     <properties>
+-        <java.version>17</java.version>
++        <java.version>21</java.version>
+ 
+-        <mapstruct.version>1.4.2.Final</mapstruct.version>
++        <mapstruct.version>1.5.5.Final</mapstruct.version>
+         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+-        <testcontainers.version>1.15.2</testcontainers.version>
+-        <firebase-admin.version>8.1.0</firebase-admin.version>
+-        <mail.version>1.4.7</mail.version>
+-        <activation.version>1.1.1</activation.version>
++        <jjwt.version>0.11.5</jjwt.version>
++        <poi.version>5.2.5</poi.version>
++
++        <frontend-maven-plugin.version>1.15.0</frontend-maven-plugin.version>
++        <typescript-generator-maven-plugin.version>3.2.1263</typescript-generator-maven-plugin.version>
++        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
++        <sonar-maven-plugin.version>3.10.0.2594</sonar-maven-plugin.version>
++        <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
++        <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
++
++        <nodeVersion>v20.10.0</nodeVersion>
++        <npmVersion>10.2.3</npmVersion>
++
++        <!-- start local DB using src/main/docker/postgres.yml  -->
++        <db.url>jdbc:postgresql://localhost:5432/zkmf2024</db.url>
++        <db.user>zkmf2024</db.user>
++        <db.schema>public</db.schema>
++        <db.password>zkmf2024</db.password>
++
++        <sonar.organization>sjucker</sonar.organization>
++        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
++        <sonar.projectKey>sjucker_zkmf2024-server</sonar.projectKey>
+     </properties>
+     <dependencies>
+         <dependency>
+@@ -34,34 +52,66 @@
+         </dependency>
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+-            <artifactId>spring-boot-starter-data-jdbc</artifactId>
++            <artifactId>spring-boot-starter-web</artifactId>
++        </dependency>
++        <dependency>
++            <groupId>org.springframework.boot</groupId>
++            <artifactId>spring-boot-starter-validation</artifactId>
++        </dependency>
++        <dependency>
++            <groupId>org.springframework.boot</groupId>
++            <artifactId>spring-boot-starter-mail</artifactId>
++        </dependency>
++        <dependency>
++            <groupId>org.springframework.boot</groupId>
++            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+         </dependency>
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+-            <artifactId>spring-boot-starter-data-jpa</artifactId>
++            <artifactId>spring-boot-starter-webflux</artifactId>
+         </dependency>
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+-            <artifactId>spring-boot-starter-data-rest</artifactId>
++            <artifactId>spring-boot-starter-jooq</artifactId>
+         </dependency>
++
+         <dependency>
+-            <groupId>com.google.firebase</groupId>
+-            <artifactId>firebase-admin</artifactId>
+-            <version>${firebase-admin.version}</version>
++            <groupId>org.apache.poi</groupId>
++            <artifactId>poi</artifactId>
++            <version>${poi.version}</version>
+         </dependency>
++
++        <dependency>
++            <groupId>org.apache.poi</groupId>
++            <artifactId>poi-ooxml</artifactId>
++            <version>${poi.version}</version>
++        </dependency>
++
+         <dependency>
+             <groupId>org.flywaydb</groupId>
+             <artifactId>flyway-core</artifactId>
+         </dependency>
++
++        <dependency>
++            <groupId>org.apache.commons</groupId>
++            <artifactId>commons-lang3</artifactId>
++        </dependency>
++
+         <dependency>
+-            <groupId>javax.mail</groupId>
+-            <artifactId>mail</artifactId>
+-            <version>${mail.version}</version>
++            <groupId>io.jsonwebtoken</groupId>
++            <artifactId>jjwt-api</artifactId>
++            <version>${jjwt.version}</version>
+         </dependency>
+         <dependency>
+-            <groupId>javax.activation</groupId>
+-            <artifactId>activation</artifactId>
+-            <version>${activation.version}</version>
++            <groupId>io.jsonwebtoken</groupId>
++            <artifactId>jjwt-impl</artifactId>
++            <version>${jjwt.version}</version>
++            <scope>runtime</scope>
++        </dependency>
++        <dependency>
++            <groupId>io.jsonwebtoken</groupId>
++            <artifactId>jjwt-jackson</artifactId>
++            <version>${jjwt.version}</version>
+             <scope>runtime</scope>
+         </dependency>
+ 
+@@ -82,10 +132,11 @@
+             <optional>true</optional>
+         </dependency>
+         <dependency>
+-            <groupId>mysql</groupId>
+-            <artifactId>mysql-connector-java</artifactId>
++            <groupId>org.postgresql</groupId>
++            <artifactId>postgresql</artifactId>
+             <scope>runtime</scope>
+         </dependency>
++
+         <dependency>
+             <groupId>org.springframework.boot</groupId>
+             <artifactId>spring-boot-starter-test</artifactId>
+@@ -93,33 +144,152 @@
+         </dependency>
+         <dependency>
+             <groupId>org.testcontainers</groupId>
+-            <artifactId>junit-jupiter</artifactId>
++            <artifactId>testcontainers</artifactId>
++            <version>${testcontainers.version}</version>
+             <scope>test</scope>
+         </dependency>
+         <dependency>
+             <groupId>org.testcontainers</groupId>
+-            <artifactId>mysql</artifactId>
++            <artifactId>postgresql</artifactId>
++            <version>${testcontainers.version}</version>
+             <scope>test</scope>
+         </dependency>
+     </dependencies>
+-    <dependencyManagement>
+-        <dependencies>
+-            <dependency>
+-                <groupId>org.testcontainers</groupId>
+-                <artifactId>testcontainers-bom</artifactId>
+-                <version>${testcontainers.version}</version>
+-                <type>pom</type>
+-                <scope>import</scope>
+-            </dependency>
+-        </dependencies>
+-    </dependencyManagement>
++
++    <profiles>
++        <profile>
++            <id>production</id>
++            <activation>
++                <activeByDefault>true</activeByDefault>
++            </activation>
++            <build>
++                <plugins>
++                    <plugin>
++                        <groupId>com.github.eirslett</groupId>
++                        <artifactId>frontend-maven-plugin</artifactId>
++                        <version>${frontend-maven-plugin.version}</version>
++                        <executions>
++                            <execution>
++                                <id>ng build</id>
++                                <goals>
++                                    <goal>npm</goal>
++                                </goals>
++                                <configuration>
++                                    <arguments>run-script build</arguments>
++                                </configuration>
++                            </execution>
++                        </executions>
++                    </plugin>
++                </plugins>
++            </build>
++        </profile>
++
++        <profile>
++            <id>staging</id>
++            <build>
++                <plugins>
++                    <plugin>
++                        <groupId>com.github.eirslett</groupId>
++                        <artifactId>frontend-maven-plugin</artifactId>
++                        <version>${frontend-maven-plugin.version}</version>
++                        <executions>
++                            <execution>
++                                <id>ng build-staging</id>
++                                <goals>
++                                    <goal>npm</goal>
++                                </goals>
++                                <configuration>
++                                    <arguments>run-script build-staging</arguments>
++                                </configuration>
++                            </execution>
++                        </executions>
++                    </plugin>
++                </plugins>
++            </build>
++        </profile>
++    </profiles>
++
+ 
+     <build>
++        <resources>
++            <resource>
++                <directory>src/main/resources</directory>
++                <filtering>true</filtering>
++            </resource>
++            <resource>
++                <directory>target/webapp</directory>
++                <targetPath>static</targetPath>
++            </resource>
++        </resources>
++
+         <plugins>
++            <plugin>
++                <groupId>com.github.eirslett</groupId>
++                <artifactId>frontend-maven-plugin</artifactId>
++                <version>${frontend-maven-plugin.version}</version>
++                <executions>
++                    <execution>
++                        <id>install node and npm</id>
++                        <goals>
++                            <goal>install-node-and-npm</goal>
++                        </goals>
++                        <configuration>
++                            <nodeVersion>${nodeVersion}</nodeVersion>
++                            <npmVersion>${npmVersion}</npmVersion>
++                        </configuration>
++                    </execution>
++
++                    <execution>
++                        <id>npm ci</id>
++                        <goals>
++                            <goal>npm</goal>
++                        </goals>
++                        <configuration>
++                            <arguments>ci</arguments>
++                        </configuration>
++                    </execution>
++
++                    <execution>
++                        <id>ng lint</id>
++                        <goals>
++                            <goal>npm</goal>
++                        </goals>
++                        <phase>test</phase>
++                        <configuration>
++                            <arguments>run-script lint</arguments>
++                        </configuration>
++                    </execution>
++                </executions>
++            </plugin>
++
++            <plugin>
++                <groupId>cz.habarta.typescript-generator</groupId>
++                <artifactId>typescript-generator-maven-plugin</artifactId>
++                <version>${typescript-generator-maven-plugin.version}</version>
++                <configuration>
++                    <jsonLibrary>jackson2</jsonLibrary>
++                    <optionalProperties>useLibraryDefinition</optionalProperties>
++                    <classPatterns>
++                        <pattern>ch.zkmf2024.**DTO</pattern>
++                    </classPatterns>
++                    <outputFile>src/main/webapp/app/rest.ts</outputFile>
++                    <outputKind>module</outputKind>
++                    <outputFileType>implementationFile</outputFileType>
++                    <mapDate>asString</mapDate>
++                    <mapEnum>asEnum</mapEnum>
++                    <optionalProperties>useSpecifiedAnnotations</optionalProperties>
++                    <requiredAnnotations>jakarta.validation.constraints.NotNull</requiredAnnotations>
++                    <primitivePropertiesRequired>true</primitivePropertiesRequired>
++                    <nonConstEnums>true</nonConstEnums>
++                    <noFileComment>true</noFileComment>
++                    <noTslintDisable>true</noTslintDisable>
++                </configuration>
++            </plugin>
++
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-compiler-plugin</artifactId>
+-                <version>3.8.1</version>
++                <version>${maven-compiler-plugin.version}</version>
+                 <configuration>
+                     <source>${java.version}</source>
+                     <target>${java.version}</target>
+@@ -146,8 +316,114 @@
+             <plugin>
+                 <groupId>org.springframework.boot</groupId>
+                 <artifactId>spring-boot-maven-plugin</artifactId>
++                <executions>
++                    <execution>
++                        <goals>
++                            <goal>repackage</goal>
++                        </goals>
++                    </execution>
++                </executions>
++            </plugin>
++
++            <plugin>
++                <groupId>org.flywaydb</groupId>
++                <artifactId>flyway-maven-plugin</artifactId>
++                <version>${flyway.version}</version>
++                <configuration>
++                    <url>${db.url}</url>
++                    <user>${db.user}</user>
++                    <password>${db.password}</password>
++                    <cleanDisabled>false</cleanDisabled>
++                    <!-- Note that we need to prefix the db/migration path with filesystem: to prevent Flyway from looking for our migration scripts only on the classpath -->
++                    <locations>
++                        <location>filesystem:src/main/resources/db/migration</location>
++                    </locations>
++                </configuration>
++            </plugin>
++
++            <plugin>
++                <groupId>org.jooq</groupId>
++                <artifactId>jooq-codegen-maven</artifactId>
++                <version>${jooq.version}</version>
++                <configuration>
++                    <jdbc>
++                        <driver>org.postgresql.Driver</driver>
++                        <url>${db.url}</url>
++                        <user>${db.user}</user>
++                        <password>${db.password}</password>
++                    </jdbc>
++                    <generator>
++                        <database>
++                            <name>org.jooq.meta.postgres.PostgresDatabase</name>
++                            <includes>.*</includes>
++                            <excludes>flyway_schema_history</excludes>
++                            <inputSchema>${db.schema}</inputSchema>
++                            <outputSchemaToDefault>true</outputSchemaToDefault>
++                        </database>
++                        <generate>
++                            <deprecated>false</deprecated>
++                            <pojos>true</pojos>
++                            <daos>true</daos>
++                            <interfaces>true</interfaces>
++                            <routines>false</routines>
++                            <javaTimeTypes>true</javaTimeTypes>
++                        </generate>
++                        <target>
++                            <packageName>ch.zkmf2024.server.jooq.generated</packageName>
++                            <directory>src/main/java</directory>
++                        </target>
++                        <strategy>
++                            <matchers>
++                                <tables>
++                                    <table>
++                                        <pojoClass>
++                                            <transform>PASCAL</transform>
++                                            <expression>$0_pojo</expression>
++                                        </pojoClass>
++                                    </table>
++                                </tables>
++                            </matchers>
++                        </strategy>
++                    </generator>
++                </configuration>
++            </plugin>
++
++            <plugin>
++                <groupId>org.apache.maven.plugins</groupId>
++                <artifactId>maven-surefire-plugin</artifactId>
++                <version>${maven-surefire-plugin.version}</version>
++            </plugin>
++
++            <plugin>
++                <groupId>org.jacoco</groupId>
++                <artifactId>jacoco-maven-plugin</artifactId>
++                <version>${jacoco-maven-plugin.version}</version>
++                <executions>
++                    <execution>
++                        <id>prepare-agent</id>
++                        <goals>
++                            <goal>prepare-agent</goal>
++                        </goals>
++                    </execution>
++                    <execution>
++                        <id>report</id>
++                        <goals>
++                            <goal>report</goal>
++                        </goals>
++                        <configuration>
++                            <formats>
++                                <format>XML</format>
++                            </formats>
++                        </configuration>
++                    </execution>
++                </executions>
++            </plugin>
++
++            <plugin>
++                <groupId>org.sonarsource.scanner.maven</groupId>
++                <artifactId>sonar-maven-plugin</artifactId>
++                <version>${sonar-maven-plugin.version}</version>
+             </plugin>
+         </plugins>
+     </build>
+-
+ </project>

@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "repo": "Advancedboy/ident-lite",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "ac478abaac8b7faec4d1c8b1eb2a402d576d4f5b",
+    "sha_to": "551a8925726950a6b192a1ba70e1e7e334a0fe2f"
+  },
+  "by_file": {
+    "src/main/java/com/identlite/api/dto/UserDto.java": [
+      {
+        "kind": "rename_field",
+        "general_idea": "Renamed the 'username' field to 'name' to better reflect the data it holds.",
+        "human_impl": "Changed private String username; to private String name;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_field",
+        "general_idea": "Removed the 'password' field from the DTO, likely moving it to a separate authentication DTO or handling it differently.",
+        "human_impl": "Deleted the line: @JsonIgnore public String password;",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "jdk_version_bump",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

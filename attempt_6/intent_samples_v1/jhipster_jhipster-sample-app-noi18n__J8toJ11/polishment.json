@@ -1,0 +1,779 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-noi18n",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "e29af5f0c09af86345ebbd08c597c02bed10286f",
+    "sha_to": "8ab3269fb02b99a5351c6be7d2fce513f05be5f8"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "add_jhipster_dependencies",
+        "general_idea": "Import JHipster BOM to manage dependency versions consistently across the project.",
+        "human_impl": "<artifactId>jhipster-dependencies</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_packaging",
+        "general_idea": "Change project packaging from WAR to JAR to align with modern Spring Boot executable jar standards.",
+        "human_impl": "<packaging>jar</packaging>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_plugins",
+        "general_idea": "Upgrade various Maven plugins (compiler, surefire, failsafe, etc.) to versions compatible with Java 11 and Maven 3.3+.",
+        "human_impl": "<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_frontend_properties",
+        "general_idea": "Add Node.js and NPM version properties to manage frontend build tool versions.",
+        "human_impl": "<node.version>v14.15.0</node.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_group_id",
+        "general_idea": "Update groupId and artifactId to reflect the new sample application identity.",
+        "human_impl": "<groupId>io.github.jhipster.sample</groupId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_testcontainers",
+        "general_idea": "Add Testcontainers MySQL dependency for integration testing with real database instances.",
+        "human_impl": "<artifactId>mysql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_archunit",
+        "general_idea": "Add ArchUnit dependency for architectural unit testing.",
+        "human_impl": "<archunit-junit5.version>0.14.1</archunit-junit5.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_sonar_properties",
+        "general_idea": "Update SonarQube plugin version and configuration properties for modern code analysis.",
+        "human_impl": "<sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Micrometer Prometheus registry for modern metrics collection.",
+        "human_impl": "Added io.micrometer:micrometer-registry-prometheus.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Dropwizard Metrics core dependency required by Micrometer or other components.",
+        "human_impl": "Added io.dropwizard.metrics:metrics-core.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add ArchUnit dependencies for architecture testing with JUnit 5.",
+        "human_impl": "Added com.tngtech.archunit:archunit-junit5-api and archunit-junit5-engine.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Zalando Problem Spring Web for standardized error handling.",
+        "human_impl": "Added org.zalando:problem-spring-web.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Spring Security Test dependency for security testing.",
+        "human_impl": "Added org.springframework.security:spring-security-test.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add Spring Boot Test dependency explicitly.",
+        "human_impl": "Added org.springframework.boot:spring-boot-test.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_exclusion",
+        "general_idea": "Exclude JUnit Vintage engine to enforce JUnit 5 native execution.",
+        "human_impl": "Added exclusion for org.junit.vintage:junit-vintage-engine in spring-boot-starter-test.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_addition",
+        "general_idea": "Add JIB Maven plugin for container image building.",
+        "human_impl": "Added com.google.cloud.tools:jib-maven-plugin.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_addition",
+        "general_idea": "Add Checkstyle plugin for code style enforcement.",
+        "human_impl": "Added org.apache.maven.plugins:maven-checkstyle-plugin.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_addition",
+        "general_idea": "Add Javadoc plugin configuration.",
+        "human_impl": "Added org.apache.maven.plugins:maven-javadoc-plugin.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_addition",
+        "general_idea": "Add Failsafe plugin for integration tests.",
+        "human_impl": "Added org.apache.maven.plugins:maven-failsafe-plugin.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_addition",
+        "general_idea": "Add IDEA plugin configuration.",
+        "human_impl": "Added org.apache.maven.plugins:maven-idea-plugin.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_addition",
+        "general_idea": "Add Resources plugin configuration for filtering YAML files.",
+        "human_impl": "Added org.apache.maven.plugins:maven-resources-plugin with YAML filtering.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_configuration_change",
+        "general_idea": "Update JaCoCo plugin to support separate unit and integration test coverage reports.",
+        "human_impl": "Added pre/post integration test executions to jacoco-maven-plugin.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_configuration_change",
+        "general_idea": "Update Enforcer plugin to require Java 8-15 and Maven version.",
+        "human_impl": "Updated requireJavaVersion and requireMavenVersion rules.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_removal",
+        "general_idea": "Remove SortPom plugin as it is no longer needed or compatible.",
+        "human_impl": "Removed com.google.code.sortpom:maven-sortpom-plugin.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_removal",
+        "general_idea": "Remove Gatling Maven plugin.",
+        "human_impl": "Removed io.gatling:gatling-maven-plugin.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_removal",
+        "general_idea": "Remove Eclipse plugin configuration from main plugins section.",
+        "human_impl": "Removed org.apache.maven.plugins:maven-eclipse-plugin from plugins, moved to pluginManagement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_removal",
+        "general_idea": "Remove Enforcer plugin configuration from main plugins section.",
+        "human_impl": "Removed org.apache.maven.plugins:maven-enforcer-plugin from plugins, moved to pluginManagement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_removal",
+        "general_idea": "Remove Surefire plugin configuration from main plugins section.",
+        "human_impl": "Removed org.apache.maven.plugins:maven-surefire-plugin from plugins, moved to pluginManagement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_removal",
+        "general_idea": "Remove WAR plugin configuration from main plugins section.",
+        "human_impl": "Removed org.apache.maven.plugins:maven-war-plugin from plugins, moved to pluginManagement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_removal",
+        "general_idea": "Remove JaCoCo plugin configuration from main plugins section.",
+        "human_impl": "Removed org.jacoco:jacoco-maven-plugin from plugins, moved to pluginManagement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_removal",
+        "general_idea": "Remove Sonar plugin configuration from main plugins section.",
+        "human_impl": "Removed org.codehaus.mojo:sonar-maven-plugin from plugins, moved to pluginManagement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_removal",
+        "general_idea": "Remove Liquibase plugin configuration from main plugins section.",
+        "human_impl": "Removed org.liquibase:liquibase-maven-plugin from plugins, moved to pluginManagement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_removal",
+        "general_idea": "Remove Spring Boot Maven plugin configuration from main plugins section.",
+        "human_impl": "Removed org.springframework.boot:spring-boot-maven-plugin from plugins, moved to pluginManagement.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "file_mode_change",
+        "general_idea": "Change pom.xml file mode from executable to regular file.",
+        "human_impl": "Changed mode from 100755 to 100644.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_failsafe_plugin",
+        "general_idea": "Add maven-failsafe-plugin to manage integration tests.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-failsafe-plugin</artifactId>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sonar_plugin",
+        "general_idea": "Add sonar-maven-plugin for code quality analysis.",
+        "human_impl": "<plugin><groupId>org.sonarsource.scanner.maven</groupId><artifactId>sonar-maven-plugin</artifactId>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_spring_boot_plugin",
+        "general_idea": "Configure spring-boot-maven-plugin with repackage goal and main class.",
+        "human_impl": "<plugin><groupId>org.springframework.boot</groupId><artifactId>spring-boot-maven-plugin</artifactId><executions>...</executions></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_no_liquibase_profile",
+        "general_idea": "Add profile to disable Liquibase database migrations.",
+        "human_impl": "<profile><id>no-liquibase</id>...</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_api_docs_profile",
+        "general_idea": "Add profile to enable API documentation generation.",
+        "human_impl": "<profile><id>api-docs</id>...</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_tls_profile",
+        "general_idea": "Add profile to enable TLS/SSL configuration.",
+        "human_impl": "<profile><id>tls</id>...</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_webpack_profile",
+        "general_idea": "Add profile to manage frontend build with Webpack.",
+        "human_impl": "<profile><id>webpack</id>...</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_frontend_maven_plugin_dev",
+        "general_idea": "Add frontend-maven-plugin to dev profile for Node/NPM installation and Webpack build.",
+        "human_impl": "<plugin><groupId>com.github.eirslett</groupId><artifactId>frontend-maven-plugin</artifactId>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_devtools_dependency",
+        "general_idea": "Add spring-boot-devtools to dev profile for faster development cycle.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-devtools</artifactId>...</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_h2_dependency_dev",
+        "general_idea": "Add H2 in-memory database to dev profile.",
+        "human_impl": "<dependency><groupId>com.h2database</groupId><artifactId>h2</artifactId>...</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "switch_embedded_server_undertow",
+        "general_idea": "Switch embedded server from Tomcat to Undertow in prod profile.",
+        "human_impl": "<artifactId>spring-boot-starter-undertow</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_yeoman_plugin",
+        "general_idea": "Remove yeoman-maven-plugin as frontend build is now handled by frontend-maven-plugin.",
+        "human_impl": "-<plugin><groupId>com.github.trecloux</groupId><artifactId>yeoman-maven-plugin</artifactId>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_frontend_maven_plugin_prod",
+        "general_idea": "Add frontend-maven-plugin to prod profile for production Webpack build.",
+        "human_impl": "<plugin><groupId>com.github.eirslett</groupId><artifactId>frontend-maven-plugin</artifactId>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_git_commit_id_plugin",
+        "general_idea": "Add git-commit-id-plugin to generate build info with git details.",
+        "human_impl": "<plugin><groupId>pl.project13.maven</groupId><artifactId>git-commit-id-plugin</artifactId>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_war_profile",
+        "general_idea": "Add profile to build the application as a WAR file.",
+        "human_impl": "<profile><id>war</id>...</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_ide_profile",
+        "general_idea": "Add profile to configure IDE-specific dependencies like MapStruct and Hibernate JPA Metamodel Generator.",
+        "human_impl": "<profile><id>IDE</id>...</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_eclipse_profile",
+        "general_idea": "Add profile to configure Eclipse m2e lifecycle mapping and dependencies.",
+        "human_impl": "<profile><id>eclipse</id>...</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_e2e_profile",
+        "general_idea": "Add profile for end-to-end testing configuration.",
+        "human_impl": "<profile><id>e2e</id>...</profile>",
+        "bucket": "polishment"
+      }
+    ],
+    ".editorconfig": [
+      {
+        "kind": "refactor_editorconfig_structure",
+        "general_idea": "Reorganized .editorconfig to group file-specific overrides and update glob patterns for modern web development file types.",
+        "human_impl": "Moved indent settings into specific glob blocks like [*.{ts,tsx,js,jsx,json,css,scss,yml,html}] and removed the generic [*] indent settings.",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitattributes": [
+      {
+        "kind": "replace_gitattributes",
+        "general_idea": "Replace the minimal .gitattributes configuration with a comprehensive, community-standard template to handle line endings and binary detection for a wider variety of file types.",
+        "human_impl": "Replaced `* text eol=lf` and specific extensions with `* text=auto` and extensive lists for text, binary, documents, and config files.",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "update_gitignore_patterns",
+        "general_idea": "Refactor .gitignore to use modern directory-only patterns and add new tool-specific ignore rules for VS Code, STS, and ESLint.",
+        "human_impl": "Changed patterns like /node_modules/** to node_modules/ and added sections for .vscode/, /.sts4-cache/, and .eslintcache.",
+        "bucket": "polishment"
+      }
+    ],
+    ".yo-rc.json": [
+      {
+        "kind": "update_jhipster_version",
+        "general_idea": "Update the JHipster generator version to 7.0.0-beta.0 to align with the Java 11 migration target.",
+        "human_impl": "\"jhipsterVersion\": \"7.0.0-beta.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_base_name",
+        "general_idea": "Rename the application base name to reflect the new sample application identity.",
+        "human_impl": "\"baseName\": \"jhipsterNoI18nSampleApplication\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_package_name",
+        "general_idea": "Change the Java package name to the new namespace for the sample application.",
+        "human_impl": "\"packageName\": \"io.github.jhipster.sample\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "normalize_boolean_config",
+        "general_idea": "Convert string-based boolean configuration values to actual booleans for clusteredHttpSession.",
+        "human_impl": "\"clusteredHttpSession\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "normalize_boolean_config",
+        "general_idea": "Convert string-based boolean configuration values to actual booleans for websocket.",
+        "human_impl": "\"websocket\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "normalize_boolean_config",
+        "general_idea": "Convert string-based boolean configuration values to actual booleans for searchEngine.",
+        "human_impl": "\"searchEngine\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_java_version",
+        "general_idea": "Remove the explicit javaVersion configuration as it is no longer required or handled differently in JHipster 7.",
+        "human_impl": "removed \"javaVersion\": \"8\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_application_type",
+        "general_idea": "Explicitly define the application type as monolith in the new configuration schema.",
+        "human_impl": "\"applicationType\": \"monolith\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_test_frameworks",
+        "general_idea": "Specify the test frameworks to be used, including Gatling and Protractor.",
+        "human_impl": "\"testFrameworks\": [\"gatling\", \"protractor\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_server_port",
+        "general_idea": "Explicitly configure the server port in the new configuration schema.",
+        "human_impl": "\"serverPort\": 8080",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_social_sign_in",
+        "general_idea": "Add configuration for social sign-in, disabled by default.",
+        "human_impl": "\"enableSocialSignIn\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_remember_me_key",
+        "general_idea": "Regenerate the remember-me key for security purposes during the migration.",
+        "human_impl": "\"rememberMeKey\": \"62227d4d159c4e6f364fe22307707385fd773e55\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sass_config",
+        "general_idea": "Enable Sass usage for frontend styling in the new configuration.",
+        "human_impl": "\"useSass\": true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jhi_prefix",
+        "general_idea": "Define the JHipster prefix for CSS classes and other identifiers.",
+        "human_impl": "\"jhiPrefix\": \"jhi\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_message_broker",
+        "general_idea": "Add configuration for message broker, disabled by default.",
+        "human_impl": "\"messageBroker\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_service_discovery",
+        "general_idea": "Add configuration for service discovery, disabled by default.",
+        "human_impl": "\"serviceDiscoveryType\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_client_package_manager",
+        "general_idea": "Specify npm as the client package manager.",
+        "human_impl": "\"clientPackageManager\": \"npm\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_client_framework",
+        "general_idea": "Specify Angular as the client framework.",
+        "human_impl": "\"clientFramework\": \"angularX\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_cache_provider",
+        "general_idea": "Explicitly define the cache provider as ehcache.",
+        "human_impl": "\"cacheProvider\": \"ehcache\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_hibernate_cache",
+        "general_idea": "Enable Hibernate cache in the new configuration schema.",
+        "human_impl": "\"enableHibernateCache\": true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_reactive_config",
+        "general_idea": "Add configuration for reactive stack, disabled by default.",
+        "human_impl": "\"reactive\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_other_modules",
+        "general_idea": "Add empty list for other modules in the new configuration schema.",
+        "human_impl": "\"otherModules\": []",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_entity_suffix",
+        "general_idea": "Define the suffix for entity classes.",
+        "human_impl": "\"entitySuffix\": \"\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dto_suffix",
+        "general_idea": "Define the suffix for DTO classes.",
+        "human_impl": "\"dtoSuffix\": \"DTO\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_client_theme",
+        "general_idea": "Specify no client theme in the new configuration.",
+        "human_impl": "\"clientTheme\": \"none\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_blueprints",
+        "general_idea": "Add empty list for blueprints in the new configuration schema.",
+        "human_impl": "\"blueprints\": []",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_embeddable_launch_script",
+        "general_idea": "Add configuration for embeddable launch script, disabled by default.",
+        "human_impl": "\"embeddableLaunchScript\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_creation_timestamp",
+        "general_idea": "Record the creation timestamp of the application configuration.",
+        "human_impl": "\"creationTimestamp\": 1577001470150",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_skip_user_management",
+        "general_idea": "Add configuration to skip user management, disabled by default.",
+        "human_impl": "\"skipUserManagement\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_admin_ui",
+        "general_idea": "Enable the admin UI in the new configuration.",
+        "human_impl": "\"withAdminUi\": true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_client_theme_variant",
+        "general_idea": "Define the client theme variant as empty.",
+        "human_impl": "\"clientThemeVariant\": \"\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_skip_client",
+        "general_idea": "Add configuration to skip client generation, disabled by default.",
+        "human_impl": "\"skipClient\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_skip_server",
+        "general_idea": "Add configuration to skip server generation, disabled by default.",
+        "human_impl": "\"skipServer\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_skip_check_length",
+        "general_idea": "Add configuration to skip checking identifier length, disabled by default.",
+        "human_impl": "\"skipCheckLengthOfIdentifier\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_skip_fake_data",
+        "general_idea": "Add configuration to skip fake data generation, disabled by default.",
+        "human_impl": "\"skipFakeData\": false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_pages",
+        "general_idea": "Add empty list for pages in the new configuration schema.",
+        "human_impl": "\"pages\": []",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_native_language",
+        "general_idea": "Define the native language as English.",
+        "human_impl": "\"nativeLanguage\": \"en\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_languages",
+        "general_idea": "Define the supported languages as English and French.",
+        "human_impl": "\"languages\": [\"en\", \"fr\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_entities",
+        "general_idea": "List the entities included in the application.",
+        "human_impl": "\"entities\": [\"BankAccount\", \"Label\", \"Operation\"]",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_readme_content",
+        "general_idea": "Replace the generic placeholder README with the standard JHipster 7.0.0-beta.0 documentation template.",
+        "human_impl": "Replaced 'README for jhipster' with full JHipster documentation including development, testing, and Docker sections.",
+        "bucket": "polishment"
+      }
+    ],
+    "package.json": [
+      {
+        "kind": "update_node_engine_requirement",
+        "general_idea": "Update the required Node.js version to 14.15.0 to align with modern tooling and JDK 11 era build environments.",
+        "human_impl": "\"engines\": { \"node\": \">=14.15.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_linting_tooling",
+        "general_idea": "Replace JSHint with ESLint and Prettier for code formatting and linting.",
+        "human_impl": "Removed jshint-stylish; added eslint, prettier, and related plugins.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_project_metadata",
+        "general_idea": "Update package name, version, and description to reflect the new application identity.",
+        "human_impl": "\"name\": \"jhipster-no-i-1-8-n-sample-application\", \"version\": \"0.0.1-SNAPSHOT\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_license_field",
+        "general_idea": "Explicitly set the license field in package.json.",
+        "human_impl": "\"license\": \"UNLICENSED\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_ci_configuration",
+        "general_idea": "Add configuration fields for backend port, default environment, and packaging type.",
+        "human_impl": "\"config\": { \"backend_port\": 8080, \"default_environment\": \"prod\", \"packaging\": \"jar\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jest_sonar_config",
+        "general_idea": "Add configuration for Jest Sonar reporter to integrate with SonarQube.",
+        "human_impl": "\"jestSonar\": { \"reportPath\": \"target/test-results/jest\", \"reportFile\": \"TESTS-results-sonar.xml\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_cache_directories",
+        "general_idea": "Specify node_modules as a cache directory for npm.",
+        "human_impl": "\"cacheDirectories\": [ \"node_modules\" ]",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/.h2.server.properties": [
+      {
+        "kind": "update_h2_db_alias",
+        "general_idea": "Rename the H2 database alias from 'JHipster H2 (Embedded)' to 'JHipster H2 (Memory)' to reflect the in-memory nature of the database.",
+        "human_impl": "0=JHipster H2 (Memory)|...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_h2_db_name",
+        "general_idea": "Update the H2 in-memory database name to match the specific application identifier 'jhipsternoi18nsampleapplication'.",
+        "human_impl": "jdbc\\:h2\\:mem\\:jhipsternoi18nsampleapplication",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_h2_db_url_suffix",
+        "general_idea": "Append the application name suffix to the H2 JDBC URL configuration.",
+        "human_impl": "|jhipsterNoI18nSampleApplication",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_h2_web_console",
+        "general_idea": "Enable remote access to the H2 web console by setting webAllowOthers to true.",
+        "human_impl": "webAllowOthers=true",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/banner.txt": [
+      {
+        "kind": "update_banner_art",
+        "general_idea": "Replace the old ASCII art banner with the standard JHipster Spring Boot banner including ANSI color codes.",
+        "human_impl": "Replaced custom ASCII art with JHipster's standard block-based banner using ${AnsiColor.GREEN} and ${AnsiColor.RED} variables.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/config/application-dev.yml": [
+      {
+        "kind": "add_jhipster_properties",
+        "general_idea": "Introduce JHipster-specific application properties for security, CORS, and logging to support the updated framework features.",
+        "human_impl": "jhipster.security.remember-me.key: 62227d4d159c4e6f364fe22307707385fd773e55",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_devtools_config",
+        "general_idea": "Configure Spring Boot DevTools for development profile to enable restart and livereload features.",
+        "human_impl": "spring.devtools.restart.enabled: true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_logging_config",
+        "general_idea": "Define explicit logging levels for root, JHipster, Hibernate, and application packages in the dev profile.",
+        "human_impl": "logging.level.ROOT: DEBUG",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mail_config",
+        "general_idea": "Add standard Spring Boot mail properties for the development environment.",
+        "human_impl": "spring.mail.host: localhost",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_thymeleaf_config",
+        "general_idea": "Update Thymeleaf configuration to disable caching and remove deprecated mode settings.",
+        "human_impl": "spring.thymeleaf.cache: false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_messages_config",
+        "general_idea": "Update message cache duration to use ISO 8601 duration format instead of seconds.",
+        "human_impl": "spring.messages.cache-duration: PT1S",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_h2_console_config",
+        "general_idea": "Explicitly disable the H2 console in the dev profile configuration.",
+        "human_impl": "spring.h2.console.enabled: false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_api_docs_profile",
+        "general_idea": "Include the api-docs profile in the active profiles list to enable API documentation generation.",
+        "human_impl": "spring.profiles.include: - api-docs",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jackson_config",
+        "general_idea": "Configure Jackson to indent output for better readability in the development environment.",
+        "human_impl": "spring.jackson.serialization.indent-output: true",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/config/application-prod.yml": [
+      {
+        "kind": "update_jpa_dialect",
+        "general_idea": "Remove explicit Hibernate dialect and database type settings in favor of auto-detection or newer defaults.",
+        "human_impl": "Removed `database-platform` and `database` properties from `spring.jpa`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_logging_config",
+        "general_idea": "Standardize logging levels using Spring Boot's `logging.level` hierarchy.",
+        "human_impl": "Added `logging.level.ROOT`, `tech.jhipster`, and `io.github.jhipster.sample` entries.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jhipster_properties",
+        "general_idea": "Introduce JHipster-specific configuration properties for security, mail, and logging.",
+        "human_impl": "Added `jhipster.security.remember-me.key`, `jhipster.mail.base-url`, and `jhipster.logging` blocks.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_server_config",
+        "general_idea": "Add modern server features like graceful shutdown and compression to the server configuration.",
+        "human_impl": "Added `server.shutdown: graceful` and `server.compression` settings.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_devtools_config",
+        "general_idea": "Explicitly disable devtools in production profile.",
+        "human_impl": "Added `spring.devtools.restart.enabled: false` and `livereload.enabled: false`.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/config/application.yml": [
+      {
+        "kind": "migrate_swagger_config",
+        "general_idea": "Update Swagger documentation properties to match JHipster 6.x structure and naming conventions.",
+        "human_impl": "Renamed 'swagger.title' to 'jhipster.api-docs.title' and updated contact/license fields to new keys.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_management_metrics",
+        "general_idea": "Enable Micrometer metrics export to Prometheus and configure health probes for Kubernetes readiness/liveness.",
+        "human_impl": "Added 'management.metrics.export.prometheus.enabled: true' and 'management.health.probes.enabled: true'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_security_headers",
+        "general_idea": "Enforce HTTP-only cookies for server sessions to improve security posture.",
+        "human_impl": "Added 'server.servlet.session.cookie.http-only: true'.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

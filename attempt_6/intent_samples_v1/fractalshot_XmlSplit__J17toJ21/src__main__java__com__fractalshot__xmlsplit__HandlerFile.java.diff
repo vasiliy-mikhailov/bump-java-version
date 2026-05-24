@@ -1,0 +1,21 @@
+diff --git a/src/main/java/com/fractalshot/xmlsplit/HandlerFile.java b/src/main/java/com/fractalshot/xmlsplit/HandlerFile.java
+index 069c142..ae14a5b 100644
+--- a/src/main/java/com/fractalshot/xmlsplit/HandlerFile.java
++++ b/src/main/java/com/fractalshot/xmlsplit/HandlerFile.java
+@@ -15,6 +15,7 @@ public class HandlerFile extends HandlerElement
+     public String stopAt = "";
+     public String outputExtension = "";
+     public String filename = "";
++    public String outputDir = "";
+     public String zipEntryName = "";
+ 
+     public void closeAll() {
+@@ -37,7 +38,7 @@ public class HandlerFile extends HandlerElement
+ 
+     @Override
+     public void open(String qName) {
+-        String f = FilenameUtils.getFullPath(filename) +
++        String f = outputDir +
+                 FilenameUtils.getBaseName(filename) + "_" +
+                 qName.replace(':', '_');
+         try {

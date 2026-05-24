@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "repo": "TranDat2000-coder/spring-cloud-consul-microservice",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "d73cd2e1c2a18b43288b47009725f2cf795fd20a",
+    "sha_to": "e86e1f2b6d6b9a53971627a9203bab902aa7f326"
+  },
+  "by_file": {
+    "product-service/src/main/java/com/example/productservice/entity/ProductEntity.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to align with Jakarta EE 9+ standards required by newer Spring Boot versions on Java 17.",
+        "human_impl": "import jakarta.persistence.*;",
+        "bucket": "breaking"
+      }
+    ],
+    "account-service/pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot starter parent from 2.7.17 to 3.3.2 to align with Java 17 and modern Spring ecosystem.",
+        "human_impl": "<version>3.3.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_property",
+        "general_idea": "Update the Java version property from 11 to 17 to enforce compilation and runtime on Java 17.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_cloud_version",
+        "general_idea": "Upgrade Spring Cloud version from 2021.0.2 to 2023.0.3 to ensure compatibility with Spring Boot 3.x.",
+        "human_impl": "<spring-cloud.version>2023.0.3</spring-cloud.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "gateway-service/pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.17 to 3.3.2 to align with Java 17 and modern Spring ecosystem.",
+        "human_impl": "<version>3.3.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the managed Java version property from 11 to 17 to target the new JDK.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_cloud_version",
+        "general_idea": "Upgrade Spring Cloud version from 2021.0.2 to 2023.0.3 to be compatible with Spring Boot 3.x.",
+        "human_impl": "<spring-cloud.version>2023.0.3</spring-cloud.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "order-service/pom.xml": [
+      {
+        "kind": "bump_parent_version",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.17 to 3.3.2 to align with Java 17 and modern Spring ecosystem.",
+        "human_impl": "<version>3.3.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_java_version_property",
+        "general_idea": "Set the Java version property to 17 to enforce compilation and runtime compatibility with JDK 17.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_cloud_version",
+        "general_idea": "Update Spring Cloud version to 2023.0.3 to ensure compatibility with Spring Boot 3.x.",
+        "human_impl": "<spring-cloud.version>2023.0.3</spring-cloud.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "product-service/pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot starter parent from 2.7.17 to 3.3.2 to align with Java 17 and modern Spring ecosystem.",
+        "human_impl": "<version>3.3.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_java_version_property",
+        "general_idea": "Update the Java version property from 11 to 17 to target the new JDK.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_cloud_version",
+        "general_idea": "Upgrade Spring Cloud version from 2021.0.2 to 2023.0.3 to maintain compatibility with Spring Boot 3.",
+        "human_impl": "<spring-cloud.version>2023.0.3</spring-cloud.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

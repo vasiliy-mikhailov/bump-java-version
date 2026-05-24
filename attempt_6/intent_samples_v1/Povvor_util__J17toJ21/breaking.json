@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "Povvor/util",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "35837aab5afdbc440e308afbe138c7a234788e7b",
+    "sha_to": "4ed7ccd3c3b3f1b1f865ca4925c85f44a48805fc"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_compiler_target",
+        "general_idea": "Update Maven compiler configuration to target Java 21 using the modern 'release' flag instead of separate source/target properties.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

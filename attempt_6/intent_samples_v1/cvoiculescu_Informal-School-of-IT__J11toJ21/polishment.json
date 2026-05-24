@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "repo": "cvoiculescu/Informal-School-of-IT",
+    "stage": "J11->J21",
+    "family": "spring-boot-2",
+    "sha_from": "cd7746866d9495de823b3c54a5582899f6452648",
+    "sha_to": "63048f55519540acc2405d61e0fb54c74b138ee3"
+  },
+  "by_file": {
+    "final-project/src/main/java/org/voiculescu/siit/recipes/model/Recipe.java": [
+      {
+        "kind": "base64_api_modernization",
+        "general_idea": "Replace Apache Commons Codec Base64 usage with standard Java 8+ java.util.Base64 API.",
+        "human_impl": "import static java.util.Base64.getEncoder; return getEncoder().encodeToString(image);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "primitive_to_wrapper_conversion",
+        "general_idea": "Change entity ID field from primitive long to Long object to support null checks and Hibernate proxy equality correctly.",
+        "human_impl": "private Long id;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "hibernate_proxy_equality",
+        "general_idea": "Implement equals and hashCode methods that handle Hibernate lazy loading proxies to prevent ClassCastException and incorrect equality checks.",
+        "human_impl": "if (o instanceof HibernateProxy proxy) ... return getId() != null && Objects.equals(getId(), recipe.getId());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "lombok_chain_accessors",
+        "general_idea": "Enable method chaining on setters by adding @Accessors(chain = true) and modifying setImage to return this.",
+        "human_impl": "@Accessors(chain = true) ... public Recipe setImage(MultipartFile image) { ... return this; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "logging_modernization",
+        "general_idea": "Replace raw exception printing with SLF4J logger for better log management and formatting.",
+        "human_impl": "@Slf4j ... log.error(e.getLocalizedMessage());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "constructor_refactoring",
+        "general_idea": "Remove manual all-args constructor in favor of Lombok @AllArgsConstructor for cleaner code.",
+        "human_impl": "@AllArgsConstructor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_formatting",
+        "general_idea": "Apply consistent spacing around annotation parameters and operators for code style compliance.",
+        "human_impl": "@Size(min = 6, message = \"minimum 6 characters\")",
+        "bucket": "polishment"
+      }
+    ],
+    "final-project/pom.xml": [
+      {
+        "kind": "add_packaging_element",
+        "general_idea": "Explicitly define the project packaging type as jar.",
+        "human_impl": "<packaging>jar</packaging>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_thymeleaf_spring5_version_property",
+        "general_idea": "Define a property for the Thymeleaf Spring 5 version for dependency management.",
+        "human_impl": "<thymeleaf-spring5.version>3.0.15.RELEASE</thymeleaf-spring5.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mapstruct_version_property",
+        "general_idea": "Define a property for the MapStruct version.",
+        "human_impl": "<org.mapstruct.version>1.6.3</org.mapstruct.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mapstruct_spring_extension_version_property",
+        "general_idea": "Define a property for the MapStruct Spring extensions version.",
+        "human_impl": "<org.mapstruct.extensions.spring.version>1.1.2</org.mapstruct.extensions.spring.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_lombok_mapstruct_binding_version_property",
+        "general_idea": "Define a property for the Lombok MapStruct binding version.",
+        "human_impl": "<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_thymeleaf_spring5_dependency_management",
+        "general_idea": "Add Thymeleaf Spring 5 to dependency management to control its version.",
+        "human_impl": "<dependencyManagement>...<artifactId>thymeleaf-spring5</artifactId>...</dependencyManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mapstruct_dependency",
+        "general_idea": "Add MapStruct dependency for object mapping.",
+        "human_impl": "<dependency><groupId>org.mapstruct</groupId><artifactId>mapstruct</artifactId>...</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mapstruct_spring_annotations_dependency",
+        "general_idea": "Add MapStruct Spring annotations dependency.",
+        "human_impl": "<dependency><groupId>org.mapstruct.extensions.spring</groupId><artifactId>mapstruct-spring-annotations</artifactId>...</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_lombok_mapstruct_binding_dependency",
+        "general_idea": "Add Lombok MapStruct binding dependency to resolve conflicts between Lombok and MapStruct.",
+        "human_impl": "<dependency><groupId>org.projectlombok</groupId><artifactId>lombok-mapstruct-binding</artifactId>...</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_junit_vintage_exclusion",
+        "general_idea": "Remove the exclusion of JUnit Vintage engine from spring-boot-starter-test.",
+        "human_impl": "Removed <exclusions> block for junit-vintage-engine",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_maven_clean_plugin",
+        "general_idea": "Add Maven Clean Plugin with auto-clean execution.",
+        "human_impl": "<plugin><artifactId>maven-clean-plugin</artifactId>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_maven_install_plugin",
+        "general_idea": "Add Maven Install Plugin with explicit version.",
+        "human_impl": "<plugin><artifactId>maven-install-plugin</artifactId>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_spring_boot_maven_plugin_version",
+        "general_idea": "Explicitly set the Spring Boot Maven Plugin version to match the parent.",
+        "human_impl": "<version>${project.parent.version}</version>",
+        "bucket": "polishment"
+      }
+    ],
+    "final-project/.mvn/wrapper/maven-wrapper.properties": [
+      {
+        "kind": "bump_maven_wrapper_version",
+        "general_idea": "Upgrade the Maven wrapper distribution URL to a newer version compatible with the Java 21 migration.",
+        "human_impl": "Changed distributionUrl from apache-maven-3.6.3 to apache-maven-3.9.9",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

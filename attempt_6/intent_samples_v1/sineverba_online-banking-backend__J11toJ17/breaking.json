@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "sineverba/online-banking-backend",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "c2c91a435b8b495d96a68f848e2b3f39e39146a2",
+    "sha_to": "ca5e5863ecd7434422b41708fb55db6a5f5b77ac"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the project's target Java version from 11 to 17 to align with the migration goal.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jaxb_api_dependency",
+        "general_idea": "Add JAXB API dependency to resolve missing javax.xml.bind classes required by the Coveralls plugin in Java 17.",
+        "human_impl": "<artifactId>jaxb-api</artifactId>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

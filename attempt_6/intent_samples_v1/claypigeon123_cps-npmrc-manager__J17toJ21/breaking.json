@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "claypigeon123/cps-npmrc-manager",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "5fa060347031ce051d9f435eb8d6f80a40913685",
+    "sha_to": "f67cc5392ad8fbad6477a98020c8d436f5051932"
+  },
+  "by_file": {
+    "src/main/java/com/cps/cli/npmrcmanager/model/NpmrcProfile.java": [
+      {
+        "kind": "add_record_field",
+        "general_idea": "Add 'active' boolean field to the record to track profile status.",
+        "human_impl": "boolean active",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

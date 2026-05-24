@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "repo": "hantsy/spring-reactive-jwt-sample",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "277106c9cafd8c49e6beeca6ff83d562f757dd29",
+    "sha_to": "7307f98ad9ba1427623d6fbdc2cad81c33a02b71"
+  },
+  "by_file": {
+    "src/main/java/com/example/demo/security/jwt/JwtTokenAuthenticationFilter.java": [
+      {
+        "kind": "offload_blocking_io",
+        "general_idea": "Wrap the blocking token provider call in Mono.fromCallable and subscribe on a bounded elastic scheduler to prevent blocking the Netty event loop.",
+        "human_impl": "return Mono.fromCallable(() -> this.tokenProvider.getAuthentication(token)).subscribeOn(Schedulers.boundedElastic())...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_reactor_scheduler_import",
+        "general_idea": "Add import for Schedulers to support the new non-blocking execution strategy.",
+        "human_impl": "import reactor.core.scheduler.Schedulers;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/security/jwt/JwtTokenProvider.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove unused import for SignatureAlgorithm as it is replaced by Jwts.SIG enum in new API.",
+        "human_impl": "-import io.jsonwebtoken.SignatureAlgorithm;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_static_import",
+        "general_idea": "Add static import for collectingAndThen, likely for future use or cleanup, though not strictly used in this diff snippet's logic change.",
+        "human_impl": "import static java.util.stream.Collectors.collectingAndThen;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_formatting",
+        "general_idea": "Adjust line breaks and indentation to comply with updated code style rules.",
+        "human_impl": "var secret = Base64.getEncoder()\\n                .encodeToString(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/web/AuthController.java": [
+      {
+        "kind": "add_validated_annotation",
+        "general_idea": "Add @Validated annotation to the controller class to enable validation support.",
+        "human_impl": "@Validated",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_formatting",
+        "general_idea": "Reformat method signature and lambda chain to adhere to updated code style guidelines.",
+        "human_impl": "public Mono<ResponseEntity> login(\n            @Valid @RequestBody Mono<AuthenticationRequest> authRequest)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/web/AuthenticationRequest.java": [
+      {
+        "kind": "add_trailing_newline",
+        "general_idea": "Add a missing newline at the end of the file to comply with POSIX standards and linter rules.",
+        "human_impl": "}",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/web/PostController.java": [
+      {
+        "kind": "annotation_addition",
+        "general_idea": "Add @Validated annotation to enable Spring MVC validation support for request parameters.",
+        "human_impl": "@Validated",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_formatting",
+        "general_idea": "Reformat method signatures and lambda bodies to adhere to updated code style guidelines.",
+        "human_impl": "public Mono<Void> update(@PathVariable(\"id\") String id,\\n            @RequestBody @Valid PostForm post) {",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/web/RestExceptionHandler.java": [
+      {
+        "kind": "migrate_to_rfc7807",
+        "general_idea": "Replace custom error response logic with Spring's standard ProblemDetail implementation for RFC 7807 compliance.",
+        "human_impl": "return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_custom_error_classes",
+        "general_idea": "Delete custom Errors and Error DTOs that are no longer needed due to the adoption of ProblemDetail.",
+        "human_impl": "Removed class Errors and class Error definitions",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_webflux_dependencies",
+        "general_idea": "Remove imports and dependencies related to WebFlux reactive types that are no longer used in the handler.",
+        "human_impl": "Removed imports for ServerWebExchange, Mono, WebExceptionHandler, etc.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

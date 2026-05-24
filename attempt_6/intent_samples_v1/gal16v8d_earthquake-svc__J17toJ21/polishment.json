@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "repo": "gal16v8d/earthquake-svc",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "a9d0caba3cb0ad50b038ff535cbcac02fcc86b17",
+    "sha_to": "8084a994c31f702d4063ed3ffd04117f57223203"
+  },
+  "by_file": {
+    "src/main/java/com/gsdd/earthquake/EarthquakeApp.java": [
+      {
+        "kind": "remove_unused_bean",
+        "general_idea": "Removed the RestTemplate bean definition as it is no longer used in the application.",
+        "human_impl": "Deleted the @Bean method returning new RestTemplate()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_method_visibility",
+        "general_idea": "Changed bean methods from public to package-private to reduce visibility scope.",
+        "human_impl": "Removed 'public' modifier from facesServletRegistration, servletContextInitializer, and jsfConfigureListener methods",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reorder_imports",
+        "general_idea": "Reordered import statements to follow a specific coding style or tool configuration.",
+        "human_impl": "Moved ConfigureListener import to top and removed RestTemplate import",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_code",
+        "general_idea": "Adjusted line wrapping for method arguments to comply with code formatting rules.",
+        "human_impl": "Wrapped setInitParameter call across multiple lines",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/gsdd/earthquake/bean/EarthquakeBean.java": [
+      {
+        "kind": "migrate_date_api",
+        "general_idea": "Replace legacy java.text.SimpleDateFormat with java.time.DateTimeFormatter for thread-safe date formatting.",
+        "human_impl": "import java.time.LocalDateTime; import java.time.format.DateTimeFormatter; private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(\"dd-MM-yyyy HH:mm:ss\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_method",
+        "general_idea": "Rename method from Spanish 'consultarSismos' to English 'searchEarthquakes' for consistency.",
+        "human_impl": "public String searchEarthquakes() {",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_logging_format",
+        "general_idea": "Adjust log statement formatting to comply with code style rules (likely Spotless).",
+        "human_impl": "log.info(\"Can not perform search if days are not in range [0,30], current value: {}\", calcDays);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_date_conversion",
+        "general_idea": "Update date conversion logic to use java.time API instead of legacy Date/TimeZone.",
+        "human_impl": "FORMATTER.format(LocalDateTime.ofInstant(date.toInstant(), ZoneOffset.UTC))",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/gsdd/earthquake/domain/EarthquakeProps.java": [
+      {
+        "kind": "refactor_constant",
+        "general_idea": "Convert mutable instance field to immutable static final constant to improve thread safety and adhere to best practices.",
+        "human_impl": "Changed 'DecimalFormat df' to 'private static final DecimalFormat DF' and updated usage in getMag().",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/gsdd/earthquake/domain/EarthquakeRequest.java": [
+      {
+        "kind": "consolidate_lombok_annotations",
+        "general_idea": "Replace separate @Getter and @Setter annotations with the combined @Data annotation to reduce boilerplate.",
+        "human_impl": "import lombok.Data; @Data",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/gsdd/earthquake/service/EarthquakeService.java": [
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Removed dependency on legacy Java date/time APIs.",
+        "human_impl": "Removed imports for `SimpleDateFormat`, `Calendar`, `Date`, and `TimeZone`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Removed dependency on Lombok for logging.",
+        "human_impl": "Removed import for `lombok.extern.slf4j.Slf4j` and the `@Slf4j` annotation.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/gsdd/earthquake/util/EartquakeFeatureUtil.java": [
+      {
+        "kind": "reorder_imports",
+        "general_idea": "Reorder import statements to group standard library, project, and third-party imports separately.",
+        "human_impl": "Moved java.util imports to the top, followed by com.gsdd imports, then lombok, and finally org.primefaces imports.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_trailing_whitespace",
+        "general_idea": "Remove unnecessary trailing blank line at the end of the file.",
+        "human_impl": "Deleted the empty line after the closing brace of the class.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

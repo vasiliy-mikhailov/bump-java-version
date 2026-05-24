@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "repo": "ProgramCX/FoxNAServer",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "bf056e176ab046580df8b44b9e6602ed126b98c5",
+    "sha_to": "031becee56451ab788a2667179a5ac333a01feb3"
+  },
+  "by_file": {
+    "src/main/java/cn/programcx/foxnaserver/jobs/BroadcastJob.java": [
+      {
+        "kind": "refactor_config_key",
+        "general_idea": "Rename configuration property from 'port' to 'broadcast.port' and add null-safety checks.",
+        "human_impl": "int bindPort = props.getProperty(\"broadcast.port\")==null || props.getProperty(\"broadcast.port\").isEmpty() ? 25522 : Integer.parseInt(props.getProperty(\"broadcast.port\"));",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_message_format",
+        "general_idea": "Change the broadcast message payload from a plain string to a JSON object containing name, port, and ip.",
+        "human_impl": "Map<String,Object> jsonMap = new HashMap<>(); jsonMap.put(\"name\", ...); jsonMap.put(\"port\", port); jsonMap.put(\"ip\", addr); String msg = mapper.writeValueAsString(jsonMap);",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version from 17 to 21 in properties and compiler configuration.",
+        "human_impl": "<java.version>21</java.version> ... <source>${java.version}</source>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade Spring Boot from 2.6.13 to 3.0.6 to support Java 21 and Jakarta EE.",
+        "human_impl": "<spring-boot.version>3.0.6</spring-boot.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

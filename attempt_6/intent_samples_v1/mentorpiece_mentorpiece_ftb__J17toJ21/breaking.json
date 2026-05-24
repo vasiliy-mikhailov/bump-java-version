@@ -1,0 +1,179 @@
+{
+  "meta": {
+    "repo": "mentorpiece/mentorpiece_ftb",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "a7bf08efc5d928de6ad5e61a1c7a5514a3023901",
+    "sha_to": "b37c5b2183ab3a2070a2f95f909e26ef15f5be5b"
+  },
+  "by_file": {
+    "src/main/java/com/aerotravel/flightticketbooking/FlightticketbookingApplication.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace javax.annotation with jakarta.annotation to comply with Jakarta EE 9+ standards required by Spring Boot 3 and Java 21.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/config/WebSecurityConfig.java": [
+      {
+        "kind": "remove_deprecated_class_extension",
+        "general_idea": "Removed extension of the deprecated WebSecurityConfigurerAdapter class to comply with Spring Security 5.7+ / 6.x standards required for Java 21 ecosystems.",
+        "human_impl": "public class WebSecurityConfig {",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_deprecated_annotation",
+        "general_idea": "Replaced the deprecated @EnableGlobalMethodSecurity with @EnableMethodSecurity to support method-level security in modern Spring Security.",
+        "human_impl": "@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true, proxyTargetClass = true)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_authentication_provider",
+        "general_idea": "Replaced the deprecated AuthenticationManagerBuilder configuration with an explicit DaoAuthenticationProvider bean.",
+        "human_impl": "@Bean public DaoAuthenticationProvider authenticationProvider() { ... }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_authentication_manager",
+        "general_idea": "Replaced the implicit AuthenticationManager from WebSecurityConfigurerAdapter with an explicit bean derived from AuthenticationConfiguration.",
+        "human_impl": "@Bean public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception { return config.getAuthenticationManager(); }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_security_filter_chain",
+        "general_idea": "Replaced the deprecated configure(HttpSecurity) method with a SecurityFilterChain bean definition using the new lambda DSL.",
+        "human_impl": "@Bean public SecurityFilterChain filterChain(HttpSecurity http) throws Exception { ... return http.build(); }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_authorize_api",
+        "general_idea": "Updated authorization configuration from the deprecated authorizeRequests/antMatchers to authorizeHttpRequests/requestMatchers.",
+        "human_impl": ".authorizeHttpRequests(authz -> authz.requestMatchers(...).permitAll())",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_headers_api",
+        "general_idea": "Updated headers configuration to use the new lambda-based API for frame options.",
+        "human_impl": ".headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/controller/FlightsGuiController.java": [
+      {
+        "kind": "import_migration",
+        "general_idea": "Migrate javax.validation import to jakarta.validation to comply with Jakarta EE 9+ namespace changes required for Java 21/Spring Boot 3.",
+        "human_impl": "import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "import_migration",
+        "general_idea": "Migrate javax.websocket.server import to jakarta.websocket.server to comply with Jakarta EE 9+ namespace changes required for Java 21.",
+        "human_impl": "import jakarta.websocket.server.PathParam;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/controller/MainController.java": [
+      {
+        "kind": "migrate_validation_import",
+        "general_idea": "Replace javax.validation.Valid with jakarta.validation.Valid to comply with Jakarta EE namespace changes in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_websocket_import",
+        "general_idea": "Replace javax.websocket.server.PathParam with jakarta.websocket.server.PathParam to comply with Jakarta EE namespace changes.",
+        "human_impl": "import jakarta.websocket.server.PathParam;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/Aircraft.java": [
+      {
+        "kind": "import_migration_javax_to_jakarta",
+        "general_idea": "Replace javax.persistence and javax.validation imports with jakarta equivalents to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.persistence.*;\nimport jakarta.validation.constraints.Max;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/Airport.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to align with Jakarta EE 9+ standards required by modern Spring Boot versions.",
+        "human_impl": "import jakarta.persistence.*;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "jakarta_validation_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to align with Jakarta EE 9+ standards required by modern Spring Boot versions.",
+        "human_impl": "import jakarta.validation.constraints.Size;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/Flight.java": [
+      {
+        "kind": "import_migration",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to align with Jakarta EE 9+ standards required by Spring Boot 3 on Java 21.",
+        "human_impl": "import jakarta.persistence.*;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "import_migration",
+        "general_idea": "Replace javax.validation.constraints imports with jakarta.validation.constraints to align with Jakarta EE 9+ standards required by Spring Boot 3 on Java 21.",
+        "human_impl": "import jakarta.validation.constraints.*;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/Passenger.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.persistence and javax.validation imports with jakarta equivalents to comply with Jakarta EE 9+ namespace requirements in Java 21.",
+        "human_impl": "import jakarta.persistence.*;\nimport jakarta.validation.constraints.Email;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/Role.java": [
+      {
+        "kind": "javax_to_jakarta_persistence",
+        "general_idea": "Migrate persistence annotations from javax.persistence to jakarta.persistence to comply with Jakarta EE 9+ namespace requirements.",
+        "human_impl": "import jakarta.persistence.*;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "javax_to_jakarta_validation",
+        "general_idea": "Migrate validation annotations from javax.validation to jakarta.validation to comply with Jakarta EE 9+ namespace requirements.",
+        "human_impl": "import jakarta.validation.constraints.NotEmpty;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/User.java": [
+      {
+        "kind": "migrate_persistence_imports",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to align with Jakarta EE 9+ standards required by modern Spring Boot versions.",
+        "human_impl": "import jakarta.persistence.*;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_validation_imports",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to align with Jakarta EE 9+ standards required by modern Spring Boot versions.",
+        "human_impl": "import jakarta.validation.constraints.Email;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/dto/AircraftDto.java": [
+      {
+        "kind": "migrate_validation_imports",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to align with Jakarta EE 9+ standards required by modern frameworks on Java 21.",
+        "human_impl": "import jakarta.validation.constraints.Max;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/aerotravel/flightticketbooking/model/dto/AirportDto.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Migrate validation annotation import from javax.validation to jakarta.validation to align with Jakarta EE 9+ standards required by modern frameworks on Java 21.",
+        "human_impl": "import jakarta.validation.constraints.Size;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

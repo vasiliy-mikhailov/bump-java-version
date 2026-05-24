@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "repo": "a-oleynik/junit-workshop",
+    "stage": "J11->J17",
+    "family": "junit4-mockito",
+    "sha_from": "db1d6befd3aab927ae7e228cefda69ea496c93f3",
+    "sha_to": "c6955a618156caa35f2f5f8f065c65efcd278471"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_junit_jupiter",
+        "general_idea": "Update JUnit Jupiter dependency to a newer patch version.",
+        "human_impl": "<junit-jupiter.version>5.10.3</junit-jupiter.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_junit_platform",
+        "general_idea": "Update JUnit Platform dependency to a newer patch version.",
+        "human_impl": "<junit.platform.version>1.10.3</junit.platform.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_opencsv",
+        "general_idea": "Update OpenCSV dependency to a newer minor version.",
+        "human_impl": "<opencsv.version>5.9</opencsv.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_assertj",
+        "general_idea": "Update AssertJ dependency to a newer minor version.",
+        "human_impl": "<asserj.version>3.26.3</asserj.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_lombok",
+        "general_idea": "Update Lombok dependency to a newer minor version.",
+        "human_impl": "<lombok.version>1.18.34</lombok.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_junit_pioneer",
+        "general_idea": "Update JUnit Pioneer dependency to a newer minor version.",
+        "human_impl": "<junit.pioneer>2.2.0</junit.pioneer>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_maven_site_plugin",
+        "general_idea": "Update Maven Site Plugin to a newer patch version.",
+        "human_impl": "<version>3.12.1</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_maven_surefire_plugin",
+        "general_idea": "Update Maven Surefire Plugin to a newer minor version.",
+        "human_impl": "<version>3.3.1</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_maven_project_info_reports_plugin",
+        "general_idea": "Update Maven Project Info Reports Plugin to a newer minor version.",
+        "human_impl": "<version>3.5.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_maven_surefire_report_plugin",
+        "general_idea": "Update Maven Surefire Report Plugin to a newer minor version.",
+        "human_impl": "<version>3.2.5</version>",
+        "bucket": "polishment"
+      }
+    ],
+    "LICENSE": [
+      {
+        "kind": "update_copyright_year",
+        "general_idea": "Update the copyright year in the license file to reflect the current year.",
+        "human_impl": "Changed 'Copyright (c) 2023' to 'Copyright (c) 2024'",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_documentation",
+        "general_idea": "Update the README title to reflect the specific version of TestNG being compared.",
+        "human_impl": "Changed 'JUnit 5 vs TestNG' to 'JUnit 5 vs TestNG 7'",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "amanzat/java-utils",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "7d27d475e88b6399afa807e0f4bd04f3beb79516",
+    "sha_to": "2f2d1d390f967303d3280c2c68ccd70830274fcd"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the project's target Java version from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

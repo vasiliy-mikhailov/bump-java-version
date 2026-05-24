@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "RawSanj/spring-redis-websocket",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "0006d91def3c7a8eed4aa4d1b257091eb0d2a8d6",
+    "sha_to": "46fdbc345325c53d6f4bfbde3fdbcc7d5fd2c9ba"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version_property",
+        "general_idea": "Update the Maven property to target Java 11 instead of Java 8.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_spring_boot_parent",
+        "general_idea": "Upgrade the Spring Boot parent POM from version 1.5.9 to 2.3.0 to support Java 11.",
+        "human_impl": "<version>2.3.0.RELEASE</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

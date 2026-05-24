@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "repo": "viadee/external-task-retry-aspect",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "d2e07ca6751e65b679d3c7883069ec8ed3442a3e",
+    "sha_to": "e04589bc32d678cc06dd830b434e511baa1316cc"
+  },
+  "by_file": {
+    "src/test/java/de/viadee/bpm/camunda/externaltask/retry/aspect/BaseTest.java": [
+      {
+        "kind": "migrate_junit4_to_junit5",
+        "general_idea": "Replace JUnit 4 annotations and runner with JUnit 5 equivalents to align with the updated test framework.",
+        "human_impl": "Changed @RunWith(SpringRunner.class) to @ExtendWith(SpringExtension.class) and @Before to @BeforeEach.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/de/viadee/bpm/camunda/externaltask/retry/aspect/ExternalTaskRetryAspectPropertiesTest.java": [
+      {
+        "kind": "migrate_junit4_to_junit5",
+        "general_idea": "Replace JUnit 4 annotations and assertions with JUnit 5 equivalents to align with the updated test framework.",
+        "human_impl": "import org.junit.jupiter.api.Test; import static org.junit.jupiter.api.Assertions.assertEquals;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/de/viadee/bpm/camunda/externaltask/retry/aspect/behaviour/CustomRetryTimeCycleIdentifierTest.java": [
+      {
+        "kind": "migrate_junit_imports",
+        "general_idea": "Replace JUnit 4 annotations and assertions with JUnit 5 equivalents to align with the updated test framework.",
+        "human_impl": "import org.junit.jupiter.api.Test; import static org.junit.jupiter.api.Assertions.assertEquals;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/de/viadee/bpm/camunda/externaltask/retry/aspect/behaviour/DefaultBehaviourForExceptionTypesTest.java": [
+      {
+        "kind": "migrate_junit_import",
+        "general_idea": "Replace JUnit 4 Test annotation import with JUnit 5 Jupiter equivalent to align with the updated test framework.",
+        "human_impl": "import org.junit.jupiter.api.Test;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/de/viadee/bpm/camunda/externaltask/retry/aspect/behaviour/EdgeCaseTest.java": [
+      {
+        "kind": "migrate_junit_import",
+        "general_idea": "Replace JUnit 4 test annotation import with JUnit 5 equivalent.",
+        "human_impl": "import org.junit.jupiter.api.Test;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_assertion_import",
+        "general_idea": "Replace JUnit 4 assertion import with JUnit 5 equivalent.",
+        "human_impl": "import static org.junit.jupiter.api.Assertions.fail;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/de/viadee/bpm/camunda/externaltask/retry/aspect/behaviour/InvalidDefaultBehaviourTest.java": [
+      {
+        "kind": "migrate_junit_import",
+        "general_idea": "Replace JUnit 4 import with JUnit 5 import to align with the updated test framework dependency.",
+        "human_impl": "import org.junit.jupiter.api.Test;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/de/viadee/bpm/camunda/externaltask/retry/aspect/behaviour/InvalidRetryTimeCycleValuesTest.java": [
+      {
+        "kind": "migrate_junit_import",
+        "general_idea": "Replace JUnit 4 import with JUnit 5 import to align with the updated test framework.",
+        "human_impl": "import org.junit.jupiter.api.Test;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/de/viadee/bpm/camunda/externaltask/retry/aspect/behaviour/RetryTimeCycleListTest.java": [
+      {
+        "kind": "migrate_junit_import",
+        "general_idea": "Replace JUnit 4 test annotation import with JUnit 5 equivalent to align with the updated test framework.",
+        "human_impl": "import org.junit.jupiter.api.Test;",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "align_compiler_source_target",
+        "general_idea": "Synchronize maven.compiler.source and target properties with the java.version property instead of hardcoding Java 8.",
+        "human_impl": "<maven.compiler.source>${java.version}</maven.compiler.source>",
+        "bucket": "breaking"
+      }
+    ],
+    ".github/workflows/maven-build.yml": [
+      {
+        "kind": "update_ci_jdk_version",
+        "general_idea": "Update the GitHub Actions workflow to use JDK 17 instead of JDK 8 to align with the project's Java version migration.",
+        "human_impl": "Changed 'java-version: 8' to 'java-version: 17' in actions/setup-java step",
+        "bucket": "breaking"
+      }
+    ],
+    ".github/workflows/maven-release.yml": [
+      {
+        "kind": "update_ci_java_version",
+        "general_idea": "Update the GitHub Actions workflow to use Java 17 instead of Java 8 to align with the project's migration target.",
+        "human_impl": "java-version: '17'",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

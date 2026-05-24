@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "repo": "jesperancinha/jeorg-camel-test-drives",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "98ab42e30f8ce767838352fc207830f21818d91f",
+    "sha_to": "61c7285eaad149da8dbf845ca65c74a52ca7e9f7"
+  },
+  "by_file": {
+    "jeorg-camel-app-atm/pom.xml": [
+      {
+        "kind": "add_kotlin_stdlib",
+        "general_idea": "Added the Kotlin Standard Library dependency to support Kotlin source code compilation.",
+        "human_impl": "<dependency>\n    <groupId>org.jetbrains.kotlin</groupId>\n    <artifactId>kotlin-stdlib</artifactId>\n</dependency>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "configure_kotlin_source_dir",
+        "general_idea": "Configured Maven to look for main source code in the Kotlin directory.",
+        "human_impl": "<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_kotlin_maven_plugin",
+        "general_idea": "Added the Kotlin Maven Plugin with Spring and JPA compiler plugins to compile Kotlin code.",
+        "human_impl": "<plugin>\n    <groupId>org.jetbrains.kotlin</groupId>\n    <artifactId>kotlin-maven-plugin</artifactId>\n    ...\n    <compilerPlugins>\n        <plugin>spring</plugin>\n        <plugin>jpa</plugin>\n    </compilerPlugins>\n</plugin>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_java_version_property",
+        "general_idea": "Updated the compiler source and target properties to use the new java.version property.",
+        "human_impl": "<source>${java.version}</source>\n<target>${java.version}</target>",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the target Java version from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_spring_boot_parent",
+        "general_idea": "Adopt Spring Boot 3.2.1 parent POM to manage dependencies and ensure compatibility with Java 21 and Spring Framework 6.",
+        "human_impl": "<spring-boot-parent.version>3.2.1</spring-boot-parent.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_spring_framework",
+        "general_idea": "Upgrade Spring Framework to version 6.0.4, which is required for Java 21 and Spring Boot 3 compatibility.",
+        "human_impl": "<spring.version>6.0.4</spring.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_spring_security",
+        "general_idea": "Upgrade Spring Security to version 6.2.1 to match the Spring Framework 6 ecosystem.",
+        "human_impl": "<spring.security.version>6.2.1</spring.security.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_apache_camel",
+        "general_idea": "Upgrade Apache Camel to version 4.3.0, which supports Java 21 and integrates with Spring Boot 3.",
+        "human_impl": "<camel.version>4.3.0</camel.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_jetty",
+        "general_idea": "Upgrade Jetty to version 11.0.19 to support Java 21 and modern servlet specifications.",
+        "human_impl": "<jetty.version>11.0.19</jetty.version>",
+        "bucket": "breaking"
+      }
+    ],
+    ".circleci/config.yml": [
+      {
+        "kind": "update_ci_base_image",
+        "general_idea": "Switch the CI Docker image from OpenJDK 17 to Eclipse Temurin 21 to align with the target Java version.",
+        "human_impl": "image: maven:3-eclipse-temurin-21",
+        "bucket": "breaking"
+      }
+    ],
+    ".github/workflows/camel-test-drives.yml": [
+      {
+        "kind": "update_jdk_version",
+        "general_idea": "Update the CI workflow to use Java 21 instead of Java 17 to match the target runtime.",
+        "human_impl": "java-version: '21'",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

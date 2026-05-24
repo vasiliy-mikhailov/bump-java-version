@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "j2gl/playground",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "d1cf6467a2891686211b8ed69419518beb9fe9b4",
+    "sha_to": "7db722948bd2a3706c6331329d055b38a132f28c"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.2 to 3.1.5 to align with Java 21 support and modern Spring ecosystem.",
+        "human_impl": "<version>3.1.5</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_21",
+        "general_idea": "Update the target Java version property from 17 to 21 to enable compilation and runtime on JDK 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

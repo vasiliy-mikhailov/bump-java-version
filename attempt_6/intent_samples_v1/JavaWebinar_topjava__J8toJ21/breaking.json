@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "JavaWebinar/topjava",
+    "stage": "J8->J21",
+    "family": null,
+    "sha_from": "981b38c0dcc6d43be6168d36d1d13aa2ee69ebbb",
+    "sha_to": "2fd2e0544d99c836d1cd638b90cb66bc2f228f36"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the Java source and target version property from 1.8 to 21 to align with the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_javax_annotation_api",
+        "general_idea": "Add the javax.annotation-api dependency to provide annotations removed from the JDK module system in newer versions.",
+        "human_impl": "<artifactId>javax.annotation-api</artifactId>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

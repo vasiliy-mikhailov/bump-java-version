@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "repo": "prebid/prebid-cache-java",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "febba9e95b26953438f5ce69587ec4777c95ddc7",
+    "sha_to": "56db1c4cec8510090e57a52423219cc4d1e86b69"
+  },
+  "by_file": {
+    "src/main/java/org/prebid/cache/PBCacheApplication.java": [
+      {
+        "kind": "replace_cors_method",
+        "general_idea": "Replace deprecated allowedOrigins with allowedOriginPatterns to support wildcard origins in Spring WebFlux on Java 17.",
+        "human_impl": ".allowedOriginPatterns(corsConfig.getAllowedOrigins())",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/prebid/cache/config/CircuitBreakerPropertyConfiguration.java": [
+      {
+        "kind": "api_migration_resilience4j",
+        "general_idea": "Update CircuitBreakerConfig builder methods to match the newer Resilience4j API signatures.",
+        "human_impl": "Replaced ringBufferSizeInHalfOpenState/ClosedState with permittedNumberOfCallsInHalfOpenState and slidingWindow.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/prebid/cache/repository/aerospike/AerospikeRepositoryImpl.java": [
+      {
+        "kind": "update_reactor_retry_import",
+        "general_idea": "Update the import statement for the Retry class to reflect its new package location in Reactor Core 3.4+.",
+        "human_impl": "import reactor.util.retry.Retry;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_retry_api_usage",
+        "general_idea": "Refactor the retry policy construction to use the new fluent API introduced in Reactor Core 3.4, replacing the deprecated builder methods.",
+        "human_impl": "return Retry.backoff(maxAttempts, minBackoff).maxBackoff(maxBackoff).filter(...).doAfterRetry(...);",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 11 to 17 to align with the migration goal.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent from 2.1.6 to 2.6.7, which is required for Java 17 support.",
+        "human_impl": "<version>2.6.7</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_maven_compiler_plugin",
+        "general_idea": "Update maven-compiler-plugin to 3.10.1 to ensure compatibility with Java 17 compilation.",
+        "human_impl": "<maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_maven_surefire_plugin",
+        "general_idea": "Update maven-surefire-plugin to 3.0.0-M6 to support running tests on Java 17.",
+        "human_impl": "<maven-surefire-plugin.version>3.0.0-M6</maven-surefire-plugin.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_validation_api_dep",
+        "general_idea": "Add explicit javax.validation-api dependency to resolve module system conflicts in Java 17.",
+        "human_impl": "<dependency>...<artifactId>validation-api</artifactId>...</dependency>",
+        "bucket": "breaking"
+      }
+    ],
+    ".github/workflows/pr-java-ci.yml": [
+      {
+        "kind": "update_ci_java_version",
+        "general_idea": "Update the CI matrix to target Java 17 instead of Java 11 to align with the migration goal.",
+        "human_impl": "matrix: java: [ 17 ]",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

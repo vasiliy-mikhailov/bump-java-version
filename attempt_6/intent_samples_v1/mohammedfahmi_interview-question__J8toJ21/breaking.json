@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "mohammedfahmi/interview-question",
+    "stage": "J8->J21",
+    "family": null,
+    "sha_from": "ddbc51ab9d6145f1e59c62478e56fdab90b62216",
+    "sha_to": "e383ac058d5b2a639e2374280dde10cde0f42787"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Switch Maven compiler configuration from source/target 8 to release 21 to target Java 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

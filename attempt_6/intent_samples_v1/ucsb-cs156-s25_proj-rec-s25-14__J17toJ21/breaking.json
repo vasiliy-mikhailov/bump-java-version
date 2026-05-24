@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "repo": "ucsb-cs156-s25/proj-rec-s25-14",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "877451cd2d7e3d920fe0f855a66353bc05737afb",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent version to 3.3.4 to support Java 21 and modern Spring ecosystem.",
+        "human_impl": "<parent><version>3.3.4</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_property",
+        "general_idea": "Explicitly set the Java version property to 21 for compilation and runtime.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_springfox_with_springdoc",
+        "general_idea": "Replace deprecated Springfox Swagger dependencies with SpringDoc OpenAPI for API documentation.",
+        "human_impl": "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>",
+        "bucket": "breaking"
+      }
+    ],
+    "Dockerfile": [
+      {
+        "kind": "base_image_upgrade",
+        "general_idea": "Switch base image from Maven JDK 11 to Liberica OpenJDK 21 Alpine to support Java 21.",
+        "human_impl": "FROM bellsoft/liberica-openjdk-alpine:21",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "package_manager_migration",
+        "general_idea": "Replace apt-get with apk to align with the new Alpine Linux base image.",
+        "human_impl": "RUN apk add curl",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_installation",
+        "general_idea": "Install Maven via apk since the base image no longer provides it.",
+        "human_impl": "RUN apk add maven",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_installation",
+        "general_idea": "Install bash via apk to support shell scripts in the build process.",
+        "human_impl": "RUN apk add bash",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_installation",
+        "general_idea": "Install libstdc++ via apk to satisfy native library dependencies.",
+        "human_impl": "RUN apk add --no-cache libstdc++",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "nodejs_installation_method",
+        "general_idea": "Switch from NodeSource apt script to nvm for installing Node.js on Alpine.",
+        "human_impl": "RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "build_step_addition",
+        "general_idea": "Add Maven build step to compile the application inside the Docker image.",
+        "human_impl": "RUN mvn -B -Pproduction -Ph2 -DskipTests -f /home/app/pom.xml clean package",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "entrypoint_definition",
+        "general_idea": "Define the entrypoint to run the compiled JAR file instead of a generic bash shell.",
+        "human_impl": "ENTRYPOINT [\"java\",\"-jar\",\"/home/app/target/team03-1.0.0.jar\"]",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "artifact_copy",
+        "general_idea": "Copy source code and configuration files into the image for the build step.",
+        "human_impl": "COPY src /home/app/src",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "Zyrex24/qr-code-ordering",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "62a7761b5aa355e15b191e9569f90e6cc7908584",
+    "sha_to": "3a3dc6c7f480f6fb65c0b0a1472b9dd7583724bd"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "add_h2_database_dependency",
+        "general_idea": "Add H2 in-memory database dependency for testing purposes.",
+        "human_impl": "<dependency><groupId>com.h2database</groupId><artifactId>h2</artifactId>...</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_webflux_test_dependency",
+        "general_idea": "Add Spring WebFlux starter dependency for testing reactive components.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-webflux</artifactId>...</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_bytebuddy_argline",
+        "general_idea": "Enable experimental ByteBuddy features for mocking in tests.",
+        "human_impl": "-Dnet.bytebuddy.experimental=true",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

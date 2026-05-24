@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "repo": "ksbrwsk/raspberrypi-boot",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "f43e3f93d8e7012497690a0353339e5eabc8c5c5",
+    "sha_to": "91b7207c8799b026c23b0bee69f95d86b2f7cfaa"
+  },
+  "by_file": {
+    "raspberrypi-boot-bmp085/src/main/java/de/ksbrwsk/config/ApplicationConfiguration.java": [
+      {
+        "kind": "fix_mqtt_password_type",
+        "general_idea": "Refactor MQTT connection setup to use MqttConnectOptions and convert password to char array to comply with API requirements.",
+        "human_impl": "options.setPassword(this.environment.getProperty(\"mqtt.password\").toCharArray());",
+        "bucket": "breaking"
+      }
+    ],
+    "raspberrypi-boot-gdata/src/main/java/de/ksbrwsk/config/GDataConfiguration.java": [
+      {
+        "kind": "fix_mqtt_password_api",
+        "general_idea": "Refactor MQTT connection setup to use MqttConnectOptions and convert password to char array to comply with updated Paho client API requirements.",
+        "human_impl": "options.setPassword(this.environment.getProperty(\"mqtt.password\").toCharArray());",
+        "bucket": "breaking"
+      }
+    ],
+    "raspberrypi-boot-pushover/src/main/java/de/ksbrwsk/config/PushoverConfiguration.java": [
+      {
+        "kind": "fix_mqtt_password_api",
+        "general_idea": "Refactor MQTT client configuration to use MqttConnectOptions and pass password as char array to comply with updated Paho client API requirements.",
+        "human_impl": "options.setPassword(this.environment.getProperty(\"mqtt.password\").toCharArray());",
+        "bucket": "breaking"
+      }
+    ],
+    "raspberrypi-boot-bmp085/pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot starter parent from 1.4.2.RELEASE to 2.4.5 to align with Java 11 support and modern Spring ecosystem.",
+        "human_impl": "<version>2.4.5</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Configure the project to compile and run on Java 11 instead of Java 8.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "raspberrypi-boot-gdata/pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot starter parent from 1.4.2.RELEASE to 2.4.5 to align with Java 11 support and modern Spring ecosystem.",
+        "human_impl": "<version>2.4.5</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the Maven compiler source and target version property from 1.8 to 11.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_guava",
+        "general_idea": "Upgrade Google Guava from 19.0 to 30.1.1-jre to use a version compatible with Java 11.",
+        "human_impl": "<version>30.1.1-jre</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

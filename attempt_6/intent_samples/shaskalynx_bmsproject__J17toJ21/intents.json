@@ -11,123 +11,192 @@
       {
         "kind": "add_component_scan",
         "general_idea": "Added explicit @ComponentScan annotation to ensure Spring component scanning is configured.",
-        "human_impl": "@ComponentScan",
-        "bucket": "polishment"
+        "before": "",
+        "after": "@ComponentScan",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "store_primary_stage",
+        "kind": "add_primary_stage_field",
         "general_idea": "Added a static field to store the primary JavaFX Stage for global access.",
-        "human_impl": "private static Stage primaryStage;",
-        "bucket": "polishment"
+        "before": "",
+        "after": "private static Stage primaryStage;",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "change_initial_view",
-        "general_idea": "Changed the initial FXML view loaded on startup from Login to Dashboard.",
-        "human_impl": "FXMLLoader loader = new FXMLLoader(getClass().getResource(\"/Dashboard.fxml\"));",
-        "bucket": "polishment"
+        "kind": "assign_primary_stage",
+        "general_idea": "Assigned the stage parameter to the static primaryStage field in the start method.",
+        "before": "",
+        "after": "primaryStage = stage;",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "change_root_fxml",
+        "general_idea": "Changed the initial FXML view loaded from Login.fxml to Dashboard.fxml.",
+        "before": "FXMLLoader loader = new FXMLLoader(getClass().getResource(\"/Login.fxml\"));",
+        "after": "FXMLLoader loader = new FXMLLoader(getClass().getResource(\"/Dashboard.fxml\"));",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_application_context_getter",
-        "general_idea": "Added a public static getter for the Spring ApplicationContext to allow dependency injection access from other classes.",
-        "human_impl": "public static ConfigurableApplicationContext getApplicationContext() { return applicationContext; }",
-        "bucket": "polishment"
+        "general_idea": "Added a static getter method to expose the Spring application context.",
+        "before": "",
+        "after": "public static ConfigurableApplicationContext getApplicationContext() { return applicationContext; }",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_primary_stage_getter",
-        "general_idea": "Added a public static getter for the primary Stage to allow UI manipulation from other classes.",
-        "human_impl": "public static Stage getPrimaryStage() { return primaryStage; }",
-        "bucket": "polishment"
+        "general_idea": "Added a static getter method to expose the primary JavaFX stage.",
+        "before": "",
+        "after": "public static Stage getPrimaryStage() { return primaryStage; }",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "pom.xml": [
       {
-        "kind": "update_java_version",
-        "general_idea": "Bump the target Java version property from 17 to 21 to align with the new JDK environment.",
-        "human_impl": "<java.version>21</java.version>",
-        "bucket": "breaking"
+        "kind": "jdk_version_bump",
+        "general_idea": "Update the project's target Java version from 17 to 21.",
+        "before": "<java.version>17</java.version>",
+        "after": "<java.version>21</java.version>",
+        "bucket": "breaking",
+        "why_exists": "Without this change, the project compiles against Java 17, failing to utilize Java 21 features or enforce compatibility with the target runtime environment specified in the migration goal."
       },
       {
-        "kind": "add_jdbc_dependency",
-        "general_idea": "Include the Spring Boot JDBC starter to enable database connectivity features required by the application.",
-        "human_impl": "<artifactId>spring-boot-starter-jdbc</artifactId>",
-        "bucket": "polishment"
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Boot JDBC starter dependency for database connectivity.",
+        "before": "",
+        "after": "<dependency>\n\t\t\t<groupId>org.springframework.boot</groupId>\n\t\t\t<artifactId>spring-boot-starter-jdbc</artifactId>\n\t\t</dependency>",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
     "src/main/resources/Login.fxml": [
       {
-        "kind": "update_controller_package",
-        "general_idea": "Updated the FXML controller reference to reflect the new package structure for controllers.",
-        "human_impl": "fx:controller=\"com.groupten.bmsproject.FXMLControllers.LoginController\"",
-        "bucket": "breaking"
+        "kind": "update_controller_path",
+        "general_idea": "Update the FXML controller reference to match the new package structure.",
+        "before": "fx:controller=\"com.groupten.bmsproject.LoginController\"",
+        "after": "fx:controller=\"com.groupten.bmsproject.FXMLControllers.LoginController\"",
+        "bucket": "breaking",
+        "why_exists": "Runtime exception (ClassNotFoundException or FXML loading error) because the controller class was moved to a subpackage."
       },
       {
         "kind": "replace_label_with_text",
-        "general_idea": "Replaced the basic Label component with a styled Text component for the login header.",
-        "human_impl": "<Text fx:id=\"Logintxt\" ... text=\"Login\" ...>",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "add_password_field",
-        "general_idea": "Replaced the generic TextField for password with a secure PasswordField.",
-        "human_impl": "<PasswordField fx:id=\"passwordField\" ...>",
-        "bucket": "polishment"
+        "general_idea": "Replace a simple Label with a styled Text node for the login header.",
+        "before": "<Label layoutX=\"286.0\" layoutY=\"59.0\" text=\"Login\" />",
+        "after": "<Text fx:id=\"Logintxt\" fill=\"#96735b\" layoutX=\"320.0\" layoutY=\"99.0\" strokeType=\"OUTSIDE\" strokeWidth=\"0.0\" text=\"Login\" textAlignment=\"CENTER\" wrappingWidth=\"110.0\">",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "update_email_prompt",
-        "general_idea": "Updated the email field prompt text to allow username or email.",
-        "human_impl": "promptText=\"Username or E-mail\"",
-        "bucket": "polishment"
+        "general_idea": "Update the email field prompt text to accept username or email.",
+        "before": "promptText=\"E-mail\"",
+        "after": "promptText=\"Username or E-mail\"",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "replace_textfield_with_passwordfield",
+        "general_idea": "Change the password input from a TextField to a PasswordField for security.",
+        "before": "<TextField fx:id=\"passwordField\" layoutX=\"226.0\" layoutY=\"165.0\" promptText=\"Password\" />",
+        "after": "<PasswordField fx:id=\"passwordField\" layoutX=\"300.0\" layoutY=\"174.0\" promptText=\"Password\" />",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "rename_submit_button",
+        "general_idea": "Rename the submit button to Login and update its action handler.",
+        "before": "<Button fx:id=\"submitButton\" ... onAction=\"#handleSubmitButton\" text=\"Submit\" />",
+        "after": "<Button fx:id=\"Loginbtn\" ... onAction=\"#handleLoginButton\" text=\"Login\" ... />",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_forgot_password_button",
-        "general_idea": "Added a new button to handle the forgot password functionality.",
-        "human_impl": "<Button fx:id=\"forgotPasswordbtn\" ... onAction=\"#handleForgotpassbtn\" ...>",
-        "bucket": "polishment"
-      },
-      {
-        "kind": "rename_login_button",
-        "general_idea": "Renamed the submit button to login button and updated its action handler.",
-        "human_impl": "<Button fx:id=\"Loginbtn\" ... onAction=\"#handleLoginButton\" ...>",
-        "bucket": "polishment"
+        "general_idea": "Add a new button for the forgot password functionality.",
+        "before": "",
+        "after": "<Button fx:id=\"forgotPasswordbtn\" ... onAction=\"#handleForgotpassbtn\" text=\"Forgot Password?\" ... />",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_register_button",
-        "general_idea": "Added a new button to navigate to the registration page.",
-        "human_impl": "<Button fx:id=\"Registerbtn\" ... onAction=\"#handleRegisterbtn\" ...>",
-        "bucket": "polishment"
+        "general_idea": "Add a new button to navigate to the registration page.",
+        "before": "",
+        "after": "<Button fx:id=\"Registerbtn\" ... onAction=\"#handleRegisterbtn\" text=\"Register\" ... />",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_registration_prompt_text",
-        "general_idea": "Added text prompting users who don't have an account to register.",
-        "human_impl": "<Text ... text=\"Don't have an account?\" />",
-        "bucket": "polishment"
+        "general_idea": "Add text prompting users to register if they don't have an account.",
+        "before": "",
+        "after": "<Text ... text=\"Don't have an account?\" />",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_security_banner_image",
-        "general_idea": "Added an ImageView for a security-themed banner image.",
-        "human_impl": "<ImageView ...><Image url=\"@Images/banners/image_security.png\" /></ImageView>",
-        "bucket": "polishment"
+        "general_idea": "Add an ImageView for a security-themed banner image.",
+        "before": "",
+        "after": "<ImageView ...><image><Image url=\"@Images/banners/image_security.png\" /></image></ImageView>",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
         "kind": "add_logo_image",
-        "general_idea": "Added an ImageView for the application logo.",
-        "human_impl": "<ImageView ...><Image url=\"@Images/logos/logo-removebg-preview.png\" /></ImageView>",
-        "bucket": "polishment"
+        "general_idea": "Add an ImageView for the application logo.",
+        "before": "",
+        "after": "<ImageView ...><image><Image url=\"@Images/logos/logo-removebg-preview.png\" /></image></ImageView>",
+        "bucket": "polishment",
+        "why_exists": ""
       },
       {
-        "kind": "apply_button_styling",
-        "general_idea": "Applied consistent CSS styling and font settings to all new buttons.",
-        "human_impl": "style=\"-fx-background-color: #96735b;\" textFill=\"WHITE\"",
-        "bucket": "polishment"
+        "kind": "add_passwordfield_import",
+        "general_idea": "Add import for PasswordField control.",
+        "before": "",
+        "after": "<?import javafx.scene.control.PasswordField?>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_image_imports",
+        "general_idea": "Add imports for Image and ImageView controls.",
+        "before": "",
+        "after": "<?import javafx.scene.image.Image?>\n<?import javafx.scene.image.ImageView?>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_font_import",
+        "general_idea": "Add import for Font control.",
+        "before": "",
+        "after": "<?import javafx.scene.text.Font?>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_text_import",
+        "general_idea": "Add import for Text control.",
+        "before": "",
+        "after": "<?import javafx.scene.text.Text?>",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "remove_label_import",
+        "general_idea": "Remove unused import for Label control.",
+        "before": "<?import javafx.scene.control.Label?>",
+        "after": "",
+        "bucket": "polishment",
+        "why_exists": ""
       }
     ],
-    "src/main/resources/application.properties": [
-      {
-        "kind": "add_mail_config",
-        "general_idea": "Added Spring Mail properties to configure SMTP connection for email functionality.",
-        "human_impl": "Added spring.mail.host, port, username, password, and SMTP auth/TLS properties.",
-        "bucket": "polishment"
-      }
-    ]
+    "src/main/resources/application.properties": []
   }
 }

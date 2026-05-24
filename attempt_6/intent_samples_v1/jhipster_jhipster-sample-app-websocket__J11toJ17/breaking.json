@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-websocket",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "99072080294cfd7725be8e8e767658f3c460965e",
+    "sha_to": "0f21d11924d11ea118fa00d67dfbf2e80aa4a698"
+  },
+  "by_file": {
+    "src/main/java/io/github/jhipster/sample/GeneratedByJHipster.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.annotation.Generated with jakarta.annotation.Generated to align with Jakarta EE namespace requirements for newer JDK/Spring Boot versions.",
+        "human_impl": "import jakarta.annotation.Generated;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/JhipsterWebsocketSampleApplicationApp.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.annotation.PostConstruct with jakarta.annotation.PostConstruct to align with Jakarta EE namespace requirements in newer Spring Boot versions.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace the legacy javax-based Hibernate5Module with the Jakarta-namespaced Hibernate5JakartaModule to support Jakarta EE 9+ requirements in Java 17.",
+        "human_impl": "import com.fasterxml.jackson.datatype.hibernate5.jakarta.Hibernate5JakartaModule; ... return new Hibernate5JakartaModule();",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LiquibaseConfiguration.java": [
+      {
+        "kind": "api_method_replacement",
+        "general_idea": "Replace deprecated Liquibase setter method with the new API method to maintain compatibility with updated library versions.",
+        "human_impl": "liquibase.setLabelFilter(liquibaseProperties.getLabelFilter());",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java": [
+      {
+        "kind": "migrate_security_config_style",
+        "general_idea": "Refactor SecurityConfiguration from extending WebSecurityConfigurerAdapter to using @Configuration with SecurityFilterChain bean to comply with Spring Security 5.7+ deprecations.",
+        "human_impl": "Removed 'extends WebSecurityConfigurerAdapter' and '@Override configure(HttpSecurity)' methods; added '@Configuration' and '@Bean SecurityFilterChain filterChain(HttpSecurity http)' returning http.build().",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_method_security_annotation",
+        "general_idea": "Replace deprecated @EnableGlobalMethodSecurity with @EnableMethodSecurity to align with Spring Security 5.7+ API changes.",
+        "human_impl": "Replaced '@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)' with '@EnableMethodSecurity(securedEnabled = true)'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_authorize_api",
+        "general_idea": "Migrate from authorizeRequests().antMatchers() to authorizeHttpRequests().requestMatchers() to use the new request matcher API in Spring Security 5.7+.",
+        "human_impl": "Replaced '.authorizeRequests().antMatchers(...)' with '.authorizeHttpRequests(authz -> authz.requestMatchers(...))'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_csrf_api",
+        "general_idea": "Update CSRF configuration to use the new lambda DSL and explicit token request handler required by newer Spring Security versions.",
+        "human_impl": "Replaced '.csrf().csrfTokenRepository(...)' with '.csrf(csrf -> csrf.csrfTokenRepository(...).csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_headers_api",
+        "general_idea": "Migrate header configuration (CSP, Referrer, Permissions) to use the new lambda DSL and updated method names (e.g., permissionsPolicy instead of featurePolicy).",
+        "human_impl": "Replaced '.headers()... .featurePolicy(...)' with '.headers(headers -> headers.contentSecurityPolicy(...).permissionsPolicy(...))'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_exception_handling_api",
+        "general_idea": "Replace custom SecurityProblemSupport entry point with standard HttpStatusEntryPoint and use the new exceptionHandling lambda DSL.",
+        "human_impl": "Replaced '.exceptionHandling().authenticationEntryPoint(problemSupport)' with '.exceptionHandling(exceptionHanding -> exceptionHanding.defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), ...))'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_form_login_api",
+        "general_idea": "Migrate form login configuration to use the new lambda DSL and replace custom Ajax handlers with standard HTTP status responses.",
+        "human_impl": "Replaced '.formLogin().successHandler(ajaxAuthenticationSuccessHandler())' with '.formLogin(formLogin -> formLogin.successHandler((request, response, authentication) -> response.setStatus(HttpStatus.OK.value())))'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_logout_api",
+        "general_idea": "Migrate logout configuration to use the new lambda DSL and replace custom Ajax logout handler with HttpStatusReturningLogoutSuccessHandler.",
+        "human_impl": "Replaced '.logout().logoutSuccessHandler(ajaxLogoutSuccessHandler())' with '.logout(logout -> logout.logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler()))'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_remember_me_api",
+        "general_idea": "Migrate remember-me configuration to use the new lambda DSL.",
+        "human_impl": "Replaced '.rememberMe().rememberMeServices(...)' with '.rememberMe(rememberMe -> rememberMe.rememberMeServices(...))'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_web_security_config",
+        "general_idea": "Remove the deprecated configure(WebSecurity) method for ignoring static resources, as this is now handled via SecurityFilterChain or ignored by default in newer setups.",
+        "human_impl": "Deleted the 'configure(WebSecurity web)' method and its associated imports.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/WebConfigurer.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.servlet imports with jakarta.servlet to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.servlet.*; // replaced import javax.servlet.*;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "cors_origin_patterns_support",
+        "general_idea": "Update CORS configuration check to include allowedOriginPatterns, which is required for wildcard origins in newer Spring Security versions.",
+        "human_impl": "if (!CollectionUtils.isEmpty(config.getAllowedOrigins()) || !CollectionUtils.isEmpty(config.getAllowedOriginPatterns())) {",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "meta": {
+    "repo": "esign-consulting/logistics",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "5721baac46c0189ffb2681da29b4be00284ebe51",
+    "sha_to": "89f0c829b1a3586866541fc4ec936f48221307d7"
+  },
+  "by_file": {
+    "logistics-ejb/src/main/java/br/com/esign/logistics/Logistics.java": [
+      {
+        "kind": "add_generic_type_parameter",
+        "general_idea": "Add explicit generic type parameter to RouteChooser variable declaration to improve type safety.",
+        "human_impl": "RouteChooser<ChosenRoute> routeChooser = ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_redundant_cast",
+        "general_idea": "Remove explicit cast to ChosenRoute since the generic type parameter now provides compile-time type information.",
+        "human_impl": "ChosenRoute chosenRoute = routeChooser.chooseRoute(\"A\", \"D\");",
+        "bucket": "polishment"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/core/Place.java": [
+      {
+        "kind": "change_constructor_visibility_to_public",
+        "general_idea": "Change the default package-private constructor to public to ensure accessibility for serialization frameworks.",
+        "human_impl": "public Place() {\n    this.name = null;\n}",
+        "bucket": "polishment"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/core/Route.java": [
+      {
+        "kind": "visibility_change",
+        "general_idea": "Change default constructor visibility from package-private to public.",
+        "human_impl": "public Route() {",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_modernization",
+        "general_idea": "Simplify array creation in Arrays.asList by removing explicit array type declaration.",
+        "human_impl": "this.routes = Arrays.asList(this);",
+        "bucket": "polishment"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/core/RoutesMap.java": [
+      {
+        "kind": "visibility_change_constructor",
+        "general_idea": "Change the default constructor visibility from package-private to public, likely required by the new ORM serialization/deserialization mechanism.",
+        "human_impl": "public RoutesMap() {",
+        "bucket": "polishment"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/dao/impl/DatastoreAdapter.java": [
+      {
+        "kind": "remove_morphia_adapter_dependency",
+        "general_idea": "Remove the dependency injection of the now-obsolete MorphiaAdapter class.",
+        "human_impl": "Removed @Inject private MorphiaAdapter morphiaAdapter;",
+        "bucket": "polishment"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/dao/impl/RoutesMapDAOImpl.java": [
+      {
+        "kind": "add_logging",
+        "general_idea": "Add Java Util Logging statements to track CRUD operations for better observability.",
+        "human_impl": "logger.log(Level.INFO, \"Saving the map {0}...\", new Object[] {routesMap.getName()});",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_method_signatures",
+        "general_idea": "Change method signatures to accept String identifiers instead of entity objects for cleaner API usage.",
+        "human_impl": "public void removeRoutesMap(String name) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_route_logic",
+        "general_idea": "Simplify route addition logic by using Morphia's object mapping instead of manual BasicDBObject construction.",
+        "human_impl": "UpdateOperators.addToSet(\"routes\", route)",
+        "bucket": "polishment"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/ejb/RoutesMapNotFoundException.java": [
+      {
+        "kind": "add_serial_version_uid",
+        "general_idea": "Add explicit serialVersionUID to ensure serialization compatibility across JVM versions.",
+        "human_impl": "private static final long serialVersionUID = 1L;",
+        "bucket": "polishment"
+      }
+    ],
+    "logistics-ejb/src/main/java/br/com/esign/logistics/ejb/impl/RoutesMapEJBImpl.java": [
+      {
+        "kind": "simplify_logic",
+        "general_idea": "Remove redundant containment check before removing a route, relying on the DAO or subsequent logic to handle existence.",
+        "human_impl": "removed if (routesMap.containsRoute(route)) block",
+        "bucket": "polishment"
+      }
+    ],
+    "logistics-ejb/src/test/java/br/com/esign/logistics/core/impl/RouteChooserImplTest.java": [
+      {
+        "kind": "add_explicit_generic_type",
+        "general_idea": "Add explicit generic type parameter to the RouteChooser variable declaration to improve type safety and clarity.",
+        "human_impl": "RouteChooser<ChosenRoute> routeChooser = new RouteChooserImpl(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "logistics-ejb/src/test/java/br/com/esign/logistics/ejb/impl/RoutesMapEJBImplTest.java": [
+      {
+        "kind": "remove_unused_rule",
+        "general_idea": "Remove unused JUnit 4 ExpectedException rule and its imports to clean up the test class.",
+        "human_impl": "Removed `@Rule public ExpectedException expectedEx` and associated imports.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_test_method",
+        "general_idea": "Delete the test method for removeRoutesMap which is no longer needed or relevant.",
+        "human_impl": "Removed `testRemoveRoutesMap` method entirely.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

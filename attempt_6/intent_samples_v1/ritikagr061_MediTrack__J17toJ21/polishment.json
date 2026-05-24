@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "repo": "ritikagr061/MediTrack",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "0e3733124875dfd3eec76294cb64207d95f854e0",
+    "sha_to": "7a175ba87404e5540b9b8c48c60e6781536aa8c4"
+  },
+  "by_file": {
+    "auth-service/src/main/java/com/meditrack/authservice/config/SpringSecurityConfig.java": [
+      {
+        "kind": "add_security_comments",
+        "general_idea": "Add explanatory comments to clarify why stateless session management is configured and how Spring Security defaults work.",
+        "human_impl": "Added multi-line comment explaining session creation policy and SecurityContext behavior.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "disable_jwt_filter",
+        "general_idea": "Comment out the custom JWT filter registration to disable it in the current security configuration.",
+        "human_impl": "Commented out http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);",
+        "bucket": "polishment"
+      }
+    ],
+    "auth-service/src/main/java/com/meditrack/authservice/controller/UserLoginSignup.java": [
+      {
+        "kind": "remove_hardcoded_field",
+        "general_idea": "Removed the hardcoded 'None' value for the membership field during user registration.",
+        "human_impl": ".membership(\"None\")",
+        "bucket": "polishment"
+      }
+    ],
+    "auth-service/src/main/java/com/meditrack/authservice/entity/UserEntity.java": [
+      {
+        "kind": "rename_table",
+        "general_idea": "Renamed the database table from 'userDetails' to 'user_details' to follow snake_case naming conventions.",
+        "human_impl": "@Table(name=\"user_details\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_field",
+        "general_idea": "Removed the 'membership' field from the UserEntity class.",
+        "human_impl": "-    private String membership;",
+        "bucket": "polishment"
+      }
+    ],
+    "api-gateway/pom.xml": [
+      {
+        "kind": "remove_dependency_version_override",
+        "general_idea": "Remove the explicit version override for Lombok in the dependency exclusion, likely relying on parent or managed versions.",
+        "human_impl": "<version>1.18.36</version>",
+        "bucket": "polishment"
+      }
+    ],
+    "auth-service/pom.xml": [
+      {
+        "kind": "remove_lombok_version_override",
+        "general_idea": "Remove the explicit version exclusion for Lombok, likely relying on managed versions or a different dependency structure.",
+        "human_impl": "Removed <version>1.18.36</version> from lombok exclude block",
+        "bucket": "polishment"
+      }
+    ],
+    "analytics-service/Dockerfile": [
+      {
+        "kind": "switch_build_base_image",
+        "general_idea": "Changed the Maven build stage base image from Eclipse Temurin to Amazon Corretto to standardize the JDK distribution.",
+        "human_impl": "FROM maven:3.9.9-amazoncorretto-21 AS builder",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "switch_runtime_base_image",
+        "general_idea": "Changed the runtime stage base image from OpenJDK to Amazon Corretto Alpine to standardize the JDK distribution and reduce image size.",
+        "human_impl": "FROM amazoncorretto:21-alpine AS runner",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

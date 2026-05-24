@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "repo": "hansreier/techreier",
+    "stage": "J17->J21",
+    "family": "hibernate-5",
+    "sha_from": "d479c34407f13dd0bc4e44bfd8baeceaddc52b7a",
+    "sha_to": "aa877146ffc30637bb10d0d000e903697affefed"
+  },
+  "by_file": {
+    "eDrops/pom.xml": [
+      {
+        "kind": "update_spring_boot_version",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.6 to 3.2.3 to support Java 21 and modern Spring features.",
+        "human_impl": "<version>3.2.3</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_java_version",
+        "general_idea": "Set the Java source and target version to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_kotlin_version",
+        "general_idea": "Upgrade Kotlin version to 1.9.23 to ensure compatibility with Java 21 and Spring Boot 3.",
+        "human_impl": "<kotlin.version>1.9.23</kotlin.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_kotlin_jvm_target",
+        "general_idea": "Update Kotlin compiler JVM target to 17 (likely a step towards 21 or required by new Kotlin version).",
+        "human_impl": "<kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_thymeleaf_security_extra",
+        "general_idea": "Add thymeleaf-extras-springsecurity6 to support Spring Security 6 integration with Thymeleaf.",
+        "human_impl": "<artifactId>thymeleaf-extras-springsecurity6</artifactId>",
+        "bucket": "breaking"
+      }
+    ],
+    "eDrops/src/main/resources/application.yaml": [
+      {
+        "kind": "switch_default_db_to_mariadb",
+        "general_idea": "Change the default active profile and database configuration from H2 in-memory to MariaDB.",
+        "human_impl": "spring.profiles.active: h2 -> spring.profiles.active: h2 (but default block uses MariaDB URL)",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

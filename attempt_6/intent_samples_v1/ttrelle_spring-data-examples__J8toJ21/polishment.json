@@ -1,0 +1,167 @@
+{
+  "meta": {
+    "repo": "ttrelle/spring-data-examples",
+    "stage": "J8->J21",
+    "family": null,
+    "sha_from": "1db992afcf4d12ba7a8e36b66543c40455bb5b23",
+    "sha_to": "3a94968e491fb33b20259c26e9aa2c184ea8b8e3"
+  },
+  "by_file": {
+    "spring-boot-mongo/src/test/java/de/codecentric/mongoboot/SpringBootMongoApplicationTests.java": [
+      {
+        "kind": "migrate_to_junit5",
+        "general_idea": "Replace JUnit 4 annotations and runner with JUnit 5 equivalents to align with modern testing standards.",
+        "human_impl": "Replaced 'import org.junit.Test' with 'import org.junit.jupiter.api.Test' and removed '@RunWith(SpringRunner.class)' and related imports.",
+        "bucket": "polishment"
+      }
+    ],
+    "springdata-jpa/src/test/java/jpa/repo/JpaRepoTest.java": [
+      {
+        "kind": "migrate_to_junit5",
+        "general_idea": "Replace JUnit 4 runner and annotations with JUnit 5 equivalents to support modern testing standards.",
+        "human_impl": "@RunWith(SpringJUnit4ClassRunner.class) -> @ExtendWith(SpringExtension.class); @Before -> @BeforeEach",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_assert_import",
+        "general_idea": "Switch from JUnit 4 static import to JUnit 5/hamcrest MatcherAssert for assertion compatibility.",
+        "human_impl": "import static org.junit.Assert.assertThat; -> import static org.hamcrest.MatcherAssert.assertThat;",
+        "bucket": "polishment"
+      }
+    ],
+    "springdata-neo4j/src/main/java/neo4j/domain/User.java": [
+      {
+        "kind": "normalize_relationship_type",
+        "general_idea": "Standardize the relationship type string to uppercase to align with Neo4j conventions.",
+        "human_impl": "@Relationship(type = \"KNOWS\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_index_annotation",
+        "general_idea": "Remove the @Index annotation as indexing is now typically handled via schema definitions or repository methods in the new driver.",
+        "human_impl": "removed @Index private String login;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_generics_syntax",
+        "general_idea": "Use diamond operator for generic type instantiation to clean up code.",
+        "human_impl": "new HashSet<>();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_accessors",
+        "general_idea": "Consolidate getter and setter methods into single-line definitions for brevity.",
+        "human_impl": "public Long getId() { return id; }",
+        "bucket": "polishment"
+      }
+    ],
+    "springdata-neo4j/src/main/java/neo4j/repo/UserRepository.java": [
+      {
+        "kind": "modernize_cypher_syntax",
+        "general_idea": "Rewrote Cypher query from legacy START/MATCH syntax to modern pattern matching syntax.",
+        "human_impl": "@Query(\"MATCH (root:User {login: 'root'})-[:KNOWS]->(friends) RETURN friends\")",
+        "bucket": "polishment"
+      }
+    ],
+    "springdata-neo4j/src/test/java/neo4j/repo/Neo4jRepoTest.java": [
+      {
+        "kind": "migrate_junit4_to_junit5",
+        "general_idea": "Replace JUnit 4 annotations and assertions with JUnit 5 equivalents to align with modern testing standards.",
+        "human_impl": "import static org.junit.jupiter.api.Assertions.assertEquals; @BeforeEach @AfterEach @Disabled",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_assertion_style",
+        "general_idea": "Update assertion calls to use the message-as-last-argument style preferred by JUnit 5.",
+        "human_impl": "assertEquals(USER_COUNT + 1, n, \"User count mismatch\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "clean_up_test_code",
+        "general_idea": "Remove obsolete comments, debug output, and unused imports to clean up the test class.",
+        "human_impl": "Removed out() method, debug comments, and unused HashMap import",
+        "bucket": "polishment"
+      }
+    ],
+    "springdata-neo4j/src/test/java/neo4j/repo/Neo4jTestConfig.java": [
+      {
+        "kind": "cleanup_imports",
+        "general_idea": "Remove imports for deprecated OGM classes and add imports for the new Bolt driver classes.",
+        "human_impl": "Removed `org.neo4j.ogm.*` and `org.springframework.data.neo4j.server.*` imports; added `org.neo4j.driver.*` imports.",
+        "bucket": "polishment"
+      }
+    ],
+    "springdata-redis/src/test/java/redis/UserRepositoryTest.java": [
+      {
+        "kind": "normalize_assertion_argument_order",
+        "general_idea": "Reorder assertEquals arguments to match JUnit 5 convention (expected, actual, message).",
+        "human_impl": "assertEquals(\"root\", user.getLogin(), \"login mismatch\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_assertion_message_label",
+        "general_idea": "Correct the error message string for the full name assertion to reflect the actual field being tested.",
+        "human_impl": "assertEquals(\"Superuser\", user.getFullName(), \"fullName mismatch\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "normalize_whitespace",
+        "general_idea": "Remove trailing whitespace and normalize indentation to standard style.",
+        "human_impl": "repo.add(new User(\"root\", \"Superuser\"));",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "add_mongodriver_module",
+        "general_idea": "Include the new dedicated MongoDB driver module in the multi-module build structure.",
+        "human_impl": "<module>mongodriver</module>",
+        "bucket": "polishment"
+      }
+    ],
+    "spring-boot-mongo/pom.xml": [
+      {
+        "kind": "add_parent_pom",
+        "general_idea": "Switched the project parent from spring-boot-starter-parent to a custom parent POM to centralize dependency management.",
+        "human_impl": "<parent><groupId>de.codecentric</groupId><artifactId>springdata-examples</artifactId>...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_artifact",
+        "general_idea": "Renamed the Maven artifact ID from mongoboot to spring-boot-mongo to align with the directory name.",
+        "human_impl": "<artifactId>spring-boot-mongo</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_project_name",
+        "general_idea": "Updated the project name and description for clarity.",
+        "human_impl": "<name>SpringBoot MongoDB REST</name>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_java_version_property",
+        "general_idea": "Removed the explicit java.version property, likely relying on the parent POM or default compiler settings for Java 21 compatibility.",
+        "human_impl": "Removed <java.version>1.8</java.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_docker_plugin_version",
+        "general_idea": "Added a property to manage the version of the docker-maven-plugin.",
+        "human_impl": "<docker-maven-plugin.version>0.4.11</docker-maven-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_actuator_dependency",
+        "general_idea": "Added the Spring Boot Actuator starter dependency to enable production-ready features.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-actuator</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_docker_profile",
+        "general_idea": "Added a Maven profile to configure the docker-maven-plugin for building Docker images.",
+        "human_impl": "<profile><id>docker</id>...<plugin>...docker-maven-plugin...</plugin>...</profile>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "Beep1608/atlanta-samples",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "5169b3de7bd94345c3527b116887244a9a5b3a25",
+    "sha_to": "f64f6c55a809a660bd0d0459234a2fa3c37d3ddb"
+  },
+  "by_file": {
+    "base/src/main/java/atlantafx/base/controls/BehaviorBase.java": [
+      {
+        "kind": "remove_abstract_modifier",
+        "general_idea": "Change class from abstract to concrete to allow direct instantiation, matching the upstream JavaFX BehaviorBase API.",
+        "human_impl": "Removed 'abstract' keyword from 'public abstract class BehaviorBase'.",
+        "bucket": "breaking"
+      }
+    ],
+    "base/src/main/java/atlantafx/base/controls/BreadcrumbsSkin.java": [
+      {
+        "kind": "refactor_data_model",
+        "general_idea": "Replace internal TreeItem usage with a custom BreadCrumbItem model to support new features like dividers and explicit first/last state tracking.",
+        "human_impl": "import atlantafx.base.controls.Breadcrumbs.BreadCrumbItem; ... List<BreadCrumbItem<T>> crumbs = constructFlatPath(selectedTreeItem);",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

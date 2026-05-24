@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "repo": "rodrigoaguilar619/lib-parent-project",
+    "stage": "J8->J21",
+    "family": "spring-boot-2",
+    "sha_from": "cd67c3d040b58cd817b0c5419a2d12a6e82cdabc",
+    "sha_to": "c329c3b5669b773db3e81b4dbf794a4b7e918879"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot starter parent from 2.3.0 to 3.2.0 to align with Java 21 and modern Spring ecosystem.",
+        "human_impl": "<parent><version>3.2.0</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_property",
+        "general_idea": "Update the Java version property from 1.8 to 21 to target the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_mysql_connector",
+        "general_idea": "Replace deprecated mysql-connector-java with the new mysql-connector-j artifact required by Spring Boot 3.",
+        "human_impl": "<dependency><groupId>com.mysql</groupId><artifactId>mysql-connector-j</artifactId></dependency>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_custom_backend_lib",
+        "general_idea": "Update the internal lib-base-backend dependency to version 3.0.0.",
+        "human_impl": "<dependency><groupId>lib.base.backend</groupId><artifactId>lib-base-backend</artifactId><version>${custom.base.version}</version></dependency>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

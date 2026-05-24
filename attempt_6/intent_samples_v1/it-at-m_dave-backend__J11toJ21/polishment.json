@@ -1,0 +1,131 @@
+{
+  "meta": {
+    "repo": "it-at-m/dave-backend",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "1128ce0aedea0bf57f04bc2fac03dc36fb69f98e",
+    "sha_to": "f0ab5ed24cf7e73cc12215bd70a8288db31fb13a"
+  },
+  "by_file": {
+    "src/main/java/de/muenchen/dave/DaveBackendApplication.java": [
+      {
+        "kind": "add_scheduler_lock_annotation",
+        "general_idea": "Enable ShedLock distributed scheduler locking to prevent concurrent execution of scheduled tasks.",
+        "human_impl": "@EnableSchedulerLock(defaultLockAtMostFor = \"1380m\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_shedlock_import",
+        "general_idea": "Import the ShedLock annotation class required for the new scheduler lock configuration.",
+        "human_impl": "import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reformat_annotations",
+        "general_idea": "Reformat existing Spring annotations to use multi-line syntax for better readability.",
+        "human_impl": "@ComponentScan(basePackages = { ... })",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/de/muenchen/dave/configuration/CacheControlConfiguration.java": [
+      {
+        "kind": "code_formatting_cleanup",
+        "general_idea": "Adjust indentation and remove empty lines in method signature and Javadoc to match code style standards.",
+        "human_impl": "final HttpServletResponse response,\n                final FilterChain filterChain",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/de/muenchen/dave/configuration/CachingConfiguration.java": [
+      {
+        "kind": "add_lombok_annotation",
+        "general_idea": "Add @Slf4j annotation to enable SLF4J logging in the configuration class.",
+        "human_impl": "@Slf4j",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_cache_constants",
+        "general_idea": "Rename cache key constants from ZAEHLSTELLE to ERHEBUNGSSTELLE to reflect domain model changes.",
+        "human_impl": "public static final String SUCHE_ERHEBUNGSSTELLE = \"SUCHE_ERHEBUNGSSTELLE\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_auth_cache_config",
+        "general_idea": "Remove configuration for the authentication cache map, likely moved to a different security configuration.",
+        "human_impl": "config.addMapConfig(this.getMapConfig(CustomUserInfoTokenServices.NAME_AUTHENTICATION_CACHE, ...));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "externalize_cache_ttl",
+        "general_idea": "Replace hardcoded cache idle times with configurable properties via @Value annotations.",
+        "human_impl": "@Value(\"${hazelcast.max-idle-time-seconds.suchergebnisse:7200}\") public int maxIdleTimeSecondsSuchergebnisse;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_profile_list",
+        "general_idea": "Update Spring profiles for local configuration to include 'docker' and 'unittest'.",
+        "human_impl": "@Profile({ \"local\", \"docker\", \"unittest\" })",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "use_var_keyword",
+        "general_idea": "Replace explicit type declarations with 'var' for local variables to modernize code style.",
+        "human_impl": "final var config = new Config();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_startup_logging",
+        "general_idea": "Add log statements to print Hazelcast configuration values at startup for debugging.",
+        "human_impl": "log.info(\"Value hazelcast.instance: {}\", this.hazelcastInstanceName);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "disable_map_backups",
+        "general_idea": "Explicitly set backup count to 0 for cache maps to disable replication in this configuration.",
+        "human_impl": "mapConfig.setBackupCount(0);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/de/muenchen/dave/configuration/LocalizationConfiguration.java": [
+      {
+        "kind": "import_reordering",
+        "general_idea": "Move java.util.Locale import to the top of the import block to follow standard Java import ordering conventions.",
+        "human_impl": "moved 'import java.util.Locale;' above 'import org.apache...'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "whitespace_cleanup",
+        "general_idea": "Remove unnecessary blank lines between imports and the class declaration to clean up file structure.",
+        "human_impl": "removed two empty lines before '@Configuration'",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/de/muenchen/dave/configuration/SecurityConfiguration.java": [
+      {
+        "kind": "remove_deprecated_oauth2_client",
+        "general_idea": "Remove unused OAuth2 Client manager bean and imports that are no longer needed or compatible.",
+        "human_impl": "Removed authorizedClientServiceAndManager bean and related imports",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_constructor_injection",
+        "general_idea": "Replace Lombok @RequiredArgsConstructor with explicit constructor to manually initialize dependencies.",
+        "human_impl": "public SecurityConfiguration(@Value(...) String uri, RestTemplateBuilder builder) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_h2_console_access",
+        "general_idea": "Add permitAll rule for H2 console endpoints to allow access during development.",
+        "human_impl": "AntPathRequestMatcher.antMatcher(\"/h2-console/**\")",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/de/muenchen/dave/configuration/SpringRestConfiguration.java": [
+      {
+        "kind": "remove_empty_line",
+        "general_idea": "Remove an unnecessary empty line between imports and the class declaration to clean up formatting.",
+        "human_impl": "Deleted the blank line before the @Configuration annotation.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

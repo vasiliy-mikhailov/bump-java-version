@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "stvali2/spring-data-rest",
+    "stage": "J11->J21",
+    "family": "spring-boot-2",
+    "sha_from": "04b401710e09729251d1c2472c7a8f68e73cee78",
+    "sha_to": "c0273fa0dce9d97e0a7b08ee36a41108b7c2b074"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent from 2.3.4 to 3.2.3 to align with Java 21 and modern Spring ecosystem.",
+        "human_impl": "<version>3.2.3</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_21",
+        "general_idea": "Update the project's target Java version property from 11 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

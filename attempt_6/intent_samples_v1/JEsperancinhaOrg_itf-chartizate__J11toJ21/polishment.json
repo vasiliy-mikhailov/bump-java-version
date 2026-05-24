@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "repo": "JEsperancinhaOrg/itf-chartizate",
+    "stage": "J11->J21",
+    "family": "junit4-mockito",
+    "sha_from": "8723a284598ab7407029034e8a4e494d4622877a",
+    "sha_to": "17dc96d0d0ae483e91de2fdfeb0e7acc1bd5c206"
+  },
+  "by_file": {
+    "itf-chartizate-api/pom.xml": [
+      {
+        "kind": "remove_compiler_plugin_config",
+        "general_idea": "Removed explicit maven-compiler-plugin configuration block, likely relying on parent POM or default settings for the new JDK version.",
+        "human_impl": "Deleted the <plugin> block for maven-compiler-plugin including source/target/annotationProcessorPaths configuration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_lombok_scope",
+        "general_idea": "Changed Lombok dependency scope from 'provided' to default (compile), ensuring it is included in the classpath at runtime or test time if needed.",
+        "human_impl": "Removed <scope>provided</scope> from the org.projectlombok:lombok dependency.",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "dependency_upgrade",
+        "general_idea": "Upgrade Lombok to version 1.18.34 to ensure compatibility and security with the newer JDK.",
+        "human_impl": "<lombok.version>1.18.34</lombok.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "plugin_replacement",
+        "general_idea": "Replace the legacy coveralls-maven-plugin with omni-coveragereporter-maven-plugin to modernize coverage reporting.",
+        "human_impl": "<artifactId>omni-coveragereporter-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove the explicit jaxb-api dependency which was previously required by the old coveralls plugin.",
+        "human_impl": "- <artifactId>jaxb-api</artifactId>",
+        "bucket": "polishment"
+      }
+    ],
+    ".circleci/config.yml": [
+      {
+        "kind": "remove_comments",
+        "general_idea": "Clean up outdated documentation and comments from the CI configuration file.",
+        "human_impl": "Removed comments like '# Java Maven CircleCI 2.0 configuration file' and '# run tests!'",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "Armaan4477/Paint-App",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "40372523e55a2ec503e37eadee2df71430f3facd",
+    "sha_to": "e36d7f93af2a83185c2a4b87680f0aeebdece77f"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Update the Maven compiler release property to target Java 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_missing_dependency",
+        "general_idea": "Add the missing javafx-graphics dependency required for JavaFX applications.",
+        "human_impl": "<artifactId>javafx-graphics</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_main_class",
+        "general_idea": "Update the main class reference in the JavaFX plugin to point to the new Launcher class.",
+        "human_impl": "<mainClass>hellofx/org.main.paint.Launcher</mainClass>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

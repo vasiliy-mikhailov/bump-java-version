@@ -1,0 +1,71 @@
+{
+  "meta": {
+    "repo": "kleberaluizio/POC-JUnit5",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "202f9ffbf986a82226b78c04a370f457431d4a8b",
+    "sha_to": "305023b8c9943425ded34a49dca8913b51c23deb"
+  },
+  "by_file": {
+    "junit/src/main/java/com/telusko/learning/Shapes.java": [
+      {
+        "kind": "add_method",
+        "general_idea": "Added a new method to compute the area of a circle.",
+        "before": "",
+        "after": "public double computeCircleArea(double radius){ return Math.PI * Math.pow(radius,2); }",
+        "bucket": "polishment",
+        "why_exists": ""
+      }
+    ],
+    "junit/src/test/java/com/telusko/learning/ShapesTest.java": [
+      {
+        "kind": "refactor_test_structure",
+        "general_idea": "Refactor flat test class into nested test classes to group tests by feature (Square vs Circle).",
+        "before": "class ShapesTest { @Test void shouldReturnCorrectResultWhenProvidedValueIsCorrect() { ... } }",
+        "after": "class ShapesTest { @Nested class ComputeSquareAreaTests { @Test void shouldReturnCorrectResultWhenProvidedValueIsCorrect() { ... } } @Nested class ComputeCircleAreaTests { ... } }",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_test_lifecycle_annotation",
+        "general_idea": "Add @TestInstance(PER_CLASS) to allow instance fields and constructor initialization for the test class.",
+        "before": "class ShapesTest",
+        "after": "@TestInstance(TestInstance.Lifecycle.PER_CLASS) class ShapesTest",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_constructor_initialization",
+        "general_idea": "Move object instantiation from individual tests to the class constructor to initialize once per class lifecycle.",
+        "before": "void shouldReturnCorrectResultWhenProvidedValueIsCorrect() { Shapes s = new Shapes(); ... }",
+        "after": "Shapes s; ShapesTest() { s = new Shapes(); ... }",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_after_all_hook",
+        "general_idea": "Add @AfterAll static method to execute cleanup or logging after all tests in the class finish.",
+        "before": "",
+        "after": "@AfterAll static void finish() { System.out.println(\"Finished all tests!\"); }",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "add_new_test_case",
+        "general_idea": "Add a new test case for computing circle area.",
+        "before": "",
+        "after": "@Nested class ComputeCircleAreaTests { @Test void shouldReturnCorrectResultWhenProvidedValueIsCorrect() { ... } }",
+        "bucket": "polishment",
+        "why_exists": ""
+      },
+      {
+        "kind": "simplify_imports",
+        "general_idea": "Replace specific JUnit imports with a wildcard import for brevity.",
+        "before": "import org.junit.jupiter.api.Assertions; import org.junit.jupiter.api.DisplayName; import org.junit.jupiter.api.Test;",
+        "after": "import org.junit.jupiter.api.*;",
+        "bucket": "polishment",
+        "why_exists": ""
+      }
+    ]
+  }
+}

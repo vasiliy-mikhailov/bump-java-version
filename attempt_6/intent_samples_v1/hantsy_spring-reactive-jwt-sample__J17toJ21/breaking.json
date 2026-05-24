@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "repo": "hantsy/spring-reactive-jwt-sample",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "277106c9cafd8c49e6beeca6ff83d562f757dd29",
+    "sha_to": "7307f98ad9ba1427623d6fbdc2cad81c33a02b71"
+  },
+  "by_file": {
+    "src/main/java/com/example/demo/domain/Comment.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation import with jakarta.validation to align with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/demo/domain/Post.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation import with jakarta.validation to align with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/demo/domain/User.java": [
+      {
+        "kind": "migrate_validation_import",
+        "general_idea": "Replace javax.validation import with jakarta.validation to align with Jakarta EE namespace requirements in Spring Boot 3.x and JDK 21 environments.",
+        "human_impl": "import jakarta.validation.constraints.Email;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/demo/security/jwt/JwtTokenProvider.java": [
+      {
+        "kind": "import_migration_javax_to_jakarta",
+        "general_idea": "Replace javax.annotation.PostConstruct with jakarta.annotation.PostConstruct to align with Jakarta EE namespace in Spring Boot 3.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "jjwt_api_migration_builder",
+        "general_idea": "Update JWT token creation to use JJWT 0.12.x builder API (claims().subject(), signWith(..., Jwts.SIG.HS256)).",
+        "human_impl": "var claimsBuilder = Jwts.claims().subject(username); ... .signWith(this.secretKey, Jwts.SIG.HS256)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "jjwt_api_migration_parser",
+        "general_idea": "Update JWT token parsing to use JJWT 0.12.x parser API (parser().verifyWith(...).build().parseSignedClaims(...)).",
+        "human_impl": "Jws<Claims> claims = Jwts.parser().verifyWith(this.secretKey).build().parseSignedClaims(token);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "jjwt_api_migration_payload_access",
+        "general_idea": "Replace deprecated getBody() calls with getPayload() for accessing JWT claims in JJWT 0.12.x.",
+        "human_impl": "claims.getPayload().getExpiration()",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/demo/web/AuthController.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/demo/web/AuthenticationRequest.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Migrate the validation annotation import from the legacy javax package to the Jakarta EE namespace required by Spring Boot 3.x and JDK 21.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/demo/web/CommentForm.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Migrate validation annotations from the legacy javax.validation package to the Jakarta EE 9+ jakarta.validation namespace required by Spring Boot 3.x and JDK 21.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/demo/web/PostController.java": [
+      {
+        "kind": "import_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/demo/web/PostForm.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation import with jakarta.validation to align with Jakarta EE 9+ namespace requirements in Spring Boot 3.x.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/demo/web/RestExceptionHandler.java": [
+      {
+        "kind": "switch_exception_handler_type",
+        "general_idea": "Change from WebFlux WebExceptionHandler to MVC-style RestControllerAdvice to align with the new exception handling strategy.",
+        "human_impl": "@RestControllerAdvice public class RestExceptionHandler extends ResponseEntityExceptionHandler",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/example/demo/web/UpdateStatusRequest.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation import with jakarta.validation to align with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+diff --git a/src/main/resources/application.properties b/src/main/resources/application.properties
+index e2de74e..2ff3657 100644
+--- a/src/main/resources/application.properties
++++ b/src/main/resources/application.properties
+@@ -4,3 +4,9 @@ spring.datasource.password=rootadmin
+ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+ spring.jpa.hibernate.ddl-auto=update
+ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
++spring.mail.host=smtp.gmail.com
++spring.mail.port=587
++spring.mail.username=krisdrewsimeon@gmail.com
++spring.mail.password=lnic dfcj pqqt evgo
++spring.mail.properties.mail.smtp.auth=true
++spring.mail.properties.mail.smtp.starttls.enable=true
+\ No newline at end of file

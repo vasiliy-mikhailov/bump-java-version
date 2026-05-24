@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "fractalshot/XmlSplit",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "ff912c1410e030351c2496ac2998c4d6173a305c",
+    "sha_to": "6716e626b623d984aeda7e0150affa624cd97c69"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Update Maven compiler configuration to target Java 21 using the modern 'release' flag instead of separate source/target properties.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

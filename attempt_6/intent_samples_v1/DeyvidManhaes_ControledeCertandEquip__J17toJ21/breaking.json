@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "repo": "DeyvidManhaes/ControledeCertandEquip",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "db2a4ec4f7d9f272382926f6c9702607ef0bf42c",
+    "sha_to": "a2c3fb32e3ef5ae037d14a893dcc49fde2041e59"
+  },
+  "by_file": {
+    "src/main/java/com/edu/controle/certificacao/model/Cliente.java": [
+      {
+        "kind": "switch_id_type_to_uuid",
+        "general_idea": "Changed the primary key from Long (auto-increment) to UUID to support distributed or non-sequential identifiers.",
+        "human_impl": "private UUID id; @GeneratedValue(strategy = GenerationType.UUID)",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/edu/controle/certificacao/repository/ClienteRepository.java": [
+      {
+        "kind": "change_primary_key_type",
+        "general_idea": "Changed the repository's generic type parameter from Long to UUID to align with the entity's primary key type.",
+        "human_impl": "extends JpaRepository<Cliente, UUID>",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade Spring Boot parent version from 3.2.5 to 3.3.5 to support Java 21 and access newer features.",
+        "human_impl": "<version>3.3.5</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

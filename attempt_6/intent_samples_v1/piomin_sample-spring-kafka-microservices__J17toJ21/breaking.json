@@ -1,0 +1,107 @@
+{
+  "meta": {
+    "repo": "piomin/sample-spring-kafka-microservices",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "0ff3494bb8bece10609c418f7bab09e87c1c4d2a",
+    "sha_to": "6dfadc736c9432bbb0e436127d8f8d69bbe98fed"
+  },
+  "by_file": {
+    "payment-service/src/main/java/pl/piomin/payment/PaymentApp.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.annotation imports with jakarta.annotation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.annotation.PostConstruct; // replaced javax.annotation.PostConstruct",
+        "bucket": "breaking"
+      }
+    ],
+    "payment-service/src/main/java/pl/piomin/payment/domain/Customer.java": [
+      {
+        "kind": "javax_to_jakarta_namespace_migration",
+        "general_idea": "Migrate JPA annotations from javax.persistence to jakarta.persistence to comply with Jakarta EE 9+ standards required by Spring Boot 3 and Java 21.",
+        "human_impl": "import jakarta.persistence.Entity;",
+        "bucket": "breaking"
+      }
+    ],
+    "stock-service/src/main/java/pl/piomin/stock/StockApp.java": [
+      {
+        "kind": "replace_javax_with_jakarta",
+        "general_idea": "Replace javax.annotation.PostConstruct with jakarta.annotation.PostConstruct to align with Jakarta EE namespace required by Spring Boot 3.x and Java 21.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      }
+    ],
+    "stock-service/src/main/java/pl/piomin/stock/domain/Product.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.persistence imports with jakarta.persistence to align with Jakarta EE 9+ standards required by Spring Boot 3 and Java 21.",
+        "human_impl": "import jakarta.persistence.Entity;",
+        "bucket": "breaking"
+      }
+    ],
+    "base-domain/pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Update Maven compiler source and target properties from Java 17 to Java 21 to ensure the project compiles for the new JDK version.",
+        "human_impl": "<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      }
+    ],
+    "order-service/pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot starter parent from 2.6.2 to 3.1.4 to align with Java 21 and modern Spring ecosystem.",
+        "human_impl": "<version>3.1.4</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the Maven Java version property from 17 to 21 to target the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_springdoc_version",
+        "general_idea": "Upgrade springdoc-openapi-ui to 1.7.0 to ensure compatibility with Spring Boot 3.",
+        "human_impl": "<version>1.7.0</version>",
+        "bucket": "breaking"
+      }
+    ],
+    "payment-service/pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent from 2.6.2 to 3.1.4 to align with Java 21 and modern Spring ecosystem.",
+        "human_impl": "<version>3.1.4</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_21",
+        "general_idea": "Configure the project to compile and run with Java 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "set_java_version",
+        "general_idea": "Explicitly set the Java version property to 21 to align with the target JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "stock-service/pom.xml": [
+      {
+        "kind": "bump_parent_version",
+        "general_idea": "Upgrade Spring Boot parent from 2.6.2 to 3.1.4 to align with Java 21 and modern Spring ecosystem.",
+        "human_impl": "<version>3.1.4</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the project's target Java version property from 17 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

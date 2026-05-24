@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "JStec0312/Component_Programing",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "314423089e5054dfd7e80f89ae68fa9282ab1cde",
+    "sha_to": "54c705235bd35d99e62ccc05ce1506afd05e7744"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_jdk_target",
+        "general_idea": "Migrate the project compilation target from Java 11 to Java 21 using the modern release flag.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

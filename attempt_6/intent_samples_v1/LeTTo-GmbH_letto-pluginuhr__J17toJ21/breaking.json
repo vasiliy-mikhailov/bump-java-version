@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "LeTTo-GmbH/letto-pluginuhr",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "91ed3870ab7c9024ce602910177eab4e74459324",
+    "sha_to": "d1035e80f90a4ea799fa501869e20316b2b30113"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update Maven compiler source and target properties from Java 17 to Java 21 to align with the new JDK version.",
+        "human_impl": "<java.version>21</java.version>\n<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+diff --git a/src/main/java/com/fractalshot/xmlsplit/XmlSplit.java b/src/main/java/com/fractalshot/xmlsplit/XmlSplit.java
+index 01afe3b..9cfb4ea 100644
+--- a/src/main/java/com/fractalshot/xmlsplit/XmlSplit.java
++++ b/src/main/java/com/fractalshot/xmlsplit/XmlSplit.java
+@@ -3,24 +3,16 @@ package com.fractalshot.xmlsplit;
+ import org.apache.commons.cli.*;
+ 
+ import java.io.IOException;
+-import java.text.SimpleDateFormat;
+-import java.util.Date;
+ 
+ public class XmlSplit {
+ 
+     public static void main(String[] args) throws IOException, Exception {
+-    	String license = "2025-12-31";
+-    	System.out.println("License expires after: " + license);
+-    	if (new SimpleDateFormat("yyyy-MM-dd").parse(license).before(new Date())) {
+-        	System.out.println("License expired");
+-        	return;
+-    	}
+-
+     	CommandLine cmd;
+ 		try {
+ 	    	Options options = new Options();
+ 			options.addOption(Option.builder("i").hasArg().desc("input file").required().build());
+ 			options.addOption(Option.builder("size").hasArg().desc("split size").required().build());
++			options.addOption(Option.builder("o").hasArg().desc("output directory").build());
+ 			options.addOption(Option.builder("depth").hasArg().desc("split depth").build());
+ 			options.addOption(Option.builder("header").hasArg().desc("elements in header").build());
+ 			options.addOption(Option.builder("stopat").hasArg().desc("stop at entity").build());

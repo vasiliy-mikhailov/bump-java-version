@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "66910sheremet/moex-john",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "20a76d9c061aa04e6a33ad74875f512b3bd440c2",
+    "sha_to": "a8489002d189b0d61c22190c973fc509306321f7"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_jdk_version",
+        "general_idea": "Update Maven compiler source and target properties from Java 11 to Java 21.",
+        "human_impl": "<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

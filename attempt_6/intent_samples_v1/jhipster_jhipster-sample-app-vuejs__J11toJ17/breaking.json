@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-vuejs",
+    "stage": "J11->J17",
+    "family": "hibernate-5",
+    "sha_from": "495007bc5d03fca54ff8a2482fd8fcaa06396dab",
+    "sha_to": "056bf07720f166c89e33a5cff41a59ee40ad5469"
+  },
+  "by_file": {
+    "src/main/java/io/github/jhipster/sample/GeneratedByJHipster.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.annotation.Generated with jakarta.annotation.Generated to align with Jakarta EE namespace requirements in newer JHipster versions.",
+        "human_impl": "import jakarta.annotation.Generated;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/JhipsterSampleApplicationVueApp.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.annotation.PostConstruct with jakarta.annotation.PostConstruct to align with Jakarta EE namespace requirements in newer Spring Boot versions.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace the legacy javax-based Hibernate5Module with the Jakarta EE compatible Hibernate5JakartaModule to support the namespace shift in Spring Boot 3.",
+        "human_impl": "import com.fasterxml.jackson.datatype.hibernate5.jakarta.Hibernate5JakartaModule; ... return new Hibernate5JakartaModule();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove the ProblemModule bean and its import, likely due to the removal of the zalando-problem library or a change in how problems are handled in the newer framework version.",
+        "human_impl": "remove import org.zalando.problem.ProblemModule; remove @Bean public ProblemModule problemModule()",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove the ConstraintViolationProblemModule bean and its import, consistent with the removal of the zalando-problem library dependencies.",
+        "human_impl": "remove import org.zalando.problem.violations.ConstraintViolationProblemModule; remove @Bean public ConstraintViolationProblemModule constraintViolationProblemModule()",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LiquibaseConfiguration.java": [
+      {
+        "kind": "api_method_replacement",
+        "general_idea": "Replace deprecated Spring Boot Liquibase setter with the new label filter API.",
+        "human_impl": "liquibase.setLabelFilter(liquibaseProperties.getLabelFilter());",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java": [
+      {
+        "kind": "migrate_security_config_class",
+        "general_idea": "Replace deprecated WebSecurityConfigurerAdapter with a standalone SecurityFilterChain bean to comply with Spring Security 5.7+ requirements.",
+        "human_impl": "public class SecurityConfiguration { @Bean public SecurityFilterChain filterChain(HttpSecurity http) ... }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_method_security_annotation",
+        "general_idea": "Replace deprecated @EnableGlobalMethodSecurity with @EnableMethodSecurity to support the new method security architecture in Spring Security 5.7+.",
+        "human_impl": "@EnableMethodSecurity(securedEnabled = true)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_authorize_syntax",
+        "general_idea": "Replace deprecated antMatchers in authorizeRequests with requestMatchers in authorizeHttpRequests to align with the new matcher API.",
+        "human_impl": ".authorizeHttpRequests(authz -> authz.requestMatchers(...))",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_headers_syntax",
+        "general_idea": "Update header configuration to use the new lambda-based DSL for content security policy, frame options, and permissions policy.",
+        "human_impl": ".headers(headers -> headers.contentSecurityPolicy(...).frameOptions(...).permissionsPolicy(...))",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_exception_handling",
+        "general_idea": "Replace custom problem support entry points with standard OAuth2 BearerTokenAuthenticationEntryPoint and BearerTokenAccessDeniedHandler.",
+        "human_impl": ".exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()).accessDeniedHandler(new BearerTokenAccessDeniedHandler()))",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_oauth2_resource_server",
+        "general_idea": "Enable OAuth2 Resource Server JWT configuration to replace the custom JWT filter chain.",
+        "human_impl": ".oauth2ResourceServer(oauth2 -> oauth2.jwt())",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_cors_filter",
+        "general_idea": "Replace the manual CorsFilter injection with a SpaWebFilter added after BasicAuthenticationFilter.",
+        "human_impl": ".addFilterAfter(new SpaWebFilter(), BasicAuthenticationFilter.class)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_csrf_config",
+        "general_idea": "Update CSRF configuration to use the new ignoringRequestMatchers syntax within the lambda DSL.",
+        "human_impl": ".csrf(csrf -> csrf.ignoringRequestMatchers(\"/h2-console/**\").disable())",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/WebConfigurer.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.servlet imports with jakarta.servlet to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.servlet.*; // replaced import javax.servlet.*;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

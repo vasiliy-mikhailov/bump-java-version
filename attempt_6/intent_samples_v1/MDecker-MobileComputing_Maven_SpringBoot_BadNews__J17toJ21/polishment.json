@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "repo": "MDecker-MobileComputing/Maven_SpringBoot_BadNews",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "eac48b9ac9d93b0771369157a3578aa97dd85c16",
+    "sha_to": "aaf01b63c899a7ea946b4b8b548f65451a55a428"
+  },
+  "by_file": {
+    "src/main/java/de/eldecker/dhbw/spring/badnews/BadNewsApplication.java": [
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Added a JavaDoc comment to the main application class to describe its purpose as the entry point.",
+        "human_impl": "/**\n * Klasse mit Einstiegsmethode, kann im Debugger ausgef\u00fchrt werden.\n */",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_whitespace",
+        "general_idea": "Adjusted whitespace and indentation in the main method signature and body for consistency.",
+        "human_impl": "public static void main( String[] args ) {\n    \n    SpringApplication.run( BadNewsApplication.class, args );",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_spring_boot_version",
+        "general_idea": "Upgrade the Spring Boot parent POM to version 3.4.5 to align with the Java 21 migration.",
+        "human_impl": "<version>3.4.5</version>",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "add_log_ignore",
+        "general_idea": "Add *.log to .gitignore to exclude log files from version control.",
+        "human_impl": "*.log",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_gz_ignore",
+        "general_idea": "Add *.gz to .gitignore to exclude compressed files from version control.",
+        "human_impl": "*.gz",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_db_ignore",
+        "general_idea": "Add *.db to .gitignore to exclude database files from version control.",
+        "human_impl": "*.db",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "add_db_config",
+        "general_idea": "Added H2 database connection properties including URL, driver, and credentials.",
+        "human_impl": "spring.datasource.url=jdbc:h2:file:./db/badnews\nspring.datasource.driverClassName=org.h2.Driver\nspring.datasource.username=sa\nspring.datasource.password=d4tenb4nk",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jpa_dialect",
+        "general_idea": "Configured Hibernate dialect for H2 database compatibility.",
+        "human_impl": "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jpa_ddl_auto",
+        "general_idea": "Set JPA Hibernate DDL auto mode to update schema on startup.",
+        "human_impl": "spring.jpa.hibernate.ddl-auto=update",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sql_formatting",
+        "general_idea": "Enabled SQL formatting for better readability in logs.",
+        "human_impl": "spring.jpa.properties.hibernate.format_sql=true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_h2_console",
+        "general_idea": "Enabled the H2 web console for database administration.",
+        "human_impl": "spring.h2.console.enabled=TRUE",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_logging_config",
+        "general_idea": "Configured file-based logging and log levels for the application package.",
+        "human_impl": "logging.file.name=logdatei.log\nlogging.level.de.eldecker=INFO",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_thymeleaf_config",
+        "general_idea": "Configured Thymeleaf template engine prefix, suffix, and cache settings.",
+        "human_impl": "spring.thymeleaf.prefix=classpath:/templates/\nspring.thymeleaf.suffix=.html\nspring.thymeleaf.cache=false",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "repo": "debezium/debezium-examples",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "11fce4356dd10ff254c6c8beaaea1c214c8bee5a",
+    "sha_to": "8a3ddb929cd76b90f356884ed2b05ad7befb162f"
+  },
+  "by_file": {
+    "kstreams/poc-ddd-aggregates/pom.xml": [
+      {
+        "kind": "upgrade_maven_compiler_plugin",
+        "general_idea": "Upgrade the Maven compiler plugin to a version compatible with Java 11.",
+        "human_impl": "<mvn.compiler.version>3.8.1</mvn.compiler.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "tutorial/register-mongodb.json": [
+      {
+        "kind": "rename_config_property",
+        "general_idea": "Replace the deprecated 'mongodb.name' property with the standard 'topic.prefix' property required by Debezium 2.0.",
+        "human_impl": "\"mongodb.name\" : \"dbserver1\" -> \"topic.prefix\" : \"dbserver1\"",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_config_property",
+        "general_idea": "Replace the deprecated 'database.whitelist' property with the new 'database.include.list' property required by Debezium 2.0.",
+        "human_impl": "\"database.whitelist\" : \"inventory\" -> \"database.include.list\" : \"inventory\"",
+        "bucket": "breaking"
+      }
+    ],
+    "tutorial/register-mysql.json": [
+      {
+        "kind": "rename_config_property",
+        "general_idea": "Rename 'database.server.name' to 'topic.prefix' to align with Debezium 2.0 configuration naming conventions.",
+        "human_impl": "\"database.server.name\": \"dbserver1\" -> \"topic.prefix\": \"dbserver1\"",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_config_property",
+        "general_idea": "Rename 'database.whitelist' to 'database.include.list' to replace the deprecated whitelist property in Debezium 2.0.",
+        "human_impl": "\"database.whitelist\": \"inventory\" -> \"database.include.list\": \"inventory\"",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_config_property",
+        "general_idea": "Rename 'database.history.kafka.bootstrap.servers' to 'schema.history.internal.kafka.bootstrap.servers' to match the new internal schema history property name in Debezium 2.0.",
+        "human_impl": "\"database.history.kafka.bootstrap.servers\" -> \"schema.history.internal.kafka.bootstrap.servers\"",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_config_property",
+        "general_idea": "Rename 'database.history.kafka.topic' to 'schema.history.internal.kafka.topic' to match the new internal schema history property name in Debezium 2.0.",
+        "human_impl": "\"database.history.kafka.topic\" -> \"schema.history.internal.kafka.topic\"",
+        "bucket": "breaking"
+      }
+    ],
+    "tutorial/register-postgres.json": [
+      {
+        "kind": "rename_config_key",
+        "general_idea": "Rename the server name configuration key to the new Debezium 2.0 standard.",
+        "human_impl": "\"database.server.name\": \"dbserver1\" -> \"topic.prefix\": \"dbserver1\"",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_config_key",
+        "general_idea": "Rename the database whitelist configuration key to the new Debezium 2.0 standard.",
+        "human_impl": "\"database.whitelist\": \"inventory\" -> \"schema.include.list\": \"inventory\"",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

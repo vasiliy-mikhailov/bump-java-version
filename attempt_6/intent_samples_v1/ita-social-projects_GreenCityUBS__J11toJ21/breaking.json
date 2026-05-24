@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "repo": "ita-social-projects/GreenCityUBS",
+    "stage": "J11->J21",
+    "family": "spring-boot-2",
+    "sha_from": "569e066f4ab1fe238d372729b4471aca7d485155",
+    "sha_to": "2766c4b0de538d1317fe6552399d22ddb37bf3c6"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent from 2.1.7 to 3.2.2 to support JDK 21 and Jakarta EE 9+.",
+        "human_impl": "<parent>...<version>3.2.2</version>...</parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_21",
+        "general_idea": "Configure Maven compiler and project properties to target JDK 21.",
+        "human_impl": "<java.version>21</java.version>\n<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jakarta_servlet_api",
+        "general_idea": "Add explicit dependency for Jakarta Servlet API 6.0.0 required by Spring Boot 3.",
+        "human_impl": "<jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_jjwt",
+        "general_idea": "Upgrade JJWT library to 0.12.3 which supports Jakarta EE namespaces.",
+        "human_impl": "<jjwt.version>0.12.3</jjwt.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_spring_security",
+        "general_idea": "Upgrade Spring Security to 6.1.5 aligned with Spring Boot 3.",
+        "human_impl": "<spring-security.version>6.1.5</spring-security.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

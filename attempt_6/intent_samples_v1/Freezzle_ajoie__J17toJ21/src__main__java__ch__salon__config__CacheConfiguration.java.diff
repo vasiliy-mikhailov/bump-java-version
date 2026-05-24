@@ -1,0 +1,63 @@
+diff --git a/src/main/java/ch/salon/config/CacheConfiguration.java b/src/main/java/ch/salon/config/CacheConfiguration.java
+index 3cf01d0..c215e39 100644
+--- a/src/main/java/ch/salon/config/CacheConfiguration.java
++++ b/src/main/java/ch/salon/config/CacheConfiguration.java
+@@ -1,7 +1,8 @@
+ package ch.salon.config;
+ 
+-import java.time.Duration;
+-import org.ehcache.config.builders.*;
++import org.ehcache.config.builders.CacheConfigurationBuilder;
++import org.ehcache.config.builders.ExpiryPolicyBuilder;
++import org.ehcache.config.builders.ResourcePoolsBuilder;
+ import org.ehcache.jsr107.Eh107Configuration;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.autoconfigure.cache.JCacheManagerCustomizer;
+@@ -9,30 +10,29 @@ import org.springframework.boot.info.BuildProperties;
+ import org.springframework.boot.info.GitProperties;
+ import org.springframework.cache.annotation.EnableCaching;
+ import org.springframework.cache.interceptor.KeyGenerator;
+-import org.springframework.context.annotation.*;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
+ import tech.jhipster.config.JHipsterProperties;
+ import tech.jhipster.config.cache.PrefixedKeyGenerator;
+ 
++import java.time.Duration;
++
+ @Configuration
+ @EnableCaching
+ public class CacheConfiguration {
+ 
++    private final javax.cache.configuration.Configuration<Object, Object> jcacheConfiguration;
+     private GitProperties gitProperties;
+     private BuildProperties buildProperties;
+-    private final javax.cache.configuration.Configuration<Object, Object> jcacheConfiguration;
+ 
+     public CacheConfiguration(JHipsterProperties jHipsterProperties) {
+         JHipsterProperties.Cache.Ehcache ehcache = jHipsterProperties.getCache().getEhcache();
+ 
+         jcacheConfiguration = Eh107Configuration.fromEhcacheCacheConfiguration(
+-            CacheConfigurationBuilder.newCacheConfigurationBuilder(
+-                Object.class,
+-                Object.class,
+-                ResourcePoolsBuilder.heap(ehcache.getMaxEntries())
+-            )
+-                .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(ehcache.getTimeToLiveSeconds())))
+-                .build()
+-        );
++                CacheConfigurationBuilder.newCacheConfigurationBuilder(Object.class, Object.class,
++                                                 ResourcePoolsBuilder.heap(ehcache.getMaxEntries())).withExpiry(
++                                                 ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(ehcache.getTimeToLiveSeconds())))
++                                         .build());
+     }
+ 
+     @Bean
+@@ -40,7 +40,6 @@ public class CacheConfiguration {
+         return cm -> {
+             createCache(cm, ch.salon.repository.UserRepository.USERS_BY_LOGIN_CACHE);
+             createCache(cm, ch.salon.repository.UserRepository.USERS_BY_EMAIL_CACHE);
+-            createCache(cm, ch.salon.domain.Authority.class.getName());
+             // jhipster-needle-ehcache-add-entry
+         };
+     }

@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "4812b78e6601fde23afb51584faef2811c7990a6",
+    "sha_to": "3991c9ca29788c033b49d2a21efb07ccbcd90e96"
+  },
+  "by_file": {
+    "src/main/java/io/github/jhipster/sample/JhipsterSampleApplicationApp.java": [
+      {
+        "kind": "update_liquibase_import",
+        "general_idea": "Update import path for LiquibaseProperties to match the new package structure in Spring Boot 3.x.",
+        "human_impl": "import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/CRLFLogConverter.java": [
+      {
+        "kind": "api_migration_marker_list",
+        "general_idea": "Replace deprecated single marker access with the new marker list API to comply with SLF4J 2.x requirements in Java 21 environments.",
+        "human_impl": "List<Marker> markers = event.getMarkerList(); if ((markers != null && !markers.isEmpty() && markers.get(0).contains(CRLF_SAFE_MARKER)) ...",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/CacheConfiguration.java": [
+      {
+        "kind": "update_import_paths",
+        "general_idea": "Update Spring Boot import statements to reflect package restructuring in newer Spring Boot versions.",
+        "human_impl": "import org.springframework.boot.cache.autoconfigure.JCacheManagerCustomizer;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LiquibaseConfiguration.java": [
+      {
+        "kind": "update_import_paths",
+        "general_idea": "Update Spring Boot import statements to reflect package restructuring in newer Spring Boot versions.",
+        "human_impl": "import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_profile_check_api",
+        "general_idea": "Replace deprecated acceptsProfiles with matchesProfiles for Spring Environment profile checking.",
+        "human_impl": "if (env.matchesProfiles(JHipsterConstants.SPRING_PROFILE_NO_LIQUIBASE))",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LoggingConfiguration.java": [
+      {
+        "kind": "replace_jackson_imports",
+        "general_idea": "Migrate Jackson imports from com.fasterxml.jackson to tools.jackson to align with the new dependency structure.",
+        "human_impl": "import tools.jackson.core.JacksonException;\nimport tools.jackson.databind.ObjectMapper;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_exception_type",
+        "general_idea": "Update the method signature to throw JacksonException instead of JsonProcessingException to match the new Jackson API.",
+        "human_impl": ") throws JacksonException {",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

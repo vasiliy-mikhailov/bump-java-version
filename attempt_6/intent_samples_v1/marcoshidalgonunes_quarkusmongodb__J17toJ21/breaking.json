@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "marcoshidalgonunes/quarkusmongodb",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "27eac7a65d282c956cf202ef9fc2e0bb834fda12",
+    "sha_to": "40281ce49188ac9b38e5dd3d7ca3ac15789ae316"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Updated the Maven compiler release property to target Java 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "repo": "mehmandarov/5-features-talk-demo",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "cf30af8ac3e814eba1661bafd0157805bca5d41d",
+    "sha_to": "2ac2413958cc3e478fc50ed1e61fad05e919c1eb"
+  },
+  "by_file": {
+    "demo-backendservice1/src/main/java/DemoApp.java": [
+      {
+        "kind": "namespace_migration",
+        "general_idea": "Migrate Java EE annotations from javax to Jakarta EE namespace to comply with Jakarta EE 9+ standards required by newer Quarkus versions.",
+        "human_impl": "import jakarta.annotation.PreDestroy; import jakarta.ws.rs.GET;",
+        "bucket": "breaking"
+      }
+    ],
+    "demo-service1/src/main/java/DemoApp.java": [
+      {
+        "kind": "namespace_migration",
+        "general_idea": "Migrate Java EE annotations from javax.* to jakarta.* to comply with Jakarta EE 9+ standards required by the newer framework version.",
+        "human_impl": "import jakarta.annotation.PreDestroy; import jakarta.inject.Inject; import jakarta.ws.rs.GET;",
+        "bucket": "breaking"
+      }
+    ],
+    "demo-service1/src/main/java/SomeWebServiceInterface.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Migrate JAX-RS annotations from the javax.ws.rs package to the jakarta.ws.rs package to comply with Jakarta EE 9+ namespace requirements.",
+        "human_impl": "import jakarta.ws.rs.GET;\nimport jakarta.ws.rs.Path;\nimport jakarta.ws.rs.Produces;\nimport jakarta.ws.rs.core.MediaType;",
+        "bucket": "breaking"
+      }
+    ],
+    "demo-backendservice1/pom.xml": [
+      {
+        "kind": "update_maven_compiler_release",
+        "general_idea": "Update the Maven compiler release property to target Java 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_quarkus_platform_version",
+        "general_idea": "Upgrade the Quarkus platform BOM to version 3.5.3 to support Jakarta EE and Java 21.",
+        "human_impl": "<quarkus.platform.version>3.5.3</quarkus.platform.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_quarkus_microprofile_version",
+        "general_idea": "Upgrade the Quarkus MicroProfile extension to version 3.0.0.Final.",
+        "human_impl": "<version>3.0.0.Final</version>",
+        "bucket": "breaking"
+      }
+    ],
+    "demo-service1/pom.xml": [
+      {
+        "kind": "update_maven_compiler_release",
+        "general_idea": "Update the Maven compiler release property to target Java 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_quarkus_platform_version",
+        "general_idea": "Upgrade the Quarkus platform BOM to version 3.5.3 to support Java 21 and Jakarta EE.",
+        "human_impl": "<quarkus.platform.version>3.5.3</quarkus.platform.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_quarkus_microprofile_version",
+        "general_idea": "Upgrade the Quarkus MicroProfile extension to version 3.0.0.Final.",
+        "human_impl": "<version>3.0.0.Final</version>",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_jdk_version",
+        "general_idea": "Update Maven compiler source and target properties to Java 21 to align with the new JDK version.",
+        "human_impl": "<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.target>21</maven.compiler.target>",
+        "bucket": "breaking"
+      }
+    ],
+    "demo-backendservice1/Dockerfile": [
+      {
+        "kind": "update_build_base_image",
+        "general_idea": "Upgrade the Maven build stage base image to use Eclipse Temurin 21 and Maven 3.9.5.",
+        "human_impl": "FROM maven:3.9.5-eclipse-temurin-21 as maven",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_runtime_base_image",
+        "general_idea": "Upgrade the runtime stage base image to use UBI8 OpenJDK 21.",
+        "human_impl": "FROM registry.access.redhat.com/ubi8/openjdk-21:1.18-3",
+        "bucket": "breaking"
+      }
+    ],
+    "demo-service1/Dockerfile": [
+      {
+        "kind": "update_build_base_image",
+        "general_idea": "Upgrade the Maven build stage base image to use Eclipse Temurin 21 and Maven 3.9.5.",
+        "human_impl": "FROM maven:3.9.5-eclipse-temurin-21 as maven",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_runtime_base_image",
+        "general_idea": "Upgrade the runtime stage base image to use UBI8 OpenJDK 21.",
+        "human_impl": "FROM registry.access.redhat.com/ubi8/openjdk-21:1.18-3",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,85 @@
+diff --git a/src/main/java/org/flaad/dsm/client/model/SurveillanceStationInfo.java b/src/main/java/org/flaad/dsm/client/model/SurveillanceStationInfo.java
+index 6de6c9e..27c7a00 100644
+--- a/src/main/java/org/flaad/dsm/client/model/SurveillanceStationInfo.java
++++ b/src/main/java/org/flaad/dsm/client/model/SurveillanceStationInfo.java
+@@ -1,6 +1,5 @@
+ package org.flaad.dsm.client.model;
+ 
+-import com.fasterxml.jackson.annotation.JsonCreator;
+ import com.fasterxml.jackson.annotation.JsonProperty;
+ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+ import lombok.Getter;
+@@ -11,51 +10,27 @@ import lombok.NoArgsConstructor;
+ @JsonDeserialize
+ public class SurveillanceStationInfo {
+ 
+-    private Version version;
+-    private String path;
+-    private int customizedPortHttp;
+-    private int customizedPortHttps;
+-    private int cameraNumber;
+-    private int licenseNumber;
+-    private int maxCameraSupport;
+-    private String serial;
+-    private boolean isAdmin;
+-    private int userPriv;
+-    private boolean isLicenseEnough;
+-    private boolean allowSnapshot;
+-    private boolean allowManualRec;
+-    private boolean allowDeleteRec;
+-
+-    @JsonCreator
+-    public SurveillanceStationInfo(
+-            @JsonProperty("version") Version version,
+-            @JsonProperty("path") String path,
+-            @JsonProperty("customizedPortHttp") int customizedPortHttp,
+-            @JsonProperty("customizedPortHttps") int customizedPortHttps,
+-            @JsonProperty("cameraNumber") int cameraNumber,
+-            @JsonProperty("licenseNumber") int licenseNumber,
+-            @JsonProperty("maxCameraSupport") int maxCameraSupport,
+-            @JsonProperty("serial") String serial,
+-            @JsonProperty("isAdmin") boolean isAdmin,
+-            @JsonProperty("userPriv") int userPriv,
+-            @JsonProperty("isLicenseEnough") boolean isLicenseEnough,
+-            @JsonProperty("allowSnapshot") boolean allowSnapshot,
+-            @JsonProperty("allowManualRec") boolean allowManualRec,
+-            @JsonProperty("allowDeleteRec") boolean allowDeleteRec) {
+-        this.version = version;
+-        this.path = path;
+-        this.customizedPortHttp = customizedPortHttp;
+-        this.customizedPortHttps = customizedPortHttps;
+-        this.cameraNumber = cameraNumber;
+-        this.licenseNumber = licenseNumber;
+-        this.maxCameraSupport = maxCameraSupport;
+-        this.serial = serial;
+-        this.isAdmin = isAdmin;
+-        this.userPriv = userPriv;
+-        this.isLicenseEnough = isLicenseEnough;
+-        this.allowSnapshot = allowSnapshot;
+-        this.allowManualRec = allowManualRec;
+-        this.allowDeleteRec = allowDeleteRec;
+-    }
++    int cameraNumber;
++    @JsonProperty("customizedPortHttp")
++    int httpPort;
++    @JsonProperty("customizedPortHttps")
++    int httpsPort;
++    boolean enableVideoRelay;
++    String hostname;
++    int isLicenseEnough;
++    @JsonProperty("liscenseNumber")
++    int licenseNumber;
++    int maxCameraSupport;
++    String path;
++    String pluginHelperVersion;
++    String productName;
++    String serial;
++    String timezone;
++    String timezoneTZDB;
++    int uid;
++    @JsonProperty("userPriv")
++    int userPrivilege;
++    String webPluginVersion;
++    Version version;
+ 
+ }

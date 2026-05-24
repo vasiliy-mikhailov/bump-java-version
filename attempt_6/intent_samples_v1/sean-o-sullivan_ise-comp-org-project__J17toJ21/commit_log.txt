@@ -1,0 +1,5 @@
+49b78f4 working stuff
+84a2586 sys info
+9989866 CPU info
+1a5cdd5 added network info
+597db37 commit batteryInfo

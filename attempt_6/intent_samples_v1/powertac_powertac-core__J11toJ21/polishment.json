@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "repo": "powertac/powertac-core",
+    "stage": "J11->J21",
+    "family": "junit4-mockito",
+    "sha_from": "48ac8a69bb26df39e69fd79fefef3309af8a9a0f",
+    "sha_to": "68f20ab1c4ba99aa8c886bee12f11b3f65eafec2"
+  },
+  "by_file": {
+    "broker-core/src/main/java/org/powertac/samplebroker/core/BrokerMessageReceiver.java": [
+      {
+        "kind": "pattern_matching_instanceof",
+        "general_idea": "Refactor instanceof check to use Java 16+ pattern matching to eliminate explicit casting.",
+        "human_impl": "if (message instanceof TextMessage textMessage) {",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "unused_import_removal",
+        "general_idea": "Remove unused import for Initializable interface to clean up code.",
+        "human_impl": "-import org.powertac.samplebroker.interfaces.Initializable;",
+        "bucket": "polishment"
+      }
+    ],
+    "broker-core/src/main/java/org/powertac/samplebroker/core/BrokerPropertiesService.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove unused import for java.io.InputStreamReader to clean up the code.",
+        "human_impl": "Removed 'import java.io.InputStreamReader;'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove unused import for org.apache.commons.configuration2.XMLConfiguration to clean up the code.",
+        "human_impl": "Removed 'import org.apache.commons.configuration2.XMLConfiguration;'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "adjust_log_level",
+        "general_idea": "Change log level from debug to info for user config loading to improve visibility.",
+        "human_impl": "Changed 'log.debug' to 'log.info' for setUserConfig message",
+        "bucket": "polishment"
+      }
+    ],
+    "broker-core/src/main/java/org/powertac/samplebroker/core/BrokerRunner.java": [
+      {
+        "kind": "fix_logger_initialization",
+        "general_idea": "Pass the class reference to LogManager.getLogger to ensure correct logger naming and MDC context.",
+        "human_impl": "LogManager.getLogger(BrokerRunner.class)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_context_access",
+        "general_idea": "Make the Spring ApplicationContext static and provide a getter to allow external access and simplify lifecycle management.",
+        "human_impl": "private static AbstractApplicationContext context; public static AbstractApplicationContext getApplicationContext()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_cli_option",
+        "general_idea": "Add a new command-line option to allow specifying a suffix for log files.",
+        "human_impl": "parser.accepts(\"log-suffix\").withRequiredArg();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "implement_log_suffix_feature",
+        "general_idea": "Implement the logic to read the log-suffix option and append it to the generated log file names.",
+        "human_impl": "System.setProperty(\"logfile\", \"log/broker\" + logSuffix + index + \".trace\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_context_refresh",
+        "general_idea": "Simplify the application context refresh logic by relying on the new static getter and removing redundant null checks.",
+        "human_impl": "getApplicationContext(); context.close(); context.refresh();",
+        "bucket": "polishment"
+      }
+    ],
+    "broker-core/src/main/java/org/powertac/samplebroker/core/JmsManagementService.java": [
+      {
+        "kind": "pattern_match_refactor",
+        "general_idea": "Replace traditional instanceof checks with pattern matching instanceof to simplify type casting logic.",
+        "human_impl": "if (connectionFactory instanceof PooledConnectionFactory pooledConnectionFactory) {",
+        "bucket": "polishment"
+      }
+    ],
+    "broker-core/src/main/java/org/powertac/samplebroker/core/PowerTacBroker.java": [
+      {
+        "kind": "reorder_repo_initialization",
+        "general_idea": "Move DomainRepo recycling logic to occur after time service initialization to ensure correct state during bootstrap.",
+        "human_impl": "timeService.init(...); ... List<DomainRepo> repos = ... repo.recycle();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_comment",
+        "general_idea": "Add a comment questioning the order of property addition.",
+        "human_impl": "propertiesService.addProperties(cli);  // are these in the correct order?",
+        "bucket": "polishment"
+      }
+    ],
+    "broker-core/src/test/java/org/powertac/samplebroker/SampleBrokerTest.java": [
+      {
+        "kind": "simplify_current_time_retrieval",
+        "general_idea": "Replace verbose Joda DateTime creation for current time with concise Java Instant.now().toEpochMilli().",
+        "human_impl": "Instant.now().toEpochMilli()",
+        "bucket": "polishment"
+      }
+    ],
+    "common/src/main/java/org/powertac/common/BalancingTransaction.java": [
+      {
+        "kind": "remove_deprecated_method",
+        "general_idea": "Remove a deprecated getter method that was previously marked for removal.",
+        "human_impl": "Commented out the @Deprecated getQuantity() method and its body.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

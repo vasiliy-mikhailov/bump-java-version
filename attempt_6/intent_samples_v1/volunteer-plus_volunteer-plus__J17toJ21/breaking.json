@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "repo": "volunteer-plus/volunteer-plus",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "09e4df102090ed9c61fc411ed9513a66e56e2c9d",
+    "sha_to": "d3c40e233afce02123914537e19d2cd071423d0d"
+  },
+  "by_file": {
+    "backend/pom.xml": [
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the project's target Java version property from 17 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "backend/Dockerfile": [
+      {
+        "kind": "update_build_base_image",
+        "general_idea": "Update the Maven builder stage to use OpenJDK 21 to compile the application with the new JDK version.",
+        "human_impl": "FROM maven:3.8.4-openjdk-21 AS builder",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_runtime_base_image",
+        "general_idea": "Update the runtime stage to use OpenJDK 21 to ensure the application runs on the target JDK version.",
+        "human_impl": "FROM openjdk:21-jdk-slim",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

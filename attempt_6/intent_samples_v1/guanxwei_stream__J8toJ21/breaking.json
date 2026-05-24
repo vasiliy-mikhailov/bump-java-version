@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "repo": "guanxwei/stream",
+    "stage": "J8->J21",
+    "family": "jakarta-ee-javax",
+    "sha_from": "a80b21f6ab85d6d43c76dac0e2eb93a8803dddfc",
+    "sha_to": "973e8c958f947c28f6fda744acf50429b3e1bf6e"
+  },
+  "by_file": {
+    "core/src/main/java/org/stream/core/component/Activity.java": [
+      {
+        "kind": "fix_syntax_error",
+        "general_idea": "Fix invalid Java syntax by removing semicolons after method bodies, which are not allowed in Java.",
+        "human_impl": "Removed trailing semicolons after 'getActivityName()' and 'getExecutionContext()' method blocks.",
+        "bucket": "breaking"
+      }
+    ],
+    "core/src/main/java/org/stream/core/component/AsyncActivity.java": [
+      {
+        "kind": "change_method_signature",
+        "general_idea": "Change resolveResource to return the Resource instead of void.",
+        "human_impl": "Changed return type from void to Resource and added return statement",
+        "bucket": "breaking"
+      }
+    ],
+    "core/src/main/java/org/stream/core/component/Graph.java": [
+      {
+        "kind": "remove_field",
+        "general_idea": "Remove the resourceType field as it is replaced by a more specific primaryResourceType.",
+        "human_impl": "Deleted 'private ResourceType resourceType;' field.",
+        "bucket": "breaking"
+      }
+    ],
+    "core/src/main/java/org/stream/core/execution/DefaultEngine.java": [
+      {
+        "kind": "refactor_api_signatures",
+        "general_idea": "Rename and restructure public execute methods to support starting from specific nodes and remove deprecated resource type parameters.",
+        "human_impl": "public ResourceTank executeFrom(final GraphContext graphContext, final String graphName, final String startNode, final boolean autoRecord)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_reboot_interruptible",
+        "general_idea": "Update reboot method signature to declare InterruptedException, allowing proper thread interruption handling.",
+        "human_impl": "public void reboot() throws InterruptedException",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

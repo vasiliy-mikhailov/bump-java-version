@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "repo": "ucsb-cs156/proj-dining",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "92b7a787955325335e289b9dba8181fcc1ebb2a5",
+    "sha_to": "877451cd2d7e3d920fe0f855a66353bc05737afb"
+  },
+  "by_file": {
+    "src/main/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoController.java": [
+      {
+        "kind": "refactor_controller_path",
+        "general_idea": "Moved the controller mapping from /api to /api/currentUser to align with the new endpoint structure.",
+        "human_impl": "@RequestMapping(\"/api/currentUser\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_security_authorization",
+        "general_idea": "Changed the authorization check from a custom SpEL expression to the standard hasRole method.",
+        "human_impl": "@PreAuthorize(\"hasRole('ROLE_USER')\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_return_type",
+        "general_idea": "Updated the endpoint to return a CurrentUser object instead of a User entity.",
+        "human_impl": "public CurrentUser getCurrentUser() { return super.getCurrentUser(); }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_endpoint_mapping",
+        "general_idea": "Adjusted the GET mapping to the root of the controller path since the controller path was updated.",
+        "human_impl": "@GetMapping(\"\")",
+        "bucket": "breaking"
+      }
+    ],
+    "src/test/java/edu/ucsb/cs156/kitchensink/ControllerTestCase.java": [
+      {
+        "kind": "rename_field_and_method",
+        "general_idea": "Rename the mock field and its associated method call to align with updated service interface naming conventions.",
+        "human_impl": "Changed field from 'currentUser' to 'currentUserService' and method call from 'get()' to 'getUser()'.",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_parent_version",
+        "general_idea": "Upgrade Spring Boot parent to 2.6.2 to align with Java 17 support requirements.",
+        "human_impl": "<version>2.6.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Configure the Maven compiler to target Java 17.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_dependency_version",
+        "general_idea": "Update spring-cloud-gateway-mvc to 3.1.0 for compatibility with the new Spring Boot version.",
+        "human_impl": "<version>3.1.0</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

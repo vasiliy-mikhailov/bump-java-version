@@ -1,0 +1,197 @@
+{
+  "meta": {
+    "repo": "indiana-university/lms-canvas-course-setup-wizard",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "635ae0b2defbc0d448536e2c745bbe8ef0a787fa",
+    "sha_to": "20ac1332aeb212ba7aa48bbf145ca7b100f17d20"
+  },
+  "by_file": {
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/Constants.java": [
+      {
+        "kind": "add_enum_constant",
+        "general_idea": "Add THEME option to MAIN_OPTION enum to support new theme selection feature.",
+        "human_impl": "HOMEPAGE,\n+        THEME",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_enum_constant",
+        "general_idea": "Add ALL_WITH_BLUEPRINT_SETTINGS option to CONTENT_OPTION enum to support blueprint settings in content selection.",
+        "human_impl": "ALL,\n+        ALL_WITH_BLUEPRINT_SETTINGS,",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/WebApplication.java": [
+      {
+        "kind": "add_startup_metrics",
+        "general_idea": "Configure Spring Boot application startup metrics with a buffer to capture performance data during initialization.",
+        "human_impl": "new BufferingApplicationStartup(STEP_CAPACITY)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/config/ApplicationConfig.java": [
+      {
+        "kind": "remove_cors_interceptor",
+        "general_idea": "Remove the custom CORS interceptor registration and its associated imports, likely because CORS is now handled by Spring Security or a global filter in the target environment.",
+        "human_impl": "Deleted the `addInterceptors` method and imports for `LmsCorsInterceptor`, `HttpMethod`, `InterceptorRegistry`, `ArrayList`, and `List`.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/config/SecurityConfig.java": [
+      {
+        "kind": "add_security_logging",
+        "general_idea": "Integrate custom REST security logging configuration into the HTTP security chain.",
+        "human_impl": "http.apply(new RestSecurityLoggingConfig());",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_cors_configuration",
+        "general_idea": "Explicitly enable CORS handling in the HTTP security configuration.",
+        "human_impl": "http.cors().and()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_object_post_processor",
+        "general_idea": "Apply a custom object post-processor to the authorization rules for enhanced security interception.",
+        "human_impl": ".withObjectPostProcessor(new LmsFilterSecurityInterceptorObjectPostProcessor())",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_csp_header",
+        "general_idea": "Configure Content Security Policy headers to restrict style sources and frame ancestors.",
+        "human_impl": ".contentSecurityPolicy(\"style-src 'self' 'unsafe-inline'; form-action 'self'; frame-ancestors 'self' https://*.instructure.com\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_referrer_policy_header",
+        "general_idea": "Set the Referrer-Policy header to SAME_ORIGIN to control referrer information leakage.",
+        "human_impl": ".referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_actuator_ignoring",
+        "general_idea": "Remove the actuator path from the list of ignored web security paths, likely to secure or manage it differently.",
+        "human_impl": "Removed \"/actuator/**\" from web.ignoring().antMatchers(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/config/SwaggerConfig.java": [
+      {
+        "kind": "add_security_requirement",
+        "general_idea": "Enforce OAuth2 security requirement globally in the OpenAPI definition to ensure all endpoints are protected.",
+        "human_impl": "Added `security = @SecurityRequirement(name = \"security_auth_coursesetupwizard\")` to `@OpenAPIDefinition`.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/config/ToolConfig.java": [
+      {
+        "kind": "add_config_field",
+        "general_idea": "Add a timezone configuration property to the ToolConfig class to support timezone-aware operations.",
+        "human_impl": "private String timezone;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/controller/ImportController.java": [
+      {
+        "kind": "add_blueprint_feature_flag",
+        "general_idea": "Add logic to expose blueprint course status to the view model when the course is an eligible destination.",
+        "human_impl": "if (wizardService.isEligibleBlueprintSettingsDestination(courseId)) { model.addAttribute(\"isBlueprintFromCourse\", ...); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_date_validation_logic",
+        "general_idea": "Implement strict date validation for class dates using java.time API to prevent invalid date submissions.",
+        "human_impl": "if (!isValid(classDates.getCurrentFirst(), ...)) { isError = true; ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_date_validation_helper",
+        "general_idea": "Create a helper method using LocalDate and ResolverStyle.STRICT to validate date strings against a format.",
+        "human_impl": "public boolean isValid(String date, String dateFormat) { ... LocalDate.parse(date, ...); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_content_option_label",
+        "general_idea": "Refine the user-facing label for the 'ALL' content import option to be more specific.",
+        "human_impl": "multiValueMap.add(\"Content selection\", \"Import course content only\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_blueprint_content_option",
+        "general_idea": "Add support for a new content import option that includes Blueprint Course settings.",
+        "human_impl": "else if(Constants.CONTENT_OPTION.ALL_WITH_BLUEPRINT_SETTINGS.equals(contentOption)) { ... }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/controller/WizardController.java": [
+      {
+        "kind": "add_route_mapping",
+        "general_idea": "Extend the loading endpoint to also handle the /launch path for compatibility or new entry points.",
+        "human_impl": "@RequestMapping({\"/launch\", \"/loading\"})",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_switch_case",
+        "general_idea": "Handle the new THEME step in the wizard navigation flow by redirecting to the theme intro page.",
+        "human_impl": "case THEME: return new ModelAndView(\"redirect:/app/theme/\" + courseId + \"/intro\");",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/controller/rest/PopupRestController.java": [
+      {
+        "kind": "add_cors_annotation",
+        "general_idea": "Add Cross-Origin Resource Sharing support to the REST controller using a Spring Boot configuration property.",
+        "human_impl": "@CrossOrigin(origins = {\"${lms.js.cors.origin}\"})",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/controller/rest/WizardUserCourseRestController.java": [
+      {
+        "kind": "add_dependency_injection",
+        "general_idea": "Inject PopupDismissalDateRepository to support new popup dismissal functionality.",
+        "human_impl": "@Autowired private PopupDismissalDateRepository popupDismissalDateRepository = null;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_injection",
+        "general_idea": "Inject WizardService to support new wizard-related business logic.",
+        "human_impl": "@Autowired private WizardService wizardService = null;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_mapping",
+        "general_idea": "Include dismissedOn field in the update logic for WizardUserCourse.",
+        "human_impl": "if (wizardUserCourse.getDismissedOn() != null) { updatedWizardUserCourse.setDismissedOn(wizardUserCourse.getDismissedOn()); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_mapping",
+        "general_idea": "Include dismissedOn field in the creation logic for WizardUserCourse.",
+        "human_impl": ".dismissedOn(wizardUserCourse.getDismissedOn())",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/model/ImportModel.java": [
+      {
+        "kind": "modernize_date_formatting",
+        "general_idea": "Update date format pattern to use the modern java.time API standard (uuuu for year) instead of legacy java.util.Date conventions.",
+        "human_impl": "public static final String DATE_FORMAT = \"M/d/uuuu\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_string_validation",
+        "general_idea": "Replace legacy null/empty string checks with the modern String.isBlank() method introduced in Java 11.",
+        "human_impl": "return date != null && !date.isBlank() ? date : \"Nothing entered\";",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/coursesetupwizard/model/PopupStatus.java": [
+      {
+        "kind": "add_field",
+        "general_idea": "Add a 'notes' field to the PopupStatus model to support storing additional context or comments.",
+        "human_impl": "private String notes;",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

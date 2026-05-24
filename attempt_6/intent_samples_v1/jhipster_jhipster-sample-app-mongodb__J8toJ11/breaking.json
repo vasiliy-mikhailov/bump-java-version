@@ -1,0 +1,157 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-mongodb",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "6b60e4f91d04bbf3500cce57c993377036507eef",
+    "sha_to": "781842f4d4eac35afef2be9cb0b969a22c5e4bdc"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the Java compiler source and target version from 1.8 to 11 to support the new JDK.",
+        "human_impl": "<java.version>11</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_spring_boot_version",
+        "general_idea": "Upgrade Spring Boot from 1.2.5.RELEASE to 2.3.7.RELEASE to align with Java 11 support and modern framework features.",
+        "human_impl": "<spring-boot.version>2.3.7.RELEASE</spring-boot.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_javax_annotation_api",
+        "general_idea": "Add explicit dependency for javax.annotation-api because it was removed from the JDK module system in Java 11.",
+        "human_impl": "<artifactId>javax.annotation-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_joda_time_with_jsr310",
+        "general_idea": "Replace joda-time and jackson-datatype-joda with jackson-datatype-jsr310 to use the standard Java 8+ Date/Time API.",
+        "human_impl": "<artifactId>jackson-datatype-jsr310</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_dropwizard_metrics",
+        "general_idea": "Remove individual Dropwizard metrics dependencies in favor of the unified jhipster-framework which manages metrics for Spring Boot 2.",
+        "human_impl": "<artifactId>jhipster-framework</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_springfox_to_oas",
+        "general_idea": "Upgrade Swagger/Springfox dependencies to support OpenAPI 3 (springfox-oas) required by newer Spring Boot versions.",
+        "human_impl": "<artifactId>springfox-oas</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_mongeez_with_mongock",
+        "general_idea": "Replace the deprecated mongeez library with mongock for MongoDB schema migration, as mongeez is incompatible with newer Spring Data MongoDB versions.",
+        "human_impl": "<artifactId>mongock-spring-v5</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_embedmongo_with_flapdoodle",
+        "general_idea": "Replace the old embedmongo-spring test dependency with de.flapdoodle.embed.mongo for modern embedded MongoDB testing support.",
+        "human_impl": "<artifactId>de.flapdoodle.embed.mongo</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove deprecated Spring Cloud Connectors dependencies which are no longer supported in modern Spring Boot versions.",
+        "human_impl": "Removed spring-cloud-cloudfoundry-connector, spring-cloud-spring-service-connector, and spring-cloud-localconfig-connector.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_removal",
+        "general_idea": "Remove legacy metrics reporter dependency in favor of Micrometer.",
+        "human_impl": "Removed fr.ippon.spark.metrics:metrics-spark-reporter.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_addition",
+        "general_idea": "Add JJWT dependencies to support modern JWT token handling required by the updated security stack.",
+        "human_impl": "Added io.jsonwebtoken:jjwt-api, jjwt-impl, and jjwt-jackson.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_modification",
+        "general_idea": "Update Spring Boot test dependencies to exclude JUnit Vintage engine, enforcing JUnit 5 native execution.",
+        "human_impl": "Added exclusion for org.junit.vintage:junit-vintage-engine in spring-boot-starter-test.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "plugin_configuration",
+        "general_idea": "Configure Maven Compiler Plugin to use Java 11 source and target levels and manage annotation processors.",
+        "human_impl": "Set source/target to ${java.version} and added spring-boot-configuration-processor and mapstruct-processor to annotationProcessorPaths.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "plugin_configuration",
+        "general_idea": "Configure JIB Maven Plugin to build Docker images using an AdoptOpenJDK 11 base image.",
+        "human_impl": "Configured jib-maven-plugin with from.image adoptopenjdk:11-jre-hotspot.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_frontend_build_tool",
+        "general_idea": "Replace the Yeoman/Grunt build process with the frontend-maven-plugin using Node.js and Webpack.",
+        "human_impl": "<artifactId>frontend-maven-plugin</artifactId>",
+        "bucket": "breaking"
+      }
+    ],
+    "package.json": [
+      {
+        "kind": "migrate_frontend_framework",
+        "general_idea": "Replace the legacy Grunt-based build and AngularJS dependencies with Angular 11 and the Angular CLI ecosystem.",
+        "human_impl": "Removed grunt, karma, requirejs; Added @angular/core, @angular/cli, webpack",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_jhipster_generator",
+        "general_idea": "Upgrade the JHipster generator dependency from version 2.19.0 to 7.0.0-beta.0 to support the new project structure.",
+        "human_impl": "\"generator-jhipster\": \"7.0.0-beta.0\"",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "modernize_testing_stack",
+        "general_idea": "Replace Karma/Jasmine testing infrastructure with Jest and Protractor for end-to-end testing.",
+        "human_impl": "Removed karma, jasmine-core; Added jest, protractor, @types/jest",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_build_scripts",
+        "general_idea": "Rewrite npm scripts to use Angular CLI commands (ng build, ng serve) and Maven wrapper instead of Grunt tasks.",
+        "human_impl": "\"start\": \"npm run webpack:dev\", \"build\": \"npm run webpack:prod\"",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/config/application-dev.yml": [
+      {
+        "kind": "update_message_cache_format",
+        "general_idea": "Change message cache duration from integer seconds to ISO 8601 duration format as required by newer Spring Boot versions.",
+        "human_impl": "messages:\n    cache-duration: PT1S",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/config/application.yml": [
+      {
+        "kind": "migrate_management_config",
+        "general_idea": "Replace deprecated Spring Boot 1.x management properties with Spring Boot 2.x structure.",
+        "human_impl": "management.security.enabled -> management.endpoints.web.exposure.include",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_async_config",
+        "general_idea": "Replace custom async pool configuration with standard Spring Boot 2.x task execution properties.",
+        "human_impl": "async.corePoolSize -> spring.task.execution.pool.core-size",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_mail_config",
+        "general_idea": "Move mail configuration from root level to standard Spring Boot 2.x spring.mail namespace.",
+        "human_impl": "mail.host -> spring.mail.host (implied by removal of root mail block)",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

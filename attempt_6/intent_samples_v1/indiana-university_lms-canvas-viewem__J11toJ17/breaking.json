@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "repo": "indiana-university/lms-canvas-viewem",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "c9e0a1caf0f41db3a05ba541c6a4ca809607f84f",
+    "sha_to": "bcb3b93f4bdef68af58f250e9c3e8b99a8f8d0f8"
+  },
+  "by_file": {
+    "src/main/java/edu/iu/uits/lms/viewem/WebApplication.java": [
+      {
+        "kind": "add_tool_keys_config",
+        "general_idea": "Explicitly specify the toolKeys for the LTI client to ensure correct tool identification in the upgraded framework.",
+        "human_impl": "@EnableLtiClient(toolKeys = {\"lms_lti_viewem\"})",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/viewem/config/SecurityConfig.java": [
+      {
+        "kind": "migrate_lti_authentication",
+        "general_idea": "Replace custom LtiAuthenticationProvider with the standard Lti13Configurer from the LTI 1.3 library to handle LTI handshakes.",
+        "human_impl": "Lti13Configurer lti13Configurer = new Lti13Configurer() .grantedAuthoritiesMapper(lmsDefaultGrantedAuthoritiesMapper); http.apply(lti13Configurer);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_authorities_mapper",
+        "general_idea": "Inject and use LmsDefaultGrantedAuthoritiesMapper for mapping LTI claims to Spring Security authorities.",
+        "human_impl": "@Autowired private LmsDefaultGrantedAuthoritiesMapper lmsDefaultGrantedAuthoritiesMapper;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/viewem/controller/MainController.java": [
+      {
+        "kind": "migrate_lti_token_class",
+        "general_idea": "Replace the deprecated LTI 1.1 authentication token class with the LTI 1.3 OIDC token class to support the newer LTI framework.",
+        "human_impl": "import edu.iu.uits.lms.lti.controller.OidcTokenAwareController; import edu.iu.uits.lms.lti.service.OidcTokenUtils; import uk.ac.ox.ctl.lti13.security.oauth2.client.lti.authentication.OidcAuthenticationToken;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_controller_base_class",
+        "general_idea": "Change the controller's superclass to the new OIDC-aware controller to align with the LTI 1.3 migration.",
+        "human_impl": "public class MainController extends OidcTokenAwareController",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_token_access",
+        "general_idea": "Update all methods to use OidcTokenUtils for extracting user and system identifiers from the new token type.",
+        "human_impl": "OidcTokenUtils oidcTokenUtils = new OidcTokenUtils(token); String currentUser = oidcTokenUtils.getUserLoginId();",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/viewem/model/SheetColumn.java": [
+      {
+        "kind": "import_migration",
+        "general_idea": "Replace the Spring Data REST annotation import with a custom project-specific annotation import.",
+        "human_impl": "Changed 'import org.springframework.data.rest.core.annotation.RestResource;' to 'import edu.iu.uits.lms.viewem.service.RestResource;'",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/viewem/model/SheetUser.java": [
+      {
+        "kind": "import_replacement",
+        "general_idea": "Replace the Spring Data REST annotation import with a custom project-specific annotation import.",
+        "human_impl": "Changed 'import org.springframework.data.rest.core.annotation.RestResource;' to 'import edu.iu.uits.lms.viewem.service.RestResource;'",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/edu/iu/uits/lms/viewem/model/UserData.java": [
+      {
+        "kind": "import_migration",
+        "general_idea": "Replace the Spring Data REST annotation import with a custom project-specific annotation import to align with internal service architecture changes.",
+        "human_impl": "import edu.iu.uits.lms.viewem.service.RestResource;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

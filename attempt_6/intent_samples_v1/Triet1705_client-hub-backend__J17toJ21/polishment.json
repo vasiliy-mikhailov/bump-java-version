@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "Triet1705/client-hub-backend",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "29927b58bd3698af24293c41ef758b622c051cc9",
+    "sha_to": "b6d2e94c28d92d1a1d9b5047299d336b2e5caf67"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "add_lombok_mapstruct_binding_dependency",
+        "general_idea": "Add the lombok-mapstruct-binding dependency to resolve compatibility issues between Lombok and MapStruct.",
+        "human_impl": "<dependency>...<artifactId>lombok-mapstruct-binding</artifactId>...</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_lombok_mapstruct_binding_processor",
+        "general_idea": "Register the lombok-mapstruct-binding as an annotation processor path in the compiler plugin.",
+        "human_impl": "<path>...<artifactId>lombok-mapstruct-binding</artifactId>...</path>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "migrate_compiler_source_target_to_release",
+        "general_idea": "Replace deprecated source/target compiler options with the modern release option for cross-compilation support.",
+        "human_impl": "<release>${java.version}</release>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "lingcoder/basic-commons-dependencies",
+    "stage": "J8->J21",
+    "family": null,
+    "sha_from": "ffe4adbd894ca35fa40e42145c6658e0eee9cb14",
+    "sha_to": "8e22f4b25aa604da6ad77acf65f88265226986d2"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Update the project's target Java version from 1.8 to 21 to support modern language features and runtime.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

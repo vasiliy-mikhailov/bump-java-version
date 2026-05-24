@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "repo": "JEsperancinhaOrg/itf-chartizate",
+    "stage": "J11->J21",
+    "family": "junit4-mockito",
+    "sha_from": "8723a284598ab7407029034e8a4e494d4622877a",
+    "sha_to": "17dc96d0d0ae483e91de2fdfeb0e7acc1bd5c206"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Update the project's target Java version from 11 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    ".circleci/config.yml": [
+      {
+        "kind": "update_base_image",
+        "general_idea": "Switch the CI Docker image from OpenJDK 11 to Eclipse Temurin 21 to align with the target Java version.",
+        "human_impl": "image: eclipse-temurin:21-alpine",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_build_dependency",
+        "general_idea": "Install Maven via apk because the new Alpine-based image does not include it by default.",
+        "human_impl": "run: apk add maven",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_build_dependency",
+        "general_idea": "Install make via apk to satisfy build requirements in the new Alpine environment.",
+        "human_impl": "run: apk add make",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

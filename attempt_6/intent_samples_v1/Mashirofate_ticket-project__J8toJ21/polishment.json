@@ -1,0 +1,405 @@
+{
+  "meta": {
+    "repo": "Mashirofate/ticket-project",
+    "stage": "J8->J21",
+    "family": "spring-boot-2",
+    "sha_from": "6277274fdbb50aaf715bacc1f62483a1528b345b",
+    "sha_to": "6a6f5d1c40f1941385c933979f5f7a3256b8accc"
+  },
+  "by_file": {
+    "src/main/java/com/tickets/TicketsApplication.java": [
+      {
+        "kind": "remove_swagger2_annotation",
+        "general_idea": "Removed the deprecated Springfox Swagger2 enable annotation to clean up the application configuration.",
+        "human_impl": "-@EnableSwagger2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_retry_annotation",
+        "general_idea": "Added the Spring Retry enable annotation to activate retry functionality in the application context.",
+        "human_impl": "+@EnableRetry",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/tickets/cache/ICacheManager.java": [
+      {
+        "kind": "fix_javadoc_param",
+        "general_idea": "Corrected Javadoc for putCache by removing the incorrect @param cache tag.",
+        "human_impl": "Changed '@param cache' to '@param' in the Javadoc block.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_javadoc_param",
+        "general_idea": "Corrected Javadoc for getCacheAll by removing the incorrect @param key tag since the method takes no arguments.",
+        "human_impl": "Changed '@param key' to '@param' in the Javadoc block.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/tickets/config/WebConfiguration.java": [
+      {
+        "kind": "cors_config_update",
+        "general_idea": "Updated CORS configuration to use `allowedOriginPatterns` instead of `allowedOrigins` to support credentials in Spring Boot 2.4+ and added PATCH method.",
+        "human_impl": ".allowedOriginPatterns(\"*\").allowCredentials(true).allowedMethods(\"GET\", \"HEAD\", \"POST\", \"PUT\", \"DELETE\", \"OPTIONS\", \"PATCH\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "interceptor_path_exclusion",
+        "general_idea": "Refactored interceptor registration to explicitly exclude static resources, Swagger endpoints, and specific API paths from authentication checks.",
+        "human_impl": "registry.addInterceptor(authorityInterceptor).addPathPatterns(\"/**\").excludePathPatterns(ignorePath);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "websocket_config_comment_out",
+        "general_idea": "Commented out the `ServerEndpointExporter` bean definition, likely due to migration to a container-managed WebSocket setup or Spring Boot 3+ changes.",
+        "human_impl": "//    @Bean\n//    public ServerEndpointExporter serverEndpointExporter() {",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/tickets/controller/AuthorityController.java": [
+      {
+        "kind": "swagger_annotation_migration",
+        "general_idea": "Replace deprecated Swagger 2 annotations with OpenAPI 3 annotations to align with modern SpringDoc standards.",
+        "human_impl": "Replaced @Api and @ApiOperation with @Tag and @Operation from io.swagger.v3.oas.annotations.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/tickets/controller/BuyticketController.java": [
+      {
+        "kind": "swagger_annotation_migration",
+        "general_idea": "Replace deprecated Swagger 2 annotations with OpenAPI 3 annotations to support modern API documentation standards.",
+        "human_impl": "Changed @Api(tags = ...) to @Tag(name = ...) and @ApiOperation(value = ...) to @Operation(summary = ...).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "import_cleanup",
+        "general_idea": "Refactor wildcard imports into explicit imports and remove unused imports for better code clarity.",
+        "human_impl": "Replaced 'import com.tickets.dto.*;' with specific imports and removed unused 'java.util.List' and 'java.util.Map'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "loop_modernization",
+        "general_idea": "Update traditional index-based for-loop to enhanced for-each loop for cleaner iteration over arrays.",
+        "human_impl": "Changed 'for (int i = 0; i < activies.length; i++)' to 'for (String activy : activies)'.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/tickets/controller/ClearCardController.java": [
+      {
+        "kind": "swagger_annotation_migration",
+        "general_idea": "Replace deprecated Swagger 2 annotations with OpenAPI 3 annotations to maintain API documentation compatibility.",
+        "human_impl": "import io.swagger.v3.oas.annotations.Operation; import io.swagger.v3.oas.annotations.tags.Tag;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "swagger_tag_update",
+        "general_idea": "Update class-level API tag annotation to use the new OpenAPI 3 syntax.",
+        "human_impl": "@Tag(name = \"\u6e05\u695a\u5361\u63a5\u53e3\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "swagger_operation_update",
+        "general_idea": "Update method-level API operation annotations to use the new OpenAPI 3 syntax for the search endpoint.",
+        "human_impl": "@Operation(summary = \"\u6e05\u695a\u5361\u6761\u4ef6\u641c\u7d22\", description = \"\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "swagger_operation_update",
+        "general_idea": "Update method-level API operation annotations to use the new OpenAPI 3 syntax for the add endpoint.",
+        "human_impl": "@Operation(summary = \"\u521b\u5efa\u6e05\u695a\u5361\", description = \"\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "swagger_operation_update",
+        "general_idea": "Update method-level API operation annotations to use the new OpenAPI 3 syntax for the update endpoint.",
+        "human_impl": "@Operation(summary = \"\u66f4\u65b0\u6e05\u695a\u5361\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "swagger_operation_update",
+        "general_idea": "Update method-level API operation annotations to use the new OpenAPI 3 syntax for the delete endpoint.",
+        "human_impl": "@Operation(summary = \"\u5220\u9664\u6e05\u695a\u5361\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "swagger_operation_update",
+        "general_idea": "Update method-level API operation annotations to use the new OpenAPI 3 syntax for the batch delete endpoint.",
+        "human_impl": "@Operation(summary = \"\u6279\u91cf\u5220\u9664\u6e05\u695a\u5361\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "for_loop_modernization",
+        "general_idea": "Refactor traditional index-based for loop to enhanced for-each loop for cleaner iteration over array elements.",
+        "human_impl": "for (String activy : activies) { clearCardService.delById(activy); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "import_cleanup",
+        "general_idea": "Replace wildcard import with explicit imports for DTO classes to improve code clarity.",
+        "human_impl": "import com.tickets.dto.ClearCardAddDto; import com.tickets.dto.ClearCardSearchDto;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/tickets/controller/DeviceController.java": [
+      {
+        "kind": "import_cleanup",
+        "general_idea": "Refactor wildcard imports to specific class imports for better code clarity and maintenance.",
+        "human_impl": "import java.io.BufferedReader; import java.io.IOException;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "unused_import_removal",
+        "general_idea": "Remove unused import statements to clean up the source file.",
+        "human_impl": "-import java.util.Date;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "loop_modernization",
+        "general_idea": "Replace indexed for-loops with enhanced for-loops (for-each) for cleaner iteration over collections.",
+        "human_impl": "for (String activy : activies) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "method_relocation",
+        "general_idea": "Move the static helper method `isConnect` to a different location in the class structure.",
+        "human_impl": "public static boolean isConnect(String ip) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "method_restoration",
+        "general_idea": "Restore the `delByIds` endpoint which was previously removed or commented out, ensuring API completeness.",
+        "human_impl": "@DeleteMapping(\"/s/{ids}\") public ResponseResult delByIds(...)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/tickets/controller/EntersController.java": [
+      {
+        "kind": "migrate_swagger_annotations",
+        "general_idea": "Replace deprecated Swagger 2 annotations with OpenAPI 3 annotations to support modern API documentation standards.",
+        "human_impl": "import io.swagger.v3.oas.annotations.Operation; @Tag(name = \"...\") @Operation(summary = \"...\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_null_check",
+        "general_idea": "Add null check for byte array before string conversion to prevent NullPointerException.",
+        "human_impl": "if(null !=by){ String a = new String(by); ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_loop",
+        "general_idea": "Replace index-based for loop with enhanced for-each loop for cleaner iteration over array.",
+        "human_impl": "for (String activy : activies) { entersService.delById(activy); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Remove unused imports related to date formatting that are no longer needed in the controller.",
+        "human_impl": "remove import java.text.SimpleDateFormat; remove import java.util.Date;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/tickets/controller/EntranceManagementController.java": [
+      {
+        "kind": "import_cleanup",
+        "general_idea": "Replace wildcard imports with explicit imports for better code clarity and maintainability.",
+        "human_impl": "import com.tickets.dto.EntranceManagementAddDto; import com.tickets.dto.EntranceManagementSearchDto; import com.tickets.dto.ResponseResult;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "unused_import_removal",
+        "general_idea": "Remove unused import statements to clean up the source file.",
+        "human_impl": "-import java.util.Map;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "loop_modernization",
+        "general_idea": "Replace traditional index-based for-loop with enhanced for-each loop for cleaner iteration over arrays.",
+        "human_impl": "for (String activy : activies) { entranceManagementService.delById(activy); }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/tickets/controller/FaceController.java": [
+      {
+        "kind": "add_lombok_logger",
+        "general_idea": "Add @Slf4j annotation to enable Lombok-generated logger, replacing manual logging or standard out prints.",
+        "human_impl": "@Slf4j",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_hutool_dependency",
+        "general_idea": "Add cn.hutool.core.io.FileUtil import to utilize Hutool for file operations, replacing or supplementing standard Java IO.",
+        "human_impl": "import cn.hutool.core.io.FileUtil;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_json_library",
+        "general_idea": "Add org.json imports (CDL, JSONException) to handle JSON/CSV parsing, likely replacing or supplementing FastJSON usage.",
+        "human_impl": "import org.json.CDL;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_retry_support",
+        "general_idea": "Add Spring Retry annotations (@Retryable, @Backoff) to enable declarative retry logic for external service calls.",
+        "human_impl": "import org.springframework.retry.annotation.Retryable;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_http_client_utils",
+        "general_idea": "Add Spring HTTP client utilities (InputStreamResource, HttpHeaders, MediaType) to support more complex HTTP request construction.",
+        "human_impl": "import org.springframework.core.io.InputStreamResource;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_imports",
+        "general_idea": "Clean up and organize imports, removing unused ones (like sun.net.www) and adding necessary Spring Web annotations explicitly.",
+        "human_impl": "import org.springframework.web.bind.annotation.PostMapping;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_venue_service",
+        "general_idea": "Inject VenueActiviesService to support new venue-related functionality in the controller.",
+        "human_impl": "@Autowired private VenueActiviesService venueActiviesService;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_search_endpoint",
+        "general_idea": "Implement a new /search endpoint to query venue activities using the injected service.",
+        "human_impl": "@PostMapping (\"/search\") public ResponseResult search(@RequestBody String params)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_applet_sync_endpoint",
+        "general_idea": "Implement a new /applet endpoint that triggers a timer task to synchronize data with a WeChat applet backend.",
+        "human_impl": "@PostMapping(\"/applet\") public ResponseResult getpostapplet(@RequestBody String params)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_entry_record_endpoint",
+        "general_idea": "Implement a new /Entryrecord endpoint that triggers a timer task to upload entry records to an external service.",
+        "human_impl": "@PostMapping(\"/Entryrecord\") public ResponseResult getpostEntryrecord(@RequestBody String params)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_posts_endpoint",
+        "general_idea": "Refactor the /posts endpoint to handle data upload for Jiangmen, including CSV generation and image upload logic.",
+        "human_impl": "@PostMapping(\"/posts\") public ResponseResult getposts(@RequestBody String params)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_huizhou_upload_endpoint",
+        "general_idea": "Implement a new /huiZhouPosts endpoint specifically for uploading face data to the Huizhou government system.",
+        "human_impl": "@PostMapping(\"/huiZhouPosts\") public ResponseResult getPostsForHuizhou(@RequestBody String params)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_retry_method",
+        "general_idea": "Add a helper method sendSsmUP with @Retryable annotation to handle retries for data uploads.",
+        "human_impl": "@Retryable(value = ResourceAccessException.class, maxAttempts = 4,backoff = @Backoff(delay = 1000L, multiplier = 2)) public JSONObject sendSsmUP(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_face_recognition_logic",
+        "general_idea": "Remove the original face recognition and comparison logic (detectFaces, extractFaceFeaqture, compareFace) which is no longer present in the new version.",
+        "human_impl": "Removed imports: com.arcsoft.face.FaceInfo, com.arcsoft.face.toolkit.ImageFactory, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_legacy_endpoint",
+        "general_idea": "Remove the legacy /search endpoint that performed face comparison, as it has been replaced by the new venue search.",
+        "human_impl": "Removed: @PostMapping(\"/search\") public ResponseResult search(@RequestBody FaceSaveDto faceSaveDto)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_test_endpoint",
+        "general_idea": "Remove the test/debug endpoint getposts111 which was likely used for local testing.",
+        "human_impl": "Removed: public ResponseResult getposts111(@RequestBody String params)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_csv_upload_logic",
+        "general_idea": "Update the data upload logic to generate CSV files and upload them along with images to a new base URL.",
+        "human_impl": "String uploadUrl = baseUrl + \"/importInfo/cvs\"; resultStr = this.uploadAttach(uploadUrl,token,file);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_token_authentication",
+        "general_idea": "Add logic to obtain and use authentication tokens for uploading data to the external government system.",
+        "human_impl": "String resultStr = this.getToken(username,password); String token = this.getTokeyValue(resultStr);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "adjust_time_offset",
+        "general_idea": "Modified the time offset in getTime1 from -10 to -90 seconds.",
+        "human_impl": "cal.add(Calendar.SECOND, -90);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_time_helper_methods",
+        "general_idea": "Added new helper methods getTime2, getTime3, and getTime4 to calculate specific past timestamps.",
+        "human_impl": "private static Date getTime2() { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_token_retrieval_method",
+        "general_idea": "Implemented getToken method to authenticate and retrieve an access token via REST call.",
+        "human_impl": "public String getToken(String username, String password) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_file_upload_method",
+        "general_idea": "Implemented uploadAttach method to upload files using multipart form data and a custom InputStreamResource.",
+        "human_impl": "public String uploadAttach(String uploadUrl, String token, File img) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_custom_resource_class",
+        "general_idea": "Added CommonInputStreamResource inner class to handle file stream metadata for uploads.",
+        "human_impl": "static class CommonInputStreamResource extends InputStreamResource { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_json_parsing_helpers",
+        "general_idea": "Added utility methods getJsonValue and getTokeyValue to extract specific fields from JSON responses.",
+        "human_impl": "private String getJsonValue(String json, String key){ ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_json_to_csv_converter",
+        "general_idea": "Added Json2Csv method to convert JSON arrays to CSV format using org.json library.",
+        "human_impl": "public String Json2Csv(String jsonstr) throws JSONException { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_base64_image_generator",
+        "general_idea": "Added generateImage method to decode base64 strings and save them as image files on the server.",
+        "human_impl": "public static String generateImage(String file, String path,String namepath, HttpServletRequest request) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_base64_to_image_helper",
+        "general_idea": "Added base642Image private helper method for decoding base64 strings to image files.",
+        "human_impl": "private void base642Image(String path, String fileName, String str){ ... }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/tickets/controller/ShareDataController.java": [
+      {
+        "kind": "migrate_swagger_annotation",
+        "general_idea": "Replace deprecated Swagger 2 annotations with OpenAPI 3 annotations to support modern API documentation standards.",
+        "human_impl": "import io.swagger.v3.oas.annotations.Operation; import io.swagger.v3.oas.annotations.tags.Tag;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_api_tag_annotation",
+        "general_idea": "Update class-level API tag annotation from Swagger 2 @Api to OpenAPI 3 @Tag.",
+        "human_impl": "@Tag(name = \"\u5171\u4eab\u6570\u636e\u63a5\u53e3\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_operation_annotation",
+        "general_idea": "Update method-level operation annotations from Swagger 2 @ApiOperation to OpenAPI 3 @Operation.",
+        "human_impl": "@Operation(summary = \"\u83b7\u53d6\u542f\u7528\u6d3b\u52a8\u5217\u8868\")",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

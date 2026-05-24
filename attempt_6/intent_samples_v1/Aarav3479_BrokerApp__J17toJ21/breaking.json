@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "repo": "Aarav3479/BrokerApp",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "d5af6f5ec1c8885def326cad26618e12243d2cd5",
+    "sha_to": "c0e97fdbfabd115c770fef566fb759c3f1115c9e"
+  },
+  "by_file": {
+    "UserService/src/main/java/com/broker/user/services/UserService.java": [
+      {
+        "kind": "update_user_identifier_type",
+        "general_idea": "Changed the identifier for updating and deleting users from Long ID to String email.",
+        "human_impl": "UserResponse updateUser(String email, UpdateUserRequest request); void deleteUser(String email);",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_password_update_method",
+        "general_idea": "Removed the dedicated updatePassword method, likely consolidating it into the general updateUser method.",
+        "human_impl": "- void updatePassword(Long userId, UpdateUserRequest request);",
+        "bucket": "breaking"
+      }
+    ],
+    "UserService/src/main/java/com/broker/user/services/impl/UserServiceImpl.java": [
+      {
+        "kind": "refactor_update_user_signature",
+        "general_idea": "Change updateUser method to identify user by email instead of ID and add password validation.",
+        "human_impl": "public UserResponse updateUser(String email, UpdateUserRequest request)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_delete_user_signature",
+        "general_idea": "Change deleteUser method to identify user by email instead of ID.",
+        "human_impl": "public void deleteUser(String email)",
+        "bucket": "breaking"
+      }
+    ],
+    "UserService/pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the Maven compiler source and target version from 17 to 21 to align with the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

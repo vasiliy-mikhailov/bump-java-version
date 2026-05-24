@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "repo": "servicex-sh/httpx",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "1a7fc6386585d285d0f778285b6bec666b744ed1",
+    "sha_to": "4a62bd1d98cbc6cb49b52ad05ffbedfccda902f4"
+  },
+  "by_file": {
+    "src/main/java/org/mvnsearch/http/HttpxApplication.java": [
+      {
+        "kind": "implement_runtime_hints_registrar",
+        "general_idea": "Implement RuntimeHintsRegistrar to register specific resource patterns for GraalVM native image generation, ensuring these resources are included in the native image.",
+        "human_impl": "implements RuntimeHintsRegistrar { registerHints(hints, classLoader) { hints.resources().registerPattern(...); } }",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/mvnsearch/http/model/HttpRequestTarget.java": [
+      {
+        "kind": "fix_uri_schema_format",
+        "general_idea": "Correct the schema string to exclude the '://' suffix, appending it explicitly during URI construction to ensure valid URI creation.",
+        "human_impl": "schema = \"tcp\"; builder.append(schema).append(\"://\");",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "encode_path_segments",
+        "general_idea": "URL-encode the absolute path while preserving forward slashes to ensure valid URI construction.",
+        "human_impl": "URLEncoder.encode(pathAbsolute, StandardCharsets.UTF_8).replaceAll(\"%2F\", \"/\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_method_and_add_arn_support",
+        "general_idea": "Rename setHostHeader to setHostOrUriHeader and add logic to parse AWS ARN headers into specific schemas.",
+        "human_impl": "public void setHostOrUriHeader(String headerName, String headerValue) { if (headerValue.startsWith(\"arn:aws:\")) ... }",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/mvnsearch/http/protocol/GrpcExecutor.java": [
+      {
+        "kind": "implement_interface",
+        "general_idea": "Make GrpcExecutor implement the BaseExecutor interface to conform to the new execution contract.",
+        "human_impl": "public class GrpcExecutor implements BaseExecutor",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_return_type",
+        "general_idea": "Change the execute method return type from void to List<byte[]> to satisfy the BaseExecutor interface.",
+        "human_impl": "public List<byte[]> execute(HttpRequest httpRequest)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_return_statements",
+        "general_idea": "Add return statements to provide the response body or empty list, ensuring the method compiles with the new return type.",
+        "human_impl": "return List.of(output.getBytes(StandardCharsets.UTF_8)); ... return Collections.emptyList();",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/mvnsearch/http/protocol/HttpExecutor.java": [
+      {
+        "kind": "change_method_signature",
+        "general_idea": "Change execute method to return a list of byte arrays instead of void, enabling response data retrieval.",
+        "human_impl": "public List<byte[]> execute(HttpRequest httpRequest)",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/mvnsearch/http/protocol/RSocketExecutor.java": [
+      {
+        "kind": "implement_interface",
+        "general_idea": "RSocketExecutor now implements the BaseExecutor interface to conform to the new execution contract.",
+        "human_impl": "public class RSocketExecutor implements BaseExecutor",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "change_return_type",
+        "general_idea": "Changed execute and helper methods to return List<byte[]> instead of void to support the new executor contract.",
+        "human_impl": "public List<byte[]> execute(HttpRequest httpRequest)",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

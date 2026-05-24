@@ -1,0 +1,14 @@
+diff --git a/spring-jdbc-transaction-management/src/main/java/com/huongdanjava/springjdbctransactionmanagement/dao/AccountDAO.java b/spring-jdbc-transaction-management/src/main/java/com/huongdanjava/springjdbctransactionmanagement/dao/AccountDAO.java
+index 344ebac..4150d65 100644
+--- a/spring-jdbc-transaction-management/src/main/java/com/huongdanjava/springjdbctransactionmanagement/dao/AccountDAO.java
++++ b/spring-jdbc-transaction-management/src/main/java/com/huongdanjava/springjdbctransactionmanagement/dao/AccountDAO.java
+@@ -4,7 +4,7 @@ import java.math.BigDecimal;
+ 
+ public interface AccountDAO {
+ 
+-    BigDecimal getCurrentAmount(int id);
++  BigDecimal getCurrentAmount(int id);
+ 
+-    void updateAmount(int id, BigDecimal amount);
++  void updateAmount(int id, BigDecimal amount);
+ }

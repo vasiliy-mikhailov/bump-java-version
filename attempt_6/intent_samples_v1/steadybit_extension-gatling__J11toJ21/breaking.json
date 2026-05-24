@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "steadybit/extension-gatling",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "885fc150da0e4bc0a6d42f4c5eb4ac7c9764fade",
+    "sha_to": "8ac2491cd37e5e8a2cf26396c8c5cb628c19c290"
+  },
+  "by_file": {
+    "gatling-maven-scaffold/pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Change the Maven compiler release property from 11 to 21 to target Java 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      }
+    ],
+    "Dockerfile": [
+      {
+        "kind": "update_java_runtime_image",
+        "general_idea": "Upgrade the runtime base image from Azul Zulu OpenJDK 23 to 25 to support the target Java version.",
+        "human_impl": "FROM azul/zulu-openjdk-debian:25",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

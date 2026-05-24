@@ -1,0 +1,48 @@
+diff --git a/src/main/java/com/groupten/bmsproject/BmsprojectApplication.java b/src/main/java/com/groupten/bmsproject/BmsprojectApplication.java
+index 1e62933..7a69356 100644
+--- a/src/main/java/com/groupten/bmsproject/BmsprojectApplication.java
++++ b/src/main/java/com/groupten/bmsproject/BmsprojectApplication.java
+@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
+ import org.springframework.boot.autoconfigure.SpringBootApplication;
+ import org.springframework.boot.autoconfigure.domain.EntityScan;
+ import org.springframework.context.ConfigurableApplicationContext;
++import org.springframework.context.annotation.ComponentScan;
+ 
+ import javafx.application.Application;
+ import javafx.fxml.FXMLLoader;
+@@ -12,10 +13,12 @@ import javafx.scene.Scene;
+ import javafx.stage.Stage;
+ 
+ @SpringBootApplication
++@ComponentScan
+ @EntityScan
+ public class BmsprojectApplication extends Application {
+ 
+     private static ConfigurableApplicationContext applicationContext;
++    private static Stage primaryStage;
+ 
+     public static void main(String[] args) {
+         applicationContext = SpringApplication.run(BmsprojectApplication.class, args);
+@@ -24,7 +27,8 @@ public class BmsprojectApplication extends Application {
+ 
+     @Override
+     public void start(Stage stage) throws Exception {
+-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
++        primaryStage = stage;
++        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Dashboard.fxml"));
+ 
+         // Set the Spring context for the FXMLLoader
+         loader.setControllerFactory(applicationContext::getBean);
+@@ -42,4 +46,12 @@ public class BmsprojectApplication extends Application {
+         super.stop();
+         applicationContext.close();
+     }
++
++    public static ConfigurableApplicationContext getApplicationContext() {
++        return applicationContext;
++    }
++
++    public static Stage getPrimaryStage() {
++        return primaryStage;
++    }
+ }

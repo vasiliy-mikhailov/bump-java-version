@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "repo": "quarkusio/code.quarkus.io",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "de57928ebe0885c5b2db46b2bb5b0e48910f9782",
+    "sha_to": "32ebe9a8fdd67666f7352f86a8f985572370e20e"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Update Maven compiler source and target properties from Java 8 to Java 11 to support the new runtime environment.",
+        "human_impl": "<maven.compiler.source>11</maven.compiler.source>\n<maven.compiler.target>11</maven.compiler.target>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "kotlin_jvm_target_upgrade",
+        "general_idea": "Set Kotlin compiler JVM target to 11 to ensure bytecode compatibility with the new JDK version.",
+        "human_impl": "<kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "quarkus_platform_migration",
+        "general_idea": "Switch from direct Quarkus BOM import to the Quarkus Universe Platform BOM for better dependency management in Quarkus 2.0.",
+        "human_impl": "<quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "quarkus_version_upgrade",
+        "general_idea": "Upgrade the Quarkus framework version to 2.0.2.Final to access new features and Java 11 support.",
+        "human_impl": "<quarkus.version>2.0.2.Final</quarkus.version>",
+        "bucket": "breaking"
+      }
+    ],
+    ".dockerignore": [
+      {
+        "kind": "add_quarkus_app_inclusion",
+        "general_idea": "Include the Quarkus application directory structure required for the runner image in Quarkus 2.0.",
+        "human_impl": "!target/quarkus-app/*",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

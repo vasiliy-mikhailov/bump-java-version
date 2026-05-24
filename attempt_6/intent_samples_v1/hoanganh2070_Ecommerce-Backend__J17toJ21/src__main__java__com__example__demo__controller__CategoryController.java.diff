@@ -1,0 +1,33 @@
+diff --git a/src/main/java/com/example/demo/controller/CategoryController.java b/src/main/java/com/example/demo/controller/CategoryController.java
+index 2b39a65..30c50a1 100644
+--- a/src/main/java/com/example/demo/controller/CategoryController.java
++++ b/src/main/java/com/example/demo/controller/CategoryController.java
+@@ -3,7 +3,6 @@ package com.example.demo.controller;
+ import java.util.List;
+ import org.springframework.http.HttpStatus;
+ import org.springframework.http.ResponseEntity;
+-import org.springframework.web.bind.annotation.CrossOrigin;
+ import org.springframework.web.bind.annotation.GetMapping;
+ import org.springframework.web.bind.annotation.RestController;
+ 
+@@ -13,7 +12,6 @@ import com.example.demo.repository.ProductCategoryRepository;
+ import lombok.extern.log4j.Log4j2;
+ 
+ @RestController
+-@CrossOrigin(value= {"http://localhost:4200", "http://localhost:3000"})
+ @Log4j2
+ public class CategoryController {
+ 	
+@@ -33,11 +31,10 @@ public class CategoryController {
+ 
+ 
+ 
+-	@GetMapping("/category")
++	@GetMapping("/api/category")
+ 	public ResponseEntity<List<ProductCategory>> getAllCategory(){
+ 		
+ 		log.info("get category");
+-		
+ 		List<ProductCategory> list = productCategoryRepository.findAll();
+ 		return new ResponseEntity<List<ProductCategory>>(list, HttpStatus.OK);
+ 		

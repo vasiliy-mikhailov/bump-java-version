@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "DanielCeron-dc/MyRubricDev",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "ad4cd894c78a506a7cd204881d544848c7d771b6",
+    "sha_to": "1db968f0921bd7714a4b3c4b72a95fb36bffade0"
+  },
+  "by_file": {
+    "src/main/java/co/edu/unicauca/distribuidos/core/capaAccesoADatos/models/ReservaEntity.java": [
+      {
+        "kind": "change_field_type",
+        "general_idea": "Changed the date field type from java.sql.Date to String, likely to handle date formatting at the service layer or API level.",
+        "human_impl": "-    private  Date date;\n+    private  String date;",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Updated the target Java version property from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

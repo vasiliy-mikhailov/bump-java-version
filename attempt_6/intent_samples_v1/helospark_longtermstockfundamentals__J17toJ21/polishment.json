@@ -1,0 +1,923 @@
+{
+  "meta": {
+    "repo": "helospark/longtermstockfundamentals",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "6d656a14d6388dff27c56da3982706f947ffdd29",
+    "sha_to": "dcbe81f6849159c7ec9e53e28fce387a8478fac0"
+  },
+  "by_file": {
+    "src/main/java/com/helospark/financialdata/CommonConfig.java": [
+      {
+        "kind": "add_constant",
+        "general_idea": "Introduce a static constant for the current date to ensure consistent temporal context across the application.",
+        "human_impl": "public static final LocalDate NOW = LocalDate.now();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_initialization",
+        "general_idea": "Move field initialization into a static block to allow conditional logic based on system properties.",
+        "human_impl": "static { if (System.getProperty(\"BASE_FOLDER\") != null) { ... } }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_configuration_override",
+        "general_idea": "Allow the base folder path to be overridden via a system property for flexibility in different environments.",
+        "human_impl": "if (System.getProperty(\"BASE_FOLDER\") != null) { BASE_FOLDER = System.getProperty(\"BASE_FOLDER\"); }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/FinancialDataApplication.java": [
+      {
+        "kind": "enable_scheduling",
+        "general_idea": "Add the @EnableScheduling annotation to activate Spring's task scheduling infrastructure.",
+        "human_impl": "@EnableScheduling",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "indentation_fix",
+        "general_idea": "Adjust indentation from tabs to spaces for consistent code formatting.",
+        "human_impl": "public static void main(String[] args) {\n        SpringApplication.run(FinancialDataApplication.class, args);\n    }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/FinancialsController.java": [
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint to retrieve company profile information.",
+        "human_impl": "@GetMapping(\"/profile\") public Profile getProfile(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_parameter",
+        "general_idea": "Add optional 'quarterly' parameter to existing financial data endpoints to support quarterly data retrieval.",
+        "human_impl": "@RequestParam(name = \"quarterly\", required = false) boolean quarterly",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor EPS calculation to derive from net income and shares outstanding instead of relying on remote ratio.",
+        "human_impl": "financialsTtm -> (double) financialsTtm.incomeStatementTtm.netIncome / financialsTtm.incomeStatementTtm.weightedAverageShsOut",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for EPS excluding R&D expenses.",
+        "human_impl": "@GetMapping(\"/eps_excl_rnd\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for EPS excluding marketing expenses.",
+        "human_impl": "@GetMapping(\"/eps_excl_marketing\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for EBITDA per share.",
+        "human_impl": "@GetMapping(\"/ebitda_per_share\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for net income.",
+        "human_impl": "@GetMapping(\"/net_income\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor operating margin calculation to derive from income statement fields.",
+        "human_impl": "toPercent((double) financialsTtm.incomeStatementTtm.operatingIncome / financialsTtm.incomeStatementTtm.revenue)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for operating FCF margin.",
+        "human_impl": "@GetMapping(\"/operating_fcf_margin\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for operating EBITDA margin.",
+        "human_impl": "@GetMapping(\"/operating_ebitda_margin\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for marketing expenses per operating expense.",
+        "human_impl": "@GetMapping(\"/marketing_per_operating_expense\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for R&D expenses per operating expense.",
+        "human_impl": "@GetMapping(\"/rd_per_operating_expense\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for administrative expenses per operating expense.",
+        "human_impl": "@GetMapping(\"/admin_per_operating_expense\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for other expenses per operating expense.",
+        "human_impl": "@GetMapping(\"/other_per_operating_expense\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor gross margin calculation to use RatioCalculator.",
+        "human_impl": "RatioCalculator.calculateGrossProfitMargin(financialsTtm)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor net margin calculation to derive from income statement fields with null handling.",
+        "human_impl": "toPercent((double) financialsTtm.incomeStatementTtm.netIncome / financialsTtm.incomeStatementTtm.revenue)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for FCF margin.",
+        "human_impl": "@GetMapping(\"/fcf_margin\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for market cap in USD.",
+        "human_impl": "@GetMapping(\"/market_cap_usd\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor PE ratio calculation to use RatioCalculator and support quarterly data.",
+        "human_impl": "RatioCalculator.calculatePriceToEarningsRatio(price, financialsTtm)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for price to operating cash flow ratio.",
+        "human_impl": "@GetMapping(\"/price_to_op_cash_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for PE ratio excluding R&D.",
+        "human_impl": "@GetMapping(\"/pe_excl_rnd_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for PE ratio excluding marketing.",
+        "human_impl": "@GetMapping(\"/pe_excl_marketing_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for PE ratio excluding amortization.",
+        "human_impl": "@GetMapping(\"/pe_excl_amortization\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for P/FCF ratio.",
+        "human_impl": "@GetMapping(\"/pfcf_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for compensation-adjusted P/FCF ratio.",
+        "human_impl": "@GetMapping(\"/pfcf_compensation_adjusted_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for P/OCF ratio.",
+        "human_impl": "@GetMapping(\"/pocf_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for price to gross profit.",
+        "human_impl": "@GetMapping(\"/price_to_gross_profit\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for price to sales.",
+        "human_impl": "@GetMapping(\"/price_to_sales\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for accrual ratio.",
+        "human_impl": "@GetMapping(\"/accrual_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for expected return calculation.",
+        "human_impl": "@GetMapping(\"/expected_return\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor trailing PEG calculation to use TrailingPegCalculator.",
+        "human_impl": "TrailingPegCalculator.calculateTrailingPeg(company, i / 4.0)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for trailing PEG with revenue growth.",
+        "human_impl": "@GetMapping(\"/past_pe_to_rev_growth_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for trailing CAPEG.",
+        "human_impl": "@GetMapping(\"/past_cape_to_growth_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for FCF yield.",
+        "human_impl": "@GetMapping(\"/fcf_yield\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for EPS yield.",
+        "human_impl": "@GetMapping(\"/eps_yield\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for price to book ratio.",
+        "human_impl": "@GetMapping(\"/p2b_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for price to tangible book value.",
+        "human_impl": "@GetMapping(\"/p2tb_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for intangible assets percent.",
+        "human_impl": "@GetMapping(\"/intangible_assets_percent\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for asset turnover ratio.",
+        "human_impl": "@GetMapping(\"/asset_turnover_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for goodwill percent.",
+        "human_impl": "@GetMapping(\"/goodwill_percent\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for Fed rate.",
+        "human_impl": "@GetMapping(\"/fed_rate\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor quick ratio calculation to use RatioCalculator.",
+        "human_impl": "RatioCalculator.calculateQuickRatio(financialsTtm)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for current ratio.",
+        "human_impl": "@GetMapping(\"/current_ratio\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor short term coverage ratio calculation to derive from balance sheet and cash flow.",
+        "human_impl": "toPercent(financialsTtm.balanceSheet.shortTermDebt > 0.0 ? (double) financialsTtm.cashFlowTtm.operatingCashFlow / financialsTtm.balanceSheet.shortTermDebt : null)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for short term debt.",
+        "human_impl": "@GetMapping(\"/short_term_debt\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor return on assets calculation to use RoicCalculator.",
+        "human_impl": "RoicCalculator.calculateROA(financialsTtm)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor return on equity calculation to use RoicCalculator.",
+        "human_impl": "RoicCalculator.calculateROE(financialsTtm)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for return on tangible capital.",
+        "human_impl": "@GetMapping(\"/return_on_tangible_capital\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for return on tangible assets.",
+        "human_impl": "@GetMapping(\"/return_on_tangible_assets\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor effective tax rate calculation to derive from income statement.",
+        "human_impl": "toPercent((double) financialsTtm.incomeStatementTtm.incomeTaxExpense / financialsTtm.incomeStatementTtm.incomeBeforeTax)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor cash flow to debt calculation to derive from balance sheet and cash flow.",
+        "human_impl": "toPercent(financialsTtm.balanceSheet.shortTermDebt > 0.0 ? (double) financialsTtm.cashFlowTtm.operatingCashFlow / financialsTtm.balanceSheet.totalDebt : 0)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for share buyback per net income.",
+        "human_impl": "@GetMapping(\"/share_buyback_per_net_income\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for share buyback per net FCF.",
+        "human_impl": "@GetMapping(\"/share_buyback_per_net_fcf\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_calculation",
+        "general_idea": "Refactor interest rate calculation to use toPercent helper.",
+        "human_impl": "toPercent((double) financialsTtm.incomeStatementTtm.interestExpense / financialsTtm.balanceSheet.totalDebt)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for interest coverage.",
+        "human_impl": "@GetMapping(\"/interest_coverage\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_method_call",
+        "general_idea": "Update DCF analysis method call to use new specific method name.",
+        "human_impl": "DcfCalculator.doStockDcfAnalysis",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_method_call",
+        "general_idea": "Update dividend DCF analysis method call to use new specific method name.",
+        "human_impl": "DcfCalculator.doCashFlowDcfAnalysisWithGrowth",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for composite fair value.",
+        "human_impl": "@GetMapping(\"/composite_fair_value\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for default calculator result.",
+        "human_impl": "@GetMapping(\"/default_calculator_result\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for insider trading bought.",
+        "human_impl": "@GetMapping(\"/insider_trading_bought\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for insider trading sold.",
+        "human_impl": "@GetMapping(\"/insider_trading_sold\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for senate trading bought.",
+        "human_impl": "@GetMapping(\"/senate_trading_bought\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for senate trading sold.",
+        "human_impl": "@GetMapping(\"/senate_trading_sold\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint",
+        "general_idea": "Add endpoint for earnings surprise.",
+        "human_impl": "@GetMapping(\"/earnings_surprise\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_growth_calculation",
+        "general_idea": "Replace generic growth calculation with specific EPS growth method for accuracy.",
+        "human_impl": "GrowthCalculator.getGrowthInInterval(...) -> GrowthCalculator.getEpsGrowthInInterval(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_quarterly_support",
+        "general_idea": "Add optional quarterly parameter to financial data endpoints to support granular data views.",
+        "human_impl": "Added @RequestParam(name = \"quarterly\", required = false) boolean quarterly to method signatures.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_balance_sheet_endpoints",
+        "general_idea": "Expose new balance sheet metrics via REST endpoints.",
+        "human_impl": "Added endpoints for total_assets, total_liabilities, debt_to_equity, equity_per_share.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_cash_flow_endpoints",
+        "general_idea": "Expose new cash flow and acquisition metrics via REST endpoints.",
+        "human_impl": "Added endpoints for acquisitions_per_market_cap, stock_compensation_per_fcf, stock_compensation_per_market_cap.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_price_endpoints",
+        "general_idea": "Add endpoints for detailed price history and drawdown calculations.",
+        "human_impl": "Added /detailed_price and /drawdown endpoints using DataLoader.readHistoricalPrice.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dividend_endpoints",
+        "general_idea": "Add endpoints for dividend reinvestment and cumulative dividend tracking.",
+        "human_impl": "Added /return_with_reinvested_dividend, /total_dividend_per_share_since, /cumulative_dividend_per_purchase_share_price.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_investment_score_endpoint",
+        "general_idea": "Expose investment score calculation via a new REST endpoint.",
+        "human_impl": "Added /investment_score endpoint using InvestmentScoreCalculator.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_roic_endpoints",
+        "general_idea": "Add endpoints for ROIC and FCF-ROIC calculations.",
+        "human_impl": "Added /fcf_roic endpoint using RoicCalculator.calculateFcfRoic.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_capex_endpoints",
+        "general_idea": "Add endpoints for capital expenditure growth and maintenance ratios.",
+        "human_impl": "Added /growth_capex_percent and /maintenance_capex_percent endpoints.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_stacked_chart_endpoints",
+        "general_idea": "Add endpoints for operating cash flow allocation breakdown (stacked chart data).",
+        "human_impl": "Added /capex_per_ocf, /rnd_per_ocf, /mna_per_ocf, /dividend_per_ocf, /buyback_per_ocf, /debt_repayment_per_ocf.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_rnd_endpoint",
+        "general_idea": "Add endpoint for R&D to revenue ratio.",
+        "human_impl": "Added /rnd_to_revenue endpoint.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_ratio_calculations",
+        "general_idea": "Replace inline ratio calculations with dedicated calculator classes for consistency.",
+        "human_impl": "Replaced inline math with RatioCalculator.calculateDebtToEquityRatio, calculatePayoutRatio, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_payout_endpoints",
+        "general_idea": "Add endpoints for total payout ratios including buybacks.",
+        "human_impl": "Added /total_payout_ratio and /total_payout_ratio_fcf endpoints.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_altman_z_endpoint",
+        "general_idea": "Add endpoint for Altman Z-score bankruptcy risk calculation.",
+        "human_impl": "Added /altmanz endpoint using AltmanZCalculator.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sloan_endpoint",
+        "general_idea": "Add endpoint for Sloan accruals ratio calculation.",
+        "human_impl": "Added /sloan endpoint using RatioCalculator.calculateSloanPercent.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_roiic_endpoint",
+        "general_idea": "Add endpoint for Return on Invested Capital Improvement (ROIIC).",
+        "human_impl": "Added /roiic endpoint using RoicCalculator.calculateRoiic.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_pietrosky_endpoint",
+        "general_idea": "Add endpoint for Piotroski F-Score calculation.",
+        "human_impl": "Added /pietrosky_score endpoint using PietroskyScoreCalculator.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_growth_intervals",
+        "general_idea": "Refactor growth rate endpoints to use dynamic year intervals instead of fixed indices.",
+        "human_impl": "Changed loops from fixed indices (i < 30) to dynamic company.financials.size() and used calculateYearsAgo.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_moving_avg_endpoints",
+        "general_idea": "Add configurable moving average endpoints for growth rates.",
+        "human_impl": "Added /eps_growth_rate_7yr_moving_avg, /revenue_growth_rate_xyr_moving_avg, /fcf_growth_rate_7yr_moving_avg with @RequestParam year.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_growth_calculation",
+        "general_idea": "Refactor price growth calculation to use dynamic date-based intervals instead of fixed index offsets.",
+        "human_impl": "Replaced `for (int i = 1; i < 30; ++i)` with `for (int i = 4; i < company.financials.size(); ++i)` and used `calculateYearsAgo`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_price_growth_dividends",
+        "general_idea": "Add new endpoint to calculate price growth including reinvested dividends.",
+        "human_impl": "Added `@GetMapping(\"/price_with_dividends_growth_rate\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_moving_avg_growth",
+        "general_idea": "Add new endpoint to calculate moving average of price growth rates over configurable years.",
+        "human_impl": "Added `@GetMapping(\"/price_growth_rate_xyr_moving_avg\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_bubble_pe",
+        "general_idea": "Add new endpoint for PE vs Growth bubble chart.",
+        "human_impl": "Added `@GetMapping(\"/pe_vs_growth_bubble\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_bubble_cape",
+        "general_idea": "Add new endpoint for CAPE vs Growth bubble chart.",
+        "human_impl": "Added `@GetMapping(\"/cape_vs_growth_bubble\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_bubble_pfcf",
+        "general_idea": "Add new endpoint for Price/FCF vs Growth bubble chart.",
+        "human_impl": "Added `@GetMapping(\"/pfcf_vs_growth_bubble\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_bubble_pocf",
+        "general_idea": "Add new endpoint for Price/OCF vs Growth bubble chart.",
+        "human_impl": "Added `@GetMapping(\"/pocf_vs_growth_bubble\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_bubble_pbook",
+        "general_idea": "Add new endpoint for Price/Book vs Growth bubble chart.",
+        "human_impl": "Added `@GetMapping(\"/pbook_vs_growth_bubble\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_bubble_peg",
+        "general_idea": "Add new endpoint for PEG vs Growth bubble chart.",
+        "human_impl": "Added `@GetMapping(\"/peg_vs_growth_bubble\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_bubble_growth_returns",
+        "general_idea": "Add new endpoint for Growth vs Returns bubble chart.",
+        "human_impl": "Added `@GetMapping(\"/growth_vs_returns_bubble\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_helper_bubble_logic",
+        "general_idea": "Add helper methods to generate bubble chart data with outlier removal.",
+        "human_impl": "Added `getBubbleWithFunctionInternal` and `removeOutliers` methods.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_trailing_moving_avg",
+        "general_idea": "Add new endpoint for trailing moving average of price growth rates.",
+        "human_impl": "Added `@GetMapping(\"/price_growth_rate_xyr_moving_avg_trailing\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_share_growth_calculation",
+        "general_idea": "Refactor share growth calculation to use dynamic date-based intervals.",
+        "human_impl": "Replaced fixed loop with `for (int i = 1; i < company.financials.size(); ++i)` and `calculateYearsAgo`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_flags",
+        "general_idea": "Add new endpoint to retrieve financial flags for a stock.",
+        "human_impl": "Added `@GetMapping(\"/flags\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_cape_calculator_args",
+        "general_idea": "Fix argument order in CAPE ratio calculation call.",
+        "human_impl": "Changed `capeCalculator.calculateCapeRatioQ(company.financials, i, 6)` to `CapeCalculator.calculateCapeRatioQ(company.financials, 6, i)`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_5yr_pe",
+        "general_idea": "Add new endpoint for 5-year PE ratio.",
+        "human_impl": "Added `@GetMapping(\"/5_year_pe\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_5yr_pfcf",
+        "general_idea": "Add new endpoint for 5-year Price/FCF ratio.",
+        "human_impl": "Added `@GetMapping(\"/5_year_pfcf\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_ltl_per_5yr_fcf",
+        "general_idea": "Add new endpoint for LTL per 5-year FCF.",
+        "human_impl": "Added `@GetMapping(\"/ltl_per_5yr_fcf\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_5yr_roic",
+        "general_idea": "Add new endpoint for 5-year ROIC.",
+        "human_impl": "Added `@GetMapping(\"/5_year_roic\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_5yr_rev_growth",
+        "general_idea": "Add new endpoint for 5-year revenue growth.",
+        "human_impl": "Added `@GetMapping(\"/5_year_rev_growth\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_5yr_netincome_growth",
+        "general_idea": "Add new endpoint for 5-year net income growth.",
+        "human_impl": "Added `@GetMapping(\"/5_year_netincome_growth\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_5yr_fcf_growth",
+        "general_idea": "Add new endpoint for 5-year FCF growth.",
+        "human_impl": "Added `@GetMapping(\"/5_year_fcf_growth\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_endpoint_5yr_share_growth",
+        "general_idea": "Add new endpoint for 5-year share growth.",
+        "human_impl": "Added `@GetMapping(\"/5_year_share_growth\")` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_income_data_helpers",
+        "general_idea": "Refactor income data retrieval into reusable private helper methods.",
+        "human_impl": "Added `getIncomeData`, `getIncomeDataOnlyPositiveNonNull`, and `getPriceIncomeData` helpers.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_percent_null_check",
+        "general_idea": "Improve null/NaN handling in percentage conversion.",
+        "human_impl": "Added `Double.isFinite` check in `toPercent` and added `toPercentNonNull`.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/domain/CompanyFinancials.java": [
+      {
+        "kind": "add_field_latest_price_usd",
+        "general_idea": "Add a field to store the latest stock price in USD.",
+        "human_impl": "public double latestPriceUsd;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_latest_price_trading_currency",
+        "general_idea": "Add a field to store the latest stock price in the trading currency.",
+        "human_impl": "public double latestPriceTradingCurrency;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_latest_price_date",
+        "general_idea": "Add a field to store the date of the latest price using java.time.LocalDate.",
+        "human_impl": "public LocalDate latestPriceDate;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_profile",
+        "general_idea": "Add a field to store the company profile information.",
+        "human_impl": "public Profile profile;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_data_quality_issue",
+        "general_idea": "Add a field to indicate data quality issues.",
+        "human_impl": "public int dataQualityIssue;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_constructor_signature",
+        "general_idea": "Update the constructor to accept and initialize the new fields.",
+        "human_impl": "public CompanyFinancials(double latestPrice, double latestPriceUsd, double latestPriceTradingCurrency, LocalDate latestPriceDate, List<FinancialsTtm> financials, Profile profile, int dataQualityIssue)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/domain/FinancialsTtm.java": [
+      {
+        "kind": "add_field",
+        "general_idea": "Add a field to store the stock price in the trading currency.",
+        "human_impl": "public double priceTradingCurrency;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Add a field to store the stock price in USD.",
+        "human_impl": "public double priceUsd;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Add a field to store auxiliary information associated with the financials.",
+        "human_impl": "public AuxilaryInformation auxilaryInfo;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_field",
+        "general_idea": "Remove the remote ratio field from the domain object.",
+        "human_impl": "- public RemoteRatio remoteRatio;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_field",
+        "general_idea": "Remove the key metrics field from the domain object.",
+        "human_impl": "- public KeyMetrics keyMetrics;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_field",
+        "general_idea": "Remove the profile field from the domain object.",
+        "human_impl": "- public Profile profile;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constructor",
+        "general_idea": "Add a default no-argument constructor for serialization or framework compatibility.",
+        "human_impl": "public FinancialsTtm() { }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constructor",
+        "general_idea": "Add a copy constructor to create a new instance based on a latest report, with logic to handle TTM data retention.",
+        "human_impl": "public FinancialsTtm(FinancialsTtm latestReport, boolean keepTtm) { ... }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/domain/FxSymbol.java": [
+      {
+        "kind": "add_field",
+        "general_idea": "Add a description field to the FxSymbol domain class to store human-readable currency information.",
+        "human_impl": "public String description;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constructor",
+        "general_idea": "Introduce a parameterized constructor to initialize both code and description fields.",
+        "human_impl": "public FxSymbol(String code, String description) { this.code = code; this.description = description; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constructor",
+        "general_idea": "Add a no-argument constructor to support frameworks requiring default instantiation.",
+        "human_impl": "public FxSymbol() { }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/domain/HistoricalPrice.java": [
+      {
+        "kind": "initialize_collection_default",
+        "general_idea": "Initialize the public list field with an empty immutable list to prevent null pointer exceptions and ensure a safe default state.",
+        "human_impl": "public List<HistoricalPriceElement> historical = List.of();",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/domain/Profile.java": [
+      {
+        "kind": "field_default_init",
+        "general_idea": "Initialize currency field to empty string to prevent null pointer exceptions.",
+        "human_impl": "public String currency = \"\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "primitive_to_wrapper",
+        "general_idea": "Change fullTimeEmployees from primitive long to Long object to support null values.",
+        "human_impl": "public Long fullTimeEmployees;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Add reportedCurrency field to store the currency in which financials are reported.",
+        "human_impl": "public String reportedCurrency;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Add currencySymbol field to store the symbol for the currency.",
+        "human_impl": "public String currencySymbol;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/domain/SimpleDataElement.java": [
+      {
+        "kind": "implement_interface",
+        "general_idea": "Implement the DateAware interface to enable date-based searching functionality for the data element.",
+        "human_impl": "public class SimpleDataElement implements DateAware { ... @Override public LocalDate getDate() { return LocalDate.parse(date); } }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_tostring",
+        "general_idea": "Add a toString method to provide a readable string representation of the object for debugging or logging.",
+        "human_impl": "@Override public String toString() { return \"SimpleDataElement [date=\" + date + \", value=\" + value + \"]\"; }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/service/AltmanZCalculator.java": [
+      {
+        "kind": "add_nan_guard",
+        "general_idea": "Add explicit check for non-finite floating-point results to return NaN instead of propagating Infinity or NaN from the calculation.",
+        "human_impl": "if (Double.isFinite(result)) { return result; } else { return Double.NaN; }",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/service/CapeCalculator.java": [
+      {
+        "kind": "remove_spring_annotations",
+        "general_idea": "Removed Spring Framework @Service and @Autowired annotations to decouple the class from the Spring container.",
+        "human_impl": "Removed `@Service` class annotation and `@Autowired` field annotation.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "convert_to_static_utility",
+        "general_idea": "Converted the class and its method to static to allow usage without instantiation, consistent with removing Spring dependency injection.",
+        "human_impl": "Added `static` modifier to `calculateCapeRatioQ` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_dependency_injection",
+        "general_idea": "Replaced instance field dependency with direct static method call to remove the need for the injected bean.",
+        "human_impl": "Replaced `cpiAdjustor.adjustForInflationToOldDate(...)` with `CpiAdjustor.adjustForInflationToOldDate(...)`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_parameter",
+        "general_idea": "Renamed the offset parameter to be more descriptive.",
+        "human_impl": "Renamed parameter `offset` to `offsetIndex`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reorder_parameters",
+        "general_idea": "Reordered method parameters to group related arguments or improve readability.",
+        "human_impl": "Swapped order of `offset` and `years` parameters in method signature.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_numerical_safety_check",
+        "general_idea": "Added a check to ensure the calculated result is a finite number before returning it.",
+        "human_impl": "Added `if (!Double.isFinite(result)) { return null; }` before returning the result.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/helospark/financialdata/service/CpiAdjustor.java": [
+      {
+        "kind": "refactor_to_static",
+        "general_idea": "Converted instance fields and methods to static to remove dependency on Spring bean lifecycle for this utility class.",
+        "human_impl": "Changed 'List<CpiData> cpiData' to 'static List<DataValuePairData> cpiData' and constructor logic to static block.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_data_model",
+        "general_idea": "Switched CPI data storage from a specific domain object to a generic key-value pair structure.",
+        "human_impl": "Replaced 'CpiData' with 'DataValuePairData' in list declarations and loading logic.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_data_source",
+        "general_idea": "Added support for historical CPI data prior to 1947 by reading from a classpath CSV resource.",
+        "human_impl": "Added 'readClasspathCsv' method and logic to load '/data/old_cpi.csv' into the static list.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "use_api_feature",
+        "general_idea": "Utilized Java 9+ InputStream.readAllBytes() for simplified resource reading.",
+        "human_impl": "Used 'file.readAllBytes()' inside 'readClasspathCsv' instead of manual buffer reading.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

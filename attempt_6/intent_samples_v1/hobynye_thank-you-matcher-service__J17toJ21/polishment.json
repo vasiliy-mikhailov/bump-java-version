@@ -1,0 +1,291 @@
+{
+  "meta": {
+    "repo": "hobynye/thank-you-matcher-service",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "89d0aa4e0da0be3beec473383ea59bf06ceba219",
+    "sha_to": "22586a752b8ea8a6d0a304b5362839ee1bdfe236"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_maven_wrapper_version",
+        "general_idea": "Bump the Maven wrapper version property to 3.3.4.",
+        "human_impl": "<maven.wrapper.version>3.2.0</maven.wrapper.version> -> <maven.wrapper.version>3.3.4</maven.wrapper.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_jacoco_version",
+        "general_idea": "Bump the JaCoCo version property to 0.8.14.",
+        "human_impl": "<jacoco.version>0.8.11</jacoco.version> -> <jacoco.version>0.8.14</jacoco.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_sonar_version_property",
+        "general_idea": "Introduce a new property for the SonarQube scanner version.",
+        "human_impl": "<sonar.version>5.5.0.6356</sonar.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_coverage_profile_activation",
+        "general_idea": "Remove the default activation of the coverage profile to prevent automatic execution.",
+        "human_impl": "Removed <activation><activeByDefault>true</activeByDefault></activation>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_jacoco_xml_format",
+        "general_idea": "Explicitly configure JaCoCo to generate XML format reports.",
+        "human_impl": "Added <configuration><formats><format>XML</format></formats></configuration>",
+        "bucket": "polishment"
+      }
+    ],
+    ".github/workflows/analysis.yml": [
+      {
+        "kind": "update_ci_trigger_types",
+        "general_idea": "Restrict pull_request trigger to specific event types to reduce unnecessary workflow runs.",
+        "human_impl": "branches: [main, beta, alpha] -> types: [opened, synchronize, reopened]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_github_token_env",
+        "general_idea": "Inject GITHUB_TOKEN into the Sonar step to enable GitHub integration features.",
+        "human_impl": "env: GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_sonar_maven_invocation",
+        "general_idea": "Use explicit plugin execution syntax for Sonar to ensure correct behavior in CI.",
+        "human_impl": "mvn clean verify sonar:sonar -> mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_coverage_profile",
+        "general_idea": "Activate the coverage Maven profile during the Sonar analysis step.",
+        "human_impl": "-Pcoverage",
+        "bucket": "polishment"
+      }
+    ],
+    ".github/workflows/release.yml": [
+      {
+        "kind": "remove_npm_cache",
+        "general_idea": "Remove the npm cache configuration from the setup-node step in the release workflow.",
+        "human_impl": "- cache: 'npm'",
+        "bucket": "polishment"
+      }
+    ],
+    ".mvn/wrapper/maven-wrapper.properties": [
+      {
+        "kind": "update_maven_wrapper_version",
+        "general_idea": "Upgrade the Maven Wrapper version to 3.3.4 to align with newer build tooling standards.",
+        "human_impl": "wrapperVersion=3.3.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_distribution_url",
+        "general_idea": "Update the Maven distribution URL to point to version 3.9.12.",
+        "human_impl": "distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.12/apache-maven-3.9.12-bin.zip",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_distribution_type",
+        "general_idea": "Configure the wrapper to download only the script distribution type.",
+        "human_impl": "distributionType=only-script",
+        "bucket": "polishment"
+      }
+    ],
+    ".releaserc": [
+      {
+        "kind": "fix_json_syntax",
+        "general_idea": "Corrected invalid JSON syntax by changing string 'true' to boolean true for the prerelease property.",
+        "human_impl": "\"prerelease\": \"true\" -> \"prerelease\": true",
+        "bucket": "polishment"
+      }
+    ],
+    "mvnw": [
+      {
+        "kind": "dependency_upgrade",
+        "general_idea": "Upgrade the Maven Wrapper script from version 3.2.0 to 3.3.2 to align with the project's dependency updates.",
+        "human_impl": "Updated version comment and applied script changes from maven-wrapper v3.3.2.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bug_fix",
+        "general_idea": "Fix shell script syntax and compatibility issues in the Maven Wrapper to ensure it runs correctly on various Unix-like environments.",
+        "human_impl": "Reformatted case statements, fixed spacing in test brackets, and updated hash_string logic for POSIX compliance.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bug_fix",
+        "general_idea": "Resolve issues with whitespace handling in property values read from maven-wrapper.properties.",
+        "human_impl": "Added a trim() function and applied it to distributionUrl and distributionSha256Sum values.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "feature_addition",
+        "general_idea": "Allow customization of the Maven user home directory via the MAVEN_USER_HOME environment variable.",
+        "human_impl": "Introduced MAVEN_USER_HOME variable defaulting to ~/.m2 and used it to construct MAVEN_HOME.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bug_fix",
+        "general_idea": "Improve error handling for download and extraction steps in the Maven Wrapper.",
+        "human_impl": "Added || die clauses to wget, curl, javac, unzip, and tar commands to fail explicitly on errors.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "security_fix",
+        "general_idea": "Update the embedded Java downloader to use URI.create instead of URL constructor for better security and compliance.",
+        "human_impl": "Changed java.net.URL(args[0]) to java.net.URI.create(args[0]).toURL() in Downloader.java.",
+        "bucket": "polishment"
+      }
+    ],
+    "mvnw.cmd": [
+      {
+        "kind": "update_wrapper_version",
+        "general_idea": "Upgrade the Maven Wrapper script from version 3.2.0 to 3.3.2 to align with the project's dependency updates.",
+        "human_impl": "Changed comment header from 'version 3.2.0' to 'version 3.3.2'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_maven_user_home_support",
+        "general_idea": "Add support for the MAVEN_USER_HOME environment variable to allow customizing the Maven distribution cache directory.",
+        "human_impl": "Added check for $env:MAVEN_USER_HOME to override $MAVEN_HOME_PARENT path",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "explicit_module_import",
+        "general_idea": "Explicitly import the Microsoft.PowerShell.Utility module to ensure Get-FileHash is available, addressing potential module loading issues in newer PowerShell environments.",
+        "human_impl": "Added 'Import-Module $PSHOME\\Modules\\Microsoft.PowerShell.Utility -Function Get-FileHash' before hash validation",
+        "bucket": "polishment"
+      }
+    ],
+    "renovate.json": [
+      {
+        "kind": "enable_renovate_dashboard",
+        "general_idea": "Add dependency dashboard to visualize and manage pending updates.",
+        "human_impl": "\"extends\": [\":dependencyDashboard\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_semantic_commits",
+        "general_idea": "Configure Renovate to use semantic commit messages for PRs.",
+        "human_impl": "\"extends\": [\":semanticCommits\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "increase_pr_limits",
+        "general_idea": "Remove hourly limits and increase concurrent PR limits for faster updates.",
+        "human_impl": "\"extends\": [\":prHourlyLimitNone\", \":prConcurrentLimit10\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "pin_github_action_digests",
+        "general_idea": "Pin GitHub Actions to specific digests for security and reproducibility.",
+        "human_impl": "\"extends\": [\"helpers:pinGitHubActionDigests\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_timezone",
+        "general_idea": "Define timezone for schedule calculations.",
+        "human_impl": "\"timezone\": \"America/New_York\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_update_schedule",
+        "general_idea": "Restrict dependency updates to weekday business hours.",
+        "human_impl": "\"schedule\": [\"after 9am and before 6pm on weekdays\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_label",
+        "general_idea": "Automatically label dependency PRs for easier filtering.",
+        "human_impl": "\"labels\": [\"dependencies\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_platform_automerge",
+        "general_idea": "Enable automatic merging of PRs on the platform level.",
+        "human_impl": "\"platformAutomerge\": true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_automerge_strategy",
+        "general_idea": "Configure squash merging for automated merges.",
+        "human_impl": "\"automergeStrategy\": \"squash\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_rebase_policy",
+        "general_idea": "Rebase PRs when they fall behind the base branch.",
+        "human_impl": "\"rebaseWhen\": \"behind-base-branch\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_dashboard_title",
+        "general_idea": "Customize the title of the dependency dashboard.",
+        "human_impl": "\"dependencyDashboardTitle\": \"Renovate Dependency Dashboard\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "auto_merge_maven_updates",
+        "general_idea": "Automatically merge patch and minor updates for Maven dependencies.",
+        "human_impl": "{ \"matchManagers\": [\"maven\"], \"matchUpdateTypes\": [\"patch\", \"minor\"], \"automerge\": true }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "auto_merge_github_action_updates",
+        "general_idea": "Automatically merge patch and minor updates for GitHub Actions.",
+        "human_impl": "{ \"matchManagers\": [\"github-actions\"], \"matchUpdateTypes\": [\"patch\", \"minor\"], \"automerge\": true }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "disable_major_automerge",
+        "general_idea": "Prevent automatic merging of major version updates.",
+        "human_impl": "{ \"matchUpdateTypes\": [\"major\"], \"automerge\": false }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "group_spring_boot_deps",
+        "general_idea": "Group Spring Boot related dependencies into a single PR.",
+        "human_impl": "{ \"matchPackagePrefixes\": [\"org.springframework.boot\", \"org.springframework\"], \"groupName\": \"spring-boot\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "group_testing_deps",
+        "general_idea": "Group testing framework dependencies into a single PR.",
+        "human_impl": "{ \"matchPackagePatterns\": [\"^org.junit\", ...], \"groupName\": \"testing-libraries\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_maven_manager",
+        "general_idea": "Explicitly enable the Maven manager in Renovate.",
+        "human_impl": "\"maven\": { \"enabled\": true }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_github_actions_manager",
+        "general_idea": "Explicitly enable the GitHub Actions manager in Renovate.",
+        "human_impl": "\"github-actions\": { \"enabled\": true }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "ignore_target_path",
+        "general_idea": "Ignore the target directory to avoid scanning build artifacts.",
+        "human_impl": "\"ignorePaths\": [\"**/target/**\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_pr_creation_policy",
+        "general_idea": "Create PRs only when not pending other checks.",
+        "human_impl": "\"prCreation\": \"not-pending\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "require_build_status",
+        "general_idea": "Require successful build status check before merging.",
+        "human_impl": "\"requiredStatusChecks\": [\"build\"]",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

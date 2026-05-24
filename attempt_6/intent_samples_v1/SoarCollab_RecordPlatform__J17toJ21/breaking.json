@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "SoarCollab/RecordPlatform",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "335710e6ea9d774600aef885e3dcdaf928dc8c3c",
+    "sha_to": "92d3dc484a0f2a035d16820e47a18347d5f68a91"
+  },
+  "by_file": {
+    "platform-backend/backend-service/pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Updated the target Java version property from 17 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "platform-backend/pom.xml": [
+      {
+        "kind": "set_java_version",
+        "general_idea": "Explicitly set the Java version property to 21 to align with the target JDK.",
+        "human_impl": "<properties>\n    <java.version>21</java.version>\n</properties>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

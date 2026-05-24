@@ -1,0 +1,82 @@
+diff --git a/src/main/java/com/fractalshot/xmlsplit/Split.java b/src/main/java/com/fractalshot/xmlsplit/Split.java
+index aaf1ff7..71c9666 100644
+--- a/src/main/java/com/fractalshot/xmlsplit/Split.java
++++ b/src/main/java/com/fractalshot/xmlsplit/Split.java
+@@ -2,21 +2,26 @@ package com.fractalshot.xmlsplit;
+ 
+ import org.apache.commons.cli.CommandLine;
+ import org.apache.commons.io.FilenameUtils;
++import org.xml.sax.InputSource;
+ import org.xml.sax.SAXException;
+ 
+ import javax.xml.parsers.ParserConfigurationException;
+ import javax.xml.parsers.SAXParserFactory;
+ import java.io.BufferedInputStream;
++import java.io.File;
+ import java.io.FileInputStream;
+ import java.io.IOException;
++import java.io.InputStream;
++import java.io.InputStreamReader;
++import java.nio.charset.StandardCharsets;
+ import java.util.zip.ZipEntry;
+ import java.util.zip.ZipFile;
+ 
+ public class Split extends HandlerFile {
+ 
+     public Split(CommandLine cmd) throws IOException, SAXException, ParserConfigurationException {
+-        filename = cmd.getOptionValue("i");
+         Timer.log("start");
++        filename = cmd.getOptionValue("i");
+         configSplitDepth = Integer.parseInt(cmd.getOptionValue("depth", "1"));
+         configElementsInHeader = Integer.parseInt(cmd.getOptionValue("header", "0"));
+         configSplitSize = Integer.parseInt(cmd.getOptionValue("size", "1000000"));
+@@ -24,20 +29,38 @@ public class Split extends HandlerFile {
+         newlines = minify && cmd.hasOption("newlines");
+         stopAt = cmd.getOptionValue("stopAt");
+         outputExtension = cmd.hasOption("xml") ? "xml" : "zip";
+-
++        outputDir = cmd.getOptionValue("o", FilenameUtils.getFullPath(filename));
++        if (!outputDir.isEmpty() && !outputDir.endsWith(File.separator)) {
++            outputDir += File.separator;
++        }
++        File outputDirFile = new File(outputDir);
++        if (!outputDirFile.exists() || !outputDirFile.isDirectory()) {
++            throw new IllegalArgumentException("Output directory does not exist: " + outputDir);
++        }
++    
+         if (FilenameUtils.getExtension(filename).equals(Writer.ZIP_EXTENSION)) {
+-            ZipFile zf = new ZipFile(filename);
+-            ZipEntry ze = zf.entries().nextElement();
+-            zipEntryName = ze.getName();
+-            System.out.println("Name: " + ze.getName() + ";\n" +
+-                    "Size: " + String.format("%,d", ze.getSize()) + " bytes;\n" +
+-                    "Compressed: " + String.format("%,d", ze.getCompressedSize()) + " bytes;\n");
+-            SAXParserFactory.newInstance().newSAXParser().parse(new BufferedInputStream(zf.getInputStream(ze)), this);
+-            zf.close();
++            try (ZipFile zf = new ZipFile(filename)) {
++                ZipEntry ze = zf.entries().nextElement();
++                zipEntryName = ze.getName();
++                System.out.println("Name: " + ze.getName() + ";\n" +
++                        "Size: " + String.format("%,d", ze.getSize()) + " bytes;\n" +
++                        "Compressed: " + String.format("%,d", ze.getCompressedSize()) + " bytes;\n");
++
++                try (InputStream is = zf.getInputStream(ze);
++                        BufferedInputStream bis = new BufferedInputStream(is);
++                        InputStreamReader isr = new InputStreamReader(bis, StandardCharsets.UTF_8)) {
++
++                    SAXParserFactory.newInstance().newSAXParser().parse(new InputSource(isr), this);
++                }
++            }
+         } else {
+             zipEntryName = filename;
+-            SAXParserFactory.newInstance().newSAXParser().parse(new BufferedInputStream(new FileInputStream(filename)),
+-                    this);
++            try (FileInputStream fis = new FileInputStream(filename);
++                    BufferedInputStream bis = new BufferedInputStream(fis);
++                    InputStreamReader isr = new InputStreamReader(bis, StandardCharsets.UTF_8)) {
++
++                SAXParserFactory.newInstance().newSAXParser().parse(new InputSource(isr), this);
++            }
+         }
+ 
+         Timer.log("end");

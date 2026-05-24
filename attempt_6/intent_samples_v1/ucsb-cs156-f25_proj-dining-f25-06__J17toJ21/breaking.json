@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "repo": "ucsb-cs156-f25/proj-dining-f25-06",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "877451cd2d7e3d920fe0f855a66353bc05737afb",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent version to 3.3.4 to support Java 21 and modern Spring ecosystem.",
+        "human_impl": "<parent><version>3.3.4</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_property",
+        "general_idea": "Explicitly set the Java version property to 21 for compilation and runtime targeting.",
+        "human_impl": "<properties><java.version>21</java.version></properties>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_swagger_with_springdoc",
+        "general_idea": "Replace deprecated Springfox Swagger dependencies with SpringDoc OpenAPI, which is compatible with Spring Boot 3.",
+        "human_impl": "<dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-starter-webmvc-ui</artifactId></dependency>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_spring_cloud_gateway",
+        "general_idea": "Update Spring Cloud Gateway MVC to version 4.1.3 to align with Spring Boot 3 dependencies.",
+        "human_impl": "<dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-gateway-mvc</artifactId><version>4.1.3</version></dependency>",
+        "bucket": "breaking"
+      }
+    ],
+    "Dockerfile": [
+      {
+        "kind": "base_image_upgrade",
+        "general_idea": "Switch the base image from a Maven-bundled JDK 11 image to a standalone Liberica JDK 21 Alpine image to support Java 21.",
+        "human_impl": "FROM bellsoft/liberica-openjdk-alpine:21",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "package_manager_migration",
+        "general_idea": "Replace apt-get with apk to align with the new Alpine Linux base image.",
+        "human_impl": "RUN apk add curl",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_installation",
+        "general_idea": "Install Maven explicitly via apk since it is no longer provided by the base image.",
+        "human_impl": "RUN apk add maven",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_installation",
+        "general_idea": "Install bash explicitly via apk as it is not present by default in minimal Alpine images.",
+        "human_impl": "RUN apk add bash",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_installation",
+        "general_idea": "Install libstdc++ to satisfy native library dependencies required by the application or tools.",
+        "human_impl": "RUN apk add --no-cache libstdc++",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "node_version_upgrade",
+        "general_idea": "Upgrade Node.js installation from version 12 to 16.20.0 using nvm to ensure compatibility with modern frontend tooling.",
+        "human_impl": "ENV NODE_VERSION=16.20.0 ... nvm install ${NODE_VERSION}",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "build_step_addition",
+        "general_idea": "Add Maven build step to compile and package the Java application within the Docker image.",
+        "human_impl": "RUN mvn -B -Pproduction -Ph2 -DskipTests -f /home/app/pom.xml clean package",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "entrypoint_configuration",
+        "general_idea": "Define the entrypoint to run the generated JAR file, replacing the generic bash shell command.",
+        "human_impl": "ENTRYPOINT [\"java\",\"-jar\",\"/home/app/target/team03-1.0.0.jar\"]",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "artifact_copy",
+        "general_idea": "Copy source code, frontend assets, and configuration files into the image for the build process.",
+        "human_impl": "COPY src /home/app/src ... COPY pom.xml /home/app",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

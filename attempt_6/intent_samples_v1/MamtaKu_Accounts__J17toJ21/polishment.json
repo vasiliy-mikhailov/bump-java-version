@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "repo": "MamtaKu/Accounts",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "3e56daca7bf1670bafb28b8c6b320453997bd006",
+    "sha_to": "4ba19e7792f9cf0977b5f08da6596675e7733705"
+  },
+  "by_file": {
+    "section2/accounts/src/main/java/com/eazybytes/accounts/controller/AccountsController.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove the unused import for ArraySchema to clean up the code.",
+        "human_impl": "Removed 'import io.swagger.v3.oas.annotations.media.ArraySchema;'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_class_javadoc",
+        "general_idea": "Add a class-level Javadoc comment to identify the author.",
+        "human_impl": "Added '/** @author Eazy Bytes */' before the class definition",
+        "bucket": "polishment"
+      }
+    ],
+    "section2/accounts/src/main/java/com/eazybytes/accounts/entity/Customer.java": [
+      {
+        "kind": "simplify_id_generation",
+        "general_idea": "Remove explicit Hibernate native generator configuration in favor of standard JPA auto-generation strategy.",
+        "human_impl": "Replaced `@GeneratedValue(strategy=GenerationType.AUTO, generator=\"native\")` and `@GenericGenerator` with simple `@GeneratedValue`.",
+        "bucket": "polishment"
+      }
+    ],
+    "section2/accounts/pom.xml": [
+      {
+        "kind": "bump_parent_version",
+        "general_idea": "Upgrade Spring Boot parent version to 3.2.0 to align with the new Java version and framework features.",
+        "human_impl": "<version>3.2.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "bump_dependency_version",
+        "general_idea": "Upgrade springdoc-openapi-starter-webmvc-ui dependency to version 2.3.0.",
+        "human_impl": "<version>2.3.0</version>",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_course_title",
+        "general_idea": "Refine the main title to emphasize Spring Boot alongside Docker and Kubernetes.",
+        "human_impl": "Changed header from 'Master Microservices with Java, Spring, Docker, Kubernetes' to 'Master Microservices with Spring Boot, Docker, Kubernetes'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_hero_image_source",
+        "general_idea": "Switch the hero image source from an external Udemy S3 bucket to a local GitHub repository path.",
+        "human_impl": "Updated image URL from udemy-image-web-upload.s3.amazonaws.com to github.com/eazybytes/microservices/blob/main/Microservice.png",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "restructure_course_sections",
+        "general_idea": "Rewrite the list of course sections to reflect updated curriculum structure and naming conventions.",
+        "human_impl": "Replaced old section list (e.g., 'Section 2 - Microservices & Spring Cloud') with new list (e.g., 'Section 2- Building microservices using Spring Boot')",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "expand_resource_links",
+        "general_idea": "Add and update external resource links to include new tools like OpenTelemetry, Jib, and specific documentation pages.",
+        "human_impl": "Added links for Spring Boot, Model Mapper, MapStruct, OpenTelemetry, Google Jib, and others while removing or updating existing ones.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_build_command",
+        "general_idea": "Simplify the Maven build image command by removing the test skip flag and adding Jib support.",
+        "human_impl": "Changed 'mvn spring-boot:build-image -Dmaven.test.skip=true' to 'mvn spring-boot:build-image' and added 'mvn compile jib:dockerBuild'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_docker_commands",
+        "general_idea": "Update Docker commands to include version tags and add commands for specific services like MySQL, Redis, and Keycloak.",
+        "human_impl": "Added ':s4' tags to image names and added run commands for MySQL, Redis, and Keycloak containers.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_apache_benchmark_section",
+        "general_idea": "Introduce a new section documenting Apache Benchmark commands for load testing.",
+        "human_impl": "Added table with 'ab -n 10 -c 2 -v 3 http://localhost:8072/eazybank/cards/api/contact-info'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_kubernetes_commands",
+        "general_idea": "Update Kubernetes command examples to reflect current deployment names and add PVC management commands.",
+        "human_impl": "Changed deployment names to 'gatewayserver-deployment' and added 'kubectl get pvc' and 'kubectl delete pvc' commands.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

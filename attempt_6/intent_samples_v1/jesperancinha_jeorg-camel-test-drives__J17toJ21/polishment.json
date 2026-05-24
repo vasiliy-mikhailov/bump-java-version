@@ -1,0 +1,199 @@
+{
+  "meta": {
+    "repo": "jesperancinha/jeorg-camel-test-drives",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "98ab42e30f8ce767838352fc207830f21818d91f",
+    "sha_to": "61c7285eaad149da8dbf845ca65c74a52ca7e9f7"
+  },
+  "by_file": {
+    "jeorg-camel-app-atm/pom.xml": [
+      {
+        "kind": "update_project_metadata",
+        "general_idea": "Renamed the project artifact name and description to reflect the new branding and scope.",
+        "human_impl": "<name>CamelTD :: ATM finder</name>\n<description>Application to find ATM across The Netherlands</description>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "consolidate_spring_dependencies",
+        "general_idea": "Replaced individual Spring Framework dependencies with the Spring Boot Starter Web to simplify classpath management.",
+        "human_impl": "<dependency>\n    <groupId>org.springframework.boot</groupId>\n    <artifactId>spring-boot-starter-web</artifactId>\n</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_legacy_logging",
+        "general_idea": "Removed explicit Log4j and SLF4J bindings, relying on Spring Boot's default logging configuration.",
+        "human_impl": "<!-- Removed log4j and slf4j-log4j12 dependencies -->",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_lombok",
+        "general_idea": "Removed the Lombok dependency, likely in favor of Kotlin data classes or manual boilerplate.",
+        "human_impl": "<!-- Removed org.projectlombok:lombok dependency -->",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_spring_boot_test",
+        "general_idea": "Added Spring Boot Test dependency to support modern Spring Boot testing features.",
+        "human_impl": "<dependency>\n    <groupId>org.springframework.boot</groupId>\n    <artifactId>spring-boot-test</artifactId>\n    <scope>test</scope>\n</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "migrate_to_camel_test_junit5",
+        "general_idea": "Replaced legacy Mockito and JUnit 4 dependencies with Camel Test JUnit 5 integrations.",
+        "human_impl": "<dependency>\n    <groupId>org.apache.camel</groupId>\n    <artifactId>camel-test-junit5</artifactId>\n</dependency>\n<dependency>\n    <groupId>org.apache.camel</groupId>\n    <artifactId>camel-test-spring-junit5</artifactId>\n</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_kotest",
+        "general_idea": "Added Kotest assertions for Kotlin-based testing.",
+        "human_impl": "<dependency>\n    <groupId>io.kotest</groupId>\n    <artifactId>kotest-assertions-core-jvm</artifactId>\n    <scope>test</scope>\n</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mockk",
+        "general_idea": "Added MockK as the mocking framework for Kotlin tests.",
+        "human_impl": "<dependency>\n    <groupId>io.mockk</groupId>\n    <artifactId>mockk-jvm</artifactId>\n    <scope>test</scope>\n</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_springmockk",
+        "general_idea": "Added SpringMockK to facilitate mocking Spring beans in Kotlin tests.",
+        "human_impl": "<dependency>\n    <groupId>com.ninja-squad</groupId>\n    <artifactId>springmockk</artifactId>\n    <scope>test</scope>\n</dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "remove_tomcat7_plugin": "Removed the legacy Tomcat 7 Maven plugin.",
+        "general_idea": "Removed the legacy Tomcat 7 Maven plugin.",
+        "human_impl": "<!-- Removed tomcat7-maven-plugin -->",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_jetty_plugin",
+        "general_idea": "Removed the Jetty Maven plugin configuration.",
+        "human_impl": "<!-- Removed jetty-maven-plugin -->",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "replace_coveralls_plugin",
+        "general_idea": "Replaced the Coveralls Maven plugin with a custom Omni Coverage Reporter plugin.",
+        "human_impl": "<plugin>\n    <groupId>org.jesperancinha.plugins</groupId>\n    <artifactId>omni-coveragereporter-maven-plugin</artifactId>\n</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_surefire_includes",
+        "general_idea": "Configured the Surefire plugin to explicitly include Test and IT classes.",
+        "human_impl": "<includes>\n    <include>**/*Test</include>\n    <include>**/*IT</include>\n</includes>",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "add_kotlin_stdlib",
+        "general_idea": "Add Kotlin standard library dependency to support Kotlin code compilation in the project.",
+        "human_impl": "<artifactId>kotlin-stdlib</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_kotest",
+        "general_idea": "Add Kotest assertions library for modern Kotlin-based testing.",
+        "human_impl": "<artifactId>kotest-assertions-core-jvm</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mockk",
+        "general_idea": "Add MockK library for Kotlin-native mocking in tests.",
+        "human_impl": "<artifactId>mockk-jvm</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_springmockk",
+        "general_idea": "Add SpringMockK to integrate MockK with Spring Boot testing.",
+        "human_impl": "<artifactId>springmockk</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_lombok",
+        "general_idea": "Remove Lombok dependency, likely replacing it with Kotlin data classes or manual boilerplate.",
+        "human_impl": "<!-- Lombok --> ... removed",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_guava",
+        "general_idea": "Upgrade Guava to version 33.0.0-jre for security patches and Java 21 compatibility.",
+        "human_impl": "<guava.version>33.0.0-jre</guava.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_junit",
+        "general_idea": "Upgrade JUnit 4 to version 4.13.2 for bug fixes and compatibility.",
+        "human_impl": "<junit.version>4.13.2</junit.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_compiler_plugin",
+        "general_idea": "Upgrade Maven Compiler Plugin to 3.12.0 to ensure proper compilation with Java 21.",
+        "human_impl": "<maven.compiler.plugin>3.12.0</maven.compiler.plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_surefire_plugin",
+        "general_idea": "Upgrade Maven Surefire Plugin to 3.2.3 for better test execution support.",
+        "human_impl": "<maven-surefire-plugin.version>3.2.3</maven-surefire-plugin.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "replace_coverage_plugin",
+        "general_idea": "Replace coveralls-maven-plugin with omni-coveragereporter-maven-plugin for code coverage reporting.",
+        "human_impl": "<artifactId>omni-coveragereporter-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_project_name",
+        "general_idea": "Add a human-readable name to the parent POM for better identification in build outputs.",
+        "human_impl": "<name>CamelTD :: Parent</name>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_maven_plugin_versions",
+        "general_idea": "Explicitly define versions for resources, war, and jar plugins to ensure build reproducibility.",
+        "human_impl": "<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>",
+        "bucket": "polishment"
+      }
+    ],
+    ".github/workflows/camel-test-drives.yml": [
+      {
+        "kind": "update_action_versions",
+        "general_idea": "Upgrade GitHub Actions runners and setup-java actions to v3 for better maintenance and compatibility.",
+        "human_impl": "uses: actions/checkout@v3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_coverage_workflow",
+        "general_idea": "Consolidate separate coverage reporting steps into a single unified step using the omni-coveragereporter plugin.",
+        "human_impl": "run: mvn omni-coveragereporter:report",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_maven_command",
+        "general_idea": "Update the Maven build command to explicitly include jacoco agent preparation and reporting goals.",
+        "human_impl": "run: mvn clean install jacoco:prepare-agent package jacoco:report",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "restrict_trigger_branches",
+        "general_idea": "Limit the workflow trigger to only the master branch instead of all pushes.",
+        "human_impl": "branches: [ master ]",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "add_debug_artifact_ignore",
+        "general_idea": "Ignore .attach* files generated by Java debuggers or process attachment tools to keep the repository clean.",
+        "human_impl": ".attach*",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

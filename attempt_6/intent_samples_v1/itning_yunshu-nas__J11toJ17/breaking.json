@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "itning/yunshu-nas",
+    "stage": "J11->J17",
+    "family": "spring-boot-2",
+    "sha_from": "b0a67331e23da3d10f4e38f076e22d777efc3804",
+    "sha_to": "77900e4114e77a9e4482a877ee90b98e279ceac7"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_upgrade",
+        "general_idea": "Update the target Java version property from 11 to 17 to align with the migration goal.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "spring_boot_upgrade",
+        "general_idea": "Bump Spring Boot parent version from 2.3.1 to 2.6.2 to support Java 17 and access newer features.",
+        "human_impl": "<version>2.6.2</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,270 @@
+diff --git a/src/main/resources/static/js/app.js b/src/main/resources/static/js/app.js
+index b8df434..c8991b5 100644
+--- a/src/main/resources/static/js/app.js
++++ b/src/main/resources/static/js/app.js
+@@ -1,9 +1,13 @@
++
+ let currentPath = '';
++let historyStack = [];
++let forwardStack = [];
+ 
+ document.addEventListener('DOMContentLoaded', function() {
+     const pathInput = document.getElementById('currentPath');
+     const navigateBtn = document.getElementById('navigateBtn');
+     const analyzeBtn = document.getElementById('analyzeBtn');
++    const backBtn = document.getElementById('backBtn');
+ 
+     // Set default path to user home or common location
+     if (navigator.platform.toLowerCase().includes('win')) {
+@@ -14,26 +18,67 @@ document.addEventListener('DOMContentLoaded', function() {
+     currentPath = pathInput.value;
+ 
+     navigateBtn.addEventListener('click', () => {
+-        currentPath = pathInput.value;
+-        loadDirectory(currentPath);
++        goToPath(pathInput.value);
+     });
+ 
+     analyzeBtn.addEventListener('click', () => {
+         currentPath = pathInput.value;
+-        analyzeDirectory(currentPath);
++        analyzeDirectoryStream(currentPath);
++    });
++
++    backBtn.addEventListener('click', () => {
++        goBack();
+     });
+ 
+     pathInput.addEventListener('keypress', (e) => {
+         if (e.key === 'Enter') {
+-            currentPath = pathInput.value;
+-            loadDirectory(currentPath);
++            goToPath(pathInput.value);
+         }
+     });
+ 
+     // Load initial directory
+-    loadDirectory(currentPath);
++    goToPath(currentPath, false);
+ });
+ 
++function goToPath(path, pushHistory = true) {
++    if (pushHistory && currentPath && currentPath !== path) {
++        historyStack.push(currentPath);
++        if (historyStack.length > 20) historyStack.shift(); // limit history
++        // updateHistoryList is intentionally kept as a safe no-op when UI isn't present
++        updateHistoryList();
++    }
++    currentPath = path;
++    document.getElementById('currentPath').value = path;
++    loadDirectory(path);
++}
++
++function goBack() {
++    if (historyStack.length > 0) {
++        const prevPath = historyStack.pop();
++        forwardStack.push(currentPath);
++        goToPath(prevPath, false);
++        updateHistoryList();
++    }
++}
++
++function updateHistoryList() {
++    // Intentionally safe: the visible history UI may be removed. If the container exists, render it,
++    // otherwise do nothing (we still maintain the internal historyStack for Back button functionality).
++    const historyList = document.getElementById('historyList');
++    if (!historyList) return; // UI not present => no DOM operations
++
++    historyList.innerHTML = '';
++    historyStack.slice().reverse().forEach((path, idx) => {
++        const li = document.createElement('li');
++        li.textContent = path;
++        li.className = 'history-item';
++        li.onclick = () => {
++            goToPath(path);
++        };
++        historyList.appendChild(li);
++    });
++}
++
+ async function loadDirectory(path) {
+     const fileList = document.getElementById('fileList');
+     fileList.innerHTML = '<div class="loading">Loading directory</div>';
+@@ -72,7 +117,7 @@ function displayFiles(files, path) {
+     // Add parent directory option if not at root
+     if (path !== '/' && path !== 'C:\\' && path !== 'D:\\') {
+         html += `
+-            <div class="file-item" onclick="navigateToParent('${path}')">
++            <div class="file-item" id="parentDirItem" data-path="${escapeHtml(path)}">
+                 <span class="file-icon">⬆️</span>
+                 <div class="file-info">
+                     <div class="file-name">..</div>
+@@ -85,10 +130,9 @@ function displayFiles(files, path) {
+     files.forEach(file => {
+         const icon = file.directory ? '📁' : getFileIcon(file.type);
+         const typeLabel = file.directory ? 'Directory' : capitalizeFirst(file.type);
+-        const clickHandler = file.directory ? `navigateToDirectory('${file.path}')` : '';
+-
++        // Use data-path attribute to store the path exactly
+         html += `
+-            <div class="file-item" ${clickHandler ? `onclick="${clickHandler}"` : ''}>
++            <div class="file-item"${file.directory ? ` data-path="${escapeHtml(file.path)}" data-directory="true"` : ''}>
+                 <span class="file-icon">${icon}</span>
+                 <div class="file-info">
+                     <div class="file-name">${escapeHtml(file.name)}</div>
+@@ -99,6 +143,23 @@ function displayFiles(files, path) {
+     });
+ 
+     fileList.innerHTML = html;
++
++    // Add event delegation for folder navigation
++    fileList.querySelectorAll('.file-item[data-directory="true"]').forEach(item => {
++        item.addEventListener('click', function() {
++            const path = this.getAttribute('data-path');
++            if (path) navigateToDirectory(path);
++        });
++    });
++
++    // Add event listener for parent directory
++    const parentItem = document.getElementById('parentDirItem');
++    if (parentItem) {
++        parentItem.addEventListener('click', function() {
++            const path = this.getAttribute('data-path');
++            if (path) navigateToParent(path);
++        });
++    }
+ }
+ 
+ function getFileIcon(type) {
+@@ -110,19 +171,20 @@ function getFileIcon(type) {
+ }
+ 
+ function navigateToDirectory(path) {
+-    currentPath = path;
+-    document.getElementById('currentPath').value = path;
+-    loadDirectory(path);
++    goToPath(path);
+ }
+ 
+ function navigateToParent(path) {
+     const separator = path.includes('\\') ? '\\' : '/';
+     const parts = path.split(separator).filter(p => p);
+     parts.pop();
+-    
++
+     let parentPath;
+     if (parts.length === 0) {
+         parentPath = separator;
++    } else if (parts.length === 1 && /^[A-Za-z]:$/.test(parts[0])) {
++        // Drive letter only (e.g. 'C:') -> return 'C:\\' (root of drive)
++        parentPath = parts[0] + separator;
+     } else {
+         parentPath = parts.join(separator);
+         if (path.startsWith(separator)) {
+@@ -158,33 +220,100 @@ async function analyzeDirectory(path) {
+     }
+ }
+ 
++function analyzeDirectoryStream(path) {
++    const resultsDiv = document.getElementById('analysisResults');
++    resultsDiv.innerHTML = `
++        <div class="loading">Analyzing directory</div>
++        <div id="analysisLive" class="analysis-live">
++            <div class="analysis-live-header">Processing files and folders</div>
++            <ul id="analysisLog" class="analysis-log"></ul>
++        </div>
++    `;
++
++    // Connect to SSE stream
++    const es = new EventSource(`/api/analyze-stream?path=${encodeURIComponent(path)}`);
++
++    const logEl = document.getElementById('analysisLog');
++
++    es.addEventListener('start', (e) => {
++        if (logEl) {
++            const li = document.createElement('li');
++            li.className = 'analysis-event analysis-start';
++            li.textContent = e.data;
++            logEl.appendChild(li);
++            logEl.scrollTop = logEl.scrollHeight;
++        }
++    });
++
++    es.addEventListener('directory', (e) => {
++        if (logEl) {
++            const li = document.createElement('li');
++            li.className = 'analysis-event directory';
++            li.textContent = e.data;
++            logEl.appendChild(li);
++            logEl.scrollTop = logEl.scrollHeight;
++        }
++    });
++
++    es.addEventListener('file', (e) => {
++        if (logEl) {
++            const li = document.createElement('li');
++            li.className = 'analysis-event file';
++            li.textContent = e.data;
++            logEl.appendChild(li);
++            // keep it scroll to bottom
++            logEl.scrollTop = logEl.scrollHeight;
++        }
++    });
++
++    es.addEventListener('result', (e) => {
++        // final result is a JSON object
++        try {
++            const result = (typeof e.data === 'string') ? JSON.parse(e.data) : e.data;
++            displayAnalysisResults(result);
++        } catch (err) {
++            console.warn('Could not parse result event', err);
++        }
++        es.close();
++    });
++
++    es.addEventListener('error', (e) => {
++        if (e && e.data) {
++            resultsDiv.innerHTML = `<div class="error-message">Error: ${e.data}</div>`;
++        } else {
++            // If EventSource encounters an error it may send a generic event; leave existing results
++        }
++        es.close();
++    });
++}
++
+ function displayAnalysisResults(results) {
+     const resultsDiv = document.getElementById('analysisResults');
+ 
+     const html = `
+         <div class="stat-grid">
+             <div class="stat-card">
+-                <div class="stat-value">${results.totalFolders}</div>
++                <div class="stat-value">${formatNumber(results.totalFolders ?? 0)}</div>
+                 <div class="stat-label">Folders</div>
+             </div>
+             <div class="stat-card">
+-                <div class="stat-value">${results.totalFiles}</div>
++                <div class="stat-value">${formatNumber(results.totalFiles ?? 0)}</div>
+                 <div class="stat-label">Total Files</div>
+             </div>
+             <div class="stat-card">
+-                <div class="stat-value">${results.totalCodeFiles}</div>
++                <div class="stat-value">${formatNumber(results.totalCodeFiles ?? 0)}</div>
+                 <div class="stat-label">Code Files</div>
+             </div>
+             <div class="stat-card">
+-                <div class="stat-value">${results.totalDocFiles}</div>
++                <div class="stat-value">${formatNumber(results.totalDocFiles ?? 0)}</div>
+                 <div class="stat-label">Documents</div>
+             </div>
+             <div class="stat-card">
+-                <div class="stat-value">${results.totalMethods}</div>
++                <div class="stat-value">${formatNumber(results.totalMethods ?? 0)}</div>
+                 <div class="stat-label">Methods</div>
+             </div>
+             <div class="stat-card">
+-                <div class="stat-value">${formatNumber(results.totalLines)}</div>
++                <div class="stat-value">${formatNumber(results.totalLines ?? 0)}</div>
+                 <div class="stat-label">Lines of Code</div>
+             </div>
+         </div>

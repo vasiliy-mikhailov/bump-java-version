@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "VizcainoRAW/hotel-alura",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "d69dc72343a1edda13daa1db478de892c93a3846",
+    "sha_to": "c487a5c105aef3d31a9ee6601254bb0a4cfb3a59"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_group_id",
+        "general_idea": "Changed the Maven groupId to reflect a new project ownership or namespace.",
+        "human_impl": "<groupId>com.vizcainoraw</groupId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_devtools_dependency",
+        "general_idea": "Added Spring Boot DevTools to enable automatic restarts and live reload during development.",
+        "human_impl": "<artifactId>spring-boot-devtools</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mysql_driver_dependency",
+        "general_idea": "Added the MySQL Connector/J driver to support database connectivity with MySQL.",
+        "human_impl": "<artifactId>mysql-connector-j</artifactId>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

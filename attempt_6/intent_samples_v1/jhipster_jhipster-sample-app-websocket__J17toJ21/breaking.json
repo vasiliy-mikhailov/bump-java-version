@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-websocket",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "0f21d11924d11ea118fa00d67dfbf2e80aa4a698",
+    "sha_to": "0fd99ea689776a184829e3e2fcb1f33ecbcd7043"
+  },
+  "by_file": {
+    "src/main/java/io/github/jhipster/sample/JhipsterWebsocketSampleApplicationApp.java": [
+      {
+        "kind": "update_liquibase_import",
+        "general_idea": "Update the import path for LiquibaseProperties to match the new package structure in Spring Boot 3.x.",
+        "human_impl": "import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/CRLFLogConverter.java": [
+      {
+        "kind": "api_migration_marker_list",
+        "general_idea": "Replace deprecated single marker access with the new marker list API introduced in newer SLF4J versions.",
+        "human_impl": "List<Marker> markers = event.getMarkerList(); if ((markers != null && !markers.isEmpty() && markers.get(0).contains(CRLF_SAFE_MARKER))",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/CacheConfiguration.java": [
+      {
+        "kind": "update_import_paths",
+        "general_idea": "Update import statements to reflect package relocations in newer Spring Boot versions.",
+        "human_impl": "Changed `org.springframework.boot.autoconfigure.cache.JCacheManagerCustomizer` to `org.springframework.boot.cache.autoconfigure.JCacheManagerCustomizer` and similar for Hibernate.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LiquibaseConfiguration.java": [
+      {
+        "kind": "update_import_paths",
+        "general_idea": "Update Spring Boot import statements to reflect package restructuring in newer Spring Boot versions.",
+        "human_impl": "import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "fix_contexts_conversion",
+        "general_idea": "Convert List contexts to comma-delimited string to match Liquibase API requirements.",
+        "human_impl": "liquibase.setContexts(StringUtils.collectionToCommaDelimitedString(liquibaseProperties.getContexts()));",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "fix_label_filter_conversion",
+        "general_idea": "Convert List label filters to comma-delimited string to match Liquibase API requirements.",
+        "human_impl": "liquibase.setLabelFilter(StringUtils.collectionToCommaDelimitedString(liquibaseProperties.getLabelFilter()));",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_profile_check_api",
+        "general_idea": "Replace deprecated acceptsProfiles with matchesProfiles for environment profile checking.",
+        "human_impl": "if (env.matchesProfiles(JHipsterConstants.SPRING_PROFILE_NO_LIQUIBASE))",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LoggingConfiguration.java": [
+      {
+        "kind": "replace_jackson_imports",
+        "general_idea": "Replace com.fasterxml.jackson imports with tools.jackson to align with the new Jackson distribution used in the target framework version.",
+        "human_impl": "import tools.jackson.core.JacksonException; import tools.jackson.databind.ObjectMapper;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_exception_type",
+        "general_idea": "Change the thrown exception type from JsonProcessingException to JacksonException to match the new Jackson API.",
+        "human_impl": ") throws JacksonException {",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "meta": {
+    "repo": "socialsoftware/microservices-simulator",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "61ccbead3604d86f590e6796b3410ef85c4a5192",
+    "sha_to": "15eea4983547ee3c609e997889914395d60dd3d8"
+  },
+  "by_file": {
+    "backend/pom.xml": [
+      {
+        "kind": "spring_boot_upgrade",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.8 to 3.3.0 to support Java 21 and modern Spring features.",
+        "human_impl": "<version>3.3.0</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "java_version_upgrade",
+        "general_idea": "Update the target Java version property from 17 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "backend/jmeter/tournament/thesis-cases/5a-updateStudentName-addParticipant-processUpdateNameEvent.jmx": [
+      {
+        "kind": "update_http_sampler_properties",
+        "general_idea": "Replace deprecated or removed HTTPSampler properties with new ones required by JMeter 5.6.2.",
+        "human_impl": "replaced embedded_url_re/connect_timeout/response_timeout with BROWSER_COMPATIBLE_MULTIPART/image_parser/concurrentDwn/concurrentPool/md5/ipSourceType",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_post_body_raw_property",
+        "general_idea": "Add the new postBodyRaw boolean property to HTTPSamplerProxy elements to ensure compatibility with newer JMeter versions.",
+        "human_impl": "added <boolProp name=\"HTTPSampler.postBodyRaw\">false</boolProp>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_thread_group_delayed_start",
+        "general_idea": "Add the delayedStart property to ThreadGroup elements to match the new JMeter schema.",
+        "human_impl": "added <boolProp name=\"ThreadGroup.delayedStart\">false</boolProp>",
+        "bucket": "breaking"
+      }
+    ],
+    "backend/jmeter/tournament/thesis-cases/5b-addParticipant-updateStudentName-processUpdateNameEvent.jmx": [
+      {
+        "kind": "http_sampler_schema_update",
+        "general_idea": "Replace deprecated or removed HTTPSampler properties with new ones required by JMeter 5.6.2.",
+        "human_impl": "Replaced embedded_url_re/connect_timeout/response_timeout with BROWSER_COMPATIBLE_MULTIPART/image_parser/concurrentDwn/concurrentPool/md5/ipSourceType",
+        "bucket": "breaking"
+      }
+    ],
+    "backend/jmeter/tournament/thesis-cases/5c-updateStudentName1-addParticipant-updateStudentName2-processUpdateNameEvent.jmx": [
+      {
+        "kind": "update_http_sampler_properties",
+        "general_idea": "Replace deprecated or removed HTTPSampler properties with their modern equivalents in JMeter 5.6.",
+        "human_impl": "Replaced embedded_url_re/connect_timeout/response_timeout with BROWSER_COMPATIBLE_MULTIPART/image_parser/concurrentDwn/concurrentPool/md5/ipSourceType",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_db_sampler_with_http",
+        "general_idea": "Replace direct JDBC database manipulation with an HTTP API call to decrement version, decoupling tests from direct DB access.",
+        "human_impl": "Removed JDBCSampler and JDBCDataSource, added HTTPSamplerProxy to /versions/decrement",
+        "bucket": "breaking"
+      }
+    ],
+    "backend/jmeter/tournament/thesis-cases/8-5-update-tournament-concurrent-intention-pass.jmx": [
+      {
+        "kind": "update_http_sampler_properties",
+        "general_idea": "Replace deprecated or removed HTTPSampler properties with new equivalents required by JMeter 5.6.2.",
+        "human_impl": "replaced embedded_url_re/connect_timeout/response_timeout with BROWSER_COMPATIBLE_MULTIPART/image_parser/concurrentDwn/concurrentPool/md5/ipSourceType",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_post_body_raw_property",
+        "general_idea": "Add the new postBodyRaw boolean property to HTTPSamplerProxy elements to ensure compatibility with newer JMeter versions.",
+        "human_impl": "added <boolProp name=\"HTTPSampler.postBodyRaw\">false</boolProp>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_thread_group_delayed_start",
+        "general_idea": "Add the delayedStart property to ThreadGroup elements to match the new JMeter schema.",
+        "human_impl": "added <boolProp name=\"ThreadGroup.delayedStart\">false</boolProp>",
+        "bucket": "breaking"
+      }
+    ],
+    "backend/jmeter/tournament/thesis-cases/8-6-add-participant-concurrent-update-execution-student-name-processing-ends-first.jmx": [
+      {
+        "kind": "update_http_sampler_schema",
+        "general_idea": "Replace deprecated or removed HTTPSampler properties with new equivalents required by JMeter 5.6.2.",
+        "human_impl": "replaced embedded_url_re/connect_timeout/response_timeout with BROWSER_COMPATIBLE_MULTIPART/image_parser/concurrentDwn/concurrentPool/md5/ipSourceType",
+        "bucket": "breaking"
+      }
+    ],
+    "backend/jmeter/tournament/thesis-cases/8-8-update-execution-student-add-participant-process-event-add-participant.jmx": [
+      {
+        "kind": "update_http_sampler_properties",
+        "general_idea": "Replace deprecated or removed HTTPSampler properties with new equivalents required by JMeter 5.6.2.",
+        "human_impl": "replaced embedded_url_re/connect_timeout/response_timeout with BROWSER_COMPATIBLE_MULTIPART/image_parser/concurrentDwn/concurrentPool/md5/ipSourceType",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_post_body_raw_property",
+        "general_idea": "Add the new postBodyRaw boolean property to HTTPSamplerProxy elements to ensure compatibility with the new JMeter version.",
+        "human_impl": "added <boolProp name=\"HTTPSampler.postBodyRaw\">false</boolProp>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_thread_group_delayed_start",
+        "general_idea": "Add the delayedStart property to ThreadGroup elements to match the new JMeter schema.",
+        "human_impl": "added <boolProp name=\"ThreadGroup.delayedStart\">false</boolProp>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

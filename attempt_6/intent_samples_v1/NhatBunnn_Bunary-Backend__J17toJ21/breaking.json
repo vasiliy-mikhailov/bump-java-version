@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "repo": "NhatBunnn/Bunary-Backend",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "f1763a6dc67bba8ecaeb54579da4fe4a5a2f9e64",
+    "sha_to": "dae28dc6b11dd7d7ef66be0906edebea1c53e783"
+  },
+  "by_file": {
+    "src/main/java/com/bunary/vocab/dto/FailureResponseDTO.java": [
+      {
+        "kind": "simplify_error_payload",
+        "general_idea": "Replace complex collection-based error fields with simple string fields for error code and message.",
+        "human_impl": "Changed 'private List<String> error' and 'private Map<String, String> fieldError' to 'private String errorCode' and 'private String message'.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/bunary/vocab/dto/SuccessReponseDTO.java": [
+      {
+        "kind": "simplify_message_field",
+        "general_idea": "Change message field from List<String> to String to simplify the DTO structure.",
+        "human_impl": "private String message;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_data_map_field",
+        "general_idea": "Remove the dataMap field as it is no longer needed in this DTO.",
+        "human_impl": "- private Map<String, Object> dataMap;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/bunary/vocab/dto/reponse/UserResponseDTO.java": [
+      {
+        "kind": "change_field_type",
+        "general_idea": "Changed the dateOfBirth field type from LocalDate to Instant to support timestamp precision.",
+        "human_impl": "private Instant dateOfBirth;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

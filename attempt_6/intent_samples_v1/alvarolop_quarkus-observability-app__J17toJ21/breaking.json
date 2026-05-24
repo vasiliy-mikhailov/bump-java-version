@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "alvarolop/quarkus-observability-app",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "d6ba02ca4430edd644975c840ea8f87a1e4a851d",
+    "sha_to": "0f4d084dad0af67698369076bf18ab46c5231c25"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the Maven compiler release target from Java 17 to Java 21 to align with the new JDK baseline.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bump_quarkus_version",
+        "general_idea": "Upgrade the Quarkus platform BOM from 3.0.3.Final to 3.13.3 to access newer features and bug fixes.",
+        "human_impl": "<quarkus.platform.version>3.13.3</quarkus.platform.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_dependency",
+        "general_idea": "Replace the deprecated quarkus-resteasy-reactive dependency with the newer quarkus-rest extension.",
+        "human_impl": "<artifactId>quarkus-rest</artifactId>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

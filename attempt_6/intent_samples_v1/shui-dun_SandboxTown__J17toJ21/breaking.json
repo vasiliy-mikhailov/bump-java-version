@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "shui-dun/SandboxTown",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "c173ad4390a9f165dca48ca93601f213a14cd5dd",
+    "sha_to": "c7caa52e0b9c02963b7d5e36ebaf346847d2af2c"
+  },
+  "by_file": {
+    "sandbox_town_backend/src/main/java/com/shuidun/sandbox_town_backend/config/WebSocketConfig.java": [
+      {
+        "kind": "update_websocket_endpoint",
+        "general_idea": "Change the primary WebSocket endpoint path from /event to /websocket.",
+        "human_impl": "registry.addHandler(myWebSocketHandler, \"/websocket\")...",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

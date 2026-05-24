@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-react",
+    "stage": "J8->J11",
+    "family": "hibernate-5",
+    "sha_from": "b5671566cac6b4f88c45a2d862fe5b7e3e572aa6",
+    "sha_to": "f8906cc132828d9158658f47ac954bb8c1e3e94f"
+  },
+  "by_file": {
+    "src/main/java/io/github/jhipster/sample/ApplicationWebXml.java": [
+      {
+        "kind": "update_spring_boot_import",
+        "general_idea": "Update the Spring Boot servlet initializer import to the new package structure introduced in Spring Boot 2.0+.",
+        "human_impl": "import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_jhipster_util_import",
+        "general_idea": "Update the JHipster default profile utility import to the new package structure.",
+        "human_impl": "import tech.jhipster.config.DefaultProfileUtil;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/JhipsterSampleApplicationReactApp.java": [
+      {
+        "kind": "update_imports",
+        "general_idea": "Update JHipster configuration imports from the old io.github.jhipster package to the new tech.jhipster package.",
+        "human_impl": "import tech.jhipster.config.DefaultProfileUtil;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/aop/logging/LoggingAspect.java": [
+      {
+        "kind": "update_spring_profiles_api",
+        "general_idea": "Update Environment.acceptsProfiles to use the new Profiles.of() API introduced in newer Spring versions.",
+        "human_impl": "env.acceptsProfiles(Profiles.of(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT))",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_jhipster_import",
+        "general_idea": "Update import path for JHipsterConstants to reflect the package rename in newer JHipster versions.",
+        "human_impl": "import tech.jhipster.config.JHipsterConstants;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/CacheConfiguration.java": [
+      {
+        "kind": "package_rename",
+        "general_idea": "Update import statements to reflect the migration from io.github.jhipster to tech.jhipster package namespace.",
+        "human_impl": "import tech.jhipster.config.JHipsterProperties;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "api_migration",
+        "general_idea": "Replace deprecated Ehcache Duration/Expirations API with Java 8+ java.time.Duration and ExpiryPolicyBuilder.",
+        "human_impl": ".withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(ehcache.getTimeToLiveSeconds())))",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/DatabaseConfiguration.java": [
+      {
+        "kind": "update_jhipster_imports",
+        "general_idea": "Update import statements to use the new `tech.jhipster` package namespace instead of the old `io.github.jhipster` namespace.",
+        "human_impl": "import tech.jhipster.config.JHipsterConstants;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java": [
+      {
+        "kind": "remove_afterburner_module",
+        "general_idea": "Remove the AfterburnerModule bean because it is incompatible with Java 11 due to bytecode generation restrictions.",
+        "human_impl": "Removed import com.fasterxml.jackson.module.afterburner.AfterburnerModule and the afterburnerModule() bean definition.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_problem_module_import",
+        "general_idea": "Update the import for ConstraintViolationProblemModule to reflect the package rename in the zalando-problem library.",
+        "human_impl": "Changed import from org.zalando.problem.validation.ConstraintViolationProblemModule to org.zalando.problem.violations.ConstraintViolationProblemModule.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LocaleConfiguration.java": [
+      {
+        "kind": "replace_deprecated_webmvc_adapter",
+        "general_idea": "Replace the deprecated WebMvcConfigurerAdapter class with the WebMvcConfigurer interface to comply with Spring Framework 5.x requirements.",
+        "human_impl": "extends WebMvcConfigurerAdapter -> implements WebMvcConfigurer",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_locale_resolver_import",
+        "general_idea": "Update the import for AngularCookieLocaleResolver to reflect the package rename from io.github.jhipster to tech.jhipster.",
+        "human_impl": "import io.github.jhipster.config.locale.AngularCookieLocaleResolver -> import tech.jhipster.config.locale.AngularCookieLocaleResolver",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LoggingAspectConfiguration.java": [
+      {
+        "kind": "package_rename",
+        "general_idea": "Update import statement to reflect the migration of JHipster configuration classes from the io.github.jhipster namespace to the tech.jhipster namespace.",
+        "human_impl": "import tech.jhipster.config.JHipsterConstants;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

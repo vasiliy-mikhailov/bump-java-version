@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "repo": "entur/extime",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "644c2df924809e0d58fdf8cefc2d8b81477a40aa",
+    "sha_to": "0576ef76b98a84ca229ba09be478af07503cac68"
+  },
+  "by_file": {
+    "src/main/java/no/rutebanken/extime/converter/CommonDataToNetexConverter.java": [
+      {
+        "kind": "jaxb_namespace_migration",
+        "general_idea": "Replace javax.xml.bind imports with jakarta.xml.bind to comply with Java EE to Jakarta EE namespace changes required by Spring Boot 3 and Java 21.",
+        "human_impl": "import jakarta.xml.bind.JAXBElement;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "camel_integration_refactor",
+        "general_idea": "Refactor the converter method to accept data via Camel Exchange properties instead of relying on Spring @Value configuration, aligning with Camel 3/Spring Boot 3 integration patterns.",
+        "human_impl": "public JAXBElement<PublicationDeliveryStructure> convertToNetex(@ExchangeProperty(PROPERTY_NSR_QUAY_MAP) Map<String, Quay> nsrQuayMap)",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/extime/converter/LineDataToNetexConverter.java": [
+      {
+        "kind": "jaxb_namespace_migration",
+        "general_idea": "Migrate JAXB import from javax.xml.bind to jakarta.xml.bind to comply with Jakarta EE namespace changes required by Spring Boot 3 and Java 21.",
+        "human_impl": "import jakarta.xml.bind.JAXBElement;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/extime/converter/NetexCommonDataSet.java": [
+      {
+        "kind": "import_migration",
+        "general_idea": "Replace javax.annotation.PostConstruct with jakarta.annotation.PostConstruct to align with Jakarta EE namespace in Spring Boot 3.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/extime/converter/RealTimeFlightToSiriConverter.java": [
+      {
+        "kind": "replace_javax_xml_duration",
+        "general_idea": "Replace deprecated javax.xml.datatype.Duration with java.time.Duration to align with Java 21 standards and remove legacy XML datatype dependencies.",
+        "human_impl": "import java.time.Duration; return java.time.Duration.ofMillis(215081000L);",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/extime/converter/ScheduledFlightConverter.java": [
+      {
+        "kind": "javax_to_jakarta_namespace_migration",
+        "general_idea": "Replace javax.annotation imports with jakarta.annotation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.annotation.PostConstruct;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/no/rutebanken/extime/repository/GcsBlobStoreRepository.java": [
+      {
+        "kind": "inject_storage_dependency",
+        "general_idea": "Replace manual storage initialization with constructor injection of the Storage bean.",
+        "human_impl": "public GcsBlobStoreRepository(Storage storage) { this.storage = storage; }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_unused_config_properties",
+        "general_idea": "Remove @Value annotations for credential path, bucket name, blob path, and project ID as they are no longer used directly.",
+        "human_impl": "Removed @Value(\"${blobstore.gcs.credential.path}\") and similar fields",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_container_name_field",
+        "general_idea": "Add a mutable field to store the container name, likely set via a setter method.",
+        "human_impl": "private String containerName;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_setter_method",
+        "general_idea": "Implement a setter method for the container name to allow external configuration.",
+        "human_impl": "public void setContainerName(String containerName) { this.containerName = containerName; }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_get_blob_method",
+        "general_idea": "Implement the getBlob method to retrieve blobs using the injected storage and container name.",
+        "human_impl": "public InputStream getBlob(String name) { return BlobStoreHelper.getBlob(storage, containerName, name); }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_upload_blob_logic",
+        "general_idea": "Update uploadBlob to use the injected storage and new container name field instead of manual storage creation and old config fields.",
+        "human_impl": "BlobStoreHelper.createNew(storage, containerName, targetFile, inputStream, false);",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

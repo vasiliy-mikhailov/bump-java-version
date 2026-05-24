@@ -1,0 +1,10 @@
+{
+  "meta": {
+    "repo": "maiaimei/example",
+    "stage": "J8->J17",
+    "family": null,
+    "sha_from": "0c4fd2690c6eaebf21a961fb36fde97634fdb3b2",
+    "sha_to": "6589073a9c7ffa02e1b4e41d62ae6e15fe49897d"
+  },
+  "by_file": {}
+}

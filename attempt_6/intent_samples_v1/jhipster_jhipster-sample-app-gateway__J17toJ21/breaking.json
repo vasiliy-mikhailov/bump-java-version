@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-gateway",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "6ae46a653e41781c4ecf9727dc5cbba4295df3d2",
+    "sha_to": "1654a717bbe0c98af434319e17cbb715134e77cb"
+  },
+  "by_file": {
+    "src/main/java/io/github/jhipster/sample/config/CRLFLogConverter.java": [
+      {
+        "kind": "api_migration_marker_list",
+        "general_idea": "Replace deprecated single marker access with the new marker list API to comply with SLF4J 2.x requirements in Java 21 environments.",
+        "human_impl": "Changed event.getMarker() check to event.getMarkerList() iteration.",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java": [
+      {
+        "kind": "remove_deprecated_annotation",
+        "general_idea": "Remove the @EnableWebFluxSecurity annotation which is no longer required in recent Spring Security versions.",
+        "human_impl": "-@EnableWebFluxSecurity",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_security_config_api",
+        "general_idea": "Update SecurityWebFilterChain configuration to use the new Customizer.withDefaults() API for CORS and OAuth2 JWT settings.",
+        "human_impl": ".cors(withDefaults()) ... .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

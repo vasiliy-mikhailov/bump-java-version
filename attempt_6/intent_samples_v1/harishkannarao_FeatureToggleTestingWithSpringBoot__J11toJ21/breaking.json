@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "repo": "harishkannarao/FeatureToggleTestingWithSpringBoot",
+    "stage": "J11->J21",
+    "family": "junit4-mockito",
+    "sha_from": "187f90e2a7b9f3e0eaaab52fe3855ff555e2a8dd",
+    "sha_to": "585e1a4524255ff4f9673d7072ab686da4a766e6"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "upgrade_java_version",
+        "general_idea": "Update the Java source and target version property from 11 to 21 to align with the new JDK.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_spring_boot",
+        "general_idea": "Migrate to Spring Boot 3.4.0 by adopting the spring-boot-starter-parent, which enforces Jakarta EE namespaces and Java 17+ requirements.",
+        "human_impl": "<parent><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-parent</artifactId><version>3.4.0</version></parent>",
+        "bucket": "breaking"
+      }
+    ],
+    "gradle/wrapper/gradle-wrapper.properties": [
+      {
+        "kind": "upgrade_gradle_version",
+        "general_idea": "Upgrade the Gradle wrapper distribution URL to version 8.11.1 to support Java 21 features and modern build capabilities.",
+        "human_impl": "distributionUrl=...gradle-8.11.1-bin.zip",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

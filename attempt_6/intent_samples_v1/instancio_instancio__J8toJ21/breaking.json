@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "repo": "instancio/instancio",
+    "stage": "J8->J21",
+    "family": "junit4-mockito",
+    "sha_from": "3d8c6591b1865720d9bcc427918071a5b064c992",
+    "sha_to": "41783c545b2e235701b9533d694c016122db8472"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "enforce_jdk_version",
+        "general_idea": "Enforce a minimum JDK version of 24 for the build environment using the maven-enforcer-plugin.",
+        "human_impl": "<requireJavaVersion><version>[24,)</version></requireJavaVersion>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "configure_multi_release_jar",
+        "general_idea": "Configure the build to produce a Multi-Release JAR with specific source roots for Java 9, 16, 17, and 21.",
+        "human_impl": "<multiReleaseOutput>true</multiReleaseOutput> ... <release>21</release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_to_jakarta_persistence",
+        "general_idea": "Replace javax.persistence dependencies with jakarta.persistence-api to support modern Java EE/Jakarta EE standards.",
+        "human_impl": "<artifactId>jakarta.persistence-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "migrate_to_jakarta_validation",
+        "general_idea": "Replace javax.validation dependencies with jakarta.validation-api to support modern Java EE/Jakarta EE standards.",
+        "human_impl": "<artifactId>jakarta.validation-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_hibernate_validator",
+        "general_idea": "Upgrade Hibernate Validator to version 8.x which requires Jakarta Validation and is incompatible with older Java versions.",
+        "human_impl": "<version.hibernate.validator>8.0.2.Final</version.hibernate.validator>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

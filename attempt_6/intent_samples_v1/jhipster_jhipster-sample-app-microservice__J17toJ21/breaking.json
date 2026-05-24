@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "repo": "jhipster/jhipster-sample-app-microservice",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "7b3f7c24df7efda0d96d1d1de844c372ff3fd1ef",
+    "sha_to": "b75b085a9efffa913f63f559f15645a9efc2d505"
+  },
+  "by_file": {
+    "src/main/java/io/github/jhipster/sample/JhipsterSampleMicroserviceApp.java": [
+      {
+        "kind": "update_liquibase_import",
+        "general_idea": "Update Liquibase properties import path to match the new package structure in Spring Boot 3.x.",
+        "human_impl": "import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/CRLFLogConverter.java": [
+      {
+        "kind": "api_migration_marker_list",
+        "general_idea": "Replace deprecated single marker access with the new marker list API to comply with SLF4J 2.x requirements in Java 21 environments.",
+        "human_impl": "List<Marker> markers = event.getMarkerList(); if ((markers != null && !markers.isEmpty() && markers.get(0).contains(CRLF_SAFE_MARKER)) ...",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/CacheConfiguration.java": [
+      {
+        "kind": "import_package_migration",
+        "general_idea": "Update ServerProperties import path to match Spring Boot 3.2+ package structure.",
+        "human_impl": "import org.springframework.boot.web.server.autoconfigure.ServerProperties;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/io/github/jhipster/sample/config/LiquibaseConfiguration.java": [
+      {
+        "kind": "update_import_paths",
+        "general_idea": "Update Spring Boot import statements to reflect package restructuring in newer Spring Boot versions.",
+        "human_impl": "import org.springframework.boot.jdbc.autoconfigure.DataSourceProperties;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_profile_check_api",
+        "general_idea": "Replace deprecated acceptsProfiles with matchesProfiles for checking active Spring profiles.",
+        "human_impl": "if (env.matchesProfiles(JHipsterConstants.SPRING_PROFILE_NO_LIQUIBASE))",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

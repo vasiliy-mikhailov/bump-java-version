@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "pascalgrimaud/jhipster-lite",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "ac7b4dd7966c76eec6878c06da616616089b33d1",
+    "sha_to": "384193208ad9ca22038f11e37d7e2275f338b76a"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the Maven compiler source and target properties to Java 17.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_enforcer_plugin",
+        "general_idea": "Add Maven Enforcer plugin to enforce Java 17 and Maven 3.8.3 requirements.",
+        "human_impl": "<plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-enforcer-plugin</artifactId>...</plugin>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

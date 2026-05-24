@@ -1,0 +1,18 @@
+diff --git a/hibernate/pom.xml b/hibernate/pom.xml
+index 7b879df..ea8a018 100644
+--- a/hibernate/pom.xml
++++ b/hibernate/pom.xml
+@@ -25,6 +25,12 @@
+             <artifactId>postgresql</artifactId>
+             <version>42.7.6</version>
+         </dependency>
++        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
++        <dependency>
++            <groupId>org.projectlombok</groupId>
++            <artifactId>lombok</artifactId>
++            <version>1.18.38</version>
++        </dependency>
+     </dependencies>
+ 
+ </project>
+\ No newline at end of file

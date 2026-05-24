@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "repo": "ruanrongman/IntelliConnect",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "e532f053641d18164580b9b5cc7567cfdcbccc74",
+    "sha_to": "44f1d89c17223122cfc67b2224e68200a0da6b4c"
+  },
+  "by_file": {
+    "src/main/java/top/rslly/iot/config/JWTAuthenticationEntryPoint.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.servlet imports with jakarta.servlet to comply with Spring Boot 3.x and Jakarta EE 9+ namespace requirements.",
+        "human_impl": "import jakarta.servlet.http.HttpServletRequest;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/top/rslly/iot/config/JWTAuthenticationFilter.java": [
+      {
+        "kind": "import_migration",
+        "general_idea": "Replace javax.servlet imports with jakarta.servlet to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.servlet.FilterChain;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/top/rslly/iot/config/JWTAuthorizationFilter.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.servlet imports with jakarta.servlet to comply with Spring Boot 3.x and Jakarta EE 9+ namespace requirements.",
+        "human_impl": "import jakarta.servlet.FilterChain;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/top/rslly/iot/config/MyAccessDeniedHandlerimplements.java": [
+      {
+        "kind": "migrate_javax_to_jakarta",
+        "general_idea": "Update servlet imports from javax.servlet to jakarta.servlet to comply with Spring Boot 3.x and Jakarta EE 9+ namespace requirements.",
+        "human_impl": "import jakarta.servlet.http.HttpServletRequest;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/top/rslly/iot/config/SecurityConfig.java": [
+      {
+        "kind": "replace_deprecated_annotation",
+        "general_idea": "Replace the deprecated @EnableGlobalMethodSecurity with the Spring Security 6+ standard @EnableMethodSecurity.",
+        "human_impl": "@EnableMethodSecurity(prePostEnabled = true)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_http_security_api",
+        "general_idea": "Migrate HttpSecurity configuration from the deprecated fluent API (antMatchers, .and()) to the new lambda-based API (requestMatchers, .authorizeHttpRequests).",
+        "human_impl": ".authorizeHttpRequests(authz -> authz.requestMatchers(...).permitAll())",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_cors_configuration",
+        "general_idea": "Update CORS configuration to use the new lambda-based setup and replace deprecated applyPermitDefaultValues with explicit allowed origin patterns.",
+        "human_impl": ".cors(cors -> cors.configurationSource(corsConfigurationSource()))",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_missing_imports",
+        "general_idea": "Add necessary imports for the new Spring Security 6 APIs and configuration classes.",
+        "human_impl": "import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_web_security_customizer",
+        "general_idea": "Update WebSecurityCustomizer to use requestMatchers instead of the deprecated antMatchers.",
+        "human_impl": "return (web) -> web.ignoring().requestMatchers(...)",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/top/rslly/iot/controllers/Auth.java": [
+      {
+        "kind": "replace_javax_with_jakarta",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/top/rslly/iot/controllers/Tool.java": [
+      {
+        "kind": "jakarta_namespace_migration",
+        "general_idea": "Replace javax.servlet and javax.validation imports with jakarta equivalents required by Spring Boot 3.x.",
+        "human_impl": "import jakarta.servlet.http.HttpServletResponse; import jakarta.validation.Valid;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

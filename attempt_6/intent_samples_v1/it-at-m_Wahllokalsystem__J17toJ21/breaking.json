@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "repo": "it-at-m/Wahllokalsystem",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "6dc0e2bda6c478dafa50abc40adc5a82a1e366d0",
+    "sha_to": "296a115db615b3b70d3a08e3f6823f131e0ab373"
+  },
+  "by_file": {
+    "wls-common/exception/pom.xml": [
+      {
+        "kind": "add_dependency_jakarta_validation_api",
+        "general_idea": "Add Jakarta Validation API dependency, migrating from javax.validation for Java EE/Jakarta EE compatibility.",
+        "human_impl": "<artifactId>jakarta.validation-api</artifactId>",
+        "bucket": "breaking"
+      }
+    ],
+    "wls-common/security/pom.xml": [
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add jakarta.persistence-api dependency, migrating from javax.persistence for Java EE/Jakarta EE compatibility.",
+        "human_impl": "<artifactId>jakarta.persistence-api</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add jakarta.validation-api dependency, migrating from javax.validation for Java EE/Jakarta EE compatibility.",
+        "human_impl": "<artifactId>jakarta.validation-api</artifactId>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

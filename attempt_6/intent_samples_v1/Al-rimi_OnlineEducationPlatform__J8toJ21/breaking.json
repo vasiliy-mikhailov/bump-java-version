@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "repo": "Al-rimi/OnlineEducationPlatform",
+    "stage": "J8->J21",
+    "family": "jakarta-ee-javax",
+    "sha_from": "05ac884078a1f2d27665a7c314fb667d8474a01f",
+    "sha_to": "c76c763d44fa88ef81bfc13e560785f2e51a6ecd"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update compiler source and target properties from Java 8 to Java 21.",
+        "human_impl": "<java.version>21</java.version>\n<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jaxb_api",
+        "general_idea": "Add JAXB API dependency required by JJWT 0.9.1 on Java 11+ where it was removed from the JDK.",
+        "human_impl": "<dependency>\n    <groupId>javax.xml.bind</groupId>\n    <artifactId>jaxb-api</artifactId>\n    <version>2.3.1</version>\n</dependency>",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/webapp/WEB-INF/web.xml": [
+      {
+        "kind": "remove_spring_xml_config",
+        "general_idea": "Remove explicit Spring MVC DispatcherServlet and ContextLoaderListener configuration from web.xml because the project is migrating to Spring Boot, which handles this via auto-configuration.",
+        "human_impl": "Removed <listener> and <servlet> blocks for org.springframework.web.context.ContextLoaderListener and org.springframework.web.servlet.DispatcherServlet.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

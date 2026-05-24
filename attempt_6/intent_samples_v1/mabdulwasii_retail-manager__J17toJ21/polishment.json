@@ -1,0 +1,245 @@
+{
+  "meta": {
+    "repo": "mabdulwasii/retail-manager",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "f4fe3e917132e15c49c6dde772dbe40edfe004e5",
+    "sha_to": "f6532d6c668608ac29fce901fa016bcc2b30be8e"
+  },
+  "by_file": {
+    "backend/src/main/java/com/princely/shopmanager/analytics/controller/AnalyticsController.java": [
+      {
+        "kind": "replace_wildcard_import",
+        "general_idea": "Replace wildcard import with explicit imports for specific DTO classes to improve code clarity and maintainability.",
+        "human_impl": "import com.princely.shopmanager.analytics.dto.SalesSummaryDto;\nimport com.princely.shopmanager.analytics.dto.InvestmentRoiDto;\nimport com.princely.shopmanager.analytics.dto.FraudStatisticsDto;\nimport com.princely.shopmanager.analytics.dto.RevenueAnalyticsDto;",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/analytics/dto/FraudStatisticsDto.java": [
+      {
+        "kind": "convert_to_record",
+        "general_idea": "Replace Lombok-annotated class with a Java record to leverage modern language features for immutable data carriers.",
+        "human_impl": "Removed @Data and @Builder annotations and converted the class to a public record with constructor parameters.",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/analytics/dto/InvestmentRoiDto.java": [
+      {
+        "kind": "migrate_to_record",
+        "general_idea": "Replace Lombok-annotated class with Java record to leverage built-in immutability and reduce boilerplate.",
+        "human_impl": "public record InvestmentRoiDto(String shopId, ...) {}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_lombok_dependency",
+        "general_idea": "Remove unused Lombok imports and annotations as the class is now a standard Java record.",
+        "human_impl": "Removed 'import lombok.Builder;' and 'import lombok.Data;'",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/analytics/dto/RevenueAnalyticsDto.java": [
+      {
+        "kind": "migrate_to_record",
+        "general_idea": "Replace Lombok-annotated class with a Java record to leverage built-in immutability and reduce boilerplate.",
+        "human_impl": "Removed @Data and @Builder annotations and converted the class to a public record with constructor parameters.",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/analytics/dto/SalesSummaryDto.java": [
+      {
+        "kind": "migrate_to_record",
+        "general_idea": "Replace Lombok-annotated class with Java record to leverage built-in data carrier features.",
+        "human_impl": "Removed @Data/@Builder annotations and class fields, replacing them with a public record declaration containing the same components.",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/analytics/service/AnalyticsService.java": [
+      {
+        "kind": "refactor_import_cleanup",
+        "general_idea": "Replace wildcard import with explicit imports and remove unused repository import to improve code clarity.",
+        "human_impl": "import com.princely.shopmanager.analytics.dto.SalesSummaryDto; ... // removed RiskAssessmentRepository",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_method_extraction",
+        "general_idea": "Extract sales summary calculation logic into a private method to allow internal reuse without transaction proxy issues.",
+        "human_impl": "private SalesSummaryDto calculateSalesSummaryInternal(...) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_dto_instantiation",
+        "general_idea": "Replace Builder pattern with direct constructor calls for SalesSummaryDto, likely due to DTO refactoring to records or immutable classes.",
+        "human_impl": "new SalesSummaryDto(shopId, startDate, ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_dto_instantiation",
+        "general_idea": "Replace Builder pattern with direct constructor calls for InvestmentRoiDto.",
+        "human_impl": "new InvestmentRoiDto(shopId, startDate, ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_dto_instantiation",
+        "general_idea": "Replace Builder pattern with direct constructor calls for FraudStatisticsDto.",
+        "human_impl": "new FraudStatisticsDto(shopId, startDate, ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_internal_call",
+        "general_idea": "Update getRevenueAnalytics to use the new internal calculation method to avoid transaction proxy issues.",
+        "human_impl": "SalesSummaryDto currentPeriod = calculateSalesSummaryInternal(...);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_accessor_usage",
+        "general_idea": "Update code to use accessor methods (e.g., totalRevenue()) instead of getters (getTotalRevenue()), consistent with Java Records or modern DTOs.",
+        "human_impl": "currentPeriod.totalRevenue()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_dto_instantiation",
+        "general_idea": "Replace Builder pattern with direct constructor calls for RevenueAnalyticsDto.",
+        "human_impl": "new RevenueAnalyticsDto(shopId, startDate, ...)",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/auth/filter/TenantFilter.java": [
+      {
+        "kind": "refactor_import_order",
+        "general_idea": "Reorder import statements to group standard library, third-party, and project-specific imports logically.",
+        "human_impl": "Moved jakarta.servlet and lombok imports below springframework imports.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for the new JwtPrincipal domain class used for authentication data extraction.",
+        "human_impl": "import com.princely.shopmanager.auth.domain.JwtPrincipal;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_user_extraction",
+        "general_idea": "Update user information extraction to support both JwtPrincipal and Jwt types for broader authentication compatibility.",
+        "human_impl": "Added instanceof check for JwtPrincipal before falling back to Jwt for extracting userId and userName.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_tenant_extraction",
+        "general_idea": "Update tenant ID extraction to support both JwtPrincipal and Jwt types for broader authentication compatibility.",
+        "human_impl": "Added instanceof check for JwtPrincipal before falling back to Jwt for extracting tenantId.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_log_message",
+        "general_idea": "Update debug log message to reflect that tenant ID can now be extracted from Principal as well as JWT.",
+        "human_impl": "Changed log message from 'extracted from JWT token' to 'extracted from JWT token/principal'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_javadoc_formatting",
+        "general_idea": "Remove empty line in Javadoc comment to adhere to stricter documentation formatting standards.",
+        "human_impl": "Removed blank line between method description and list of approaches in extractTenantId Javadoc.",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/auth/security/JwtAuthConverter.java": [
+      {
+        "kind": "add_import",
+        "general_idea": "Add import for JwtPrincipal class to enable its usage in the converter.",
+        "human_impl": "import com.princely.shopmanager.auth.domain.JwtPrincipal;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "use_api_feature",
+        "general_idea": "Replace Collectors.toList() with Stream.toList() to utilize the Java 16+ convenience method.",
+        "human_impl": ".toList()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_logic",
+        "general_idea": "Instantiate JwtPrincipal from JWT and populate it with extracted roles.",
+        "human_impl": "JwtPrincipal principal = JwtPrincipal.fromJwt(jwt); ... principal.setRoles(roleNames);",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/auth/security/TenantSecurityService.java": [
+      {
+        "kind": "extract_role_constants",
+        "general_idea": "Replace hardcoded role string literals with constants from a dedicated SecurityRoles class to improve maintainability and consistency.",
+        "human_impl": "authority.getAuthority().equals(SecurityRoles.ROLE_SYSTEM_ADMIN)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_return_statement",
+        "general_idea": "Refactor validateAndGetShop to return the Optional result directly instead of assigning to a local variable first.",
+        "human_impl": "return shopRepository.findById(shopId).orElseThrow(...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_role_names",
+        "general_idea": "Update role checks to use new constant names (e.g., SHOP_MANAGER instead of MANAGER) reflecting a change in the role naming convention.",
+        "human_impl": "hasRoleInCurrentTenant(SecurityRoles.SHOP_MANAGER)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reorganize_imports",
+        "general_idea": "Reorder and clean up import statements, moving Lombok imports to the end and removing unused User import.",
+        "human_impl": "import lombok.RequiredArgsConstructor;",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/core/controller/ShopController.java": [
+      {
+        "kind": "extract_magic_number",
+        "general_idea": "Extract the hardcoded page size value into a named constant to improve code maintainability and readability.",
+        "human_impl": "Added `private static final int DEFAULT_PAGE_SIZE = 20;` and replaced the literal `20` in `@PageableDefault` with the constant.",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/core/domain/Product.java": [
+      {
+        "kind": "add_field",
+        "general_idea": "Add a location field to the Product entity to store product location information.",
+        "human_impl": "private String location;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field_with_annotation",
+        "general_idea": "Add a metadata field using Hibernate's JSON type code to store flexible key-value pairs.",
+        "human_impl": "@JdbcTypeCode(SqlTypes.JSON)\nprivate Map<String, Object> metadata;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Add supplier_name column to store the name of the product supplier.",
+        "human_impl": "@Column(name = \"supplier_name\")\nprivate String supplierName;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Add supplier_contact column to store contact information for the product supplier.",
+        "human_impl": "@Column(name = \"supplier_contact\")\nprivate String supplierContact;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Add a dimensions field to store product dimension details.",
+        "human_impl": "private String dimensions;",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/java/com/princely/shopmanager/core/domain/Shop.java": [
+      {
+        "kind": "refactor_imports",
+        "general_idea": "Replace wildcard imports with explicit imports for Jakarta Persistence and Lombok annotations.",
+        "human_impl": "import jakarta.persistence.CascadeType; ... import lombok.Getter;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_lombok_config",
+        "general_idea": "Update Lombok @ToString and @EqualsAndHashCode exclusions to reflect the new Tenant field and removed Users field.",
+        "human_impl": "@ToString(exclude = {\"products\", \"tenant\"})",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

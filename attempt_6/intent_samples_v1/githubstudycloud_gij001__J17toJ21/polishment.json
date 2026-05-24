@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "repo": "githubstudycloud/gij001",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "1201e4cac29f2f55d9786f885cb81f7da2b1f2ce",
+    "sha_to": "56beef992fdc30c045d06a9f7e3836a0c6cb1e6a"
+  },
+  "by_file": {
+    "platform-config/pom.xml": [
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Boot Web starter to enable web server capabilities for the config service.",
+        "human_impl": "<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Lombok dependency to reduce boilerplate code in Java entities.",
+        "human_impl": "<dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><scope>provided</scope></dependency>",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "update_spring_cloud_version",
+        "general_idea": "Bump the Spring Cloud BOM version from 2025.0.0 to 2025.1.0.",
+        "human_impl": "<spring-cloud.version>2025.1.0</spring-cloud.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_lombok_version",
+        "general_idea": "Bump the Lombok dependency version from 1.18.36 to 1.18.42.",
+        "human_impl": "<lombok.version>1.18.42</lombok.version>",
+        "bucket": "polishment"
+      }
+    ],
+    "platform-config/src/main/resources/application.yml": [
+      {
+        "kind": "add_native_profile_support",
+        "general_idea": "Introduce a native filesystem backend profile to allow local development without requiring a GitLab connection.",
+        "human_impl": "Added 'profiles.active' defaulting to 'native' and configured 'spring.cloud.config.server.native.search-locations'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_git_basedir",
+        "general_idea": "Explicitly set the base directory for Git clones to avoid using the default temporary directory.",
+        "human_impl": "Added 'basedir: ${CONFIG_BASEDIR:${user.home}/config-repo}' to git configuration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_force_pull",
+        "general_idea": "Force the config server to pull the latest changes from Git on every request.",
+        "human_impl": "Added 'force-pull: ${CONFIG_FORCE_PULL:true}' to git configuration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_search_paths",
+        "general_idea": "Refactor Git search paths to support a multi-environment directory structure.",
+        "human_impl": "Changed 'search-paths' from '{application}' to 'config/env{profile}'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "default_gitlab_token",
+        "general_idea": "Provide an empty default value for the GitLab token environment variable to prevent startup errors if missing.",
+        "human_impl": "Changed 'password: ${GITLAB_TOKEN}' to 'password: ${GITLAB_TOKEN:}'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "disable_clone_on_start",
+        "general_idea": "Change default behavior to not clone the repository on startup, likely to improve startup time or allow lazy loading.",
+        "human_impl": "Changed 'clone-on-start: true' to 'clone-on-start: ${CLONE_ON_START:false}'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "parameterize_ssl_validation",
+        "general_idea": "Allow SSL validation skipping to be controlled via environment variable instead of being hardcoded.",
+        "human_impl": "Changed 'skip-ssl-validation: false' to 'skip-ssl-validation: ${SKIP_SSL_VALIDATION:false}'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_refresh_rate",
+        "general_idea": "Explicitly set the Git refresh rate to 0, disabling periodic background refreshes.",
+        "human_impl": "Added 'refresh-rate: 0' to git configuration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_app_logging",
+        "general_idea": "Enable DEBUG level logging for the application's specific package.",
+        "human_impl": "Added 'com.platform.config: DEBUG' to logging levels.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_springdoc",
+        "general_idea": "Enable SpringDoc OpenAPI documentation generation and Swagger UI.",
+        "human_impl": "Added 'springdoc.api-docs.enabled: true' and 'springdoc.swagger-ui.enabled: true'.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

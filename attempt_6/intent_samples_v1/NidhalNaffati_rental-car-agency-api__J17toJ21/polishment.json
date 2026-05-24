@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "repo": "NidhalNaffati/rental-car-agency-api",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "b95068e55dc082724ca81a97a9d76cbc7aca39a6",
+    "sha_to": "cd62919ef4690c9608908f99158d083504eb38f8"
+  },
+  "by_file": {
+    "src/main/java/com/CarRentalAgency/CarRentalAgencyApplication.java": [
+      {
+        "kind": "add_javadoc_author",
+        "general_idea": "Add Javadoc comment block with author attribution to the main application class.",
+        "human_impl": "Added /** @Autor Nidhal Naffati */ before the class declaration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_indentation",
+        "general_idea": "Normalize code indentation from tabs to spaces to comply with standard Java formatting conventions.",
+        "human_impl": "Changed leading tabs in main method to spaces.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/CarRentalAgency/entity/Car.java": [
+      {
+        "kind": "add_validation_constraints",
+        "general_idea": "Add Hibernate validation annotations to enforce data integrity rules on entity fields.",
+        "human_impl": "@Length(min = 5, max = 50) private String name;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_not_null_constraints",
+        "general_idea": "Enforce non-nullability on primitive-like fields using Jakarta validation annotations.",
+        "human_impl": "@NotNull private short seats;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_id_generation",
+        "general_idea": "Switch from AUTO generation to explicit SEQUENCE generation for better database compatibility and control.",
+        "human_impl": "@SequenceGenerator(name = \"car_seq\", ...) @GeneratedValue(strategy = GenerationType.SEQUENCE, ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_primitive_to_wrapper",
+        "general_idea": "Change ID type from primitive long to Long object to support nullability and standard JPA practices.",
+        "human_impl": "private Long id;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_column_constraints",
+        "general_idea": "Define unique and nullable constraints explicitly on the registration number column.",
+        "human_impl": "@Column(unique = true, nullable = false) private int registrationNumber;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_enum_mappings",
+        "general_idea": "Map string-based enums to database columns using EnumType.STRING for readability.",
+        "human_impl": "@Enumerated(EnumType.STRING) private Model model;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_relationship_mapping",
+        "general_idea": "Establish a ManyToOne relationship with Dealer entity including join column configuration.",
+        "human_impl": "@ManyToOne @JoinColumn(name = \"dealer_id\", nullable = false) private Dealer dealer;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_json_serialization_fix",
+        "general_idea": "Prevent infinite recursion during JSON serialization by marking the back-reference.",
+        "human_impl": "@JsonBackReference private Dealer dealer;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_lombok_builder",
+        "general_idea": "Enable builder pattern support for the entity class using Lombok.",
+        "human_impl": "@Builder",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_enum_definitions",
+        "general_idea": "Define specific enum types for Car attributes like Model, Gear, and Fuel.",
+        "human_impl": "public enum Model { SUV, SPORTS_CAR, ... }",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "add_flyway_dependency",
+        "general_idea": "Add Flyway MySQL dependency for database migration management.",
+        "human_impl": "<artifactId>flyway-mysql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_flyway_plugin",
+        "general_idea": "Add Flyway Maven plugin to execute database migrations during the build process.",
+        "human_impl": "<artifactId>flyway-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jackson_jsr310",
+        "general_idea": "Add Jackson JSR310 datatype support for Java 8+ date/time API serialization.",
+        "human_impl": "<artifactId>jackson-datatype-jsr310</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mail_starter",
+        "general_idea": "Add Spring Boot Mail starter dependency for email functionality.",
+        "human_impl": "<artifactId>spring-boot-starter-mail</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_jupiter",
+        "general_idea": "Explicitly add JUnit Jupiter dependency for modern testing support.",
+        "human_impl": "<artifactId>junit-jupiter</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_vintage",
+        "general_idea": "Add JUnit 4 dependency, likely for legacy test compatibility or specific vintage engine needs.",
+        "human_impl": "<artifactId>junit</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_context_support",
+        "general_idea": "Add Spring Context Support dependency, often needed for specific mail or resource handling utilities.",
+        "human_impl": "<artifactId>spring-context-support</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_thymeleaf",
+        "general_idea": "Remove Thymeleaf starter as the project appears to be moving towards a pure REST API approach.",
+        "human_impl": "Removed spring-boot-starter-thymeleaf",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_project_version",
+        "general_idea": "Update the project artifact version from snapshot to a release version.",
+        "human_impl": "<version>1.02.02</version>",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.yml": [
+      {
+        "kind": "update_db_url",
+        "general_idea": "Updated the database connection URL to use a cleaner schema name and removed legacy JDBC parameters.",
+        "human_impl": "url: jdbc:mysql://localhost:3306/RentalCarDB?createDatabaseIfNotExist=true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_password",
+        "general_idea": "Removed unnecessary quotes from the database password configuration.",
+        "human_impl": "password: root",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_ddl_strategy",
+        "general_idea": "Changed Hibernate DDL auto strategy from 'update' to 'validate' to enforce schema consistency with migrations.",
+        "human_impl": "ddl-auto: validate",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_hibernate_dialect",
+        "general_idea": "Switched Hibernate dialect from MySQL8Dialect to the generic MySQLDialect.",
+        "human_impl": "dialect: org.hibernate.dialect.MySQLDialect",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_sql_formatting",
+        "general_idea": "Enabled SQL formatting in Hibernate properties for better readability in logs.",
+        "human_impl": "format_sql: true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_thymeleaf_config",
+        "general_idea": "Removed Thymeleaf configuration block as it is no longer used or required.",
+        "human_impl": "-  thymeleaf:\n-    cache: false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_flyway_config",
+        "general_idea": "Added Flyway configuration to manage database migrations explicitly.",
+        "human_impl": "flyway:\n    enabled: true\n    baseline-on-migrate: true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_error_config",
+        "general_idea": "Configured the server to exclude stack traces from error responses for security and cleanliness.",
+        "human_impl": "server:\n  error:\n    include-stacktrace: never",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

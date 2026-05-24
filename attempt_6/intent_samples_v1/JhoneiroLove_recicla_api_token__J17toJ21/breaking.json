@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "JhoneiroLove/recicla_api_token",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "56025175582775a670b8879c2c2b17e4bc7727cd",
+    "sha_to": "ddf0db26821dae54c49f6dc9d1b359c0055c7faa"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_java_version",
+        "general_idea": "Update the project's target Java version from 17 to 21 in the Maven properties.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

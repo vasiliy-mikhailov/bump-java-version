@@ -1,0 +1,131 @@
+{
+  "meta": {
+    "repo": "hpcclab/OaaS",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "d17c57750cfb25098be9957dade04fcf45c27ce3",
+    "sha_to": "0fc3f09370f221b5c75815dc17bbfb138288a07e"
+  },
+  "by_file": {
+    "common/model/src/main/java/org/hpcclab/oaas/model/data/DataAccessContext.java": [
+      {
+        "kind": "refactor_class_structure",
+        "general_idea": "Replace task-centric fields (mainId, outId, inputIds) with a unified object-centric schema (id, cls, level, vid, pub) to align with the new OObject model.",
+        "human_impl": "Removed UUID/String list fields and added String id, cls, AccessLevel level, String vid, boolean pub.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_dependency_import",
+        "general_idea": "Switch import from the old proto-based OaasObject to the new Java model OObject to support the refactored class structure.",
+        "human_impl": "Changed import org.hpcclab.oaas.model.proto.OaasObject to org.hpcclab.oaas.model.object.OObject.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_constructor",
+        "general_idea": "Remove the constructor that mapped TaskContext to DataAccessContext, as the class no longer represents a task context.",
+        "human_impl": "Deleted public DataAccessContext(TaskContext taskContext) constructor.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_helper_method",
+        "general_idea": "Remove the getCls(UUID id) helper method which was specific to the old list-based input/output structure.",
+        "human_impl": "Deleted public String getCls(UUID id) method.",
+        "bucket": "breaking"
+      }
+    ],
+    "common/model/src/main/java/org/hpcclab/oaas/model/data/DataAccessRequest.java": [
+      {
+        "kind": "add_new_field",
+        "general_idea": "Add a new 'vid' field to the data access request structure.",
+        "human_impl": "String vid,",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_import",
+        "general_idea": "Update the import for the class type to reflect a package or class name change.",
+        "human_impl": "import org.hpcclab.oaas.model.cls.OClass;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_field_type",
+        "general_idea": "Change the type of the 'cls' field from OaasClass to OClass to match the renamed class.",
+        "human_impl": "OClass cls,",
+        "bucket": "breaking"
+      }
+    ],
+    "common/model/src/main/java/org/hpcclab/oaas/model/data/DataAllocateRequest.java": [
+      {
+        "kind": "change_field_type",
+        "general_idea": "Change the 'keys' field from a list of strings to a list of KeySpecification objects.",
+        "human_impl": "List<KeySpecification> keys;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_field",
+        "general_idea": "Rename the 'provider' field to 'defaultProvider' for clarity.",
+        "human_impl": "String defaultProvider;",
+        "bucket": "breaking"
+      }
+    ],
+    "common/model/src/main/java/org/hpcclab/oaas/model/exception/OaasValidationException.java": [
+      {
+        "kind": "change_base_exception",
+        "general_idea": "Change the parent class of OaasValidationException from NoStackException to StdOaasException to align with a new exception hierarchy.",
+        "human_impl": "extends StdOaasException",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "refactor_constructor",
+        "general_idea": "Update the primary constructor to pass the HTTP status code directly to the new parent class constructor instead of calling a separate setter.",
+        "human_impl": "super(message, 400);",
+        "bucket": "breaking"
+      }
+    ],
+    "common/model/src/main/java/org/hpcclab/oaas/model/provision/KnativeProvision.java": [
+      {
+        "kind": "change_field_type",
+        "general_idea": "Replace Map<String, String> env with DSMap to use a protobuf-compatible map type.",
+        "human_impl": "DSMap env;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_proto_fields",
+        "general_idea": "Update ProtoField annotations to reflect new field indices and default values for serialization compatibility.",
+        "human_impl": "@ProtoField(value = 5, defaultValue = \"-1\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_constructor",
+        "general_idea": "Update the ProtoFactory constructor to include new fields and the new env type.",
+        "human_impl": "public KnativeProvision(..., DSMap env, String apiPath)",
+        "bucket": "breaking"
+      }
+    ],
+    "common/model/src/main/java/org/hpcclab/oaas/model/provision/ProvisionConfig.java": [
+      {
+        "kind": "refactor_class_structure",
+        "general_idea": "Replace the old JobProvisionConfig and Type enum with new KDeploymentProvision and StaticUrlProvision fields to support a broader set of provisioning strategies.",
+        "human_impl": "Removed 'job' field and 'Type' enum; added 'deployment' and 'staticUrl' fields with corresponding ProtoField annotations.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_validation_logic",
+        "general_idea": "Update the validation method to check for mutual exclusivity among the new set of provisioning options instead of the old job/knative pair.",
+        "human_impl": "Rewrote validate() to count non-null fields among knative, deployment, and staticUrl, throwing an error if more than one is present.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_exception_type",
+        "general_idea": "Switch the validation exception from the generic OaasValidationException to the more specific FunctionValidationException.",
+        "human_impl": "Changed import and throw statement to use FunctionValidationException.format().",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "simplify_constructor",
+        "general_idea": "Update the ProtoFactory constructor to accept the new fields and remove the logic that derived the Type enum from the inputs.",
+        "human_impl": "Changed constructor signature to accept KnativeProvision, KDeploymentProvision, and StaticUrlProvision directly.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "meta": {
+    "repo": "freeok/so-novel",
+    "stage": "J11->J17",
+    "family": null,
+    "sha_from": "069a189f5f9400cd3b677bbf827c228434bbf825",
+    "sha_to": "df439c47e83b042339bf47a7b9276395c9c10603"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_compiler_target",
+        "general_idea": "Update Maven compiler source and target properties from Java 11 to Java 17 to enable compilation for the new JDK version.",
+        "human_impl": "<maven.compiler.source>17</maven.compiler.source>\n<maven.compiler.target>17</maven.compiler.target>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

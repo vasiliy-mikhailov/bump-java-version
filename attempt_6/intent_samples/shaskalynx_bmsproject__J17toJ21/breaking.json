@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "repo": "shaskalynx/bmsproject",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "66b38a25c059138abf13a2cb5a0c406a9ad3f1b0",
+    "sha_to": "daed835be655410cc41b5e67212d6ed6cb2e24e7"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "jdk_version_bump",
+        "general_idea": "Update the project's target Java version from 17 to 21.",
+        "before": "<java.version>17</java.version>",
+        "after": "<java.version>21</java.version>",
+        "bucket": "breaking",
+        "why_exists": "Without this change, the project compiles against Java 17, failing to utilize Java 21 features or enforce compatibility with the target runtime environment specified in the migration goal."
+      }
+    ],
+    "src/main/resources/Login.fxml": [
+      {
+        "kind": "update_controller_path",
+        "general_idea": "Update the FXML controller reference to match the new package structure.",
+        "before": "fx:controller=\"com.groupten.bmsproject.LoginController\"",
+        "after": "fx:controller=\"com.groupten.bmsproject.FXMLControllers.LoginController\"",
+        "bucket": "breaking",
+        "why_exists": "Runtime exception (ClassNotFoundException or FXML loading error) because the controller class was moved to a subpackage."
+      }
+    ]
+  }
+}

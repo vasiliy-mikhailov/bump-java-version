@@ -1,0 +1,133 @@
+{
+  "meta": {
+    "repo": "xianyum/XianYumBase",
+    "stage": "J11->J21",
+    "family": "spring-boot-2",
+    "sha_from": "d5439c0ea08e0fcd1a99473855d4123ddd072bc3",
+    "sha_to": "cfd7fededcc45e23eb338d50b6b9b50ee6c7c84e"
+  },
+  "by_file": {
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/config/IpConfig.java": [
+      {
+        "kind": "remove_auto_download_logic",
+        "general_idea": "Remove the automatic downloading of the IP database from a remote URL, requiring the file to be present locally instead.",
+        "human_impl": "// FileUtils.copyByUrl(DOWNLOAD_DB_URL,dbFilePath); throw new SoException(\"...put ip2region.xdb file...\");",
+        "bucket": "breaking"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/config/XianYumConfig.java": [
+      {
+        "kind": "refactor_config_source",
+        "general_idea": "Migrate configuration loading from Spring Boot properties binding to a custom static method retrieving data from a system constant utility.",
+        "human_impl": "Removed @Component and @ConfigurationProperties; added static getXianYumConfig() using SystemConstantUtils.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "fix_static_field_access",
+        "general_idea": "Change the 'profile' field from static to instance variable to align with the new non-static configuration retrieval pattern.",
+        "human_impl": "Changed 'private static String profile' to 'private String profile' and updated static methods to use getXianYumConfig().getProfile().",
+        "bucket": "breaking"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/enums/LoginTypeEnum.java": [
+      {
+        "kind": "change_field_type",
+        "general_idea": "Changed the login type identifier from Integer to String to support alphanumeric codes.",
+        "human_impl": "private String loginType;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_method",
+        "general_idea": "Renamed getLoginType to getAccountType to better reflect the return value semantics.",
+        "human_impl": "public String getAccountType() { return loginType; }",
+        "bucket": "breaking"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/FileUtils.java": [
+      {
+        "kind": "refactor_config_access",
+        "general_idea": "Update static configuration access to use an instance-based getter method instead of a static method.",
+        "human_impl": "XianYumConfig.getXianYumConfig().getProfile()",
+        "bucket": "breaking"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/HttpContextUtils.java": [
+      {
+        "kind": "header_name_change",
+        "general_idea": "Changed the HTTP header name for token retrieval from 'token' to 'Authorization' to align with standard OAuth2 practices.",
+        "human_impl": "httpRequest.getHeader(\"Authorization\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "param_name_change",
+        "general_idea": "Changed the query parameter name for token retrieval from 'token' to 'access_token' to align with standard OAuth2 practices.",
+        "human_impl": "httpRequest.getParameter(\"access_token\")",
+        "bucket": "breaking"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/HttpUtils.java": [
+      {
+        "kind": "dependency_migration",
+        "general_idea": "Migrate HTTP client library from com.ejlchina.okhttps to cn.zhxu.okhttps to align with JDK 21 ecosystem or library updates.",
+        "human_impl": "import cn.zhxu.okhttps.HTTP;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "json_library_upgrade",
+        "general_idea": "Switch message converter from Fastjson1 to Fastjson2 to support modern JSON processing standards.",
+        "human_impl": "new Fastjson2MsgConvertor()",
+        "bucket": "breaking"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/IPUtils.java": [
+      {
+        "kind": "refactor_ip_lookup",
+        "general_idea": "Replace the old Spring-based IP service with a new IpSearcher configuration bean to handle IP geolocation.",
+        "human_impl": "Replaced `SpringUtils.getBean(IpService.class).getIpInfo(ip)` with `SpringUtils.getBean(\"ipSearcherConfig\").search(ip)` and added parsing logic for the pipe-delimited result.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for the new IpSearcher utility class used in the refactored IP lookup.",
+        "human_impl": "Added `import cn.xianyum.common.utils.ip.IpSearcher;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for the custom SoException class used in the new error handling.",
+        "human_impl": "Added `import cn.xianyum.common.exception.SoException;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for HashMap to support the new Map return type in IP info methods.",
+        "human_impl": "Added `import java.util.HashMap;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for Map interface to support the new return type.",
+        "human_impl": "Added `import java.util.Map;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for Objects utility to handle null checks in IP data parsing.",
+        "human_impl": "Added `import java.util.Objects;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_dependency_import",
+        "general_idea": "Remove import for the deprecated IpInfoEntity class.",
+        "human_impl": "Removed `import cn.xianyum.common.entity.IpInfoEntity;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_dependency_import",
+        "general_idea": "Remove import for the deprecated IpService interface.",
+        "human_impl": "Removed `import cn.xianyum.common.service.IpService;`.",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "repo": "Ivinman/java-shareit",
+    "stage": "J11->J21",
+    "family": "spring-boot-2",
+    "sha_from": "72cdc17f604dc1073ec59669e3ae3a876ada5a38",
+    "sha_to": "f9ec0d2d78b7a9a6c72ff7c0879e6ba07bef5684"
+  },
+  "by_file": {
+    "src/main/java/ru/practicum/shareit/item/model/Item.java": [
+      {
+        "kind": "add_jakarta_persistence_entity",
+        "general_idea": "Convert the class into a JPA entity using Jakarta Persistence annotations to replace the older javax.persistence API.",
+        "human_impl": "import jakarta.persistence.*; @Entity @Table(name = \"items\")",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_version",
+        "general_idea": "Upgrade Spring Boot parent from 2.7.2 to 3.3.2 to support Java 21 and modern Spring features.",
+        "human_impl": "<version>3.3.2</version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version",
+        "general_idea": "Update the target Java version property from 11 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "switch_db_driver",
+        "general_idea": "Changed the database driver from H2 in-memory to PostgreSQL to support persistent storage.",
+        "human_impl": "Changed spring.datasource.driverClassName from org.h2.Driver to org.postgresql.Driver",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_db_url",
+        "general_idea": "Updated the database connection URL to point to a local PostgreSQL instance instead of an H2 memory database.",
+        "human_impl": "Changed spring.datasource.url from jdbc:h2:mem:shareit to jdbc:postgresql://localhost:5432/shareit",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_db_credentials",
+        "general_idea": "Updated database username and password placeholders for the new PostgreSQL connection.",
+        "human_impl": "Changed spring.datasource.username to username and spring.datasource.password to password",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

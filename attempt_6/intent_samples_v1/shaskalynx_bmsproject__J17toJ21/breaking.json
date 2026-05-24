@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "repo": "shaskalynx/bmsproject",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "66b38a25c059138abf13a2cb5a0c406a9ad3f1b0",
+    "sha_to": "daed835be655410cc41b5e67212d6ed6cb2e24e7"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Bump the target Java version property from 17 to 21 to align with the new JDK environment.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/resources/Login.fxml": [
+      {
+        "kind": "update_controller_package",
+        "general_idea": "Updated the FXML controller reference to reflect the new package structure for controllers.",
+        "human_impl": "fx:controller=\"com.groupten.bmsproject.FXMLControllers.LoginController\"",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

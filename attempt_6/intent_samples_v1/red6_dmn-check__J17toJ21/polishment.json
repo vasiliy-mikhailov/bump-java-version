@@ -1,0 +1,167 @@
+{
+  "meta": {
+    "repo": "red6/dmn-check",
+    "stage": "J17->J21",
+    "family": "junit4-mockito",
+    "sha_from": "2bb3105e37c7b339df89cc2c78d73ebef7f86ba1",
+    "sha_to": "846539f22888c74f392218993e1f1b983045c33c"
+  },
+  "by_file": {
+    "cli/src/main/java/de/redsix/dmncheck/cli/Main.java": [
+      {
+        "kind": "reformat_annotations",
+        "general_idea": "Reformatted picocli @Option annotations to use multi-line syntax for better readability.",
+        "human_impl": "@Option(\n        names = {\"--excludeList\"},\n        split = \",\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reformat_method_call",
+        "general_idea": "Reformatted the PluginLogger constructor call to split arguments across multiple lines.",
+        "human_impl": "return new PrettyPrintValidationResults.PluginLogger(\n        (t) -> logger.info(t.toString()), ...);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reorder_imports",
+        "general_idea": "Moved java.util and java.util.concurrent imports to the top of the import block, before org.slf4j.",
+        "human_impl": "import java.util.Collections;\nimport java.util.List;\nimport java.util.Objects;\nimport java.util.concurrent.Callable;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_trailing_whitespace",
+        "general_idea": "Removed trailing empty line at the end of the file.",
+        "human_impl": "-\n }",
+        "bucket": "polishment"
+      }
+    ],
+    "cli/src/test/java/de/redsix/dmncheck/cli/MainTest.java": [
+      {
+        "kind": "import_reordering",
+        "general_idea": "Reorder imports to group static imports before regular imports and sort them alphabetically.",
+        "human_impl": "Moved 'import static org.junit.jupiter.api.Assertions.*;' to the top of the import block.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "whitespace_cleanup",
+        "general_idea": "Remove unnecessary blank lines to clean up code structure.",
+        "human_impl": "Removed empty line after 'cmd = new CommandLine(app);' in setupCommand().",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "line_breaking",
+        "general_idea": "Break long lines to adhere to code style guidelines.",
+        "human_impl": "Split 'assertArrayEquals(...)' call into multiple lines for readability.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "file_termination",
+        "general_idea": "Ensure the file ends with a newline character.",
+        "human_impl": "Added newline at the end of the file.",
+        "bucket": "polishment"
+      }
+    ],
+    "core/src/main/java/de/redsix/dmncheck/validators/core/GenericValidator.java": [
+      {
+        "kind": "reorder_imports",
+        "general_idea": "Reordered import statements to group standard library imports before third-party imports.",
+        "human_impl": "Moved java.util.* imports above org.camunda.* imports.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_javadoc",
+        "general_idea": "Updated Javadoc comments to use HTML paragraph tags and anchor tags for better formatting.",
+        "human_impl": "Replaced plain text notes with <p> and <a href> tags in class and method documentation.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_class_declaration",
+        "general_idea": "Wrapped the class declaration line to adhere to line length formatting rules.",
+        "human_impl": "Split the public abstract class declaration across two lines.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_method_body",
+        "general_idea": "Wrapped a long method statement to adhere to line length formatting rules.",
+        "human_impl": "Split the assignment of childElementsUnderValidation across two lines.",
+        "bucket": "polishment"
+      }
+    ],
+    "core/src/main/java/de/redsix/dmncheck/validators/core/RequirementGraphValidator.java": [
+      {
+        "kind": "import_reordering",
+        "general_idea": "Reorder imports to group java.util before third-party packages, likely due to IDE auto-formatting rules.",
+        "human_impl": "Moved `import org.camunda.bpm.model.dmn.DmnModelInstance;` below `import java.util.*;`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "javadoc_compaction",
+        "general_idea": "Compact multi-line Javadoc into a single line to reduce vertical whitespace.",
+        "human_impl": "Changed `/**\\n * Generic validator...\\n *\\n */` to `/** Generic validator... */`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "indentation_fix",
+        "general_idea": "Fix excessive indentation in a chained method call builder pattern.",
+        "human_impl": "Reduced indentation of `.message(...)`, `.element(...)`, and `.build()` calls inside `ValidationResult.init`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "whitespace_cleanup",
+        "general_idea": "Remove unnecessary trailing blank line at the end of the file.",
+        "human_impl": "Removed empty line before the closing brace of the class.",
+        "bucket": "polishment"
+      }
+    ],
+    "core/src/main/java/de/redsix/dmncheck/validators/core/ValidationContext.java": [
+      {
+        "kind": "add_static_modifier",
+        "general_idea": "Make the inner helper class static to remove the implicit reference to the outer class instance.",
+        "human_impl": "private static class Memoizer<T, U>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_nullness_annotation",
+        "general_idea": "Add explicit non-null type annotation to the cache map value type for better static analysis.",
+        "human_impl": "Map<Class<T>, @NonNull U> cache",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "reorder_imports",
+        "general_idea": "Reorder import statements to group java.* imports before third-party imports.",
+        "human_impl": "import java.util.*; ... import org.camunda...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_javadoc_formatting",
+        "general_idea": "Wrap the note in the Javadoc with a paragraph tag for better HTML rendering.",
+        "human_impl": "<p>Note: Reading from the validation context is cached.</p>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_empty_lines",
+        "general_idea": "Remove unnecessary empty lines to compact the code structure.",
+        "human_impl": "Removed blank lines after Memoizer class and before constructor.",
+        "bucket": "polishment"
+      }
+    ],
+    "core/src/test/java/de/redsix/dmncheck/validators/core/GenericValidatorTest.java": [
+      {
+        "kind": "reorder_imports",
+        "general_idea": "Reorganize import statements to group static imports at the top and standard imports below, following common Java coding conventions.",
+        "human_impl": "Moved static imports for JUnit and Mockito to the top of the file and standard imports below them.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_line_breaks",
+        "general_idea": "Apply consistent line breaking for long method chains and method signatures to improve readability.",
+        "human_impl": "Broke long lines in `ValidationResult.init` chains and `when(...)` calls into multiple lines.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_empty_lines",
+        "general_idea": "Remove unnecessary empty lines between test methods to compact the code structure.",
+        "human_impl": "Deleted blank lines preceding `@Test` annotations.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

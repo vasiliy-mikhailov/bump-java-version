@@ -7,13 +7,6 @@
     "sha_to": "1c16976dc20e3777b0349a77335b094493b49e42"
   },
   "by_file": {
-    ".gitignore": [
-      {
-        "kind": "add_idea_dir_ignore",
-        "general_idea": "Add the .idea/ directory to .gitignore to prevent IntelliJ IDEA project-specific files from being tracked.",
-        "human_impl": "+.idea/",
-        "bucket": "polishment"
-      }
-    ]
+    ".gitignore": []
   }
 }

@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "repo": "dperezcabrera/demo-spring-boot",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "fdc13c6d7da6a150c6b53c56b1789c5ed3e2acce",
+    "sha_to": "518c7690ded344f78231c8af119beeabb65ce2af"
+  },
+  "by_file": {
+    "src/main/java/com/example/demo/customer/controllers/CustomerController.java": [
+      {
+        "kind": "api_path_prefix_update",
+        "general_idea": "Update the base request mapping path to include an 'api' prefix for better URL structure.",
+        "human_impl": "@RequestMapping(path = \"/api/v1/customers\")",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/logging/StatsFilter.java": [
+      {
+        "kind": "log_enhancement_with_http_method",
+        "general_idea": "Enhance logging output to include the HTTP method alongside the URI for better request traceability.",
+        "human_impl": "log.debug(\"{} {}: {} ms \", ((HttpServletRequest) req).getMethod(), ((HttpServletRequest) req).getRequestURI(), time);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/security/config/JwtAuthenticationFilter.java": [
+      {
+        "kind": "dependency_injection_refactor",
+        "general_idea": "Replace local instantiation of ObjectMapper with an injected field to improve testability and resource management.",
+        "human_impl": "private final ObjectMapper objectMapper; // injected instead of new ObjectMapper()",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/security/config/JwtSecurityConfigurer.java": [
+      {
+        "kind": "refactor_filter_instantiation",
+        "general_idea": "Extract JWT filter instantiation into separate methods to pass dependencies explicitly, removing reliance on adapter methods.",
+        "human_impl": ".addFilter(jwtAuthenticationFilter(authManager))",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_whitelist_paths",
+        "general_idea": "Update the list of permitted URL patterns to reflect new API paths and remove static asset patterns.",
+        "human_impl": "return new String[]{ \"/\", LOGIN_PATH, LOGOUT_PATH, ... };",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_cors_origin_property",
+        "general_idea": "Introduce environment property support for dynamic CORS origin configuration.",
+        "human_impl": "var origin = env.getProperty(CORS_ORIGIN_PROPERTY);",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/security/config/JwtTokenManager.java": [
+      {
+        "kind": "code_refactoring_extraction",
+        "general_idea": "Extract token extraction and username parsing into separate private methods to improve modularity and testability.",
+        "human_impl": "private String extractJwtToken(HttpServletRequest request)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "import_cleanup",
+        "general_idea": "Remove unused import java.util.Objects after refactoring null checks to use standard operators.",
+        "human_impl": "-import java.util.Objects;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/example/demo/security/controllers/UserController.java": [
+      {
+        "kind": "update_request_mapping",
+        "general_idea": "Update the base request mapping path to include API versioning.",
+        "human_impl": "@RequestMapping(\"/api/v1/user\")",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

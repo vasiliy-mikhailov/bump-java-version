@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "hansreier/techreier",
+    "stage": "J11->J17",
+    "family": "hibernate-5",
+    "sha_from": "2dd9370a58fb23ad6798b3071e880d147bbf1d42",
+    "sha_to": "d479c34407f13dd0bc4e44bfd8baeceaddc52b7a"
+  },
+  "by_file": {
+    "eDrops/pom.xml": [
+      {
+        "kind": "set_java_version",
+        "general_idea": "Changed the target Java version property from 11 to 17 to align with the migration goal.",
+        "human_impl": "<java.version>17</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_compiler_release_flag",
+        "general_idea": "Added the 'release' configuration to the maven-compiler-plugin to ensure cross-compilation compatibility with Java 17.",
+        "human_impl": "<release>${java.version}</release>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

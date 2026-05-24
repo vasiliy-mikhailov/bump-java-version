@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "repo": "prebid/prebid-cache-java",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "56db1c4cec8510090e57a52423219cc4d1e86b69",
+    "sha_to": "c45373ab7c2fada4e4abc6ea8c9a1f84334b4062"
+  },
+  "by_file": {
+    "src/main/java/org/prebid/cache/builders/PrebidServerResponseBuilder.java": [
+      {
+        "kind": "rename_method_call",
+        "general_idea": "Update method call from getMessage to getErrorMessage to align with refactored error handling API.",
+        "human_impl": "translation.getErrorMessage()",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/prebid/cache/handlers/CacheHandler.java": [
+      {
+        "kind": "replace_deprecated_timer_api",
+        "general_idea": "Replace deprecated Dropwizard Timer.Context with Micrometer MetricsRecorderTimer to align with the metrics library migration.",
+        "human_impl": "Changed parameter type from Timer.Context to MetricsRecorderTimer in finalizeResult",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_deprecated_reactor_operator",
+        "general_idea": "Replace deprecated doAfterSuccessOrError with doOnEach to ensure compatibility with Reactor 3.4+ used in Spring Boot 3/JDK 21.",
+        "human_impl": "Replaced doAfterSuccessOrError((v, t) -> ...) with doOnEach(signal -> ...)",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/prebid/cache/handlers/GetCacheHandler.java": [
+      {
+        "kind": "update_constructor_dependency",
+        "general_idea": "Replace GraphiteMetricsRecorder dependency with the new MetricsRecorder interface in the constructor.",
+        "human_impl": "-final GraphiteMetricsRecorder metricsRecorder,\n+final MetricsRecorder metricsRecorder,",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_method_call",
+        "general_idea": "Replace optional timer context creation with a direct call to createRequestTimerForServiceType.",
+        "human_impl": "-metricsRecorder.createRequestContextTimerOptionalForServiceType(this.type).orElse(null)\n+metricsRecorder.createRequestTimerForServiceType(this.type)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_method_signature",
+        "general_idea": "Change timerContext parameter type from Timer.Context to MetricsRecorderTimer to align with new metrics API.",
+        "human_impl": "-final Timer.Context timerContext)\n+final MetricsRecorderTimer timerContext)",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_metric_method",
+        "general_idea": "Replace mark() with increment() for proxy failure metrics to align with Micrometer API.",
+        "human_impl": "-metricsRecorder.getProxyFailure().mark();\n+metricsRecorder.getProxyFailure().increment();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_metric_method",
+        "general_idea": "Replace mark() with increment() for proxy success metrics to align with Micrometer API.",
+        "human_impl": "-metricsRecorder.getProxySuccess().mark();\n+metricsRecorder.getProxySuccess().increment();",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_metric_method",
+        "general_idea": "Replace mark() with increment() for proxy failure metrics in the handle block to align with Micrometer API.",
+        "human_impl": "-metricsRecorder.getProxyFailure().mark();\n+metricsRecorder.getProxyFailure().increment();",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/org/prebid/cache/metrics/MetricsRecorder.java": [
+      {
+        "kind": "replace_metrics_library",
+        "general_idea": "Migrate metrics implementation from Dropwizard to Micrometer to align with modern Spring Boot standards.",
+        "human_impl": "import io.micrometer.core.instrument.MeterRegistry; ... private final MeterRegistry meterRegistry;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_spring_component",
+        "general_idea": "Register the metrics recorder as a Spring-managed bean to enable dependency injection.",
+        "human_impl": "@Component public class MetricsRecorder { ... public MetricsRecorder(MeterRegistry meterRegistry) { ... }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "implement_timer_metric",
+        "general_idea": "Implement timer functionality using Micrometer's Timer API to replace previous timing logic.",
+        "human_impl": "public class MetricsRecorderTimer { ... sample = Timer.start(meterRegistry); ... sample.stop(timer); }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "implement_counter_metrics",
+        "general_idea": "Implement counter functionality using Micrometer's Counter API for various error and success metrics.",
+        "human_impl": "public Counter getInvalidRequestMeter() { return meterRegistry.counter(...); }",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

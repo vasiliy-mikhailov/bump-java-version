@@ -1,0 +1,432 @@
+757d267 feat: cors study
+890ca3f update tmp/label.txt
+7958adc add tmp/label.txt
+dbecb9a feat: springdoc-openapi-starter-webmvc-ui-study
+7a73eb5 feat: springdoc-openapi-starter-webmvc-ui-study
+ac52c20 feat: springdoc-openapi-starter-webmvc-ui-study
+39e9da3 feat: springdoc-openapi-starter-webmvc-ui-study
+b469578 feat: springdoc-openapi-starter-webmvc-ui-study
+27d299a feat: springdoc-openapi-starter-webmvc-ui-study
+7ea5dca feat: springdoc-openapi-starter-webmvc-ui-study
+a021c5e feat: springdoc-openapi-starter-webmvc-ui-study
+efaf235 feat: springdoc-openapi-starter-webmvc-ui-study
+b812dc4 feat: springdoc-openapi-starter-webmvc-ui-study
+9a3b036 feat: springdoc-openapi-starter-webmvc-ui-study
+716b774 refactor: Java list-form object type and database array-form JSON type conversion
+ae73171 feat: rename AbstractGenericArrayTypeHandler
+ccb9151 feat: add ArrayJsonTypeHandler
+2e598b0 feat: add ArrayJsonTypeHandler
+2ac9db0 feat: add ObjectJsonTypeHandler
+1a8d026 feat: add generic array type handler
+f658e90 feat: add generic array type handler
+c4004a1 fix: fix in sql format issue
+8c594d4 refactor: remove unnecessary code
+0d8e137 refactor: remove unnecessary project
+c0538d2 refactor: remove unnecessary code
+475f26d feat: type handler(test not pass, with issues)
+efc2a97 feat: postgresql array test
+b119978 feat: dynamic sql
+92b58c0 feat: JsonTypeHandler
+ddc8eb1 feat: jsonb_set
+b282315 feat: jsonb test
+bca3b72 refactor: sql operator
+e5a13bb refactor: sql operator
+a76af09 feat: jsonb test
+8b59251 feat: jsonb test
+378deb6 feat: jsonb test
+47eaf20 refactor
+b244ae2 refactor
+499d627 refactor
+b7903e3 refactor
+86f1b25 refactor
+3fdaf4f refactor
+444baaf feat: test type handler
+4cf5e3f feat: add mybatis-extension
+16243ee feat: Study BaseTypeHandler
+782d712 feat: Study BaseTypeHandler
+1c25e47 feat: Study BaseTypeHandler
+a9b8cde feat: mybatis-plus test
+172b2e0 feat: mybatis-plus test
+6132291 feat: add mybatis-plus-boot-starter-study
+15e9dfa refactor
+476aab6 refactor
+7e40a43 refactor
+1a419d7 refactor
+a352a15 refactor
+9a22bac refactor
+7f6fe15 refactor
+c51dd71 refactor
+272cbd1 refactor: Mybatis TypeHandler
+fa5f5a4 feat: add RequestUtils
+ebf77b4 refactor
+62b4a17 refactor
+fbfc66d refactor
+031ba6e refactor
+df41100 refactor
+4c78c04 refactor
+a073051 refactor
+ec3c1b9 refactor
+f1f228f refactor
+5681f4b refactor
+3d87fa6 feat: add PostgreSQL operator.md
+e266c17 refactor: SQLOperatorStrategyFactory
+22d502c refactor: SQLOperatorStrategyFactory
+3c239e7 docs: add UnitTest.md
+ddb4629 test: add GlobalResponseHandlerTest
+07ca568 test: add GlobalResponseHandlerTest
+76a3345 refactor: update pom
+0a746eb feat: add JacksonConfig
+0690173 refactor: GlobalResponseHandler
+e679752 refactor: GlobalResponseHandler
+86e73be test: add UserServiceTest
+3578921 test: add UserControllerTest
+64bfb4c refactor
+122344d refactor
+2ca3aa2 feat: update QueryConditionBuilder and SimpleConditionFactory
+70912e3 refactor: dynamically build pagination clause
+5896a15 refactor: dynamically build sql
+8db7b22 refactor: dynamically build sql
+7d2119b refactor: dynamically build sql
+2f484ca refactor: dynamically build sql
+7a4ede7 refactor: ConditionInterceptor
+42d7362 feat: add debug sql
+40f58fd feat: update BasicRepository
+f44264e feat: batch insert
+0d3ec14 feat: batch insert
+4af2c7a refactor: dynamically build sql
+1665a86 refactor: dynamically build sql
+6ebcf9f feat: add advancedCount and advancedDelete to BasicRepository
+e80b9a8 feat: register PostgreSQL specific operators and strategies
+56644a2 refactor: dynamically build sql
+c5ecf8c refactor: dynamically build sql
+d6450c1 refactor: dynamically build sql
+497a7a9 refactor: dynamically build sql
+96d4cd2 refactor: dynamically build sql
+bd0b142 refactor: dynamically build sql
+025fcf4 refactor: dynamically build sql
+051c086 refactor: SQLHelper
+9c204bf refactor: SQLHelper
+c911b44 feat: dynamically build sql
+ea7f300 feat: dynamically build sql
+d6f5975 feat: dynamically build sql
+d6a2bbb feat: dynamically build sql
+7a89dcd feat: dynamically build sql
+9bd4403 feat: dynamically build sql
+955ec55 feat: dynamically build sql
+c0945d5 feat: dynamically build sql
+f3e7ca6 feat: dynamically build sql
+b620b0c feat: dynamically build sql
+e237758 feat: dynamically build sql
+855acf8 feat: dynamically build sql
+56e15c9 feat: dynamically build sql
+e751f6a feat: dynamically build sql
+2d7dc99 feat: dynamically build sql
+bee892a feat: dynamically build sql
+d269732 feat: dynamically build sql
+0e7ea08 feat: dynamically build sql
+a0d682e feat: dynamically build sql
+cad0d88 refactor(package):
+c20f901 feat: dynamically build sql
+e4abf85 feat: dynamically build sql
+f1aa4a3 feat: dynamically build sql
+0f06606 feat: dynamically build sql
+77ce45f feat: dynamically build sql
+f254766 feat: dynamically build sql
+1f75097 feat: dynamically build sql
+59920dd feat: dynamically build sql
+c6a6621 feat: dynamically build sql
+73fd88b feat: dynamically build sql
+7288c73 feat: dynamically build sql
+e6a627e feat: dynamically build sql
+4505e24 feat: dynamically build sql
+0e4fc64 feat: dynamically build sql
+8fae1dc feat: dynamically build sql
+eee9a5e feat: dynamically build sql
+45dca22 feat: dynamically build sql
+7d9bb24 feat: dynamically build sql
+ef65a69 feat: multiple data source
+719502f feat: multiple data source
+7711268 feat: multiple data source
+ebf7e4b feat: multiple data source
+8e09897 feat: multiple data source
+0145d90 feat: multiple data source
+88185c3 refactor: mybatis-spring-boot-starter
+27b4bd4 refactor: mybatis-spring-boot-starter
+89af62f refactor: mybatis-spring-boot-starter
+b0769e4 refactor: mybatis-spring-boot-starter
+103fb52 refactor: mybatis-spring-boot-starter
+efd1f6d docs: rename markdown filename
+fa68572 docs: TimeZone.md
+25caa63 refactor: mybatis-spring-boot-starter
+79b7bd7 refactor: mybatis-spring-boot-starter
+acd734c refactor: mybatis-spring-boot-starter
+c70c4e8 refactor: mybatis-spring-boot-starter
+4eca8a4 feat: mybatis-spring-boot-starter
+71b5bf5 feat: mybatis-spring-boot-starter
+27b40f1 feat: mybatis-spring-boot-starter
+fbfe5b1 feat: mybatis-spring-boot-starter
+d77183b refactor: remove mybatis-project
+6e93a03 feat: springdoc-openapi-starter-webmvc-ui-study
+d25951a feat: springdoc-openapi-starter-webmvc-ui-study
+ee330bd feat: springdoc-openapi-starter-webmvc-ui-study
+86e92aa feat: springdoc-openapi-starter-webmvc-ui-study
+7a7d5e1 feat: springdoc-openapi-starter-webmvc-ui-study
+d57bee7 feat: springdoc-openapi-starter-webmvc-ui-study
+35be201 feat: springdoc-openapi-starter-webmvc-ui-study
+30a42f2 feat: springdoc-openapi-starter-webmvc-ui-study
+7410128 feat: springdoc-openapi-starter-webmvc-ui-study
+0e48e34 feat: springdoc-openapi-starter-webmvc-ui-study
+450cd26 feat: spring boot study
+bc6ca1d feat: SecureBCryptPasswordEncoder issue fix
+55acf7b feat: CTRDRBGSecureRandom issue fix
+42a01d9 feat: refactoring jwt
+f31ca03 feat: springdoc-openapi-starter-webmvc-ui-study
+81eb718 feat: springdoc-openapi-starter-webmvc-ui-study
+d6fdace feat: SecureRandom study
+94b2795 feat: SecureRandom study
+0e14f69 feat: SecureRandom study
+cb42626 feat: SecureRandom study
+547dbeb feat: SecureRandom study
+be9e1dc feat: SecureRandom study
+1c919bf feat: SecureRandom study
+48b27d2 feat: SecureRandom study
+0b2c5fd feat: SecureRandom study
+910becb feat: SecureRandom study
+aaefb82 feat: SecureRandom study
+f21ef90 feat: SecureRandom study
+15220ee feat: SecureRandom study
+a74fdbb feat: SecureRandom study
+ca9db29 feat: SecureRandom study
+7ef696d feat: SecureRandom study
+c741c87 feat: SecureRandom study
+3aec00f feat: SecureRandom study
+d28e251 feat: SecureRandom study
+fd6af2c feat: SecureRandom study
+103eff2 feat: SecureRandom study
+92b66b3 feat: SecureRandom study
+519f2e8 feat: SecureRandom study
+50d7339 feat: SecureRandom study
+e0e972a jwt study
+c5ad738 feat: springdoc-openapi-starter-webmvc-ui-study
+9fbfa54 feat: springdoc-openapi-starter-webmvc-ui-study
+c29bb3b feat: springdoc-openapi-starter-webmvc-ui-study
+c0c342c feat: springdoc-openapi-starter-webmvc-ui-study
+121b29d feat: springdoc-openapi-starter-webmvc-ui-study
+cba8f5d feat: springdoc-openapi-starter-webmvc-ui-study
+b050058 feat: springdoc-openapi-starter-webmvc-ui-study
+0fc24f6 feat: springdoc-openapi-starter-webmvc-ui-study
+869ac49 feat: springdoc-openapi-starter-webmvc-ui-study
+30d94ac feat: springdoc-openapi-starter-webmvc-ui-study
+04c36c7 feat: springdoc-openapi-starter-webmvc-ui-study
+1dfa9f2 feat: springdoc-openapi-starter-webmvc-ui-study
+202a9f3 feat: springdoc-openapi-starter-webmvc-ui-study
+73d5bf0 feat: springdoc-openapi-starter-webmvc-ui-study
+636e88d feat: springdoc-openapi-starter-webmvc-ui-study
+89807b0 feat: springdoc-openapi-starter-webmvc-ui-study
+9e06f47 feat: springdoc-openapi-starter-webmvc-ui-study
+d4762e9 feat: springdoc-openapi-starter-webmvc-ui-study
+610ea5f feat: springdoc-openapi-starter-webmvc-ui-study
+685b8b7 feat: springdoc-openapi-starter-webmvc-ui-study
+ec1ae46 feat: springdoc-openapi-starter-webmvc-ui-study
+d600960 feat: springdoc-openapi-starter-webmvc-ui-study
+0b48cd8 feat: springdoc-openapi-starter-webmvc-ui-study
+f5889f9 feat: springdoc-openapi-starter-webmvc-ui-study
+2051a53 feat: spring boot study
+82280b9 feat: spring boot study
+8db5aef feat: spring boot study
+5ae8614 feat: spring boot study
+56376da feat: spring boot study
+9bc25cf feat: spring boot study
+9d56558 feat: spring boot study
+9ecf2a3 feat: spring boot study
+f1f8496 jwt study
+98fda5b jwt study
+96c38d1 spring security study
+4fe5c38 spring security study
+acde12e spring security study
+334841e spring security study
+09bccbb spring boot study
+cfca179 spring boot study
+44e1eee spring boot study
+b026a0b update Spring Boot 3.4.x Servlet Web Application Startup Process.txt
+16770bc update Spring Boot 3.4.x Servlet Web Application Startup Process.txt
+f52d9a6 update Spring Boot 3.4.x Startup Process.txt
+0a97c1d update Spring Boot 3.x Startup Process.txt
+81d36c0 update Spring Boot 3.x Startup Process.txt
+9d4d00a update Spring Boot 3.x Startup Process.txt
+83a5a7d update SpringFactoriesScanner
+1cf5fb3 add SpringFactoriesAnalyzer & SpringFactoriesScanner
+78ed97b remove SecurityApplication to MainApplication
+300a6cd add spring-boot-study
+a64c399 remove user-management-service
+80e8f0c rename project
+ccb3d49 add user-management-service
+9a28930 websocket learning
+08edabd websocket learning
+126e46d websocket learning
+d4b9238 websocket learning
+4d04c48 websocket learning
+4b9ee97 websocket learning
+f2d5a6e websocket learning
+95f5f22 websocket learning
+dabac9d websocket learning
+b2103ed websocket learning
+fb46057 websocket learning
+a53d003 websocket learning
+2e92048 websocket learning
+fa6bf4f websocket learning
+210a7b9 websocket learning
+17010ae websocket learning
+e4e3bf9 websocket learning
+a38c5bf websocket learning
+c106584 websocket learning
+37d5d4e add spring-boot-websocket
+47587e6 Learning SpEL
+51f8aca Learning SpEL
+d3cc99e Learning JsonPath
+ab5b444 Learning JsonPath
+a3fb958 init third-party-lib-test module
+091235a feat: add jira_utils
+b7d4f41 refactor(infrastructure): refactoring project structure
+a7598b4 shell study
+90742a5 shell study
+6c14596 update startup.sh
+8ae5feb shell study
+742bcf8 shell study
+02548a2 refactor(文档操作): 重构代码
+598b0c4 refactor(文档操作): 删除无效代码
+6cfaeed refactor(文档操作): 添加依赖cn.maiaimei.commons.lang:commons-lang
+cd3ef24 feat(Stream API): 添加StringConvertTest
+04000f4 feat(数据校验): 添加NumberTest
+93d074e feat(日期时间): 时区转换
+445bf6c feat(批处理): 批量处理数据实现
+424fe16 feat(文档操作): 测试Jackson解析超大JSON文件数据
+3def068 feat(文档操作): 测试Jackson解析超大JSON文件数据
+fb1ce98 feat(文档操作): 为PDF添加页眉页脚
+4143d74 feat(文档操作): 为PDF添加页眉页脚
+c7036d2 feat(文档操作): 为PDF添加页眉页脚
+de06790 feat(文档操作): 为PDF添加页眉页脚
+35fb43b refactor(文档操作): 重构代码
+04994b3 feat(文档操作): 为PDF添加页眉页脚
+01d0405 feat(module): Add document-samples module
+cc0a6e7 feat(基础设施): 实现RESTful API客户端
+fd3fce4 feat(基础设施): 日志分类输出
+cc27166 feat(基础设施): 日志分类输出
+f3fe724 feat(基础设施): 日志分类输出
+07cfcfe feat(基础设施): 日志分类输出
+2768b06 refactor(基础设施): 重命名HeartBeatXxx
+982cadd feat(基础设施): 日志分类输出
+9e43f9e feat(基础设施): 日志分类输出
+85d959c feat(基础设施): 日志分类输出
+6999811 feat(基础设施): 添加过滤器和拦截器
+f890eb8 test aop & logback
+778ba19 test aop & logback
+2b092d9 test aop
+7c2a47f test aop
+dae7a78 test aop
+1d60005 test aop
+9e26bbe test aop
+4829c16 test aop
+f229b2c test logback
+984b69e add SpELMapTest
+ed445ac remove junit-samples
+781616f add Allure
+f842e6b update DataSourceTest.java
+0e07764 update README.md
+6a2d4af add Junit5 Parameterized Test
+cec2612 rename project junit-samples
+f45b90d remove cucumber-samples
+dcf73b1 feat: update cucumber-samples
+c786dfc feat: update cucumber-samples
+036dc20 feat: init cucumber-samples
+092b4a9 feat: python study
+a179d93 add jacoco-sample
+9baee1e spring boot 3
+c9ed92f feat:quartz
+437fb3f feat: add SpEL samples
+f66eab8 feat: add SpEL samples
+ed9e2ed refactor code
+184e058 add datasource-samples
+4b3355f hibernate-validator
+3239720 add validation
+f328d47 add validation
+c6f112a junit learning
+a72cd3c update beetl-samples README.md
+0cd8de0 update beetl-samples README.md
+1d38269 add beetl-samples
+881fa2d remove java-project
+9d597b8 collection source code learning
+e4bf352 java learning
+e0a7cb4 feat: spring-integration
+dcec366 feat: test spring-integration-http
+f407a35 feat: test ChannelInterceptor
+1ed0c3d feat: xml Could not resolve placeholder
+5bfd7e5 feat: test Message, MessageChannel and ChannelAdapter
+0ed2dac feat: ognl
+32df5bc feat: add spring-boot-logback
+1e2411e feat: add OGNL
+4cd618d feat: add OGNL
+ff7f1bd feat: update freemarker README.md
+bff6336 feat: add freemarker testcase
+7de9eeb feat: add spring-boot-freemarker
+dba815a feat: spring-boot-swagger-samples
+8936c56 feat: add office-pdf-samples
+28a8c37 feat: add decorator pattern example
+73168af feat: add design pattern example
+0facf4b refactor
+0f74111 refactor
+7ce551a feat: 国际化失败消息
+b412e9b feat: 自定义约束+自定义校验器
+4055b4f feat: bean-validation
+975fe2f feat: bean-validation
+28a000a feat: bean-validation
+9bb0b41 refactor: spring-boot-validation
+c159fbe update strategy pattern
+3e67b3b add Converter
+e3370bc add spring-integration-samples
+831781e add mapstruct
+31eeea3 test receive mail
+23ff277 add servlet project
+9d27176 add servlet project
+8be9f16 update spring-boot-demo module
+0208bc6 update spring-boot-demo module
+7bdc07c update k8s
+d5f49d5 update spring-boot-scheduler
+d076efb update spring-boot-scheduler
+d2207c7 update spring-boot-jpa
+eee0a98 update spring-boot-testcase
+d054640 add retry
+5edb5e9 add spring-boot-scheduler
+0c8de2c add mybatis-plus-generator
+16ce066 add spring-boot-mybatis-multids
+60f3cc4 update mybatis-generator
+2f7c9ee update mybatis-generator
+82906d3 add jpa multi datasource config
+1e806de update spring-boot-email, add README.md
+470d763 add spring-boot-email
+b18c2b7 add mybatis-generator
+4036f7d update spring-integration-demo
+27c99ed update spring-integration-demo
+a0b63d1 update
+c0b5595 update python-project
+4180294 add python-project
+5a54dac update mybatis
+113a54e update spring-boot-mybatis-plus
+31f3561 update spring-boot-mybatis
+3f9df45 update
+86cefc1 update
+03e9155 update
+edd7bda update module spring-cloud-openfeign, add openfeign logging
+6ca90b4 update module spring-cloud-openfeign
+ba2e81f update spring-boot-mq-activemq, add request-reponse mode demo code
+68a055c add module spring-boot-jdbctemplate
+c151cc0 update spring-boot-mq-activemq
+773a908 spring-boot-mq-activemq
+5fad854 update spring-cloud-openfeign and add spring-cloud-nacos
+77e2487 add code
+c27ef92 add code
+b208db3 add spring-boot-testcase
+832a191 add HttpClient
+0c4fd26 add spring-boot-validation
+2955306 update spring-boot-demo
+33e6cfb update xxx

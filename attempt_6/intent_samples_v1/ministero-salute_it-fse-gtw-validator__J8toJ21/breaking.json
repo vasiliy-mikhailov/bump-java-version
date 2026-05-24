@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "repo": "ministero-salute/it-fse-gtw-validator",
+    "stage": "J8->J21",
+    "family": "spring-boot-2",
+    "sha_from": "33679e3868a0ab3aa0c542bafc022a3b208a53b2",
+    "sha_to": "45b2e260ddb7debe57f1adf476e643cdaf89f624"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_java_version",
+        "general_idea": "Update the Java source and target version from 1.8 to 21 to enable compilation and execution on JDK 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent from 2.6.6 to 2.7.18 to align with JDK 21 compatibility requirements and security patches.",
+        "human_impl": "<version>2.7.18</version>",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}
