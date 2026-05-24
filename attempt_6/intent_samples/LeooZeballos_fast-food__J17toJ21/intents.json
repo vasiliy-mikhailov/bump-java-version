@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "repo": "LeooZeballos/fast-food",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "9871510129fe0e657d780c81f378556ed4d4f8a4",
+    "sha_to": "2122d7effc567f72e4c543b7411894ed66c9fbf8"
+  },
+  "by_file": {
+    "src/main/java/net/leozeballos/FastFood/FastFoodApplication.java": [
+      {
+        "kind": "add_encryptable_properties_annotation",
+        "general_idea": "Enable Jasypt Spring Boot integration to allow decryption of encrypted properties in the application configuration.",
+        "human_impl": "@EnableEncryptableProperties",
+        "bucket": "polishment"
+      }
+    ],
+    "src/test/java/net/leozeballos/FastFood/FastFoodApplicationTests.java": [
+      {
+        "kind": "add_test_profile",
+        "general_idea": "Activate the 'test' Spring profile for the application context test.",
+        "human_impl": "@ActiveProfiles(\"test\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_test_datasource",
+        "general_idea": "Override datasource properties to use an in-memory H2 database for testing.",
+        "human_impl": "@TestPropertySource(properties = { \"spring.datasource.url=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1\", ... })",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "upgrade_spring_boot",
+        "general_idea": "Upgrade Spring Boot parent from 2.6.6 to 3.5.11 to support Java 21 and modern Spring ecosystem.",
+        "human_impl": "<parent><version>3.5.11</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "upgrade_java_version",
+        "general_idea": "Update the target Java version property from 17 to 21.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_jasypt_dependency",
+        "general_idea": "Add jasypt-spring-boot-starter for encrypting configuration properties.",
+        "human_impl": "<artifactId>jasypt-spring-boot-starter</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_validation_dependency",
+        "general_idea": "Add spring-boot-starter-validation for Bean Validation support.",
+        "human_impl": "<artifactId>spring-boot-starter-validation</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "switch_db_driver",
+        "general_idea": "Replace MySQL connector with PostgreSQL driver for database connectivity.",
+        "human_impl": "<artifactId>postgresql</artifactId>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_bootstrap_webjar",
+        "general_idea": "Add Bootstrap webjar for frontend styling.",
+        "human_impl": "<artifactId>bootstrap</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_statemachine_dependency",
+        "general_idea": "Add Spring State Machine core library for managing order states.",
+        "human_impl": "<artifactId>spring-statemachine-core</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_h2_test_dependency",
+        "general_idea": "Add H2 in-memory database for testing purposes.",
+        "human_impl": "<artifactId>h2</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jasypt_plugin",
+        "general_idea": "Add jasypt-maven-plugin to encrypt properties during the build process.",
+        "human_impl": "<artifactId>jasypt-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "ignore_local_config",
+        "general_idea": "Add local application properties to gitignore to prevent committing environment-specific secrets or settings.",
+        "human_impl": "+/src/main/resources/application-local.properties",
+        "bucket": "polishment"
+      }
+    ],
+    "LICENSE": [
+      {
+        "kind": "replace_license",
+        "general_idea": "Replace the GNU General Public License v3 with the MIT License to change the project's legal terms.",
+        "human_impl": "Removed full GPL-3.0 text and added MIT License text with copyright for Leonel Zeballos.",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [],
+    "mvnw": [],
+    "mvnw.cmd": [],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "switch_db_dialect",
+        "general_idea": "Changed Hibernate dialect from MySQL to PostgreSQL to support the new database backend.",
+        "human_impl": "spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialect",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_timezone_config",
+        "general_idea": "Added explicit JDBC timezone configuration for Hibernate to handle temporal data correctly.",
+        "human_impl": "spring.jpa.properties.hibernate.jdbc.time_zone = -03:00",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_open_in_view",
+        "general_idea": "Explicitly enabled Open Session In View pattern via configuration property.",
+        "human_impl": "spring.jpa.open-in-view=true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "disable_whitelabel_error",
+        "general_idea": "Disabled the default Spring Boot whitelabel error page for cleaner error handling.",
+        "human_impl": "server.error.whitelabel.enabled=false",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_error_path",
+        "general_idea": "Configured the specific path for error handling endpoints.",
+        "human_impl": "server.error.path=/error",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_datasource_pool",
+        "general_idea": "Added detailed Tomcat JDBC connection pool configuration parameters.",
+        "human_impl": "spring.datasource.tomcat.initial-size=5 ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_active_profile",
+        "general_idea": "Defined the active Spring profile to use development settings by default.",
+        "human_impl": "spring.profiles.active=dev",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

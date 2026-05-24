@@ -1,0 +1,3424 @@
+{
+  "meta": {
+    "repo": "ucsb-cs156-f25/proj-dining-f25-06",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "877451cd2d7e3d920fe0f855a66353bc05737afb",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "bump_spring_boot_parent",
+        "general_idea": "Upgrade Spring Boot parent version to 3.3.4 to support Java 21 and modern Spring ecosystem.",
+        "human_impl": "<parent><version>3.3.4</version></parent>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "set_java_version_property",
+        "general_idea": "Explicitly set the Java version property to 21 for compilation and runtime targeting.",
+        "human_impl": "<properties><java.version>21</java.version></properties>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "replace_swagger_with_springdoc",
+        "general_idea": "Replace deprecated Springfox Swagger dependencies with SpringDoc OpenAPI, which is compatible with Spring Boot 3.",
+        "human_impl": "<dependency><groupId>org.springdoc</groupId><artifactId>springdoc-openapi-starter-webmvc-ui</artifactId></dependency>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_spring_cloud_gateway",
+        "general_idea": "Update Spring Cloud Gateway MVC to version 4.1.3 to align with Spring Boot 3 dependencies.",
+        "human_impl": "<dependency><groupId>org.springframework.cloud</groupId><artifactId>spring-cloud-gateway-mvc</artifactId><version>4.1.3</version></dependency>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_javax_validation_api",
+        "general_idea": "Add explicit dependency for javax.validation API, likely to resolve classpath conflicts or missing classes in the new environment.",
+        "human_impl": "<dependency><groupId>javax.validation</groupId><artifactId>validation-api</artifactId><version>2.0.1.Final</version></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_playwright_dependency",
+        "general_idea": "Add Microsoft Playwright dependency for browser automation testing.",
+        "human_impl": "<dependency><groupId>com.microsoft.playwright</groupId><artifactId>playwright</artifactId><version>1.41.0</version></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_wiremock_dependency",
+        "general_idea": "Add WireMock standalone dependency for mocking HTTP services in tests.",
+        "human_impl": "<dependency><groupId>com.github.tomakehurst</groupId><artifactId>wiremock-jre8-standalone</artifactId><version>2.35.1</version></dependency>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_pitest_plugin",
+        "general_idea": "Add Pitest Maven plugin for mutation testing with specific configuration for history and exclusions.",
+        "human_impl": "<plugin><groupId>org.pitest</groupId><artifactId>pitest-maven</artifactId><version>1.7.3</version></plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_frontend_node_version",
+        "general_idea": "Update the Node.js version used by the frontend-maven-plugin from v12 to v16 for better compatibility.",
+        "human_impl": "<nodeVersion>v16.20.0</nodeVersion>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_integration_profile",
+        "general_idea": "Add a new Maven profile for integration testing that activates specific properties and builds the frontend.",
+        "human_impl": "<profile><id>integration</id>...</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_wiremock_profile",
+        "general_idea": "Add a new Maven profile for running with WireMock enabled, activating specific Spring profiles.",
+        "human_impl": "<profile><id>wiremock</id>...</profile>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_pom_structure",
+        "general_idea": "Restructure pom.xml with extensive comments and organized sections for better readability and maintenance.",
+        "human_impl": "<!-- (0) <modelVersion/> --> ... <!-- (28) <profiles/> -->",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jacoco_excludes",
+        "general_idea": "Update JaCoCo plugin configuration to exclude new or renamed classes from coverage checks.",
+        "human_impl": "<exclude>**/${app.packagePath}/aop/LoggingAspect.*</exclude>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_surefire_plugin_config",
+        "general_idea": "Add explicit configuration for maven-surefire-plugin to fix event transmission issues.",
+        "human_impl": "<plugin><artifactId>maven-surefire-plugin</artifactId><version>3.0.0-M5</version>...</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jar_plugin_config",
+        "general_idea": "Configure maven-jar-plugin to set the main class in the manifest for executable JARs.",
+        "human_impl": "<plugin><artifactId>maven-jar-plugin</artifactId>...<mainClass>${mainClass}</mainClass>...</plugin>",
+        "bucket": "polishment"
+      }
+    ],
+    ".env.SAMPLE": [
+      {
+        "kind": "add_env_variable",
+        "general_idea": "Add placeholder for Chromatic project token to support visual regression testing configuration.",
+        "human_impl": "CHROMATIC_PROJECT_TOKEN=see-instructions-in-readme",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "add_macos_ignore",
+        "general_idea": "Add .DS_Store to .gitignore to prevent macOS metadata files from being tracked.",
+        "human_impl": "+.DS_Store",
+        "bucket": "polishment"
+      }
+    ],
+    "Dockerfile": [
+      {
+        "kind": "base_image_upgrade",
+        "general_idea": "Switch the base image from a Maven-bundled JDK 11 image to a standalone Liberica JDK 21 Alpine image to support Java 21.",
+        "human_impl": "FROM bellsoft/liberica-openjdk-alpine:21",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "package_manager_migration",
+        "general_idea": "Replace apt-get with apk to align with the new Alpine Linux base image.",
+        "human_impl": "RUN apk add curl",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_installation",
+        "general_idea": "Install Maven explicitly via apk since it is no longer provided by the base image.",
+        "human_impl": "RUN apk add maven",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_installation",
+        "general_idea": "Install bash explicitly via apk as it is not present by default in minimal Alpine images.",
+        "human_impl": "RUN apk add bash",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "dependency_installation",
+        "general_idea": "Install libstdc++ to satisfy native library dependencies required by the application or tools.",
+        "human_impl": "RUN apk add --no-cache libstdc++",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "node_version_upgrade",
+        "general_idea": "Upgrade Node.js installation from version 12 to 16.20.0 using nvm to ensure compatibility with modern frontend tooling.",
+        "human_impl": "ENV NODE_VERSION=16.20.0 ... nvm install ${NODE_VERSION}",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "build_step_addition",
+        "general_idea": "Add Maven build step to compile and package the Java application within the Docker image.",
+        "human_impl": "RUN mvn -B -Pproduction -Ph2 -DskipTests -f /home/app/pom.xml clean package",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "entrypoint_configuration",
+        "general_idea": "Define the entrypoint to run the generated JAR file, replacing the generic bash shell command.",
+        "human_impl": "ENTRYPOINT [\"java\",\"-jar\",\"/home/app/target/team03-1.0.0.jar\"]",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "artifact_copy",
+        "general_idea": "Copy source code, frontend assets, and configuration files into the image for the build process.",
+        "human_impl": "COPY src /home/app/src ... COPY pom.xml /home/app",
+        "bucket": "breaking"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "update_project_metadata",
+        "general_idea": "Rename the project title and add team-specific instructions and deployment links.",
+        "human_impl": "Changed header from '# demo-spring-react-kitchensink' to '# STARTER-team03' and added TODOs for repo name and deployment URLs.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_version_documentation",
+        "general_idea": "Document the specific Java and Node versions required for the project.",
+        "human_impl": "Added '# Versions' section listing Java 17 and node 16.20.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_application_overview",
+        "general_idea": "Describe the functional requirements and user roles for the application.",
+        "human_impl": "Added '# Overview of application' section detailing features for logged-in users and admins.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_setup_instructions",
+        "general_idea": "Simplify local setup instructions by referencing external documentation for OAuth configuration.",
+        "human_impl": "Replaced detailed Google Client ID setup steps with a link to 'docs/oauth.md'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "improve_start_guide",
+        "general_idea": "Clarify the steps to start the backend and frontend services locally.",
+        "human_impl": "Rewrote '# Getting Started on localhost' with clearer terminal commands and troubleshooting tips.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dokku_guide",
+        "general_idea": "Provide instructions for deploying and running the application on Dokku.",
+        "human_impl": "Added '# Getting Started on Dokku' section linking to external documentation.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_swagger_access_info",
+        "general_idea": "Document how to access the Swagger UI for API exploration.",
+        "human_impl": "Added '# Accessing swagger' section with the URL path '/swagger-ui/index.html'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_database_access_info",
+        "general_idea": "Explain how to access the H2 database console locally and on Dokku.",
+        "human_impl": "Added '# SQL Database access' section with links to h2-console and Dokku database docs.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_testing_documentation",
+        "general_idea": "Document commands for running unit, integration, and mutation tests.",
+        "human_impl": "Added '# Testing' section with subsections for Unit Tests, Integration Tests, and Partial pitest runs.",
+        "bucket": "polishment"
+      }
+    ],
+    "dev_environment": [
+      {
+        "kind": "rename_docker_image",
+        "general_idea": "Rename the Docker image tag to reflect the new project identity.",
+        "human_impl": "IMAGE_NAME=demo_spring_react_example_dev",
+        "bucket": "polishment"
+      }
+    ],
+    "frontend/.gitignore": [
+      {
+        "kind": "resolve_merge_conflict",
+        "general_idea": "Resolve a merge conflict in .gitignore by selecting the stashed changes over the upstream changes.",
+        "human_impl": "Removed '<<<<<<< Updated upstream' block containing '/reports' and kept '======= ... >>>>>>> Stashed changes' block containing '/.nyc_output' and 'build-storybook.log'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_gitignore_entry",
+        "general_idea": "Ignore nyc test coverage output directory.",
+        "human_impl": "Added '.nyc_output/' to .gitignore.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_gitignore_entry",
+        "general_idea": "Ignore stryker mutation testing temporary files.",
+        "human_impl": "Added '.stryker-tmp' to .gitignore.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_gitignore_entry",
+        "general_idea": "Ignore storybook log files.",
+        "human_impl": "Added '*storybook.log' to .gitignore.",
+        "bucket": "polishment"
+      }
+    ],
+    "frontend/.storybook/main.js": [
+      {
+        "kind": "migrate_to_esm",
+        "general_idea": "Convert Storybook configuration from CommonJS module.exports to ES Module export default.",
+        "human_impl": "export default config;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_type_annotation",
+        "general_idea": "Add JSDoc type annotation for StorybookConfig to improve IDE support.",
+        "human_impl": "/** @type { import('@storybook/react-webpack5').StorybookConfig } */",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_story_patterns",
+        "general_idea": "Update story file glob patterns to include .mdx and .mjs extensions.",
+        "human_impl": "stories: [\"../src/**/*.mdx\", \"../src/**/*.stories.@(js|jsx|mjs|ts|tsx)\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_addon_onboarding",
+        "general_idea": "Add the new Storybook addon-onboarding to the addons list.",
+        "human_impl": "\"@storybook/addon-onboarding\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_addon_chromatic",
+        "general_idea": "Add the Chromatic Storybook addon for visual testing integration.",
+        "human_impl": "\"@chromatic-com/storybook\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_addon_interactions",
+        "general_idea": "Add the Storybook addon-interactions for interaction testing.",
+        "human_impl": "\"@storybook/addon-interactions\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "explicit_framework_config",
+        "general_idea": "Explicitly define the framework configuration block for react-webpack5.",
+        "human_impl": "framework: { name: \"@storybook/react-webpack5\", options: {} }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_static_dirs",
+        "general_idea": "Configure staticDirs to serve public assets in Storybook.",
+        "human_impl": "staticDirs: [\"../public\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_custom_webpack_plugin",
+        "general_idea": "Remove custom webpack plugin that failed builds on warnings, likely due to deprecation or migration to standard Storybook error handling.",
+        "human_impl": "removed webpackFinal and WebpackPluginFailBuildOnWarning",
+        "bucket": "polishment"
+      }
+    ],
+    "frontend/.storybook/preview.js": [
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for react-toastify CSS to support toast notifications in Storybook.",
+        "human_impl": "import 'react-toastify/dist/ReactToastify.css';",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add imports for msw-storybook-addon to enable Mock Service Worker in Storybook.",
+        "human_impl": "import { initialize, mswLoader } from 'msw-storybook-addon'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for ToastContainer component from react-toastify.",
+        "human_impl": "import { ToastContainer } from \"react-toastify\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_feature_logic",
+        "general_idea": "Implement logic to determine the correct URL for the Mock Service Worker script based on whether the environment is localhost or GitHub Pages.",
+        "human_impl": "const isLocalhost = currentUrl.startsWith(\"http://localhost:6006/\"); const mockServiceWorkerUrl = isLocalhost ? \"mockServiceWorker.js\" : \"https://\" + window.location.hostname + \"/mockServiceWorker.js\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_feature_logic",
+        "general_idea": "Initialize the Mock Service Worker with the calculated URL.",
+        "human_impl": "initialize({ serviceWorker: { url: mockServiceWorkerUrl } });",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_decorator",
+        "general_idea": "Wrap Storybook stories with ToastContainer to render toast notifications.",
+        "human_impl": "<ToastContainer /> <Story />",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_config",
+        "general_idea": "Refactor Storybook preview configuration to use the modern default export object with parameters and loaders.",
+        "human_impl": "const preview = { parameters: { controls: { ... } }, loaders: [mswLoader] }; export default preview;",
+        "bucket": "polishment"
+      }
+    ],
+    "frontend/README.md": [],
+    "frontend/jsconfig.json": [
+      {
+        "kind": "update_jsconfig_base_url",
+        "general_idea": "Changed the baseUrl in jsconfig.json from './src' to 'src' to align with standard path resolution.",
+        "human_impl": "\"baseUrl\": \"src\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jsconfig_include",
+        "general_idea": "Added an 'include' field to jsconfig.json to explicitly specify the source directory for the compiler.",
+        "human_impl": "\"include\": [\"src\"]",
+        "bucket": "polishment"
+      }
+    ],
+    "frontend/package-lock.json": [
+      {
+        "kind": "lockfile_format_upgrade",
+        "general_idea": "Upgrade package-lock.json from lockfileVersion 1 to 3 to align with modern npm versions and improve dependency resolution accuracy.",
+        "human_impl": "\"lockfileVersion\": 3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_tree_restructure",
+        "general_idea": "Restructure dependency storage from flat 'dependencies' object to nested 'node_modules' paths to support hoisting and peer dependency resolution in npm v7+.",
+        "human_impl": "\"packages\": { \"node_modules/@babel/core\": ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "babel_core_update",
+        "general_idea": "Update @babel/core and related helpers to latest versions compatible with the new lockfile format and Node.js 20.",
+        "human_impl": "\"@babel/core\": { \"version\": \"7.25.2\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "semver_dependency_update",
+        "general_idea": "Update semver dependency versions within babel packages to ensure compatibility with newer node environments.",
+        "human_impl": "\"semver\": { \"version\": \"6.3.1\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "babel_parser_update",
+        "general_idea": "Update @babel/parser to latest version to support newer JavaScript syntax features.",
+        "human_impl": "\"@babel/parser\": { \"version\": \"7.25.3\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "babel_plugin_updates",
+        "general_idea": "Update various babel plugins (class-properties, decorators, etc.) to their latest stable versions.",
+        "human_impl": "\"@babel/plugin-proposal-class-properties\": { \"version\": \"7.18.6\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "babel_helper_updates",
+        "general_idea": "Update babel helper packages to match the new core version and lockfile structure.",
+        "human_impl": "\"@babel/helper-compilation-targets\": { \"version\": \"7.25.2\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_plugins",
+        "general_idea": "Upgrade Babel plugin versions to align with newer Babel core and Node.js standards.",
+        "human_impl": "Updated @babel/plugin-proposal-private-methods from 7.13.0 to 7.18.6 and other plugins to 7.24.x/7.25.x",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_decorators",
+        "general_idea": "Add support for decorators via a new Babel plugin.",
+        "human_impl": "Added @babel/plugin-proposal-decorators@7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_resource_management",
+        "general_idea": "Add support for explicit resource management syntax.",
+        "human_impl": "Added @babel/plugin-proposal-explicit-resource-management@7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_nullish_coalescing",
+        "general_idea": "Add support for nullish coalescing operator.",
+        "human_impl": "Added @babel/plugin-proposal-nullish-coalescing-operator@7.18.6",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_numeric_separator",
+        "general_idea": "Add support for numeric separator syntax.",
+        "human_impl": "Added @babel/plugin-proposal-numeric-separator@7.18.6",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_optional_chaining",
+        "general_idea": "Add support for optional chaining syntax.",
+        "human_impl": "Added @babel/plugin-proposal-optional-chaining@7.21.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_private_property",
+        "general_idea": "Add support for private property in object syntax.",
+        "human_impl": "Added @babel/plugin-proposal-private-property-in-object@7.21.11",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_import_assertions",
+        "general_idea": "Add support for import assertions syntax.",
+        "human_impl": "Added @babel/plugin-syntax-import-assertions@7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_import_attributes",
+        "general_idea": "Add support for import attributes syntax.",
+        "human_impl": "Added @babel/plugin-syntax-import-attributes@7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_unicode_sets",
+        "general_idea": "Add support for unicode sets regex syntax.",
+        "human_impl": "Added @babel/plugin-syntax-unicode-sets-regex@7.18.6",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_async_generator",
+        "general_idea": "Add support for async generator functions.",
+        "human_impl": "Added @babel/plugin-transform-async-generator-functions@7.25.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_class_properties",
+        "general_idea": "Add support for class properties.",
+        "human_impl": "Added @babel/plugin-transform-class-properties@7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_class_static_block",
+        "general_idea": "Add support for class static blocks.",
+        "human_impl": "Added @babel/plugin-transform-class-static-block@7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_duplicate_groups",
+        "general_idea": "Add support for duplicate named capturing groups in regex.",
+        "human_impl": "Added @babel/plugin-transform-duplicate-named-capturing-groups-regex@7.25.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_dynamic_import",
+        "general_idea": "Add support for dynamic imports.",
+        "human_impl": "Added @babel/plugin-transform-dynamic-import@7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_export_namespace",
+        "general_idea": "Add support for export namespace from syntax.",
+        "human_impl": "Added @babel/plugin-transform-export-namespace-from@7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_flow",
+        "general_idea": "Update Flow type stripping plugin to latest version.",
+        "human_impl": "Updated @babel/plugin-transform-flow-strip-types from 7.12.1 to 7.25.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_for_of",
+        "general_idea": "Update for-of loop transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-for-of from 7.13.0 to 7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_function_name",
+        "general_idea": "Update function name transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-function-name from 7.12.13 to 7.25.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_classes",
+        "general_idea": "Update class transformation plugin to latest version.",
+        "human_impl": "Updated @babel/plugin-transform-classes from 7.13.0 to 7.25.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_block_scoping",
+        "general_idea": "Update block scoping transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-block-scoping from 7.13.16 to 7.25.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_destructuring",
+        "general_idea": "Update destructuring transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-destructuring from 7.13.17 to 7.24.8",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_dotall_regex",
+        "general_idea": "Update dotall regex transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-dotall-regex from 7.12.13 to 7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_duplicate_keys",
+        "general_idea": "Update duplicate keys transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-duplicate-keys from 7.12.13 to 7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_exponentiation",
+        "general_idea": "Update exponentiation operator transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-exponentiation-operator from 7.12.13 to 7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_computed_properties",
+        "general_idea": "Update computed properties transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-computed-properties from 7.13.0 to 7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_block_scoped_functions",
+        "general_idea": "Update block scoped functions transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-block-scoped-functions from 7.12.13 to 7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_async_to_generator",
+        "general_idea": "Update async to generator transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-async-to-generator from 7.13.0 to 7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_arrow_functions",
+        "general_idea": "Update arrow functions transformation plugin.",
+        "human_impl": "Updated @babel/plugin-transform-arrow-functions from 7.13.0 to 7.24.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_syntax_plugins",
+        "general_idea": "Update various syntax parsing plugins to latest versions.",
+        "human_impl": "Updated @babel/plugin-syntax-* packages to 7.24.7 or 7.14.5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_preset_env",
+        "general_idea": "Upgrade @babel/preset-env to version 7.25.3 to align with modern JavaScript standards and fix compatibility issues.",
+        "human_impl": "Replaced @babel/preset-env 7.14.0 with 7.25.3 in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_plugins",
+        "general_idea": "Update individual Babel transform plugins to versions compatible with the new preset-env and core.",
+        "human_impl": "Updated dependencies like @babel/plugin-transform-react-jsx to 7.25.2 and others to 7.24.x",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_runtime",
+        "general_idea": "Upgrade @babel/runtime and related helpers to ensure consistent polyfilling and helper functions.",
+        "human_impl": "Updated @babel/runtime and @babel/runtime-corejs3 versions in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_core",
+        "general_idea": "Upgrade @babel/core and its sub-dependencies to match the new plugin versions.",
+        "human_impl": "Updated @babel/core, @babel/parser, @babel/traverse, and @babel/types to 7.25.x",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_preset_typescript",
+        "general_idea": "Upgrade @babel/preset-typescript to support newer TypeScript syntax and Babel versions.",
+        "human_impl": "Updated @babel/preset-typescript and @babel/plugin-transform-typescript in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_preset_react",
+        "general_idea": "Upgrade @babel/preset-react to ensure compatibility with the new React JSX transform plugins.",
+        "human_impl": "Updated @babel/preset-react and associated plugins in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_preset_flow",
+        "general_idea": "Upgrade @babel/preset-flow to maintain Flow type stripping capabilities with newer Babel versions.",
+        "human_impl": "Updated @babel/preset-flow and @babel/plugin-transform-flow-strip-types in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_register",
+        "general_idea": "Upgrade @babel/register for development-time transpilation compatibility.",
+        "human_impl": "Updated @babel/register in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_helper_plugins",
+        "general_idea": "Update internal Babel helper packages to match the new core version.",
+        "human_impl": "Updated @babel/helper-plugin-utils, @babel/helper-module-transforms, etc. to 7.24.x/7.25.x",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_regenerator_runtime",
+        "general_idea": "Update regenerator-runtime to support async/await transformations in the new Babel setup.",
+        "human_impl": "Updated regenerator-runtime and regenerator-transform in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_core_js_compat",
+        "general_idea": "Update core-js-compat to accurately determine polyfill requirements for the new Babel preset.",
+        "human_impl": "Updated core-js-compat in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_semver_dependency",
+        "general_idea": "Update semver dependency to a version compatible with the new Babel plugins.",
+        "human_impl": "Updated semver to 6.3.1 in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_emotion_packages",
+        "general_idea": "Update Emotion CSS-in-JS library packages to their latest compatible versions.",
+        "human_impl": "Updated @emotion/cache, @emotion/core, @emotion/css, etc. in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_testing_utilities",
+        "general_idea": "Update testing-related dependencies like @bcoe/v8-coverage for better test coverage reporting.",
+        "human_impl": "Updated @bcoe/v8-coverage in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_css_tools",
+        "general_idea": "Update CSS processing tools to ensure compatibility with the build pipeline.",
+        "human_impl": "Updated @csstools/convert-colors and @csstools/normalize.css in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_watch_utility",
+        "general_idea": "Update file watching utility for development server compatibility.",
+        "human_impl": "Updated @cnakazawa/watch in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_pretty_print_object",
+        "general_idea": "Update utility for pretty-printing objects in test outputs or logs.",
+        "human_impl": "Updated @base2/pretty-print-object in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_preset_env",
+        "general_idea": "Upgrade @babel/preset-env and its associated transformation plugins to newer versions.",
+        "human_impl": "Added @babel/preset-env dependencies like @babel/plugin-transform-exponentiation-operator and @babel/plugin-transform-nullish-coalescing-operator.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_preset_flow",
+        "general_idea": "Add support for Flow type stripping via @babel/preset-flow.",
+        "human_impl": "Added node_modules/@babel/preset-flow with dependency @babel/plugin-transform-flow-strip-types.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_babel_preset_modules",
+        "general_idea": "Add @babel/preset-modules for better module transformation.",
+        "human_impl": "Added node_modules/@babel/preset-modules.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_preset_react",
+        "general_idea": "Upgrade @babel/preset-react to a newer version.",
+        "human_impl": "Added node_modules/@babel/preset-react with updated dependencies.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_preset_typescript",
+        "general_idea": "Upgrade @babel/preset-typescript to a newer version.",
+        "human_impl": "Added node_modules/@babel/preset-typescript with updated dependencies.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_register",
+        "general_idea": "Upgrade @babel/register to a newer version.",
+        "human_impl": "Added node_modules/@babel/register with updated dependencies.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_core_packages",
+        "general_idea": "Upgrade core Babel packages like @babel/runtime, @babel/template, @babel/traverse, and @babel/types.",
+        "human_impl": "Updated versions for @babel/runtime, @babel/template, @babel/traverse, and @babel/types.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_emotion_packages",
+        "general_idea": "Remove unused @emotion packages from the dependency tree.",
+        "human_impl": "Removed @emotion/sheet, @emotion/styled, @emotion/stylis, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_eslint_packages",
+        "general_idea": "Remove unused @eslint packages from the dependency tree.",
+        "human_impl": "Removed @eslint/eslintrc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_hapi_packages",
+        "general_idea": "Remove unused @hapi packages from the dependency tree.",
+        "human_impl": "Removed @hapi/address, @hapi/bourne, @hapi/hoek, @hapi/joi, @hapi/topo.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_istanbul_packages",
+        "general_idea": "Remove unused @istanbuljs packages from the dependency tree.",
+        "human_impl": "Removed @istanbuljs/load-nyc-config and @istanbuljs/schema.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_jest_packages",
+        "general_idea": "Remove unused @jest packages from the dependency tree.",
+        "human_impl": "Removed @jest/console, @jest/core, @jest/environment, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_mdx_packages",
+        "general_idea": "Remove unused @mdx-js packages from the dependency tree.",
+        "human_impl": "Removed @mdx-js/loader, @mdx-js/mdx, @mdx-js/react, @mdx-js/util.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_mrmlnc_packages",
+        "general_idea": "Remove unused @mrmlnc packages from the dependency tree.",
+        "human_impl": "Removed @mrmlnc/readdir-enhanced.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_nodelib_packages",
+        "general_idea": "Remove unused @nodelib packages from the dependency tree.",
+        "human_impl": "Removed @nodelib/fs.scandir, @nodelib/fs.stat, @nodelib/fs.walk.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_npmcli_packages",
+        "general_idea": "Remove unused @npmcli packages from the dependency tree.",
+        "human_impl": "Removed @npmcli/move-file.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_pmmmwh_packages",
+        "general_idea": "Remove unused @pmmmwh packages from the dependency tree.",
+        "human_impl": "Removed @pmmmwh/react-refresh-webpack-plugin.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_popperjs_packages",
+        "general_idea": "Remove unused @popperjs packages from the dependency tree.",
+        "human_impl": "Removed @popperjs/core.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_reach_packages",
+        "general_idea": "Remove unused @reach packages from the dependency tree.",
+        "human_impl": "Removed @reach/router.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_restart_packages",
+        "general_idea": "Remove unused @restart packages from the dependency tree.",
+        "human_impl": "Removed @restart/context and @restart/hooks.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_rollup_packages",
+        "general_idea": "Remove unused @rollup packages from the dependency tree.",
+        "human_impl": "Removed @rollup/plugin-node-resolve and @rollup/plugin-replace.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_chromatic_storybook",
+        "general_idea": "Add @chromatic-com/storybook for Chromatic integration.",
+        "human_impl": "Added node_modules/@chromatic-com/storybook.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_bundled_es_modules",
+        "general_idea": "Add bundled ES modules for cookie, statuses, and tough-cookie.",
+        "human_impl": "Added @bundled-es-modules/cookie, @bundled-es-modules/statuses, @bundled-es-modules/tough-cookie.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_storybook_dependencies",
+        "general_idea": "Remove Storybook and its extensive dependency tree from the frontend lock file as part of cleaning up unused development tools.",
+        "human_impl": "Removed @storybook/addon-actions, @storybook/addon-docs, @storybook/builder-webpack4, and related packages from package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_csstools_postcss_plugins",
+        "general_idea": "Add modern CSS processing plugins from the @csstools suite to support newer CSS features in the build pipeline.",
+        "human_impl": "Added @csstools/postcss-cascade-layers, @csstools/postcss-color-function, @csstools/postcss-font-format-keywords, and other @csstools packages",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_storybook_dependencies",
+        "general_idea": "Remove Storybook and its associated dependencies from the project lockfile.",
+        "human_impl": "Removed entries for @storybook/* packages and related transitive dependencies like core-js and telejson.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_eslint_dependencies",
+        "general_idea": "Add modern ESLint and its utility packages to the project lockfile.",
+        "human_impl": "Added entries for @eslint/js, @eslint-community/eslint-utils, @eslint-community/regexpp, and @eslint/eslintrc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_esbuild_dependencies",
+        "general_idea": "Add esbuild platform-specific binaries to the project lockfile.",
+        "human_impl": "Added entry for @esbuild/darwin-x64.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_csstools_dependencies",
+        "general_idea": "Add CSS tools postcss plugins to the project lockfile.",
+        "human_impl": "Added entries for @csstools/postcss-unset-value and @csstools/selector-specificity.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_inquirer_dependencies",
+        "general_idea": "Add Inquirer CLI library components to the project lockfile.",
+        "human_impl": "Added entries for @inquirer/checkbox, @inquirer/confirm, and related core/type packages.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_humanwhocodes_dependencies",
+        "general_idea": "Add HumanWhoCodes utility packages to the project lockfile.",
+        "human_impl": "Added entries for @humanwhocodes/config-array, @humanwhocodes/module-importer, and @humanwhocodes/object-schema.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_storybook_deps",
+        "general_idea": "Remove Storybook and related UI testing dependencies that were no longer needed.",
+        "human_impl": "Removed @storybook/react, @storybook/preset-create-react-app, and associated packages from package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_stryker_deps",
+        "general_idea": "Remove Stryker mutation testing framework dependencies.",
+        "human_impl": "Removed @stryker-mutator/core, @stryker-mutator/jest-runner, and related packages from package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_inquirer_deps",
+        "general_idea": "Add Inquirer CLI prompt library dependencies.",
+        "human_impl": "Added @inquirer/core, @inquirer/prompts, and related packages to package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_framework",
+        "general_idea": "Upgrade the Jest testing framework from version 26 to version 29 to align with modern React ecosystem standards.",
+        "human_impl": "Replaced @jest/core@26.6.3 with @jest/core@29.7.0 and associated packages like @jest/console, @jest/transform, and @jest/types.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_testing_library",
+        "general_idea": "Update @testing-library packages to newer versions compatible with the updated Jest framework.",
+        "human_impl": "Removed @testing-library/dom@7.30.4, @testing-library/jest-dom@5.12.0, and @testing-library/react@11.2.6 in favor of newer implicit or explicit versions in the lockfile structure.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_svgr_dependency",
+        "general_idea": "Update the SVG-to-React component transformer (@svgr) to a newer version.",
+        "human_impl": "Replaced @svgr/webpack@5.5.0 and its sub-dependencies with updated versions in the new lockfile structure.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_type_definitions",
+        "general_idea": "Update TypeScript type definitions for Node.js, React, and other libraries to match current library versions.",
+        "human_impl": "Replaced @types/node@15.0.1, @types/react@17.0.4, and @types/jest@26.0.23 with newer versions compatible with the updated runtime libraries.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_istanbul_coverage",
+        "general_idea": "Update Istanbul code coverage tools to support the new Jest version.",
+        "human_impl": "Added/updated @istanbuljs/load-nyc-config and @istanbuljs/schema to versions compatible with Jest 29.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_cli_utilities",
+        "general_idea": "Update command-line interface utility libraries used by build tools.",
+        "human_impl": "Added @isaacs/cliui@8.0.2 and updated string-width, strip-ansi, and wrap-ansi dependencies.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_dependencies",
+        "general_idea": "Update Jest and its internal dependencies to version 29.7.0 to align with the new React App version.",
+        "human_impl": "Replaced old Jest packages with `node_modules/@jest/core/node_modules/jest-*` versions 29.7.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_types",
+        "general_idea": "Remove unused TypeScript definition packages that are no longer required by the updated build tooling.",
+        "human_impl": "Removed `@types/react-transition-group`, `@types/resolve`, `@types/scheduler`, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_typescript_eslint",
+        "general_idea": "Remove old TypeScript ESLint plugin and parser versions that are likely replaced or no longer needed.",
+        "human_impl": "Removed `@typescript-eslint/eslint-plugin`, `@typescript-eslint/parser`, and related utils",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_webassemblyjs",
+        "general_idea": "Remove WebAssembly JS packages that are no longer dependencies of the updated webpack/bundler setup.",
+        "human_impl": "Removed `@webassemblyjs/ast`, `@webassemblyjs/wasm-parser`, and other `@webassemblyjs` packages",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_xtuc",
+        "general_idea": "Remove utility packages from xtuc that were dependencies of the removed WebAssembly packages.",
+        "human_impl": "Removed `@xtuc/ieee754` and `@xtuc/long`",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_misc_packages",
+        "general_idea": "Remove miscellaneous packages like `abab`, `acorn`, `ajv`, and `angular-html-parser` that are no longer in the dependency tree.",
+        "human_impl": "Removed `abab`, `acorn`, `ajv`, `ajv-errors`, `ajv-keywords`, `angular-html-parser`, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_environment",
+        "general_idea": "Update Jest environment and expect utilities to version 29.7.0.",
+        "human_impl": "Added `node_modules/@jest/environment` and `node_modules/@jest/expect` version 29.7.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_expect_utils",
+        "general_idea": "Update Jest expect utilities and their dependencies to version 29.7.0.",
+        "human_impl": "Added `node_modules/@jest/expect-utils` and nested `jest-get-type` version 29.6.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_schemas",
+        "general_idea": "Update Jest schemas and typebox dependencies to version 29.6.3.",
+        "human_impl": "Added `node_modules/@jest/expect/node_modules/@jest/schemas` version 29.6.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_transform",
+        "general_idea": "Update Jest transform module to version 29.7.0.",
+        "human_impl": "Added `node_modules/@jest/expect/node_modules/@jest/transform` version 29.7.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_types",
+        "general_idea": "Update Jest types and related dependencies to version 29.6.3.",
+        "human_impl": "Added `node_modules/@jest/expect/node_modules/@jest/types` version 29.6.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_yargs_types",
+        "general_idea": "Update Yargs types to version 17.0.33 to match new Jest CLI requirements.",
+        "human_impl": "Added `node_modules/@jest/expect/node_modules/@types/yargs` version 17.0.33",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_ansi_styles",
+        "general_idea": "Update ansi-styles to version 4.3.0 for consistent terminal output formatting.",
+        "human_impl": "Added `node_modules/@jest/expect/node_modules/ansi-styles` version 4.3.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_chalk",
+        "general_idea": "Update chalk to version 4.1.2 for consistent terminal output formatting.",
+        "human_impl": "Added `node_modules/@jest/expect/node_modules/chalk` version 4.1.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_lockfile_format",
+        "general_idea": "Regenerate package-lock.json to adopt the modern node_modules structure and updated dependency tree.",
+        "human_impl": "diff --git a/frontend/package-lock.json ... index c74353f..ace6fb5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_dependencies",
+        "general_idea": "Update Jest testing framework dependencies to version 29 to ensure compatibility with modern Node.js versions and fix potential runtime issues.",
+        "human_impl": "Replaced Jest 26/27 packages with Jest 29 packages in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_dependencies",
+        "general_idea": "Update Babel compiler dependencies to align with the new Jest version and modern JavaScript syntax support.",
+        "human_impl": "Replaced old Babel preset and plugin entries with updated versions in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_source_map_dependencies",
+        "general_idea": "Update source map generation libraries to support newer Node.js environments and improve debugging accuracy.",
+        "human_impl": "Replaced source-map and related utility packages with newer versions in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_color_utilities",
+        "general_idea": "Update terminal color output libraries to ensure consistent styling across different environments.",
+        "human_impl": "Replaced chalk and ansi-styles packages with newer versions in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_is_dependency",
+        "general_idea": "Update React utility dependencies to match the current React version used in the project.",
+        "human_impl": "Replaced react-is package with version 18.3.1 in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_lockfile",
+        "general_idea": "Regenerate package-lock.json to reflect updated dependency tree and versions.",
+        "human_impl": "npm install",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_storybook_dependencies",
+        "general_idea": "Update Storybook and its associated webpack builder dependencies to version 8.2.9 to align with modern Node.js and Webpack 5 standards.",
+        "human_impl": "Replaced legacy Storybook packages with @storybook/builder-webpack5, @storybook/codemod, @storybook/core, and related modules at version 8.2.9.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack_dev_middleware",
+        "general_idea": "Upgrade webpack-dev-middleware to version 6.1.3 to support Node.js 14+ and Webpack 5 peer dependencies.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/webpack-dev-middleware with version 6.1.3.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_fork_ts_checker_plugin",
+        "general_idea": "Upgrade fork-ts-checker-webpack-plugin to version 8.0.0 to ensure compatibility with TypeScript and Webpack 5.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/fork-ts-checker-webpack-plugin with version 8.0.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_fs_extra",
+        "general_idea": "Update fs-extra to version 11.2.0 to support newer Node.js versions and modern file system APIs.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/fs-extra with version 11.2.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_globby",
+        "general_idea": "Update globby to version 14.0.2 to support Node.js 18+ and modern globbing patterns.",
+        "human_impl": "Added node_modules/@storybook/codemod/node_modules/globby with version 14.0.2.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_path_type",
+        "general_idea": "Update path-type to version 5.0.0 to align with modern Node.js path handling standards.",
+        "human_impl": "Added node_modules/@storybook/codemod/node_modules/path-type with version 5.0.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_slash",
+        "general_idea": "Update slash to version 5.1.0 to ensure cross-platform path compatibility in newer Node.js environments.",
+        "human_impl": "Added node_modules/@storybook/codemod/node_modules/slash with version 5.1.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_types_node",
+        "general_idea": "Update @types/node to version 18.19.45 to provide type definitions compatible with Node.js 18 and modern TypeScript.",
+        "human_impl": "Added node_modules/@storybook/core-webpack/node_modules/@types/node with version 18.19.45.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_undici_types",
+        "general_idea": "Add undici-types version 5.26.5 to support modern Node.js HTTP client type definitions.",
+        "human_impl": "Added node_modules/@storybook/core-webpack/node_modules/undici-types with version 5.26.5.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_ws",
+        "general_idea": "Update ws (WebSocket) to version 8.18.0 to support modern WebSocket protocols and Node.js versions.",
+        "human_impl": "Added node_modules/@storybook/core/node_modules/ws with version 8.18.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_magic_string",
+        "general_idea": "Update magic-string to version 0.30.11 to improve source map generation and code transformation capabilities.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/magic-string with version 0.30.11.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_chalk",
+        "general_idea": "Update chalk to version 4.1.2 to ensure consistent terminal styling in newer Node.js environments.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/chalk with version 4.1.2.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_ansi_styles",
+        "general_idea": "Update ansi-styles to version 4.3.0 to support modern terminal color codes.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/ansi-styles with version 4.3.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_color_convert",
+        "general_idea": "Update color-convert to version 2.0.1 to support modern color space conversions.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/color-convert with version 2.0.1.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_color_name",
+        "general_idea": "Update color-name to version 1.1.4 to provide accurate color name mappings.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/color-name with version 1.1.4.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_has_flag",
+        "general_idea": "Update has-flag to version 4.0.0 to correctly detect Node.js environment flags.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/has-flag with version 4.0.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_supports_color",
+        "general_idea": "Update supports-color to version 7.2.0 to accurately detect terminal color support.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/supports-color with version 7.2.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_schema_utils",
+        "general_idea": "Update schema-utils to version 3.3.0 to validate Webpack configuration schemas correctly.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/fork-ts-checker-webpack-plugin/node_modules/schema-utils with version 3.3.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_fs_extra_nested",
+        "general_idea": "Update nested fs-extra to version 10.1.0 for compatibility with fork-ts-checker-webpack-plugin.",
+        "human_impl": "Added node_modules/@storybook/builder-webpack5/node_modules/fork-ts-checker-webpack-plugin/node_modules/fs-extra with version 10.1.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_type_fest",
+        "general_idea": "Update type-fest to version 2.19.0 to provide modern TypeScript utility types.",
+        "human_impl": "Added node_modules/@storybook/csf/node_modules/type-fest with version 2.19.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_merge_streams",
+        "general_idea": "Update @sindresorhus/merge-streams to version 2.3.0 to support Node.js 18+ stream merging.",
+        "human_impl": "Added node_modules/@storybook/codemod/node_modules/@sindresorhus/merge-streams with version 2.3.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade",
+        "general_idea": "Upgrade Storybook and its associated React/Webpack presets to version 8.2.9.",
+        "human_impl": "Replaced old cssnano/css-what dependencies with @storybook/preset-react-webpack@8.2.9 and related packages.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade",
+        "general_idea": "Update @storybook/react to version 8.2.9 to align with the new Storybook core.",
+        "human_impl": "Added node_modules/@storybook/react@8.2.9 with updated peer dependencies for React 16-19.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade",
+        "general_idea": "Update @storybook/test to version 8.2.9 to use the new testing library integration.",
+        "human_impl": "Added node_modules/@storybook/test@8.2.9 replacing older testing utilities.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade",
+        "general_idea": "Update @storybook/react-webpack5 to version 8.2.9 for Webpack 5 support in Storybook.",
+        "human_impl": "Added node_modules/@storybook/react-webpack5@8.2.9.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_cleanup",
+        "general_idea": "Remove obsolete CSS processing dependencies no longer required by the new Storybook version.",
+        "human_impl": "Removed cssnano, css-what, css.escape, cssdb, cssesc, csso, and related postcss plugins.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update @storybook/test and its transitive dependencies to versions compatible with the new Node.js environment.",
+        "human_impl": "package-lock.json: @storybook/test -> 8.x (implied by deps like @testing-library/jest-dom@6.4.5)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update Jest testing framework dependencies to version 29.x to align with modern tooling standards.",
+        "human_impl": "package-lock.json: @jest/core, @jest/test-sequencer, etc. -> 29.7.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update Testing Library dependencies to latest major versions for improved accessibility testing support.",
+        "human_impl": "package-lock.json: @testing-library/dom -> 10.1.0, @testing-library/jest-dom -> 6.4.5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_cleanup",
+        "general_idea": "Remove obsolete dotenv-related dependencies that are no longer required by the build process.",
+        "human_impl": "package-lock.json: removed dotenv, dotenv-defaults, dotenv-expand, dotenv-webpack",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_cleanup",
+        "general_idea": "Remove obsolete utility and legacy library dependencies from the lock file.",
+        "human_impl": "package-lock.json: removed downshift, duplexer, duplexify, ecc-jsbn, ejs, electron-to-chromium, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_cleanup",
+        "general_idea": "Remove obsolete ESLint and Babel configuration dependencies that have been superseded or removed.",
+        "human_impl": "package-lock.json: removed eslint, eslint-config-react-app, eslint-import-resolver-node, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_storybook_jest_deps",
+        "general_idea": "Update Jest dependencies within the Storybook test package to version 29.7.0 to align with modern Node.js and testing standards.",
+        "human_impl": "Replaced old Jest CLI and config entries with `jest-cli: 29.7.0` and `jest-config: 29.7.0` in `node_modules/@storybook/test/node_modules`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_eslint_plugins",
+        "general_idea": "Remove unused or outdated ESLint plugins from the lockfile to clean up the dependency tree.",
+        "human_impl": "Deleted entries for `eslint-plugin-flowtype`, `eslint-plugin-import`, `eslint-plugin-jest`, `eslint-plugin-jsx-a11y`, `eslint-plugin-react`, `eslint-plugin-react-hooks`, and `eslint-plugin-testing-library`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_eslint_core_deps",
+        "general_idea": "Remove core ESLint utility packages that are no longer required by the remaining tooling.",
+        "human_impl": "Deleted entries for `eslint-scope`, `eslint-utils`, `eslint-visitor-keys`, `eslint-webpack-plugin`, `espree`, `esprima`, `esquery`, `esrecurse`, `estraverse`, `estree-walker`, and `esutils`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_utils",
+        "general_idea": "Clean up miscellaneous utility packages that are no longer dependencies of the active toolchain.",
+        "human_impl": "Deleted entries for `etag`, `eventemitter3`, `events`, `eventsource`, `evp_bytestokey`, `exec-sh`, `execa`, `exit`, `expand-brackets`, `expect`, `express`, `ext`, `extend`, `extend-shallow`, `external-editor`, `extglob`, `extsprintf`, `fast-deep-equal`, `fast-glob`, `fast-json-parse`, `fast-json-stable-stringify`, `fast-levenshtein`, `fastq`, `fault`, and `faye-websocket`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add @stryker-mutator/core to enable mutation testing with Stryker.",
+        "human_impl": "node_modules/@stryker-mutator/core",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add @stryker-mutator/jest-runner to integrate Stryker with the Jest test runner.",
+        "human_impl": "node_modules/@stryker-mutator/jest-runner",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add @testing-library/react v16 to update React testing utilities.",
+        "human_impl": "node_modules/@testing-library/react",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add @testing-library/dom v10 to update DOM testing utilities.",
+        "human_impl": "node_modules/@testing-library/dom",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add @storybook/theming to support Storybook theming capabilities.",
+        "human_impl": "node_modules/@storybook/theming",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add @svgr/webpack to enable importing SVGs as React components.",
+        "human_impl": "node_modules/@svgr/webpack",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add @swc/helpers to provide runtime helpers for SWC compilation.",
+        "human_impl": "node_modules/@swc/helpers",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add @surma/rollup-plugin-off-main-thread for off-main-thread bundling support.",
+        "human_impl": "node_modules/@surma/rollup-plugin-off-main-thread",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend dependencies to versions compatible with modern Node.js environments and Spring Boot 3 ecosystem.",
+        "human_impl": "package-lock.json: added/updated @types/node, @typescript-eslint, vitest, and other dev dependencies",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_bootstrap",
+        "general_idea": "Update Bootstrap to version 5.3.3 to align with modern frontend standards and security patches.",
+        "human_impl": "\"bootstrap\": { \"version\": \"5.3.3\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_chromatic",
+        "general_idea": "Add Chromatic version 11.7.1 for visual regression testing integration.",
+        "human_impl": "\"chromatic\": { \"version\": \"11.7.1\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_babel_preset",
+        "general_idea": "Update babel-preset-react-app to 10.0.1 to support newer JavaScript syntax and React features.",
+        "human_impl": "\"babel-preset-react-app\": { \"version\": \"10.0.1\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_core_js",
+        "general_idea": "Update core-js to 3.38.1 to ensure polyfills are up-to-date for browser compatibility.",
+        "human_impl": "\"core-js\": { \"version\": \"3.38.1\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_jest",
+        "general_idea": "Update Jest testing framework to version 29.7.0 for improved test runner performance and features.",
+        "human_impl": "\"create-jest\": { \"version\": \"29.7.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_classnames",
+        "general_idea": "Update classnames utility to version 2.5.1 for conditional CSS class handling.",
+        "human_impl": "\"classnames\": { \"version\": \"2.5.1\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_browserslist",
+        "general_idea": "Update browserslist to 4.23.3 to target modern browser versions correctly.",
+        "human_impl": "\"browserslist\": { \"version\": \"4.23.3\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_react_router",
+        "general_idea": "Update react-router-dom to version 6.26.0 for improved routing capabilities.",
+        "human_impl": "\"react-router-dom\": { \"version\": \"6.26.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_react_scripts",
+        "general_idea": "Update react-scripts to 5.0.1 to maintain compatibility with Create React App ecosystem.",
+        "human_impl": "\"react-scripts\": { \"version\": \"5.0.1\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_web_vitals",
+        "general_idea": "Update web-vitals to 4.2.4 for accurate performance metric collection.",
+        "human_impl": "\"web-vitals\": { \"version\": \"4.2.4\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_dependencies",
+        "general_idea": "Update Jest and its internal dependencies to version 29.7.0 to align with modern Node.js environments.",
+        "human_impl": "node_modules/create-jest/node_modules/jest-environment-node: { version: 29.7.0 }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_css_processing_deps",
+        "general_idea": "Update CSS processing libraries like css-loader and cssnano to support newer PostCSS and Webpack versions.",
+        "human_impl": "node_modules/css-loader: { version: 6.11.0 }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_eslint_utils_deps",
+        "general_idea": "Update ESLint utility dependencies to ensure compatibility with current linting rules and Node.js versions.",
+        "human_impl": "node_modules/es-abstract: { version: 1.23.3 }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add es-to-primitive utility for type coercion handling.",
+        "human_impl": "node_modules/es-to-primitive",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add es6-error for custom error class creation.",
+        "human_impl": "node_modules/es6-error",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add esbuild for fast JavaScript bundling.",
+        "human_impl": "node_modules/esbuild",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add esbuild-register for on-the-fly compilation.",
+        "human_impl": "node_modules/esbuild-register",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add escalade for directory traversal.",
+        "human_impl": "node_modules/escalade",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add escape-html for HTML escaping.",
+        "human_impl": "node_modules/escape-html",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add escape-string-regexp for regex escaping.",
+        "human_impl": "node_modules/escape-string-regexp",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add escodegen for AST code generation.",
+        "human_impl": "node_modules/escodegen",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint for JavaScript linting.",
+        "human_impl": "node_modules/eslint",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-config-react-app for React-specific linting rules.",
+        "human_impl": "node_modules/eslint-config-react-app",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-import-resolver-node for import resolution.",
+        "human_impl": "node_modules/eslint-import-resolver-node",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-module-utils for module utility checks.",
+        "human_impl": "node_modules/eslint-module-utils",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-plugin-flowtype for Flow type linting.",
+        "human_impl": "node_modules/eslint-plugin-flowtype",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-plugin-import for import statement linting.",
+        "human_impl": "node_modules/eslint-plugin-import",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-plugin-jest for Jest test linting.",
+        "human_impl": "node_modules/eslint-plugin-jest",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-plugin-jsx-a11y for accessibility linting.",
+        "human_impl": "node_modules/eslint-plugin-jsx-a11y",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-plugin-react for React component linting.",
+        "human_impl": "node_modules/eslint-plugin-react",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-plugin-react-hooks for React hooks linting.",
+        "human_impl": "node_modules/eslint-plugin-react-hooks",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-plugin-storybook for Storybook linting.",
+        "human_impl": "node_modules/eslint-plugin-storybook",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-plugin-testing-library for testing library linting.",
+        "human_impl": "node_modules/eslint-plugin-testing-library",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-scope for scope analysis.",
+        "human_impl": "node_modules/eslint-scope",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-visitor-keys for AST visitor keys.",
+        "human_impl": "node_modules/eslint-visitor-keys",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eslint-webpack-plugin for webpack integration.",
+        "human_impl": "node_modules/eslint-webpack-plugin",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add espree for JavaScript parsing.",
+        "human_impl": "node_modules/espree",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add esprima for JavaScript parsing.",
+        "human_impl": "node_modules/esprima",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add esquery for AST querying.",
+        "human_impl": "node_modules/esquery",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add esrecurse for AST recursion.",
+        "human_impl": "node_modules/esrecurse",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add estraverse for AST traversal.",
+        "human_impl": "node_modules/estraverse",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add estree-walker for AST walking.",
+        "human_impl": "node_modules/estree-walker",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add esutils for JavaScript utility checks.",
+        "human_impl": "node_modules/esutils",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add etag for HTTP entity tag generation.",
+        "human_impl": "node_modules/etag",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add eventemitter3 for event emission.",
+        "human_impl": "node_modules/eventemitter3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add events for Node.js event emitter compatibility.",
+        "human_impl": "node_modules/events",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add execa for executing child processes.",
+        "human_impl": "node_modules/execa",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add exit for process exit handling.",
+        "human_impl": "node_modules/exit",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add expect for Jest assertion matching.",
+        "human_impl": "node_modules/expect",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add express for web server framework.",
+        "human_impl": "node_modules/express",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add external-editor for external text editing.",
+        "human_impl": "node_modules/external-editor",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fast-deep-equal for deep object comparison.",
+        "human_impl": "node_modules/fast-deep-equal",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fast-glob for fast file globbing.",
+        "human_impl": "node_modules/fast-glob",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fast-json-parse for fast JSON parsing.",
+        "human_impl": "node_modules/fast-json-parse",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fast-json-stable-stringify for stable JSON stringification.",
+        "human_impl": "node_modules/fast-json-stable-stringify",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fast-levenshtein for Levenshtein distance calculation.",
+        "human_impl": "node_modules/fast-levenshtein",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fast-uri for URI parsing.",
+        "human_impl": "node_modules/fast-uri",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fastq for fast queue processing.",
+        "human_impl": "node_modules/fastq",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add faye-websocket for WebSocket support.",
+        "human_impl": "node_modules/faye-websocket",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fb-watchman for Facebook Watchman integration.",
+        "human_impl": "node_modules/fb-watchman",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fd-package-json for package.json resolution.",
+        "human_impl": "node_modules/fd-package-json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add figures for Unicode symbols in CLI.",
+        "human_impl": "node_modules/figures",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add file-entry-cache for file caching.",
+        "human_impl": "node_modules/file-entry-cache",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add file-loader for webpack file loading.",
+        "human_impl": "node_modules/file-loader",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add file-url for file URL generation.",
+        "human_impl": "node_modules/file-url",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add filelist for file listing.",
+        "human_impl": "node_modules/filelist",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add filesize for file size formatting.",
+        "human_impl": "node_modules/filesize",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fill-range for range filling.",
+        "human_impl": "node_modules/fill-range",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add finalhandler for HTTP request finalization.",
+        "human_impl": "node_modules/finalhandler",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add find-cache-dir for cache directory discovery.",
+        "human_impl": "node_modules/find-cache-dir",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add find-up for upward file searching.",
+        "human_impl": "node_modules/find-up",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add flat-cache for flat file caching.",
+        "human_impl": "node_modules/flat-cache",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add flatted for JSON serialization.",
+        "human_impl": "node_modules/flatted",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add flow-parser for Flow type parsing.",
+        "human_impl": "node_modules/flow-parser",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add follow-redirects for HTTP redirect handling.",
+        "human_impl": "node_modules/follow-redirects",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add for-each for array iteration.",
+        "human_impl": "node_modules/for-each",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add foreground-child for foreground process management.",
+        "human_impl": "node_modules/foreground-child",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fork-ts-checker-webpack-plugin for TypeScript checking.",
+        "human_impl": "node_modules/fork-ts-checker-webpack-plugin",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add form-data for multipart form data creation.",
+        "human_impl": "node_modules/form-data",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add forwarded for HTTP header parsing.",
+        "human_impl": "node_modules/forwarded",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fraction.js for fraction arithmetic.",
+        "human_impl": "node_modules/fraction.js",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fresh for HTTP freshness checking.",
+        "human_impl": "node_modules/fresh",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fromentries for Map/Set entry creation.",
+        "human_impl": "node_modules/fromentries",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fs-extra for extended filesystem operations.",
+        "human_impl": "node_modules/fs-extra",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fs-minipass for filesystem streaming.",
+        "human_impl": "node_modules/fs-minipass",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fs-monkey for filesystem monkey patching.",
+        "human_impl": "node_modules/fs-monkey",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fs.realpath for real path resolution.",
+        "human_impl": "node_modules/fs.realpath",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add fsevents for macOS file watching.",
+        "human_impl": "node_modules/fsevents",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add function-bind for function binding.",
+        "human_impl": "node_modules/function-bind",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add function.prototype.name for function name polyfill.",
+        "human_impl": "node_modules/function.prototype.name",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Node.js environment.",
+        "human_impl": "package-lock.json: added/updated node_modules entries (e.g., jest, globals, http-proxy-middleware)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "lockfile_regeneration",
+        "general_idea": "Regenerate package-lock.json to reflect updated dependency tree and lockfile v2/v3 format changes.",
+        "human_impl": "npm install",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_dependencies",
+        "general_idea": "Update Jest and its internal dependencies to version 27.5.1 to align with the new frontend tooling requirements.",
+        "human_impl": "Added jest-runtime, jest-snapshot, jest-util, and related modules at version 27.5.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_watch_typeahead",
+        "general_idea": "Update jest-watch-typeahead to version 1.1.0 to support newer Jest versions and Node.js engines.",
+        "human_impl": "Added jest-watch-typeahead 1.1.0 with dependencies on jest-watcher 28.1.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_legacy_fbjs",
+        "general_idea": "Remove obsolete fbjs and fbjs-css-vars packages that are no longer required by the updated dependency tree.",
+        "human_impl": "Removed fbjs 3.0.0 and fbjs-css-vars 1.0.2 from package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_legacy_build_tools",
+        "general_idea": "Remove deprecated or unused build tool dependencies such as figgy-pudding, file-system-cache, and flush-write-stream.",
+        "human_impl": "Removed figgy-pudding, file-system-cache, flush-write-stream, and fs-write-stream-atomic",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_color_utilities",
+        "general_idea": "Update color conversion and styling utilities to newer versions compatible with the updated Jest ecosystem.",
+        "human_impl": "Added ansi-styles 4.3.0, chalk 4.1.2, color-convert 2.0.1, and supports-color 7.2.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add mz package to support promise-based file system operations.",
+        "human_impl": "Added node_modules/mz with dependencies any-promise, object-assign, thenify-all",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add nano-time package for high-resolution timing utilities.",
+        "human_impl": "Added node_modules/nano-time with dependency big-integer",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add nanoid package for generating unique identifiers.",
+        "human_impl": "Added node_modules/nanoid version 3.3.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add natural-compare package for string comparison.",
+        "human_impl": "Added node_modules/natural-compare version 1.4.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add natural-compare-lite package for lightweight string comparison.",
+        "human_impl": "Added node_modules/natural-compare-lite version 1.4.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add negotiator package for content negotiation.",
+        "human_impl": "Added node_modules/negotiator version 0.6.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add neo-async package for asynchronous control flow.",
+        "human_impl": "Added node_modules/neo-async version 2.6.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add no-case package for converting strings to no-case format.",
+        "human_impl": "Added node_modules/no-case with dependencies lower-case, tslib",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add node-abort-controller package for abort controller support.",
+        "human_impl": "Added node_modules/node-abort-controller version 3.1.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add node-dir package for directory traversal.",
+        "human_impl": "Added node_modules/node-dir with dependency minimatch",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add node-fetch-native package for native fetch support.",
+        "human_impl": "Added node_modules/node-fetch-native version 1.6.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add node-forge package for cryptographic operations.",
+        "human_impl": "Added node_modules/node-forge version 1.3.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add node-int64 package for 64-bit integer handling.",
+        "human_impl": "Added node_modules/node-int64 version 0.4.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add node-preload package for preloading modules.",
+        "human_impl": "Added node_modules/node-preload with dependency process-on-spawn",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add node-releases package for Node.js release information.",
+        "human_impl": "Added node_modules/node-releases version 2.0.18",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add normalize-path package for path normalization.",
+        "human_impl": "Added node_modules/normalize-path version 3.0.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add normalize-range package for range normalization.",
+        "human_impl": "Added node_modules/normalize-range version 0.1.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add normalize-url package for URL normalization.",
+        "human_impl": "Added node_modules/normalize-url version 6.1.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add npm-run-path package for managing PATH in child processes.",
+        "human_impl": "Added node_modules/npm-run-path with dependency path-key",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add nth-check package for CSS nth-child parsing.",
+        "human_impl": "Added node_modules/nth-check with dependency boolbase",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add nwsapi package for CSS selector engine.",
+        "human_impl": "Added node_modules/nwsapi version 2.2.12",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add nyc package for code coverage instrumentation.",
+        "human_impl": "Added node_modules/nyc with dependencies including istanbul-lib-coverage, rimraf, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Add nypm package for package management utilities.",
+        "human_impl": "Added node_modules/nypm with dependencies citty, consola, execa, etc.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: minipass-pipeline@1.2.4 -> pkg-dir@4.2.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: minizlib@2.1.2 -> pkg-types@1.1.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: mississippi@3.0.0 -> pkg-up@3.1.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: mixin-deep@1.3.2 -> find-up@3.0.0 (nested)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: mkdirp@0.5.5 -> locate-path@3.0.0 (nested)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: move-concurrently@1.0.1 -> p-locate@3.0.0 (nested)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: ms@2.1.2 -> path-exists@3.0.0 (nested)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: multicast-dns@6.2.3 -> pnp-webpack-plugin@1.7.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: multicast-dns-service-types@1.1.0 -> polished@4.3.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: mutation-testing-elements@1.5.2 -> possible-typed-array-names@1.0.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: mutation-testing-metrics@1.5.2 -> postcss@8.4.41",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: mutation-testing-report-schema@1.5.2 -> postcss-attribute-case-insensitive@5.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: mute-stream@0.0.8 -> postcss-browser-comments@4.0.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: nan@2.14.2 -> postcss-calc@8.2.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: nano-time@1.0.0 -> postcss-clamp@4.1.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: nanoid@3.1.22 -> postcss-color-functional-notation@4.2.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: nanomatch@1.2.13 -> postcss-color-hex-alpha@8.0.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: native-url@0.2.6 -> postcss-color-rebeccapurple@7.1.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: natural-compare@1.4.0 -> postcss-colormin@5.3.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: negotiator@0.6.2 -> postcss-convert-values@5.1.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: neo-async@2.6.2 -> postcss-custom-media@8.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: nested-error-stacks@2.1.0 -> postcss-custom-properties@12.1.11",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: next-tick@1.0.0 -> postcss-custom-selectors@6.0.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: nice-try@1.0.5 -> postcss-dir-pseudo-class@6.0.5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: no-case@3.0.4 -> postcss-discard-comments@5.1.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: nock@13.0.11 -> postcss-discard-duplicates@5.1.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: node-dir@0.1.17 -> postcss-discard-empty@5.1.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: node-fetch@2.6.1 -> postcss-discard-overridden@5.1.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: node-forge@0.10.0 -> postcss-double-position-gradients@3.1.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: node-int64@0.4.0 -> postcss-env-function@4.0.6",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: node-libs-browser@2.2.1 -> postcss-flexbugs-fixes@5.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: node-modules-regexp@1.0.0 -> postcss-focus-visible@6.0.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: node-notifier@8.0.2 -> postcss-focus-within@5.0.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: node-releases@1.1.71 -> postcss-font-variant@5.0.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: normalize-package-data@2.5.0 -> postcss-gap-properties@3.0.5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: normalize-path@3.0.0 -> postcss-image-set-function@4.0.7",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: normalize-range@0.1.2 -> postcss-import@15.1.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: normalize-url@1.9.1 -> postcss-initial@4.0.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: npm-run-path@2.0.2 -> postcss-js@4.0.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: npmlog@4.1.2 -> postcss-lab-function@4.2.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: nth-check@1.0.2 -> postcss-load-config@4.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: num2fraction@1.2.2 -> lilconfig@3.1.2 (nested)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: number-is-nan@1.0.1 -> yaml@2.5.0 (nested)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json: nwsapi@2.2.0 -> [end of diff]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update frontend npm dependencies to versions compatible with the new Spring Boot/Node environment.",
+        "human_impl": "package-lock.json updated with new postcss and webpack loader versions",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update postcss-svgo and its transitive dependencies to versions compatible with PostCSS 8 and modern Node.js environments.",
+        "human_impl": "Replaced postcss-svgo v4 dependencies with v2.8.0 including css-tree v1.1.3 and csso v4.2.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update postcss-unique-selectors to a version supporting PostCSS 8.",
+        "human_impl": "Added postcss-unique-selectors v5.1.1 with peerDependency postcss ^8.2.15",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update postcss-value-parser to a modern version.",
+        "human_impl": "Added postcss-value-parser v4.2.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update prettier to the latest major version.",
+        "human_impl": "Added prettier v3.3.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update pretty-ms to a version requiring Node 18+.",
+        "human_impl": "Added pretty-ms v9.1.0 with engines node >=18",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update react to version 18.",
+        "human_impl": "Added react v18.3.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update react-app-polyfill to support modern core-js.",
+        "human_impl": "Added react-app-polyfill v3.0.0 with core-js ^3.19.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update react-bootstrap to a version compatible with React 18.",
+        "human_impl": "Added react-bootstrap v2.10.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update react-dev-utils to a version requiring Node 14+.",
+        "human_impl": "Added react-dev-utils v12.0.1 with engines node >=14",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_dom",
+        "general_idea": "Upgrade react-dom to version 18.3.1 to align with React 18 ecosystem and modernize the frontend stack.",
+        "human_impl": "react-dom: 18.3.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_router",
+        "general_idea": "Upgrade react-router and react-router-dom to version 6.26.1 to use the modern data router API.",
+        "human_impl": "react-router: 6.26.1, react-router-dom: 6.26.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_scripts",
+        "general_idea": "Upgrade react-scripts to version 5.0.1 to leverage Webpack 5 and modern build tooling.",
+        "human_impl": "react-scripts: 5.0.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_hook_form",
+        "general_idea": "Upgrade react-hook-form to version 7.53.0 for improved performance and TypeScript support.",
+        "human_impl": "react-hook-form: 7.53.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_query",
+        "general_idea": "Upgrade react-query to version 3.39.3 to ensure compatibility with React 18 and fix bugs.",
+        "human_impl": "react-query: 3.39.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_table",
+        "general_idea": "Upgrade react-table to version 7.8.0 to maintain compatibility with the React 18 ecosystem.",
+        "human_impl": "react-table: 7.8.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_dev_utils_deps",
+        "general_idea": "Update internal dependencies of react-dev-utils (e.g., find-up, locate-path) to versions compatible with Node 14+.",
+        "human_impl": "react-dev-utils/node_modules/find-up: 5.0.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_docgen",
+        "general_idea": "Upgrade react-docgen to version 7.0.3 to support newer Babel versions and React 18.",
+        "human_impl": "react-docgen: 7.0.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_refresh",
+        "general_idea": "Upgrade react-refresh to version 0.11.0 for better hot module replacement support in React 18.",
+        "human_impl": "react-refresh: 0.11.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_transition_group",
+        "general_idea": "Upgrade react-transition-group to version 4.4.5 to ensure compatibility with React 18.",
+        "human_impl": "react-transition-group: 4.4.5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_is",
+        "general_idea": "Upgrade react-is to version 17.0.2 to align with React 17/18 type checking standards.",
+        "human_impl": "react-is: 17.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_element_to_jsx_string",
+        "general_idea": "Upgrade react-element-to-jsx-string to version 15.0.0 for better React 18 support.",
+        "human_impl": "react-element-to-jsx-string: 15.0.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_error_overlay",
+        "general_idea": "Upgrade react-error-overlay to version 6.0.11 for improved error reporting in development.",
+        "human_impl": "react-error-overlay: 6.0.11",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_inspector",
+        "general_idea": "Upgrade react-inspector to version 6.0.2 for compatibility with React 18.",
+        "human_impl": "react-inspector: 6.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_lifecycles_compat",
+        "general_idea": "Upgrade react-lifecycles-compat to version 3.0.4 to support newer React versions.",
+        "human_impl": "react-lifecycles-compat: 3.0.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react18_json_view",
+        "general_idea": "Upgrade react18-json-view to version 0.2.8 for React 18 compatibility.",
+        "human_impl": "react18-json-view: 0.2.8",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_toastify",
+        "general_idea": "Upgrade react-toastify to version 10.0.5 to support React 18 and modern styling.",
+        "human_impl": "react-toastify: 10.0.5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_docgen_typescript",
+        "general_idea": "Upgrade react-docgen-typescript to version 2.2.2 for better TypeScript support.",
+        "human_impl": "react-docgen-typescript: 2.2.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_react_app_polyfill_deps",
+        "general_idea": "Update core-js and regenerator-runtime dependencies to ensure compatibility with modern browsers and Node 14+.",
+        "human_impl": "regenerator-runtime: 0.14.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_postcss_deps",
+        "general_idea": "Update PostCSS related dependencies to versions compatible with PostCSS 8 and modern build tools.",
+        "human_impl": "postcss-safe-parser: 5.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack_deps",
+        "general_idea": "Update Webpack related dependencies (e.g., terser, css-loader) to versions compatible with Webpack 5.",
+        "human_impl": "terser-webpack-plugin: 5.2.5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_babel_deps",
+        "general_idea": "Update Babel dependencies to versions compatible with Babel 7 and modern JavaScript features.",
+        "human_impl": "@babel/core: 7.16.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_eslint_deps",
+        "general_idea": "Update ESLint dependencies to versions compatible with ESLint 8 and modern linting rules.",
+        "human_impl": "eslint: 8.3.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jest_deps",
+        "general_idea": "Update Jest dependencies to versions compatible with Jest 27 and modern testing practices.",
+        "human_impl": "jest: 27.4.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_node_utils_deps",
+        "general_idea": "Update Node.js utility dependencies (e.g., readable-stream, readdirp) to versions compatible with Node 14+.",
+        "human_impl": "readable-stream: 3.6.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_misc_deps",
+        "general_idea": "Update miscellaneous dependencies (e.g., clsx, pify) to their latest stable versions for security and compatibility.",
+        "human_impl": "clsx: 2.1.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade_react",
+        "general_idea": "Upgrade React and ReactDOM from version 17 to a newer version compatible with the updated build tooling.",
+        "human_impl": "Removed 'react': '17.0.2' and 'react-dom': '17.0.2' entries from package-lock.json.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade_react_scripts",
+        "general_idea": "Upgrade react-scripts from version 4 to a newer version to support modern Node.js and build features.",
+        "human_impl": "Removed 'react-scripts': '4.0.3' entry from package-lock.json.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade_react_router",
+        "general_idea": "Upgrade React Router from beta version 6.0.0-beta.0 to a stable release.",
+        "human_impl": "Removed 'react-router': '6.0.0-beta.0' and 'react-router-dom': '6.0.0-beta.0' entries.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade_react_query",
+        "general_idea": "Upgrade react-query to a newer version.",
+        "human_impl": "Removed 'react-query': '3.15.2' entry from package-lock.json.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_upgrade_react_bootstrap",
+        "general_idea": "Upgrade react-bootstrap from alpha version to a stable release.",
+        "human_impl": "Removed 'react-bootstrap': '2.0.0-alpha.1' entry from package-lock.json.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_add_rehype_slug",
+        "general_idea": "Add rehype-slug dependency for generating slugs in HTML headings.",
+        "human_impl": "Added 'node_modules/rehype-slug' with version 6.0.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_resolve",
+        "general_idea": "Update the resolve package to a newer version.",
+        "human_impl": "Added 'node_modules/resolve' with version 1.22.8.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_sass_loader",
+        "general_idea": "Update sass-loader to version 12.6.0.",
+        "human_impl": "Added 'node_modules/sass-loader' with version 12.6.0.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_rollup",
+        "general_idea": "Update rollup to version 2.79.1.",
+        "human_impl": "Added 'node_modules/rollup' with version 2.79.1.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update_rimraf",
+        "general_idea": "Update rimraf to version 3.0.2.",
+        "human_impl": "Added 'node_modules/rimraf' with version 3.0.2.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update scheduler to version 0.23.2 to align with React 18 ecosystem requirements.",
+        "human_impl": "\"scheduler\": \"0.23.2\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update schema-utils to version 4.2.0 to support webpack 5 configuration validation.",
+        "human_impl": "\"schema-utils\": \"4.2.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update semver to version 7.6.3 for improved version parsing and compliance.",
+        "human_impl": "\"semver\": \"7.6.3\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update send to version 0.18.0 to fix security vulnerabilities and improve HTTP serving.",
+        "human_impl": "\"send\": \"0.18.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update serialize-javascript to version 6.0.2 for safer serialization of JavaScript values.",
+        "human_impl": "\"serialize-javascript\": \"6.0.2\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update serve-index to version 1.9.1 for directory listing improvements.",
+        "human_impl": "\"serve-index\": \"1.9.1\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update serve-static to version 1.15.0 to align with send and other static file serving dependencies.",
+        "human_impl": "\"serve-static\": \"1.15.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update set-function-length to version 1.2.2 for robust function property manipulation.",
+        "human_impl": "\"set-function-length\": \"1.2.2\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update set-function-name to version 2.0.2 for robust function name property manipulation.",
+        "human_impl": "\"set-function-name\": \"2.0.2\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update setprototypeof to version 1.2.0 for standard prototype setting.",
+        "human_impl": "\"setprototypeof\": \"1.2.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update shallow-clone to version 3.0.1 for modern object cloning.",
+        "human_impl": "\"shallow-clone\": \"3.0.1\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update shebang-command to version 2.0.0 for better shebang parsing.",
+        "human_impl": "\"shebang-command\": \"2.0.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update shebang-regex to version 3.0.0 for accurate shebang regex matching.",
+        "human_impl": "\"shebang-regex\": \"3.0.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update shell-quote to version 1.8.1 for secure shell command quoting.",
+        "human_impl": "\"shell-quote\": \"1.8.1\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update side-channel to version 1.0.6 for secure data storage in closures.",
+        "human_impl": "\"side-channel\": \"1.0.6\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update signal-exit to version 3.0.7 for reliable process exit handling.",
+        "human_impl": "\"signal-exit\": \"3.0.7\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update sisteransi to version 1.0.5 for ANSI escape sequence handling.",
+        "human_impl": "\"sisteransi\": \"1.0.5\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update slash to version 3.0.0 for path normalization.",
+        "human_impl": "\"slash\": \"3.0.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update sockjs to version 0.3.24 for WebSocket fallback support.",
+        "human_impl": "\"sockjs\": \"0.3.24\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update source-map to version 0.7.4 for modern source map generation.",
+        "human_impl": "\"source-map\": \"0.7.4\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update source-map-js to version 1.2.0 for pure JS source map handling.",
+        "human_impl": "\"source-map-js\": \"1.2.0\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update source-map-loader to version 3.0.2 for webpack 5 compatibility.",
+        "human_impl": "\"source-map-loader\": \"3.0.2\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency",
+        "general_idea": "Update source-map-support to version 0.5.21 for stack trace formatting.",
+        "human_impl": "\"source-map-support\": \"0.5.21\"",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_lockfile_format",
+        "general_idea": "Migrate package-lock.json from legacy flat structure to modern nested node_modules structure.",
+        "human_impl": "Changed root dependency entries from flat objects to nested 'node_modules/<pkg>' paths.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency_versions",
+        "general_idea": "Update frontend dependencies to versions compatible with the new Node.js environment.",
+        "human_impl": "Replaced old package versions (e.g., react-scripts, jest) with newer ones in the lockfile.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update svgo to a newer version with updated dependencies and engine requirements.",
+        "human_impl": "svgo version updated, adding bin and engines fields, updating css-select dependency.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tailwindcss to version 3.4.10 with new dependencies and engine requirements.",
+        "human_impl": "tailwindcss version updated to 3.4.10, adding new dependencies like @alloc/quick-lru and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tapable to version 2.2.1 with updated engine requirements.",
+        "human_impl": "tapable version updated to 2.2.1, adding engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tar to version 6.2.1 with updated dependencies and engine requirements.",
+        "human_impl": "tar version updated to 6.2.1, updating minipass dependency and adding engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update telejson to version 7.2.0 with updated dependencies.",
+        "human_impl": "telejson version updated to 7.2.0, updating memoizerific dependency.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update temp to version 0.8.4 with updated dependencies and engine requirements.",
+        "human_impl": "temp version updated to 0.8.4, adding rimraf dependency and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update temp-dir to version 2.0.0 with updated engine requirements.",
+        "human_impl": "temp-dir version updated to 2.0.0, adding engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tempy to version 0.6.0 with updated dependencies and engine requirements.",
+        "human_impl": "tempy version updated to 0.6.0, updating dependencies and adding engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update terminal-link to version 2.1.1 with updated dependencies and engine requirements.",
+        "human_impl": "terminal-link version updated to 2.1.1, adding dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update terser to version 5.31.6 with updated dependencies and engine requirements.",
+        "human_impl": "terser version updated to 5.31.6, updating dependencies and adding engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update terser-webpack-plugin to version 5.3.10 with updated dependencies and engine requirements.",
+        "human_impl": "terser-webpack-plugin version updated to 5.3.10, updating dependencies and adding engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update test-exclude to version 6.0.0 with updated dependencies and engine requirements.",
+        "human_impl": "test-exclude version updated to 6.0.0, adding dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update text-table to version 0.2.0 with updated license.",
+        "human_impl": "text-table version updated to 0.2.0, updating license field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update throat to version 6.0.2 with updated license.",
+        "human_impl": "throat version updated to 6.0.2, updating license field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update thunky to version 1.1.0 with updated license.",
+        "human_impl": "thunky version updated to 1.1.0, updating license field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tiny-invariant to version 1.3.3 with updated license.",
+        "human_impl": "tiny-invariant version updated to 1.3.3, updating license field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tinyspy to version 2.2.1 with updated license and engine requirements.",
+        "human_impl": "tinyspy version updated to 2.2.1, updating license and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tmp to version 0.0.33 with updated dependencies and engine requirements.",
+        "human_impl": "tmp version updated to 0.0.33, adding dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tmpl to version 1.0.5 with updated license.",
+        "human_impl": "tmpl version updated to 1.0.5, updating license field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update to-fast-properties to version 2.0.0 with updated license and engine requirements.",
+        "human_impl": "to-fast-properties version updated to 2.0.0, updating license and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update to-regex-range to version 5.0.1 with updated dependencies and engine requirements.",
+        "human_impl": "to-regex-range version updated to 5.0.1, updating dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update toidentifier to version 1.0.1 with updated license and engine requirements.",
+        "human_impl": "toidentifier version updated to 1.0.1, updating license and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tough-cookie to version 4.1.4 with updated dependencies and engine requirements.",
+        "human_impl": "tough-cookie version updated to 4.1.4, updating dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tr46 to version 2.1.0 with updated dependencies and engine requirements.",
+        "human_impl": "tr46 version updated to 2.1.0, updating dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tree-kill to version 1.2.2 with updated license and bin field.",
+        "human_impl": "tree-kill version updated to 1.2.2, updating license and bin field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tryer to version 1.0.1 with updated license.",
+        "human_impl": "tryer version updated to 1.0.1, updating license field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update ts-api-utils to version 1.3.0 with updated license and engine requirements.",
+        "human_impl": "ts-api-utils version updated to 1.3.0, updating license and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update ts-dedent to version 2.2.0 with updated license and engine requirements.",
+        "human_impl": "ts-dedent version updated to 2.2.0, updating license and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update ts-interface-checker to version 0.1.13 with updated license.",
+        "human_impl": "ts-interface-checker version updated to 0.1.13, updating license field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update ts-pnp to version 1.2.0 with updated license and engine requirements.",
+        "human_impl": "ts-pnp version updated to 1.2.0, updating license and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tsconfig-paths to version 3.15.0 with updated dependencies.",
+        "human_impl": "tsconfig-paths version updated to 3.15.0, updating dependencies.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tslib to version 2.6.3 with updated license.",
+        "human_impl": "tslib version updated to 2.6.3, updating license field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tsutils to version 3.21.0 with updated dependencies and engine requirements.",
+        "human_impl": "tsutils version updated to 3.21.0, updating dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tunnel to version 0.0.6 with updated license and engine requirements.",
+        "human_impl": "tunnel version updated to 0.0.6, updating license and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update tween-functions to version 1.2.0 with updated license.",
+        "human_impl": "tween-functions version updated to 1.2.0, updating license field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update type-check to version 0.4.0 with updated dependencies and engine requirements.",
+        "human_impl": "type-check version updated to 0.4.0, updating dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update type-detect to version 4.0.8 with updated license and engine requirements.",
+        "human_impl": "type-detect version updated to 4.0.8, updating license and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update type-fest to version 0.21.3 with updated license and engine requirements.",
+        "human_impl": "type-fest version updated to 0.21.3, updating license and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update type-is to version 1.6.18 with updated dependencies and engine requirements.",
+        "human_impl": "type-is version updated to 1.6.18, updating dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update typed-array-buffer to version 1.0.2 with updated dependencies and engine requirements.",
+        "human_impl": "typed-array-buffer version updated to 1.0.2, updating dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update typed-array-byte-length to version 1.0.1 with updated dependencies and engine requirements.",
+        "human_impl": "typed-array-byte-length version updated to 1.0.1, updating dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update typed-array-byte-offset to version 1.0.2 with updated dependencies and engine requirements.",
+        "human_impl": "typed-array-byte-offset version updated to 1.0.2, updating dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update typed-array-length to version 1.0.6 with updated dependencies and engine requirements.",
+        "human_impl": "typed-array-length version updated to 1.0.6, updating dependencies and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update typed-inject to version 4.0.0 with updated license and engine requirements.",
+        "human_impl": "typed-inject version updated to 4.0.0, updating license and engines field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "dependency_update",
+        "general_idea": "Update typed-rest-client to version 2.0.2 with updated dependencies.",
+        "human_impl": "typed-rest-client version updated to 2.0.2, updating dependencies.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_typescript",
+        "general_idea": "Upgrade TypeScript to version 4.9.5 to align with modern frontend tooling standards.",
+        "human_impl": "\"typescript\": { \"version\": \"4.9.5\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_typescript_eslint",
+        "general_idea": "Add typescript-eslint v8.2.0 and its dependencies to enforce TypeScript linting rules.",
+        "human_impl": "\"typescript-eslint\": { \"version\": \"8.2.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_unbox_primitive",
+        "general_idea": "Update unbox-primitive to version 1.0.2 to fix potential security or compatibility issues.",
+        "human_impl": "\"unbox-primitive\": { \"version\": \"1.0.2\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_underscore",
+        "general_idea": "Downgrade/Update underscore to version 1.12.1 to match specific project requirements.",
+        "human_impl": "\"underscore\": { \"version\": \"1.12.1\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_undici_types",
+        "general_idea": "Add undici-types v6.19.8 as a dependency for Node.js fetch API type definitions.",
+        "human_impl": "\"undici-types\": { \"version\": \"6.19.8\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_unicode_ecmascript",
+        "general_idea": "Update unicode-canonical-property-names-ecmascript and related packages to v2.x for better regex support.",
+        "human_impl": "\"unicode-canonical-property-names-ecmascript\": { \"version\": \"2.0.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_unicorn_magic",
+        "general_idea": "Add unicorn-magic v0.1.0 as a utility dependency.",
+        "human_impl": "\"unicorn-magic\": { \"version\": \"0.1.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_unique_string",
+        "general_idea": "Update unique-string to version 2.0.0 to use crypto-random-string v2.",
+        "human_impl": "\"unique-string\": { \"version\": \"2.0.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_unist_utils",
+        "general_idea": "Update unist-util-is, unist-util-visit, and unist-util-visit-parents to v6/v5 for unified ecosystem compatibility.",
+        "human_impl": "\"unist-util-is\": { \"version\": \"6.0.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_universalify",
+        "general_idea": "Update universalify to version 2.0.1 for promise-based fs operations.",
+        "human_impl": "\"universalify\": { \"version\": \"2.0.1\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_unplugin",
+        "general_idea": "Add unplugin v1.12.2 to support plugin systems for bundlers like Vite or Webpack.",
+        "human_impl": "\"unplugin\": { \"version\": \"1.12.2\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_update_browserslist_db",
+        "general_idea": "Add update-browserslist-db v1.1.0 to keep browserslist data current.",
+        "human_impl": "\"update-browserslist-db\": { \"version\": \"1.1.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_url_package",
+        "general_idea": "Update url package to version 0.11.4 to fix parsing issues.",
+        "human_impl": "\"url\": { \"version\": \"0.11.4\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_url_parse",
+        "general_idea": "Update url-parse to version 1.5.10 for security and compatibility fixes.",
+        "human_impl": "\"url-parse\": { \"version\": \"1.5.10\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_util_package",
+        "general_idea": "Update util package to version 0.12.5 to include modern Node.js util functions.",
+        "human_impl": "\"util\": { \"version\": \"0.12.5\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_v8_to_istanbul",
+        "general_idea": "Update v8-to-istanbul to version 9.3.0 for improved coverage mapping.",
+        "human_impl": "\"v8-to-istanbul\": { \"version\": \"9.3.0\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_walk_up_path",
+        "general_idea": "Add walk-up-path v3.0.1 for directory traversal utilities.",
+        "human_impl": "\"walk-up-path\": { \"version\": \"3.0.1\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_walker",
+        "general_idea": "Update walker to version 1.0.8 to fix dependency on makeerror.",
+        "human_impl": "\"walker\": { \"version\": \"1.0.8\" }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack",
+        "general_idea": "Upgrade webpack from version 4 to version 5 to align with modern frontend build standards.",
+        "human_impl": "webpack: 4.44.2 -> 5.93.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack_dev_server",
+        "general_idea": "Upgrade webpack-dev-server from version 3 to version 4 to support the new webpack version.",
+        "human_impl": "webpack-dev-server: 3.11.1 -> 4.15.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack_dev_middleware",
+        "general_idea": "Upgrade webpack-dev-middleware from version 3 to version 5 to support the new webpack version.",
+        "human_impl": "webpack-dev-middleware: 3.7.3 -> 5.3.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_watchpack",
+        "general_idea": "Upgrade watchpack from version 1 to version 2 to support the new webpack version.",
+        "human_impl": "watchpack: 1.7.4 -> 2.4.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_web_vitals",
+        "general_idea": "Upgrade web-vitals from version 1 to version 2 for improved performance metrics.",
+        "human_impl": "web-vitals: 1.1.1 -> 2.1.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_weapon_regex",
+        "general_idea": "Upgrade weapon-regex from version 0.4.2 to version 1.3.2.",
+        "human_impl": "weapon-regex: 0.4.2 -> 1.3.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_wcwidth",
+        "general_idea": "Add wcwidth dependency version 1.0.1.",
+        "human_impl": "wcwidth: 1.0.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack_dev_server",
+        "general_idea": "Upgrade webpack-dev-server to a version compatible with modern Node.js environments.",
+        "human_impl": "Updated webpack-dev-server entry in package-lock.json",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack_hot_middleware",
+        "general_idea": "Upgrade webpack-hot-middleware to fix dependencies and improve compatibility.",
+        "human_impl": "Updated webpack-hot-middleware to version 2.26.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack_manifest_plugin",
+        "general_idea": "Upgrade webpack-manifest-plugin to support newer webpack versions.",
+        "human_impl": "Updated webpack-manifest-plugin to version 4.1.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack_sources",
+        "general_idea": "Upgrade webpack-sources to align with webpack 5 requirements.",
+        "human_impl": "Updated webpack-sources to version 3.2.3",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack_virtual_modules",
+        "general_idea": "Upgrade webpack-virtual-modules for better virtual file handling.",
+        "human_impl": "Updated webpack-virtual-modules to version 0.6.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_webpack",
+        "general_idea": "Upgrade webpack core to version 5 for improved performance and features.",
+        "human_impl": "Updated webpack dependencies including eslint-scope and schema-utils",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_whatwg_fetch",
+        "general_idea": "Upgrade whatwg-fetch to the latest stable version.",
+        "human_impl": "Updated whatwg-fetch to version 3.6.20",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_whatwg_url",
+        "general_idea": "Upgrade whatwg-url to ensure correct URL parsing standards.",
+        "human_impl": "Updated whatwg-url to version 8.7.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_which",
+        "general_idea": "Upgrade which package to version 2 for better cross-platform compatibility.",
+        "human_impl": "Updated which to version 2.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_which_boxed_primitive",
+        "general_idea": "Upgrade which-boxed-primitive for accurate type checking.",
+        "human_impl": "Updated which-boxed-primitive to version 1.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_which_builtin_type",
+        "general_idea": "Add which-builtin-type for improved type introspection.",
+        "human_impl": "Added which-builtin-type version 1.1.4",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_which_collection",
+        "general_idea": "Add which-collection for identifying collection types.",
+        "human_impl": "Added which-collection version 1.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_which_module",
+        "general_idea": "Upgrade which-module for better module resolution.",
+        "human_impl": "Updated which-module to version 2.0.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_which_typed_array",
+        "general_idea": "Add which-typed-array for identifying typed array types.",
+        "human_impl": "Added which-typed-array version 1.1.15",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_word_wrap",
+        "general_idea": "Upgrade word-wrap for consistent text wrapping behavior.",
+        "human_impl": "Updated word-wrap to version 1.2.5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_background_sync",
+        "general_idea": "Upgrade workbox-background-sync to version 6 for PWA improvements.",
+        "human_impl": "Updated workbox-background-sync to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_broadcast_update",
+        "general_idea": "Upgrade workbox-broadcast-update to version 6.",
+        "human_impl": "Updated workbox-broadcast-update to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_build",
+        "general_idea": "Upgrade workbox-build to version 6 for better service worker generation.",
+        "human_impl": "Updated workbox-build to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_cacheable_response",
+        "general_idea": "Upgrade workbox-cacheable-response to version 6.",
+        "human_impl": "Updated workbox-cacheable-response to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_core",
+        "general_idea": "Upgrade workbox-core to version 6.",
+        "human_impl": "Updated workbox-core to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_expiration",
+        "general_idea": "Upgrade workbox-expiration to version 6.",
+        "human_impl": "Updated workbox-expiration to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_google_analytics",
+        "general_idea": "Upgrade workbox-google-analytics to version 6.",
+        "human_impl": "Updated workbox-google-analytics to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_navigation_preload",
+        "general_idea": "Upgrade workbox-navigation-preload to version 6.",
+        "human_impl": "Updated workbox-navigation-preload to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_precaching",
+        "general_idea": "Upgrade workbox-precaching to version 6.",
+        "human_impl": "Updated workbox-precaching to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_range_requests",
+        "general_idea": "Upgrade workbox-range-requests to version 6.",
+        "human_impl": "Updated workbox-range-requests to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_recipes",
+        "general_idea": "Upgrade workbox-recipes to version 6.",
+        "human_impl": "Updated workbox-recipes to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_routing",
+        "general_idea": "Upgrade workbox-routing to version 6.",
+        "human_impl": "Updated workbox-routing to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_strategies",
+        "general_idea": "Upgrade workbox-strategies to version 6.",
+        "human_impl": "Updated workbox-strategies to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_streams",
+        "general_idea": "Upgrade workbox-streams to version 6.",
+        "human_impl": "Updated workbox-streams to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_sw",
+        "general_idea": "Upgrade workbox-sw to version 6.",
+        "human_impl": "Updated workbox-sw to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_webpack_plugin",
+        "general_idea": "Upgrade workbox-webpack-plugin to version 6.",
+        "human_impl": "Updated workbox-webpack-plugin to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_workbox_window",
+        "general_idea": "Upgrade workbox-window to version 6.",
+        "human_impl": "Updated workbox-window to version 6.6.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_wrap_ansi",
+        "general_idea": "Upgrade wrap-ansi for better terminal output formatting.",
+        "human_impl": "Updated wrap-ansi to version 7.0.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency_ws",
+        "general_idea": "Update ws package from 7.4.5 to 7.5.10 to include security patches and minor improvements.",
+        "human_impl": "ws: 7.4.5 -> 7.5.10",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency_y18n",
+        "general_idea": "Update y18n package from 4.0.3 to 5.0.8 to align with newer dependency trees.",
+        "human_impl": "y18n: 4.0.3 -> 5.0.8",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency_yallist",
+        "general_idea": "Update yallist package from 4.0.0 to 3.1.1, likely due to a parent dependency change.",
+        "human_impl": "yallist: 4.0.0 -> 3.1.1",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency_yargs",
+        "general_idea": "Update yargs package from 15.4.1 to 16.2.0 to support newer Node.js versions and features.",
+        "human_impl": "yargs: 15.4.1 -> 16.2.0",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_dependency_yargs_parser",
+        "general_idea": "Update yargs-parser package from 18.1.3 to 20.2.9 to match yargs 16.x requirements.",
+        "human_impl": "yargs-parser: 18.1.3 -> 20.2.9",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency_yoctocolors",
+        "general_idea": "Add yoctocolors and yoctocolors-cjs as new dev dependencies, likely for modern terminal styling.",
+        "human_impl": "Added yoctocolors@2.1.1 and yoctocolors-cjs@2.1.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency_xtend",
+        "general_idea": "Remove xtend dependency as it is no longer required by the updated dependency tree.",
+        "human_impl": "Removed xtend@4.0.2",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency_zwitch",
+        "general_idea": "Remove zwitch dependency as it is no longer required by the updated dependency tree.",
+        "human_impl": "Removed zwitch@1.0.5",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_package_lock_format",
+        "general_idea": "Refactor package-lock.json structure to use node_modules keys and remove resolved/integrity fields for cleaner lockfile.",
+        "human_impl": "Changed keys from 'package-name' to 'node_modules/package-name' and removed 'resolved'/'integrity' fields.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

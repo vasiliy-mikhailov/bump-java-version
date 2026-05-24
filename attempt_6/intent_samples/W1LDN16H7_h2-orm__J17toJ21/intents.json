@@ -1,0 +1,324 @@
+{
+  "meta": {
+    "repo": "W1LDN16H7/h2-orm",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "906730f4e4af5581de5eebe47b895047345d70d0",
+    "sha_to": "6290aaa862641e8c75d4b4d1cd9f8798e8846e65"
+  },
+  "by_file": {
+    "src/main/java/h2/orm/H2ORM.java": [
+      {
+        "kind": "add_backup_service",
+        "general_idea": "Integrate BackupService to provide database backup and restore capabilities.",
+        "human_impl": "private static final BackupService backupService = new BackupService();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_export_service",
+        "general_idea": "Integrate ExportService to provide data export capabilities to CSV, Excel, and JSON.",
+        "human_impl": "private static final ExportService exportService = new ExportService();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_table_management",
+        "general_idea": "Integrate TableManager to provide table creation, deletion, and inspection utilities.",
+        "human_impl": "h2.orm.core.service.TableManager.createAll();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_imports",
+        "general_idea": "Update import statements to reflect new package structure and added service dependencies.",
+        "human_impl": "import h2.orm.core.service.BackupService;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/h2/orm/config/DatabaseProperties.java": [],
+    "src/main/java/h2/orm/core/EntityManagerProvider.java": [
+      {
+        "kind": "remove_thread_local_state",
+        "general_idea": "Remove the ThreadLocal field used to cache EntityManager instances to eliminate stateful thread-bound resources.",
+        "human_impl": "Removed `private static final ThreadLocal<EntityManager> entityManagerThreadLocal = new ThreadLocal<>();`",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_entity_manager_lifecycle",
+        "general_idea": "Change EntityManager retrieval to create a new instance per call instead of reusing a thread-local cached instance.",
+        "human_impl": "Replaced `getEntityManager` logic to directly call `factory.createEntityManager()` without checking or setting ThreadLocal.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "deprecate_close_method",
+        "general_idea": "Convert the closeEntityManager method into a no-op with a debug log, as lifecycle is now managed per-transaction.",
+        "human_impl": "Replaced closing logic in `closeEntityManager` with `logger.debug(...)` and comments indicating deprecation.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "inline_transaction_setup",
+        "general_idea": "Inline the EntityManager creation and transaction management within executeInTransaction to ensure isolation.",
+        "human_impl": "Modified `executeInTransaction` to create `em` locally via `factory.createEntityManager()` and manage its lifecycle in try/finally.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/h2/orm/core/MetadataManager.java": [
+      {
+        "kind": "add_reflection_helper",
+        "general_idea": "Added a generic helper method to retrieve entity IDs via reflection to support new pagination and sorting features.",
+        "human_impl": "public static <ID> ID getEntityId(Object entity) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_method",
+        "general_idea": "Renamed the existing isEntityNew method to isEntityNewById to distinguish it from the new logic or prepare for refactoring.",
+        "human_impl": "public static boolean isEntityNewById(Object entity)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/h2/orm/core/TransactionManager.java": [
+      {
+        "kind": "remove_premature_cleanup",
+        "general_idea": "Removed the finally block from the isActive method to prevent closing the EntityManager while the transaction state is being checked.",
+        "human_impl": "Removed 'finally { EntityManagerProvider.closeEntityManager(); }' from the isActive method.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_commit_error_handling",
+        "general_idea": "Added exception handling to the commit method to log errors, rollback the transaction if active, and rethrow the exception.",
+        "human_impl": "Added catch block after commit logic: logs error, checks isActive(), rolls back, and throws e.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_rollback_error_handling",
+        "general_idea": "Added exception handling to the rollback method to log errors and rethrow the exception.",
+        "human_impl": "Added catch block after rollback logic: logs error and throws e.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/h2/orm/example/SpringBootStyleExample.java": [
+      {
+        "kind": "import_refactor",
+        "general_idea": "Update import statement to reflect the new package structure of the JpaRepository class.",
+        "human_impl": "import h2.orm.core.repository.JpaRepository;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/h2/orm/example/SuperSimpleExample.java": [
+      {
+        "kind": "import_refactor",
+        "general_idea": "Update import statement to reflect a package restructuring of the JpaRepository class.",
+        "human_impl": "import h2.orm.core.repository.JpaRepository;",
+        "bucket": "breaking"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "downgrade_jdk_target",
+        "general_idea": "Change the Maven compiler source and target from JDK 24 to JDK 21 to align with the migration goal.",
+        "human_impl": "<maven.compiler.target>21</maven.compiler.target>\n<maven.compiler.source>21</maven.compiler.source>\n<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_compiler_release_flag",
+        "general_idea": "Introduce the 'release' compiler argument to ensure cross-compilation compatibility for JDK 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_compiler_parameters_flag",
+        "general_idea": "Enable the '-parameters' compiler flag to preserve parameter names in bytecode, often required for modern frameworks.",
+        "human_impl": "<arg>-parameters</arg>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_compiler_lint_flags",
+        "general_idea": "Enable comprehensive compiler warnings with '-Xlint:all' while suppressing processing warnings.",
+        "human_impl": "<arg>-Xlint:all</arg>\n<arg>-Xlint:-processing</arg>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_surefire_plugin",
+        "general_idea": "Configure the Maven Surefire plugin to run unit tests with specific include/exclude patterns and logging configuration.",
+        "human_impl": "<plugin>\n    <artifactId>maven-surefire-plugin</artifactId>\n    ...\n</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_failsafe_plugin",
+        "general_idea": "Configure the Maven Failsafe plugin to run integration tests during the verify phase.",
+        "human_impl": "<plugin>\n    <artifactId>maven-failsafe-plugin</artifactId>\n    ...\n</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_plugin",
+        "general_idea": "Add the JaCoCo plugin to generate code coverage reports during the test phase.",
+        "human_impl": "<plugin>\n    <groupId>org.jacoco</groupId>\n    <artifactId>jacoco-maven-plugin</artifactId>\n    ...\n</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_spotbugs_plugin",
+        "general_idea": "Add the SpotBugs plugin for static code analysis with maximum effort and low threshold.",
+        "human_impl": "<plugin>\n    <groupId>com.github.spotbugs</groupId>\n    <artifactId>spotbugs-maven-plugin</artifactId>\n    ...\n</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_gpg_plugin",
+        "general_idea": "Add the GPG plugin to sign artifacts during the release profile execution.",
+        "human_impl": "<plugin>\n    <artifactId>maven-gpg-plugin</artifactId>\n    ...\n</plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_release_profiles",
+        "general_idea": "Define Maven profiles for release, development, and fast builds to manage test skipping and signing.",
+        "human_impl": "<profiles>\n    <profile>\n        <id>release</id>\n        ...\n    </profile>\n    ...\n</profiles>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_distribution_management",
+        "general_idea": "Configure distribution management URLs for deploying snapshots and releases to OSSRH.",
+        "human_impl": "<distributionManagement>\n    <snapshotRepository>\n        <id>ossrh</id>\n        ...\n    </snapshotRepository>\n    ...\n</distributionManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_project_metadata",
+        "general_idea": "Update project name, description, version, and developer information to reflect the new state of the library.",
+        "human_impl": "<artifactId>h2-orm</artifactId>\n<version>1.0.0</version>\n<name>H2-ORM</name>\n<description>Modern Spring Boot-style ORM library...</description>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_scm_info",
+        "general_idea": "Update SCM connection details and issue management URLs to point to the correct GitHub repository.",
+        "human_impl": "<scm>\n    <url>https://github.com/W1LDN16H7/h2-orm</url>\n    ...\n</scm>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_plugin_versions",
+        "general_idea": "Extract plugin versions into properties for better maintainability and consistency.",
+        "human_impl": "<maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>\n...\n<version>${maven.compiler.plugin.version}</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_shade_plugin",
+        "general_idea": "Remove the Maven Shade plugin which was previously used for creating uber JARs.",
+        "human_impl": "-            <!-- Shade Plugin for uber JAR -->\n-            <plugin>\n-                <groupId>org.apache.maven.plugins</groupId>\n-                <artifactId>maven-shade-plugin</artifactId>\n-                ...\n-            </plugin>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_assembly_plugin",
+        "general_idea": "Simplify the Maven Assembly plugin configuration to produce a complete JAR with dependencies without manifest classpath manipulation.",
+        "human_impl": "<finalName>${project.artifactId}-${project.version}-complete</finalName>\n<appendAssemblyId>false</appendAssemblyId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_javadoc_plugin",
+        "general_idea": "Enhance the Maven Javadoc plugin configuration with explicit source/target, encoding, and doclint options.",
+        "human_impl": "<source>${maven.compiler.source}</source>\n<target>${maven.compiler.target}</target>\n<additionalJOptions>\n    <additionalJOption>-Xdoclint:none</additionalJOption>\n</additionalJOptions>",
+        "bucket": "polishment"
+      }
+    ],
+    ".idea/copilotDiffState.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Update Maven compiler source and target properties from 17 to 21 to align with the new JDK version.",
+        "human_impl": "<maven.compiler.target>21</maven.compiler.target>\n<maven.compiler.source>21</maven.compiler.source>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_compiler_release_flag",
+        "general_idea": "Add maven.compiler.release property to ensure cross-compilation compatibility with JDK 21.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_compiler_args",
+        "general_idea": "Add compiler arguments for parameter name retention and linting in the maven-compiler-plugin configuration.",
+        "human_impl": "<compilerArgs>\n    <arg>-parameters</arg>\n    <arg>-Xlint:all</arg>\n    <arg>-Xlint:-processing</arg>\n</compilerArgs>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_failsafe_plugin",
+        "general_idea": "Add maven-failsafe-plugin to support integration testing execution.",
+        "human_impl": "<plugin>\n    <groupId>org.apache.maven.plugins</groupId>\n    <artifactId>maven-failsafe-plugin</artifactId>\n    ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_plugin",
+        "general_idea": "Add jacoco-maven-plugin for code coverage reporting.",
+        "human_impl": "<plugin>\n    <groupId>org.jacoco</groupId>\n    <artifactId>jacoco-maven-plugin</artifactId>\n    ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_spotbugs_plugin",
+        "general_idea": "Add spotbugs-maven-plugin for static code analysis.",
+        "human_impl": "<plugin>\n    <groupId>com.github.spotbugs</groupId>\n    <artifactId>spotbugs-maven-plugin</artifactId>\n    ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_gpg_plugin",
+        "general_idea": "Add maven-gpg-plugin for signing artifacts in the release profile.",
+        "human_impl": "<plugin>\n    <groupId>org.apache.maven.plugins</groupId>\n    <artifactId>maven-gpg-plugin</artifactId>\n    ...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_build_profiles",
+        "general_idea": "Define dev, fast, and release build profiles to manage test skipping and signing.",
+        "human_impl": "<profiles>\n    <profile>\n        <id>release</id>\n        ...\n    </profile>\n    <profile>\n        <id>dev</id>\n        ...\n    </profile>\n    <profile>\n        <id>fast</id>\n        ...\n    </profile>\n</profiles>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_distribution_management",
+        "general_idea": "Configure distribution management for deploying to OSSRH (Sonatype).",
+        "human_impl": "<distributionManagement>\n    <snapshotRepository>\n        <id>ossrh</id>\n        <url>https://oss.sonatype.org/content/repositories/snapshots</url>\n    </snapshotRepository>\n    <repository>\n        <id>ossrh</id>\n        <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>\n    </repository>\n</distributionManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_pom_metadata",
+        "general_idea": "Update project metadata including inception year, developer details, and SCM information.",
+        "human_impl": "<inceptionYear>2025</inceptionYear>\n<developers>\n    <developer>\n        <id>w1ldn16h7</id>\n        <name>W1LDN16H7</name>\n        ...\n    </developer>\n</developers>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_scm_config",
+        "general_idea": "Refine SCM connection strings and add tag configuration.",
+        "human_impl": "<scm>\n    <url>https://github.com/W1LDN16H7/h2-orm</url>\n    <connection>scm:git:git://github.com/W1LDN16H7/h2-orm.git</connection>\n    <developerConnection>scm:git:ssh://git@github.com/W1LDN16H7/h2-orm.git</developerConnection>\n    <tag>HEAD</tag>\n</scm>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_issue_management",
+        "general_idea": "Add issue management configuration pointing to GitHub Issues.",
+        "human_impl": "<issueManagement>\n    <system>GitHub Issues</system>\n    <url>https://github.com/W1LDN16H7/h2-orm/issues</url>\n</issueManagement>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_javadoc_config",
+        "general_idea": "Enhance maven-javadoc-plugin configuration with explicit source/target and additional options.",
+        "human_impl": "<configuration>\n    <source>${maven.compiler.source}</source>\n    <target>${maven.compiler.target}</target>\n    <additionalJOptions>\n        <additionalJOption>-Xdoclint:none</additionalJOption>\n    </additionalJOptions>\n</configuration>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_surefire_config",
+        "general_idea": "Configure maven-surefire-plugin with specific include/exclude patterns and system properties.",
+        "human_impl": "<configuration>\n    <includes>\n        <include>**/*Test.java</include>\n        <include>**/*Tests.java</include>\n    </includes>\n    <excludes>\n        <exclude>**/*IntegrationTest.java</exclude>\n    </excludes>\n    <systemPropertyVariables>\n        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>\n    </systemPropertyVariables>\n</configuration>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_assembly_config",
+        "general_idea": "Refine maven-assembly-plugin configuration to set final name and disable assembly ID appending.",
+        "human_impl": "<configuration>\n    <descriptorRefs>\n        <descriptorRef>jar-with-dependencies</descriptorRef>\n    </descriptorRefs>\n    <finalName>${project.artifactId}-${project.version}-complete</finalName>\n    <appendAssemblyId>false</appendAssemblyId>\n</configuration>",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/logback.xml": [
+      {
+        "kind": "update_log_pattern",
+        "general_idea": "Enhance console log pattern to include the full date for better traceability.",
+        "human_impl": "<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_log_file",
+        "general_idea": "Rename log files from 'jpa-database-handler' to 'h2-orm' to reflect the specific technology stack.",
+        "human_impl": "<file>logs/h2-orm.log</file>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

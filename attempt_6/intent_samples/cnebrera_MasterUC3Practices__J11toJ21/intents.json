@@ -1,0 +1,310 @@
+{
+  "meta": {
+    "repo": "cnebrera/MasterUC3Practices",
+    "stage": "J11->J21",
+    "family": null,
+    "sha_from": "238efebfd731f669a41dcafb9d22d64a1b364a94",
+    "sha_to": "2395028c3a75e31026977d1af3c390bd9bae554f"
+  },
+  "by_file": {
+    "Lesson3/src/main/java/com/cnebrera/uc3/tech/lesson3/SimplePublisher.java": [
+      {
+        "kind": "remove_todo_comment",
+        "general_idea": "Remove a TODO comment that was completed in the code implementation.",
+        "human_impl": "Changed '// TODO Create a string message...' to '// Create a string message...'",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson6/src/main/java/com/imdg/pojos/Person.java": [
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove the unused import of java.io.Serializable to clean up the code.",
+        "human_impl": "Removed 'import java.io.Serializable;'",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson6/src/main/java/com/imdg/practicas/Practica1IMDG.java": [
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Remove unused import statements to clean up the source file.",
+        "human_impl": "Removed imports for Hazelcast, IMap, Person, Map, and Queue.",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson7/src/main/java/com/imdg/listeners/VolumeListener.java": [
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Removed imports for EntryListener, MapEvent, and MapListener that were not used in the class.",
+        "human_impl": "-import com.hazelcast.core.EntryListener;\n-import com.hazelcast.core.MapEvent;\n-import com.hazelcast.map.listener.MapListener;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_author_comment",
+        "general_idea": "Removed the Javadoc block containing the author and creation date.",
+        "human_impl": "-/**\n- * Created by Sobremesa on 31/10/2016.\n- */",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_whitespace_formatting",
+        "general_idea": "Adjusted indentation and spacing around operators and assignments to match standard coding conventions.",
+        "human_impl": "-            implements EntryAddedListener<String, MarketOrder>,\n+        implements EntryAddedListener<String, MarketOrder>,\n-    private int volumenAcumulado=0;\n+    private int volumenAcumulado = 0;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc_separator",
+        "general_idea": "Added empty lines in Javadoc comments to separate the description from the @param tag.",
+        "human_impl": "+     *\n      * @param entryEvent",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson7/src/main/java/com/imdg/pojos/MarketOrder.java": [
+      {
+        "kind": "remove_author_comment",
+        "general_idea": "Remove the Javadoc block containing author and creation date metadata.",
+        "human_impl": "Deleted the `/** Created by ... */` comment block above the class declaration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_spacing",
+        "general_idea": "Add a space before the opening brace of the class declaration to comply with standard Java formatting conventions.",
+        "human_impl": "Changed `public class MarketOrder implements Serializable{` to `public class MarketOrder implements Serializable {`.",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson7/src/main/java/com/imdg/practicas/P1VolumeAdder.java": [],
+    "Lesson7/src/main/java/com/imdg/practicas/P1VolumeControl.java": [
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Remove imports that are no longer used in the code to clean up the file.",
+        "human_impl": "Removed imports for HazelcastClient, ClientConfig, IMap (old path), EntryObject, PredicateBuilder, and ArrayList.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_import_path",
+        "general_idea": "Update the import statement for IMap to use the new package structure in newer Hazelcast versions.",
+        "human_impl": "Changed 'import com.hazelcast.core.IMap;' to 'import com.hazelcast.map.IMap;'.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_outdated_comment",
+        "general_idea": "Remove the outdated creation comment block from the class header.",
+        "human_impl": "Deleted the Javadoc comment block containing 'Created by Sobremesa on 31/10/2016'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_whitespace",
+        "general_idea": "Remove unnecessary whitespace inside method arguments for cleaner code style.",
+        "human_impl": "Changed 'Hazelcast.newHazelcastInstance( config )' to 'Hazelcast.newHazelcastInstance(config)' and added space after comma in addEntryListener.",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson7/src/main/java/com/imdg/practicas/P2VolumeProcessing.java": [
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Remove imports for classes that are no longer used in the source file to clean up the code.",
+        "human_impl": "Removed imports for HazelcastClient, ClientConfig, IMap (old package), NotEqualPredicate, and ArrayList.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_import_path",
+        "general_idea": "Update the import statement for IMap to use the new package structure introduced in newer Hazelcast versions.",
+        "human_impl": "Changed import from com.hazelcast.core.IMap to com.hazelcast.map.IMap.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_class_comment",
+        "general_idea": "Remove the outdated Javadoc class comment containing author and date information.",
+        "human_impl": "Deleted the block comment 'Created by Sobremesa on 31/10/2016'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_code_spacing",
+        "general_idea": "Apply standard Java formatting rules by adding spaces around operators and in loop declarations.",
+        "human_impl": "Added spaces around '=' in for loops and around '+' in string concatenations.",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson7/src/main/java/com/imdg/processors/OrderProcessor.java": [
+      {
+        "kind": "replace_deprecated_class",
+        "general_idea": "Replaced the deprecated AbstractEntryProcessor with the EntryProcessor interface to align with modern Hazelcast API standards.",
+        "human_impl": "extends AbstractEntryProcessor<String,MarketOrder> -> implements EntryProcessor<String, MarketOrder, Object>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_redundant_serializable",
+        "general_idea": "Removed the explicit Serializable interface implementation as it is no longer required or implied by the new EntryProcessor interface.",
+        "human_impl": "implements Serializable -> removed",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Removed the import for the deprecated AbstractEntryProcessor class that is no longer used.",
+        "human_impl": "import com.hazelcast.map.AbstractEntryProcessor; -> removed",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_required_import",
+        "general_idea": "Added the import for the new EntryProcessor interface used in the class declaration.",
+        "human_impl": "import com.hazelcast.map.EntryProcessor;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Removed the unused java.io.Serializable import after removing the interface implementation.",
+        "human_impl": "import java.io.Serializable; -> removed",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "clean_up_javadoc",
+        "general_idea": "Removed outdated author and date tags from the class Javadoc.",
+        "human_impl": "Removed 'Created by Sobremesa on 31/10/2016.' block",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "format_code_style",
+        "general_idea": "Applied standard Java formatting by adding spaces after commas in generic type parameters.",
+        "human_impl": "<String,MarketOrder> -> <String, MarketOrder>",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson9/src/main/java/com/cnebrera/uc3/tech/lesson9/Measurement.java": [
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Remove unused JAXB serializer import and instance to simplify the class.",
+        "human_impl": "Removed import com.cnebrera.uc3.tech.lesson9.jaxb.JaxbSerializer and private static final JaxbSerializer jaxbSerializer",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Remove unused JSON serializer import and instance to simplify the class.",
+        "human_impl": "Removed import com.cnebrera.uc3.tech.lesson9.json.JsonSerializer and private static final JsonSerializer jsonSerializer",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Remove unused Instrument model import as it is no longer directly referenced in this file.",
+        "human_impl": "Removed import com.cnebrera.uc3.tech.lesson9.model.Instrument",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Utils import to centralize test data creation.",
+        "human_impl": "Added import com.cnebrera.uc3.tech.lesson9.utils.Utils",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_dependency",
+        "general_idea": "Remove unused IO and Net imports since file reading logic was moved to Utils.",
+        "human_impl": "Removed imports for java.io.IOException, java.net.URISyntaxException, java.net.URL, java.nio.file.Files, java.nio.file.Paths",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_logic",
+        "general_idea": "Replace manual file reading and object construction with utility methods for cleaner setup.",
+        "human_impl": "Replaced URL/Files reading and manual builder logic with Utils.getReferenceData() and Utils.getProtoReferenceData()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_logic",
+        "general_idea": "Remove JAXB and JSON performance tests from the serialization benchmark.",
+        "human_impl": "Removed JAXB and JSON serialization loops and timing logic from testPerformanceSerialization",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_logic",
+        "general_idea": "Remove JAXB and JSON performance tests from the deserialization benchmark.",
+        "human_impl": "Removed JAXB and JSON deserialization loops and timing logic from testPerformanceDeSerialization",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_logic",
+        "general_idea": "Remove JAXB and JSON performance tests from the combined serialization/deserialization benchmark.",
+        "human_impl": "Removed JAXB and JSON combined loops and timing logic from testPerformanceSerializationAndDeserialization",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_constant",
+        "general_idea": "Reduce the number of iterations for performance tests, likely to speed up execution.",
+        "human_impl": "Changed NUM_ITERATIONS from 100000000 to 5000000",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_logging",
+        "general_idea": "Standardize log message prefixes from 'Practica' to 'Lesson 9'.",
+        "human_impl": "Changed LOGGER.debug messages from [Practica X] to [Lesson 9]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_signature",
+        "general_idea": "Simplify main method signature by removing checked exceptions that are no longer thrown.",
+        "human_impl": "Removed throws URISyntaxException, IOException from main method",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson9/src/main/java/com/cnebrera/uc3/tech/lesson9/kryo/KryoTest.java": [
+      {
+        "kind": "refactor_data_source",
+        "general_idea": "Replace manual JSON file reading and deserialization with a utility method to generate test data.",
+        "human_impl": "ReferenceData referenceData = Utils.getReferenceData();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Remove imports for classes no longer used after refactoring the data source.",
+        "human_impl": "-import com.cnebrera.uc3.tech.lesson9.json.JsonSerializer;\n-import java.io.IOException;\n-import java.net.URISyntaxException;\n-import java.net.URL;\n-import java.nio.file.Files;\n-import java.nio.file.Paths;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_utility_import",
+        "general_idea": "Add import for the new utility class used to generate test data.",
+        "human_impl": "+import com.cnebrera.uc3.tech.lesson9.utils.Utils;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_exception_declarations",
+        "general_idea": "Remove checked exceptions from main method signature since file I/O is no longer performed directly.",
+        "human_impl": "public static void main(String[] args) {",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_log_message",
+        "general_idea": "Update the debug log message to reflect the new task naming convention.",
+        "human_impl": "LOGGER.debug(\"[Task 2] Kryo Serializer [{}] \", ...)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_field",
+        "general_idea": "Remove the JsonSerializer field as it is no longer used for deserialization.",
+        "human_impl": "-private static final JsonSerializer jsonSerializer = new JsonSerializer();",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson9/src/main/java/com/cnebrera/uc3/tech/lesson9/proto/ProtoTest.java": [
+      {
+        "kind": "refactor_data_loading",
+        "general_idea": "Replace manual JSON file reading and deserialization with a utility method to generate test data.",
+        "human_impl": "Utils.getProtoReferenceData()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Remove imports for JSON serialization and file I/O that are no longer used after refactoring data loading.",
+        "human_impl": "Removed imports for JsonSerializer, Instrument, ReferenceData, IOException, URISyntaxException, URL, Files, Paths",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_main_signature",
+        "general_idea": "Remove checked exceptions from main method signature since file I/O operations were removed.",
+        "human_impl": "public static void main(String[] args)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_test_comment",
+        "general_idea": "Update the log message identifier to reflect the new task context.",
+        "human_impl": "Changed log message from '[Practica 3]' to '[Task 1]'",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

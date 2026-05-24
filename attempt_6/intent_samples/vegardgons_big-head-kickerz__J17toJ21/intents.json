@@ -1,0 +1,227 @@
+{
+  "meta": {
+    "repo": "vegardgons/big-head-kickerz",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "0b1c113db030788ac1f47c11dea74df6c2b7ae75",
+    "sha_to": "7906f4c5dc94a441661aaba7b6fd501e5033ab3f"
+  },
+  "by_file": {
+    "pom.xml": [
+      {
+        "kind": "update_compiler_target",
+        "general_idea": "Update the Maven compiler release property from 17 to 21 to target the new JDK version.",
+        "human_impl": "<maven.compiler.release>21</maven.compiler.release>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "update_libgdx_version",
+        "general_idea": "Upgrade the libGDX library version from 1.10.0 to 1.13.1 to support newer features and JDK compatibility.",
+        "human_impl": "<libgdx.version>1.13.1</libgdx.version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_headless_backend",
+        "general_idea": "Add the libGDX headless backend dependency to allow running tests without a graphical display.",
+        "human_impl": "<artifactId>gdx-backend-headless</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_freetype_dependency",
+        "general_idea": "Add libGDX freetype dependency for dynamic font rendering capabilities.",
+        "human_impl": "<artifactId>gdx-freetype</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_freetype_natives",
+        "general_idea": "Add libGDX freetype platform natives for desktop execution.",
+        "human_impl": "<artifactId>gdx-freetype-platform</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "upgrade_junit",
+        "general_idea": "Upgrade JUnit Jupiter to a newer version managed by the JUnit BOM for better test framework support.",
+        "human_impl": "<artifactId>junit-bom</artifactId> <version>5.11.4</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_junit_reporting",
+        "general_idea": "Add JUnit platform reporting dependency to enable XML test result output.",
+        "human_impl": "<artifactId>junit-platform-reporting</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_opentest4j",
+        "general_idea": "Add OpenTest4J dependency for standard assertion failure exceptions.",
+        "human_impl": "<artifactId>opentest4j</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_hamcrest",
+        "general_idea": "Add Hamcrest dependency for advanced matcher assertions in tests.",
+        "human_impl": "<artifactId>hamcrest</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mockito",
+        "general_idea": "Add Mockito dependency for mocking objects in unit tests.",
+        "human_impl": "<artifactId>mockito-core</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_slf4j_api",
+        "general_idea": "Add SLF4J API dependency for logging abstraction.",
+        "human_impl": "<artifactId>slf4j-api</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_slf4j_simple",
+        "general_idea": "Add SLF4J simple implementation for basic logging output.",
+        "human_impl": "<artifactId>slf4j-simple</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_spotbugs_plugin",
+        "general_idea": "Add SpotBugs Maven plugin for static code analysis.",
+        "human_impl": "<artifactId>spotbugs-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_enforcer_plugin",
+        "general_idea": "Add Maven Enforcer plugin to ensure minimum Maven version requirements.",
+        "human_impl": "<artifactId>maven-enforcer-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_jacoco_plugin",
+        "general_idea": "Add JaCoCo Maven plugin for code coverage measurement.",
+        "human_impl": "<artifactId>jacoco-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_failsafe_plugin",
+        "general_idea": "Add Maven Failsafe plugin for running integration tests.",
+        "human_impl": "<artifactId>maven-failsafe-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_surefire_config",
+        "general_idea": "Configure Surefire plugin to enable Open Test Reporting XML output.",
+        "human_impl": "junit.platform.reporting.open.xml.enabled = true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_shade_plugin",
+        "general_idea": "Upgrade Maven Shade plugin version to 3.6.0 for better uber-jar creation.",
+        "human_impl": "<artifactId>maven-shade-plugin</artifactId> <version>3.6.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_compiler_plugin",
+        "general_idea": "Upgrade Maven Compiler plugin version to 3.13.0 for better JDK 21 support.",
+        "human_impl": "<artifactId>maven-compiler-plugin</artifactId> <version>3.13.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_surefire_plugin",
+        "general_idea": "Upgrade Maven Surefire plugin version to 3.5.2 for modern test execution.",
+        "human_impl": "<artifactId>maven-surefire-plugin</artifactId> <version>3.5.2</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_exec_plugin",
+        "general_idea": "Upgrade Maven Exec plugin version to 3.5.0 for running applications.",
+        "human_impl": "<artifactId>exec-maven-plugin</artifactId> <version>3.5.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_clean_plugin",
+        "general_idea": "Upgrade Maven Clean plugin version to 3.4.0.",
+        "human_impl": "<artifactId>maven-clean-plugin</artifactId> <version>3.4.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_site_plugin",
+        "general_idea": "Upgrade Maven Site plugin version to 4.0.0-M16.",
+        "human_impl": "<artifactId>maven-site-plugin</artifactId> <version>4.0.0-M16</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_resources_plugin",
+        "general_idea": "Upgrade Maven Resources plugin version to 3.3.1.",
+        "human_impl": "<artifactId>maven-resources-plugin</artifactId> <version>3.3.1</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jar_plugin",
+        "general_idea": "Upgrade Maven JAR plugin version to 3.4.2.",
+        "human_impl": "<artifactId>maven-jar-plugin</artifactId> <version>3.4.2</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_install_plugin",
+        "general_idea": "Upgrade Maven Install plugin version to 3.1.3.",
+        "human_impl": "<artifactId>maven-install-plugin</artifactId> <version>3.1.3</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_deploy_plugin",
+        "general_idea": "Upgrade Maven Deploy plugin version to 3.1.3.",
+        "human_impl": "<artifactId>maven-deploy-plugin</artifactId> <version>3.1.3</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_versions_plugin",
+        "general_idea": "Add Versions Maven plugin to help manage dependency and plugin version updates.",
+        "human_impl": "<artifactId>versions-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "add_backup_file_patterns",
+        "general_idea": "Add patterns to ignore common backup and editor swap files to keep the repository clean.",
+        "human_impl": "*.bak\n*.old\n*~\n*#*\n*.swp",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_maven_plugin_artifact_pattern",
+        "general_idea": "Ignore the dependency-reduced-pom.xml generated by the Maven Shade Plugin to prevent committing build artifacts.",
+        "human_impl": "dependency-reduced-pom.xml",
+        "bucket": "polishment"
+      }
+    ],
+    "README.md": [
+      {
+        "kind": "replace_template_with_project_docs",
+        "general_idea": "Replaced the generic INF112 Maven template README with specific documentation for the 'Big Head Kickerz' game project.",
+        "human_impl": "Removed generic Maven setup instructions and ANTLR snippets; added project title, team info, game description, and controls.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_screenshot",
+        "general_idea": "Added a visual screenshot of the game to the README to showcase the project.",
+        "human_impl": "Added markdown image link pointing to `/docs/screenshot.jpg`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_run_instructions",
+        "general_idea": "Updated the running instructions to reflect the specific build output and Java version requirements of the final project.",
+        "human_impl": "Changed instructions to use `mvn package` and `java -jar target/big-head-kickerz-1.0-SNAPSHOT-fat.jar`, specifying Java 21.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_known_bugs",
+        "general_idea": "Replaced the empty 'Known bugs' section with a detailed list of current physics and collision issues in the game.",
+        "human_impl": "Listed specific bugs regarding ball-player collisions, powerup effects, and foot physics.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_credits",
+        "general_idea": "Added a credits section acknowledging the sources for assets, sounds, and inspiration used in the game.",
+        "human_impl": "Added links to Kongregate, Fandom, Wikipedia, Freesound, and other asset providers.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

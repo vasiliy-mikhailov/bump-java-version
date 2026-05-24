@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "repo": "cnebrera/MasterUC3Practices",
+    "stage": "J8->J11",
+    "family": null,
+    "sha_from": "c87a329714375049b1dc75c2c7c9e6ae5289e3c4",
+    "sha_to": "238efebfd731f669a41dcafb9d22d64a1b364a94"
+  },
+  "by_file": {
+    "Lesson1/src/main/java/com/cnebrera/uc3/tech/lesson1/PracticeLatency1.java": [
+      {
+        "kind": "add_todo_comment",
+        "general_idea": "Add a TODO comment to indicate where an empty Histogram should be created.",
+        "human_impl": "// TODO Create an empty Histogram",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_todo_comment",
+        "general_idea": "Add a TODO comment to indicate where latency should be computed for each operation.",
+        "human_impl": "// TODO Compute latency for each operation",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_todo_comment",
+        "general_idea": "Add a TODO comment to indicate where latency should be recorded into the histogram.",
+        "human_impl": "//TODO Record latency into histogram",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson1/src/main/java/com/cnebrera/uc3/tech/lesson1/PracticeLatency2.java": [
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add import for HdrHistogram library to enable latency measurement.",
+        "human_impl": "import org.HdrHistogram.ConcurrentHistogram;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add imports for standard Java collections and concurrency utilities.",
+        "human_impl": "import java.util.LinkedList; import java.util.List; import java.util.concurrent.TimeUnit;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_logic",
+        "general_idea": "Replace single-threaded loop with multi-threaded execution using a Runner class.",
+        "human_impl": "List<Runner> runners = new LinkedList<>(); ... new Thread(runner).start();",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_simulator",
+        "general_idea": "Switch simulator from long operation to sleep-based operation for latency testing.",
+        "human_impl": "BaseSyncOpSimulator syncOpSimulator = new SyncOpSimulSleep(10);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constants",
+        "general_idea": "Define configuration constants for thread count, executions, and expected throughput.",
+        "human_impl": "static final int NUM_THREADS = 4; static final int NUM_EXECUTIONS = 100;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_todo",
+        "general_idea": "Add placeholder comments for students to implement histogram creation and usage.",
+        "human_impl": "// TODO Create two different empty concurrent histograms",
+        "bucket": "polishment"
+      }
+    ],
+    "Lesson1/pom.xml": [
+      {
+        "kind": "remove_jdk_version_config",
+        "general_idea": "Removed explicit source and target 1.8 configuration from the maven-compiler-plugin to allow the build to default to the JDK version of the build environment (JDK 11).",
+        "human_impl": "<configuration>\n\t\t\t\t<source>1.8</source>\n\t\t\t\t<target>1.8</target>\n\t\t\t</configuration>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_comment",
+        "general_idea": "Added a comment placeholder in the dependencies section.",
+        "human_impl": "<!-- Test Comment -->",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_newline",
+        "general_idea": "Added a missing newline at the end of the file.",
+        "human_impl": "+</project>",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

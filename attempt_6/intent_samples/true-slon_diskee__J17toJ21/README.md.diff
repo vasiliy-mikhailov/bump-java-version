@@ -1,0 +1,11 @@
+diff --git a/README.md b/README.md
+index e6253cc..28a3f3d 100644
+--- a/README.md
++++ b/README.md
+@@ -1,3 +1,2 @@
+ # diskee
+-Архитектура программных систем
+-test connection
+\ No newline at end of file
++Архитектура программных систем
+\ No newline at end of file

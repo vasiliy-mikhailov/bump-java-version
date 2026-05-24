@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "repo": "JEsperancinhaOrg/itf-chartizate",
+    "stage": "J8->J11",
+    "family": "junit4-mockito",
+    "sha_from": "9a725185a1e82d78e5ca00022005b3e19179ce97",
+    "sha_to": "8723a284598ab7407029034e8a4e494d4622877a"
+  },
+  "by_file": {
+    ".gitignore": [
+      {
+        "kind": "add_generated_ignore",
+        "general_idea": "Add a comment indicating the file contains generated or standard ignore patterns.",
+        "human_impl": "+# Generated",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_target_ignore",
+        "general_idea": "Explicitly ignore the Maven target directory at the root level.",
+        "human_impl": "+target",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_macos_ignore",
+        "general_idea": "Add ignore patterns for macOS specific files.",
+        "human_impl": "+.DS_Store",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_maven_ignore",
+        "general_idea": "Add ignore patterns for Maven backup files.",
+        "human_impl": "+pom.xml.versionsBackup",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_eclipse_ignore",
+        "general_idea": "Add ignore patterns for Eclipse IDE metadata files.",
+        "human_impl": "+build-by-eclipse\n+.project\n+.classpath\n+.settings\n+gen",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_intellij_ignore",
+        "general_idea": "Add ignore patterns for IntelliJ IDEA metadata files.",
+        "human_impl": "+.idea\n+*.iml",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_local_props_ignore",
+        "general_idea": "Add ignore pattern for local properties file.",
+        "human_impl": "+/local.properties",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_bin_gen_ignore",
+        "general_idea": "Add ignore patterns for generated bin and gen directories.",
+        "human_impl": "+bin/\n+gen/",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_gradle_ignore",
+        "general_idea": "Add ignore patterns for Gradle build files and directories.",
+        "human_impl": "+.gradle/\n+build/",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_coveralls_ignore",
+        "general_idea": "Add ignore pattern for Coveralls configuration file.",
+        "human_impl": "+.coveralls.yml",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_codecov_ignore",
+        "general_idea": "Add ignore pattern for Codecov configuration file.",
+        "human_impl": "+codecov.yml",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_recursive_build_ignore",
+        "general_idea": "Remove recursive ignore pattern for Eclipse build directory.",
+        "human_impl": "-**/build-by-eclipse",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_recursive_target_ignore",
+        "general_idea": "Remove recursive ignore pattern for Maven target directory.",
+        "human_impl": "-**/target",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_recursive_ds_store_ignore",
+        "general_idea": "Remove recursive ignore pattern for macOS DS_Store files.",
+        "human_impl": "-**/.DS_Store",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

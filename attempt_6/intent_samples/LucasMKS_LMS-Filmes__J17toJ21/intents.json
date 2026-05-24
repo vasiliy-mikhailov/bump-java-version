@@ -1,0 +1,283 @@
+{
+  "meta": {
+    "repo": "LucasMKS/LMS-Filmes",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "a55bf9052aaa242c967c83c4213a2dae0f586866",
+    "sha_to": "ab3a10dbb71bfc15957a9f12f68197852470f778"
+  },
+  "by_file": {
+    "eureka/src/main/java/com/lucasm/eureka/EurekaApplication.java": [],
+    "gateway/src/main/java/com/lucasm/gateway/GatewayApplication.java": [
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Add a Javadoc comment to the main application class to document its purpose.",
+        "human_impl": "Added /** ... */ block above the class declaration.",
+        "bucket": "polishment"
+      }
+    ],
+    "gateway/src/main/java/com/lucasm/gateway/config/CorsGlobalConfig.java": [
+      {
+        "kind": "externalize_cors_origins",
+        "general_idea": "Replace hardcoded allowed origin with a configurable property value to support dynamic deployment environments.",
+        "human_impl": "@Value(\"${cors.allowed-origins:...}\") private String allowedOrigins;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "expand_cors_origins",
+        "general_idea": "Add multiple production and development domains to the list of allowed CORS origins.",
+        "human_impl": "config.setAllowedOriginPatterns(Arrays.asList(allowedOrigins, \"https://lms-filmes.vercel.app\", ...));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "explicit_cors_methods",
+        "general_idea": "Replace wildcard allowed methods with an explicit list of HTTP verbs for stricter security control.",
+        "human_impl": "config.setAllowedMethods(Arrays.asList(\"GET\", \"POST\", \"PUT\", \"DELETE\", \"OPTIONS\", \"PATCH\"));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_cors_max_age",
+        "general_idea": "Configure the preflight request cache duration to improve performance for repeated cross-origin requests.",
+        "human_impl": "config.setMaxAge(3600L);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_java_doc",
+        "general_idea": "Add JavaDoc comments to the class and method to improve code documentation.",
+        "human_impl": "/** Configura\u00e7\u00e3o global de CORS aplicada no gateway. */",
+        "bucket": "polishment"
+      }
+    ],
+    "lms-email-service/src/main/java/com/lms/email/EmailApplication.java": [],
+    "lms-email-service/src/main/java/com/lms/email/config/RabbitMQConfig.java": [],
+    "lms-email-service/src/main/java/com/lms/email/service/EmailConsumer.java": [
+      {
+        "kind": "extract_dto_classes",
+        "general_idea": "Move record definitions for DTOs out of the consumer class to dedicated importable classes.",
+        "human_impl": "Removed `record UserRegistrationDTO` and `record PasswordResetDTO` from file, added imports.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_amqp_exception_handling",
+        "general_idea": "Import and use Spring AMQP specific exception to control message requeue behavior on failure.",
+        "human_impl": "Added import `org.springframework.amqp.AmqpRejectAndDontRequeueException`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_messaging_exception_handling",
+        "general_idea": "Import JavaMail API exception to handle specific email sending errors.",
+        "human_impl": "Added import `jakarta.mail.MessagingException`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Add JavaDoc comments to class and methods for better documentation.",
+        "human_impl": "Added `/** ... */` blocks for class, constructor, and listener methods.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_error_handling",
+        "general_idea": "Replace generic RuntimeException with specific AmqpRejectAndDontRequeueException to prevent message reprocessing loops.",
+        "human_impl": "Changed `throw new RuntimeException` to `throw new AmqpRejectAndDontRequeueException` in catch blocks.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_logging",
+        "general_idea": "Clean up verbose logging statements and standardize error logging format.",
+        "human_impl": "Removed debug/info logs, kept error logs with specific messages.",
+        "bucket": "polishment"
+      }
+    ],
+    "lms-email-service/src/main/java/com/lms/email/service/EmailSender.java": [
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Thymeleaf TemplateEngine dependency to enable HTML email templating.",
+        "human_impl": "import org.thymeleaf.TemplateEngine;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_email_content",
+        "general_idea": "Replace inline HTML string concatenation with Thymeleaf template processing for welcome emails.",
+        "human_impl": "String htmlBody = templateEngine.process(\"welcome-email\", context);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_email_content",
+        "general_idea": "Replace inline HTML string concatenation with Thymeleaf template processing for password reset emails.",
+        "human_impl": "String htmlBody = templateEngine.process(\"reset-password-email\", context);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_code_structure",
+        "general_idea": "Extract common email sending logic into a private helper method to reduce duplication.",
+        "human_impl": "private void sendHtmlEmail(String toAddress, String subject, String htmlBody) throws MessagingException",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "improve_error_handling",
+        "general_idea": "Propagate MessagingException instead of wrapping it in a generic RuntimeException.",
+        "human_impl": "public void sendWelcomeEmail(...) throws MessagingException",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_encoding",
+        "general_idea": "Explicitly set UTF-8 encoding in MimeMessageHelper to ensure correct character rendering.",
+        "human_impl": "new MimeMessageHelper(message, true, \"UTF-8\");",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_documentation",
+        "general_idea": "Add JavaDoc comments to the class and public methods for better API documentation.",
+        "human_impl": "/** * Servi\u00e7o respons\u00e1vel por montar e enviar e-mails transacionais. */",
+        "bucket": "polishment"
+      }
+    ],
+    "lmsfavorite/src/main/java/com/lucasm/lmsfavorite/LmsfavoriteApplication.java": [
+      {
+        "kind": "enable_scheduling",
+        "general_idea": "Add the @EnableScheduling annotation to activate Spring's task scheduling support for the application.",
+        "human_impl": "@EnableScheduling",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_class_javadoc",
+        "general_idea": "Add a Javadoc comment to the main application class describing its purpose.",
+        "human_impl": "/**\n * Classe principal de inicializa\u00e7\u00e3o do microservi\u00e7o de favoritos e watchlist.\n */",
+        "bucket": "polishment"
+      }
+    ],
+    "lmsfavorite/src/main/java/com/lucasm/lmsfavorite/config/JWTAuthFilter.java": [
+      {
+        "kind": "add_cookie_auth_support",
+        "general_idea": "Enable JWT retrieval from cookies in addition to the Authorization header to support cookie-based authentication.",
+        "human_impl": "Added `recuperarToken` method that checks `request.getCookies()` for 'auth_token' before falling back to the Authorization header.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_role_fallback",
+        "general_idea": "Ensure a default role is assigned if the JWT does not contain a valid role claim.",
+        "human_impl": "Added check `if (role == null || role.isBlank()) { role = \"USER\"; }` before constructing authorities.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "normalize_role_case",
+        "general_idea": "Standardize role names to uppercase to ensure consistent authority matching.",
+        "human_impl": "Changed authority creation to use `role.toUpperCase()`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_debug_logging",
+        "general_idea": "Add console output for debugging authentication flow and errors.",
+        "human_impl": "Added `System.out.println` statements for missing tokens, successful access, and critical validation errors.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Document the class and methods with Javadoc comments.",
+        "human_impl": "Added JavaDoc blocks for `JWTAuthFilter`, `doFilterInternal`, and `recuperarToken`.",
+        "bucket": "polishment"
+      }
+    ],
+    "lmsfavorite/src/main/java/com/lucasm/lmsfavorite/config/SecurityConfig.java": [],
+    "lmsfavorite/src/main/java/com/lucasm/lmsfavorite/controller/FavoriteMovieController.java": [
+      {
+        "kind": "refactor_inject_dependency",
+        "general_idea": "Replace field injection with constructor injection for FavoriteMovieService to improve testability and adhere to modern Spring best practices.",
+        "human_impl": "private final FavoriteMovieService favoriteService; public FavoriteMovieController(FavoriteMovieService favoriteService) { this.favoriteService = favoriteService; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_auth_extraction",
+        "general_idea": "Extract Authentication object from method parameters instead of accessing SecurityContextHolder directly to decouple controller from security context implementation.",
+        "human_impl": "public ResponseEntity<FavoriteStatusResponse> toggleFavoriteMovie(@RequestParam String movieId, Authentication authentication) { String email = authentication.getName(); ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_response_typing",
+        "general_idea": "Replace generic ResponseEntity<String> or ResponseEntity<?> with specific typed DTOs (FavoriteStatusResponse, ApiResponse) for better API contract clarity.",
+        "human_impl": "return ResponseEntity.ok(new FavoriteStatusResponse(movieId, newStatus));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "feature_batch_endpoint",
+        "general_idea": "Add a new batch endpoint to check favorite status for multiple movies in a single request to optimize client-side performance.",
+        "human_impl": "@GetMapping(\"/status/batch\") public ResponseEntity<Map<String, Boolean>> getFavoriteStatusMoviesBatch(@RequestParam List<String> movieIds, Authentication authentication) { ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_response_structure",
+        "general_idea": "Standardize the response structure for the list endpoint using a generic ApiResponse DTO instead of ad-hoc Map construction.",
+        "human_impl": "return ResponseEntity.ok(new ApiResponse<>(message, favorites));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "cleanup_imports",
+        "general_idea": "Remove unused imports (Logger, LoggerFactory, SecurityContextHolder) and organize remaining imports.",
+        "human_impl": "Removed: import org.slf4j.Logger; import org.slf4j.LoggerFactory; import org.springframework.security.core.context.SecurityContextHolder;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "cleanup_logging",
+        "general_idea": "Remove explicit logger instance and logging statements from the controller, likely delegating logging to the service layer or removing verbose debug logs.",
+        "human_impl": "Removed: private static final Logger logger = ...; logger.info(...);",
+        "bucket": "polishment"
+      }
+    ],
+    "lmsfavorite/src/main/java/com/lucasm/lmsfavorite/controller/FavoriteSerieController.java": [
+      {
+        "kind": "refactor_injection",
+        "general_idea": "Replace field-based @Autowired injection with constructor injection to improve testability and adhere to modern Spring best practices.",
+        "human_impl": "private final FavoriteSerieService favoriteService; public FavoriteSerieController(FavoriteSerieService favoriteService) { this.favoriteService = favoriteService; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_auth_injection",
+        "general_idea": "Inject Authentication object via method parameter instead of accessing SecurityContextHolder statically to decouple from thread-local state.",
+        "human_impl": "public ResponseEntity<FavoriteSerieStatusResponse> toggleFavoriteSerie(@RequestParam String serieId, Authentication authentication)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_response_type",
+        "general_idea": "Change toggle endpoint return type from generic String to specific FavoriteSerieStatusResponse DTO for structured data.",
+        "human_impl": "return ResponseEntity.ok(new FavoriteSerieStatusResponse(serieId, newStatus));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_batch_endpoint",
+        "general_idea": "Add new batch endpoint to check favorite status for multiple series IDs in a single request.",
+        "human_impl": "@GetMapping(\"/status/batch\") public ResponseEntity<Map<String, Boolean>> getFavoriteStatusSeriesBatch(@RequestParam List<String> serieIds, Authentication authentication)",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_response_type",
+        "general_idea": "Change list endpoint return type from generic Map to specific ApiResponse<List<FavoriteSerie>> DTO for consistent API structure.",
+        "human_impl": "return ResponseEntity.ok(new ApiResponse<>(message, favorites));",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_message_content",
+        "general_idea": "Correct the success message in the list endpoint to refer to 'series' instead of 'movies' (filmes).",
+        "human_impl": "String message = favorites.isEmpty() ? \"Nenhuma s\u00e9rie favoritada encontrada\" : \"S\u00e9ries favoritadas encontradas\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove unused import for org.slf4j.Logger and LoggerFactory as logging was removed.",
+        "human_impl": "Removed import org.slf4j.Logger; import org.slf4j.LoggerFactory;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_import",
+        "general_idea": "Remove unused import for org.springframework.security.core.context.SecurityContextHolder as authentication is now injected.",
+        "human_impl": "Removed import org.springframework.security.core.context.SecurityContextHolder;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_javadoc",
+        "general_idea": "Add Javadoc comments to the class and all public methods to improve documentation.",
+        "human_impl": "/** * Exp\u00f5e endpoints de gerenciamento de s\u00e9ries favoritas do usu\u00e1rio autenticado. */",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}
