@@ -27,6 +27,10 @@ CRITICAL RULES:
    compatible with the old JDK, restructuring, doc/test modernisation that wasn't required to compile.
 4) Default to polishment when in doubt.
 5) Skip pure whitespace/comment-only changes unless they signal real intent.
+6) If the file is auto-generated (e.g. lockfiles like package-lock.json/yarn.lock/poetry.lock,
+   generated docs, build caches), emit ZERO intents — it reflects tooling state, not human intent.
+7) Incidental changes bundled into the same commit window (rebrandings, env-var additions,
+   doc rewrites unrelated to the JDK move) are polishment, never breaking.
 
 Output ONLY a JSON array. No prose, no markdown."""
 
