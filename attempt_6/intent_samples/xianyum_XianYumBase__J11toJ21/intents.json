@@ -1,0 +1,369 @@
+{
+  "meta": {
+    "repo": "xianyum/XianYumBase",
+    "stage": "J11->J21",
+    "family": "spring-boot-2",
+    "sha_from": "d5439c0ea08e0fcd1a99473855d4123ddd072bc3",
+    "sha_to": "cfd7fededcc45e23eb338d50b6b9b50ee6c7c84e"
+  },
+  "by_file": {
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/config/IpConfig.java": [
+      {
+        "kind": "refactor_ip_searcher_class",
+        "general_idea": "Replace the custom IpDbSearcher implementation with the standard ip2region IpSearcher class to leverage official library features.",
+        "human_impl": "import cn.xianyum.common.utils.ip.IpSearcher; ... public IpSearcher loadIpConfig()",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_auto_download_logic",
+        "general_idea": "Remove the automatic downloading of the IP database from a remote URL, requiring the file to be present locally instead.",
+        "human_impl": "// FileUtils.copyByUrl(DOWNLOAD_DB_URL,dbFilePath); throw new SoException(\"...put ip2region.xdb file...\");",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "optimize_vector_index_caching",
+        "general_idea": "Implement pre-loading of VectorIndex into memory to reduce IO operations during IP lookups, a feature specific to the new searcher API.",
+        "human_impl": "byte[] vIndex = IpSearcher.loadVectorIndexFromFile(dbFilePath); IpSearcher.newWithVectorIndex(dbFilePath, vIndex);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_config_property",
+        "general_idea": "Rename the configuration property for the database path from 'dbFile' to 'dbFilePath' for clarity.",
+        "human_impl": "@Value(\"${ip.db.path:xxxxxx}\") private String dbFilePath;",
+        "bucket": "polishment"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/config/XianYumConfig.java": [
+      {
+        "kind": "refactor_config_source",
+        "general_idea": "Migrate configuration loading from Spring Boot properties binding to a custom static method retrieving data from a system constant utility.",
+        "human_impl": "Removed @Component and @ConfigurationProperties; added static getXianYumConfig() using SystemConstantUtils.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "modernize_lombok",
+        "general_idea": "Replace manual getter and setter methods with the Lombok @Data annotation to reduce boilerplate code.",
+        "human_impl": "Added @Data annotation and removed explicit getAvatarUrl, setAvatarUrl, getName, setName, getVersion, setVersion methods.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_static_field_access",
+        "general_idea": "Change the 'profile' field from static to instance variable to align with the new non-static configuration retrieval pattern.",
+        "human_impl": "Changed 'private static String profile' to 'private String profile' and updated static methods to use getXianYumConfig().getProfile().",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_config_field",
+        "general_idea": "Add a new 'webUrl' field to the configuration class to support storing the homepage address.",
+        "human_impl": "Added 'private String webUrl;' field with comment '\u9996\u9875\u5730\u5740'.",
+        "bucket": "polishment"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/enums/LoginTypeEnum.java": [
+      {
+        "kind": "add_enum_constant",
+        "general_idea": "Added a new 'XIAN_YU' login type to support the Xianyu client.",
+        "human_impl": "XIAN_YU(\"3\",\"\u54b8\u9c7c\u5ba2\u6237\u7aef\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_enum_field",
+        "general_idea": "Added a 'desc' field to store human-readable descriptions for login types.",
+        "human_impl": "private String desc;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_field_type",
+        "general_idea": "Changed the login type identifier from Integer to String to support alphanumeric codes.",
+        "human_impl": "private String loginType;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_method",
+        "general_idea": "Renamed getLoginType to getAccountType to better reflect the return value semantics.",
+        "human_impl": "public String getAccountType() { return loginType; }",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_method",
+        "general_idea": "Removed the setter method for the login type, enforcing immutability of the enum constant.",
+        "human_impl": "removed setLoginType",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_utility_method",
+        "general_idea": "Added a static lookup method to retrieve enum instances by their string code using Streams.",
+        "human_impl": "public static LoginTypeEnum getLoginTypeEnum(String loginType) { ... Arrays.stream ... }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_import",
+        "general_idea": "Added imports for Arrays and Optional to support the new stream-based lookup logic.",
+        "human_impl": "import java.util.Arrays; import java.util.Optional;",
+        "bucket": "polishment"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/exception/SoException.java": [
+      {
+        "kind": "extract_magic_number",
+        "general_idea": "Replace hardcoded HTTP status code 500 with a named constant for better maintainability.",
+        "human_impl": "private int code = Constants.SERVER_ERROR_STATUS_CODE;",
+        "bucket": "polishment"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/BeanUtils.java": [],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/DateUtils.java": [
+      {
+        "kind": "add_constant",
+        "general_idea": "Add TIME_PATTERN constant for HH:mm:ss formatting.",
+        "human_impl": "public final static String TIME_PATTERN = \"HH:mm:ss\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constant",
+        "general_idea": "Add START_DATE_PATTERN constant for start of day formatting.",
+        "human_impl": "public final static String START_DATE_PATTERN = DATE_PATTERN +\" 00:00:00\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constant",
+        "general_idea": "Add END_DATE_PATTERN constant for end of day formatting.",
+        "human_impl": "public final static String END_DATE_PATTERN = DATE_PATTERN +\" 23:59:59\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constant",
+        "general_idea": "Add YYYY_MM constant for year-month formatting.",
+        "human_impl": "public final static String YYYY_MM = \"yyyy-MM\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_constant",
+        "general_idea": "Add YYYY constant for year formatting.",
+        "human_impl": "public final static String YYYY = \"yyyy\";",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method",
+        "general_idea": "Add overloaded stringToDate method with default pattern.",
+        "human_impl": "public static Date stringToDate(String strDate) { return stringToDate(strDate,DATE_TIME_PATTERN); }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_formatting",
+        "general_idea": "Fix brace placement in getDatePoor method signature.",
+        "human_impl": "public static String getDatePoor(Date endDate, Date nowDate) {",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method",
+        "general_idea": "Add getDatePoor method to convert seconds to human-readable duration.",
+        "human_impl": "public static String getDatePoor(Long second) { ... return hours + \"\u5c0f\u65f6\" + minutes + \"\u5206\" + remainingSeconds + \"\u79d2\"; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method",
+        "general_idea": "Add minusDate method to generate list of past dates.",
+        "human_impl": "public static List<String> minusDate(Date date, String pattern, int day) { ... return dateStrs; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method",
+        "general_idea": "Add checkNowBetweenTime method to check if current time is within a range.",
+        "human_impl": "public static boolean checkNowBetweenTime(Date limitSendStartTime, Date limitSendEndTime) { ... return true/false; }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_method",
+        "general_idea": "Add isWeek method to check if current day is weekend.",
+        "human_impl": "public static boolean isWeek(){ ... return (dayOfWeek == 6 || dayOfWeek == 7); }",
+        "bucket": "polishment"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/DesUtils.java": [],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/FileUtils.java": [
+      {
+        "kind": "refactor_config_access",
+        "general_idea": "Update static configuration access to use an instance-based getter method instead of a static method.",
+        "human_impl": "XianYumConfig.getXianYumConfig().getProfile()",
+        "bucket": "breaking"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/HttpContextUtils.java": [
+      {
+        "kind": "header_name_change",
+        "general_idea": "Changed the HTTP header name for token retrieval from 'token' to 'Authorization' to align with standard OAuth2 practices.",
+        "human_impl": "httpRequest.getHeader(\"Authorization\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "param_name_change",
+        "general_idea": "Changed the query parameter name for token retrieval from 'token' to 'access_token' to align with standard OAuth2 practices.",
+        "human_impl": "httpRequest.getParameter(\"access_token\")",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "bearer_prefix_stripping",
+        "general_idea": "Added logic to strip the 'Bearer ' prefix from the token string if present, ensuring the raw token is returned.",
+        "human_impl": "token.replace(\"Bearer \",\"\")",
+        "bucket": "polishment"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/HttpUtils.java": [
+      {
+        "kind": "dependency_migration",
+        "general_idea": "Migrate HTTP client library from com.ejlchina.okhttps to cn.zhxu.okhttps to align with JDK 21 ecosystem or library updates.",
+        "human_impl": "import cn.zhxu.okhttps.HTTP;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "json_library_upgrade",
+        "general_idea": "Switch message converter from Fastjson1 to Fastjson2 to support modern JSON processing standards.",
+        "human_impl": "new Fastjson2MsgConvertor()",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "concurrency_fix",
+        "general_idea": "Implement double-checked locking pattern to ensure thread-safe singleton initialization without performance penalty.",
+        "human_impl": "synchronized (HttpUtils.class){ if(null == http){ ... } }",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "timeout_configuration",
+        "general_idea": "Increase HTTP connection, write, and read timeouts from 1 second to 10 seconds to prevent premature failures.",
+        "human_impl": "builder.connectTimeout(10, TimeUnit.SECONDS);",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "request_interceptor",
+        "general_idea": "Add an OkHttp interceptor to automatically inject a User-Agent header into all outgoing requests.",
+        "human_impl": "builder.addInterceptor(chain -> { ... .addHeader(Constants.USER_AGENT_KEY, Constants.USER_AGENT_VALUE) ... });",
+        "bucket": "polishment"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/IPUtils.java": [
+      {
+        "kind": "refactor_ip_lookup",
+        "general_idea": "Replace the old Spring-based IP service with a new IpSearcher configuration bean to handle IP geolocation.",
+        "human_impl": "Replaced `SpringUtils.getBean(IpService.class).getIpInfo(ip)` with `SpringUtils.getBean(\"ipSearcherConfig\").search(ip)` and added parsing logic for the pipe-delimited result.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for the new IpSearcher utility class used in the refactored IP lookup.",
+        "human_impl": "Added `import cn.xianyum.common.utils.ip.IpSearcher;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for the custom SoException class used in the new error handling.",
+        "human_impl": "Added `import cn.xianyum.common.exception.SoException;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for HashMap to support the new Map return type in IP info methods.",
+        "human_impl": "Added `import java.util.HashMap;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for Map interface to support the new return type.",
+        "human_impl": "Added `import java.util.Map;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency_import",
+        "general_idea": "Add import for Objects utility to handle null checks in IP data parsing.",
+        "human_impl": "Added `import java.util.Objects;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_dependency_import",
+        "general_idea": "Remove import for the deprecated IpInfoEntity class.",
+        "human_impl": "Removed `import cn.xianyum.common.entity.IpInfoEntity;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_dependency_import",
+        "general_idea": "Remove import for the deprecated IpService interface.",
+        "human_impl": "Removed `import cn.xianyum.common.service.IpService;`.",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "code_style_cleanup",
+        "general_idea": "Standardize code formatting by removing excessive whitespace and aligning braces.",
+        "human_impl": "Removed empty lines at the top of the file and adjusted brace placement in if/switch statements.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_style_cleanup",
+        "general_idea": "Fix spacing around operators and assignments for better readability.",
+        "human_impl": "Added spaces around `=`, `==`, `!=`, and other operators (e.g., `ip = inet.getHostAddress()`).",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_style_cleanup",
+        "general_idea": "Standardize Javadoc formatting by removing extra indentation.",
+        "human_impl": "Aligned `@param` and `@return` tags in Javadoc comments.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "code_style_cleanup",
+        "general_idea": "Add missing closing braces for if-statements to comply with standard coding conventions.",
+        "human_impl": "Added `{` and `}` around single-line if bodies (e.g., `if (p.length != 4) { return 0; }`).",
+        "bucket": "polishment"
+      }
+    ],
+    "XianYumApi/xianyum-common/src/main/java/cn/xianyum/common/utils/MD5Utils.java": [
+      {
+        "kind": "remove_unused_method",
+        "general_idea": "Removed the unused `stringToMD5` method to clean up the utility class.",
+        "human_impl": "Deleted the entire `stringToMD5` method definition.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_method",
+        "general_idea": "Removed the unused `getPassword` method which performed iterative hashing.",
+        "human_impl": "Deleted the `getPassword` method definition.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_code",
+        "general_idea": "Removed the `main` method used for local testing.",
+        "human_impl": "Deleted the `main` method containing `System.out.println`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_explicit_charset",
+        "general_idea": "Replaced implicit platform-dependent charset in `getBytes()` with explicit `StandardCharsets.UTF_8` for portability.",
+        "human_impl": "Changed `content.getBytes()` to `content.getBytes(StandardCharsets.UTF_8)` in the new overloaded method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_overloaded_method",
+        "general_idea": "Added a new `getMd5` overload that accepts a secret string for HMAC-like signing.",
+        "human_impl": "Added `public static String getMd5(String content, String secret)` method.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "modernize_hex_encoding",
+        "general_idea": "Replaced manual BigInteger hex conversion with StringBuilder and String.format for cleaner hex encoding in the new method.",
+        "human_impl": "Used `StringBuilder` and `String.format(\"%02x\", b)` instead of `BigInteger`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_exception_handling",
+        "general_idea": "Changed the exception type thrown in the new method to a custom `SoException`.",
+        "human_impl": "Caught `Exception` and threw `new SoException(\"sign md5 error.\")`.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_whitespace",
+        "general_idea": "Added missing space in substring arguments for code style consistency.",
+        "human_impl": "Changed `substring(8,24)` to `substring(8, 24)`.",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

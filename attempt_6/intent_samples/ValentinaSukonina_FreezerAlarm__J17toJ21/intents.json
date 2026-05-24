@@ -1,0 +1,213 @@
+{
+  "meta": {
+    "repo": "ValentinaSukonina/FreezerAlarm",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "a498ed23cf8d73363929ba437e4896ad636fb82b",
+    "sha_to": "e510af5db370771c103c10fc7725267bc811d2dc"
+  },
+  "by_file": {
+    "backend/pom.xml": [
+      {
+        "kind": "jdk_version_bump",
+        "general_idea": "Update the project's target Java version from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_validation_dependency",
+        "general_idea": "Add Spring Boot Starter Validation to enable Bean Validation annotations in the application.",
+        "human_impl": "<artifactId>spring-boot-starter-validation</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_devtools_dependency",
+        "general_idea": "Add Spring Boot DevTools to enable automatic restarts and live reload during development.",
+        "human_impl": "<artifactId>spring-boot-devtools</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_docker_compose_dependency",
+        "general_idea": "Add Spring Boot Docker Compose support to manage containerized services during development.",
+        "human_impl": "<artifactId>spring-boot-docker-compose</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_h2_database_dependency",
+        "general_idea": "Add H2 in-memory database dependency for testing or development purposes.",
+        "human_impl": "<artifactId>h2</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_testcontainers_dependency",
+        "general_idea": "Add Testcontainers core library to support container-based integration testing.",
+        "human_impl": "<artifactId>testcontainers</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_testcontainers_mysql_dependency",
+        "general_idea": "Add Testcontainers MySQL module to support MySQL-specific integration tests.",
+        "human_impl": "<artifactId>mysql</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_surefire_plugin",
+        "general_idea": "Add Maven Surefire plugin with explicit version and test inclusion patterns to ensure tests run correctly.",
+        "human_impl": "<artifactId>maven-surefire-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_jacoco_version",
+        "general_idea": "Update JaCoCo plugin version to 0.8.12 to ensure compatibility with newer JDKs and features.",
+        "human_impl": "<version>0.8.12</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_jacoco_phase",
+        "general_idea": "Change JaCoCo report generation phase from verify to prepare-package for earlier feedback.",
+        "human_impl": "<phase>prepare-package</phase>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "update_compiler_plugin",
+        "general_idea": "Update Maven Compiler plugin to version 3.13.0 and remove explicit source/target configuration to rely on defaults.",
+        "human_impl": "<artifactId>maven-compiler-plugin</artifactId> <version>3.13.0</version>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_hibernate_enhance_plugin",
+        "general_idea": "Add Hibernate Enhance Maven plugin to enable bytecode enhancements for lazy initialization and dirty tracking.",
+        "human_impl": "<artifactId>hibernate-enhance-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "exclude_lombok_from_repackage",
+        "general_idea": "Configure Spring Boot Maven plugin to exclude Lombok from the repackaged jar to avoid unnecessary bloat.",
+        "human_impl": "<exclude> <groupId>org.projectlombok</groupId> <artifactId>lombok</artifactId> </exclude>",
+        "bucket": "polishment"
+      }
+    ],
+    ".github/workflows/maven.yml": [
+      {
+        "kind": "jdk_version_downgrade",
+        "general_idea": "Changed the CI environment to use JDK 21 instead of JDK 23 to align with the target runtime.",
+        "human_impl": "java-version: '21'",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "skip_tests_in_ci",
+        "general_idea": "Configured the Maven build step to skip test execution to speed up the pipeline or avoid test failures.",
+        "human_impl": "mvn -B clean package -DskipTests",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "add_backup_file_ignore",
+        "general_idea": "Add pattern to ignore editor backup files ending with tilde.",
+        "human_impl": "*~",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/compose.yaml": [
+      {
+        "kind": "pin_mysql_version",
+        "general_idea": "Pinned the MySQL Docker image to a specific version (8.3.0) instead of using 'latest' for reproducibility.",
+        "human_impl": "image: 'mysql:8.3.0'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_container_name",
+        "general_idea": "Added an explicit container name for easier identification and management.",
+        "human_impl": "container_name: mysql_db",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "externalize_db_credentials",
+        "general_idea": "Replaced hardcoded database credentials with environment variable references to improve security.",
+        "human_impl": "MYSQL_DATABASE: ${DB_NAME}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "fix_port_mapping",
+        "general_idea": "Corrected the port mapping syntax to explicitly map the host port to the container port.",
+        "human_impl": "- '3306:3306'",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "set_auth_plugin",
+        "general_idea": "Configured MySQL to use the native password authentication plugin, often required for compatibility with older clients or specific drivers.",
+        "human_impl": "command: --default-authentication-plugin=mysql_native_password",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_healthcheck",
+        "general_idea": "Added a health check to monitor the MySQL service status for orchestration purposes.",
+        "human_impl": "healthcheck: test: [\"CMD-SHELL\", \"mysqladmin ping -h localhost || exit 1\"]",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_network",
+        "general_idea": "Defined and attached a custom bridge network for the service to isolate traffic.",
+        "human_impl": "networks: - backend-network",
+        "bucket": "polishment"
+      }
+    ],
+    "backend/src/main/resources/application.properties": [
+      {
+        "kind": "disable_banner",
+        "general_idea": "Disable the Spring Boot startup banner to reduce console noise.",
+        "human_impl": "spring.main.banner-mode=off",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_jpa_ddl",
+        "general_idea": "Enable automatic Hibernate schema update on startup.",
+        "human_impl": "spring.jpa.hibernate.ddl-auto=update",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_oauth_config",
+        "general_idea": "Remove commented-out OAuth2 client configuration for Google.",
+        "human_impl": "Removed lines starting with //spring.security.oauth2...",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_tmdb_config",
+        "general_idea": "Remove commented-out TMDB access token configuration.",
+        "human_impl": "Removed line //tmdb.access.token=${ACCESS_TOKEN:defaultAccessToken}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_mysql_driver",
+        "general_idea": "Specify the MySQL JDBC driver class for the datasource.",
+        "human_impl": "spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_db_credentials",
+        "general_idea": "Configure database username and password using environment variables.",
+        "human_impl": "spring.datasource.username=${DB_USER}\nspring.datasource.password=${DB_PASSWORD}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_db_url",
+        "general_idea": "Configure the database connection URL using an environment variable.",
+        "human_impl": "spring.datasource.url=${DB_URL}",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_sql_logging",
+        "general_idea": "Enable logging of executed SQL statements for debugging.",
+        "human_impl": "spring.jpa.show-sql= true",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "enable_jpa_ddl_generation",
+        "general_idea": "Explicitly enable JPA DDL generation.",
+        "human_impl": "spring.jpa.generate-ddl=true",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}

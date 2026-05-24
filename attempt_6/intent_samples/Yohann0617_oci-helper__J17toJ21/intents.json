@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "repo": "Yohann0617/oci-helper",
+    "stage": "J17->J21",
+    "family": "spring-boot-2",
+    "sha_from": "5051ef40df6be06518fda257dfe4efa7526a0160",
+    "sha_to": "21bfc4a6477e734c9161205c55cd7a9b31f37112"
+  },
+  "by_file": {
+    "src/main/java/com/yohann/ocihelper/bean/constant/CacheConstant.java": [
+      {
+        "kind": "add_cache_prefix_constant",
+        "general_idea": "Add new cache key prefix constants for tenant region and compartment ID to support new caching logic.",
+        "human_impl": "public static final String PREFIX_TENANT_REGION = \"tenant_region_\";\npublic static final String PREFIX_TENANT_COMPARTMENT_ID = \"tenant_compartment_id_\";",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/dto/InstanceDetailDTO.java": [
+      {
+        "kind": "add_field",
+        "general_idea": "Add a new boolean field to the DTO to track the absence of a public VCN.",
+        "human_impl": "private boolean isNoPubVcn = false;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/dto/SysUserDTO.java": [
+      {
+        "kind": "add_field",
+        "general_idea": "Add compartmentId field to the nested configuration class to support OCI compartment identification.",
+        "human_impl": "private String compartmentId;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/entity/OciCreateTask.java": [
+      {
+        "kind": "add_field",
+        "general_idea": "Add a new field to store the OCI region associated with the creation task.",
+        "human_impl": "private String ociRegion;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/params/IdListParams.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotEmpty;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/params/IdParams.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/params/cf/AddCfCfgParams.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation import with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/params/cf/OciAddCfDnsRecordsParams.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.Min;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "primitive_type_conversion",
+        "general_idea": "Change the proxied field from Boolean wrapper to boolean primitive to simplify usage or enforce non-null semantics.",
+        "human_impl": "private boolean proxied;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "validation_constraint_removal",
+        "general_idea": "Remove validation annotations for prefix, proxied, and ttl fields, likely because they are now handled differently or made optional.",
+        "human_impl": "//    @NotBlank(message = \"\u57df\u540d\u524d\u7f00\u4e0d\u80fd\u4e3a\u7a7a\")",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/params/cf/OciRemoveCfDnsRecordsParams.java": [
+      {
+        "kind": "javax_to_jakarta_migration",
+        "general_idea": "Replace javax.validation import with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotEmpty;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/params/cf/OciUpdateCfDnsRecordsParams.java": [
+      {
+        "kind": "migrate_validation_imports",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to comply with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.Min;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "rename_field",
+        "general_idea": "Rename the 'name' field to 'prefix' to better reflect its semantic meaning as a domain prefix.",
+        "human_impl": "private String prefix;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_validation_constraint",
+        "general_idea": "Remove the @NotBlank validation constraint from the renamed 'prefix' field.",
+        "human_impl": "//    @NotBlank(message = \"\u57df\u540d\u524d\u7f00\u4e0d\u80fd\u4e3a\u7a7a\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "change_field_type",
+        "general_idea": "Change the 'proxied' field from Boolean object to primitive boolean to simplify usage.",
+        "human_impl": "private boolean proxied;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_validation_constraint",
+        "general_idea": "Remove the @NotNull validation constraint from the 'proxied' field.",
+        "human_impl": "//    @NotNull(message = \"\u662f\u5426\u4ee3\u7406\u4e0d\u80fd\u4e3a\u7a7a\")",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_validation_constraint",
+        "general_idea": "Remove the @NotNull and @Min validation constraints from the 'ttl' field.",
+        "human_impl": "//    @NotNull(message = \"ttl\u4e0d\u80fd\u4e3a\u7a7a\")\n//    @Min(value = 60)",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/params/oci/cfg/AddCfgParams.java": [
+      {
+        "kind": "migrate_validation_imports",
+        "general_idea": "Replace javax.validation imports with jakarta.validation to align with Jakarta EE 9+ namespace requirements in Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ],
+    "src/main/java/com/yohann/ocihelper/bean/params/oci/cfg/GetOciCfgDetailsParams.java": [
+      {
+        "kind": "javax_to_jakarta_namespace_migration",
+        "general_idea": "Migrate validation annotation import from javax.validation to jakarta.validation to comply with Jakarta EE 9+ standards required by Spring Boot 3.",
+        "human_impl": "import jakarta.validation.constraints.NotBlank;",
+        "bucket": "breaking"
+      }
+    ]
+  }
+}

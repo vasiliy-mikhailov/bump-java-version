@@ -1,0 +1,273 @@
+{
+  "meta": {
+    "repo": "Advancedboy/ident-lite",
+    "stage": "J17->J21",
+    "family": null,
+    "sha_from": "ac478abaac8b7faec4d1c8b1eb2a402d576d4f5b",
+    "sha_to": "551a8925726950a6b192a1ba70e1e7e334a0fe2f"
+  },
+  "by_file": {
+    "src/main/java/com/identlite/IdentliteApplication.java": [
+      {
+        "kind": "enable_async_support",
+        "general_idea": "Enable Spring's asynchronous method execution support by adding the @EnableAsync annotation.",
+        "human_impl": "@EnableAsync",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_modelmapper_import",
+        "general_idea": "Remove the unused import for org.modelmapper.ModelMapper to clean up the code.",
+        "human_impl": "-import org.modelmapper.ModelMapper;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_bean_import",
+        "general_idea": "Remove the unused import for org.springframework.context.annotation.Bean to clean up the code.",
+        "human_impl": "-import org.springframework.context.annotation.Bean;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/identlite/api/dto/BookingDto.java": [
+      {
+        "kind": "remove_lombok_annotations",
+        "general_idea": "Removed @NoArgsConstructor and @AllArgsConstructor annotations to simplify the DTO structure.",
+        "human_impl": "Removed @NoArgsConstructor and @AllArgsConstructor from class declaration.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_jackson_annotations",
+        "general_idea": "Removed Jackson-specific annotations like @JsonFormat and @JsonBackReference to decouple DTO from serialization logic.",
+        "human_impl": "Removed @JsonFormat and @JsonBackReference annotations and their imports.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "refactor_field_names",
+        "general_idea": "Renamed date fields from checkInDate/checkOutDate to startDate/endDate for clearer semantic meaning.",
+        "human_impl": "Replaced 'checkInDate' and 'checkOutDate' with 'startDate' and 'endDate'.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "simplify_associations",
+        "general_idea": "Replaced complex entity references (RoomDto, UserDto) with a single HotelDto reference to simplify the booking model.",
+        "human_impl": "Removed 'room' and 'user' fields and added 'hotel' field.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_id_field",
+        "general_idea": "Removed the explicit ID field from the DTO, likely delegating identification to the referenced HotelDto or handling it at a different layer.",
+        "human_impl": "Removed 'private Long id;' field.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/identlite/api/dto/HotelDto.java": [
+      {
+        "kind": "remove_lombok_annotations",
+        "general_idea": "Removed @NoArgsConstructor, @AllArgsConstructor, and @Builder annotations to simplify the DTO structure.",
+        "human_impl": "-@NoArgsConstructor\n-@AllArgsConstructor\n-@Builder",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_unused_imports",
+        "general_idea": "Cleaned up imports for List, Set, and removed Lombok annotations that are no longer used.",
+        "human_impl": "-import java.util.List;\n-import java.util.Set;\n-import lombok.AllArgsConstructor;\n-import lombok.Builder;\n-import lombok.NoArgsConstructor;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_field",
+        "general_idea": "Added a new 'city' field to the HotelDto to capture location data.",
+        "human_impl": "+    private String city;",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "remove_nested_dto_fields",
+        "general_idea": "Removed references to RoomDto and AmenityDto collections to decouple the HotelDto from nested entities.",
+        "human_impl": "-    private List<RoomDto> rooms;\n-    private Set<AmenityDto> amenities;",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/java/com/identlite/api/dto/UserDto.java": [
+      {
+        "kind": "remove_lombok_annotations",
+        "general_idea": "Removed Lombok @Data, @NoArgsConstructor, and @AllArgsConstructor annotations to replace them with explicit Java code.",
+        "human_impl": "Removed imports for lombok.Data, lombok.NoArgsConstructor, lombok.AllArgsConstructor and their annotations from the class.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_explicit_constructor",
+        "general_idea": "Added explicit no-args and all-args constructors to replace the functionality previously provided by Lombok.",
+        "human_impl": "Added public UserDto() and public UserDto(Long id, String name, String email) methods with field assignments.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "rename_field",
+        "general_idea": "Renamed the 'username' field to 'name' to better reflect the data it holds.",
+        "human_impl": "Changed private String username; to private String name;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_field",
+        "general_idea": "Removed the 'password' field from the DTO, likely moving it to a separate authentication DTO or handling it differently.",
+        "human_impl": "Deleted the line: @JsonIgnore public String password;",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "remove_jackson_annotations",
+        "general_idea": "Removed Jackson annotations @JsonIgnore and @JsonManagedReference as they are no longer needed for the removed or modified fields.",
+        "human_impl": "Removed imports for com.fasterxml.jackson.annotation.JsonIgnore and com.fasterxml.jackson.annotation.JsonManagedReference.",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "initialize_collection",
+        "general_idea": "Explicitly initialized the bookings list in the constructor to prevent null pointer exceptions.",
+        "human_impl": "Added this.bookings = new ArrayList<>(); inside the all-args constructor.",
+        "bucket": "polishment"
+      }
+    ],
+    "src/test/java/com/identlite/IdentliteApplicationTests.java": [
+      {
+        "kind": "add_assertion_to_test",
+        "general_idea": "Enhance the Spring Boot context loading test by injecting ApplicationContext and asserting it is not null to verify proper initialization.",
+        "human_impl": "Autowired ApplicationContext and added assertNotNull(context) in contextLoads()",
+        "bucket": "polishment"
+      }
+    ],
+    "pom.xml": [
+      {
+        "kind": "jdk_version_bump",
+        "general_idea": "Update the target Java version property from 17 to 21 to align with the migration goal.",
+        "human_impl": "<java.version>21</java.version>",
+        "bucket": "breaking"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add MapStruct library for object mapping.",
+        "human_impl": "<artifactId>mapstruct</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add MapStruct annotation processor for compile-time code generation.",
+        "human_impl": "<artifactId>mapstruct-processor</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Security Crypto module for password encoding and hashing.",
+        "human_impl": "<artifactId>spring-security-crypto</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Security Core module for authentication and authorization support.",
+        "human_impl": "<artifactId>spring-security-core</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Boot Starter Validation for Bean Validation support.",
+        "human_impl": "<artifactId>spring-boot-starter-validation</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Retry library for declarative retry support.",
+        "human_impl": "<artifactId>spring-retry</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add SpringDoc OpenAPI starter for automatic API documentation generation.",
+        "human_impl": "<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Spring Boot Starter AOP for aspect-oriented programming support.",
+        "human_impl": "<artifactId>spring-boot-starter-aop</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Mockito Core for unit testing mocking capabilities.",
+        "human_impl": "<artifactId>mockito-core</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Byte Buddy Agent for runtime bytecode manipulation in tests.",
+        "human_impl": "<artifactId>byte-buddy-agent</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_dependency",
+        "general_idea": "Add Mockito JUnit Jupiter integration for modern JUnit 5 testing.",
+        "human_impl": "<artifactId>mockito-junit-jupiter</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_annotation_processor",
+        "general_idea": "Register MapStruct processor in the Maven compiler plugin to enable annotation processing.",
+        "human_impl": "<path><groupId>org.mapstruct</groupId><artifactId>mapstruct-processor</artifactId></path>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_build_plugin",
+        "general_idea": "Add JaCoCo plugin to measure code coverage during the build process.",
+        "human_impl": "<artifactId>jacoco-maven-plugin</artifactId>",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "configure_test_plugin",
+        "general_idea": "Configure Maven Surefire plugin to explicitly include test classes.",
+        "human_impl": "<artifactId>maven-surefire-plugin</artifactId>",
+        "bucket": "polishment"
+      }
+    ],
+    ".gitignore": [
+      {
+        "kind": "ignore_application_properties",
+        "general_idea": "Exclude the main application properties file from version control to prevent committing environment-specific configurations.",
+        "human_impl": "+/src/main/resources/application.properties",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "ignore_app_log",
+        "general_idea": "Exclude the application log file from version control to avoid tracking runtime-generated data.",
+        "human_impl": "+app.log",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "ignore_html_report",
+        "general_idea": "Exclude the HTML report directory from version control to avoid tracking generated test or coverage reports.",
+        "human_impl": "+htmlReport/",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "ignore_logs_directory",
+        "general_idea": "Exclude the logs directory from version control to avoid tracking runtime-generated log files.",
+        "human_impl": "+logs/",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "ignore_maven_wrapper",
+        "general_idea": "Exclude the Maven wrapper directory from version control, likely to enforce local wrapper usage or clean up repository structure.",
+        "human_impl": "+.mvn/",
+        "bucket": "polishment"
+      }
+    ],
+    "src/main/resources/application.properties": [
+      {
+        "kind": "add_logging_level_config",
+        "general_idea": "Configure logging levels for Spring Web and the application package to control output verbosity.",
+        "human_impl": "logging.level.org.springframework.web=INFO\nlogging.level.com.yourpackage=DEBUG",
+        "bucket": "polishment"
+      },
+      {
+        "kind": "add_logging_pattern_config",
+        "general_idea": "Define custom log patterns for console and file outputs to standardize log formatting.",
+        "human_impl": "logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} - %msg%n\nlogging.pattern.file=%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n",
+        "bucket": "polishment"
+      }
+    ]
+  }
+}
