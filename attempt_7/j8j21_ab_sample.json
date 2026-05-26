@@ -1,0 +1,82 @@
+[
+  {
+    "repo": "VoxNut/MuseMoe",
+    "sha_from": "56b5f58c8f710fc2408b952905f503388d95bc85",
+    "sha_to": "5e87cc01618cc0ff62a4cf74c4279a9581345bec",
+    "i0_status": "FULL_PASS",
+    "i0_pass": true,
+    "sb": "sb_2.7.18"
+  },
+  {
+    "repo": "ministero-salute/it-fse-gtw-validator",
+    "sha_from": "33679e3868a0ab3aa0c542bafc022a3b208a53b2",
+    "sha_to": "45b2e260ddb7debe57f1adf476e643cdaf89f624",
+    "i0_status": "FULL_PASS",
+    "i0_pass": true,
+    "sb": "sb_2.6.6"
+  },
+  {
+    "repo": "ShahidKhan48/All-Application-Codes",
+    "sha_from": "e99ec495182fc2f93c62619c17b8837398bd7cf4",
+    "sha_to": "18fe7f4f18a9e5c437adf03748d911e71af117cc",
+    "i0_status": "FULL_PASS",
+    "i0_pass": true,
+    "sb": "sb_2.7.5"
+  },
+  {
+    "repo": "kunal1601/jenkins-docker-maven-java-webapp",
+    "sha_from": "670219f43294d03356569e8063251622ccb18c2e",
+    "sha_to": "e0f3c2cc34444ec0e621e37d627bfaf6bc1dec7f",
+    "i0_status": "FULL_PASS",
+    "i0_pass": true,
+    "sb": "no_sb"
+  },
+  {
+    "repo": "devak23/java",
+    "sha_from": "a1b3ffa675f7d79a6d4e8b95bb4aeca95abf17fe",
+    "sha_to": "75f5c2b0bf1c056c7cfbf599407447b2c7afd4b1",
+    "i0_status": "FULL_PASS",
+    "i0_pass": true,
+    "sb": "no_sb"
+  },
+  {
+    "repo": "byteD-x/easyCloudPan",
+    "sha_from": "90f95b882817f75d19779630da157d2685f7e6e1",
+    "sha_to": "bfa084c7e403cc713dde72b9c118903360796fb3",
+    "i0_status": "other",
+    "i0_pass": false,
+    "sb": "sb_2.6.1"
+  },
+  {
+    "repo": "cesardl/spring-mongodb-web",
+    "sha_from": "8109bb26421dee2018b5bcc7cd52610d28dd271d",
+    "sha_to": "96d7342fab9171b6043d473d21d042ed7f42fb58",
+    "i0_status": "broke_tests",
+    "i0_pass": false,
+    "sb": "sb_1.5.7.RELEASE"
+  },
+  {
+    "repo": "SSSSycamore/xuecheng",
+    "sha_from": "cb85f0168dab0d9635760484c34be4d244260f77",
+    "sha_to": "5b59ba2d3fcd46654b78594c881aa0b8bf74b83f",
+    "i0_status": "recipe_fail",
+    "i0_pass": false,
+    "sb": "sb_2.3.7.RELEASE"
+  },
+  {
+    "repo": "SkillPanel/friendly-id",
+    "sha_from": "87ef6621539e33e7e5a6c0296b7508bdea14a7b3",
+    "sha_to": "fbf8c1c6dcd1236af4a7c12a5e5c478f9ad74786",
+    "i0_status": "broke_tests",
+    "i0_pass": false,
+    "sb": "no_sb"
+  },
+  {
+    "repo": "skjolber/gtfs-databinding",
+    "sha_from": "9bcafa8818c80de5e3697768acd8759af113ab19",
+    "sha_to": "5ea7680a6bf47ffa8182718d75ebe11cc4fdd9c4",
+    "i0_status": "recipe_fail",
+    "i0_pass": false,
+    "sb": "no_sb"
+  }
+]

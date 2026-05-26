@@ -1,0 +1,245 @@
+[
+  {
+    "repo": "sayyadhasan/boot-demo1",
+    "sha_from": "415829ab224a489552dddbcbd95c2ec40c07de09",
+    "sha_to": "cc693f9306776da9e954609d7e623f8527c4ac2b",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "keepid/keepid_server",
+    "sha_from": "5ee7081b79debc07a43d0fae0c0f268b1fa48b34",
+    "sha_to": "d482e9203832fa82e610741353dabdf944f0fb72",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "cvoiculescu/Informal-School-of-IT",
+    "sha_from": "cd7746866d9495de823b3c54a5582899f6452648",
+    "sha_to": "63048f55519540acc2405d61e0fb54c74b138ee3",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "recipe_fail",
+    "i0_pass": false
+  },
+  {
+    "repo": "Pardus-LiderAhenk/liderapi",
+    "sha_from": "73c56845c1d41e9d37cd111f27a87d0bbdc8a741",
+    "sha_to": "5a96be0a067efc8e32b396fd931a7369dfd1d9b9",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "recipe_fail",
+    "i0_pass": false
+  },
+  {
+    "repo": "hbz/to.science.forms.v2",
+    "sha_from": "a76420127095e20d932b2818660feef88b7eeef7",
+    "sha_to": "d2c7af30445fd95a98d1bb8621defefb366aa9d9",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "ozgen/binance-telegram-bot",
+    "sha_from": "076613e9d0a03a00115ea78fc5db2a083607a912",
+    "sha_to": "23b2ee247155d5ee130753ea7ef8e96b9c4d964d",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "it-at-m/dave-backend",
+    "sha_from": "1128ce0aedea0bf57f04bc2fac03dc36fb69f98e",
+    "sha_to": "f0ab5ed24cf7e73cc12215bd70a8288db31fb13a",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "recipe_fail",
+    "i0_pass": false
+  },
+  {
+    "repo": "Groupe-Key-Consulting/poc-drools",
+    "sha_from": "fc89fccc41b842d6dc51389f8a141614d8783c92",
+    "sha_to": "01f9be5fcd369404a21d3d6777d0ceb9f7f12ab7",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "dmadcham/mercadaw_trabajo_ev3",
+    "sha_from": "ad0603d9e43305bec7f0ca4dd6591da6502b6b32",
+    "sha_to": "f635e3dcaa6d39a17b516dc6f8d537fac6d70fb0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "rslakra/SpringSecurity",
+    "sha_from": "76d774b1a03e40497aea9f59dc5985a793314e28",
+    "sha_to": "3e25466146db5d455cdede77f78f53375634cf22",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "attiand/experiments",
+    "sha_from": "dabd67ee5e4e6277a8d9ddca4d5508c1d6b7aee5",
+    "sha_to": "475ffd6378392d14c565d00acd8e14f243faa8fb",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "recipe_fail",
+    "i0_pass": false
+  },
+  {
+    "repo": "steadybit/extension-gatling",
+    "sha_from": "885fc150da0e4bc0a6d42f4c5eb4ac7c9764fade",
+    "sha_to": "8ac2491cd37e5e8a2cf26396c8c5cb628c19c290",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "Buhle8/microservices",
+    "sha_from": "4434a210fbb8fb1c6bf0759460e6104577942d33",
+    "sha_to": "f770e585b65abe67c4c5960b586aeb725222b6b6",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "Ivinman/java-shareit",
+    "sha_from": "72cdc17f604dc1073ec59669e3ae3a876ada5a38",
+    "sha_to": "f9ec0d2d78b7a9a6c72ff7c0879e6ba07bef5684",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "genesis177/java-explore-with-me",
+    "sha_from": "4cbb792c732ef234e16aa00302b47be154866253",
+    "sha_to": "50a0f43323ff978b3457c18a07651d3523764209",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "66910sheremet/moex-john",
+    "sha_from": "20a76d9c061aa04e6a33ad74875f512b3bd440c2",
+    "sha_to": "a8489002d189b0d61c22190c973fc509306321f7",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "soserdev/shortener-kubernetes",
+    "sha_from": "d19007d96a4ea742eadb6500b505d59c92ce033d",
+    "sha_to": "4b08b854ff3579d342fcf3c787ba1ae3fe4434d7",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "thalysf/tax-challange",
+    "sha_from": "5d1d2aebfb3a7d2ad6d8dbea9ba8bcaf618685b9",
+    "sha_to": "b02ef8215e7f0359db4fb751bf13d04a4dce0547",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "NikosPappas/Java",
+    "sha_from": "34f089d6f70b89103fbee06fdc6e9393cc8cedff",
+    "sha_to": "fd6be82aea166f924489dba7cc71fb50dde2ea48",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "Fotogjengen/hilfling-photo-backend",
+    "sha_from": "aac7fc9065a383c7fd1ce8f5c50ae9097073a0af",
+    "sha_to": "8485d3f075bf923a129a5c3989e9b6add20a36a3",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "recipe_fail",
+    "i0_pass": false
+  },
+  {
+    "repo": "Osireg17/Telemetry-Aware-URL-Shortener",
+    "sha_from": "9a1d3b79662db6fac5e9383ede95210b58bceb1d",
+    "sha_to": "74b79025d9a669c67340456f6ad063392de71b9f",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "HakjunMIN/spring-petclinic-monolith",
+    "sha_from": "18c0830de64882004a3f013944d6d8ffd8dfa619",
+    "sha_to": "d6b35c10de552a0328d50be488a4906754c6d155",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "broke_tests",
+    "i0_pass": false
+  },
+  {
+    "repo": "ACANX/MetaOpen",
+    "sha_from": "03ae1927c7b3b695fff3311ac851d2c9a654b7df",
+    "sha_to": "c0648b7e5bf80444f36e205c83973b843394dfa2",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "stvali2/spring-data-rest",
+    "sha_from": "04b401710e09729251d1c2472c7a8f68e73cee78",
+    "sha_to": "c0273fa0dce9d97e0a7b08ee36a41108b7c2b074",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "ita-social-projects/GreenCityUBS",
+    "sha_from": "569e066f4ab1fe238d372729b4471aca7d485155",
+    "sha_to": "2766c4b0de538d1317fe6552399d22ddb37bf3c6",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "JStec0312/Component_Programing",
+    "sha_from": "314423089e5054dfd7e80f89ae68fa9282ab1cde",
+    "sha_to": "54c705235bd35d99e62ccc05ce1506afd05e7744",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  },
+  {
+    "repo": "Oujiang-Laboratory-Bioinformatics/KMCG",
+    "sha_from": "63919ff167201a7cf7d3a6685266e43f4c041d94",
+    "sha_to": "c04cafc3852f27738c6d4d38e30152e5ef5cdc6f",
+    "jv_from": 11,
+    "jv_to": 21,
+    "i0_status": "FULL_PASS",
+    "i0_pass": true
+  }
+]
