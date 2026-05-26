@@ -1,38 +1,33 @@
-"""attempt_8 dataset builder — per ff #2 contract.
+"""attempt_8 dataset builder — commit-distance variant (per refined ff #2).
 
-For each (repo, jv_from→jv_to=21) stage in the existing lineage dataset, find a
-NEW sha_from that:
-  1. Is roughly one year BEFORE the version-bump commit (sha_to)
-  2. Compiles cleanly under jv_from
-  3. Has a unit-test pass-rate ≥ 0.7 (defaults configurable)
-  4. Has at least 1 passing test (so item 8's test-conservation isn't degenerate)
+For each (repo, jv_from → jv_to=21) stage pulled from the existing lineage corpus:
+  1. Find `next_version_commit` = first commit at the next Java version after jv_from
+     in this repo's lineage (may or may not be jv_to itself).
+  2. Walk back N commits from next_version_commit along --first-parent.
+     This commit is solidly in the jv_from era, past the maintainer's prep window.
+  3. Probe at increasing distances N ∈ {20, 50, 100, 200}. For each candidate:
+       mvn compile under jv_from   (must pass)
+       mvn test under jv_from      (pass-rate must be ≥ min_pass_rate, default 0.7)
+  4. Accept the smallest distance that meets the bar.
 
-We probe candidates spiralling outward from the 365-day target inside a
-configurable window (default ±180 days), one mvn compile + mvn test per probe,
-accepting the first candidate that meets the bar.
+A repo with full lineage J8→J11→J17→J21 contributes THREE stages:
+  (J8→J21)  sha_from = step-back from first_J11_commit
+  (J11→J21) sha_from = step-back from first_J17_commit
+  (J17→J21) sha_from = step-back from first_J21_commit
 
-Output: attempt_8/dataset_yearback.json — JSON list of:
-  {repo, sha_from, sha_to, jv_from, jv_to, days_back_actual,
-   pre_pass_count, pre_fail_count, pass_rate, probes_tried}
+All three share the same sha_to (the J21-bump commit).
 
-Skipped stages are written to attempt_8/dataset_yearback_skipped.json with reason.
+Cache-only commit/SHA discovery via /var/cache/git-mirrors. Probe checkouts use
+shallow_fetch (1 SHA per probe). No full GitHub clones.
 
-Usage:
-  build_yearback_dataset.py [--input <lineage.json>] [--output attempt_8/...]
-                            [--target-days 365] [--window-days 180]
-                            [--min-pass-rate 0.7] [--max-probes 5]
-                            [--workers 6] [--limit N]
-                            [--filter-slug 'pattern*']
+Output: attempt_8/dataset_yearback.json  (selected stages)
+        attempt_8/dataset_yearback_skipped.json  (with reason + probes tried)
 """
-import os, sys, json, time, argparse, subprocess, tempfile, shutil, uuid, threading
-from datetime import datetime
+import os, sys, json, time, argparse, subprocess, tempfile, shutil, threading
 from concurrent.futures import ThreadPoolExecutor
 
-# Reuse machinery from attempt_7
 sys.path.insert(0, "/home/vmihaylov/java_8_11_17_to_java_21/attempt_7/tools")
-from run_sequenced_java import (
-    docker_phase, shallow_fetch, WORK, BASE, ATTEMPT7,
-)
+from run_sequenced_java import docker_phase, shallow_fetch, WORK, BASE
 from test_conservation import parse_surefire_dir, clear_surefire
 
 ATTEMPT8 = f"{BASE}/attempt_8"
@@ -40,18 +35,14 @@ DEFAULT_INPUT = f"{BASE}/attempt_5/lineage_dataset_v4_final.json"
 DEFAULT_OUTPUT = f"{ATTEMPT8}/dataset_yearback.json"
 DEFAULT_SKIPPED = f"{ATTEMPT8}/dataset_yearback_skipped.json"
 DEFAULT_PERSTAGE_DIR = f"{ATTEMPT8}/yearback_probes"
+CACHE_DIR = "/var/cache/git-mirrors"
 
 os.makedirs(ATTEMPT8, exist_ok=True)
 os.makedirs(DEFAULT_PERSTAGE_DIR, exist_ok=True)
 
 
-def git_in(work, *args, timeout=120):
-    r = subprocess.run(["git", "-C", work] + list(args), capture_output=True, timeout=timeout)
-    return r.returncode, r.stdout.decode(errors="replace"), r.stderr.decode(errors="replace")
-
-
 def cache_path(repo):
-    return f"/var/cache/git-mirrors/{repo}.git"
+    return f"{CACHE_DIR}/{repo}.git"
 
 
 def have_cache(repo):
@@ -59,53 +50,31 @@ def have_cache(repo):
     return os.path.isdir(p) and os.path.isfile(os.path.join(p, "HEAD"))
 
 
-def commit_date_iso(repo_or_work, sha):
-    """Read commit date. Works on either a clone path OR the bare cache.
-    The cache is partial-clone (blob:none) so blobs are missing, but commit
-    metadata is present — `git show -s` works fine without lazy-fetching."""
-    arg = repo_or_work if os.path.isdir(repo_or_work) else cache_path(repo_or_work)
-    r = subprocess.run(["git", "-C", arg, "show", "-s", "--format=%cI", sha],
-                       capture_output=True, timeout=15)
-    if r.returncode != 0: return None
-    try: return datetime.fromisoformat(r.stdout.decode().strip().replace("Z", "+00:00"))
-    except Exception: return None
-
-
-def candidates_around(repo, target_dt, window_days, max_candidates=8):
-    """Return commit shas around target_dt from the local mirror cache (no network)."""
-    if not target_dt: return []
-    import datetime as _dt
-    iso_lo = (target_dt - _dt.timedelta(days=window_days)).isoformat()
-    iso_hi = (target_dt + _dt.timedelta(days=window_days)).isoformat()
+def commit_back(repo, anchor_sha, n):
+    """Return the sha that is n commits back from anchor_sha along --first-parent.
+    None if the history isn't long enough."""
     r = subprocess.run(
-        ["git", "-C", cache_path(repo), "log", "--first-parent", "--format=%H %cI",
-         f"--since={iso_lo}", f"--until={iso_hi}", "HEAD"],
-        capture_output=True, timeout=60,
+        ["git", "-C", cache_path(repo), "rev-list", "--first-parent",
+         f"-n", "1", f"--skip={n}", anchor_sha],
+        capture_output=True, timeout=30,
     )
-    if r.returncode != 0: return []
-    rows = []
-    for ln in r.stdout.decode(errors="replace").splitlines():
-        parts = ln.split(" ", 1)
-        if len(parts) != 2: continue
-        sha, iso = parts
-        try: d = datetime.fromisoformat(iso.replace("Z", "+00:00"))
-        except Exception: continue
-        rows.append((sha, d, abs((d - target_dt).total_seconds())))
-    rows.sort(key=lambda r: r[2])
-    return rows[:max_candidates]
+    if r.returncode != 0: return None
+    sha = r.stdout.decode().strip()
+    return sha or None
 
 
-def probe_candidate(repo, sha, jv_from, work_dir=None, timeout_each=900):
-    """Checkout candidate, mvn compile + mvn test under jv_from, return (compile_ok, p_pass, p_fail)."""
+def probe_candidate(repo, sha, jv_from, timeout_each=900):
+    """Shallow-fetch sha, run mvn compile then mvn test under jv_from.
+    Returns (compile_ok, passed_count, failed_count, note)."""
     work = tempfile.mkdtemp(prefix="yb_probe_", dir=WORK)
     rdir = tempfile.mkdtemp(prefix="yb_r_", dir=WORK)
     logs = tempfile.mkdtemp(prefix="yb_l_", dir=WORK)
     try:
-        if not shallow_fetch(repo, sha, work): return (False, 0, 0, "fetch_failed")
-        # compile
+        if not shallow_fetch(repo, sha, work):
+            return (False, 0, 0, "fetch_failed")
         rc_c, _ = docker_phase(work, rdir, logs, "build_pre", jv_from, timeout=timeout_each)
-        if rc_c != 0: return (False, 0, 0, f"compile_rc={rc_c}")
-        # test_pre  (the entry script supports this phase)
+        if rc_c != 0:
+            return (False, 0, 0, f"compile_rc={rc_c}")
         clear_surefire(work)
         rc_t, _ = docker_phase(work, rdir, logs, "test_pre", jv_from, timeout=timeout_each)
         passed, failed = parse_surefire_dir(work)
@@ -115,15 +84,16 @@ def probe_candidate(repo, sha, jv_from, work_dir=None, timeout_each=900):
             shutil.rmtree(d, ignore_errors=True)
 
 
-def best_sha_from(stage, target_days, window_days, min_pass_rate, max_probes):
-    """For one stage: read commit metadata from cache, then shallow_fetch each probe (1 SHA)."""
+def best_sha_from(stage, distances, min_pass_rate):
+    """For one stage, probe candidates at increasing commit-distance back from next_version_commit."""
     repo = stage["repo"]
-    sha_bump = stage["sha_from"]
+    next_version_commit = stage["next_version_commit"]
     jv_from = stage["jv_from"]
     slug = f"{repo.replace('/', '_')}__J{jv_from}toJ{stage['jv_to']}"
     probe_log = f"{DEFAULT_PERSTAGE_DIR}/{slug}.json"
     if os.path.exists(probe_log):
-        return json.load(open(probe_log))
+        prev = json.load(open(probe_log))
+        if prev.get("selected"): return prev
 
     record = {"slug": slug, "stage": stage, "probes": [], "selected": None, "skipped_reason": None}
 
@@ -132,34 +102,16 @@ def best_sha_from(stage, target_days, window_days, min_pass_rate, max_probes):
         json.dump(record, open(probe_log, "w"), indent=2)
         return record
 
-    bump_dt = commit_date_iso(repo, sha_bump)
-    if not bump_dt:
-        record["skipped_reason"] = "bump_date_unknown"
-        json.dump(record, open(probe_log, "w"), indent=2)
-        return record
-    import datetime as _dt
-    target_dt = bump_dt - _dt.timedelta(days=target_days)
-    record["sha_bump"] = sha_bump
-    record["sha_bump_dt"] = bump_dt.isoformat()
-    record["target_dt"] = target_dt.isoformat()
-
-    cands = candidates_around(repo, target_dt, window_days, max_candidates=max_probes * 2)
-    if not cands:
-        record["skipped_reason"] = "no_candidates_in_window"
-        json.dump(record, open(probe_log, "w"), indent=2)
-        return record
-
-    for sha, dt, _delta in cands[:max_probes]:
-        # probe_candidate uses shallow_fetch internally — 1 small SHA pull
-        work = tempfile.mkdtemp(prefix="yb_probe_", dir=WORK)
-        try:
-            compile_ok, p_pass, p_fail, note = probe_candidate(repo, sha, jv_from, work)
-        finally:
-            shutil.rmtree(work, ignore_errors=True)
-        days_back = (bump_dt - dt).days
+    for n in distances:
+        sha = commit_back(repo, next_version_commit, n)
+        if not sha:
+            record["probes"].append({"distance_back": n, "note": "history_too_short"})
+            json.dump(record, open(probe_log, "w"), indent=2)
+            break
+        compile_ok, p_pass, p_fail, note = probe_candidate(repo, sha, jv_from)
         pass_rate = p_pass / max(1, (p_pass + p_fail))
         probe = {
-            "sha": sha, "dt": dt.isoformat(), "days_back": days_back,
+            "distance_back": n, "sha": sha,
             "compile_ok": compile_ok, "pass": p_pass, "fail": p_fail,
             "pass_rate": round(pass_rate, 3), "note": note,
         }
@@ -167,35 +119,45 @@ def best_sha_from(stage, target_days, window_days, min_pass_rate, max_probes):
         json.dump(record, open(probe_log, "w"), indent=2)
         if compile_ok and p_pass >= 1 and pass_rate >= min_pass_rate:
             record["selected"] = {
-                "repo": repo, "sha_from": sha,
-                "sha_to": stage.get("sha_to"),
+                "repo": repo, "sha_from": sha, "sha_to": stage["sha_to"],
                 "jv_from": jv_from, "jv_to": stage["jv_to"],
-                "days_back_actual": days_back,
+                "next_version_commit": next_version_commit,
+                "commits_back": n,
                 "pre_pass_count": p_pass, "pre_fail_count": p_fail,
                 "pass_rate": round(pass_rate, 3),
                 "probes_tried": len(record["probes"]),
             }
             json.dump(record, open(probe_log, "w"), indent=2)
             return record
-
-    record["skipped_reason"] = "no_candidate_met_bar"
+    if record["selected"] is None:
+        record["skipped_reason"] = "no_candidate_met_bar"
     json.dump(record, open(probe_log, "w"), indent=2)
     return record
 
 
 def gather_j21_stages(corpus):
-    """Pull every adjacent (jv_from -> 21) stage out of the corpus."""
+    """Emit ALL (jv_from → J21) stages per repo.
+
+    For each repo whose verified_lineage contains J21, every Java version earlier
+    in the lineage produces a stage. `next_version_commit` for that stage is the
+    commit at the NEXT version in this repo's lineage (which may or may not be J21).
+    `sha_to` is always the J21-bump commit.
+    """
     stages = []
     for e in corpus:
         vl = sorted(e["verified_lineage"], key=lambda s: s["java_version"])
-        for i in range(len(vl) - 1):
-            if vl[i + 1]["java_version"] != 21: continue
+        j21_idx = next((k for k, s in enumerate(vl) if s["java_version"] == 21), None)
+        if j21_idx is None: continue
+        sha_to = vl[j21_idx]["commit_sha"]
+        # Emit one stage per Java version that comes BEFORE J21 in the lineage
+        for k in range(j21_idx):
             stages.append({
                 "repo": e["repo_full_name"],
-                "sha_from": vl[i]["commit_sha"],   # the existing one — used as a "near" anchor; we'll walk back from sha_to's parent
-                "sha_to": vl[i + 1]["commit_sha"],
-                "jv_from": vl[i]["java_version"],
+                "sha_to": sha_to,
+                "next_version_commit": vl[k + 1]["commit_sha"],
+                "jv_from": vl[k]["java_version"],
                 "jv_to": 21,
+                "lineage_versions": [s["java_version"] for s in vl],
             })
     return stages
 
@@ -205,11 +167,9 @@ def main():
     ap.add_argument("--input", default=DEFAULT_INPUT)
     ap.add_argument("--output", default=DEFAULT_OUTPUT)
     ap.add_argument("--skipped", default=DEFAULT_SKIPPED)
-    ap.add_argument("--target-days", type=int, default=365)
-    ap.add_argument("--window-days", type=int, default=180)
+    ap.add_argument("--distances", default="20,50,100,200", help="comma-sep commit-distances to probe")
     ap.add_argument("--min-pass-rate", type=float, default=0.7)
-    ap.add_argument("--max-probes", type=int, default=5)
-    ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--filter-slug", default="")
     args = ap.parse_args()
@@ -222,22 +182,29 @@ def main():
             f"{s['repo'].replace('/', '_')}__J{s['jv_from']}toJ{s['jv_to']}",
             args.filter_slug)]
     if args.limit: stages = stages[:args.limit]
-    print(f"=== {len(stages)} J21-target stages to probe ===", flush=True)
+    distances = [int(d.strip()) for d in args.distances.split(",")]
+
+    n = len(stages)
+    print(f"=== {n} (repo, jv_from→J21) stages to probe ===", flush=True)
+    by_jvf = {}
+    for s in stages: by_jvf[s["jv_from"]] = by_jvf.get(s["jv_from"], 0) + 1
+    print(f"  by jv_from: {dict(sorted(by_jvf.items()))}", flush=True)
+    print(f"  distances per probe: {distances}", flush=True)
 
     done = [0]; lock = threading.Lock()
     def go(s):
         slug = f"{s['repo'].replace('/', '_')}__J{s['jv_from']}toJ{s['jv_to']}"
         try:
-            rec = best_sha_from(s, args.target_days, args.window_days, args.min_pass_rate, args.max_probes)
+            rec = best_sha_from(s, distances, args.min_pass_rate)
         except Exception as e:
             rec = {"slug": slug, "stage": s, "skipped_reason": f"EXC:{type(e).__name__}:{e}"}
         with lock:
             done[0] += 1
             sel = rec.get("selected")
             if sel:
-                print(f"  [{done[0]:3d}/{len(stages)}] {slug}: SELECTED days_back={sel['days_back_actual']} pre={sel['pre_pass_count']}p/{sel['pre_fail_count']}f rate={sel['pass_rate']}", flush=True)
+                print(f"  [{done[0]:3d}/{n}] {slug}: SELECTED commits_back={sel['commits_back']} pre={sel['pre_pass_count']}p/{sel['pre_fail_count']}f rate={sel['pass_rate']}", flush=True)
             else:
-                print(f"  [{done[0]:3d}/{len(stages)}] {slug}: SKIPPED reason={rec.get('skipped_reason')}", flush=True)
+                print(f"  [{done[0]:3d}/{n}] {slug}: SKIPPED reason={rec.get('skipped_reason')}", flush=True)
         return rec
 
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
@@ -248,10 +215,14 @@ def main():
                 "probes": r.get("probes", [])} for r in all_recs if not r.get("selected")]
     json.dump(selected, open(args.output, "w"), indent=2)
     json.dump(skipped, open(args.skipped, "w"), indent=2)
-    print(f"\n=== SUMMARY ===")
-    print(f"  selected: {len(selected)}/{len(stages)} ({100*len(selected)/max(1,len(stages)):.1f}%)")
-    print(f"  skipped:  {len(skipped)}")
-    print(f"  saved:    {args.output}")
+    print()
+    print("=== SUMMARY ===")
+    print(f"  selected stages: {len(selected)}/{n} ({100*len(selected)/max(1,n):.1f}%)")
+    print(f"  skipped:         {len(skipped)}")
+    by_jvf_sel = {}
+    for s in selected: by_jvf_sel[s["jv_from"]] = by_jvf_sel.get(s["jv_from"], 0) + 1
+    print(f"  selected by jv_from: {dict(sorted(by_jvf_sel.items()))}")
+    print(f"  saved → {args.output}")
 
 
 if __name__ == "__main__":
