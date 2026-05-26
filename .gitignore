@@ -39,3 +39,6 @@ attempt_4/iter-001_failed_experiments/
 attempt_4/mine_j8_to_j11.py
 attempt_5/Dockerfile.j21-fitness
 attempt_3/verify/baseline_summary.json
+
+# attempt_7: ephemeral per-stage Qwen synthesis cache
+/attempt_7/per_stage/
