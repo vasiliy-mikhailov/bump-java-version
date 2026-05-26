@@ -17,7 +17,16 @@ The baseline every repo is measured against is the one-shot `org.openrewrite.jav
 
 ## Results so far
 
-PASS rate trajectory across attempts (each attempt's champion against the corpus available at the time):
+```mermaid
+xychart-beta
+    title "Recipe pass rate by attempt"
+    x-axis ["a1 (4-repo smoke)", "a3 (271 repos)", "a4 (271 repos)", "a6 (494 stages)", "a7 (395 stages)"]
+    y-axis "PASS rate (%)" 0 --> 100
+    bar [25, 56, 68, 71, 83]
+    line [25, 56, 68, 71, 83]
+```
+
+Each attempt's champion against the corpus available at the time:
 
 | attempt | champion | corpus | PASS | Δ vs same-attempt iter-0 baseline |
 |---|---|---|---|---|
@@ -25,7 +34,7 @@ PASS rate trajectory across attempts (each attempt's champion against the corpus
 | 3 | (dataset rediscovery, no recipe iteration) | 271 repos | 56 % baseline | — |
 | 4 | staged-per-JDK (`UpgradeToJava<N>` + SB3 + Hibernate + Jakarta at each stage) | 271 repos | 68 % | +12 pp |
 | 6 | per-target `recipe.yaml` with `if_pom_contains` framework gating | ~494 stages | 71 % | +3 pp over iter-0 |
-| 7 | per-repo iterative search over a sequenced default chain (`lombok_bump → java8→11 → plugins17 → build17 → java17_transforms → plugins21 → build21 → java21_transforms`) + Qwen-proposed per-repo mutations | 395 J21-target stages | 78 %+ (in flight) | +13 pp on processed subset |
+| 7 | per-repo iterative search over a sequenced default chain (`lombok_bump → java8→11 → plugins17 → build17 → java17_transforms → plugins21 → build21 → java21_transforms`) + Qwen-proposed per-repo mutations | 395 J21-target stages | 83 % (pass-1 done; pass-2 in flight) | +16 pp over iter-0 baseline (67 → 83) |
 
 Numbers track item 1's reward against the one-shot baseline on the same corpus. Caveat: corpus composition changed across attempts, so absolute PASS rate is comparable within an attempt's column but not across rows.
 
