@@ -43,9 +43,12 @@ def load_env(p=f"{BASE}/.env"):
 
 
 ENV = load_env()
-VLLM_URL = ENV.get("VLLM_BASE_URL", "https://inference.mikhailov.tech/v1").rstrip("/")
-VLLM_KEY = ENV.get("VLLM_API_KEY", "")
-VLLM_MODEL = ENV.get("VLLM_MODEL", "qwen3.6-27b-fp8")
+# Per ff #5: compactor (high-frequency, structured-output) gets its own endpoint when
+# available; falls back to the main VLLM_* values if COMPACTOR_VLLM_* aren't set.
+VLLM_URL = ENV.get("COMPACTOR_VLLM_BASE_URL",
+                   ENV.get("VLLM_BASE_URL", "https://inference.mikhailov.tech/v1")).rstrip("/")
+VLLM_KEY = ENV.get("COMPACTOR_VLLM_API_KEY", ENV.get("VLLM_API_KEY", ""))
+VLLM_MODEL = ENV.get("COMPACTOR_VLLM_MODEL", ENV.get("VLLM_MODEL", "qwen3.6-27b-fp8"))
 
 
 def sh_int(cmd, timeout=10, default=0):

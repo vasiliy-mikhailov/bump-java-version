@@ -27,8 +27,8 @@
    - **Search:** when a pattern repeats and is slow, pin a known location or cache for it; when a pattern risks an external rate-limit, cache the upstream once.
    - **Reward:** zero ban incidents; predictable per-iteration wall-clock; locations re-used across iterations.
    - **Repeat:** whenever a new noisy or slow pattern emerges.
-5. **Fitness (vLLM spin-up):** stand up an OpenAI-compatible chat-completion endpoint that the agent can call from inside Docker containers, serving a tool-capable model, with authentication enforced. Arrive there through a ralph loop over container, model, and reverse-proxy config.
-   - **Contract:** consumers (item 1's proposer, item 7's compactor) default to thinking mode (`chat_template_kwargs.enable_thinking: true`); fall back to no-thinking only when thinking output is unparseable.
+5. **Fitness (vLLM spin-up):** stand up one or more OpenAI-compatible chat-completion endpoints that the agent can call from inside Docker containers, serving tool-capable models, with authentication enforced. Arrive there through a ralph loop over container, model, and reverse-proxy config.
+   - **Contract:** consumers (item 1's proposer, item 7's compactor) default to thinking mode (`chat_template_kwargs.enable_thinking: true`); fall back to no-thinking only when thinking output is unparseable. All endpoints in active use serve models from the same generation family — never mix generations, since prompts calibrated against one generation drift on another. When two consumers have meaningfully different throughput / depth tradeoffs they get separate endpoints on separate accelerators so they don't contend for slots: the proposer (deep, long-context, intermittent) on a dense endpoint on the highest-VRAM accelerator; the compactor (high-frequency, structured-output, short) on a MoE endpoint on a smaller accelerator.
    - **Reward:** consumers report uninterrupted service.
    - **Repeat:** on any consumer reporting degraded service.
 6. **Fitness (runner saturation):** keep the verifier host CPU in a healthy utilisation band while any parent loop is making progress — composes with the parent rather than standing alone.
