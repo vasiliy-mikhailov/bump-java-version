@@ -67,26 +67,85 @@ def sh(cmd, timeout=10):
         return f"<err: {type(e).__name__}: {e}>"
 
 
+VECTOR_HOST_METRICS = "/var/log/observe/host_metrics.jsonl"
+VECTOR_DOCKER = "/var/log/observe/docker.jsonl"
+VECTOR_APP_LOGS = "/var/log/observe/app_logs.jsonl"
+
+
+def _tail_jsonl(path, since_ts, max_lines=20000):
+    """Yield JSONL rows from the file whose timestamp is >= since_ts.
+    We tail the last max_lines of the file (cheap), parse, and filter."""
+    if not os.path.exists(path): return
+    try:
+        r = subprocess.run(["tail", "-n", str(max_lines), path],
+                           capture_output=True, timeout=15)
+        for ln in r.stdout.decode(errors="replace").splitlines():
+            try: rec = json.loads(ln)
+            except Exception: continue
+            ts = rec.get("timestamp") or rec.get("t")
+            if not ts: continue
+            # Compare ISO timestamps lexically — Vector emits Z-suffixed RFC3339
+            if ts >= since_ts: yield rec
+    except Exception:
+        return
+
+
 def capture():
-    """Sample one observation and append to today's raw jsonl."""
+    """Sample one observation from Vector's JSONL streams + per-trajectory state."""
     now = time.time()
     iso = datetime.fromtimestamp(now).isoformat(timespec="seconds")
     obs = {"ts": now, "iso": iso}
 
-    obs["loadavg"] = sh("cat /proc/loadavg | awk '{print $1,$2,$3}'")
-    obs["uptime"] = sh("uptime -p")
-    obs["mpstat_1s"] = sh("mpstat 1 1 2>/dev/null | tail -1 | awk '{print \"usr=\"$3\" sys=\"$5\" iowait=\"$6\" idle=\"$12}'")
-    obs["mem_kb"] = sh("free -k | awk '/Mem:/ {print \"total=\"$2\" used=\"$3\" avail=\"$7}'")
-    obs["disk_root"] = sh("df -h / | awk 'NR==2 {print \"used=\"$3\" avail=\"$4\" pct=\"$5}'")
-    obs["containers_iter"] = sh_int("docker ps --format '{{.Names}}' 2>/dev/null | grep -c '^iter_'")
-    obs["containers_seqj"] = sh_int("docker ps --format '{{.Names}}' 2>/dev/null | grep -c '^seqj_'")
-    obs["containers_total"] = sh_int("docker ps -q 2>/dev/null | wc -l")
+    # Sample window: last 90 seconds of Vector data
+    import datetime as _dt
+    since = (datetime.utcnow() - _dt.timedelta(seconds=90)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # --- HOST METRICS via Vector ---
+    # Vector ships one row per (metric_name, scrape). Pick the latest of each.
+    latest_metrics = {}
+    for rec in _tail_jsonl(VECTOR_HOST_METRICS, since):
+        name = rec.get("name")
+        if not name: continue
+        v = rec.get("gauge") or rec.get("counter") or {}
+        val = v.get("value") if isinstance(v, dict) else None
+        if val is None: continue
+        latest_metrics[name] = (val, rec.get("timestamp", ""))
+    # Project the bits we care about
+    def get(k): return latest_metrics.get(k, (None, None))[0]
+    obs["loadavg"] = f"{get('load1') or 0:.2f} {get('load5') or 0:.2f} {get('load15') or 0:.2f}"
+    mem_total = get("memory_total_bytes") or 0
+    mem_avail = get("memory_available_bytes") or 0
+    mem_used = mem_total - mem_avail if mem_total else 0
+    obs["mem_kb"] = f"total={int(mem_total/1024)} used={int(mem_used/1024)} avail={int(mem_avail/1024)}"
+    # CPU — Vector ships cpu_seconds_total per (cpu, mode) counters; we approximate idle ratio
+    # via the most recent "idle" mode aggregate vs total
+    cpu_idle = get("cpu_seconds_total_idle") or 0  # may not exist; approximate
+    obs["mpstat_1s"] = f"vector_metrics_only loadavg1m={get('load1') or 0:.2f}"
+
+    # --- DOCKER CONTAINER STATE via Vector ---
+    # Last-seen records per container name in window
+    containers_seen = {}
+    for rec in _tail_jsonl(VECTOR_DOCKER, since, max_lines=5000):
+        cn = rec.get("container_name")
+        if cn: containers_seen[cn] = rec.get("timestamp", "")
+    iter_n = sum(1 for n in containers_seen if n.startswith("iter_"))
+    seqj_n = sum(1 for n in containers_seen if n.startswith("seqj_"))
+    yb_n = sum(1 for n in containers_seen if n.startswith("yb_"))
+    obs["containers_iter"] = iter_n
+    obs["containers_seqj"] = seqj_n
+    obs["containers_yb"] = yb_n
+    obs["containers_total_recent"] = len(containers_seen)
+
+    # --- PROCESS / PID state (still cheap subprocess; not in Vector) ---
     obs["round_robin_pid"] = sh("pgrep -f 'round_robin.py' | head -1")
     if obs["round_robin_pid"]:
         obs["round_robin_etime"] = sh(f"ps -p {obs['round_robin_pid']} -o etime= | tr -d ' '")
-    obs["traj_count"] = sh_int(f"ls {ITER_TRAJ_DIR} 2>/dev/null | wc -l")
+    obs["yb_build_pid"] = sh("pgrep -f 'build_yearback_dataset.py' | head -1")
+    if obs["yb_build_pid"]:
+        obs["yb_build_etime"] = sh(f"ps -p {obs['yb_build_pid']} -o etime= | tr -d ' '")
 
-    # Per-verdict counts in iterator
+    # --- TRAJECTORY / DATASET PROGRESS (file-based, fast) ---
+    obs["traj_count"] = sh_int(f"ls {ITER_TRAJ_DIR} 2>/dev/null | wc -l")
     if os.path.isdir(ITER_TRAJ_DIR):
         passes = fails = excs = 0
         for slug in os.listdir(ITER_TRAJ_DIR):
@@ -104,15 +163,35 @@ def capture():
         obs["iter_fail"] = fails
         obs["iter_exc"] = excs
 
-    # Recent round_robin log tail (last 30 lines)
-    if os.path.exists(ROUND_ROBIN_LOG):
-        obs["round_robin_log_tail"] = sh(f"tail -30 {ROUND_ROBIN_LOG}")
-        obs["round_robin_log_mtime"] = os.path.getmtime(ROUND_ROBIN_LOG)
+    yb_probes_dir = f"{BASE}/attempt_8/yearback_probes"
+    if os.path.isdir(yb_probes_dir):
+        yb_sel = yb_skip = 0
+        for f in os.listdir(yb_probes_dir):
+            try:
+                r = json.load(open(f"{yb_probes_dir}/{f}"))
+                if r.get("selected"): yb_sel += 1
+                elif r.get("skipped_reason"): yb_skip += 1
+            except Exception: continue
+        obs["yb_selected"] = yb_sel
+        obs["yb_skipped"] = yb_skip
+        obs["yb_total_processed"] = yb_sel + yb_skip
 
-    # Recent error / warn counts in the log
-    if os.path.exists(ROUND_ROBIN_LOG):
-        obs["log_recent_FAIL_count"] = sh_int(f"tail -500 {ROUND_ROBIN_LOG} 2>/dev/null | grep -c 'verdict: FAIL'")
-        obs["log_recent_PASS_count"] = sh_int(f"tail -500 {ROUND_ROBIN_LOG} 2>/dev/null | grep -c 'verdict: PASS'")
+    # --- APP-LOG SAMPLE via Vector ---
+    # Pull last 50 lines from the most recent log file in window, surface error-flavored ones
+    log_lines = []
+    error_lines = []
+    for rec in _tail_jsonl(VECTOR_APP_LOGS, since, max_lines=5000):
+        msg = rec.get("message", "")
+        fil = rec.get("file", "")
+        log_lines.append((rec.get("timestamp", ""), fil, msg))
+        if any(s in msg for s in ("[ERROR]", "Caused by:", "java.lang.", "FAIL", "BUILD FAILURE")):
+            error_lines.append((rec.get("timestamp", ""), fil, msg))
+    obs["log_recent_FAIL_count"] = sum(1 for _, _, m in log_lines if "verdict: FAIL" in m)
+    obs["log_recent_PASS_count"] = sum(1 for _, _, m in log_lines if "verdict: PASS" in m)
+    # Keep a compact tail (last 25 lines of FAIL/PASS for the digest prompt)
+    important = [l for l in log_lines if "verdict:" in l[2] or any(s in l[2] for s in ("[ERROR]", "FAIL"))][-25:]
+    obs["round_robin_log_tail"] = "\n".join(f"{f.split('/')[-1] if f else '?'}: {m}" for _, f, m in important)
+    obs["error_lines_sample"] = [f"{f.split('/')[-1] if f else '?'}: {m[:200]}" for _, f, m in error_lines[-10:]]
 
     day = iso[:10]
     out_path = f"{TELEMETRY_DIR}/raw-{day}.jsonl"
@@ -212,7 +291,8 @@ def digest(window_min=60, force=False):
     delta = {}
     if len(samples) >= 2:
         for k in ("iter_pass", "iter_fail", "traj_count",
-                  "containers_iter", "containers_seqj"):
+                  "containers_iter", "containers_seqj", "containers_yb",
+                  "yb_selected", "yb_skipped", "yb_total_processed"):
             if k in first and k in last:
                 delta[k] = last[k] - first[k]
 
@@ -291,7 +371,9 @@ def digest(window_min=60, force=False):
         "trend": delta,
         "snapshot_tail": {k: last.get(k) for k in
                           ("iter_pass", "iter_fail", "iter_exc", "traj_count",
-                           "containers_iter", "loadavg", "mpstat_1s")},
+                           "containers_iter", "containers_yb",
+                           "yb_selected", "yb_skipped", "yb_total_processed",
+                           "loadavg", "mpstat_1s")},
     }
 
     if entry["emitted"]:
