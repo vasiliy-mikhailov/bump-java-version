@@ -352,85 +352,127 @@ def propose_next_chain(stage, current_chain, observation, history_recap):
     return obj, None
 
 
+def _save_trajectory(out_dir, stage, max_attempts, history_lite, next_chain_dicts):
+    """Persist trajectory + the chain Qwen wants tried next (so resume continues)."""
+    final = history_lite[-1]["verdict"] if history_lite else "?"
+    out = {"stage": stage, "max_attempts": max_attempts, "history": history_lite,
+           "next_chain_to_try": next_chain_dicts, "final_verdict": final}
+    json.dump(out, open(f"{out_dir}/trajectory.json", "w"), indent=2)
+    return out
+
+
+def _history_to_fakes(history_lite):
+    """compact_history wants [{chain, traj, observation, qwen_rationale}].
+    Convert the persisted lite form back to that shape."""
+    out = []
+    for h in history_lite:
+        out.append({
+            "chain": chain_from_qwen(h["chain"]),
+            "traj": {"final_status": h["verdict"]},
+            "observation": h.get("observation", ""),
+            "qwen_rationale": h.get("qwen_rationale", ""),
+        })
+    return out
+
+
 def iterate_one(stage, max_attempts=10):
+    """Run iterator on one stage, up to max_attempts TOTAL (resumes from cached state)."""
     slug = f"{stage['repo'].replace('/', '_')}__J{stage['jv_from']}toJ{stage['jv_to']}"
     out_dir = f"{OUT_DIR}/{slug}"
     os.makedirs(out_dir, exist_ok=True)
-    chain = plan_for(stage["jv_from"], stage["jv_to"])
-    history = []
+    tpath = f"{out_dir}/trajectory.json"
 
-    for attempt in range(1, max_attempts + 1):
-        print(f"\n[{slug}] === attempt {attempt}/{max_attempts} ===", flush=True)
+    # Resume from cached trajectory if any
+    history_lite = []
+    chain = None
+    if os.path.exists(tpath):
+        prev = json.load(open(tpath))
+        if prev.get("final_verdict") == "PASS":
+            print(f"[{slug}] cached PASS (attempt {len(prev.get('history', []))})", flush=True)
+            return prev
+        history_lite = prev.get("history", [])
+        if len(history_lite) >= max_attempts:
+            print(f"[{slug}] cached FAIL {prev.get('final_verdict')} — already at budget {max_attempts}", flush=True)
+            return prev
+        # restore the chain Qwen proposed at the end of last pass, else replay last chain
+        next_dicts = prev.get("next_chain_to_try")
+        if next_dicts:
+            chain = chain_from_qwen(next_dicts)
+        elif history_lite:
+            chain = chain_from_qwen(history_lite[-1]["chain"])
+
+    if chain is None:
+        chain = plan_for(stage["jv_from"], stage["jv_to"])
+
+    start_attempt = len(history_lite) + 1
+    print(f"[{slug}] starting attempt {start_attempt}/{max_attempts} ({len(history_lite)} prior)", flush=True)
+
+    for attempt in range(start_attempt, max_attempts + 1):
+        attempt_t0 = time.time()
         chain_brief = " -> ".join(st[0] for st in chain)
-        print(f"  chain: {chain_brief}", flush=True)
+        print(f"[{slug}] === attempt {attempt}/{max_attempts} ===\n[{slug}]   chain: {chain_brief}", flush=True)
         traj = run_chain(stage, chain)
+        wall_s = round(time.time() - attempt_t0, 1)
         verdict = traj.get("final_status", "?")
-        print(f"  verdict: {verdict}", flush=True)
+        print(f"[{slug}]   verdict: {verdict}  (wall_s={wall_s})", flush=True)
+
+        steps_brief = [{"step": s["step"], "jdk": s["jdk"],
+                        "recipe_ok": s.get("recipe_ok"), "build_ok": s.get("build_ok")}
+                       for s in traj.get("steps", [])]
 
         if verdict == "PASS":
-            history.append({"attempt": attempt, "chain": chain, "traj": traj,
-                            "observation": "PASS", "qwen_proposal": None,
-                            "qwen_rationale": ""})
+            history_lite.append({"attempt": attempt, "chain": render_chain_for_qwen(chain),
+                                 "verdict": "PASS", "aborted_at": None,
+                                 "wall_s": wall_s, "steps": steps_brief,
+                                 "observation": "PASS", "qwen_observation": "",
+                                 "qwen_rationale": ""})
+            _save_trajectory(out_dir, stage, max_attempts, history_lite, None)
             break
 
         obs = extract_observation(traj)
-        print(f"  observation: {obs[:200]}", flush=True)
-        recap = compact_history(history) if history else ""
+        print(f"[{slug}]   observation: {obs[:200]}", flush=True)
+        recap = compact_history(_history_to_fakes(history_lite)) if history_lite else ""
         proposal, perr = propose_next_chain(stage, chain, obs, recap)
+        next_chain_dicts = None
+        rationale = ""
+        qwen_obs = ""
+        next_chain = None
         if proposal is None:
-            print(f"  qwen proposer failed: {perr}", flush=True)
-            history.append({"attempt": attempt, "chain": chain, "traj": traj,
-                            "observation": obs, "qwen_proposal": None,
-                            "qwen_rationale": f"proposer error: {perr}"})
+            print(f"[{slug}]   qwen proposer failed: {perr}", flush=True)
+            rationale = f"proposer error: {perr}"
+        else:
+            next_chain_dicts = proposal.get("next_chain", [])
+            next_chain = chain_from_qwen(next_chain_dicts)
+            rationale = proposal.get("rationale", "")
+            qwen_obs = proposal.get("observation", "")
+            print(f"[{slug}]   qwen obs: {qwen_obs[:160]}\n[{slug}]   qwen rationale: {rationale[:160]}", flush=True)
+            next_brief = " -> ".join(st[0] for st in next_chain)
+            print(f"[{slug}]   next chain: {next_brief}", flush=True)
+
+        history_lite.append({"attempt": attempt, "chain": render_chain_for_qwen(chain),
+                             "verdict": verdict, "aborted_at": traj.get("aborted_at"),
+                             "wall_s": wall_s, "steps": steps_brief,
+                             "observation": obs[:8192],
+                             "qwen_observation": qwen_obs,
+                             "qwen_rationale": rationale[:2048]})
+        _save_trajectory(out_dir, stage, max_attempts, history_lite, next_chain_dicts)
+
+        if not proposal or not next_chain:
+            print(f"[{slug}]   empty proposal — bailing", flush=True)
             break
-
-        next_chain_dicts = proposal.get("next_chain", [])
-        next_chain = chain_from_qwen(next_chain_dicts)
-        rationale = proposal.get("rationale", "")
-        qwen_obs = proposal.get("observation", "")
-        print(f"  qwen obs: {qwen_obs[:160]}", flush=True)
-        print(f"  qwen rationale: {rationale[:160]}", flush=True)
-        next_brief = " -> ".join(st[0] for st in next_chain)
-        print(f"  next chain: {next_brief}", flush=True)
-
-        history.append({"attempt": attempt, "chain": chain, "traj": traj,
-                        "observation": obs, "qwen_proposal": next_chain_dicts,
-                        "qwen_rationale": rationale, "qwen_observation": qwen_obs})
-
-        if not next_chain:
-            print("  empty proposal — bailing", flush=True)
-            break
-        # bail if proposal is identical to current chain
         if render_chain_for_qwen(next_chain) == render_chain_for_qwen(chain):
-            print("  proposal == current chain — bailing", flush=True)
+            print(f"[{slug}]   proposal == current chain — bailing", flush=True)
             break
         chain = next_chain
 
-    out = {"stage": stage, "max_attempts": max_attempts, "history": []}
-    for h in history:
-        # also save the steps so we can debug per-step status
-        steps_brief = []
-        for s in h["traj"].get("steps", []):
-            steps_brief.append({"step": s["step"], "jdk": s["jdk"],
-                                "recipe_ok": s.get("recipe_ok"),
-                                "build_ok": s.get("build_ok")})
-        out["history"].append({
-            "attempt": h["attempt"],
-            "chain": render_chain_for_qwen(h["chain"]),
-            "verdict": h["traj"].get("final_status", "?"),
-            "aborted_at": h["traj"].get("aborted_at"),
-            "steps": steps_brief,
-            "observation": h["observation"][:8192],
-            "qwen_observation": h.get("qwen_observation", ""),
-            "qwen_rationale": h.get("qwen_rationale", "")[:2048],
-        })
-    out["final_verdict"] = history[-1]["traj"].get("final_status", "?") if history else "?"
-    json.dump(out, open(f"{out_dir}/trajectory.json", "w"), indent=2)
-    print(f"\n[{slug}] FINAL: {out['final_verdict']}  (attempts: {len(history)})", flush=True)
+    out = json.load(open(tpath))
+    print(f"[{slug}] FINAL: {out['final_verdict']}  (attempts: {len(out['history'])})", flush=True)
     return out
 
 
 def main():
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--repo")
@@ -440,19 +482,35 @@ def main():
     ap.add_argument("--jv-from", type=int)
     ap.add_argument("--jv-to", type=int, default=21)
     ap.add_argument("--max-attempts", type=int, default=10)
+    ap.add_argument("--workers", type=int, default=1)
     args = ap.parse_args()
 
-    stages = []
     if args.repo:
         assert args.sha_from and args.jv_from is not None, "need --sha-from and --jv-from with --repo"
         stages = [{"repo": args.repo, "sha_from": args.sha_from, "sha_to": args.sha_to,
                    "jv_from": args.jv_from, "jv_to": args.jv_to}]
     else:
         stages = json.load(open(args.sample))
+    for s in stages: s.setdefault("jv_to", 21)
 
-    for s in stages:
-        s.setdefault("jv_to", 21)
-        iterate_one(s, max_attempts=args.max_attempts)
+    print(f"== iterating {len(stages)} stages, max_attempts={args.max_attempts}, workers={args.workers} ==", flush=True)
+    done = [0]; lock = threading.Lock()
+    def go(s):
+        try: r = iterate_one(s, max_attempts=args.max_attempts)
+        except Exception as e:
+            r = {"final_verdict": f"EXC:{type(e).__name__}:{e}"}
+            print(f"[{s['repo']}] EXCEPTION: {type(e).__name__}: {e}", flush=True)
+        with lock:
+            done[0] += 1
+            print(f"== progress {done[0]}/{len(stages)}: {s['repo']} -> {r.get('final_verdict','?')} ==", flush=True)
+        return r
+
+    if args.workers == 1:
+        for s in stages: go(s)
+    else:
+        with ThreadPoolExecutor(max_workers=args.workers) as ex:
+            list(ex.map(go, stages))
+    print("== done ==", flush=True)
 
 
 if __name__ == "__main__":
