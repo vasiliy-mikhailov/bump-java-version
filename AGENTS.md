@@ -41,8 +41,3 @@
    - **Search:** the snapshot fed to the compactor must surface failure signals when present, not just happy-path state; emit only when state changes materially since the previous snapshot, so a quiet stream stays quiet; on input exceeding the compactor's budget, chunk-and-merge rather than drop; periodically spot-sample raw vs digest to recalibrate trust.
    - **Reward:** balance between compaction rate and anomalies missed; quiet streams stay quiet so emitted entries carry signal.
    - **Repeat:** whenever a new noisy stream enters the loop.
-8. **Fitness (sub-agent delegation):** stand up an OpenHands (or equivalent) agent endpoint on the work host that the orchestrating agent can hand well-scoped subtasks to, so the orchestrator writes less glue code itself.
-   - **Constraints:** sub-agent runs in Docker on the work host, can read/write the project workdir, returns structured results. The sub-agent's sandbox may not reach host-owned docker images or sockets — scope dispatched tasks accordingly.
-   - **Search:** ralph loop over container config, model backend wiring, auth.
-   - **Reward:** dispatch a representative subtask, get a usable artifact back without writing the script.
-   - **Repeat:** every time the orchestrator catches itself writing throwaway scripting glue.
