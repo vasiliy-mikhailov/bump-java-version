@@ -51,3 +51,8 @@
    - **Search:** regenerate when item 1's PASS rate moves materially, when the docker entry script gains a new escape, when a pinned GAV bumps, or when a new deterministic primitive enters the chain; an unexpected smoke-pair verdict flip is a regression signal, not a green light.
    - **Reward:** smoke pair stays green; the stranger reproduces the project's deterministic best without any project knowledge beyond `--help`.
    - **Repeat:** every Search trigger.
+10. **Fitness (corpus triage):** every repository in an operator's source corpus is reduced to one machine-consumable record of the observable signals the conversion chain composer reads.
+   - **Contract:** schema co-evolves with the composer's signal set — composer adds a field → report gains it, composer drops a field → report drops it; the cheapest model whose output passes a smoke pair (one obvious-yes repo, one obvious-blocker repo) is the one to use.
+   - **Search:** signals come from observable text patterns over a pre-extracted slice of each repo, not from judgment about what the project "is"; unobserved must remain distinguishable from observed-absent.
+   - **Reward:** the composer composes a chain directly from the record without re-reading the repo; misclassifications surface as composer crashes or smoke-pair regressions, not silent wrong chains.
+   - **Repeat:** whenever the composer reads a new signal, whenever a misclassification surfaces, whenever a cheaper model passes the smoke pair.
