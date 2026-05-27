@@ -117,7 +117,8 @@ class GitLab:
     def __init__(self, base_url, token):
         self.base = base_url.rstrip('/') + '/api/v4'
         self.s = requests.Session()
-        self.s.headers.update({'PRIVATE-TOKEN': token})
+        if token:
+            self.s.headers.update({'PRIVATE-TOKEN': token})
 
     def _get(self, path, **params):
         r = self.s.get(self.base + path, params=params, timeout=30)
@@ -152,21 +153,41 @@ class GitLab:
 
 # ═══ per-project triage ═══════════════════════════════════════════════════════
 
+def find_all_subdirs(root, name_chain):
+    '''Find every dir under root whose path ends with the given chain
+    (e.g. ['src','main']). Includes the case where it sits at root level.'''
+    found = []
+    target = os.path.join(*name_chain)
+    for dirpath, dirs, _ in os.walk(root):
+        if dirpath.endswith(os.sep + target) or dirpath == os.path.join(str(root), target):
+            found.append(Path(dirpath))
+            # don't descend further into this branch — nested src/main isn't a thing
+            dirs[:] = []
+    return found
+
+
 def grep_recursive(root, pattern_re, subdir=None):
-    '''Return True if any file under root (or root/subdir) matches the regex.'''
-    base = root / subdir if subdir else root
-    if not base.exists(): return None  # not observable
+    '''Return True if any file under any matching subdir at any depth matches.
+    subdir like 'src/main' is matched at ANY depth (root level or under module dirs).'''
+    if subdir is None:
+        bases = [root]
+    else:
+        name_chain = subdir.split('/')
+        bases = find_all_subdirs(root, name_chain)
+        if not bases:
+            return None  # signal not observable — no matching dir anywhere
     rx = re.compile(pattern_re)
-    for dirpath, _, files in os.walk(base):
-        for f in files:
-            if not f.endswith(('.java', '.kt', '.scala', '.groovy', '.xml', '.gradle', '.kts')):
-                continue
-            try:
-                with open(Path(dirpath)/f, errors='replace') as fh:
-                    if rx.search(fh.read()):
-                        return True
-            except (OSError, UnicodeError):
-                continue
+    for base in bases:
+        for dirpath, _, files in os.walk(base):
+            for f in files:
+                if not f.endswith(('.java', '.kt', '.scala', '.groovy', '.xml', '.gradle', '.kts')):
+                    continue
+                try:
+                    with open(Path(dirpath)/f, errors='replace') as fh:
+                        if rx.search(fh.read()):
+                            return True
+                except (OSError, UnicodeError):
+                    continue
     return False
 
 
@@ -194,11 +215,11 @@ def parse_pom(pom_path):
     return out
 
 
-def detect_frameworks(pom_texts_joined, src_root):
+def detect_frameworks(pom_texts_joined, repo_root):
     '''Match framework vocabulary against pom XML AND deduplicated source imports.'''
     haystack = pom_texts_joined
-    # Plus all imports from src/main/java
-    if src_root.exists():
+    src_dirs = find_all_subdirs(repo_root, ['src', 'main'])
+    for src_root in src_dirs:
         for dirpath, _, files in os.walk(src_root):
             for f in files:
                 if f.endswith('.java') or f.endswith('.kt'):
@@ -208,7 +229,7 @@ def detect_frameworks(pom_texts_joined, src_root):
                                 if line.startswith('import ') or line.startswith('package '):
                                     haystack += '\n' + line
                                 elif not line.startswith(('//', '/*', ' ', '\t')):
-                                    break  # past header
+                                    break
                     except OSError:
                         continue
     found = []
@@ -238,13 +259,14 @@ def primary_language(repo_root):
 
 
 def count_files(repo_root, subdir, exts):
-    base = repo_root / subdir
-    if not base.exists(): return None
+    bases = find_all_subdirs(repo_root, subdir.split('/'))
+    if not bases: return None
     n = 0
-    for dirpath, _, files in os.walk(base):
-        for f in files:
-            if any(f.endswith(e) for e in exts):
-                n += 1
+    for base in bases:
+        for dirpath, _, files in os.walk(base):
+            for f in files:
+                if any(f.endswith(e) for e in exts):
+                    n += 1
     return n
 
 
@@ -265,23 +287,31 @@ def triage_one(repo_root):
 
     rec['primary_language'] = primary_language(repo_root)
 
+    # Find ALL pom.xml files anywhere in the tree (handles multi-module + subproject layouts)
+    all_poms = []
+    for dirpath, _, files in os.walk(repo_root):
+        if 'pom.xml' in files: all_poms.append(Path(dirpath) / 'pom.xml')
     pom_data = {}
     pom_texts = ''
     if has_pom:
         pom_data = parse_pom(repo_root / 'pom.xml')
-        pom_texts = pom_data.get('_pom_text', '')
-        # walk submodule poms too
-        for sub in pom_data.get('modules', []):
-            sp = repo_root / sub / 'pom.xml'
-            if sp.exists():
-                sub_data = parse_pom(sp)
-                pom_texts += '\n' + sub_data.get('_pom_text', '')
+    elif all_poms:
+        # No root pom but submodule poms exist (e.g. spring-boot-react-fullstack-examples)
+        pom_data = parse_pom(all_poms[0])
+        has_pom = True
+        rec['build_tool'] = 'maven'  # upgrade detection
+    for pp in all_poms:
+        try:
+            txt = pp.read_text(errors='replace')
+            pom_texts += '\n' + txt
+        except OSError:
+            continue
 
     rec['is_multi_module'] = (len(pom_data.get('modules', [])) > 0) if has_pom else (False if has_gradle else None)
     rec['java_version_declared'] = pom_data.get('java_version_declared')
     rec['spring_boot_version'] = pom_data.get('spring_boot_version')
 
-    rec['frameworks'] = detect_frameworks(pom_texts, repo_root / 'src' / 'main')
+    rec['frameworks'] = detect_frameworks(pom_texts, repo_root)
 
     # code signals
     signals = {}
@@ -325,7 +355,9 @@ def triage_one(repo_root):
 def main():
     ap = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                  description=__doc__)
-    ap.add_argument('--group', required=True, help='GitLab group ID or path (e.g. "my-org/backend")')
+    src = ap.add_mutually_exclusive_group(required=True)
+    src.add_argument('--group', help='GitLab group ID or path (e.g. "my-org/backend") — discovers all projects in the group + subgroups')
+    src.add_argument('--projects', help='Comma-separated list of project IDs to triage directly (alternative to --group)')
     ap.add_argument('--output-dir', default='./triage', help='Where to write per-project JSON')
     ap.add_argument('--limit', type=int, default=0, help='Triage only the first N projects (0 = all)')
     ap.add_argument('--resume', action='store_true', default=True, help='Skip projects with existing JSON (default)')
@@ -333,17 +365,30 @@ def main():
     args = ap.parse_args()
 
     base_url = os.environ.get('GITLAB_URL')
-    token = os.environ.get('GITLAB_TOKEN')
-    if not base_url or not token:
-        print('error: set GITLAB_URL and GITLAB_TOKEN env vars', file=sys.stderr)
+    token = os.environ.get('GITLAB_TOKEN', '')
+    if not base_url:
+        print('error: set GITLAB_URL env var', file=sys.stderr)
         return 2
+    if not token:
+        print('warning: GITLAB_TOKEN unset — using unauthenticated access (works for public repos only, lower rate limits)', file=sys.stderr)
 
     gl = GitLab(base_url, token)
     out_dir = Path(args.output_dir); out_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f'== discovering projects in group {args.group} ==', flush=True)
-    projects = gl.list_group_projects(args.group)
-    print(f'   found {len(projects)} project(s) (including subgroups)', flush=True)
+    if args.projects:
+        ids = [int(x) for x in args.projects.split(',')]
+        print(f'== fetching {len(ids)} project(s) directly by ID ==', flush=True)
+        projects = []
+        for pid in ids:
+            try:
+                p = gl._get(f'/projects/{pid}').json()
+                projects.append(p)
+            except Exception as e:
+                print(f'   id={pid}: ERROR {type(e).__name__}: {e}', flush=True)
+    else:
+        print(f'== discovering projects in group {args.group} ==', flush=True)
+        projects = gl.list_group_projects(args.group)
+        print(f'   found {len(projects)} project(s) (including subgroups)', flush=True)
     if args.limit: projects = projects[:args.limit]
 
     summary = {'total': 0, 'by_build_tool': {}, 'by_jv': {}, 'by_blocker': {}, 'java_projects': 0}
