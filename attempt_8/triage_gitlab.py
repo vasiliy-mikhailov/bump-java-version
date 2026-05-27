@@ -14,14 +14,22 @@ USAGE
 
   triage_gitlab.py --group <id-or-path> [--output-dir DIR] [--limit N] [--resume]
 
-Required env vars:
-    GITLAB_URL    e.g. https://gitlab.example.com  (or https://gitlab.com)
-    GITLAB_TOKEN  Personal Access Token with 'read_api' + 'read_repository' scope
+Env vars:
+    GITLAB_URL    REQUIRED, e.g. https://gitlab.example.com  (or https://gitlab.com)
+    GITLAB_TOKEN  OPTIONAL. PAT with 'read_api' + 'read_repository' scope for
+                  private repos / higher rate limits. Public repos triage fine
+                  without a token (warning is printed; rate limit ~10 req/min).
 
 Examples:
-    GITLAB_URL=https://gitlab.com GITLAB_TOKEN=glpat-...  \
+    # Public gitlab.com, no token, triage a single known project by ID
+    GITLAB_URL=https://gitlab.com  \
+        triage_gitlab.py --projects 34840973 --output-dir ./triage
+
+    # Authenticated, whole group + subgroups
+    GITLAB_URL=https://gitlab.example.com GITLAB_TOKEN=glpat-...  \
         triage_gitlab.py --group my-org/backend --output-dir ./triage
 
+    # Quick sample (first 5 projects in a group)
     triage_gitlab.py --group 1234 --output-dir ./triage --limit 5
 
 Resume: re-running on the same --output-dir skips projects whose triage
