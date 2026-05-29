@@ -1,0 +1,220 @@
+[
+  {
+    "slug": "AdityaTile04_Java-Backend__J21toJ21",
+    "repo": "AdityaTile04/Java-Backend",
+    "sha_to": "f0cb41c0a1702dcfd6b1575b16c8a3d492356728",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.6",
+    "hit_paths": [
+      "Spring_boot/spring_OAuth2/src/main/java/com/project/spring_oauth2/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "Harishtandale74_EMS_Infosys__J21toJ21",
+    "repo": "Harishtandale74/EMS_Infosys",
+    "sha_to": "c1ba66d5abe287535c8034eb5326517ff9a4b555",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "4.0.2",
+    "hit_paths": [
+      "backend/src/main/java/com/ems/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "MarlonLuan_jhipster-starter__J21toJ21",
+    "repo": "MarlonLuan/jhipster-starter",
+    "sha_to": "46984fecf583d04ad32af15c50292e46dde46617",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "4.0.3",
+    "hit_paths": [
+      "my-workspace/server/src/main/java/com/mycompany/myapp/config/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "slug": "MoisesNEY_ControlExpedientes__J21toJ21",
+    "repo": "MoisesNEY/ControlExpedientes",
+    "sha_to": "01f3cfe33615615726be199e5a8a5dc16de70815",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.5",
+    "hit_paths": [
+      "backend/src/main/java/ni/edu/mney/config/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "slug": "NTTH7419_yas-devops-1__J21toJ21",
+    "repo": "NTTH7419/yas-devops-1",
+    "sha_to": "6f433191eda1d9cc225390ff9d09f1a8f07198af",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.3.2",
+    "hit_paths": [
+      "backoffice-bff/src/main/java/com/yas/backofficebff/config/SecurityConfig.java",
+      "storefront-bff/src/main/java/com/yas/storefrontbff/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "ProgramCX_FoxNAServer__J21toJ21",
+    "repo": "ProgramCX/FoxNAServer",
+    "sha_to": "ad9d09ade5616b3cc01a77c3bb9e76ef939c9e94",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.0.6",
+    "hit_paths": [
+      "src/main/java/cn/programcx/foxnaserver/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "Sov1etB0mb3_mono-ecom__J21toJ21",
+    "repo": "Sov1etB0mb3/mono-ecom",
+    "sha_to": "e2465ad481cfbd0066c75d88cc07f5b84ffd58cf",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.5",
+    "hit_paths": [
+      "src/main/java/com/calt/buroxz/config/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "slug": "ValentinaSukonina_FreezerAlarm__J21toJ21",
+    "repo": "ValentinaSukonina/FreezerAlarm",
+    "sha_to": "d23459f29495b72d58a4cc2350ff6ee3b5bf87ba",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.1",
+    "hit_paths": [
+      "backend/src/main/java/com/example/backend/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "dangxuanphuc_java-spring-boot-tutorial__J21toJ21",
+    "repo": "dangxuanphuc/java-spring-boot-tutorial",
+    "sha_to": "a2fbb2ed0cf42b1a70c15148fe174ae13279fa18",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.3.3",
+    "hit_paths": [
+      "spring-oauth-demo/src/main/java/com/phucdx/spring_oauth_demo/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "farscrl_chalender-server__J21toJ21",
+    "repo": "farscrl/chalender-server",
+    "sha_to": "b3ef65ea4aabdd8fd3ddb3771063ec41a915933f",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.2.3",
+    "hit_paths": [
+      "api/src/main/java/ch/chalender/api/config/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "slug": "geonetwork_geonetwork__J21toJ21",
+    "repo": "geonetwork/geonetwork",
+    "sha_to": "90c57a5abd68d1534e7ba3d36a659a28dfc62481",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.3.11",
+    "hit_paths": [
+      "src/apps/geonetwork/src/main/java/org/geonetwork/config/WebSecurityConfiguration.java"
+    ]
+  },
+  {
+    "slug": "it-at-m_refarch__J21toJ21",
+    "repo": "it-at-m/refarch",
+    "sha_to": "14184aa91c6f9014332353cf3074a5f95b867420",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.14",
+    "hit_paths": [
+      "refarch-gateway/src/main/java/de/muenchen/oss/refarch/gateway/configuration/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "slug": "jobmission_oauth2-server__J21toJ21",
+    "repo": "jobmission/oauth2-server",
+    "sha_to": "7ffc47e4b4fed2be02cbf360d756da1f85cfc0a5",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "4.0.6",
+    "hit_paths": [
+      "src/main/java/com/revengemission/sso/oauth2/server/config/DefaultSecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "making_oauth2-sso-demo__J21toJ21",
+    "repo": "making/oauth2-sso-demo",
+    "sha_to": "42780eae3d386250fa1e432e3d6210a06b873a54",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "4.0.4",
+    "hit_paths": [
+      "todo-frontend-webflux/src/main/java/lol/maki/dev/todo/config/SecurityConfig.java",
+      "todo-frontend/src/main/java/lol/maki/dev/todo/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "phamquan220400_udemy-spring-security__J21toJ21",
+    "repo": "phamquan220400/udemy-spring-security",
+    "sha_to": "d1fcd0c7f188db3e1de2214f4382612bd3186204",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.3.0",
+    "hit_paths": [
+      "section_14/springsecOAUTH2/src/main/java/com/eazybytes/config/ProjectSecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "posseidon_webscraper__J21toJ21",
+    "repo": "posseidon/webscraper",
+    "sha_to": "585a95e0e926d5acac355455aab3267be3b9d511",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.5",
+    "hit_paths": [
+      "src/main/java/hu/elte/inf/projects/quizme/security/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-happycows-f25-16__J21toJ21",
+    "repo": "ucsb-cs156-f25/proj-happycows-f25-16",
+    "sha_to": "2bd4bbb38c9f679bf5736f46e17325052825946f",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.3",
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/happiercows/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "volunteer-plus_volunteer-plus__J21toJ21",
+    "repo": "volunteer-plus/volunteer-plus",
+    "sha_to": "1ec88c21ef852d256112cc78779fa34786bd101d",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.3",
+    "hit_paths": [
+      "backend/src/main/java/volunteer/plus/backend/config/security/SecurityConf.java"
+    ]
+  }
+]

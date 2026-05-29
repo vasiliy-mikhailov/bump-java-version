@@ -1,0 +1,976 @@
+{
+  "stage": {
+    "repo": "jhipster/jhipster-sample-app-elasticsearch",
+    "sha_from": "5fc34608f8ce3ce66c0583ee03da30eda67d472f",
+    "sha_to": "de6e5a081d37aee0866773b141c84f3732aded5e",
+    "jv_from": 11,
+    "jv_to": 21,
+    "next_version_commit": "6c689f24aa7556644bdfccc4388dda6d4816f2fe",
+    "commits_back": 20,
+    "pre_pass_count": 43,
+    "pre_fail_count": 0,
+    "pass_rate": 1.0,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 443.7,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[14:28:50] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] [ERROR] Some problems were encountered while processing the POMs:\n[ERROR] 'dependencies.dependency.version' for org.zalando:problem-spring-web:jar is missing. @ line 280, column 21\n[ERROR] 'dependencies.dependency.version' for io.jsonwebtoken:jjwt-api:jar is missing. @ line 284, column 21\n[ERROR] 'dependencies.dependency.version' for io.jsonwebtoken:jjwt-impl:jar is missing. @ line 288, column 21\n[ERROR] 'dependencies.dependency.version' for io.jsonwebtoken:jjwt-jackson:jar is missing. @ line 293, column 21\n @ \n[ERROR] The build could not read 1 project -> [Help 1]\n[ERROR]   \n[ERROR]   The project io.github.jhipster.sample:jhipster-elasticsearch-sample-application:0.0.1-SNAPSHOT (/work/src/pom.xml) has 4 errors\n[ERROR]     'dependencies.dependency.version' for org.zalando:problem-spring-web:jar is missing. @ line 280, column 21\n[ERROR]     'dependencies.dependency.version' for io.jsonwebtoken:jjwt-api:jar is missing. @ line 284, column 21\n[ERROR]     'dependencies.dependency.version' for io.jsonwebtoken:jjwt-impl:jar is missing. @ line 288, column 21\n[ERROR]     'dependencies.dependency.version' for io.jsonwebtoken:jjwt-jackson:jar is missing. @ line 293, column 21\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException",
+      "qwen_observation": "The UpgradeSpringBoot_3_3 recipe removed version management for problem-spring-web and jjwt dependencies, causing Maven to fail POM parsing due to missing <version> tags.",
+      "qwen_rationale": "Insert a pom_patch step immediately after the Spring Boot 3.3 upgrade to explicitly set versions for the unmanaged dependencies (problem-spring-web and jjwt artifacts) so the POM parses and compiles successfully under JDK 17 before proceeding to Java 17/21 transforms."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "pom_patch_fix_missing_versions",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "problem-spring-web",
+              "version": "0.29.1"
+            },
+            {
+              "op": "force_version",
+              "artifactId": "jjwt-api",
+              "version": "0.12.5"
+            },
+            {
+              "op": "force_version",
+              "artifactId": "jjwt-impl",
+              "version": "0.12.5"
+            },
+            {
+              "op": "force_version",
+              "artifactId": "jjwt-jackson",
+              "version": "0.12.5"
+            }
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 491.4,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[14:39:35] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] [ERROR] Some problems were encountered while processing the POMs:\n[ERROR] 'dependencies.dependency.version' for org.zalando:problem-spring-web:jar is missing. @ line 280, column 21\n[ERROR] 'dependencies.dependency.version' for io.jsonwebtoken:jjwt-api:jar is missing. @ line 284, column 21\n[ERROR] 'dependencies.dependency.version' for io.jsonwebtoken:jjwt-impl:jar is missing. @ line 288, column 21\n[ERROR] 'dependencies.dependency.version' for io.jsonwebtoken:jjwt-jackson:jar is missing. @ line 293, column 21\n @ \n[ERROR] The build could not read 1 project -> [Help 1]\n[ERROR]   \n[ERROR]   The project io.github.jhipster.sample:jhipster-elasticsearch-sample-application:0.0.1-SNAPSHOT (/work/src/pom.xml) has 4 errors\n[ERROR]     'dependencies.dependency.version' for org.zalando:problem-spring-web:jar is missing. @ line 280, column 21\n[ERROR]     'dependencies.dependency.version' for io.jsonwebtoken:jjwt-api:jar is missing. @ line 284, column 21\n[ERROR]     'dependencies.dependency.version' for io.jsonwebtoken:jjwt-impl:jar is missing. @ line 288, column 21\n[ERROR]     'dependencies.dependency.version' for io.jsonwebtoken:jjwt-jackson:jar is missing. @ line 293, column 21\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException",
+      "qwen_observation": "Build failed post-recipe at `upgrade_spring_boot_3_3` due to missing `<version>` tags for `problem-spring-web` and `jjwt` artifacts, which lost their managed versions after the Spring Boot parent upgrade.",
+      "qwen_rationale": "Moving the `pom_patch_fix_missing_versions` step before `upgrade_spring_boot_3_3` ensures the missing dependency versions are explicitly declared in the POM before the Spring Boot 3.3 upgrade recipe runs and triggers a compile check, preventing the immediate Maven resolution failure."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "pom_patch_fix_missing_versions",
+          "jdk": 11,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "problem-spring-web",
+              "version": "0.29.1"
+            },
+            {
+              "op": "force_version",
+              "artifactId": "jjwt-api",
+              "version": "0.12.5"
+            },
+            {
+              "op": "force_version",
+              "artifactId": "jjwt-impl",
+              "version": "0.12.5"
+            },
+            {
+              "op": "force_version",
+              "artifactId": "jjwt-jackson",
+              "version": "0.12.5"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 537.8,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "pom_patch_fix_missing_versions",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[14:49:44] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java:[8,27] cannot find symbol\n  symbol:   class ProblemModule\n  location: package org.zalando.problem\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java:[40,12] cannot find symbol\n  symbol:   class ProblemModule\n  location: class io.github.jhipster.sample.config.JacksonConfiguration\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java:[15,72] cannot find symbol\n  symbol:   class WebSecurityConfigurerAdapter\n  location: package org.springframework.security.config.annotation.web.configuration\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java:[28,44] cannot find symbol\n  symbol: class WebSecurityConfigurerAdapter\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/BankAccountResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/LabelResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/OperationResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/PublicUserResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/UserResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project jhipster-elasticsearch-sample-application: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java:[8,27] cannot find symbol\n[ERROR]   symbol:   class ProblemModule\n[ERROR]   location: package org.zalando.problem\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java:[40,12] cannot find symbol\n[ERROR]   symbol:   class ProblemModule\n[ERROR]   location: class io.github.jhipster.sample.config.JacksonConfiguration\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java:[15,72] cannot find symbol\n[ERROR]   symbol:   class WebSecurityConfigurerAdapter\n[ERROR]   location: package org.springframework.security.config.annotation.web.configuration\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/SecurityConfiguration.java:[28,44] cannot find symbol\n[ERROR]   symbol: class WebSecurityConfigurerAdapter\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/BankAccountResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/LabelResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/OperationResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/PublicUserResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/UserResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "The Spring Boot 3.3 upgrade step fails to compile because Spring Security 6 removed `WebSecurityConfigurerAdapter`, and dependencies like `problem-spring-web`, `jjwt`, and `elasticsearch` are missing or version-misaligned after the framework bump.",
+      "qwen_rationale": "Merging the WSCA AST rewrite and dependency version fixes directly into the `upgrade_spring_boot_3_3` step ensures they run before the post-step `mvn compile` check, preventing the chain from aborting. Switching from `pom_patch` to `UpgradeDependencyVersion` recipes avoids lxml DOM manipulation quirks and lets OpenRewrite safely resolve versions within the upgraded dependency tree."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3",
+            "com.claude.recipes.RewriteWebSecurityConfigurerAdapterToFilterChain",
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.zalando",
+              "artifactId": "problem-spring-web",
+              "newVersion": "0.29.1"
+            },
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "io.jsonwebtoken",
+              "artifactId": "jjwt-api",
+              "newVersion": "0.12.5"
+            },
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "io.jsonwebtoken",
+              "artifactId": "jjwt-impl",
+              "newVersion": "0.12.5"
+            },
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "io.jsonwebtoken",
+              "artifactId": "jjwt-jackson",
+              "newVersion": "0.12.5"
+            },
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.elasticsearch",
+              "artifactId": "elasticsearch",
+              "newVersion": "7.17.24"
+            }
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 498.5,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[15:02:31] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] [ERROR] Some problems were encountered while processing the POMs:\n[ERROR] 'dependencies.dependency.version' for org.zalando:problem-spring-web:jar is missing. @ line 280, column 21\n[ERROR] 'dependencies.dependency.version' for io.jsonwebtoken:jjwt-api:jar is missing. @ line 284, column 21\n[ERROR] 'dependencies.dependency.version' for io.jsonwebtoken:jjwt-impl:jar is missing. @ line 288, column 21\n[ERROR] 'dependencies.dependency.version' for io.jsonwebtoken:jjwt-jackson:jar is missing. @ line 293, column 21\n @ \n[ERROR] The build could not read 1 project -> [Help 1]\n[ERROR]   \n[ERROR]   The project io.github.jhipster.sample:jhipster-elasticsearch-sample-application:0.0.1-SNAPSHOT (/work/src/pom.xml) has 4 errors\n[ERROR]     'dependencies.dependency.version' for org.zalando:problem-spring-web:jar is missing. @ line 280, column 21\n[ERROR]     'dependencies.dependency.version' for io.jsonwebtoken:jjwt-api:jar is missing. @ line 284, column 21\n[ERROR]     'dependencies.dependency.version' for io.jsonwebtoken:jjwt-impl:jar is missing. @ line 288, column 21\n[ERROR]     'dependencies.dependency.version' for io.jsonwebtoken:jjwt-jackson:jar is missing. @ line 293, column 21\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException",
+      "qwen_observation": "The Spring Boot 3.3 upgrade step failed because Maven reported missing <version> tags for problem-spring-web and jjwt artifacts, which are not managed by the Spring Boot BOM and were left unversioned after the recipe run.",
+      "qwen_rationale": "Inserting a pom_patch step before the Spring Boot upgrade forces explicit versions on these unmanaged dependencies at the XML level, guaranteeing a valid POM before mvn compile executes. The redundant UpgradeDependencyVersion recipes are removed from the upgrade step to prevent recipe-matching conflicts and streamline the transition."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "fix_missing_dependency_versions",
+          "jdk": 11,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "problem-spring-web",
+              "version": "0.29.1"
+            },
+            {
+              "op": "force_version",
+              "artifactId": "jjwt-api",
+              "version": "0.12.5"
+            },
+            {
+              "op": "force_version",
+              "artifactId": "jjwt-impl",
+              "version": "0.12.5"
+            },
+            {
+              "op": "force_version",
+              "artifactId": "jjwt-jackson",
+              "version": "0.12.5"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3",
+            "com.claude.recipes.RewriteWebSecurityConfigurerAdapterToFilterChain",
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.elasticsearch",
+              "artifactId": "elasticsearch",
+              "newVersion": "7.17.24"
+            }
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 528.7,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "fix_missing_dependency_versions",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[15:13:08] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java:[8,27] cannot find symbol\n  symbol:   class ProblemModule\n  location: package org.zalando.problem\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java:[40,12] cannot find symbol\n  symbol:   class ProblemModule\n  location: class io.github.jhipster.sample.config.JacksonConfiguration\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/BankAccountResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/LabelResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/OperationResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/PublicUserResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/UserResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project jhipster-elasticsearch-sample-application: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java:[8,27] cannot find symbol\n[ERROR]   symbol:   class ProblemModule\n[ERROR]   location: package org.zalando.problem\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/config/JacksonConfiguration.java:[40,12] cannot find symbol\n[ERROR]   symbol:   class ProblemModule\n[ERROR]   location: class io.github.jhipster.sample.config.JacksonConfiguration\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/BankAccountResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/LabelResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/OperationResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/PublicUserResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] /work/src/src/main/java/io/github/jhipster/sample/web/rest/UserResource.java:[3,44] package org.elasticsearch.index.query does not exist\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Compilation failed after Spring Boot 3 upgrade due to missing `ProblemModule` (Zalando problem-spring-web) and `org.elasticsearch.index.query` (Elasticsearch client) on the classpath.",
+      "qwen_rationale": "The `UpgradeSpringBoot_3_3` recipe likely removed or failed to manage these third-party dependencies during the javax-to-jakarta transition. Explicitly adding `problem-spring-web` (0.29.1, compatible with SB3/Jakarta) and `elasticsearch` (7.17.24, to preserve legacy query APIs) via `AddDependency` in the same step ensures they are resolved before the post-recipe compile check runs."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "lombok_safe_bump",
+      "jdk": 11,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "newVersion": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "org.projectlombok.lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok-version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombokVersion",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "version.lombok",
+          "newValue": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java17",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+      ]
+    },
+    {
+      "label": "fix_missing_dependency_versions",
+      "jdk": 11,
+      "recipes": [
+        {
+          "op": "force_version",
+          "artifactId": "problem-spring-web",
+          "version": "0.29.1"
+        },
+        {
+          "op": "force_version",
+          "artifactId": "jjwt-api",
+          "version": "0.12.5"
+        },
+        {
+          "op": "force_version",
+          "artifactId": "jjwt-impl",
+          "version": "0.12.5"
+        },
+        {
+          "op": "force_version",
+          "artifactId": "jjwt-jackson",
+          "version": "0.12.5"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_spring_boot_3_3",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3",
+        "com.claude.recipes.RewriteWebSecurityConfigurerAdapterToFilterChain",
+        {
+          "name": "org.openrewrite.maven.AddDependency",
+          "groupId": "org.zalando",
+          "artifactId": "problem-spring-web",
+          "version": "0.29.1",
+          "scope": "compile"
+        },
+        {
+          "name": "org.openrewrite.maven.AddDependency",
+          "groupId": "org.elasticsearch",
+          "artifactId": "elasticsearch",
+          "version": "7.17.24",
+          "scope": "compile"
+        }
+      ]
+    },
+    {
+      "label": "java17_transforms",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+        "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+        "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+        "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+        "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+        "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+        "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+        "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+        "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+        "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+        "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+        "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+        "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+        "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+        "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+        "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_upgrade_spring_boot_3_3"
+}

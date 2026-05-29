@@ -1,0 +1,946 @@
+{
+  "stage": {
+    "repo": "sdrahnea/file-management-system",
+    "sha_from": "ac714e9096d2f6166ca1a61ee9f3217bddd1c5c0",
+    "sha_to": "346d8c5b4556fda7db31f2e52a7bd8e8b25b8c70",
+    "jv_from": 8,
+    "jv_to": 21,
+    "next_version_commit": "346d8c5b4556fda7db31f2e52a7bd8e8b25b8c70",
+    "commits_back": 20,
+    "pre_pass_count": 33,
+    "pre_fail_count": 0,
+    "pass_rate": 1.0,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 108.4,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[16:49:38] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/com/fms/config/MultipartConfig.java:[6,49] package org.springframework.web.multipart.commons does not exist\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project file-management-system: Compilation failure\n[ERROR] /work/src/src/main/java/com/fms/config/MultipartConfig.java:[6,49] package org.springframework.web.multipart.commons does not exist\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Compilation failed during Spring Boot 3.3 upgrade because Springfox is incompatible with Spring Boot 3 and commons-fileupload dependency is missing for multipart support.",
+      "qwen_rationale": "Springfox is completely incompatible with Spring Boot 3.x and causes classpath conflicts. Removing it explicitly before the SB3 meta-recipe runs prevents compilation failures. Additionally, Spring Boot 3.x requires commons-fileupload2-jakarta-servlet5 for multipart support, which must be added to resolve the missing package error."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "prepare_sb3",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.RemoveDependency",
+              "groupId": "io.springfox",
+              "artifactId": "springfox-swagger2"
+            },
+            {
+              "name": "org.openrewrite.maven.RemoveDependency",
+              "groupId": "io.springfox",
+              "artifactId": "springfox-swagger-ui"
+            },
+            {
+              "name": "org.openrewrite.maven.AddDependency",
+              "groupId": "commons-fileupload",
+              "artifactId": "commons-fileupload2-jakarta-servlet5",
+              "version": "2.0.0"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_prepare_sb3",
+      "aborted_at": "prepare_sb3",
+      "wall_s": 109.6,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "prepare_sb3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `prepare_sb3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[16:54:54] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] Failed to execute goal on project file-management-system: Could not resolve dependencies for project com.fms:file-management-system:jar:1.0.7\n[ERROR] dependency: commons-fileupload:commons-fileupload2-jakarta-servlet5:jar:2.0.0 (compile)\n[ERROR] \tCould not find artifact commons-fileupload:commons-fileupload2-jakarta-servlet5:jar:2.0.0 in nexus-public (http://nexus:8081/repository/maven-public/)\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException",
+      "qwen_observation": "The build failed because the manually added artifact commons-fileupload2-jakarta-servlet5:2.0.0 does not exist in the repository; Spring Boot 3.x requires Jakarta Servlet 6.0, which corresponds to commons-fileupload2-jakarta-servlet6.",
+      "qwen_rationale": "Removing the incorrect manual dependency addition prevents the dependency resolution failure. The UpgradeSpringBoot_3_3 recipe will automatically migrate the legacy commons-fileupload dependency to the correct Jakarta EE 10 equivalent if needed, or handle it transitively without blocking the build."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "prepare_sb3",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.RemoveDependency",
+              "groupId": "io.springfox",
+              "artifactId": "springfox-swagger2"
+            },
+            {
+              "name": "org.openrewrite.maven.RemoveDependency",
+              "groupId": "io.springfox",
+              "artifactId": "springfox-swagger-ui"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 105.0,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "prepare_sb3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[16:58:35] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/com/fms/FileManagementSystemApplication.java:[8,52] package springfox.documentation.swagger2.annotations does not exist\n[ERROR] /work/src/src/main/java/com/fms/FileManagementSystemApplication.java:[13,2] cannot find symbol\n  symbol: class EnableSwagger2\n[ERROR] /work/src/src/main/java/com/fms/config/MultipartConfig.java:[6,49] package org.springframework.web.multipart.commons does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[5,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[6,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[7,39] package springfox.documentation.service does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[8,35] package springfox.documentation.spi does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[9,50] package springfox.documentation.spring.web.plugins does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[23,12] cannot find symbol\n  symbol:   class Docket\n  location: class com.fms.config.SpringFoxConfig\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[32,13] cannot find symbol\n  symbol:   class ApiInfo\n  location: class com.fms.config.SpringFoxConfig\n[ERROR] /work/src/src/main/java/com/fms/controller/DownloadFileController.java:[5,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/src/main/java/com/fms/controller/DownloadFileController.java:[6,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/src/main/java/com/fms/controller/DownloadFileController.java:[18,2] cannot find symbol\n  symbol: class Api\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[6,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[7,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[18,2] cannot find symbol\n  symbol: class Api\n[ERROR] /work/src/src/main/java/com/fms/controller/DownloadFileController.java:[30,6] cannot find symbol\n  symbol:   class ApiOperation\n  location: class com.fms.controller.DownloadFileController\n[ERROR] /work/src/src/main/java/com/fms/controller/DownloadFileController.java:[39,6] cannot find symbol\n  symbol:   class ApiOperation\n  location: class com.fms.controller.DownloadFileController\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[31,6] cannot find symbol\n  symbol:   class ApiOperation\n  location: class com.fms.controller.UploadFileController\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[42,6] cannot find symbol\n  symbol:   class ApiOperation\n  location: class com.fms.controller.UploadFileController\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[52,6] cannot find symbol\n  symbol:   class ApiOperation\n  location: class com.fms.controller.UploadFileController\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[62,6] cannot find symbol\n  symbol:   class ApiOperation\n  location: class com.fms.controller.UploadFileController\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[74,6] cannot find symbol\n  symbol:   class ApiOperation\n  location: class com.fms.controller.UploadFileController\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[86,6] cannot find symbol\n  symbol:   class ApiOperation\n  location: class com.fms.controller.UploadFileController\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project file-management-system: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/com/fms/FileManagementSystemApplication.java:[8,52] package springfox.documentation.swagger2.annotations does not exist\n[ERROR] /work/src/src/main/java/com/fms/FileManagementSystemApplication.java:[13,2] cannot find symbol\n[ERROR]   symbol: class EnableSwagger2\n[ERROR] /work/src/src/main/java/com/fms/config/MultipartConfig.java:[6,49] package org.springframework.web.multipart.commons does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[5,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[6,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[7,39] package springfox.documentation.service does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[8,35] package springfox.documentation.spi does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[9,50] package springfox.documentation.spring.web.plugins does not exist\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[23,12] cannot find symbol\n[ERROR]   symbol:   class Docket\n--- final 30 lines ---\n[ERROR]   symbol:   class ApiOperation\n[ERROR]   location: class com.fms.controller.DownloadFileController\n[ERROR] /work/src/src/main/java/com/fms/controller/DownloadFileController.java:[39,6] cannot find symbol\n[ERROR]   symbol:   class ApiOperation\n[ERROR]   location: class com.fms.controller.DownloadFileController\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[31,6] cannot find symbol\n[ERROR]   symbol:   class ApiOperation\n[ERROR]   location: class com.fms.controller.UploadFileController\n[ERROR] /work/src/src/main/java/com/fms/controller/UploadFileController.java:[42,6] cannot find symbol\n[ERROR]   symbol:   class ApiOperation\n[ERROR]   location: class com.fms.controlle\n... [truncated] ...",
+      "qwen_observation": "Spring Boot 3.3 upgrade failed because SpringFox dependencies and annotations are incompatible with Spring Boot 3.x and were not migrated before the upgrade.",
+      "qwen_rationale": "Inserting the SpringFoxToSpringDoc migration step before the Spring Boot 3.3 upgrade will replace abandoned SpringFox dependencies with springdoc-openapi and rewrite all related annotations and configuration classes, allowing the SB3 upgrade to proceed without missing package errors."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "springfox_to_springdoc",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.springdoc.SpringFoxToSpringDoc"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_springfox_to_springdoc",
+      "aborted_at": "springfox_to_springdoc",
+      "wall_s": 149.2,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "springfox_to_springdoc",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `springfox_to_springdoc` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[17:04:11] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[19,16] constructor Info in class io.swagger.v3.oas.models.info.Info cannot be applied to given types;\n  required: no arguments\n  found:    java.lang.String,java.lang.String,java.lang.String,java.lang.String,<nulltype>,java.lang.String,java.lang.String,java.util.List<java.lang.Object>\n  reason: actual and formal argument lists differ in length\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.1:compile (default-compile) on project file-management-system: Compilation failure\n[ERROR] /work/src/src/main/java/com/fms/config/SpringFoxConfig.java:[19,16] constructor Info in class io.swagger.v3.oas.models.info.Info cannot be applied to given types;\n[ERROR]   required: no arguments\n[ERROR]   found:    java.lang.String,java.lang.String,java.lang.String,java.lang.String,<nulltype>,java.lang.String,java.lang.String,java.util.List<java.lang.Object>\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "The SpringFoxToSpringDoc recipe upgraded dependencies but left SpringFoxConfig.java using an incompatible Info constructor signature, causing a compilation failure under JDK 17.",
+      "qwen_rationale": "Removing the explicit SpringFoxToSpringDoc step and relying on UpgradeSpringBoot_3_3 (which internally handles build upgrades and may trigger broader framework migrations) aligns with the recommended template for SB 2.x -> 3.x transitions. The SB3 meta-recipe is designed to compose necessary dependency and namespace changes, avoiding the partial migration state that caused the constructor mismatch."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 147.0,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[17:09:55] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/com/fms/config/MultipartConfig.java:[6,49] package org.springframework.web.multipart.commons does not exist\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project file-management-system: Compilation failure\n[ERROR] /work/src/src/main/java/com/fms/config/MultipartConfig.java:[6,49] package org.springframework.web.multipart.commons does not exist\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Spring Boot 3.3 upgrade fails because SpringFox is incompatible with Spring Framework 6 (Jakarta EE) and org.springframework.web.multipart.commons was removed.",
+      "qwen_rationale": "Explicitly remove SpringFox dependencies before invoking the SB3 meta-recipe to prevent javax/jakarta namespace clashes and missing API errors. The SB3 upgrade will then proceed cleanly under JDK 17, followed by standard Java 17/21 transformations."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "lombok_safe_bump",
+      "jdk": 8,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "newVersion": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "org.projectlombok.lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok-version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombokVersion",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "version.lombok",
+          "newValue": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "java8_to_java11",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.migrate.Java8toJava11"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java17",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+      ]
+    },
+    {
+      "label": "remove_springfox",
+      "jdk": 11,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.RemoveDependency",
+          "groupId": "io.springfox",
+          "artifactId": "springfox-swagger2"
+        },
+        {
+          "name": "org.openrewrite.maven.RemoveDependency",
+          "groupId": "io.springfox",
+          "artifactId": "springfox-swagger-ui"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_spring_boot_3_3",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+      ]
+    },
+    {
+      "label": "java17_transforms",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+        "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+        "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+        "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+        "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+        "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+        "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+        "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+        "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+        "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+        "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+        "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+        "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+        "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+        "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+        "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_upgrade_spring_boot_3_3"
+}

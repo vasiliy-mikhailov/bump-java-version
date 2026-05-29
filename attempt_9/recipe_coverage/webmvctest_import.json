@@ -1,0 +1,637 @@
+[
+  {
+    "slug": "1190782_odsoft-project-1190782-1230183-1230164__J17toJ21",
+    "repo": "1190782/odsoft-project-1190782-1230183-1230164",
+    "sha_from": "e83b0a37b6a26c417ae2e26435458f2081fdb1a1",
+    "sha_to": "a94f1b9c0cee085aa30f0c17396d2e2d25302a9d",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/pt/psoft/g1/psoftg1/configuration/SecurityConfig.java",
+      "src/test/java/pt/psoft/g1/psoftg1/integrationTests/controllers/AuthorControllerIntegrationTest.java"
+    ]
+  },
+  {
+    "slug": "Helenlongjiao_UCSB-dining-portal__J11toJ21",
+    "repo": "Helenlongjiao/UCSB-dining-portal",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "Helenlongjiao_UCSB-dining-portal__J17toJ21",
+    "repo": "Helenlongjiao/UCSB-dining-portal",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "daxyonis_pdi-fundraising__J11toJ21",
+    "repo": "daxyonis/pdi-fundraising",
+    "sha_from": "3e0bbc1819806a9a0ce09ab8b672c25d46a06177",
+    "sha_to": "a8f796043121798180ee364e8be8ceec314af87b",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/com/poivredesiles/fundraising/config/SecurityConfig.java",
+      "src/test/java/com/poivredesiles/fundraising/controller/GlobalPaymentsControllerTest.java",
+      "src/test/java/com/poivredesiles/fundraising/controller/MainControllerTest.java",
+      "src/test/java/com/poivredesiles/fundraising/controller/PdiCampaignControllerTest.java",
+      "src/test/java/com/poivredesiles/fundraising/controller/SalesControllerTest.java"
+    ]
+  },
+  {
+    "slug": "farzad-sedaghatbin_ShipFlow__J17toJ21",
+    "repo": "farzad-sedaghatbin/ShipFlow",
+    "sha_from": "8b0e240c44649659617c783afde261483f7c4bf1",
+    "sha_to": "51b3f23aaaeb81d040471e9402b68b1002ef20d5",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "backend/src/main/java/com/github/farzadsedaghatbin/shipflow/security/SecurityConfig.java",
+      "backend/src/test/java/com/github/farzadsedaghatbin/shipflow/config/TestAIConfig.java"
+    ]
+  },
+  {
+    "slug": "gii-is-DP1_react-petclinic__J17toJ21",
+    "repo": "gii-is-DP1/react-petclinic",
+    "sha_from": "252ea28f777d2aa73f3f4ed9c0d8ff6eb1de8a57",
+    "sha_to": "c4ff33c574ff4f1900c34ef77f99f97e60a1f518",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/org/springframework/samples/petclinic/configuration/SecurityConfiguration.java",
+      "src/test/java/org/springframework/samples/petclinic/auth/AuthControllerTests.java",
+      "src/test/java/org/springframework/samples/petclinic/consultation/ConsultationControllerTests.java",
+      "src/test/java/org/springframework/samples/petclinic/owner/OwnerRestControllerTests.java",
+      "src/test/java/org/springframework/samples/petclinic/pet/PetRestControllerTests.java"
+    ]
+  },
+  {
+    "slug": "in28minutes_spring-boot-examples__J17toJ21",
+    "repo": "in28minutes/spring-boot-examples",
+    "sha_from": "4ea7e5c0a2864cd8ae7f19c1942760c67763d973",
+    "sha_to": "643d9741f232e2430514b994a3171ff2ac7662f6",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "spring-boot-react-examples/spring-boot-react-basic-auth-login-logout/backend-spring-boot-react-basic-auth-login-logout/src/main/java/com/in28minutes/fullstack/springboot/fullstack/basic/authentication/springbootfullstackbasicauthloginlogout/basic/auth/SpringSecurityConfigurationBasicAuth.java",
+      "spring-boot-react-examples/spring-boot-react-cors-cross-origin-csrf/backend-spring-boot-react-cors-cross-origin-csrf/src/main/java/com/in28minutes/fullstack/springboot/rest/api/springbootcorscrossorigincsrf/basic/auth/SpringSecurityConfigurationBasicAuth.java",
+      "spring-boot-react-examples/spring-boot-react-jwt-auth-login-logout/backend-spring-boot-react-jwt-auth-login-logout/src/main/java/com/in28minutes/fullstack/springboot/jwt/basic/authentication/springbootjwtauthloginlogout/jwt/JWTWebSecurityConfig.java",
+      "spring-boot-rest-services-with-unit-and-integration-tests/src/test/java/com/in28minutes/springboot/controller/StudentControllerTest.java",
+      "spring-boot-rest-services/src/main/java/com/in28minutes/springboot/security/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "indiana-university_lms-canvas-course-setup-wizard__J17toJ21",
+    "repo": "indiana-university/lms-canvas-course-setup-wizard",
+    "sha_from": "0906f35f4ea713310a484900915640e3eb439440",
+    "sha_to": "20ac1332aeb212ba7aa48bbf145ca7b100f17d20",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/iu/uits/lms/coursesetupwizard/config/SecurityConfig.java",
+      "src/test/java/edu/iu/uits/lms/coursesetupwizard/services/AppLaunchSecurityTest.java",
+      "src/test/java/edu/iu/uits/lms/coursesetupwizard/services/CorsTest.java",
+      "src/test/java/edu/iu/uits/lms/coursesetupwizard/services/RestLaunchSecurityTest.java"
+    ]
+  },
+  {
+    "slug": "indiana-university_lms-canvas-viewem__J17toJ21",
+    "repo": "indiana-university/lms-canvas-viewem",
+    "sha_from": "ecce8eb81edeedaf4dae60d4de759d8265668016",
+    "sha_to": "343c445a9e81f9234aaca7131623ceff148ccb20",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/iu/uits/lms/viewem/config/SecurityConfig.java",
+      "src/test/java/edu/iu/uits/lms/viewem/AppLaunchSecurityTest.java"
+    ]
+  },
+  {
+    "slug": "mabdulwasii_retail-manager__J17toJ21",
+    "repo": "mabdulwasii/retail-manager",
+    "sha_from": "ec83e65dabbc4aac95324792fe563c67ec859342",
+    "sha_to": "f6532d6c668608ac29fce901fa016bcc2b30be8e",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "backend/src/main/java/com/princely/shopmanager/auth/config/SecurityConfig.java",
+      "backend/src/main/java/com/princely/shopmanager/shared/config/SwaggerSecurityConfig.java",
+      "backend/src/test/java/com/princely/shopmanager/analytics/controller/AnalyticsControllerTest.java",
+      "backend/src/test/java/com/princely/shopmanager/core/controller/ShopControllerTest.java",
+      "backend/src/test/java/com/princely/shopmanager/sales/controller/ReceiptControllerTest.java"
+    ]
+  },
+  {
+    "slug": "mpalourdio_SpringBootTemplate__J11toJ21",
+    "repo": "mpalourdio/SpringBootTemplate",
+    "sha_from": "e4599c9e6519723d68cc033b7f25d88cf72537d1",
+    "sha_to": "6fb9c21b6be40768d03dbd442b4921a4f1a03192",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/app/config/WebSecurityConfig.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/BasicAuthControllerTest.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/ExceptionControllerTest.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/ForwarderControllerTest.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/HttpVersionedApiTest.java"
+    ]
+  },
+  {
+    "slug": "mpalourdio_SpringBootTemplate__J17toJ21",
+    "repo": "mpalourdio/SpringBootTemplate",
+    "sha_from": "9d5eb27eb427363500b9467517db4a5b3cc2ba76",
+    "sha_to": "6fb9c21b6be40768d03dbd442b4921a4f1a03192",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/app/config/WebSecurityConfig.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/BasicAuthControllerTest.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/ExceptionControllerTest.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/ForwarderControllerTest.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/HttpVersionedApiTest.java"
+    ]
+  },
+  {
+    "slug": "mpalourdio_SpringBootTemplate__J8toJ21",
+    "repo": "mpalourdio/SpringBootTemplate",
+    "sha_from": "9d53a1a3b7929ab2d181d2f0626bf6380bed22c7",
+    "sha_to": "6fb9c21b6be40768d03dbd442b4921a4f1a03192",
+    "jv_from": 8,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/app/config/WebSecurityConfig.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/BasicAuthControllerTest.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/ExceptionControllerTest.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/ForwarderControllerTest.java",
+      "src/test/java/com/mpalourdio/springboottemplate/controllers/HttpVersionedApiTest.java"
+    ]
+  },
+  {
+    "slug": "ppashapu_my-personal-repository__J17toJ21",
+    "repo": "ppashapu/my-personal-repository",
+    "sha_from": "4ea7e5c0a2864cd8ae7f19c1942760c67763d973",
+    "sha_to": "643d9741f232e2430514b994a3171ff2ac7662f6",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "spring-boot-react-examples/spring-boot-react-basic-auth-login-logout/backend-spring-boot-react-basic-auth-login-logout/src/main/java/com/in28minutes/fullstack/springboot/fullstack/basic/authentication/springbootfullstackbasicauthloginlogout/basic/auth/SpringSecurityConfigurationBasicAuth.java",
+      "spring-boot-react-examples/spring-boot-react-cors-cross-origin-csrf/backend-spring-boot-react-cors-cross-origin-csrf/src/main/java/com/in28minutes/fullstack/springboot/rest/api/springbootcorscrossorigincsrf/basic/auth/SpringSecurityConfigurationBasicAuth.java",
+      "spring-boot-react-examples/spring-boot-react-jwt-auth-login-logout/backend-spring-boot-react-jwt-auth-login-logout/src/main/java/com/in28minutes/fullstack/springboot/jwt/basic/authentication/springbootjwtauthloginlogout/jwt/JWTWebSecurityConfig.java",
+      "spring-boot-rest-services-with-unit-and-integration-tests/src/test/java/com/in28minutes/springboot/controller/StudentControllerTest.java",
+      "spring-boot-rest-services/src/main/java/com/in28minutes/springboot/security/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f24_proj-courses-f24-01__J11toJ21",
+    "repo": "ucsb-cs156-f24/proj-courses-f24-01",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "2fdba3b6752d97e4042ae301b06155553ff6ae09",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f24_proj-courses-f24-01__J17toJ21",
+    "repo": "ucsb-cs156-f24/proj-courses-f24-01",
+    "sha_from": "55f42a4f2d31dd0b785e51bf23a202ce82add854",
+    "sha_to": "2fdba3b6752d97e4042ae301b06155553ff6ae09",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/courses/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/courses/controllers/ApiControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/courses/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/courses/controllers/CourseOverTimeBuildingControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/courses/controllers/CourseOverTimeControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f24_proj-courses-f24-02__J11toJ21",
+    "repo": "ucsb-cs156-f24/proj-courses-f24-02",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "2fdba3b6752d97e4042ae301b06155553ff6ae09",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f24_proj-courses-f24-02__J17toJ21",
+    "repo": "ucsb-cs156-f24/proj-courses-f24-02",
+    "sha_from": "55f42a4f2d31dd0b785e51bf23a202ce82add854",
+    "sha_to": "2fdba3b6752d97e4042ae301b06155553ff6ae09",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/courses/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/courses/controllers/ApiControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/courses/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/courses/controllers/CourseOverTimeBuildingControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/courses/controllers/CourseOverTimeControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-dining-f25-06__J11toJ21",
+    "repo": "ucsb-cs156-f25/proj-dining-f25-06",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-dining-f25-06__J17toJ21",
+    "repo": "ucsb-cs156-f25/proj-dining-f25-06",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-dining-f25-07__J11toJ21",
+    "repo": "ucsb-cs156-f25/proj-dining-f25-07",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-dining-f25-07__J17toJ21",
+    "repo": "ucsb-cs156-f25/proj-dining-f25-07",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-dining-f25-08__J11toJ21",
+    "repo": "ucsb-cs156-f25/proj-dining-f25-08",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-dining-f25-08__J17toJ21",
+    "repo": "ucsb-cs156-f25/proj-dining-f25-08",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-happycows-f25-14__J17toJ21",
+    "repo": "ucsb-cs156-f25/proj-happycows-f25-14",
+    "sha_from": "7cd546ef016865239ca8f22ac2265757a27e57a5",
+    "sha_to": "23c661db4647035207c1244515e3efbd3efce3a6",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/happiercows/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/AnnouncementsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/ChatMessageControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CommonStatsControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-happycows-f25-15__J17toJ21",
+    "repo": "ucsb-cs156-f25/proj-happycows-f25-15",
+    "sha_from": "7cd546ef016865239ca8f22ac2265757a27e57a5",
+    "sha_to": "23c661db4647035207c1244515e3efbd3efce3a6",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/happiercows/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/AnnouncementsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/ChatMessageControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CommonStatsControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-happycows-f25-16__J17toJ21",
+    "repo": "ucsb-cs156-f25/proj-happycows-f25-16",
+    "sha_from": "7cd546ef016865239ca8f22ac2265757a27e57a5",
+    "sha_to": "23c661db4647035207c1244515e3efbd3efce3a6",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/happiercows/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/AnnouncementsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/ChatMessageControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CommonStatsControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_proj-rec-s25-13__J11toJ21",
+    "repo": "ucsb-cs156-s25/proj-rec-s25-13",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_proj-rec-s25-13__J17toJ21",
+    "repo": "ucsb-cs156-s25/proj-rec-s25-13",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_proj-rec-s25-14__J11toJ21",
+    "repo": "ucsb-cs156-s25/proj-rec-s25-14",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_proj-rec-s25-14__J17toJ21",
+    "repo": "ucsb-cs156-s25/proj-rec-s25-14",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_proj-rec-s25-15__J11toJ21",
+    "repo": "ucsb-cs156-s25/proj-rec-s25-15",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_proj-rec-s25-15__J17toJ21",
+    "repo": "ucsb-cs156-s25/proj-rec-s25-15",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_proj-rec-s25-16__J11toJ21",
+    "repo": "ucsb-cs156-s25/proj-rec-s25-16",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_proj-rec-s25-16__J17toJ21",
+    "repo": "ucsb-cs156-s25/proj-rec-s25-16",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_team02-s25-03__J11toJ21",
+    "repo": "ucsb-cs156-s25/team02-s25-03",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_team02-s25-03__J17toJ21",
+    "repo": "ucsb-cs156-s25/team02-s25-03",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_team02-s25-09__J11toJ21",
+    "repo": "ucsb-cs156-s25/team02-s25-09",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_team02-s25-09__J17toJ21",
+    "repo": "ucsb-cs156-s25/team02-s25-09",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_team02-s25-14__J11toJ21",
+    "repo": "ucsb-cs156-s25/team02-s25-14",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_team02-s25-14__J17toJ21",
+    "repo": "ucsb-cs156-s25/team02-s25-14",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_team02-s25-16__J11toJ21",
+    "repo": "ucsb-cs156-s25/team02-s25-16",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s25_team02-s25-16__J17toJ21",
+    "repo": "ucsb-cs156-s25/team02-s25-16",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-s26_proj-happycows-s26-14__J17toJ21",
+    "repo": "ucsb-cs156-s26/proj-happycows-s26-14",
+    "sha_from": "7cd546ef016865239ca8f22ac2265757a27e57a5",
+    "sha_to": "23c661db4647035207c1244515e3efbd3efce3a6",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/happiercows/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/AnnouncementsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/ChatMessageControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CommonStatsControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156_proj-dining__J11toJ21",
+    "repo": "ucsb-cs156/proj-dining",
+    "sha_from": "90e52dc7a053968d40514d7d2f378b1f870bfe31",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 11,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/kitchensink/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/kitchensink/controllers/UserInfoControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156_proj-dining__J17toJ21",
+    "repo": "ucsb-cs156/proj-dining",
+    "sha_from": "3a8c5a36bc9419b6aa4088ddaf3760cdddc0d847",
+    "sha_to": "789d5d75b14a401141b8710347d47a3704da94e0",
+    "jv_from": 17,
+    "jv_to": 21,
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/example/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/RestaurantsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/SystemInfoControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/example/controllers/UCSBDatesControllerTests.java"
+    ]
+  }
+]

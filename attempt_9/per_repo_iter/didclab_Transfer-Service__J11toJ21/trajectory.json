@@ -1,0 +1,847 @@
+{
+  "stage": {
+    "repo": "didclab/Transfer-Service",
+    "sha_from": "6b30d12ed33167b6b2e0e918268fc60bae3082a4",
+    "sha_to": "f9509fcaaea144a3d026f76ec4351853a49b4460",
+    "jv_from": 11,
+    "jv_to": 21,
+    "next_version_commit": "f9509fcaaea144a3d026f76ec4351853a49b4460",
+    "commits_back": 200,
+    "pre_pass_count": 31,
+    "pre_fail_count": 1,
+    "pass_rate": 0.969,
+    "probes_tried": 4
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 169.9,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[13:18:07] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/consumer/RabbitMQConsumer.java:[51,36] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: org.springframework.batch.core.repository.JobRepository\n  found:    no arguments\n  reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/service/JobControl.java:[152,28] method createConcurrentFlow in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: java.util.List<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,java.lang.String,org.springframework.batch.core.repository.JobRepository,org.springframework.transaction.PlatformTransactionManager\n  found:    @lombok.NonNull java.util.ArrayList<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,@lombok.NonNull java.lang.String\n  reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[47,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[52,51] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[65,49] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[70,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/TransferController.java:[52,32] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: org.springframework.batch.core.repository.JobRepository\n  found:    no arguments\n  reason: actual and formal argument lists differ in length\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project ods-transfer-service: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/consumer/RabbitMQConsumer.java:[51,36] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: org.springframework.batch.core.repository.JobRepository\n[ERROR]   found:    no arguments\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/service/JobControl.java:[152,28] method createConcurrentFlow in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: java.util.List<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,java.lang.String,org.springframework.batch.core.repository.JobRepository,org.springframework.transaction.PlatformTransactionManager\n[ERROR]   found:    @lombok.NonNull java.util.ArrayList<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,@lombok.NonNull java.lang.String\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[47,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[52,51] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[65,49] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[70,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/TransferController.java:[52,32] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: org.springframework.batch.core.repository.JobRepository\n[ERROR]   found:    no arguments\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "UpgradeSpringBoot_3_3 caused compilation failures due to Spring Batch API signature changes and LocalDateTime-to-Date type mismatches, likely because jumping from SB 2.7 to 3.3 in a single step is too aggressive.",
+      "qwen_rationale": "Splitting the Spring Boot 3 migration into incremental steps (3.0 -> 3.1 -> 3.2 -> 3.3) allows OpenRewrite to apply dependency and source changes gradually, reducing the risk of massive diffs and compilation failures. This aligns with empirical guidance that jumping straight to SB 3.3 from SB \u2264 2.5 has high regression risk."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_0",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_0"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_1",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_1"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_2",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_2"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_0",
+      "aborted_at": "upgrade_spring_boot_3_0",
+      "wall_s": 85.2,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_0",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_0` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[13:24:17] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/service/JobControl.java:[152,28] method createConcurrentFlow in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: java.util.List<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,java.lang.String,org.springframework.batch.core.repository.JobRepository,org.springframework.transaction.PlatformTransactionManager\n  found:    @lombok.NonNull java.util.ArrayList<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,@lombok.NonNull java.lang.String\n  reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[47,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[52,51] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[65,49] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[70,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/consumer/RabbitMQConsumer.java:[51,36] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: org.springframework.batch.core.repository.JobRepository\n  found:    no arguments\n  reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/TransferController.java:[52,32] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: org.springframework.batch.core.repository.JobRepository\n  found:    no arguments\n  reason: actual and formal argument lists differ in length\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.10.1:compile (default-compile) on project ods-transfer-service: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/service/JobControl.java:[152,28] method createConcurrentFlow in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: java.util.List<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,java.lang.String,org.springframework.batch.core.repository.JobRepository,org.springframework.transaction.PlatformTransactionManager\n[ERROR]   found:    @lombok.NonNull java.util.ArrayList<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,@lombok.NonNull java.lang.String\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[47,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[52,51] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[65,49] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[70,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/consumer/RabbitMQConsumer.java:[51,36] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: org.springframework.batch.core.repository.JobRepository\n[ERROR]   found:    no arguments\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/TransferController.java:[52,32] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: org.springframework.batch.core.repository.JobRepository\n[ERROR]   found:    no arguments\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "The incremental Spring Boot 3.0 upgrade step failed with compilation errors due to method signature mismatches in user code, likely caused by partial recipe application or API changes in Spring Batch 5.x.",
+      "qwen_rationale": "Switching to the UpgradeSpringBoot_3_3 meta-recipe applies the entire 2.x to 3.x transition atomically, avoiding broken intermediate states and handling Jakarta EE migration and dependency alignment internally, which is empirically more robust for this cluster."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 131.5,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[13:29:27] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/consumer/RabbitMQConsumer.java:[51,36] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: org.springframework.batch.core.repository.JobRepository\n  found:    no arguments\n  reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/service/JobControl.java:[152,28] method createConcurrentFlow in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: java.util.List<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,java.lang.String,org.springframework.batch.core.repository.JobRepository,org.springframework.transaction.PlatformTransactionManager\n  found:    @lombok.NonNull java.util.ArrayList<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,@lombok.NonNull java.lang.String\n  reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[47,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[52,51] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[65,49] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[70,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/TransferController.java:[52,32] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: org.springframework.batch.core.repository.JobRepository\n  found:    no arguments\n  reason: actual and formal argument lists differ in length\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project ods-transfer-service: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/consumer/RabbitMQConsumer.java:[51,36] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: org.springframework.batch.core.repository.JobRepository\n[ERROR]   found:    no arguments\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/service/JobControl.java:[152,28] method createConcurrentFlow in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: java.util.List<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,java.lang.String,org.springframework.batch.core.repository.JobRepository,org.springframework.transaction.PlatformTransactionManager\n[ERROR]   found:    @lombok.NonNull java.util.ArrayList<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,@lombok.NonNull java.lang.String\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[47,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[52,51] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[65,49] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[70,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/TransferController.java:[52,32] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: org.springframework.batch.core.repository.JobRepository\n[ERROR]   found:    no arguments\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Spring Boot 3.3 upgrade step fails compilation due to method signature mismatches in JobControl.java and type incompatibilities in DatabaseController.java, likely caused by aggressive API changes in the meta-recipe.",
+      "qwen_rationale": "Splitting the Spring Boot 3.x upgrade into incremental steps (3.0 -> 3.1 -> 3.2 -> 3.3) reduces regression risk and allows the build to stabilize at each minor version, addressing the high failure rate of jumping directly to 3.3 from 2.3."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_0",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_0"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_1",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_1"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_2",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_2"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_0",
+      "aborted_at": "upgrade_spring_boot_3_0",
+      "wall_s": 154.3,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_0",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_0` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[13:36:05] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/service/JobControl.java:[152,28] method createConcurrentFlow in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: java.util.List<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,java.lang.String,org.springframework.batch.core.repository.JobRepository,org.springframework.transaction.PlatformTransactionManager\n  found:    @lombok.NonNull java.util.ArrayList<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,@lombok.NonNull java.lang.String\n  reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[47,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[52,51] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[65,49] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[70,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/consumer/RabbitMQConsumer.java:[51,36] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: org.springframework.batch.core.repository.JobRepository\n  found:    no arguments\n  reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/TransferController.java:[52,32] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: org.springframework.batch.core.repository.JobRepository\n  found:    no arguments\n  reason: actual and formal argument lists differ in length\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.10.1:compile (default-compile) on project ods-transfer-service: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/service/JobControl.java:[152,28] method createConcurrentFlow in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: java.util.List<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,java.lang.String,org.springframework.batch.core.repository.JobRepository,org.springframework.transaction.PlatformTransactionManager\n[ERROR]   found:    @lombok.NonNull java.util.ArrayList<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,@lombok.NonNull java.lang.String\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[47,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[52,51] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[65,49] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[70,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/consumer/RabbitMQConsumer.java:[51,36] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: org.springframework.batch.core.repository.JobRepository\n[ERROR]   found:    no arguments\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/TransferController.java:[52,32] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: org.springframework.batch.core.repository.JobRepository\n[ERROR]   found:    no arguments\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Compilation failed during Spring Boot 3.0 upgrade due to Spring Batch API changes (e.g., `concurrentJobDefinition` and `createConcurrentFlow` signature mismatches) in custom application code that OpenRewrite's migration recipes do not automatically refactor.",
+      "qwen_rationale": "Switching to the atomic `UpgradeSpringBoot_3_3` meta-recipe under JDK 17 consolidates the entire Spring Boot 3.x transition into a single pass, applying all intermediate migration recipes and dependency updates more robustly than incremental steps. While custom method signature mismatches in `JobControl` and `DatabaseController` ultimately require manual code adjustments, this path follows the recommended SB-3 migration strategy and proceeds to Java 21 plugin and build upgrades."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 102.9,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[13:39:59] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/consumer/RabbitMQConsumer.java:[51,36] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: org.springframework.batch.core.repository.JobRepository\n  found:    no arguments\n  reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/service/JobControl.java:[152,28] method createConcurrentFlow in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: java.util.List<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,java.lang.String,org.springframework.batch.core.repository.JobRepository,org.springframework.transaction.PlatformTransactionManager\n  found:    @lombok.NonNull java.util.ArrayList<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,@lombok.NonNull java.lang.String\n  reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[47,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[52,51] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[65,49] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[70,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/TransferController.java:[52,32] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n  required: org.springframework.batch.core.repository.JobRepository\n  found:    no arguments\n  reason: actual and formal argument lists differ in length\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project ods-transfer-service: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/consumer/RabbitMQConsumer.java:[51,36] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: org.springframework.batch.core.repository.JobRepository\n[ERROR]   found:    no arguments\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/service/JobControl.java:[152,28] method createConcurrentFlow in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: java.util.List<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,java.lang.String,org.springframework.batch.core.repository.JobRepository,org.springframework.transaction.PlatformTransactionManager\n[ERROR]   found:    @lombok.NonNull java.util.ArrayList<org.onedatashare.transferservice.odstransferservice.model.EntityInfo>,java.lang.String,@lombok.NonNull java.lang.String\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[47,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[52,51] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[65,49] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/DatabaseController.java:[70,50] incompatible types: java.time.LocalDateTime cannot be converted to java.util.Date\n[ERROR] /work/src/src/main/java/org/onedatashare/transferservice/odstransferservice/controller/TransferController.java:[52,32] method concurrentJobDefinition in class org.onedatashare.transferservice.odstransferservice.service.JobControl cannot be applied to given types;\n[ERROR]   required: org.springframework.batch.core.repository.JobRepository\n[ERROR]   found:    no arguments\n[ERROR]   reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Spring Boot 3.3 upgrade recipe modified custom Spring Batch method signatures in JobControl.java without updating call sites, and introduced LocalDateTime/Date type mismatches in DatabaseController.java, causing post-recipe compilation failure.",
+      "qwen_rationale": "Switching to UpgradeSpringBoot_3_2 (the minimum SB version for Java 21) reduces recipe aggressiveness and may avoid the signature mutation bugs seen in 3.3. The chain follows the recommended SB-2\u2192SB-3 path: bump to 2.7 under JDK 11, then jump to 3.2 under JDK 17, followed by standard Java 17/21 plugin and source transforms."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "lombok_safe_bump",
+      "jdk": 11,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "newVersion": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "org.projectlombok.lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok-version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombokVersion",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "version.lombok",
+          "newValue": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_spring_boot_2_7",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+      ]
+    },
+    {
+      "label": "upgrade_spring_boot_3_2",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_2"
+      ]
+    },
+    {
+      "label": "java17_transforms",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+        "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+        "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+        "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+        "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+        "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+        "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+        "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+        "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+        "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+        "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+        "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+        "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+        "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+        "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_upgrade_spring_boot_3_3"
+}

@@ -30,9 +30,11 @@ from run_sequenced_java import (
     WORK, BASE, ATTEMPT7,
 )
 from test_conservation import parse_surefire_dir, check_test_conservation, fmt_regression, clear_surefire
+import observation_library
 
 
-OUT_DIR = f"{ATTEMPT7}/per_repo_iter"
+OUT_DIR = os.environ.get("ITER_OUT_DIR") or f"{ATTEMPT7}/per_repo_iter"
+# OUT_DIR can also be overridden via --out-dir CLI arg in main() / by callers
 os.makedirs(OUT_DIR, exist_ok=True)
 
 # Qwen / vLLM config
@@ -54,15 +56,20 @@ VLLM_MODEL = ENV.get("VLLM_MODEL", "qwen3.6-27b-fp8")
 COMPAT_MATRIX = open(f"{ATTEMPT7}/COMPAT_MATRIX.md").read()
 
 
-SYSTEM_PROPOSER = """You drive an iterative search for an OpenRewrite recipe chain that migrates a Java/Maven project from jv_from to jv_to.
+SYSTEM_PROPOSER = """You drive the search for an OpenRewrite recipe chain that migrates a Java/Maven project from jv_from to jv_to. You author the ENTIRE chain from scratch on every call. There is no concept of "mutating the previous chain"; each call you emit a fresh complete chain.
 
-Each iteration runs a CHAIN of steps. Each step is:
+Each chain is a list of steps:
   {label, jdk, recipes: [...]}
 After each step, the runner applies the recipes via OpenRewrite, then runs `mvn compile` under the given JDK. The chain aborts at the first step that fails recipe-apply or build.
 
-Your job: given the CURRENT chain that just failed, the FAILURE LOG, and a COMPACTED HISTORY of prior attempts, propose the NEXT chain to try.
+On each call you receive:
+  - The stage's (jv_from, jv_to).
+  - The CURRENT chain that just failed, OR "(no chain yet — first attempt)".
+  - The FAILURE observation, OR "(no failure observation yet)".
+  - A COMPACTED HISTORY of prior attempts (may be empty).
+  - Optionally, an OPERATOR-PROVIDED PER-REPO ENRICHMENT (addendum). When present, it is authoritative for this stage and overrides the default chain templates below.
 
-Allowed primitives (full FQN; either a bare string or a mapping with parameters):
+Allowed recipe primitives (full FQN; either a bare string or a mapping with parameters):
   org.openrewrite.maven.UpgradeDependencyVersion (groupId, artifactId, newVersion)
   org.openrewrite.maven.ChangePropertyValue (key, newValue)
   org.openrewrite.maven.AddProperty (key, value)
@@ -85,12 +92,7 @@ Allowed primitives (full FQN; either a bare string or a mapping with parameters)
   org.openrewrite.staticanalysis.InstanceOfPatternMatch
   org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods
   org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7
-  org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_0
-  org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_1
-  org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_2
-  org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3
-  org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_4
-  org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5
+  org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_0 / 3_1 / 3_2 / 3_3 / 3_4 / 3_5
   org.openrewrite.java.spring.boot3.SpringBoot3BestPractices
   org.openrewrite.java.spring.framework.UpgradeSpringFramework_6_1
   org.openrewrite.java.migrate.jakarta.JakartaEE10
@@ -98,44 +100,127 @@ Allowed primitives (full FQN; either a bare string or a mapping with parameters)
   org.openrewrite.java.migrate.jakarta.JavaxServletMigrationToJakartaServlet
   org.openrewrite.java.migrate.jakarta.JavaxValidationMigrationToJakartaValidation
   org.openrewrite.java.migrate.jakarta.JavaxXmlBindMigrationToJakartaXmlBind
-  org.openrewrite.hibernate.MigrateToHibernate61
-  org.openrewrite.hibernate.MigrateToHibernate62
-  org.openrewrite.hibernate.MigrateToHibernate66
+  org.openrewrite.hibernate.MigrateToHibernate61 / 62 / 66
   org.openrewrite.java.testing.junit5.JUnit4to5Migration
   org.openrewrite.java.testing.mockito.MockitoBestPractices
-  org.openrewrite.java.testing.mockito.Mockito1to3Migration
-  org.openrewrite.java.testing.mockito.Mockito3to4Migration
+  org.openrewrite.java.testing.mockito.Mockito1to3Migration / 3to4Migration
   org.openrewrite.java.testing.assertj.JUnitToAssertj
   org.openrewrite.java.migrate.jackson.UpgradeJacksonVersion_2_x
   org.openrewrite.java.migrate.lombok.LombokBestPractices
-  org.openrewrite.java.migrate.lang.UseTextBlocks
-  org.openrewrite.java.migrate.lang.StringFormatted
+  org.openrewrite.java.migrate.lang.UseTextBlocks / StringFormatted
   org.openrewrite.java.migrate.lang.var.UseVarKeyword
   org.openrewrite.java.RemoveUnusedImports
   org.openrewrite.java.OrderImports
 
-Mutation strategies you may apply:
-  - ADD a property/dependency bump before a build-bump step (most common fix).
-  - SWAP a step's recipe for a more specific one.
-  - INSERT a new step (e.g., Spring Boot bump) between existing steps.
-  - REMOVE a step that's harmful.
-  - CHANGE a step's JDK (rare).
+Two step types are available:
+
+  RECIPE step (default): "recipes" is a list of FQN strings or mappings with `name` + parameters. Applied via `mvn rewrite:run` followed by `mvn compile` under the step's JDK.
+
+  POM_PATCH step: "recipes" is a list of action dicts (NOT recipe FQNs):
+      {"op": "add_dependency", "groupId": "...", "artifactId": "...", "version": "...", "scope"?: "..."}
+      {"op": "add_ap_path",    "groupId": "...", "artifactId": "...", "version": "..."}   (adds to maven-compiler-plugin's <annotationProcessorPaths>)
+      {"op": "force_version",  "artifactId": "...", "version": "..."}                     (rewrites every <version> wherever this artifactId appears)
+    Applied directly via lxml (no rewrite plugin), then `mvn compile` under the step's JDK. Use this when the unmodified project doesn't compile — `mvn rewrite:run` requires compile-success before any recipe runs, so OpenRewrite primitives cannot reach this layer.
+
+DEFAULT CHAIN TEMPLATES
+
+  These are the empirical starting points when no addendum applies and the failure observation does not signal an unusual cluster. The proposer may follow them verbatim OR modify them based on the current failure / history / addendum. The templates assume the project compiles cleanly under jv_from at sha_from, has no SB-2→SB-3 transition required, no JAXB/annotation-processor incompatibilities, and tests that survive the JDK + recipe transition.
+
+  For jv_from=8, jv_to=21:
+    lombok_safe_bump (jdk=8) -> java8_to_java11 (jdk=11) -> upgrade_plugins_for_java17 (jdk=11) -> upgrade_build_to_java17 (jdk=17) -> java17_transforms (jdk=17) -> upgrade_plugins_for_java21 (jdk=17) -> upgrade_build_to_java21 (jdk=21) -> java21_transforms (jdk=21)
+
+  For jv_from=11, jv_to=21:
+    lombok_safe_bump (jdk=11) -> upgrade_plugins_for_java17 (jdk=11) -> upgrade_build_to_java17 (jdk=17) -> java17_transforms (jdk=17) -> upgrade_plugins_for_java21 (jdk=17) -> upgrade_build_to_java21 (jdk=21) -> java21_transforms (jdk=21)
+
+  For jv_from=17, jv_to=21:
+    upgrade_plugins_for_java21 (jdk=17) -> upgrade_build_to_java21 (jdk=21) -> java21_transforms (jdk=21)
+
+  Step contents:
+    lombok_safe_bump: UpgradeDependencyVersion org.projectlombok:lombok 1.18.30, plus ChangePropertyValue on lombok.version / org.projectlombok.lombok.version / lombok-version / lombokVersion / version.lombok (defensive — different projects use different property names).
+    java8_to_java11: org.openrewrite.java.migrate.Java8toJava11
+    upgrade_plugins_for_java17: org.openrewrite.java.migrate.UpgradePluginsForJava17
+    upgrade_build_to_java17: org.openrewrite.java.migrate.UpgradeBuildToJava17
+    java17_transforms: org.openrewrite.staticanalysis.InstanceOfPatternMatch, org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID, org.openrewrite.java.migrate.RemovedRuntimeTraceMethods, org.openrewrite.java.migrate.RemovedToolProviderConstructor, org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors, org.openrewrite.java.migrate.lang.ExplicitRecordImport, org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert, org.openrewrite.java.migrate.DeprecatedLogRecordThreadID, org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName, org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic, org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod, org.openrewrite.java.migrate.RemovedZipFinalizeMethods, org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl, org.openrewrite.java.migrate.SunNetSslPackageUnavailable, org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant, org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods
+    upgrade_plugins_for_java21: org.openrewrite.java.migrate.UpgradePluginsForJava21
+    upgrade_build_to_java21: org.openrewrite.java.migrate.UpgradeBuildToJava21
+    java21_transforms: org.openrewrite.java.migrate.RemoveIllegalSemicolons, org.openrewrite.java.migrate.lang.ThreadStopUnsupported, org.openrewrite.java.migrate.net.URLConstructorToURICreate, org.openrewrite.java.migrate.util.SequencedCollection, org.openrewrite.java.migrate.util.UseLocaleOf, org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods, org.openrewrite.java.migrate.DeleteDeprecatedFinalize, org.openrewrite.java.migrate.RemovedSubjectMethods
+
+  When the project IS on Spring Boot 2.x and needs to reach SB 3.x (Java 17+), the default templates above WILL FAIL because they have no SB version bump; the cluster typically needs an `org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3` step in place of the upgrade_build_to_java17 step (the SB-3 meta-recipe composes that internally). If you see SB-2 in the failure observation or in the pom of a current-chain step, prefer the SB-3 meta-recipe path. When an addendum names the override chain explicitly, follow it.
+
+OBSERVATION LIBRARY — read alongside the failure observation
+
+  After each failed chain attempt, the user message includes an OBSERVATION LIBRARY MATCHES block listing entries whose error pattern matched the current observation. Each entry has:
+    - id (short slug)
+    - diagnosis: one paragraph explaining what is going on
+    - fix_snippet: a step (label, jdk, recipes) to splice into the next chain, OR null if the fix is a removal
+    - fix_placement: where in the chain to put the fix — one of:
+        replace_step:<label>     — replace an existing step (by label) with fix_snippet
+        insert_after:<label>     — insert fix_snippet as a new step immediately after the named step
+        insert_before:<label>    — insert fix_snippet as a new step immediately before the named step
+        insert_before:first_failing_step — insert fix_snippet immediately before the step that just failed
+        remove_step:<label>      — drop a step from the chain (no fix_snippet)
+        prepend                  — fix_snippet becomes the first step
+        append                   — fix_snippet becomes the last step
+    - notes: optional caveats
+
+  Your job when the OBSERVATION LIBRARY MATCHES block is present: integrate ALL matching fixes into the next chain, respecting each fix_placement. Library entries are operator-verified; do not deviate from the fix_snippet recipes or parameters unless the observation contradicts them. If multiple entries match, apply them all (they are designed to compose).
+
+  When the block is empty or absent (no library match), fall back to general reasoning: the SEARCH HINTS below + the failure observation + your own knowledge of OpenRewrite recipes.
+
+
+SEARCH HINTS
+
+  These are patterns the proposer has been observed to under-handle. Apply them when the matching failure signal appears.
+
+  - When the failure log shows NoClassDefFoundError for any javax/* class that was unbundled from JDK 11+ (javax.xml.bind, javax.annotation, javax.activation, javax.xml.ws), insert a pom_patch step BEFORE the failing step. Bundle THREE ops in the same step, not across attempts: add_dependency (compile classpath) + add_ap_path (annotation-processor classpath) + force_version on any annotation processor pinned at a JDK-8-era version. A lone add_dependency is rarely enough — the AP classpath is separate, and a too-old AP will NPE inside javac on the new JDK regardless of what's on the compile classpath.
+
+  - When the failure log shows NullPointerException inside com.sun.tools.javac.processing.JavacProcessingEnvironment.callProcessor (or any frame inside discoverAndRunProcs / Round.run), an annotation processor in the project's <annotationProcessorPaths> is too old for the target JDK. The fix is force_version on the AP's artifactId, not on the maven-compiler-plugin. Identify the AP by scanning the classpath dump in the maven debug output for jars under <annotationProcessorPaths> — the older Hibernate/MapStruct/Spring/Lombok versions are the usual suspects.
+
+  - When the same NoClassDefFoundError persists across attempts even after add_dependency was already tried, the missing class is needed at annotation-processor time, not compile time. Switch to add_ap_path for the same artifact (or add it alongside add_dependency).
 
 Return STRICT JSON with this shape (and nothing else):
 {
   "observation": "<one sentence: what broke + suspected root cause>",
   "rationale":   "<one short paragraph: why this mutation should fix it>",
   "next_chain": [
-    {"label": "...", "jdk": 11, "recipes": [
-       "org.openrewrite.java.migrate.Java8toJava11",
-       {"name": "org.openrewrite.maven.ChangePropertyValue", "key": "java.version", "newValue": "11"}
-    ]},
-    ...
+    {"label": "...", "jdk": 11, "recipes": [...]}
   ]
 }
 
 Do NOT include thinking traces or markdown fences. Just the JSON.
 """
+
+
+def snapshot_stage_facts(stage):
+    """Extract structured per-stage features via triage_gitlab.triage_one().
+
+    Reads the project tree at sha_from from /var/cache/git-mirrors/<repo>.git
+    via `git archive`, runs the existing triage code that classifies Java
+    projects by frameworks, code signals, version pins, etc., and returns
+    the JSON-pretty-printed output. On failure returns a one-line marker.
+    """
+    import json as _json, subprocess as _sp, tempfile as _tmp, tarfile as _tf, io as _io, shutil as _sh, sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, "/home/vmihaylov/java_8_11_17_to_java_21/attempt_8")
+    try:
+        from triage_gitlab import triage_one as _triage_one
+    except Exception as e:
+        return f"(features unavailable: cannot import triage_one: {e})"
+    repo = stage.get("repo", "")
+    sha  = stage.get("sha_from", "")
+    git_dir = f"/var/cache/git-mirrors/{repo}.git"
+    work = _tmp.mkdtemp(prefix="triage_")
+    try:
+        r = _sp.run(["git", "archive", "--format=tar", sha], cwd=git_dir, capture_output=True, timeout=60)
+        if r.returncode != 0 or not r.stdout:
+            return f"(features unavailable: git archive {sha[:10]} failed in {git_dir})"
+        _tf.open(fileobj=_io.BytesIO(r.stdout)).extractall(work)
+        rec = _triage_one(_Path(work))
+        return _json.dumps(rec, indent=2, sort_keys=True)
+    except Exception as e:
+        return f"(features unavailable: {type(e).__name__}: {e})"
+    finally:
+        _sh.rmtree(work, ignore_errors=True)
 
 
 def call_qwen(system, user, *, max_tokens=8192, enable_thinking=True, temperature=0.0):
@@ -199,6 +284,94 @@ def extract_json(text):
     return None
 
 
+
+
+# ─── pom_patch step type ─────────────────────────────────────────────────────
+# Declarative pom XML edits that happen IN-PROCESS before any docker_phase.
+# A step is recognized as pom_patch when its "recipes" list contains dicts
+# with an "op" key. Supported ops:
+#   {"op": "add_dependency",  groupId, artifactId, version, [scope]}
+#   {"op": "add_ap_path",     groupId, artifactId, version}   # adds to <annotationProcessorPaths>
+#   {"op": "force_version",   artifactId, version}            # rewrites <version> wherever artifactId matches
+#
+# Used when `mvn rewrite:run` cannot start because the unmodified project
+# doesn't compile (per AGENTS.md ff #1 "pre-recipe pom XML edit" hint).
+
+def _is_pom_patch_step(recipe_list):
+    return (recipe_list and all(isinstance(r, dict) and "op" in r for r in recipe_list))
+
+
+def apply_pom_patches(work_dir, actions):
+    """Apply a list of pom_patch ops to every pom.xml found under work_dir. Returns (n_files_modified, log_msg)."""
+    try:
+        from lxml import etree
+    except ImportError:
+        return 0, "lxml not available — install via: pip install lxml"
+    import os as _os
+    poms = []
+    for dp, _, files in _os.walk(work_dir):
+        if "pom.xml" in files:
+            poms.append(_os.path.join(dp, "pom.xml"))
+    if not poms:
+        return 0, "no pom.xml found"
+    msgs = []
+    for pom in poms:
+        try:
+            tree = etree.parse(pom)
+            root = tree.getroot()
+            ns_uri = root.nsmap.get(None) or ""
+            ns = f"{{{ns_uri}}}" if ns_uri else ""
+            for a in actions:
+                op = a["op"]
+                if op == "add_dependency":
+                    top_deps = None
+                    for c in root:
+                        if c.tag == f"{ns}dependencies": top_deps = c; break
+                    if top_deps is None:
+                        top_deps = etree.SubElement(root, f"{ns}dependencies")
+                    # skip if already present
+                    have = any(d.find(f"{ns}artifactId") is not None and
+                               d.find(f"{ns}artifactId").text == a["artifactId"]
+                               for d in top_deps.findall(f"{ns}dependency"))
+                    if not have:
+                        d = etree.SubElement(top_deps, f"{ns}dependency")
+                        etree.SubElement(d, f"{ns}groupId").text = a["groupId"]
+                        etree.SubElement(d, f"{ns}artifactId").text = a["artifactId"]
+                        etree.SubElement(d, f"{ns}version").text = a["version"]
+                        if a.get("scope"):
+                            etree.SubElement(d, f"{ns}scope").text = a["scope"]
+                elif op == "add_ap_path":
+                    for plugin in root.iter(f"{ns}plugin"):
+                        aid = plugin.find(f"{ns}artifactId")
+                        if aid is None or aid.text != "maven-compiler-plugin": continue
+                        config = plugin.find(f"{ns}configuration")
+                        if config is None: config = etree.SubElement(plugin, f"{ns}configuration")
+                        apaths = config.find(f"{ns}annotationProcessorPaths")
+                        if apaths is None: apaths = etree.SubElement(config, f"{ns}annotationProcessorPaths")
+                        have = any(pth.find(f"{ns}artifactId") is not None and
+                                   pth.find(f"{ns}artifactId").text == a["artifactId"]
+                                   for pth in apaths.findall(f"{ns}path"))
+                        if not have:
+                            pth = etree.SubElement(apaths, f"{ns}path")
+                            etree.SubElement(pth, f"{ns}groupId").text = a["groupId"]
+                            etree.SubElement(pth, f"{ns}artifactId").text = a["artifactId"]
+                            etree.SubElement(pth, f"{ns}version").text = a["version"]
+                elif op == "force_version":
+                    for el in root.iter():
+                        if el.tag == f"{ns}artifactId" and el.text == a["artifactId"]:
+                            parent = el.getparent()
+                            ver = parent.find(f"{ns}version")
+                            if ver is not None:
+                                ver.text = a["version"]
+                            else:
+                                etree.SubElement(parent, f"{ns}version").text = a["version"]
+                else:
+                    msgs.append(f"unknown op: {op}")
+            tree.write(pom, xml_declaration=True, encoding="UTF-8", pretty_print=False)
+        except Exception as e:
+            msgs.append(f"{pom}: {type(e).__name__}: {e}")
+    return len(poms), "; ".join(msgs) if msgs else "OK"
+
 def run_chain(stage, chain, *, log_tail_bytes=8192, test_conservation=False):
     """Run one chain on a fresh clone of the repo. Returns trajectory dict.
 
@@ -211,7 +384,7 @@ def run_chain(stage, chain, *, log_tail_bytes=8192, test_conservation=False):
     work = tempfile.mkdtemp(prefix="iter_w_", dir=WORK)
     recipes_dir = tempfile.mkdtemp(prefix="iter_r_", dir=WORK)
     logs = tempfile.mkdtemp(prefix="iter_l_", dir=WORK)
-    traj = {"chain_in": chain, "started_at": time.time(), "steps": []}
+    traj = {"stage": stage, "chain_in": chain, "started_at": time.time(), "steps": []}
     try:
         if not shallow_fetch(repo, sha_from, work):
             traj["error"] = "checkout_failed"
@@ -228,18 +401,26 @@ def run_chain(stage, chain, *, log_tail_bytes=8192, test_conservation=False):
             traj["test_pre"] = {"rc": rc_tp, "passed": len(pre_passed), "failed": len(pre_failed)}
             shutil.rmtree(tp_logs, ignore_errors=True)
         for label, jdk, recipe_list in chain:
-            rfile = os.path.join(recipes_dir, f"{label}.yml")
-            write_recipe_yaml(rfile, f"org.example.iter.{slug}.{label}", recipe_list)
-            # per-step log_dir so successive build_post calls don't accumulate into one file
+            # per-step log_dir so successive build_post calls don't accumulate
             step_logs = tempfile.mkdtemp(prefix=f"iter_l_{label}_", dir=WORK)
-            rc_r, log_r = docker_phase(work, recipes_dir, step_logs, "recipe", jdk,
-                                       recipe_file=rfile, timeout=1200)
-            entry = {"step": label, "jdk": jdk, "recipe_count": len(recipe_list),
-                     "recipe_rc": rc_r, "recipe_ok": rc_r == 0}
-            if rc_r != 0:
-                entry["recipe_log_full"] = log_r
-                entry["recipe_log_tail"] = log_r[-log_tail_bytes:]
+            entry = {"step": label, "jdk": jdk, "recipe_count": len(recipe_list)}
+            if _is_pom_patch_step(recipe_list):
+                # pom_patch step — apply declared actions via lxml in-process, no rewrite:run
+                n_poms, msg = apply_pom_patches(work, recipe_list)
+                entry["type"] = "pom_patch"; entry["pom_patch_n"] = n_poms
+                entry["pom_patch_msg"] = msg
+                rc_r = 0
+                entry["recipe_rc"] = rc_r; entry["recipe_ok"] = True
             else:
+                rfile = os.path.join(recipes_dir, f"{label}.yml")
+                write_recipe_yaml(rfile, f"org.example.iter.{slug}.{label}", recipe_list)
+                rc_r, log_r = docker_phase(work, recipes_dir, step_logs, "recipe", jdk,
+                                           recipe_file=rfile, timeout=1200)
+                entry["recipe_rc"] = rc_r; entry["recipe_ok"] = rc_r == 0
+                if rc_r != 0:
+                    entry["recipe_log_full"] = log_r
+                    entry["recipe_log_tail"] = log_r[-log_tail_bytes:]
+            if entry["recipe_ok"]:
                 rc_b, log_b = docker_phase(work, recipes_dir, step_logs, "build_post", jdk, timeout=600)
                 entry["build_rc"] = rc_b
                 entry["build_ok"] = rc_b == 0
@@ -281,6 +462,38 @@ def run_chain(stage, chain, *, log_tail_bytes=8192, test_conservation=False):
                     traj["test_conservation"] = "REGRESSED"
                     traj["regressed_tests"] = [f"{c}.{n}" for c, n in regressed[:50]]
                     traj["regressed_count"] = len(regressed)
+                    import glob as _glob
+                    details = []
+                    seen_files = set()
+                    seen_classes = set()
+                    for cls, mth in regressed[:6]:
+                        if cls in seen_classes: continue
+                        seen_classes.add(cls)
+                        cls_simple = cls.split(".")[-1]
+                        patterns = [
+                            f"{work}/**/target/surefire-reports/{cls}.txt",
+                            f"{work}/**/target/surefire-reports/*{cls_simple}*.txt",
+                        ]
+                        for pat in patterns:
+                            found = False
+                            for p in _glob.glob(pat, recursive=True):
+                                if p in seen_files: continue
+                                seen_files.add(p)
+                                try:
+                                    body = open(p, errors="replace").read()
+                                except OSError:
+                                    continue
+                                # Dump up to 6KB of the .txt report — keep the whole
+                                # cascade of "Caused by:" frames so deep failure
+                                # patterns (PathPatternParser, Mockito final-method
+                                # etc.) remain matchable in the observation.
+                                details.append(f"--- {cls} ---")
+                                details.append(body[:15000])
+                                found = True
+                                break
+                            if found: break
+                    if details:
+                        traj["regressed_failure_details"] = "\n".join(details)[:30000]
         else:
             traj["final_status"] = (
                 "PASS" if compile_pass
@@ -329,6 +542,27 @@ def _extract_error_context(log, max_bytes=6000):
 
 def extract_observation(traj):
     if "error" in traj: return f"checkout failed for {traj.get('error')}"
+    # ff #8 test conservation: regression takes precedence over per-step build error
+    if traj.get("final_status") == "FAIL_at_test_conservation":
+        pre = traj.get("test_pre", {})
+        post = traj.get("test_post", {})
+        regressed = traj.get("regressed_tests", [])
+        cnt = traj.get("regressed_count", len(regressed))
+        lines = [
+            f"test-conservation FAIL: {cnt} tests passed pre-recipe but no longer pass post-recipe.",
+            f"test_pre  (jdk={(traj.get('stage') or {}).get('jv_from','?')}): passed={pre.get('passed',0)} failed={pre.get('failed',0)}",
+            f"test_post (jdk={(traj.get('stage') or {}).get('jv_to','?')}): passed={post.get('passed',0)} failed={post.get('failed',0)}",
+            "regressed test methods:",
+        ]
+        for r in regressed[:30]:
+            lines.append(f"  - {r}")
+        if cnt > 30: lines.append(f"  ... +{cnt - 30} more")
+        details = traj.get("regressed_failure_details")
+        if details:
+            lines.append("")
+            lines.append("regressed-test failure detail:")
+            lines.append(details)
+        return "\n".join(lines)
     last = traj["steps"][-1] if traj["steps"] else None
     if not last: return "no steps ran"
     log = last.get("recipe_log_full") or last.get("build_log_full") or ""
@@ -391,16 +625,40 @@ def compact_history(history_entries):
     return text.strip()
 
 
-def propose_next_chain(stage, current_chain, observation, history_recap):
-    qwen_chain = render_chain_for_qwen(current_chain)
+def propose_next_chain(stage, current_chain, observation, history_recap, addendum=None, stage_facts=None):
+    if current_chain:
+        qwen_chain = render_chain_for_qwen(current_chain)
+        chain_section = f"=== CURRENT CHAIN (just failed) ===\n{json.dumps(qwen_chain, indent=2)}\n\n"
+    else:
+        chain_section = "=== CURRENT CHAIN ===\n(no chain yet — this is the first attempt; emit a starting chain)\n\n"
+    addendum_section = ""
+    if addendum:
+        addendum_section = (
+            "=== OPERATOR-PROVIDED PER-REPO ENRICHMENT "
+            "(authoritative for this stage; overrides the default chain templates) ===\n"
+            f"{addendum}\n\n"
+        )
+    facts_section = ""
+    if stage_facts:
+        facts_section = f"=== STAGE FACTS (signature from pom + source-tree grep at sha_from) ===\n{stage_facts}\n\n"
+    library_section = ""
+    try:
+        matches = observation_library.match_library(observation) if observation else []
+        if matches:
+            library_section = observation_library.render_matches_for_prompt(matches) + "\n"
+    except Exception:
+        library_section = ""
     user = (
         f"Repo: {stage['repo']}\n"
         f"jv_from={stage['jv_from']}  jv_to={stage['jv_to']}\n\n"
+        f"{facts_section}"
         f"=== COMPAT MATRIX ===\n{COMPAT_MATRIX}\n\n"
-        f"=== CURRENT CHAIN (just failed) ===\n{json.dumps(qwen_chain, indent=2)}\n\n"
+        f"{chain_section}"
         f"=== FAILURE ===\n{observation}\n\n"
+        f"{library_section}"
         f"=== PRIOR ATTEMPTS RECAP ===\n{history_recap or '(this is the first attempt)'}\n\n"
-        "Propose the NEXT chain. Return STRICT JSON per the system prompt schema."
+        f"{addendum_section}"
+        "Emit the chain. Return STRICT JSON per the system prompt schema."
     )
     text, err = call_qwen(SYSTEM_PROPOSER, user, max_tokens=16384,
                           enable_thinking=True, temperature=0.0)
@@ -445,6 +703,12 @@ def iterate_one(stage, max_attempts=10, test_conservation=False):
     out_dir = f"{OUT_DIR}/{slug}"
     os.makedirs(out_dir, exist_ok=True)
     tpath = f"{out_dir}/trajectory.json"
+    addendum_path = f"{out_dir}/observation_addendum.md"
+    addendum_text = open(addendum_path).read() if os.path.exists(addendum_path) else None
+    if addendum_text:
+        print(f"[{slug}] using observation_addendum.md ({len(addendum_text)} chars)", flush=True)
+    stage_facts = snapshot_stage_facts(stage)
+    print(f"[{slug}] stage_facts ({len(stage_facts.splitlines())} lines)", flush=True)
 
     # Resume from cached trajectory if any
     history_lite = []
@@ -466,7 +730,36 @@ def iterate_one(stage, max_attempts=10, test_conservation=False):
             chain = chain_from_qwen(history_lite[-1]["chain"])
 
     if chain is None:
-        chain = plan_for(stage["jv_from"], stage["jv_to"])
+        # The proposer authors the chain. No hidden Python default; the
+        # default-chain knowledge lives in SYSTEM_PROPOSER and the proposer
+        # decides whether to follow the default or override based on the
+        # addendum + observation.
+        print(f"[{slug}] no prior chain — asking proposer for initial chain (addendum_present={addendum_text is not None})", flush=True)
+        proposal, perr = propose_next_chain(
+            stage, None,
+            "(no failure observation yet — this is the first attempt)",
+            "(no prior attempts)",
+            addendum=addendum_text,
+            stage_facts=stage_facts,
+        )
+        if proposal is None:
+            print(f"[{slug}] proposer produced no initial chain (err={perr}); recording FAIL", flush=True)
+            history_lite.append({"attempt": 0, "chain": [], "verdict": f"FAIL_proposer_no_initial_chain ({perr})",
+                                 "aborted_at": None, "wall_s": 0.0, "steps": [],
+                                 "observation": "proposer returned no initial chain",
+                                 "qwen_observation": "", "qwen_rationale": ""})
+            _save_trajectory(out_dir, stage, max_attempts, history_lite, None)
+            return {"final_verdict": history_lite[-1]["verdict"], "history": history_lite, "stage": stage}
+        next_chain_dicts = proposal.get("next_chain", []) if isinstance(proposal, dict) else []
+        if not next_chain_dicts:
+            print(f"[{slug}] proposer returned malformed initial proposal (no next_chain); recording FAIL", flush=True)
+            history_lite.append({"attempt": 0, "chain": [], "verdict": "FAIL_proposer_malformed_initial",
+                                 "aborted_at": None, "wall_s": 0.0, "steps": [],
+                                 "observation": "proposer returned no next_chain in initial proposal",
+                                 "qwen_observation": "", "qwen_rationale": ""})
+            _save_trajectory(out_dir, stage, max_attempts, history_lite, None)
+            return {"final_verdict": history_lite[-1]["verdict"], "history": history_lite, "stage": stage}
+        chain = chain_from_qwen(next_chain_dicts)
 
     start_attempt = len(history_lite) + 1
     print(f"[{slug}] starting attempt {start_attempt}/{max_attempts} ({len(history_lite)} prior)", flush=True)
@@ -488,6 +781,9 @@ def iterate_one(stage, max_attempts=10, test_conservation=False):
             history_lite.append({"attempt": attempt, "chain": render_chain_for_qwen(chain),
                                  "verdict": "PASS", "aborted_at": None,
                                  "wall_s": wall_s, "steps": steps_brief,
+                                 "test_pre": traj.get("test_pre"),
+                                 "test_post": traj.get("test_post"),
+                                 "test_conservation": traj.get("test_conservation"),
                                  "observation": "PASS", "qwen_observation": "",
                                  "qwen_rationale": ""})
             _save_trajectory(out_dir, stage, max_attempts, history_lite, None)
@@ -496,7 +792,7 @@ def iterate_one(stage, max_attempts=10, test_conservation=False):
         obs = extract_observation(traj)
         print(f"[{slug}]   observation: {obs[:200]}", flush=True)
         recap = compact_history(_history_to_fakes(history_lite)) if history_lite else ""
-        proposal, perr = propose_next_chain(stage, chain, obs, recap)
+        proposal, perr = propose_next_chain(stage, chain, obs, recap, addendum=addendum_text, stage_facts=stage_facts)
         next_chain_dicts = None
         rationale = ""
         qwen_obs = ""
@@ -516,6 +812,11 @@ def iterate_one(stage, max_attempts=10, test_conservation=False):
         history_lite.append({"attempt": attempt, "chain": render_chain_for_qwen(chain),
                              "verdict": verdict, "aborted_at": traj.get("aborted_at"),
                              "wall_s": wall_s, "steps": steps_brief,
+                             "test_pre": traj.get("test_pre"),
+                             "test_post": traj.get("test_post"),
+                             "test_conservation": traj.get("test_conservation"),
+                             "regressed_count": traj.get("regressed_count"),
+                             "regressed_tests": (traj.get("regressed_tests") or [])[:30],
                              "observation": obs[:8192],
                              "qwen_observation": qwen_obs,
                              "qwen_rationale": rationale[:2048]})

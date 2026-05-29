@@ -1,0 +1,992 @@
+{
+  "stage": {
+    "repo": "jhipster/jhipster-sample-app-noi18n",
+    "sha_from": "b968d72bdf2e5292dd62112a87a394f7b66b594e",
+    "sha_to": "f32ea57d16c70bd292458bf55c5cbe68a5210420",
+    "jv_from": 8,
+    "jv_to": 21,
+    "next_version_commit": "8ab3269fb02b99a5351c6be7d2fce513f05be5f8",
+    "commits_back": 50,
+    "pre_pass_count": 143,
+    "pre_fail_count": 0,
+    "pass_rate": 1.0,
+    "probes_tried": 2
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_java8_to_java11",
+      "aborted_at": "java8_to_java11",
+      "wall_s": 66.7,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `java8_to_java11` (jdk=11): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[15:14:42] PROJECT_ROOT=/work/src PHASE=recipe JDK=11\n[WARNING] 1 problem was encountered while building the effective model for org.javassist:javassist:jar:3.20.0-GA during dependency collection step for project (use -X to see details)\n[WARNING]  Parameter 'resources' is read-only, must not be used in configuration\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:compile (default-compile) on project jhipster-no-i-18-n-sample-application: Fatal error compiling: java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException: javax.xml.bind.JAXBException -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException",
+      "qwen_observation": "JAXB classes were unbundled in JDK 11, causing NoClassDefFoundError during compilation at the java8_to_java11 step.",
+      "qwen_rationale": "Inserting a POM_PATCH step to add jaxb-api and jaxb-runtime to both the compile and annotation-processor classpaths before the JDK 11 upgrade step resolves the missing javax.xml.bind classes, as mandated by the observation library."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "bundle_jaxb",
+          "jdk": 11,
+          "recipes": [
+            {
+              "op": "add_dependency",
+              "groupId": "javax.xml.bind",
+              "artifactId": "jaxb-api",
+              "version": "2.3.1"
+            },
+            {
+              "op": "add_dependency",
+              "groupId": "org.glassfish.jaxb",
+              "artifactId": "jaxb-runtime",
+              "version": "2.3.1"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "javax.xml.bind",
+              "artifactId": "jaxb-api",
+              "version": "2.3.1"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "org.glassfish.jaxb",
+              "artifactId": "jaxb-runtime",
+              "version": "2.3.1"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_bundle_jaxb",
+      "aborted_at": "bundle_jaxb",
+      "wall_s": 54.7,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "bundle_jaxb",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `bundle_jaxb` (jdk=11): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[15:17:43] PROJECT_ROOT=/work/src PHASE=build_post JDK=11\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:compile (default-compile) on project jhipster-no-i-18-n-sample-application: Fatal error compiling: java.lang.NoClassDefFoundError: javax/annotation/Generated: javax.annotation.Generated -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException",
+      "qwen_observation": "Build failed at bundle_jaxb (JDK 11) with NoClassDefFoundError for javax/annotation/Generated, indicating missing javax.annotation-api on the compile/annotation-processor classpath.",
+      "qwen_rationale": "Replaced the JAXB-only patch with a javax.annotation-api patch, adding both compile and annotation-processor dependencies for javax.annotation:javax.annotation-api 1.3.2 to satisfy the missing Generated annotation required by jpamodelgen and other processors during the JDK 11 transition."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "bundle_javax",
+          "jdk": 11,
+          "recipes": [
+            {
+              "op": "add_dependency",
+              "groupId": "javax.annotation",
+              "artifactId": "javax.annotation-api",
+              "version": "1.3.2"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "javax.annotation",
+              "artifactId": "javax.annotation-api",
+              "version": "1.3.2"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_bundle_javax",
+      "aborted_at": "bundle_javax",
+      "wall_s": 79.0,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "bundle_javax",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `bundle_javax` (jdk=11): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[15:21:27] PROJECT_ROOT=/work/src PHASE=build_post JDK=11\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:compile (default-compile) on project jhipster-no-i-18-n-sample-application: Fatal error compiling: java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException: javax.xml.bind.JAXBException -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException",
+      "qwen_observation": "The build failed at JDK 11 with NoClassDefFoundError for javax.xml.bind.JAXBException because JAXB was removed from the JDK and the previous patch only added javax.annotation-api.",
+      "qwen_rationale": "Inserting the library-provided bundle_jaxb step before the failing step adds both jaxb-api and jaxb-runtime to the compile and annotation-processor classpaths, which resolves the missing JAXB classes required by the project's annotation processors (e.g., jpamodelgen) during the JDK 11 transition."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "bundle_jaxb",
+          "jdk": 11,
+          "recipes": [
+            {
+              "op": "add_dependency",
+              "groupId": "javax.xml.bind",
+              "artifactId": "jaxb-api",
+              "version": "2.3.1"
+            },
+            {
+              "op": "add_dependency",
+              "groupId": "org.glassfish.jaxb",
+              "artifactId": "jaxb-runtime",
+              "version": "2.3.1"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "javax.xml.bind",
+              "artifactId": "jaxb-api",
+              "version": "2.3.1"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "org.glassfish.jaxb",
+              "artifactId": "jaxb-runtime",
+              "version": "2.3.1"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_bundle_jaxb",
+      "aborted_at": "bundle_jaxb",
+      "wall_s": 67.2,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "bundle_jaxb",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `bundle_jaxb` (jdk=11): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[15:25:07] PROJECT_ROOT=/work/src PHASE=build_post JDK=11\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:compile (default-compile) on project jhipster-no-i-18-n-sample-application: Fatal error compiling: java.lang.NoClassDefFoundError: javax/annotation/Generated: javax.annotation.Generated -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException",
+      "qwen_observation": "Compilation on JDK 11 fails with NoClassDefFoundError for javax/annotation/Generated because javax.annotation-api was not provided on the compile or annotation-processor classpaths.",
+      "qwen_rationale": "The previous attempt only bundled JAXB APIs, but jpamodelgen and other annotation processors also require javax.annotation. Combining javax.annotation-api with jaxb-api/jaxb-runtime in a single POM_PATCH step before the JDK 11 transition ensures both compile and AP classpaths are fully satisfied, preventing the javac crash."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "bundle_javax_and_jaxb",
+          "jdk": 11,
+          "recipes": [
+            {
+              "op": "add_dependency",
+              "groupId": "javax.annotation",
+              "artifactId": "javax.annotation-api",
+              "version": "1.3.2"
+            },
+            {
+              "op": "add_dependency",
+              "groupId": "javax.xml.bind",
+              "artifactId": "jaxb-api",
+              "version": "2.3.1"
+            },
+            {
+              "op": "add_dependency",
+              "groupId": "org.glassfish.jaxb",
+              "artifactId": "jaxb-runtime",
+              "version": "2.3.1"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "javax.annotation",
+              "artifactId": "javax.annotation-api",
+              "version": "1.3.2"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "javax.xml.bind",
+              "artifactId": "jaxb-api",
+              "version": "2.3.1"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "org.glassfish.jaxb",
+              "artifactId": "jaxb-runtime",
+              "version": "2.3.1"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_bundle_javax_and_jaxb",
+      "aborted_at": "bundle_javax_and_jaxb",
+      "wall_s": 110.7,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "bundle_javax_and_jaxb",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `bundle_javax_and_jaxb` (jdk=11): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[15:28:48] PROJECT_ROOT=/work/src PHASE=build_post JDK=11\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:compile (default-compile) on project jhipster-no-i-18-n-sample-application: Fatal error compiling: java.lang.NullPointerException -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException",
+      "qwen_observation": "Compilation on JDK 11 fails with a NullPointerException inside javac's annotation processing environment, indicating an outdated annotation processor is crashing on the newer JDK.",
+      "qwen_rationale": "The search hints explicitly state that NPEs in javac processing on newer JDKs are caused by old annotation processors, and the fix is to force the AP's version rather than the compiler plugin. Since the project uses jpamodelgen, forcing hibernate-jpamodelgen to 5.6.15.Final (which fully supports JDK 11+) before the javax/jaxb bundling step should resolve the processor crash and allow the build to proceed."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "lombok_safe_bump",
+      "jdk": 8,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "newVersion": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "org.projectlombok.lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok-version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombokVersion",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "version.lombok",
+          "newValue": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "fix_ap_npe",
+      "jdk": 11,
+      "recipes": [
+        {
+          "op": "force_version",
+          "artifactId": "hibernate-jpamodelgen",
+          "version": "5.6.15.Final"
+        }
+      ]
+    },
+    {
+      "label": "bundle_javax_and_jaxb",
+      "jdk": 11,
+      "recipes": [
+        {
+          "op": "add_dependency",
+          "groupId": "javax.annotation",
+          "artifactId": "javax.annotation-api",
+          "version": "1.3.2"
+        },
+        {
+          "op": "add_dependency",
+          "groupId": "javax.xml.bind",
+          "artifactId": "jaxb-api",
+          "version": "2.3.1"
+        },
+        {
+          "op": "add_dependency",
+          "groupId": "org.glassfish.jaxb",
+          "artifactId": "jaxb-runtime",
+          "version": "2.3.1"
+        },
+        {
+          "op": "add_ap_path",
+          "groupId": "javax.annotation",
+          "artifactId": "javax.annotation-api",
+          "version": "1.3.2"
+        },
+        {
+          "op": "add_ap_path",
+          "groupId": "javax.xml.bind",
+          "artifactId": "jaxb-api",
+          "version": "2.3.1"
+        },
+        {
+          "op": "add_ap_path",
+          "groupId": "org.glassfish.jaxb",
+          "artifactId": "jaxb-runtime",
+          "version": "2.3.1"
+        }
+      ]
+    },
+    {
+      "label": "java8_to_java11",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.migrate.Java8toJava11"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java17",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+      ]
+    },
+    {
+      "label": "upgrade_spring_boot_3_3",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+      ]
+    },
+    {
+      "label": "java17_transforms",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+        "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+        "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+        "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+        "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+        "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+        "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+        "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+        "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+        "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+        "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+        "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+        "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+        "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+        "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+        "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_bundle_javax_and_jaxb"
+}

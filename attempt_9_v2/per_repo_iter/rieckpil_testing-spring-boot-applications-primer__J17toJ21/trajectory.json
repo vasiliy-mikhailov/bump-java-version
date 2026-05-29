@@ -1,0 +1,404 @@
+{
+  "stage": {
+    "repo": "rieckpil/testing-spring-boot-applications-primer",
+    "sha_from": "7e8ed995ed85c63ab864656bf6e7172f70de8e08",
+    "sha_to": "214683e3bcd91e00d3125c38c59f5688bcea73a3",
+    "jv_from": 17,
+    "jv_to": 21,
+    "next_version_commit": "214683e3bcd91e00d3125c38c59f5688bcea73a3",
+    "commits_back": 20,
+    "pre_pass_count": 20,
+    "pre_fail_count": 4,
+    "pass_rate": 0.833,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_sb_upgrade_to_3_3",
+      "aborted_at": "sb_upgrade_to_3_3",
+      "wall_s": 36.2,
+      "steps": [
+        {
+          "step": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `sb_upgrade_to_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[22:55:47] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] [ERROR] Some problems were encountered while processing the POMs:\n[ERROR] Non-resolvable import POM: The following artifacts could not be resolved: org.seleniumhq.selenium:selenium-bom:pom:4.2.2 (absent): org.seleniumhq.selenium:selenium-bom:pom:4.2.2 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced @ org.springframework.boot:spring-boot-dependencies:3.3.13, /root/.m2/repository/org/springframework/boot/spring-boot-dependencies/3.3.13/spring-boot-dependencies-3.3.13.pom, line 2419, column 19\n @ \n[ERROR] The build could not read 1 project -> [Help 1]\n[ERROR]   \n[ERROR]   The project de.rieckpil.blog:spring-boot-testing-primer:0.0.1-SNAPSHOT (/work/src/pom.xml) has 1 error\n[ERROR]     Non-resolvable import POM: The following artifacts could not be resolved: org.seleniumhq.selenium:selenium-bom:pom:4.2.2 (absent): org.seleniumhq.selenium:selenium-bom:pom:4.2.2 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced @ org.springframework.boot:spring-boot-dependencies:3.3.13, /root/.m2/repository/org/springframework/boot/spring-boot-dependencies/3.3.13/spring-boot-dependencies-3.3.13.pom, line 2419, column 19 -> [Help 2]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException\n[ERROR] [Help 2] http://cwiki.apache.org/confluence/display/MAVEN/UnresolvableModelException",
+      "qwen_observation": "POM resolution failed because Spring Boot 3.3 BOM imports selenium-bom:4.2.2, which is missing or corrupted in the local Nexus cache.",
+      "qwen_rationale": "Insert a pom_patch step immediately after the Spring Boot upgrade to force selenium-bom to a newer, available version (4.22.0). This bypasses the cached resolution failure and allows Maven to successfully read the POM before proceeding to the Java 21 build upgrade."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "fix_selenium_bom",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "selenium-bom",
+              "version": "4.22.0"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_sb_upgrade_to_3_3",
+      "aborted_at": "sb_upgrade_to_3_3",
+      "wall_s": 22.3,
+      "steps": [
+        {
+          "step": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `sb_upgrade_to_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[22:58:38] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] [ERROR] Some problems were encountered while processing the POMs:\n[ERROR] Non-resolvable import POM: The following artifacts could not be resolved: org.seleniumhq.selenium:selenium-bom:pom:4.2.2 (absent): org.seleniumhq.selenium:selenium-bom:pom:4.2.2 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced @ org.springframework.boot:spring-boot-dependencies:3.3.13, /root/.m2/repository/org/springframework/boot/spring-boot-dependencies/3.3.13/spring-boot-dependencies-3.3.13.pom, line 2419, column 19\n @ \n[ERROR] The build could not read 1 project -> [Help 1]\n[ERROR]   \n[ERROR]   The project de.rieckpil.blog:spring-boot-testing-primer:0.0.1-SNAPSHOT (/work/src/pom.xml) has 1 error\n[ERROR]     Non-resolvable import POM: The following artifacts could not be resolved: org.seleniumhq.selenium:selenium-bom:pom:4.2.2 (absent): org.seleniumhq.selenium:selenium-bom:pom:4.2.2 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced @ org.springframework.boot:spring-boot-dependencies:3.3.13, /root/.m2/repository/org/springframework/boot/spring-boot-dependencies/3.3.13/spring-boot-dependencies-3.3.13.pom, line 2419, column 19 -> [Help 2]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException\n[ERROR] [Help 2] http://cwiki.apache.org/confluence/display/MAVEN/UnresolvableModelException",
+      "qwen_observation": "Build failed during Spring Boot 3.3 upgrade because the imported selenium-bom:4.2.2 is missing from Nexus, and the patch step was incorrectly placed after the failing step.",
+      "qwen_rationale": "Moving the pom_patch step to the beginning ensures the selenium-bom version is overridden to 4.22.0 before Maven attempts to resolve the Spring Boot 3.3 dependencies, preventing the POM resolution failure and allowing the migration to proceed."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "fix_selenium_bom",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "selenium-bom",
+              "version": "4.22.0"
+            }
+          ]
+        },
+        {
+          "label": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_sb_upgrade_to_3_3",
+      "aborted_at": "sb_upgrade_to_3_3",
+      "wall_s": 28.8,
+      "steps": [
+        {
+          "step": "fix_selenium_bom",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `sb_upgrade_to_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[23:01:16] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] [ERROR] Some problems were encountered while processing the POMs:\n[ERROR] Non-resolvable import POM: The following artifacts could not be resolved: org.seleniumhq.selenium:selenium-bom:pom:4.2.2 (absent): org.seleniumhq.selenium:selenium-bom:pom:4.2.2 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced @ org.springframework.boot:spring-boot-dependencies:3.3.13, /root/.m2/repository/org/springframework/boot/spring-boot-dependencies/3.3.13/spring-boot-dependencies-3.3.13.pom, line 2419, column 19\n @ \n[ERROR] The build could not read 1 project -> [Help 1]\n[ERROR]   \n[ERROR]   The project de.rieckpil.blog:spring-boot-testing-primer:0.0.1-SNAPSHOT (/work/src/pom.xml) has 1 error\n[ERROR]     Non-resolvable import POM: The following artifacts could not be resolved: org.seleniumhq.selenium:selenium-bom:pom:4.2.2 (absent): org.seleniumhq.selenium:selenium-bom:pom:4.2.2 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced @ org.springframework.boot:spring-boot-dependencies:3.3.13, /root/.m2/repository/org/springframework/boot/spring-boot-dependencies/3.3.13/spring-boot-dependencies-3.3.13.pom, line 2419, column 19 -> [Help 2]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException\n[ERROR] [Help 2] http://cwiki.apache.org/confluence/display/MAVEN/UnresolvableModelException",
+      "qwen_observation": "The Spring Boot 3.3 upgrade fails because the imported selenium-bom:4.2.2 is missing from Nexus and cached as failed in the local repository.",
+      "qwen_rationale": "Adding the selenium.version property to 4.22.0 before the Spring Boot upgrade forces Spring Boot's dependency management to resolve a newer, available Selenium BOM version, bypassing the cached resolution failure."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "fix_selenium_version",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.AddProperty",
+              "key": "selenium.version",
+              "value": "4.22.0"
+            }
+          ]
+        },
+        {
+          "label": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_sb_upgrade_to_3_3",
+      "aborted_at": "sb_upgrade_to_3_3",
+      "wall_s": 60.9,
+      "steps": [
+        {
+          "step": "fix_selenium_version",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `sb_upgrade_to_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[23:04:24] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/de/rieckpil/blog/WebSecurityConfig.java:[19,7] cannot find symbol\n  symbol:   method mvcMatchers(org.springframework.http.HttpMethod,java.lang.String)\n  location: variable requests of type org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer<org.springframework.security.config.annotation.web.builders.HttpSecurity>.AuthorizationManagerRequestMatcherRegistry\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project spring-boot-testing-primer: Compilation failure\n[ERROR] /work/src/src/main/java/de/rieckpil/blog/WebSecurityConfig.java:[19,7] cannot find symbol\n[ERROR]   symbol:   method mvcMatchers(org.springframework.http.HttpMethod,java.lang.String)\n[ERROR]   location: variable requests of type org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer<org.springframework.security.config.annotation.web.builders.HttpSecurity>.AuthorizationManagerRequestMatcherRegistry\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Compilation failed after Spring Boot 3.3 upgrade because `mvcMatchers` was not migrated to `requestMatchers`, indicating the Spring Security 6 migration recipes did not fully apply or were bypassed.",
+      "qwen_rationale": "Re-running the Spring Boot 3.3 upgrade recipe alongside SpringBoot3BestPractices ensures the Spring Security 6 migration recipes execute completely, replacing `mvcMatchers` with `requestMatchers` and modernizing the `WebSecurityConfigurerAdapter` usage. The Selenium version property is retained to prevent dependency resolution cache issues observed in prior attempts."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "fix_selenium_version",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.AddProperty",
+              "key": "selenium.version",
+              "value": "4.22.0"
+            }
+          ]
+        },
+        {
+          "label": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3",
+            "org.openrewrite.java.spring.boot3.SpringBoot3BestPractices"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_sb_upgrade_to_3_3",
+      "aborted_at": "sb_upgrade_to_3_3",
+      "wall_s": 40.2,
+      "steps": [
+        {
+          "step": "fix_selenium_version",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `sb_upgrade_to_3_3` (jdk=17): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[23:07:21] PROJECT_ROOT=/work/src PHASE=recipe JDK=17\n[WARNING] 1 problem was encountered while building the effective model for org.javassist:javassist:jar:3.20.0-GA during dependency collection step for project (use -X to see details)\n[ERROR] Recipe validation error in org.example.iter.rieckpil_testing-spring-boot-applications-primer__J17toJ21.sb_upgrade_to_3_3 for property initialization: DeclarativeRecipe must not contain uninitialized recipes. Be sure to call .initialize() on DeclarativeRecipe.\n[ERROR] Recipe validation error in org.example.iter.rieckpil_testing-spring-boot-applications-primer__J17toJ21.sb_upgrade_to_3_3 for property org.example.iter.rieckpil_testing-spring-boot-applications-primer__J17toJ21.sb_upgrade_to_3_3.recipeList[1] (in file:/recipes/sb_upgrade_to_3_3.yml): recipe 'org.openrewrite.java.spring.boot3.SpringBoot3BestPractices' does not exist.\n[ERROR] Failed to execute goal org.openrewrite.maven:rewrite-maven-plugin:6.40.0:run (default-cli) on project spring-boot-testing-primer: Recipe validation errors detected as part of one or more activeRecipe(s). Please check error logs. -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException",
+      "qwen_observation": "Recipe validation failed because `org.openrewrite.java.spring.boot3.SpringBoot3BestPractices` does not exist in the runner's OpenRewrite version.",
+      "qwen_rationale": "Removing the non-existent recipe allows the `UpgradeSpringBoot_3_3` meta-recipe to execute successfully. This meta-recipe internally composes the Spring Security 6 migration, which automatically replaces `mvcMatchers` with `requestMatchers` and removes `WebSecurityConfigurerAdapter` usage. The chain then proceeds to upgrade Maven plugins and the build target to Java 21, followed by Java 21-specific source transforms."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "fix_selenium_version",
+      "jdk": 17,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.AddProperty",
+          "key": "selenium.version",
+          "value": "4.22.0"
+        }
+      ]
+    },
+    {
+      "label": "sb_upgrade_to_3_3",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_sb_upgrade_to_3_3"
+}

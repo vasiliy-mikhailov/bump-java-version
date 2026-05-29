@@ -1,0 +1,650 @@
+{
+  "stage": {
+    "repo": "pagopa/pagopa-ecommerce-commons",
+    "sha_from": "ab7b3f36ce8f4436c801742f7dc61e707d05ec97",
+    "sha_to": "c470763791580495b293aec4510e67dfcb8172a7",
+    "jv_from": 17,
+    "jv_to": 21,
+    "next_version_commit": "c470763791580495b293aec4510e67dfcb8172a7",
+    "commits_back": 20,
+    "pre_pass_count": 501,
+    "pre_fail_count": 1,
+    "pass_rate": 0.998,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 213.8,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n################################################################################\n# Thanks for using OpenAPI Generator.                                          #\n# Please consider donation to help us maintain this project \ud83d\ude4f                 #\n# https://opencollective.com/openapi_generator/donate                          #\n################################################################################\n[ERROR] Could not create enum.\norg.jsonschema2pojo.exception.ClassAlreadyExistsException: it.pagopa.ecommerce.commons.generated.events.v1.Version\n    at org.jsonschema2pojo.rules.EnumRule.createEnum (EnumRule.java:354)\n    at org.jsonschema2pojo.rules.EnumRule.apply (EnumRule.java:116)\n    at org.jsonschema2pojo.rules.EnumRule.apply (EnumRule.java:68)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:81)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:76)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:38)\n    at org.jsonschema2pojo.SchemaMapper.generate (SchemaMapper.java:92)\n    at org.jsonschema2pojo.Jsonschema2Pojo.generate (Jsonschema2Pojo.java:79)\n    at org.jsonschema2pojo.maven.Jsonschema2PojoMojo.execute (Jsonschema2PojoMojo.java:893)\n    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)\n    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)\n    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)\n    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)\n    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)\n    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)\n    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)\n    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)\n    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)\n    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)\n    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)\n    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)\n    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)\n    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)\n    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)\n    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)\n    at java.lang.reflect.Method.invoke (Method.java:569)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/FieldsDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/FieldsDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/CardDataResponseDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/CardDataResponseDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/StateResponseDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/StateResponseDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/RefundResponseDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/RefundResponseDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/OrderResponseDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/OrderResponseDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/CreateHostedOrderRequestDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/CreateHostedOrderRequestDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/\n... [truncated] ...",
+      "qwen_observation": "The build failed during the Spring Boot 3.3 upgrade step due to missing `io.swagger.annotations` package and `ClassAlreadyExistsException` in generated sources, caused by SpringFox being incompatible with Spring Boot 3.x.",
+      "qwen_rationale": "SpringFox is abandoned and incompatible with Spring Boot 3. Inserting the `SpringFoxToSpringDoc` migration step before the SB-3 upgrade will replace SpringFox dependencies and annotations with springdoc-openapi equivalents, resolving the missing package errors and allowing the SB-3 upgrade to proceed cleanly."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "springfox_to_springdoc",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.springdoc.SpringFoxToSpringDoc"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_springfox_to_springdoc",
+      "aborted_at": "springfox_to_springdoc",
+      "wall_s": 143.7,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "springfox_to_springdoc",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `springfox_to_springdoc` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n################################################################################\n# Thanks for using OpenAPI Generator.                                          #\n# Please consider donation to help us maintain this project \ud83d\ude4f                 #\n# https://opencollective.com/openapi_generator/donate                          #\n################################################################################\n[ERROR] Could not create enum.\norg.jsonschema2pojo.exception.ClassAlreadyExistsException: it.pagopa.ecommerce.commons.generated.events.v1.Version\n    at org.jsonschema2pojo.rules.EnumRule.createEnum (EnumRule.java:354)\n    at org.jsonschema2pojo.rules.EnumRule.apply (EnumRule.java:116)\n    at org.jsonschema2pojo.rules.EnumRule.apply (EnumRule.java:68)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:81)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:76)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:38)\n    at org.jsonschema2pojo.SchemaMapper.generate (SchemaMapper.java:92)\n    at org.jsonschema2pojo.Jsonschema2Pojo.generate (Jsonschema2Pojo.java:79)\n    at org.jsonschema2pojo.maven.Jsonschema2PojoMojo.execute (Jsonschema2PojoMojo.java:893)\n    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)\n    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)\n    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)\n    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)\n    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)\n    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)\n    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)\n    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)\n    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)\n    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)\n    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)\n    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)\n    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)\n    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)\n    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)\n    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)\n    at java.lang.reflect.Method.invoke (Method.java:569)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)\n22:18:56.716 [main] INFO it.pagopa.ecommerce.commons.utils.warmup.annotationprocessor.WarmupAnnotationProcessor - WarmupAnnotationProcessor initialized\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/OperationResultDto.java:[18,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/generated/pdv/v1/dto/PiiResourceDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/generated/pdv/v1/dto/PiiResourceDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/generated/pdv/v1/dto/TokenResourceDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/generated/pdv/v1/dto/TokenResourceDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/TransactionSummaryAttributeDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/TransactionSummaryAttributeDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/PostMessageDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/PostMessageDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/GDIStatusDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/GDIStatusDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/FieldSettingsDto.java:[23,30] package io.swagger.annotations do\n... [truncated] ...",
+      "qwen_observation": "The SpringFoxToSpringDoc recipe removed io.swagger:swagger-annotations, causing OpenAPI generator output to fail compilation with 'package io.swagger.annotations does not exist', alongside a jsonschema2pojo ClassAlreadyExistsException.",
+      "qwen_rationale": "Adding io.swagger:swagger-annotations back via AddDependency ensures generated code compiles under JDK 17. The subsequent UpgradeSpringBoot_3_3 step will migrate javax.* annotations to jakarta.* as needed. The chain follows the required SB2->SB3->JDK21 progression with defensive Lombok bumping."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "springfox_to_springdoc",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.springdoc.SpringFoxToSpringDoc",
+            {
+              "name": "org.openrewrite.maven.AddDependency",
+              "groupId": "io.swagger",
+              "artifactId": "swagger-annotations",
+              "version": "1.6.15"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_lombok_safe_bump",
+      "aborted_at": "lombok_safe_bump",
+      "wall_s": 1201.4,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 17,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `lombok_safe_bump` (jdk=17): RECIPE APPLY FAILED, rc=124\n--- log tail (no [ERROR] markers found) ---\n[22:21:32] PROJECT_ROOT=/work/src PHASE=recipe JDK=17\n################################################################################\n# Thanks for using OpenAPI Generator.                                          #\n# Please consider donation to help us maintain this project \ud83d\ude4f                 #\n# https://opencollective.com/openapi_generator/donate                          #\n################################################################################\n################################################################################\n# Thanks for using OpenAPI Generator.                                          #\n# Please consider donation to help us maintain this project \ud83d\ude4f                 #\n# https://opencollective.com/openapi_generator/donate                          #\n################################################################################",
+      "qwen_observation": "The initial lombok bump step timed out (rc=124) during mvn compile, likely due to slow dependency resolution or OpenAPI code generation triggering a hang.",
+      "qwen_rationale": "Removing the explicit SpringFox-to-SpringDoc step simplifies the chain, as UpgradeSpringBoot_3_3 handles the API documentation migration internally. The SB 3.3 meta-recipe will manage the javax-to-jakarta namespace shift and framework upgrades under JDK 17, followed by standard Java 21 plugin and build upgrades to complete the migration."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 188.2,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n################################################################################\n# Thanks for using OpenAPI Generator.                                          #\n# Please consider donation to help us maintain this project \ud83d\ude4f                 #\n# https://opencollective.com/openapi_generator/donate                          #\n################################################################################\n[ERROR] Could not create enum.\norg.jsonschema2pojo.exception.ClassAlreadyExistsException: it.pagopa.ecommerce.commons.generated.events.v1.Version\n    at org.jsonschema2pojo.rules.EnumRule.createEnum (EnumRule.java:354)\n    at org.jsonschema2pojo.rules.EnumRule.apply (EnumRule.java:116)\n    at org.jsonschema2pojo.rules.EnumRule.apply (EnumRule.java:68)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:81)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:76)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:38)\n    at org.jsonschema2pojo.SchemaMapper.generate (SchemaMapper.java:92)\n    at org.jsonschema2pojo.Jsonschema2Pojo.generate (Jsonschema2Pojo.java:79)\n    at org.jsonschema2pojo.maven.Jsonschema2PojoMojo.execute (Jsonschema2PojoMojo.java:893)\n    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)\n    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)\n    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)\n    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)\n    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)\n    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)\n    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)\n    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)\n    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)\n    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)\n    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)\n    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)\n    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)\n    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)\n    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)\n    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)\n    at java.lang.reflect.Method.invoke (Method.java:569)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/FieldsDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/FieldsDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/CardDataResponseDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/CardDataResponseDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/StateResponseDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/StateResponseDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/RefundResponseDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/RefundResponseDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/OrderResponseDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/OrderResponseDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/CreateHostedOrderRequestDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/CreateHostedOrderRequestDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/\n... [truncated] ...",
+      "qwen_observation": "The build failed during the Spring Boot 3 upgrade step due to missing io.swagger.annotations packages (SpringFox incompatibility with SB3) and a jsonschema2pojo class generation conflict.",
+      "qwen_rationale": "SpringFox is abandoned and incompatible with Spring Boot 3.x. Inserting the SpringFoxToSpringDoc migration step before the SB3 upgrade will replace SpringFox dependencies with springdoc-openapi and rewrite annotations, resolving the missing package errors and aligning the project for a successful SB3 and JDK 21 migration."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "springfox_to_springdoc",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.springdoc.SpringFoxToSpringDoc"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_springfox_to_springdoc",
+      "aborted_at": "springfox_to_springdoc",
+      "wall_s": 108.4,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "springfox_to_springdoc",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `springfox_to_springdoc` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n################################################################################\n# Thanks for using OpenAPI Generator.                                          #\n# Please consider donation to help us maintain this project \ud83d\ude4f                 #\n# https://opencollective.com/openapi_generator/donate                          #\n################################################################################\n[ERROR] Could not create enum.\norg.jsonschema2pojo.exception.ClassAlreadyExistsException: it.pagopa.ecommerce.commons.generated.events.v1.Version\n    at org.jsonschema2pojo.rules.EnumRule.createEnum (EnumRule.java:354)\n    at org.jsonschema2pojo.rules.EnumRule.apply (EnumRule.java:116)\n    at org.jsonschema2pojo.rules.EnumRule.apply (EnumRule.java:68)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:81)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:76)\n    at org.jsonschema2pojo.rules.SchemaRule.apply (SchemaRule.java:38)\n    at org.jsonschema2pojo.SchemaMapper.generate (SchemaMapper.java:92)\n    at org.jsonschema2pojo.Jsonschema2Pojo.generate (Jsonschema2Pojo.java:79)\n    at org.jsonschema2pojo.maven.Jsonschema2PojoMojo.execute (Jsonschema2PojoMojo.java:893)\n    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)\n    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)\n    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)\n    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)\n    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)\n    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)\n    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)\n    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)\n    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)\n    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)\n    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)\n    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)\n    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)\n    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)\n    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)\n    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)\n    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)\n    at java.lang.reflect.Method.invoke (Method.java:569)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)\n    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)\n22:50:29.640 [main] INFO it.pagopa.ecommerce.commons.utils.warmup.annotationprocessor.WarmupAnnotationProcessor - WarmupAnnotationProcessor initialized\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/OperationResultDto.java:[18,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/generated/pdv/v1/dto/PiiResourceDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/generated/pdv/v1/dto/PiiResourceDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/generated/pdv/v1/dto/TokenResourceDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/generated/pdv/v1/dto/TokenResourceDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/TransactionSummaryAttributeDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/TransactionSummaryAttributeDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/PostMessageDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/PostMessageDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/GDIStatusDto.java:[23,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/GDIStatusDto.java:[24,30] package io.swagger.annotations does not exist\n[ERROR] /work/src/target/generated-sources/openapi/src/main/java/it/pagopa/ecommerce/commons/generated/npg/v1/dto/FieldSettingsDto.java:[23,30] package io.swagger.annotations do\n... [truncated] ...",
+      "qwen_observation": "The SpringFox-to-SpringDoc migration step fails during mvn compile due to a jsonschema2pojo ClassAlreadyExistsException and missing io.swagger.annotations package in generated OpenAPI code.",
+      "qwen_rationale": "Upgrading jsonschema2pojo-maven-plugin to 1.2.0 resolves the known ClassAlreadyExistsException bug that surfaces in non-clean builds. Adding io.swagger:swagger-annotations as a compile dependency fixes the missing package error in generated OpenAPI code that still references v2 annotations after SpringFox removal. The SpringFoxToSpringDoc recipe is kept as instructed, now augmented with the dependency fix to ensure compilation succeeds before the SB3 upgrade."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "lombok_safe_bump",
+      "jdk": 17,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "newVersion": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "org.projectlombok.lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok-version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombokVersion",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "version.lombok",
+          "newValue": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "fix_jsonschema2pojo",
+      "jdk": 17,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradePluginVersion",
+          "groupId": "org.jsonschema2pojo",
+          "artifactId": "jsonschema2pojo-maven-plugin",
+          "newVersion": "1.2.0"
+        }
+      ]
+    },
+    {
+      "label": "springfox_to_springdoc",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.springdoc.SpringFoxToSpringDoc",
+        {
+          "name": "org.openrewrite.maven.AddDependency",
+          "groupId": "io.swagger",
+          "artifactId": "swagger-annotations",
+          "version": "1.6.14",
+          "scope": "compile"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_spring_boot_3_3",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_springfox_to_springdoc"
+}

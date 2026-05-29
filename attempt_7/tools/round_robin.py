@@ -13,6 +13,15 @@ import os, sys, json, time, argparse, threading
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, "/home/vmihaylov/java_8_11_17_to_java_21/attempt_7/tools")
+# Set ITER_OUT_DIR from --out-dir BEFORE importing iterate_repo so module-level OUT_DIR picks it up
+import sys as _sys
+for _i, _a in enumerate(_sys.argv):
+    if _a == "--out-dir" and _i+1 < len(_sys.argv):
+        os.environ["ITER_OUT_DIR"] = _sys.argv[_i+1]
+        break
+    if _a.startswith("--out-dir="):
+        os.environ["ITER_OUT_DIR"] = _a.split("=", 1)[1]
+        break
 from iterate_repo import iterate_one, OUT_DIR
 
 
@@ -27,9 +36,13 @@ def load_verdict(stage):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sample", required=True, help="JSON list of stages")
-    ap.add_argument("--K", type=int, default=5, help="attempts per slice per pass")
+    ap.add_argument("--K", type=int, default=1, help="attempts added per pass (pass N grants budget=N*K). Default K=1 means each pass grants ONE more attempt per still-FAILing stage — fast feedback, frequent checkpoints for harness/proposer fixes.")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--max-passes", type=int, default=100)
+    ap.add_argument("--start-pass", type=int, default=1, help="resume an in-progress run at this pass number (so the budget formula already accounts for prior compute)")
+    ap.add_argument("--out-dir", default="", help="per_repo_iter directory; defaults to ITER_OUT_DIR env or attempt_7/per_repo_iter — REQUIRED for attempt_8 runs to avoid clobbering attempt_7")
+    ap.add_argument("--test-conservation", action="store_true",
+                    help="ff #8: enforce that tests passing pre-recipe still pass post-recipe")
     ap.add_argument("--log", default="/tmp/round_robin.log")
     args = ap.parse_args()
 
@@ -37,9 +50,10 @@ def main():
     for s in stages: s.setdefault("jv_to", 21)
     n = len(stages)
     print(f"== round-robin: {n} stages, K={args.K}, workers={args.workers}, max_passes={args.max_passes} ==", flush=True)
+    print(f"== OUT_DIR={OUT_DIR} ==", flush=True)
 
     cumulative_curve = []  # [(pass_no, total_pass, new_this_pass, wall_s)]
-    for pass_no in range(1, args.max_passes + 1):
+    for pass_no in range(args.start_pass, args.max_passes + 1):
         budget = pass_no * args.K
         # Count current PASSes BEFORE this pass
         passed_before = sum(1 for s in stages if load_verdict(s)[0] == "PASS")
@@ -49,7 +63,7 @@ def main():
         done = [0]
         def go(s):
             try:
-                iterate_one(s, max_attempts=budget)
+                iterate_one(s, max_attempts=budget, test_conservation=args.test_conservation)
             except Exception as e:
                 print(f"[{s['repo']}] EXC: {type(e).__name__}: {e}", flush=True)
             with lock:

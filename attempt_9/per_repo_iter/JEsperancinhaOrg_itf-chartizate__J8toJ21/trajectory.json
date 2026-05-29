@@ -1,0 +1,942 @@
+{
+  "stage": {
+    "repo": "JEsperancinhaOrg/itf-chartizate",
+    "sha_from": "14c396075473c65d2c8319a6eed4cb6d6fb8d297",
+    "sha_to": "17dc96d0d0ae483e91de2fdfeb0e7acc1bd5c206",
+    "jv_from": 8,
+    "jv_to": 21,
+    "next_version_commit": "8723a284598ab7407029034e8a4e494d4622877a",
+    "commits_back": 20,
+    "pre_pass_count": 7,
+    "pre_fail_count": 0,
+    "pass_rate": 1.0,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_plugins_for_java17",
+      "aborted_at": "upgrade_plugins_for_java17",
+      "wall_s": 53.8,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_plugins_for_java17` (jdk=11): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[WARNING] \n[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.\n[WARNING] \n[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!\n[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:testCompile (default-testCompile) on project itf-chartizate-api: Execution default-testCompile of goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:testCompile failed: For input string: \"1.8\" -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :itf-chartizate-api",
+      "qwen_observation": "maven-compiler-plugin:3.8.0 fails to parse source/target version '1.8' when running on JDK 11, causing testCompile to abort during the upgrade_plugins_for_java17 step.",
+      "qwen_rationale": "Upgrading the maven-compiler-plugin to 3.11.0 via a POM_PATCH step before the JDK 11 compile phase resolves the known parsing bug with '1.8' on newer JDKs, allowing the build to proceed to the Java 17 and 21 migration steps."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "fix_compiler_plugin_jdk11",
+          "jdk": 11,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "maven-compiler-plugin",
+              "version": "3.11.0"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_plugins_for_java17",
+      "aborted_at": "upgrade_plugins_for_java17",
+      "wall_s": 73.2,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "fix_compiler_plugin_jdk11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_plugins_for_java17` (jdk=11): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[WARNING] \n[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.\n[WARNING] \n[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!\n[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile (default-testCompile) on project itf-chartizate-api: Execution default-testCompile of goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile failed: For input string: \"1.8\" -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :itf-chartizate-api",
+      "qwen_observation": "maven-compiler-plugin 3.11.0 throws a NumberFormatException ('For input string: 1.8') during test compilation on JDK 11, a known bug when legacy '1.8' source/target properties are present.",
+      "qwen_rationale": "Bumping maven-compiler-plugin to 3.13.0 resolves the legacy version string parsing bug on newer JDKs, allowing the build to proceed through the Java 17 and 21 migration steps without compilation failures."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "fix_compiler_plugin_jdk11",
+          "jdk": 11,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "maven-compiler-plugin",
+              "version": "3.13.0"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_plugins_for_java17",
+      "aborted_at": "upgrade_plugins_for_java17",
+      "wall_s": 59.5,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "fix_compiler_plugin_jdk11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_plugins_for_java17` (jdk=11): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[WARNING] \n[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!\n[WARNING]  Parameter 'compilerVersion' (user property 'maven.compiler.compilerVersion') is deprecated: This parameter is no longer evaluated by the underlying compilers, instead the actual version of the javac binary is automatically retrieved.\n[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!\n[WARNING]  Parameter 'compilerVersion' (user property 'maven.compiler.compilerVersion') is deprecated: This parameter is no longer evaluated by the underlying compilers, instead the actual version of the javac binary is automatically retrieved.\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile (default-testCompile) on project itf-chartizate-api: Execution default-testCompile of goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile failed: For input string: \"1.8\" -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :itf-chartizate-api",
+      "qwen_observation": "The build fails during testCompile under JDK 11 with 'For input string: \"1.8\"', indicating maven.compiler.source/target are still set to 1.8, which newer compiler plugin versions reject on JDK 11+.",
+      "qwen_rationale": "Updating maven.compiler.source and maven.compiler.target to 11 before running under JDK 11 resolves the NumberFormatException thrown by the compiler plugin, allowing the build to proceed to the Java 17 and 21 upgrade steps."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "fix_compiler_source_target",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.source",
+              "newValue": "11"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.target",
+              "newValue": "11"
+            }
+          ]
+        },
+        {
+          "label": "fix_compiler_plugin_jdk11",
+          "jdk": 11,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "maven-compiler-plugin",
+              "version": "3.13.0"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_fix_compiler_source_target",
+      "aborted_at": "fix_compiler_source_target",
+      "wall_s": 40.2,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "fix_compiler_source_target",
+          "jdk": 11,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `fix_compiler_source_target` (jdk=11): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[WARNING] \n[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.\n[WARNING] \n[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!\n[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:testCompile (default-testCompile) on project itf-chartizate-api: Execution default-testCompile of goal org.apache.maven.plugins:maven-compiler-plugin:3.8.0:testCompile failed: For input string: \"1.8\" -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :itf-chartizate-api",
+      "qwen_observation": "The build fails at step fix_compiler_source_target because maven-compiler-plugin:3.8.0 cannot parse the version string '1.8' when running under JDK 11, and the plugin version bump step was incorrectly placed after the failing step.",
+      "qwen_rationale": "Moving the maven-compiler-plugin version bump to a POM_PATCH step early in the chain (under JDK 8) ensures the plugin is updated to 3.13.0 before any JDK 11 compilation attempts. This resolves the parsing error and allows subsequent Java 8 to 11 migration recipes to apply and compile successfully."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "fix_compiler_plugin",
+          "jdk": 8,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "maven-compiler-plugin",
+              "version": "3.13.0"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_plugins_for_java17",
+      "aborted_at": "upgrade_plugins_for_java17",
+      "wall_s": 68.0,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "fix_compiler_plugin",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_plugins_for_java17` (jdk=11): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[WARNING] \n[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!\n[WARNING]  Parameter 'compilerVersion' (user property 'maven.compiler.compilerVersion') is deprecated: This parameter is no longer evaluated by the underlying compilers, instead the actual version of the javac binary is automatically retrieved.\n[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!\n[WARNING]  Parameter 'compilerVersion' (user property 'maven.compiler.compilerVersion') is deprecated: This parameter is no longer evaluated by the underlying compilers, instead the actual version of the javac binary is automatically retrieved.\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile (default-testCompile) on project itf-chartizate-api: Execution default-testCompile of goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile failed: For input string: \"1.8\" -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :itf-chartizate-api",
+      "qwen_observation": "The build fails at upgrade_plugins_for_java17 with 'For input string: 1.8' because maven-compiler-plugin 3.13.0 cannot parse the legacy '1.8' source/target properties as integers.",
+      "qwen_rationale": "Explicitly setting maven.compiler.source and maven.compiler.target to '11' in the java8_to_java11 step ensures the upgraded compiler plugin receives valid integer-compatible values, preventing the NumberFormatException during testCompile. Removing the aggressive 3.13.0 force-version step avoids premature strict parsing and lets UpgradePluginsForJava17 manage a compatible version."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "lombok_safe_bump",
+      "jdk": 8,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "newVersion": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "org.projectlombok.lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok-version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombokVersion",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "version.lombok",
+          "newValue": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "java8_to_java11",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.migrate.Java8toJava11",
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "maven.compiler.source",
+          "newValue": "11"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "maven.compiler.target",
+          "newValue": "11"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "maven.compiler.release",
+          "newValue": "11"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java17",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java17",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+      ]
+    },
+    {
+      "label": "java17_transforms",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+        "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+        "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+        "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+        "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+        "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+        "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+        "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+        "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+        "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+        "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+        "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+        "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+        "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+        "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+        "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_upgrade_plugins_for_java17"
+}

@@ -28,7 +28,7 @@ TELEMETRY_DIR = f"{BASE}/attempt_7/telemetry"
 os.makedirs(TELEMETRY_DIR, exist_ok=True)
 ROUND_ROBIN_LOG = "/tmp/round_robin.log"
 SEQUENCED_LOG = "/tmp/seqj_full.log"
-ITER_TRAJ_DIR = f"{BASE}/attempt_7/per_repo_iter"
+ITER_TRAJ_DIR = os.environ.get("ITER_TRAJ_DIR") or f"{BASE}/attempt_8/per_repo_iter"
 
 
 def load_env(p=f"{BASE}/.env"):

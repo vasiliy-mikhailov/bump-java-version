@@ -1,0 +1,993 @@
+{
+  "stage": {
+    "repo": "powertac/powertac-core",
+    "sha_from": "28ee26fb8adfdb9fdb5543fd486f290b242039a4",
+    "sha_to": "68f20ab1c4ba99aa8c886bee12f11b3f65eafec2",
+    "jv_from": 8,
+    "jv_to": 21,
+    "next_version_commit": "48ac8a69bb26df39e69fd79fefef3309af8a9a0f",
+    "commits_back": 20,
+    "pre_pass_count": 262,
+    "pre_fail_count": 0,
+    "pass_rate": 1.0,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_java8_to_java11",
+      "aborted_at": "java8_to_java11",
+      "wall_s": 46.3,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `java8_to_java11` (jdk=11): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.\n[WARNING] \n[WARNING] The project org.powertac:powertac-parent:pom:1.5.0-SNAPSHOT uses prerequisites which is only intended for maven-plugin projects but not for non maven-plugin projects. For such purposes you should use the maven-enforcer-plugin. See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html\n[WARNING] 2 problems were encountered while building the effective model for org.codehaus.mojo:aspectj-maven-plugin:jar:1.9 during plugin request org.codehaus.mojo:aspectj-maven-plugin:1.9 (use -X to see details)\n[WARNING] 2 problems were encountered while building the effective model for org.codehaus.mojo:aspectj-maven-plugin:jar:1.9 during dependency collection for org.codehaus.mojo:aspectj-maven-plugin:jar:1.9 () -> [org.aspectj:aspectjtools:jar:1.8.10 (runtime)] < [nexus-public (http://nexus:8081/repository/maven-public/, default, releases+snapshots)] (use -X to see details)\n[ERROR] Failed to execute goal org.codehaus.mojo:aspectj-maven-plugin:1.9:compile (default) on project powertac-aop: Execution default of goal org.codehaus.mojo:aspectj-maven-plugin:1.9:compile failed: Plugin org.codehaus.mojo:aspectj-maven-plugin:1.9 or one of its dependencies could not be resolved:\n[ERROR] \tCould not find artifact com.sun:tools:jar:11.0.31 at specified path /opt/jdk/11/../lib/tools.jar\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginResolutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :powertac-aop",
+      "qwen_observation": "The aspectj-maven-plugin:1.9 fails to resolve com.sun:tools:jar on JDK 11 because tools.jar was removed in JDK 11+, causing the compile step to abort.",
+      "qwen_rationale": "Upgrading aspectj-maven-plugin to 1.14.0 (which supports JDK 11+ and no longer depends on the legacy tools.jar) before the Java 8\u219211 migration step will allow the build to proceed under JDK 11."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "aspectj_plugin_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradePluginVersion",
+              "groupId": "org.codehaus.mojo",
+              "artifactId": "aspectj-maven-plugin",
+              "newVersion": "1.14.0"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_aspectj_plugin_bump",
+      "aborted_at": "aspectj_plugin_bump",
+      "wall_s": 31.6,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "aspectj_plugin_bump",
+          "jdk": 11,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `aspectj_plugin_bump` (jdk=11): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.\n[WARNING] \n[WARNING] The project org.powertac:powertac-parent:pom:1.5.0-SNAPSHOT uses prerequisites which is only intended for maven-plugin projects but not for non maven-plugin projects. For such purposes you should use the maven-enforcer-plugin. See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html\n[WARNING] 2 problems were encountered while building the effective model for org.codehaus.mojo:aspectj-maven-plugin:jar:1.9 during plugin request org.codehaus.mojo:aspectj-maven-plugin:1.9 (use -X to see details)\n[WARNING] 2 problems were encountered while building the effective model for org.codehaus.mojo:aspectj-maven-plugin:jar:1.9 during dependency collection for org.codehaus.mojo:aspectj-maven-plugin:jar:1.9 () -> [org.aspectj:aspectjtools:jar:1.8.10 (runtime)] < [nexus-public (http://nexus:8081/repository/maven-public/, default, releases+snapshots)] (use -X to see details)\n[ERROR] Failed to execute goal org.codehaus.mojo:aspectj-maven-plugin:1.9:compile (default) on project powertac-aop: Execution default of goal org.codehaus.mojo:aspectj-maven-plugin:1.9:compile failed: Plugin org.codehaus.mojo:aspectj-maven-plugin:1.9 or one of its dependencies could not be resolved:\n[ERROR] \tCould not find artifact com.sun:tools:jar:11.0.31 at specified path /opt/jdk/11/../lib/tools.jar\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginResolutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :powertac-aop",
+      "qwen_observation": "The aspectj-maven-plugin 1.9 fails on JDK 11 due to missing tools.jar, causing mvn compile (and thus rewrite:run) to abort before the version bump recipe can apply.",
+      "qwen_rationale": "Moving the aspectj plugin bump to JDK 8 allows the recipe to apply successfully while the project still compiles cleanly. Upgrading to 1.12.0 resolves the tools.jar dependency issue for JDK 11+ without breaking JDK 8 compilation, unblocking the subsequent Java 11 migration step."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "aspectj_plugin_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradePluginVersion",
+              "groupId": "org.codehaus.mojo",
+              "artifactId": "aspectj-maven-plugin",
+              "newVersion": "1.12.0"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "aspectj.version",
+              "newValue": "1.12.0"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "aspectj-maven-plugin.version",
+              "newValue": "1.12.0"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_aspectj_plugin_bump",
+      "aborted_at": "aspectj_plugin_bump",
+      "wall_s": 55.4,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "aspectj_plugin_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `aspectj_plugin_bump` (jdk=8): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[16:21:47] PROJECT_ROOT=/work/src PHASE=build_post JDK=8\n[ERROR] Failed to execute goal on project powertac-aop: Could not resolve dependencies for project org.powertac:powertac-aop:jar:1.5.0-SNAPSHOT\n[ERROR] dependency: org.aspectj:aspectjrt:jar:1.12.0 (compile)\n[ERROR] \tCould not find artifact org.aspectj:aspectjrt:jar:1.12.0 in nexus-public (http://nexus:8081/repository/maven-public/)\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :powertac-aop",
+      "qwen_observation": "The build failed because aspectjrt:jar:1.12.0 does not exist in the repository; AspectJ runtime uses 1.9.x versioning while the plugin uses 1.x.y versioning.",
+      "qwen_rationale": "Changing the AspectJ plugin version to 1.14.0 and the aspectj.version property to 1.9.22 aligns with actual Maven Central releases, resolves the missing artifact error, and provides JDK 11+ compatibility by removing the tools.jar dependency."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "aspectj_plugin_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradePluginVersion",
+              "groupId": "org.codehaus.mojo",
+              "artifactId": "aspectj-maven-plugin",
+              "newVersion": "1.14.0"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "aspectj.version",
+              "newValue": "1.9.22"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "aspectj-maven-plugin.version",
+              "newValue": "1.14.0"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_aspectj_plugin_bump",
+      "aborted_at": "aspectj_plugin_bump",
+      "wall_s": 61.8,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "aspectj_plugin_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `aspectj_plugin_bump` (jdk=8): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[16:25:09] PROJECT_ROOT=/work/src PHASE=build_post JDK=8\n[ERROR] Failed to execute goal org.codehaus.mojo:aspectj-maven-plugin:1.14.0:compile (default) on project powertac-aop: Execution default of goal org.codehaus.mojo:aspectj-maven-plugin:1.14.0:compile failed: The AspectJ compiler needs at least Java runtime 17 -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :powertac-aop",
+      "qwen_observation": "The aspectj-maven-plugin 1.14.0 requires Java 17 to run, but the step was executed under JDK 8, causing a build failure.",
+      "qwen_rationale": "Moving the AspectJ plugin and runtime version bump to JDK 17 ensures the AspectJ compiler runs on a supported JVM. The rest of the chain follows the standard Java 8 to 21 migration path."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 8,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "java8_to_java11",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.Java8toJava11"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "aspectj_plugin_bump",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradePluginVersion",
+              "groupId": "org.codehaus.mojo",
+              "artifactId": "aspectj-maven-plugin",
+              "newVersion": "1.14.0"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "aspectj.version",
+              "newValue": "1.9.22"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "aspectj-maven-plugin.version",
+              "newValue": "1.14.0"
+            }
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_java8_to_java11",
+      "aborted_at": "java8_to_java11",
+      "wall_s": 49.3,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 8,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java8_to_java11",
+          "jdk": 11,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `java8_to_java11` (jdk=11): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.\n[WARNING] \n[WARNING] The project org.powertac:powertac-parent:pom:1.5.0-SNAPSHOT uses prerequisites which is only intended for maven-plugin projects but not for non maven-plugin projects. For such purposes you should use the maven-enforcer-plugin. See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html\n[WARNING] 2 problems were encountered while building the effective model for org.codehaus.mojo:aspectj-maven-plugin:jar:1.9 during plugin request org.codehaus.mojo:aspectj-maven-plugin:1.9 (use -X to see details)\n[WARNING] 2 problems were encountered while building the effective model for org.codehaus.mojo:aspectj-maven-plugin:jar:1.9 during dependency collection for org.codehaus.mojo:aspectj-maven-plugin:jar:1.9 () -> [org.aspectj:aspectjtools:jar:1.8.10 (runtime)] < [nexus-public (http://nexus:8081/repository/maven-public/, default, releases+snapshots)] (use -X to see details)\n[ERROR] Failed to execute goal org.codehaus.mojo:aspectj-maven-plugin:1.9:compile (default) on project powertac-aop: Execution default of goal org.codehaus.mojo:aspectj-maven-plugin:1.9:compile failed: Plugin org.codehaus.mojo:aspectj-maven-plugin:1.9 or one of its dependencies could not be resolved:\n[ERROR] \tCould not find artifact com.sun:tools:jar:11.0.31 at specified path /opt/jdk/11/../lib/tools.jar\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginResolutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :powertac-aop",
+      "qwen_observation": "The aspectj-maven-plugin:1.9 fails on JDK 11+ because it attempts to load the removed tools.jar, causing mvn compile to abort before recipes can proceed.",
+      "qwen_rationale": "Bumping the AspectJ plugin and runtime incrementally ensures compatibility at each JDK stage: 1.11.0/1.9.7 for JDK 8/11, 1.13.0/1.9.22 for JDK 11/17, and 1.14.0/1.9.22 for JDK 17/21. This avoids the tools.jar resolution error and satisfies the compiler requirements at each transition."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "lombok_safe_bump",
+      "jdk": 8,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "newVersion": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "org.projectlombok.lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok-version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombokVersion",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "version.lombok",
+          "newValue": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "aspectj_bump_jdk8",
+      "jdk": 8,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradePluginVersion",
+          "groupId": "org.codehaus.mojo",
+          "artifactId": "aspectj-maven-plugin",
+          "newVersion": "1.11.0"
+        },
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.aspectj",
+          "artifactId": "aspectjrt",
+          "newVersion": "1.9.7"
+        },
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.aspectj",
+          "artifactId": "aspectjweaver",
+          "newVersion": "1.9.7"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "aspectj.version",
+          "newValue": "1.9.7"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "aspectj-maven-plugin.version",
+          "newValue": "1.11.0"
+        }
+      ]
+    },
+    {
+      "label": "java8_to_java11",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.migrate.Java8toJava11"
+      ]
+    },
+    {
+      "label": "aspectj_bump_jdk11",
+      "jdk": 11,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradePluginVersion",
+          "groupId": "org.codehaus.mojo",
+          "artifactId": "aspectj-maven-plugin",
+          "newVersion": "1.13.0"
+        },
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.aspectj",
+          "artifactId": "aspectjrt",
+          "newVersion": "1.9.22"
+        },
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.aspectj",
+          "artifactId": "aspectjweaver",
+          "newVersion": "1.9.22"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "aspectj.version",
+          "newValue": "1.9.22"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "aspectj-maven-plugin.version",
+          "newValue": "1.13.0"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java17",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java17",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+      ]
+    },
+    {
+      "label": "aspectj_bump_jdk17",
+      "jdk": 17,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradePluginVersion",
+          "groupId": "org.codehaus.mojo",
+          "artifactId": "aspectj-maven-plugin",
+          "newVersion": "1.14.0"
+        },
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.aspectj",
+          "artifactId": "aspectjrt",
+          "newVersion": "1.9.22"
+        },
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.aspectj",
+          "artifactId": "aspectjweaver",
+          "newVersion": "1.9.22"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "aspectj.version",
+          "newValue": "1.9.22"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "aspectj-maven-plugin.version",
+          "newValue": "1.14.0"
+        }
+      ]
+    },
+    {
+      "label": "java17_transforms",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+        "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+        "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+        "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+        "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+        "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+        "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+        "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+        "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+        "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+        "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+        "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+        "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+        "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+        "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_java8_to_java11"
+}

@@ -1,0 +1,457 @@
+{
+  "stage": {
+    "repo": "servicex-sh/httpx",
+    "sha_from": "83e1a22a45a4ffb6f45161ab7deea356851bb574",
+    "sha_to": "4a62bd1d98cbc6cb49b52ad05ffbedfccda902f4",
+    "jv_from": 17,
+    "jv_to": 21,
+    "next_version_commit": "4a62bd1d98cbc6cb49b52ad05ffbedfccda902f4",
+    "commits_back": 20,
+    "pre_pass_count": 30,
+    "pre_fail_count": 2,
+    "pass_rate": 0.938,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_to_3_3",
+      "aborted_at": "upgrade_spring_boot_to_3_3",
+      "wall_s": 49.2,
+      "steps": [
+        {
+          "step": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_to_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_to_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[23:05:08] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/com/alibaba/fastjson2/JSON.java:[32,51] cannot find symbol\n  symbol:   class Feature\n  location: class com.alibaba.fastjson2.JSON\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[4,25] package com.sun.mail.smtp does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[5,25] package com.sun.mail.smtp does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[3,1] package com.sun.mail.handlers does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/ThirdLibrariesHints.java:[26,25] package com.sun.mail.util does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[13,17] cannot find symbol\n  symbol: class SMTPProvider\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[14,17] cannot find symbol\n  symbol: class SMTPTransport\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[15,17] cannot find symbol\n  symbol: class multipart_mixed\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[16,17] cannot find symbol\n  symbol: class text_plain\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[17,17] cannot find symbol\n  symbol: class text_html\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[18,17] cannot find symbol\n  symbol: class text_xml\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[19,17] cannot find symbol\n  symbol: class message_rfc822\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project httpx: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/com/alibaba/fastjson2/JSON.java:[32,51] cannot find symbol\n[ERROR]   symbol:   class Feature\n[ERROR]   location: class com.alibaba.fastjson2.JSON\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[4,25] package com.sun.mail.smtp does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[5,25] package com.sun.mail.smtp does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[3,1] package com.sun.mail.handlers does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/ThirdLibrariesHints.java:[26,25] package com.sun.mail.util does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[13,17] cannot find symbol\n[ERROR]   symbol: class SMTPProvider\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[14,17] cannot find symbol\n[ERROR]   symbol: class SMTPTransport\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[15,17] cannot find symbol\n[ERROR]   symbol: class multipart_mixed\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[16,17] cannot find symbol\n[ERROR]   symbol: class text_plain\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[17,17] cannot find symbol\n[ERROR]   symbol: class text_html\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[18,17] cannot find symbol\n[ERROR]   symbol: class text_xml\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[19,17] cannot find symbol\n[ERROR]   symbol: class message_rfc822\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Spring Boot 3.3 upgrade evicted or failed to manage com.sun.mail:jakarta.mail and com.alibaba.fastjson2:fastjson2, causing missing com.sun.mail.* implementation classes and JSON.Feature symbol.",
+      "qwen_rationale": "Insert a pom_patch step before the SB upgrade to explicitly declare the missing mail and fastjson2 dependencies on the compile classpath, ensuring they survive the parent POM change and dependency management shift."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "add_missing_deps",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "add_dependency",
+              "groupId": "com.sun.mail",
+              "artifactId": "jakarta.mail",
+              "version": "2.1.3"
+            },
+            {
+              "op": "add_dependency",
+              "groupId": "com.alibaba",
+              "artifactId": "fastjson2",
+              "version": "2.0.53"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_add_missing_deps",
+      "aborted_at": "add_missing_deps",
+      "wall_s": 35.1,
+      "steps": [
+        {
+          "step": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "add_missing_deps",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `add_missing_deps` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[23:07:23] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] Failed to execute goal on project httpx: Could not resolve dependencies for project org.mvnsearch:httpx:jar:0.42.4\n[ERROR] dependency: com.sun.mail:jakarta.mail:jar:2.1.3 (compile)\n[ERROR] \tcom.sun.mail:jakarta.mail:jar:2.1.3 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced\n[ERROR] dependency: com.alibaba:fastjson2:jar:2.0.53 (compile)\n[ERROR] \tcom.alibaba:fastjson2:jar:2.0.53 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException",
+      "qwen_observation": "Dependency resolution failed for com.sun.mail:jakarta.mail:2.1.3 and com.alibaba:fastjson2:2.0.53 due to Maven negative cache and an incorrect groupId for fastjson2.",
+      "qwen_rationale": "Bypass the local Maven negative cache by using slightly older, widely-available versions (2.1.2 and 2.0.43) and correct the fastjson2 groupId to com.alibaba.fastjson2. Placing this pom_patch before the Spring Boot 3.3 upgrade ensures the required classes are on the classpath when the migration recipes run and compile."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "add_missing_deps",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "add_dependency",
+              "groupId": "com.sun.mail",
+              "artifactId": "jakarta.mail",
+              "version": "2.1.2"
+            },
+            {
+              "op": "add_dependency",
+              "groupId": "com.alibaba.fastjson2",
+              "artifactId": "fastjson2",
+              "version": "2.0.43"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_add_missing_deps",
+      "aborted_at": "add_missing_deps",
+      "wall_s": 32.6,
+      "steps": [
+        {
+          "step": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "add_missing_deps",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `add_missing_deps` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[23:10:07] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] Failed to execute goal on project httpx: Could not resolve dependencies for project org.mvnsearch:httpx:jar:0.42.4\n[ERROR] dependency: com.sun.mail:jakarta.mail:jar:2.1.2 (compile)\n[ERROR] \tcom.sun.mail:jakarta.mail:jar:2.1.2 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException",
+      "qwen_observation": "The add_missing_deps step failed because Maven's local repository cached a negative resolution for com.sun.mail:jakarta.mail, blocking all subsequent version fetches.",
+      "qwen_rationale": "Removing the explicit dependency patch step bypasses the Maven cache blocker. The UpgradeSpringBoot_3_3 meta-recipe will manage Jakarta namespace migrations and dependency management via Spring Boot's BOM, allowing the build to proceed to the Java 21 upgrade without triggering the cached failure."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_to_3_3",
+      "aborted_at": "upgrade_spring_boot_to_3_3",
+      "wall_s": 76.7,
+      "steps": [
+        {
+          "step": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_to_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_to_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[23:12:58] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/com/alibaba/fastjson2/JSON.java:[32,51] cannot find symbol\n  symbol:   class Feature\n  location: class com.alibaba.fastjson2.JSON\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[4,25] package com.sun.mail.smtp does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[5,25] package com.sun.mail.smtp does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[3,1] package com.sun.mail.handlers does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/ThirdLibrariesHints.java:[26,25] package com.sun.mail.util does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[13,17] cannot find symbol\n  symbol: class SMTPProvider\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[14,17] cannot find symbol\n  symbol: class SMTPTransport\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[15,17] cannot find symbol\n  symbol: class multipart_mixed\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[16,17] cannot find symbol\n  symbol: class text_plain\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[17,17] cannot find symbol\n  symbol: class text_html\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[18,17] cannot find symbol\n  symbol: class text_xml\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[19,17] cannot find symbol\n  symbol: class message_rfc822\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project httpx: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/com/alibaba/fastjson2/JSON.java:[32,51] cannot find symbol\n[ERROR]   symbol:   class Feature\n[ERROR]   location: class com.alibaba.fastjson2.JSON\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[4,25] package com.sun.mail.smtp does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[5,25] package com.sun.mail.smtp does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[3,1] package com.sun.mail.handlers does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/ThirdLibrariesHints.java:[26,25] package com.sun.mail.util does not exist\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[13,17] cannot find symbol\n[ERROR]   symbol: class SMTPProvider\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[14,17] cannot find symbol\n[ERROR]   symbol: class SMTPTransport\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[15,17] cannot find symbol\n[ERROR]   symbol: class multipart_mixed\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[16,17] cannot find symbol\n[ERROR]   symbol: class text_plain\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[17,17] cannot find symbol\n[ERROR]   symbol: class text_html\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[18,17] cannot find symbol\n[ERROR]   symbol: class text_xml\n[ERROR] /work/src/src/main/java/org/mvnsearch/http/aot/JavamailHints.java:[19,17] cannot find symbol\n[ERROR]   symbol: class message_rfc822\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Spring Boot 3.3 upgrade recipe applied successfully but post-recipe compile failed because com.sun.mail.* (Jakarta Mail implementation) and com.alibaba.fastjson2.Feature classes are missing from the classpath",
+      "qwen_rationale": "The SB 3.3 upgrade migrates javax.mail to jakarta.mail but the com.sun.mail:jakarta.mail implementation dependency fails to resolve from the internal Nexus (cached negative results for 2.1.2/2.1.3). Pre-patching the pom with jakarta.mail-api and com.sun.mail:jakarta.mail at version 2.1.1 (an uncached version) alongside forcing fastjson2 to 2.0.43 before the SB upgrade should satisfy the compile classpath requirements for the AOT hint sources and the vendored fastjson2 JSON.java that references Feature."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "add_missing_deps",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "add_dependency",
+              "groupId": "jakarta.mail",
+              "artifactId": "jakarta.mail-api",
+              "version": "2.1.1"
+            },
+            {
+              "op": "add_dependency",
+              "groupId": "com.sun.mail",
+              "artifactId": "jakarta.mail",
+              "version": "2.1.1"
+            },
+            {
+              "op": "force_version",
+              "artifactId": "fastjson2",
+              "version": "2.0.43"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_add_missing_deps",
+      "aborted_at": "add_missing_deps",
+      "wall_s": 15.3,
+      "steps": [
+        {
+          "step": "add_missing_deps",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `add_missing_deps` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[23:16:53] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] Failed to execute goal on project httpx: Could not resolve dependencies for project org.mvnsearch:httpx:jar:0.42.4\n[ERROR] dependency: com.sun.mail:jakarta.mail:jar:2.1.1 (compile)\n[ERROR] \tCould not find artifact com.sun.mail:jakarta.mail:jar:2.1.1 in nexus-public (http://nexus:8081/repository/maven-public/)\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/DependencyResolutionException",
+      "qwen_observation": "Dependency resolution failed for com.sun.mail:jakarta.mail:2.1.1 due to internal Nexus cache blocking previously attempted versions (2.1.3, 2.1.2, 2.1.1).",
+      "qwen_rationale": "Switching to version 2.1.0 bypasses the cached negative resolution entries while still providing a valid Jakarta Mail implementation compatible with Spring Boot 3.3, allowing the build to proceed before the framework migration."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "add_missing_deps",
+      "jdk": 17,
+      "recipes": [
+        {
+          "op": "add_dependency",
+          "groupId": "jakarta.mail",
+          "artifactId": "jakarta.mail-api",
+          "version": "2.1.0"
+        },
+        {
+          "op": "add_dependency",
+          "groupId": "com.sun.mail",
+          "artifactId": "jakarta.mail",
+          "version": "2.1.0"
+        },
+        {
+          "op": "force_version",
+          "artifactId": "fastjson2",
+          "version": "2.0.43"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_spring_boot_to_3_3",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_add_missing_deps"
+}

@@ -56,3 +56,29 @@ demonstrably high regression risk.
 - Optional dependency security/feature updates
 - Code formatting, import reordering, refactors that preserve semantics
 - Renaming/restructuring that's orthogonal to the JDK change
+
+## Decision rule — DO NOT add an SB upgrade step unless the matrix says you must
+
+Before adding any `UpgradeSpringBoot_*` step (e.g. `org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3`) to the chain, run this exact check:
+
+1. Read the project's current SB version from `stage_facts.spring_boot_version`.
+2. If that field is absent or null, the project is not a Spring Boot project. **Do not add any SB upgrade step.**
+3. Find the row for the current SB major.minor in the Spring Boot table above (e.g. "3.2" matches the "3.2" row).
+4. Check the "Java versions supported" column on that row.
+5. If `jv_to` is in that list, the current SB already supports the target JDK. **Do not add an SB upgrade step.** The recipe chain only needs JDK-bump primitives.
+6. Only if `jv_to` is NOT in that list, add the smallest SB bump that gets the project to a row containing `jv_to`. Prefer:
+   - Within 2.x: `UpgradeSpringBoot_2_7`
+   - 2.x → 3.x: `UpgradeSpringBoot_3_3` (encompasses 2.x→3.0 jakarta migration)
+   - Already-3.x → newer 3.y: `UpgradeSpringBoot_3_{y}` matching the smallest row that includes jv_to.
+
+### Worked examples
+
+| Current SB | jv_to | Decision |
+|---|---|---|
+| 3.2.5 | 21 | No SB upgrade — row "3.2" supports 17, 21 |
+| 2.7.18 | 21 | Add `UpgradeSpringBoot_3_3` — row "2.7" supports only 8/11/17/18, not 21 |
+| 2.3.12 | 17 | Add `UpgradeSpringBoot_2_7` or `UpgradeSpringBoot_3_3` — row "2.3" doesn't list 17 |
+| 3.4.1 | 21 | No SB upgrade — row "3.4" supports 17, 21, 22, 23 |
+| (no Spring Boot) | 21 | No SB upgrade — project is not Spring Boot |
+
+If you add an SB upgrade step that violates this rule, the resulting chain will typically regress projects that were already compatible. Several stages have been observed to fail this way: a default `lombok → java17_transforms → java21_build` chain PASSes them, but injecting an unnecessary `UpgradeSpringBoot_3_3` causes compile failure mid-chain.

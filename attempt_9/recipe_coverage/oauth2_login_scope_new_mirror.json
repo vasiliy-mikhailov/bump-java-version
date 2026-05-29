@@ -1,0 +1,130 @@
+[
+  {
+    "repo": "AdityaTile04/Java-Backend",
+    "head_sha": "f0cb41c0a1702dcfd6b1575b16c8a3d492356728",
+    "hit_paths": [
+      "Spring_boot/spring_OAuth2/src/main/java/com/project/spring_oauth2/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "Harishtandale74/EMS_Infosys",
+    "head_sha": "c1ba66d5abe287535c8034eb5326517ff9a4b555",
+    "hit_paths": [
+      "backend/src/main/java/com/ems/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "MarlonLuan/jhipster-starter",
+    "head_sha": "46984fecf583d04ad32af15c50292e46dde46617",
+    "hit_paths": [
+      "my-workspace/server/src/main/java/com/mycompany/myapp/config/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "repo": "MoisesNEY/ControlExpedientes",
+    "head_sha": "01f3cfe33615615726be199e5a8a5dc16de70815",
+    "hit_paths": [
+      "backend/src/main/java/ni/edu/mney/config/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "repo": "NTTH7419/yas-devops-1",
+    "head_sha": "6f433191eda1d9cc225390ff9d09f1a8f07198af",
+    "hit_paths": [
+      "backoffice-bff/src/main/java/com/yas/backofficebff/config/SecurityConfig.java",
+      "storefront-bff/src/main/java/com/yas/storefrontbff/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "ProgramCX/FoxNAServer",
+    "head_sha": "ad9d09ade5616b3cc01a77c3bb9e76ef939c9e94",
+    "hit_paths": [
+      "src/main/java/cn/programcx/foxnaserver/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "Sov1etB0mb3/mono-ecom",
+    "head_sha": "e2465ad481cfbd0066c75d88cc07f5b84ffd58cf",
+    "hit_paths": [
+      "src/main/java/com/calt/buroxz/config/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "repo": "ValentinaSukonina/FreezerAlarm",
+    "head_sha": "d23459f29495b72d58a4cc2350ff6ee3b5bf87ba",
+    "hit_paths": [
+      "backend/src/main/java/com/example/backend/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "dangxuanphuc/java-spring-boot-tutorial",
+    "head_sha": "a2fbb2ed0cf42b1a70c15148fe174ae13279fa18",
+    "hit_paths": [
+      "spring-oauth-demo/src/main/java/com/phucdx/spring_oauth_demo/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "farscrl/chalender-server",
+    "head_sha": "b3ef65ea4aabdd8fd3ddb3771063ec41a915933f",
+    "hit_paths": [
+      "api/src/main/java/ch/chalender/api/config/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "repo": "geonetwork/geonetwork",
+    "head_sha": "90c57a5abd68d1534e7ba3d36a659a28dfc62481",
+    "hit_paths": [
+      "src/apps/geonetwork/src/main/java/org/geonetwork/config/WebSecurityConfiguration.java"
+    ]
+  },
+  {
+    "repo": "it-at-m/refarch",
+    "head_sha": "14184aa91c6f9014332353cf3074a5f95b867420",
+    "hit_paths": [
+      "refarch-gateway/src/main/java/de/muenchen/oss/refarch/gateway/configuration/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "repo": "jobmission/oauth2-server",
+    "head_sha": "7ffc47e4b4fed2be02cbf360d756da1f85cfc0a5",
+    "hit_paths": [
+      "src/main/java/com/revengemission/sso/oauth2/server/config/DefaultSecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "making/oauth2-sso-demo",
+    "head_sha": "42780eae3d386250fa1e432e3d6210a06b873a54",
+    "hit_paths": [
+      "todo-frontend-webflux/src/main/java/lol/maki/dev/todo/config/SecurityConfig.java",
+      "todo-frontend/src/main/java/lol/maki/dev/todo/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "phamquan220400/udemy-spring-security",
+    "head_sha": "d1fcd0c7f188db3e1de2214f4382612bd3186204",
+    "hit_paths": [
+      "section_14/springsecOAUTH2/src/main/java/com/eazybytes/config/ProjectSecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "posseidon/webscraper",
+    "head_sha": "585a95e0e926d5acac355455aab3267be3b9d511",
+    "hit_paths": [
+      "src/main/java/hu/elte/inf/projects/quizme/security/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "ucsb-cs156-f25/proj-happycows-f25-16",
+    "head_sha": "2bd4bbb38c9f679bf5736f46e17325052825946f",
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/happiercows/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "volunteer-plus/volunteer-plus",
+    "head_sha": "1ec88c21ef852d256112cc78779fa34786bd101d",
+    "hit_paths": [
+      "backend/src/main/java/volunteer/plus/backend/config/security/SecurityConf.java"
+    ]
+  }
+]

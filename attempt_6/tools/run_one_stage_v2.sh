@@ -43,7 +43,14 @@ MVN_FLAGS="-B -ntp -fae -Denforcer.skip=true -DskipTests -Dlombok.version=1.18.3
 case "$PHASE" in
   build_pre|build_post)
     extra=""
-    [ "$PHASE" = "build_post" ] && extra="-Dmaven.compiler.release=${STAGE_JDK} -Djava.version=${STAGE_JDK}"
+    if [ "$PHASE" = "build_post" ]; then
+      # JDK 8 javac does not support --release (added in JDK 9). Use source/target instead.
+      if [ "$STAGE_JDK" -lt 9 ]; then
+        extra="-Dmaven.compiler.source=${STAGE_JDK} -Dmaven.compiler.target=${STAGE_JDK} -Djava.version=${STAGE_JDK}"
+      else
+        extra="-Dmaven.compiler.release=${STAGE_JDK} -Djava.version=${STAGE_JDK}"
+      fi
+    fi
     if [ "$BUILD_TOOL" = "maven" ]; then
       mvn $MVN_FLAGS $extra -q compile >> "$STAGE_LOG" 2>&1
     else
@@ -56,7 +63,13 @@ case "$PHASE" in
     # mvn test under JDK = STAGE_JDK. -DskipTests stripped via override to false. Other -D*.skip kept.
     # test_pre runs against UNMODIFIED source under jv_from; test_post runs against post-recipe source under jv_to.
     extra="-DskipTests=false"
-    [ "$PHASE" = "test_post" ] && extra="-Dmaven.compiler.release=${STAGE_JDK} -Djava.version=${STAGE_JDK} -DskipTests=false"
+    if [ "$PHASE" = "test_post" ]; then
+      if [ "$STAGE_JDK" -lt 9 ]; then
+        extra="-Dmaven.compiler.source=${STAGE_JDK} -Dmaven.compiler.target=${STAGE_JDK} -Djava.version=${STAGE_JDK} -DskipTests=false"
+      else
+        extra="-Dmaven.compiler.release=${STAGE_JDK} -Djava.version=${STAGE_JDK} -DskipTests=false"
+      fi
+    fi
     if [ "$BUILD_TOOL" = "maven" ]; then
       mvn $MVN_FLAGS $extra -q test >> "$STAGE_LOG" 2>&1
     else
@@ -68,7 +81,7 @@ case "$PHASE" in
   recipe)
     : "${STAGE_RECIPE:?}"
     PLUGIN=org.openrewrite.maven:rewrite-maven-plugin:6.40.0
-    COORDS=org.openrewrite.recipe:rewrite-migrate-java:3.35.0,org.openrewrite.recipe:rewrite-spring:6.31.0,org.openrewrite.recipe:rewrite-testing-frameworks:3.36.0,org.openrewrite.recipe:rewrite-hibernate:2.20.3
+    COORDS=org.openrewrite.recipe:rewrite-migrate-java:3.35.0,org.openrewrite.recipe:rewrite-spring:6.31.0,org.openrewrite.recipe:rewrite-testing-frameworks:3.36.0,org.openrewrite.recipe:rewrite-hibernate:2.20.3,com.claude.recipes:claude-recipes:1.0.0
     recipe_name=$(grep -E '^name:' "$STAGE_RECIPE" | head -1 | awk '{print $2}')
     if [ "$BUILD_TOOL" = "maven" ]; then
       mvn $MVN_FLAGS -U "$PLUGIN:run" \

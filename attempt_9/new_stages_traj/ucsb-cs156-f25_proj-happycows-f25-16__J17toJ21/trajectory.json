@@ -1,0 +1,11 @@
+{
+  "stage": {
+    "repo": "ucsb-cs156-f25/proj-happycows-f25-16",
+    "sha_from": "7cd546ef016865239ca8f22ac2265757a27e57a5",
+    "sha_to": "23c661db4647035207c1244515e3efbd3efce3a6",
+    "jv_from": 17,
+    "jv_to": 21
+  },
+  "history": [],
+  "final_verdict": "NOT_YET_RUN"
+}

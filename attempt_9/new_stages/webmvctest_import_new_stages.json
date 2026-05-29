@@ -1,0 +1,210 @@
+[
+  {
+    "slug": "AngelSigueros_Spring__J21toJ21",
+    "repo": "AngelSigueros/Spring",
+    "sha_to": "c113cd1c6fab07f88253833eddd1eff8545e6ef1",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.1.2",
+    "hit_paths": [
+      "complete-spring-project-master/src/main/java/com/edwise/completespring/config/SpringWebSecurityConfig.java",
+      "spring-boot-rest/src/test/java/com/baeldung/springhateoas/CustomerControllerIntegrationTest.java",
+      "spring-boot-rest/src/test/java/com/baeldung/web/FooControllerWebLayerIntegrationTest.java",
+      "spring-data-examples-main/rest/security/src/main/java/example/springdata/rest/security/Application.java"
+    ]
+  },
+  {
+    "slug": "Maynito_TaskForge__J21toJ21",
+    "repo": "Maynito/TaskForge",
+    "sha_to": "eab1d5a415a0e91d3a6414b1ea092e2463581eda",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.7",
+    "hit_paths": [
+      "backend/src/main/java/com/taskforge/security/SecurityConfig.java",
+      "backend/src/test/java/com/taskforge/controller/VersionControllerTest.java"
+    ]
+  },
+  {
+    "slug": "ValentinaSukonina_FreezerAlarm__J21toJ21",
+    "repo": "ValentinaSukonina/FreezerAlarm",
+    "sha_to": "d23459f29495b72d58a4cc2350ff6ee3b5bf87ba",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.1",
+    "hit_paths": [
+      "backend/src/main/java/com/example/backend/config/SecurityConfig.java",
+      "backend/src/test/java/com/example/backend/config/CorsConfigTest.java",
+      "backend/src/test/java/com/example/backend/controller/AuthControllerTest.java",
+      "backend/src/test/java/com/example/backend/controller/EmailControllerTest.java",
+      "backend/src/test/java/com/example/backend/controller/FreezerControllerTest.java"
+    ]
+  },
+  {
+    "slug": "ankurkumar2002_AppVerse-V1.0.0__J21toJ21",
+    "repo": "ankurkumar2002/AppVerse-V1.0.0",
+    "sha_to": "c243a6be06b13ed3b208884ca5ac03463a2d0033",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.2.5",
+    "hit_paths": [
+      "api-gateway/src/main/java/com/appverse/api_gateway/config/SecurityConfig.java",
+      "app-service/src/main/java/com/appverse/app_service/config/SecurityConfig.java",
+      "app-service/src/test/java/com/appverse/app_service/ApplicationControllerTest.java",
+      "cart-service/src/main/java/com/appverse/cart_service/config/SecurityConfig.java",
+      "developer-service/src/main/java/com/appverse/developer_service/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "aws-samples_java-on-aws__J25toJ21",
+    "repo": "aws-samples/java-on-aws",
+    "sha_to": "69ac209c84f2b686e7862258a54bb34f5af87240",
+    "sha_from": null,
+    "jv_from": 25,
+    "jv_to": 21,
+    "spring_boot_version": "4.0.2",
+    "hit_paths": [
+      "apps/aiagent-agentcore/aiagent/src/main/java/com/example/agent/SecurityConfig.java",
+      "apps/java-spring-ai-agents/aiagent/src/main/java/com/example/agent/SecurityConfig.java",
+      "samples/security/apikey/weather/src/main/java/com/example/weather/McpSecurityConfig.java",
+      "samples/security/oauth/ai-agent/src/main/java/com/example/ai/agent/SecurityConfiguration.java",
+      "samples/security/oauth/authorization-server/src/main/java/org/devoxx/mcp/trip/hotel/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "slug": "dhiebert-whs_Project-Management-2.0__J21toJ21",
+    "repo": "dhiebert-whs/Project-Management-2.0",
+    "sha_to": "0cfdd2ccf0b24b57a95f9c8d6e4e50d0eec2d56c",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.2.0",
+    "hit_paths": [
+      "src/main/java/org/frcpm/config/SecurityConfig.java",
+      "src/test/java/org/frcpm/security/SecurityIntegrationTest.java"
+    ]
+  },
+  {
+    "slug": "karlhex_turtle__J21toJ21",
+    "repo": "karlhex/turtle",
+    "sha_to": "e29ceee4d7697b5afa1fbc862dc7d0bdbcbfe6a6",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.3.1",
+    "hit_paths": [
+      "backend/src/main/java/com/fwai/turtle/security/config/SecurityConfiguration.java",
+      "backend/src/test/java/com/fwai/turtle/modules/organization/controller/DepartmentControllerTest.java",
+      "backend/src/test/java/com/fwai/turtle/modules/organization/controller/EmployeeControllerTest.java"
+    ]
+  },
+  {
+    "slug": "kljajic-luka_Rentoza__J21toJ21",
+    "repo": "kljajic-luka/Rentoza",
+    "sha_to": "067b081f03748c8f830521a6e739a2c71000f811",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.6",
+    "hit_paths": [
+      "apps/backend/src/test/java/org/example/rentoza/admin/controller/AdminDocumentControllerSecurityTest.java",
+      "apps/backend/src/test/java/org/example/rentoza/auth/AuthControllerRefreshTest.java",
+      "apps/backend/src/test/java/org/example/rentoza/auth/EnhancedRegistrationIntegrationTest.java",
+      "apps/backend/src/test/java/org/example/rentoza/auth/SupabaseAuthControllerGateTest.java",
+      "apps/backend/src/test/java/org/example/rentoza/auth/SupabaseAuthControllerGoogleOAuthTest.java"
+    ]
+  },
+  {
+    "slug": "maiaimei_example__JunknowntoJ21",
+    "repo": "maiaimei/example",
+    "sha_to": "a3345e7bac7c89d034c73d7651d3fdf7baff72ac",
+    "sha_from": null,
+    "jv_from": null,
+    "jv_to": 21,
+    "spring_boot_version": "2.7.10",
+    "hit_paths": [
+      "spring-boot-study/src/test/java/cn/maiaimei/advice/GlobalResponseHandlerTest.java",
+      "spring-project/spring-boot-resttemplate/src/test/java/cn/maiaimei/example/controller/ApiControllerTest.java",
+      "spring-project/spring-boot-resttemplate/src/test/java/cn/maiaimei/example/controller/UserControllerTest.java",
+      "spring-project/spring-security-oauth2/src/main/java/cn/maiaimei/example/config/WebSecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "osipov-slava_job4j_mock__J21toJ21",
+    "repo": "osipov-slava/job4j_mock",
+    "sha_to": "b045fc36c3a9c90ace71de9c0a68e9ef0fa63ece",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": null,
+    "hit_paths": [
+      "services/auth/src/main/java/ru/checkdev/auth/config/SecurityConfig.java",
+      "services/auth/src/test/java/ru/checkdev/auth/web/controller/ProfileControllerTest.java",
+      "services/desc/src/main/java/ru/checkdev/desc/config/SecurityConfig.java",
+      "services/mock/src/main/java/ru/checkdev/mock/config/SecurityConfig.java",
+      "services/notification/src/main/java/ru/checkdev/notification/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "rslakra_SpringSecurity__J21toJ21",
+    "repo": "rslakra/SpringSecurity",
+    "sha_to": "a813a70e7aeee6e52ca5aef0c686e28ab4e6be4b",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.7",
+    "hit_paths": [
+      "component-based-security/src/main/java/com/rslakra/componentbasedsecurity/config/WebSecurityConfig.java",
+      "enable-method-security/src/main/java/com/rslakra/enablemethodsecurity/configuration/SecurityConfig.java",
+      "java-jwt-based-security/src/main/java/com/rslakra/springsecurity/jwtbasedsecurity/config/WebSecurityConfig.java",
+      "jwt-authentications/jwt-authentication1/src/main/java/com/rslakra/jwtauthentication1/security/WebSecurityConfig.java",
+      "jwt-authentications/jwt-authentication3/src/main/java/com/rslakra/jwtauthentication3/security/WebSecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "sukumarrkv_spring-boot-microservices__J21toJ21",
+    "repo": "sukumarrkv/spring-boot-microservices",
+    "sha_to": "fcccf36556d7417f2f4db37558c13fa95c8edb94",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.0",
+    "hit_paths": [
+      "order-service/src/main/java/com/sukumar/bookstore/orders/config/SecurityConfig.java",
+      "order-service/src/test/java/com/sukumar/bookstore/orders/web/controllers/OrderControllerUnitTest.java"
+    ]
+  },
+  {
+    "slug": "ucsb-cs156-f25_proj-happycows-f25-16__J21toJ21",
+    "repo": "ucsb-cs156-f25/proj-happycows-f25-16",
+    "sha_to": "2bd4bbb38c9f679bf5736f46e17325052825946f",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.3",
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/happiercows/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/AnnouncementsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/ChatMessageControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CommonStatsControllerTests.java"
+    ]
+  },
+  {
+    "slug": "ymahdi001_TaskForge_Dev__J21toJ21",
+    "repo": "ymahdi001/TaskForge_Dev",
+    "sha_to": "265ec8140a164849ed2969d172a13a2a87608f58",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.7",
+    "hit_paths": [
+      "backend/src/main/java/com/taskforge/security/SecurityConfig.java",
+      "backend/src/test/java/com/taskforge/controller/VersionControllerTest.java"
+    ]
+  }
+]

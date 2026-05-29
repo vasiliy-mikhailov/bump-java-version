@@ -25,7 +25,7 @@ ENTRY = f"{BASE}/attempt_6/tools/run_one_stage_v2.sh"
 MAVEN_SETTINGS = "/home/vmihaylov/maven-config/settings.xml"
 M2_CACHE = "/home/vmihaylov/.m2-fitness"
 NET = "mvn-cache"
-WORK = "/tmp/ff_seqjava"
+WORK = "/tmp/java_8_11_17_to_java_21/ff_seqjava"
 OUT_DIR = f"{ATTEMPT7}/sequenced_java"
 os.makedirs(WORK, exist_ok=True); os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -86,19 +86,24 @@ def _plan_j17_to_j21():
 
 
 def write_recipe_yaml(path, name, recipes):
-    body = ["---", "type: specs.openrewrite.org/v1beta/recipe", f"name: {name}", "recipeList:"]
+    import yaml as _yaml
+    doc = {
+        "type": "specs.openrewrite.org/v1beta/recipe",
+        "name": name,
+        "recipeList": [],
+    }
     for r in recipes:
         if isinstance(r, str):
-            body.append(f"  - {r}")
+            doc["recipeList"].append(r)
         elif isinstance(r, dict):
             rname = r["name"]
-            body.append(f"  - {rname}:")
-            for k, v in r.items():
-                if k == "name": continue
-                body.append(f"      {k}: {v}")
+            params = {k: v for k, v in r.items() if k != "name"}
+            doc["recipeList"].append({rname: params} if params else rname)
         else:
             raise ValueError(f"bad recipe entry: {r!r}")
-    open(path, "w").write("\n".join(body) + "\n")
+    with open(path, "w") as f:
+        f.write("---\n")
+        _yaml.safe_dump(doc, f, default_flow_style=False, width=10000, sort_keys=False)
 
 
 def shallow_fetch(repo, sha, dst):

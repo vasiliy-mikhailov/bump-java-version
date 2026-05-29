@@ -1,0 +1,418 @@
+{
+  "stage": {
+    "repo": "piomin/sample-spring-jpa-streamer",
+    "sha_from": "928be9c3dcb18a45e6109a880d8c99a797c023c8",
+    "sha_to": "6d106c09e65784dd6a211b9a62431f090efeb121",
+    "jv_from": 17,
+    "jv_to": 21,
+    "next_version_commit": "6d106c09e65784dd6a211b9a62431f090efeb121",
+    "commits_back": 20,
+    "pre_pass_count": 6,
+    "pre_fail_count": 0,
+    "pass_rate": 1.0,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 29.0,
+      "steps": [
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[16:09:30] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/DepartmentController.java:[11,50] cannot find symbol\n  symbol:   class Department$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/DepartmentRepository.java:[8,50] cannot find symbol\n  symbol:   class Department$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/EmployeeController.java:[12,50] cannot find symbol\n  symbol:   class Employee$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/EmployeeRepository.java:[8,50] cannot find symbol\n  symbol:   class Employee$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project sample-spring-jpa-streamer: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/DepartmentController.java:[11,50] cannot find symbol\n[ERROR]   symbol:   class Department$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/DepartmentRepository.java:[8,50] cannot find symbol\n[ERROR]   symbol:   class Department$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/EmployeeController.java:[12,50] cannot find symbol\n[ERROR]   symbol:   class Employee$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/EmployeeRepository.java:[8,50] cannot find symbol\n[ERROR]   symbol:   class Employee$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Compilation fails because JPA metamodel classes (Department$, Employee$) are not generated, indicating the hibernate-jpamodelgen annotation processor is missing from the compiler's annotationProcessorPaths after the Spring Boot 3.3 upgrade.",
+      "qwen_rationale": "Spring Boot 3.3 upgrades Hibernate to 6.x, which uses org.hibernate.orm:hibernate-jpamodelgen for metamodel generation. Explicitly adding this artifact to the maven-compiler-plugin's annotationProcessorPaths ensures the $ metamodel classes are generated during compilation. Placing this pom_patch before the Spring Boot upgrade step guarantees the processor is configured before the upgraded build is compiled."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "fix_jpa_metamodel_gen",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "add_ap_path",
+              "groupId": "org.hibernate.orm",
+              "artifactId": "hibernate-jpamodelgen",
+              "version": "6.4.0.Final"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_fix_jpa_metamodel_gen",
+      "aborted_at": "fix_jpa_metamodel_gen",
+      "wall_s": 6.9,
+      "steps": [
+        {
+          "step": "fix_jpa_metamodel_gen",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `fix_jpa_metamodel_gen` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[16:11:23] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/DepartmentController.java:[11,50] cannot find symbol\n  symbol:   class Department$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/DepartmentRepository.java:[8,50] cannot find symbol\n  symbol:   class Department$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/EmployeeController.java:[13,50] cannot find symbol\n  symbol:   class Employee$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/EmployeeRepository.java:[8,50] cannot find symbol\n  symbol:   class Employee$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project sample-spring-jpa-streamer: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/DepartmentController.java:[11,50] cannot find symbol\n[ERROR]   symbol:   class Department$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/DepartmentRepository.java:[8,50] cannot find symbol\n[ERROR]   symbol:   class Department$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/EmployeeController.java:[13,50] cannot find symbol\n[ERROR]   symbol:   class Employee$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/EmployeeRepository.java:[8,50] cannot find symbol\n[ERROR]   symbol:   class Employee$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "The build failed because hibernate-jpamodelgen was added before the Spring Boot 3.3 upgrade, causing a version mismatch with the still-present Hibernate 5 runtime, so metamodel classes were not generated.",
+      "qwen_rationale": "Moving the annotation processor patch to after the Spring Boot 3.3 upgrade ensures the project is on Hibernate 6, allowing hibernate-jpamodelgen 6.4 to correctly generate the $ metamodel classes before subsequent Java 21 upgrades."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "fix_jpa_metamodel_gen",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "add_ap_path",
+              "groupId": "org.hibernate.orm",
+              "artifactId": "hibernate-jpamodelgen",
+              "version": "6.4.0.Final"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 27.3,
+      "steps": [
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[16:13:45] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/DepartmentController.java:[11,50] cannot find symbol\n  symbol:   class Department$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/DepartmentRepository.java:[8,50] cannot find symbol\n  symbol:   class Department$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/EmployeeController.java:[12,50] cannot find symbol\n  symbol:   class Employee$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/EmployeeRepository.java:[8,50] cannot find symbol\n  symbol:   class Employee$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project sample-spring-jpa-streamer: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/DepartmentController.java:[11,50] cannot find symbol\n[ERROR]   symbol:   class Department$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/DepartmentRepository.java:[8,50] cannot find symbol\n[ERROR]   symbol:   class Department$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/EmployeeController.java:[12,50] cannot find symbol\n[ERROR]   symbol:   class Employee$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/EmployeeRepository.java:[8,50] cannot find symbol\n[ERROR]   symbol:   class Employee$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Compilation fails because JPA metamodel classes (Department$, Employee$) are missing after Spring Boot 3.3 upgrade, indicating the hibernate-jpamodelgen annotation processor is not correctly configured for Hibernate 6.",
+      "qwen_rationale": "Insert a POM_PATCH step before the Spring Boot upgrade to explicitly add org.hibernate.orm:hibernate-jpamodelgen to the maven-compiler-plugin's annotationProcessorPaths. This ensures the metamodel generator runs during compilation regardless of how the Spring Boot meta-recipe modifies dependencies, preventing the missing symbol errors that halted the previous chain."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "ensure_metamodel_gen",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "add_ap_path",
+              "groupId": "org.hibernate.orm",
+              "artifactId": "hibernate-jpamodelgen",
+              "version": "6.4.0.Final"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_ensure_metamodel_gen",
+      "aborted_at": "ensure_metamodel_gen",
+      "wall_s": 6.1,
+      "steps": [
+        {
+          "step": "ensure_metamodel_gen",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `ensure_metamodel_gen` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[16:16:09] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/DepartmentController.java:[11,50] cannot find symbol\n  symbol:   class Department$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/DepartmentRepository.java:[8,50] cannot find symbol\n  symbol:   class Department$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/EmployeeController.java:[13,50] cannot find symbol\n  symbol:   class Employee$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/EmployeeRepository.java:[8,50] cannot find symbol\n  symbol:   class Employee$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project sample-spring-jpa-streamer: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/DepartmentController.java:[11,50] cannot find symbol\n[ERROR]   symbol:   class Department$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/DepartmentRepository.java:[8,50] cannot find symbol\n[ERROR]   symbol:   class Department$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/EmployeeController.java:[13,50] cannot find symbol\n[ERROR]   symbol:   class Employee$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/EmployeeRepository.java:[8,50] cannot find symbol\n[ERROR]   symbol:   class Employee$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "Compilation failed because the annotation processor artifact ID was incorrect for Spring Boot 2.7 (Hibernate 5); it used org.hibernate.orm instead of org.hibernate, preventing metamodel class generation.",
+      "qwen_rationale": "Switching to org.hibernate:hibernate-jpamodelgen:5.6.15.Final aligns with the Hibernate 5.x version in Spring Boot 2.7.11, enabling successful metamodel generation. After the Spring Boot 3.3 upgrade, a follow-up patch switches the processor to the Hibernate 6 equivalent (org.hibernate.orm) to maintain compilation before proceeding to Java 21 plugin and build upgrades."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "ensure_metamodel_gen",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "add_dependency",
+              "groupId": "org.hibernate",
+              "artifactId": "hibernate-jpamodelgen",
+              "version": "5.6.15.Final",
+              "scope": "provided"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "org.hibernate",
+              "artifactId": "hibernate-jpamodelgen",
+              "version": "5.6.15.Final"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "fix_hibernate6_ap",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "add_ap_path",
+              "groupId": "org.hibernate.orm",
+              "artifactId": "hibernate-jpamodelgen",
+              "version": "6.4.0.Final"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_ensure_metamodel_gen",
+      "aborted_at": "ensure_metamodel_gen",
+      "wall_s": 5.2,
+      "steps": [
+        {
+          "step": "ensure_metamodel_gen",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `ensure_metamodel_gen` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[16:18:38] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/DepartmentController.java:[11,50] cannot find symbol\n  symbol:   class Department$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/DepartmentRepository.java:[8,50] cannot find symbol\n  symbol:   class Department$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/EmployeeController.java:[13,50] cannot find symbol\n  symbol:   class Employee$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/EmployeeRepository.java:[8,50] cannot find symbol\n  symbol:   class Employee$\n  location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project sample-spring-jpa-streamer: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/DepartmentController.java:[11,50] cannot find symbol\n[ERROR]   symbol:   class Department$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/DepartmentRepository.java:[8,50] cannot find symbol\n[ERROR]   symbol:   class Department$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/controller/EmployeeController.java:[13,50] cannot find symbol\n[ERROR]   symbol:   class Employee$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] /work/src/src/main/java/pl/piomin/samples/spring/jpastreamer/repository/EmployeeRepository.java:[8,50] cannot find symbol\n[ERROR]   symbol:   class Employee$\n[ERROR]   location: package pl.piomin.samples.spring.jpastreamer.model\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "The initial POM_PATCH step failed to correctly configure the JPA metamodel annotation processor, causing compilation to fail immediately with missing Department$ and Employee$ classes.",
+      "qwen_rationale": "Removing the faulty POM_PATCH step allows the project to compile using its existing configuration. The UpgradeSpringBoot_3_3 meta-recipe will handle the Spring Boot 2.7 to 3.3 migration, including javax-to-jakarta namespace changes and dependency updates, under JDK 17 before proceeding to JDK 21 upgrades."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "upgrade_spring_boot_3_3",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_ensure_metamodel_gen"
+}

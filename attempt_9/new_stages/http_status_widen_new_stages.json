@@ -1,0 +1,306 @@
+[
+  {
+    "slug": "AngelSigueros_Spring__J21toJ21",
+    "repo": "AngelSigueros/Spring",
+    "sha_to": "c113cd1c6fab07f88253833eddd1eff8545e6ef1",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.1.2",
+    "hit_paths": [
+      "bootify-app/src/main/java/como/sas/bootify_app/config/RestExceptionHandler.java",
+      "bootify-app/src/main/java/como/sas/bootify_app/rest/CategoriaResource.java",
+      "bootify-app/src/main/java/como/sas/bootify_app/rest/ProductoResource.java",
+      "complete-spring-project-master/src/main/java/com/edwise/completespring/controllers/BookController.java",
+      "complete-spring-project-master/src/main/java/com/edwise/completespring/controllers/FooController.java"
+    ]
+  },
+  {
+    "slug": "DanielCeron-dc_MyRubricDev__J21toJ21",
+    "repo": "DanielCeron-dc/MyRubricDev",
+    "sha_to": "6f34ccdbad15471aa70647e5dfbf1ab5aa8b03cf",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.2.3",
+    "hit_paths": [
+      "src/main/java/co/edu/unicauca/distribuidos/core/asignaturas/controladores/AsignaturaController.java",
+      "src/main/java/co/edu/unicauca/distribuidos/core/errores/BusinessException.java",
+      "src/main/java/co/edu/unicauca/distribuidos/core/errores/modelos/ErrorController.java",
+      "src/main/java/co/edu/unicauca/distribuidos/core/rubrica/controladores/CriteriosController.java",
+      "src/main/java/co/edu/unicauca/distribuidos/core/rubrica/controladores/NivelesController.java"
+    ]
+  },
+  {
+    "slug": "HonourHealth_JavaSpringbootRESTMicroservices__J21toJ21",
+    "repo": "HonourHealth/JavaSpringbootRESTMicroservices",
+    "sha_to": "14846a0ab779b97dbf836e4c2a5476c32e9a57b2",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.1",
+    "hit_paths": [
+      "banking-app/src/main/java/com/example/bankingapp/controller/AccountController.java",
+      "springboot-fullstack-employee-management-system/src/main/java/com/example/employeemanagementsystem/controller/DepartmentController.java",
+      "springboot-fullstack-employee-management-system/src/main/java/com/example/employeemanagementsystem/controller/EmployeeController.java",
+      "springboot-fullstack-employee-management-system/src/main/java/com/example/employeemanagementsystem/exception/ResourceNotFoundException.java",
+      "springboot-fullstack-employee-management-system/src/test/java/com/example/employeemanagementsystem/controller/DepartmentControllerTest.java"
+    ]
+  },
+  {
+    "slug": "LucklySpace_Lucky-cloud__J21toJ21",
+    "repo": "LucklySpace/Lucky-cloud",
+    "sha_to": "274a2ad09969df0157d03c5c2b90e284761b876c",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": null,
+    "hit_paths": [
+      "im-framework/im-starter-crypto/src/main/java/com/xy/lucky/crypto/exception/CryptoExceptionHandler.java",
+      "im-framework/im-starter-general-webflux/src/main/java/com/xy/lucky/general/response/handler/ResponseHandler.java",
+      "im-framework/im-starter-job/src/main/java/com/xy/lucky/job/core/JobAdminClient.java",
+      "im-gateway/src/main/java/com/xy/lucky/gateway/filter/ApiSignFilter.java",
+      "im-gateway/src/main/java/com/xy/lucky/gateway/filter/BlackListFilter.java"
+    ]
+  },
+  {
+    "slug": "NTTH7419_yas-devops-1__J21toJ21",
+    "repo": "NTTH7419/yas-devops-1",
+    "sha_to": "6f433191eda1d9cc225390ff9d09f1a8f07198af",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.3.2",
+    "hit_paths": [
+      "backoffice-bff/src/main/java/com/yas/backofficebff/controller/AuthenticationController.java",
+      "cart/src/it/java/com/yas/cart/controller/CartItemControllerIT.java",
+      "cart/src/main/java/com/yas/cart/controller/CartItemController.java",
+      "cart/src/test/java/com/yas/cart/service/ProductServiceTest.java",
+      "common-library/src/it/java/common/kafka/CdcConsumerTest.java"
+    ]
+  },
+  {
+    "slug": "ThuanNgcodelor_VibeX-E-Commerce__J21toJ21",
+    "repo": "ThuanNgcodelor/VibeX-E-Commerce",
+    "sha_to": "716e4229ee916397a6fd303821934e4e4bd4684c",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.3.12",
+    "hit_paths": [
+      "auth-service/src/main/java/com/example/authservice/client/CustomErrorDecoder.java",
+      "auth-service/src/main/java/com/example/authservice/client/UserServiceClient.java",
+      "auth-service/src/main/java/com/example/authservice/controller/AuthController.java",
+      "auth-service/src/main/java/com/example/authservice/exception/CustomErrorDecoder.java",
+      "auth-service/src/main/java/com/example/authservice/exception/GeneralExceptionHandler.java"
+    ]
+  },
+  {
+    "slug": "TiagoAlb12_TQS_112901__J21toJ21",
+    "repo": "TiagoAlb12/TQS_112901",
+    "sha_to": "9e3ca072e4335f832ff58018179f66957667af94",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.4",
+    "hit_paths": [
+      "HW1-112901/backend/src/main/java/com/tqs/backend/controller/ReservationController.java",
+      "HW1-112901/backend/src/main/java/com/tqs/backend/exception/GlobalExceptionHandler.java",
+      "HW1-112901/backend/src/main/java/com/tqs/backend/service/ReservationService.java",
+      "HW1-112901/backend/src/test/java/com/tqs/backend/GlobalExceptionHandlerTest.java",
+      "HW1-112901/backend/src/test/java/com/tqs/backend/ReservationServiceTest.java"
+    ]
+  },
+  {
+    "slug": "boypro5235_warehouse-management-backend__J21toJ21",
+    "repo": "boypro5235/warehouse-management-backend",
+    "sha_to": "a04d20d353d07971ce43719aeb657825b343786e",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.2",
+    "hit_paths": [
+      "src/main/java/com/example/WebQlyKho/config/JwtAuthenticationFilter.java",
+      "src/main/java/com/example/WebQlyKho/controller/CategoryController.java",
+      "src/main/java/com/example/WebQlyKho/controller/DeliveryInfoController.java",
+      "src/main/java/com/example/WebQlyKho/controller/DskhohangController.java",
+      "src/main/java/com/example/WebQlyKho/controller/ImportDetailsController.java"
+    ]
+  },
+  {
+    "slug": "davidakpele_epay__J21toJ21",
+    "repo": "davidakpele/epay",
+    "sha_to": "dd2b79f070378e13dde7b9f308673ef21309db55",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "4.0.3",
+    "hit_paths": [
+      "fullstack-fintech-app/admin-api-service/src/main/java/com/example/admin_api_service/Interfaces/IAuthService.java",
+      "fullstack-fintech-app/admin-api-service/src/main/java/com/example/admin_api_service/controllers/AccountFlagController.java",
+      "fullstack-fintech-app/admin-api-service/src/main/java/com/example/admin_api_service/controllers/AccountRestrictionController.java",
+      "fullstack-fintech-app/admin-api-service/src/main/java/com/example/admin_api_service/controllers/AdminIpWhitelistController.java",
+      "fullstack-fintech-app/admin-api-service/src/main/java/com/example/admin_api_service/controllers/AdminPasswordHistoryController.java"
+    ]
+  },
+  {
+    "slug": "hiepphan1411_22719711_PhanPhuocHiep_KT-TKPM_Nhom3__J21toJ21",
+    "repo": "hiepphan1411/22719711_PhanPhuocHiep_KT-TKPM_Nhom3",
+    "sha_to": "b75bf7395ef73394d318ffb41b467e34ce3eb64a",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.3.1",
+    "hit_paths": [
+      "Tuan10_PhanPhuocHiep_22719711/api-gateway/src/main/java/fit/orion/apigateway/resilience/ResilienceGatewayFilter.java",
+      "Tuan10_PhanPhuocHiep_22719711/order-service/src/main/java/fit/orion/orderservice/controller/OrderExceptionHandler.java",
+      "Tuan10_PhanPhuocHiep_22719711/order-service/src/main/java/fit/orion/orderservice/service/client/PaymentServiceClient.java",
+      "Tuan10_PhanPhuocHiep_22719711/user-service/src/main/java/fit/orion/userservice/controller/UserController.java",
+      "Tuan1_PhanPhuocHiep_22719711/jwt-oauth2-resource-server/src/main/java/com/iuh/jwtoauth2resourceserver/controller/AuthController.java"
+    ]
+  },
+  {
+    "slug": "ita-social-projects_GreenCityUBS__J21toJ21",
+    "repo": "ita-social-projects/GreenCityUBS",
+    "sha_to": "c77b931f81b1d623c696247470e0033dabfb676f",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.2.2",
+    "hit_paths": [
+      "core/src/main/java/greencity/controller/AddressController.java",
+      "core/src/main/java/greencity/controller/AdminUbsController.java",
+      "core/src/main/java/greencity/controller/ClientController.java",
+      "core/src/main/java/greencity/controller/CommitInfoController.java",
+      "core/src/main/java/greencity/controller/ManagementEmployeeController.java"
+    ]
+  },
+  {
+    "slug": "jharifAparicio_PruebaYManteniminetoDeSoftware__J21toJ21",
+    "repo": "jharifAparicio/PruebaYManteniminetoDeSoftware",
+    "sha_to": "f4cec13897b167ff018f64c781de6faf5b99f521",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.1.3",
+    "hit_paths": [
+      "api-reservations/src/main/java/com/reservations/controller/ReservationController.java",
+      "api-reservations/src/main/java/com/reservations/controller/resource/ReservationResource.java",
+      "api-reservations/src/main/java/com/reservations/enums/APIError.java",
+      "api-reservations/src/main/java/com/reservations/exception/APIExceptionHandler.java",
+      "api-reservations/src/main/java/com/reservations/exception/ErrException.java"
+    ]
+  },
+  {
+    "slug": "kljajic-luka_Rentoza__J21toJ21",
+    "repo": "kljajic-luka/Rentoza",
+    "sha_to": "067b081f03748c8f830521a6e739a2c71000f811",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.6",
+    "hit_paths": [
+      "apps/backend/src/main/java/org/example/rentoza/admin/AdminUserController.java",
+      "apps/backend/src/main/java/org/example/rentoza/admin/controller/AdminAnalyticsController.java",
+      "apps/backend/src/main/java/org/example/rentoza/admin/controller/AdminAuditController.java",
+      "apps/backend/src/main/java/org/example/rentoza/admin/controller/AdminBookingController.java",
+      "apps/backend/src/main/java/org/example/rentoza/admin/controller/AdminCarController.java"
+    ]
+  },
+  {
+    "slug": "madgeek-arc_registry__J21toJ21",
+    "repo": "madgeek-arc/registry",
+    "sha_to": "a468359576383467629e1e89fac6057d1c26b028",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.10",
+    "hit_paths": [
+      "registry-core-api/src/main/java/gr/uoa/di/madgik/registry/exception/ResourceAlreadyExistsException.java",
+      "registry-core-api/src/main/java/gr/uoa/di/madgik/registry/exception/ResourceException.java",
+      "registry-core-api/src/main/java/gr/uoa/di/madgik/registry/exception/ResourceNotFoundException.java",
+      "registry-core-rest/src/main/java/gr/uoa/di/madgik/registry/controllers/ResourceController.java",
+      "registry-core-rest/src/main/java/gr/uoa/di/madgik/registry/controllers/ResourceSyncController.java"
+    ]
+  },
+  {
+    "slug": "maiaimei_example__JunknowntoJ21",
+    "repo": "maiaimei/example",
+    "sha_to": "a3345e7bac7c89d034c73d7651d3fdf7baff72ac",
+    "sha_from": null,
+    "jv_from": null,
+    "jv_to": 21,
+    "spring_boot_version": "2.7.10",
+    "hit_paths": [
+      "spring-boot-3/src/main/java/cn/maiaimei/example/client/AbstractHttpClient.java",
+      "spring-project/spring-boot-resttemplate/src/main/java/cn/maiaimei/example/client/HttpClient.java",
+      "spring-project/spring-boot-resttemplate/src/main/java/cn/maiaimei/example/client/RestClientResponseErrorHandler.java",
+      "spring-project/spring-boot-resttemplate/src/test/java/cn/maiaimei/example/RestTemplateTest.java",
+      "spring-project/spring-boot-resttemplate/src/test/java/cn/maiaimei/example/controller/ApiControllerTest.java"
+    ]
+  },
+  {
+    "slug": "prasadus92_spring-async-example__J21toJ21",
+    "repo": "prasadus92/spring-async-example",
+    "sha_to": "42d46d36256d1ff774827687d22b76e44d20f5be",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.4.1",
+    "hit_paths": [
+      "src/main/java/com/welt/data/client/JsonPlaceholderClient.java",
+      "src/main/java/com/welt/data/controller/UserDataController.java",
+      "src/main/java/com/welt/data/exception/ExternalApiException.java",
+      "src/main/java/com/welt/data/exception/GlobalExceptionHandler.java",
+      "src/main/java/com/welt/data/exception/ServiceUnavailableException.java"
+    ]
+  },
+  {
+    "slug": "sontungexpt_inlaco-crewmgr-service__J21toJ21",
+    "repo": "sontungexpt/inlaco-crewmgr-service",
+    "sha_to": "41cdcf5943cf133c461cac799ab3eda676aba3cb",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.8",
+    "hit_paths": [
+      "src/main/java/com/inlaco/crewmgrservice/feature/attendance/presentation/rest/AttendanceController.java",
+      "src/main/java/com/inlaco/crewmgrservice/feature/auth/presentation/rest/controller/AuthController.java",
+      "src/main/java/com/inlaco/crewmgrservice/feature/auth/presentation/rest/controller/TwoStepVerificationController.java",
+      "src/main/java/com/inlaco/crewmgrservice/feature/contract/presentation/rest/controller/ContractLifecycleController.java",
+      "src/main/java/com/inlaco/crewmgrservice/feature/contract/presentation/rest/controller/CrewSupplyContractController.java"
+    ]
+  },
+  {
+    "slug": "trhlow_EDUCYCLE__J21toJ21",
+    "repo": "trhlow/EDUCYCLE",
+    "sha_to": "a1a191850e3e7f99fac84104081f4c5a39136183",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "4.0.5",
+    "hit_paths": [
+      "apps/api/src/main/java/com/educycle/admin/api/AdminController.java",
+      "apps/api/src/main/java/com/educycle/ai/api/AiChatController.java",
+      "apps/api/src/main/java/com/educycle/auth/api/AuthController.java",
+      "apps/api/src/main/java/com/educycle/bookwanted/api/BookWantedController.java",
+      "apps/api/src/main/java/com/educycle/bookwanted/api/BookWantedInquiryController.java"
+    ]
+  },
+  {
+    "slug": "vakser_gym-service__J21toJ21",
+    "repo": "vakser/gym-service",
+    "sha_to": "329d26ec0baa2eea67fa55eb893da70a4b0eb8e3",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.3.6",
+    "hit_paths": [
+      "src/main/java/com/epam/learn/gymservice/controller/LoginController.java",
+      "src/main/java/com/epam/learn/gymservice/controller/TraineeController.java",
+      "src/main/java/com/epam/learn/gymservice/controller/TrainerController.java",
+      "src/main/java/com/epam/learn/gymservice/controller/TrainingTypeController.java",
+      "src/main/java/com/epam/learn/gymservice/dto/CustomErrorResponse.java"
+    ]
+  }
+]

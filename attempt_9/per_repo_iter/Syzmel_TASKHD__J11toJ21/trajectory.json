@@ -1,0 +1,888 @@
+{
+  "stage": {
+    "repo": "Syzmel/TASKHD",
+    "sha_from": "bab93c37a32bb3b09ac909cd245f4cec4ca58fe6",
+    "sha_to": "c755f4631940af509b4cd43f6b6821824896d640",
+    "jv_from": 11,
+    "jv_to": 21,
+    "next_version_commit": "384193208ad9ca22038f11e37d7e2275f338b76a",
+    "commits_back": 20,
+    "pre_pass_count": 224,
+    "pre_fail_count": 0,
+    "pass_rate": 1.0,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_2_7",
+      "aborted_at": "upgrade_spring_boot_2_7",
+      "wall_s": 59.3,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_2_7` (jdk=11): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[12:35:39] PROJECT_ROOT=/work/src PHASE=build_post JDK=11\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[5,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[6,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[7,35] package springfox.documentation.spi does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[8,50] package springfox.documentation.spring.web.plugins does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[14,10] cannot find symbol\n  symbol:   class Docket\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,190] cannot find symbol\n  symbol:   class Docket\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,197] cannot find symbol\n  symbol:   variable DocumentationType\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[18,13] cannot find symbol\n  symbol:   variable RequestHandlerSelectors\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[19,14] cannot find symbol\n  symbol:   variable PathSelectors\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.10.1:compile (default-compile) on project jhforge: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[5,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[6,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[7,35] package springfox.documentation.spi does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[8,50] package springfox.documentation.spring.web.plugins does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[14,10] cannot find symbol\n[ERROR]   symbol:   class Docket\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,190] cannot find symbol\n[ERROR]   symbol:   class Docket\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,197] cannot find symbol\n[ERROR]   symbol:   variable DocumentationType\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[18,13] cannot find symbol\n[ERROR]   symbol:   variable RequestHandlerSelectors\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[19,14] cannot find symbol\n[ERROR]   symbol:   variable PathSelectors\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "SpringFox packages (springfox.documentation.*) don't exist after UpgradeSpringBoot_2_7 recipe runs, causing compilation failure",
+      "qwen_rationale": "SpringFox is abandoned and incompatible with Spring Boot 2.7+. The SpringFoxToSpringDoc recipe must run before any Spring Boot upgrade to replace SpringFox dependencies and code with springdoc-openapi equivalents, preventing the 'package springfox does not exist' compilation error."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "springfox_to_springdoc",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.springdoc.SpringFoxToSpringDoc"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_springfox_to_springdoc",
+      "aborted_at": "springfox_to_springdoc",
+      "wall_s": 54.7,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "springfox_to_springdoc",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `springfox_to_springdoc` (jdk=11): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[12:37:29] PROJECT_ROOT=/work/src PHASE=build_post JDK=11\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[5,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[6,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[7,35] package springfox.documentation.spi does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[8,50] package springfox.documentation.spring.web.plugins does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[14,10] cannot find symbol\n  symbol:   class Docket\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,190] cannot find symbol\n  symbol:   class Docket\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,197] cannot find symbol\n  symbol:   variable DocumentationType\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[18,13] cannot find symbol\n  symbol:   variable RequestHandlerSelectors\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[19,14] cannot find symbol\n  symbol:   variable PathSelectors\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.8.1:compile (default-compile) on project jhforge: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[5,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[6,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[7,35] package springfox.documentation.spi does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[8,50] package springfox.documentation.spring.web.plugins does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[14,10] cannot find symbol\n[ERROR]   symbol:   class Docket\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,190] cannot find symbol\n[ERROR]   symbol:   class Docket\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,197] cannot find symbol\n[ERROR]   symbol:   variable DocumentationType\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[18,13] cannot find symbol\n[ERROR]   symbol:   variable RequestHandlerSelectors\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[19,14] cannot find symbol\n[ERROR]   symbol:   variable PathSelectors\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "The SpringFoxToSpringDoc recipe failed at JDK 11 because it removed SpringFox dependencies but the build still attempted to compile SpringFox configuration classes, likely due to recipe incompatibility with JDK 11 or incomplete migration.",
+      "qwen_rationale": "Moving the SpringFoxToSpringDoc migration to JDK 17 (as recommended by the observation library) ensures the recipe runs in a compatible environment after the project has been upgraded to Spring Boot 2.7 and Java 17 build settings. This prevents premature dependency removal and allows the recipe to properly rewrite configuration classes before the Spring Boot 3.3 upgrade."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "springfox_to_springdoc",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.springdoc.SpringFoxToSpringDoc"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_2_7",
+      "aborted_at": "upgrade_spring_boot_2_7",
+      "wall_s": 64.6,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_2_7` (jdk=11): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[12:40:42] PROJECT_ROOT=/work/src PHASE=build_post JDK=11\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[5,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[6,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[7,35] package springfox.documentation.spi does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[8,50] package springfox.documentation.spring.web.plugins does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[14,10] cannot find symbol\n  symbol:   class Docket\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,190] cannot find symbol\n  symbol:   class Docket\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,197] cannot find symbol\n  symbol:   variable DocumentationType\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[18,13] cannot find symbol\n  symbol:   variable RequestHandlerSelectors\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[19,14] cannot find symbol\n  symbol:   variable PathSelectors\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.10.1:compile (default-compile) on project jhforge: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[5,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[6,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[7,35] package springfox.documentation.spi does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[8,50] package springfox.documentation.spring.web.plugins does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[14,10] cannot find symbol\n[ERROR]   symbol:   class Docket\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,190] cannot find symbol\n[ERROR]   symbol:   class Docket\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,197] cannot find symbol\n[ERROR]   symbol:   variable DocumentationType\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[18,13] cannot find symbol\n[ERROR]   symbol:   variable RequestHandlerSelectors\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[19,14] cannot find symbol\n[ERROR]   symbol:   variable PathSelectors\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "SpringFox packages fail to resolve during Spring Boot 2.7 upgrade on JDK 11, and the SpringFoxToSpringDoc migration recipe also fails on JDK 11, indicating the recipe requires JDK 17 to execute properly.",
+      "qwen_rationale": "The SpringFox-to-SpringDoc migration must happen on JDK 17 (where the recipe can run) and before the Spring Boot 3.3 upgrade (where SpringFox is incompatible). Since SpringFox breaks during the Spring Boot 2.7 upgrade on JDK 11, we skip that step entirely and go straight to upgrading the build to Java 17, then migrate SpringFox to SpringDoc on JDK 17, then upgrade to Spring Boot 3.3. This avoids the compilation failure caused by SpringFox incompatibility with newer Spring Boot versions while ensuring the migration recipe runs on a compatible JDK."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "springfox_to_springdoc",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.springdoc.SpringFoxToSpringDoc"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_springfox_to_springdoc",
+      "aborted_at": "springfox_to_springdoc",
+      "wall_s": 108.7,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "springfox_to_springdoc",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `springfox_to_springdoc` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[12:43:32] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[5,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[6,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[7,35] package springfox.documentation.spi does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[8,50] package springfox.documentation.spring.web.plugins does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[14,10] cannot find symbol\n  symbol:   class Docket\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,190] cannot find symbol\n  symbol:   class Docket\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,197] cannot find symbol\n  symbol:   variable DocumentationType\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[18,13] cannot find symbol\n  symbol:   variable RequestHandlerSelectors\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[19,14] cannot find symbol\n  symbol:   variable PathSelectors\n  location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project jhforge: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[5,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[6,40] package springfox.documentation.builders does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[7,35] package springfox.documentation.spi does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[8,50] package springfox.documentation.spring.web.plugins does not exist\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[14,10] cannot find symbol\n[ERROR]   symbol:   class Docket\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,190] cannot find symbol\n[ERROR]   symbol:   class Docket\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[16,197] cannot find symbol\n[ERROR]   symbol:   variable DocumentationType\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[18,13] cannot find symbol\n[ERROR]   symbol:   variable RequestHandlerSelectors\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] /work/src/src/main/java/tech/jhipster/forge/technical/config/api/SpringFoxConfiguration.java:[19,14] cannot find symbol\n[ERROR]   symbol:   variable PathSelectors\n[ERROR]   location: class tech.jhipster.forge.technical.config.api.SpringFoxConfiguration\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException",
+      "qwen_observation": "The SpringFoxToSpringDoc recipe removed the SpringFox dependency but failed to rewrite the custom SpringFoxConfiguration.java file, causing compilation to fail with missing package errors.",
+      "qwen_rationale": "Since the explicit SpringFox migration recipe proved fragile and left orphaned source code, I will remove it and rely on the UpgradeSpringBoot_3_3 meta-recipe, which internally composes SpringFox migration logic and is more robust for handling dependency and source code transitions together under JDK 17."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 11,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "java17_transforms",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+            "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+            "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+            "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+            "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+            "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+            "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+            "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+            "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+            "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+            "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+            "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+            "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+            "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+            "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+            "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 112.4,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_plugins_for_java17",
+          "jdk": 11,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_build_to_java17",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[12:48:42] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] [ERROR] Some problems were encountered while processing the POMs:\n[ERROR] Non-resolvable import POM: The following artifacts could not be resolved: org.assertj:assertj-bom:pom:3.18.1 (absent): org.assertj:assertj-bom:pom:3.18.1 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced @ org.springframework.boot:spring-boot-dependencies:3.3.13, /root/.m2/repository/org/springframework/boot/spring-boot-dependencies/3.3.13/spring-boot-dependencies-3.3.13.pom, line 2216, column 19\n[ERROR] 'dependencies.dependency.version' for org.assertj:assertj-core:jar is missing. @ line 95, column 17\n @ \n[ERROR] The build could not read 1 project -> [Help 1]\n[ERROR]   \n[ERROR]   The project tech.jhipster.forge:jhforge:0.0.1-SNAPSHOT (/work/src/pom.xml) has 2 errors\n[ERROR]     Non-resolvable import POM: The following artifacts could not be resolved: org.assertj:assertj-bom:pom:3.18.1 (absent): org.assertj:assertj-bom:pom:3.18.1 was not found in http://nexus:8081/repository/maven-public/ during a previous attempt. This failure was cached in the local repository and resolution is not reattempted until the update interval of nexus-public has elapsed or updates are forced @ org.springframework.boot:spring-boot-dependencies:3.3.13, /root/.m2/repository/org/springframework/boot/spring-boot-dependencies/3.3.13/spring-boot-dependencies-3.3.13.pom, line 2216, column 19 -> [Help 2]\n[ERROR]     'dependencies.dependency.version' for org.assertj:assertj-core:jar is missing. @ line 95, column 17\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException\n[ERROR] [Help 2] http://cwiki.apache.org/confluence/display/MAVEN/UnresolvableModelException",
+      "qwen_observation": "POM resolution failed during Spring Boot 3.3 upgrade because assertj-bom:3.18.1 is missing from the Nexus and assertj-core lacks an explicit version.",
+      "qwen_rationale": "Insert a step to explicitly version assertj-core to 3.25.3 and set the assertj.version property before the Spring Boot 3.3 upgrade, bypassing the missing BOM artifact and satisfying Maven's version requirement."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "lombok_safe_bump",
+      "jdk": 11,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "newVersion": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "org.projectlombok.lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok-version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombokVersion",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "version.lombok",
+          "newValue": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java17",
+      "jdk": 11,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava17"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java17",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava17"
+      ]
+    },
+    {
+      "label": "fix_assertj_version",
+      "jdk": 17,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.assertj",
+          "artifactId": "assertj-core",
+          "newVersion": "3.25.3"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "assertj.version",
+          "newValue": "3.25.3"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_spring_boot_3_3",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+      ]
+    },
+    {
+      "label": "java17_transforms",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.staticanalysis.InstanceOfPatternMatch",
+        "org.openrewrite.staticanalysis.AddSerialAnnotationToSerialVersionUID",
+        "org.openrewrite.java.migrate.RemovedRuntimeTraceMethods",
+        "org.openrewrite.java.migrate.RemovedToolProviderConstructor",
+        "org.openrewrite.java.migrate.RemovedModifierAndConstantBootstrapsConstructors",
+        "org.openrewrite.java.migrate.lang.ExplicitRecordImport",
+        "org.openrewrite.java.migrate.DeprecatedJavaxSecurityCert",
+        "org.openrewrite.java.migrate.DeprecatedLogRecordThreadID",
+        "org.openrewrite.java.migrate.RemovedLegacySunJSSEProviderName",
+        "org.openrewrite.java.migrate.Jre17AgentMainPreMainPublic",
+        "org.openrewrite.java.migrate.DeprecatedCountStackFramesMethod",
+        "org.openrewrite.java.migrate.RemovedZipFinalizeMethods",
+        "org.openrewrite.java.migrate.RemovedSSLSessionGetPeerCertificateChainMethodImpl",
+        "org.openrewrite.java.migrate.SunNetSslPackageUnavailable",
+        "org.openrewrite.java.migrate.RemovedRMIConnectorServerCredentialTypesConstant",
+        "org.openrewrite.java.migrate.RemovedFileIOFinalizeMethods"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_upgrade_spring_boot_3_3"
+}

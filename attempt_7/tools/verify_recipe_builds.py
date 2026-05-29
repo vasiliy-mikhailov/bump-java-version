@@ -18,7 +18,7 @@ ENTRY = "/tmp/run_one_stage_v3.sh"   # has -Dmaven.test.skip=true for recipe pha
 MAVEN_SETTINGS = "/home/vmihaylov/maven-config/settings.xml"
 M2_CACHE = "/home/vmihaylov/.m2-fitness"
 NET = "mvn-cache"
-WORK = "/tmp/ff_verifybld"
+WORK = "/tmp/java_8_11_17_to_java_21/ff_verifybld"
 os.makedirs(WORK, exist_ok=True)
 
 

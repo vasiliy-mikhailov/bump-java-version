@@ -1,0 +1,140 @@
+[
+  {
+    "repo": "AngelSigueros/Spring",
+    "head_sha": "c113cd1c6fab07f88253833eddd1eff8545e6ef1",
+    "hit_paths": [
+      "complete-spring-project-master/src/main/java/com/edwise/completespring/config/SpringWebSecurityConfig.java",
+      "spring-boot-rest/src/test/java/com/baeldung/springhateoas/CustomerControllerIntegrationTest.java",
+      "spring-boot-rest/src/test/java/com/baeldung/web/FooControllerWebLayerIntegrationTest.java",
+      "spring-data-examples-main/rest/security/src/main/java/example/springdata/rest/security/Application.java"
+    ]
+  },
+  {
+    "repo": "Maynito/TaskForge",
+    "head_sha": "eab1d5a415a0e91d3a6414b1ea092e2463581eda",
+    "hit_paths": [
+      "backend/src/main/java/com/taskforge/security/SecurityConfig.java",
+      "backend/src/test/java/com/taskforge/controller/VersionControllerTest.java"
+    ]
+  },
+  {
+    "repo": "ValentinaSukonina/FreezerAlarm",
+    "head_sha": "d23459f29495b72d58a4cc2350ff6ee3b5bf87ba",
+    "hit_paths": [
+      "backend/src/main/java/com/example/backend/config/SecurityConfig.java",
+      "backend/src/test/java/com/example/backend/config/CorsConfigTest.java",
+      "backend/src/test/java/com/example/backend/controller/AuthControllerTest.java",
+      "backend/src/test/java/com/example/backend/controller/EmailControllerTest.java",
+      "backend/src/test/java/com/example/backend/controller/FreezerControllerTest.java"
+    ]
+  },
+  {
+    "repo": "ankurkumar2002/AppVerse-V1.0.0",
+    "head_sha": "c243a6be06b13ed3b208884ca5ac03463a2d0033",
+    "hit_paths": [
+      "api-gateway/src/main/java/com/appverse/api_gateway/config/SecurityConfig.java",
+      "app-service/src/main/java/com/appverse/app_service/config/SecurityConfig.java",
+      "app-service/src/test/java/com/appverse/app_service/ApplicationControllerTest.java",
+      "cart-service/src/main/java/com/appverse/cart_service/config/SecurityConfig.java",
+      "developer-service/src/main/java/com/appverse/developer_service/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "aws-samples/java-on-aws",
+    "head_sha": "69ac209c84f2b686e7862258a54bb34f5af87240",
+    "hit_paths": [
+      "apps/aiagent-agentcore/aiagent/src/main/java/com/example/agent/SecurityConfig.java",
+      "apps/java-spring-ai-agents/aiagent/src/main/java/com/example/agent/SecurityConfig.java",
+      "samples/security/apikey/weather/src/main/java/com/example/weather/McpSecurityConfig.java",
+      "samples/security/oauth/ai-agent/src/main/java/com/example/ai/agent/SecurityConfiguration.java",
+      "samples/security/oauth/authorization-server/src/main/java/org/devoxx/mcp/trip/hotel/SecurityConfiguration.java"
+    ]
+  },
+  {
+    "repo": "dhiebert-whs/Project-Management-2.0",
+    "head_sha": "0cfdd2ccf0b24b57a95f9c8d6e4e50d0eec2d56c",
+    "hit_paths": [
+      "src/main/java/org/frcpm/config/SecurityConfig.java",
+      "src/test/java/org/frcpm/security/SecurityIntegrationTest.java"
+    ]
+  },
+  {
+    "repo": "karlhex/turtle",
+    "head_sha": "e29ceee4d7697b5afa1fbc862dc7d0bdbcbfe6a6",
+    "hit_paths": [
+      "backend/src/main/java/com/fwai/turtle/security/config/SecurityConfiguration.java",
+      "backend/src/test/java/com/fwai/turtle/modules/organization/controller/DepartmentControllerTest.java",
+      "backend/src/test/java/com/fwai/turtle/modules/organization/controller/EmployeeControllerTest.java"
+    ]
+  },
+  {
+    "repo": "kljajic-luka/Rentoza",
+    "head_sha": "067b081f03748c8f830521a6e739a2c71000f811",
+    "hit_paths": [
+      "apps/backend/src/test/java/org/example/rentoza/admin/controller/AdminDocumentControllerSecurityTest.java",
+      "apps/backend/src/test/java/org/example/rentoza/auth/AuthControllerRefreshTest.java",
+      "apps/backend/src/test/java/org/example/rentoza/auth/EnhancedRegistrationIntegrationTest.java",
+      "apps/backend/src/test/java/org/example/rentoza/auth/SupabaseAuthControllerGateTest.java",
+      "apps/backend/src/test/java/org/example/rentoza/auth/SupabaseAuthControllerGoogleOAuthTest.java"
+    ]
+  },
+  {
+    "repo": "maiaimei/example",
+    "head_sha": "a3345e7bac7c89d034c73d7651d3fdf7baff72ac",
+    "hit_paths": [
+      "spring-boot-study/src/test/java/cn/maiaimei/advice/GlobalResponseHandlerTest.java",
+      "spring-project/spring-boot-resttemplate/src/test/java/cn/maiaimei/example/controller/ApiControllerTest.java",
+      "spring-project/spring-boot-resttemplate/src/test/java/cn/maiaimei/example/controller/UserControllerTest.java",
+      "spring-project/spring-security-oauth2/src/main/java/cn/maiaimei/example/config/WebSecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "osipov-slava/job4j_mock",
+    "head_sha": "b045fc36c3a9c90ace71de9c0a68e9ef0fa63ece",
+    "hit_paths": [
+      "services/auth/src/main/java/ru/checkdev/auth/config/SecurityConfig.java",
+      "services/auth/src/test/java/ru/checkdev/auth/web/controller/ProfileControllerTest.java",
+      "services/desc/src/main/java/ru/checkdev/desc/config/SecurityConfig.java",
+      "services/mock/src/main/java/ru/checkdev/mock/config/SecurityConfig.java",
+      "services/notification/src/main/java/ru/checkdev/notification/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "rslakra/SpringSecurity",
+    "head_sha": "a813a70e7aeee6e52ca5aef0c686e28ab4e6be4b",
+    "hit_paths": [
+      "component-based-security/src/main/java/com/rslakra/componentbasedsecurity/config/WebSecurityConfig.java",
+      "enable-method-security/src/main/java/com/rslakra/enablemethodsecurity/configuration/SecurityConfig.java",
+      "java-jwt-based-security/src/main/java/com/rslakra/springsecurity/jwtbasedsecurity/config/WebSecurityConfig.java",
+      "jwt-authentications/jwt-authentication1/src/main/java/com/rslakra/jwtauthentication1/security/WebSecurityConfig.java",
+      "jwt-authentications/jwt-authentication3/src/main/java/com/rslakra/jwtauthentication3/security/WebSecurityConfig.java"
+    ]
+  },
+  {
+    "repo": "sukumarrkv/spring-boot-microservices",
+    "head_sha": "fcccf36556d7417f2f4db37558c13fa95c8edb94",
+    "hit_paths": [
+      "order-service/src/main/java/com/sukumar/bookstore/orders/config/SecurityConfig.java",
+      "order-service/src/test/java/com/sukumar/bookstore/orders/web/controllers/OrderControllerUnitTest.java"
+    ]
+  },
+  {
+    "repo": "ucsb-cs156-f25/proj-happycows-f25-16",
+    "head_sha": "2bd4bbb38c9f679bf5736f46e17325052825946f",
+    "hit_paths": [
+      "src/main/java/edu/ucsb/cs156/happiercows/config/SecurityConfig.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/AnnouncementsControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CSRFControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/ChatMessageControllerTests.java",
+      "src/test/java/edu/ucsb/cs156/happiercows/controllers/CommonStatsControllerTests.java"
+    ]
+  },
+  {
+    "repo": "ymahdi001/TaskForge_Dev",
+    "head_sha": "265ec8140a164849ed2969d172a13a2a87608f58",
+    "hit_paths": [
+      "backend/src/main/java/com/taskforge/security/SecurityConfig.java",
+      "backend/src/test/java/com/taskforge/controller/VersionControllerTest.java"
+    ]
+  }
+]

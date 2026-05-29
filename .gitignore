@@ -43,3 +43,4 @@ attempt_3/verify/baseline_summary.json
 # attempt_7: ephemeral per-stage Qwen synthesis cache
 /attempt_7/per_stage/
 /attempt_7/telemetry/
+target/

@@ -1,0 +1,105 @@
+[
+  {
+    "slug": "AliHassan104_question-bank__J21toJ21",
+    "repo": "AliHassan104/question-bank",
+    "sha_to": "eaef2db63f848ffed0f71e27a17199f0a852b31b",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "2.7.16",
+    "hit_paths": [
+      "question-bank-backed/src/main/java/com/example/questionbank/config/security/SecurityConfigure.java"
+    ]
+  },
+  {
+    "slug": "AngelSigueros_Spring__J21toJ21",
+    "repo": "AngelSigueros/Spring",
+    "sha_to": "c113cd1c6fab07f88253833eddd1eff8545e6ef1",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.1.2",
+    "hit_paths": [
+      "complete-spring-project-master/src/main/java/com/edwise/completespring/config/SpringWebSecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "Jhanseeram_Wipro_JAVA_FSA__J21toJ21",
+    "repo": "Jhanseeram/Wipro_JAVA_FSA",
+    "sha_to": "afa0f7066d988821a507b55124c62d44d971bf4c",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": "3.5.4",
+    "hit_paths": [
+      "11-08-2025/JWTtime/src/main/java/com/wipro/timeservice/TimeServiceApplication.java"
+    ]
+  },
+  {
+    "slug": "SSSSycamore_xuecheng__J21toJ21",
+    "repo": "SSSSycamore/xuecheng",
+    "sha_to": "eb6c84b8173ade9dcf1669abda7c8ff20ec6b330",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": null,
+    "hit_paths": [
+      "xuecheng-plus-auth/src/main/java/com/xuecheng/auth/config/WebSecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "khanhnguyenj_huongdanjava.com__J17toJ21",
+    "repo": "khanhnguyenj/huongdanjava.com",
+    "sha_to": "aac2e6b6533a892884d7241880343d47daee0718",
+    "sha_from": null,
+    "jv_from": 17,
+    "jv_to": 21,
+    "spring_boot_version": null,
+    "hit_paths": [
+      "spring-boot-spring-security/src/main/java/com/huongdanjava/springboot/springsecurity/SpringSecurityConfiguration.java",
+      "spring-security-abstractsecuritywebapplicationinitializer/src/main/java/com/huongdanjava/springsecurity/SpringSecurityConfiguration.java",
+      "spring-security-custom-authentication-filter-login-no-password/src/main/java/com/huongdanjava/springsecurity/SpringSecurityConfiguration.java",
+      "spring-security-custom-login-form/src/main/java/com/huongdanjava/springsecurity/SpringSecurityConfiguration.java",
+      "spring-security-multiple-login/src/main/java/com/huongdanjava/springsecurity/SpringSecurityConfiguration.java"
+    ]
+  },
+  {
+    "slug": "maiaimei_example__JunknowntoJ21",
+    "repo": "maiaimei/example",
+    "sha_to": "a3345e7bac7c89d034c73d7651d3fdf7baff72ac",
+    "sha_from": null,
+    "jv_from": null,
+    "jv_to": 21,
+    "spring_boot_version": "2.7.10",
+    "hit_paths": [
+      "spring-project/spring-security-oauth2/src/main/java/cn/maiaimei/example/config/WebSecurityConfig.java",
+      "spring-project/spring-security/src/main/java/cn/maiaimei/example/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "osipov-slava_job4j_mock__J21toJ21",
+    "repo": "osipov-slava/job4j_mock",
+    "sha_to": "b045fc36c3a9c90ace71de9c0a68e9ef0fa63ece",
+    "sha_from": null,
+    "jv_from": 21,
+    "jv_to": 21,
+    "spring_boot_version": null,
+    "hit_paths": [
+      "services/desc/src/main/java/ru/checkdev/desc/config/SecurityConfig.java",
+      "services/mock/src/main/java/ru/checkdev/mock/config/SecurityConfig.java",
+      "services/notification/src/main/java/ru/checkdev/notification/config/SecurityConfig.java"
+    ]
+  },
+  {
+    "slug": "ralscha_eds-starter6-jpa__J25toJ21",
+    "repo": "ralscha/eds-starter6-jpa",
+    "sha_to": "8d0f86ba21ec6c1de72582b40dc1749675c23f06",
+    "sha_from": null,
+    "jv_from": 25,
+    "jv_to": 21,
+    "spring_boot_version": "2.7.15",
+    "hit_paths": [
+      "src/main/java/ch/rasc/eds/starter/config/security/SecurityConfig.java"
+    ]
+  }
+]

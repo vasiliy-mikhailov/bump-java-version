@@ -1,0 +1,675 @@
+{
+  "stage": {
+    "repo": "Zeus-2-0/member-mgmt-service",
+    "sha_from": "d84d553ab24639bde679fcb1b9c4950a53b26b16",
+    "sha_to": "ce4d3becb8e167a445ab320a0d48ef64ee32c88e",
+    "jv_from": 17,
+    "jv_to": 21,
+    "next_version_commit": "ce4d3becb8e167a445ab320a0d48ef64ee32c88e",
+    "commits_back": 50,
+    "pre_pass_count": 1,
+    "pre_fail_count": 0,
+    "pass_rate": 1.0,
+    "probes_tried": 2
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_sb_upgrade_to_3_3",
+      "aborted_at": "sb_upgrade_to_3_3",
+      "wall_s": 47.9,
+      "steps": [
+        {
+          "step": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `sb_upgrade_to_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[12:40:28] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Account.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Account\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/AccountAttribute.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.AccountAttribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Attribute.java:[35,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Attribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/EnrollmentSpan.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.EnrollmentSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/PremiumSpan.java:[40,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.PremiumSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPremium.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberPremium\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Member.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Member\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPhone.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberPhone\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberLanguage.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberLanguage\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberEmail.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberEmail\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberIdentifier.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberIdentifier\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberAddress.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberAddress\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberAttribute.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberAttribute\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project member-mgmt-service: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Account.java:[39,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.Account\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/AccountAttribute.java:[36,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.AccountAttribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Attribute.java:[35,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.Attribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/EnrollmentSpan.java:[39,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.EnrollmentSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/PremiumSpan.java:[40,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.PremiumSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPremium.java:[37,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.MemberPremium\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Member.java:[39,11] cannot find symbol",
+      "qwen_observation": "Compilation fails with 'cannot find symbol: variable uuid' across multiple entity classes after Spring Boot 3.3 upgrade, indicating the Lombok annotation processor is not running or is incompatible with the new dependencies.",
+      "qwen_rationale": "The initial chain skipped the recommended lombok_safe_bump step. Upgrading Lombok to 1.18.30 and aligning its Maven properties ensures the annotation processor runs correctly under JDK 17, resolving the missing symbol errors before the Spring Boot and Java 21 migrations proceed."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "parameters": {
+                "groupId": "org.projectlombok",
+                "artifactId": "lombok",
+                "newVersion": "1.18.30"
+              }
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "parameters": {
+                "key": "lombok.version",
+                "newValue": "1.18.30"
+              }
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "parameters": {
+                "key": "org.projectlombok.lombok.version",
+                "newValue": "1.18.30"
+              }
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "parameters": {
+                "key": "lombok-version",
+                "newValue": "1.18.30"
+              }
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "parameters": {
+                "key": "lombokVersion",
+                "newValue": "1.18.30"
+              }
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "parameters": {
+                "key": "version.lombok",
+                "newValue": "1.18.30"
+              }
+            }
+          ]
+        },
+        {
+          "label": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_lombok_safe_bump",
+      "aborted_at": "lombok_safe_bump",
+      "wall_s": 24.2,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 17,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `lombok_safe_bump` (jdk=17): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[12:42:46] PROJECT_ROOT=/work/src PHASE=recipe JDK=17\n[WARNING] 2 problems were encountered while building the effective model for org.apache.yetus:audience-annotations:jar:0.5.0 during dependency collection step for project (use -X to see details)\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.UpgradeDependencyVersion.artifactId: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.UpgradeDependencyVersion.groupId: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.UpgradeDependencyVersion.newVersion: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.ChangePropertyValue.key: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.ChangePropertyValue.newValue: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.ChangePropertyValue.key: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.ChangePropertyValue.newValue: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.ChangePropertyValue.key: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.ChangePropertyValue.newValue: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.ChangePropertyValue.key: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.ChangePropertyValue.newValue: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.ChangePropertyValue.key: is required\n[ERROR] Recipe validation error in org.example.iter.Zeus-2-0_member-mgmt-service__J17toJ21.lombok_safe_bump for property org.openrewrite.maven.ChangePropertyValue.newValue: is required\n[ERROR] Failed to execute goal org.openrewrite.maven:rewrite-maven-plugin:6.40.0:run (default-cli) on project member-mgmt-service: Recipe validation errors detected as part of one or more activeRecipe(s). Please check error logs. -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException",
+      "qwen_observation": "Recipe validation failed because parameters were nested under a 'parameters' key instead of being top-level properties in the recipe mapping.",
+      "qwen_rationale": "Flattening the recipe parameter structure to match OpenRewrite's expected JSON schema (name + direct parameters) will allow the lombok_safe_bump step to execute successfully, enabling the subsequent Spring Boot and Java 21 upgrades."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_sb_upgrade_to_3_3",
+      "aborted_at": "sb_upgrade_to_3_3",
+      "wall_s": 50.0,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `sb_upgrade_to_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[12:45:46] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Account.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Account\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/AccountAttribute.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.AccountAttribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Attribute.java:[35,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Attribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/EnrollmentSpan.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.EnrollmentSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/PremiumSpan.java:[40,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.PremiumSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPremium.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberPremium\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Member.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Member\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPhone.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberPhone\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberLanguage.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberLanguage\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberEmail.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberEmail\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberIdentifier.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberIdentifier\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberAddress.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberAddress\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberAttribute.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberAttribute\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project member-mgmt-service: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Account.java:[39,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.Account\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/AccountAttribute.java:[36,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.AccountAttribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Attribute.java:[35,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.Attribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/EnrollmentSpan.java:[39,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.EnrollmentSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/PremiumSpan.java:[40,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.PremiumSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPremium.java:[37,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.MemberPremium\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Member.java:[39,11] cannot find symbol",
+      "qwen_observation": "The Spring Boot 3.3 upgrade step failed with 'cannot find symbol: variable uuid' in multiple entity classes, indicating that Lombok annotation processing is failing or not generating the expected code after the framework migration.",
+      "qwen_rationale": "The previous attempt's `lombok_safe_bump` step likely succeeded in updating the version property but may not have ensured the dependency was correctly resolved or the annotation processor path was updated for the new JDK/Spring Boot context. The `UpgradeSpringBoot_3_3` recipe changes the parent and dependencies, which can sometimes disrupt annotation processor configurations if not handled carefully. By inserting a dedicated `lombok_fix` step immediately after the Lombok bump and before the Spring Boot upgrade, we explicitly force the Lombok dependency version and ensure it is on the annotation processor path using a POM_PATCH. This guarantees that Lombok is correctly configured to process annotations before the complex Spring Boot 3.3 migration runs, preventing the 'uuid' symbol errors which are typically generated by Lombok's `@Data` or `@Builder` (if configured) or simply missing getters/setters if Lombok fails."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "lombok_fix",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "lombok",
+              "version": "1.18.30"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "version": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_sb_upgrade_to_3_3",
+      "aborted_at": "sb_upgrade_to_3_3",
+      "wall_s": 48.4,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "lombok_fix",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `sb_upgrade_to_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[12:53:12] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Account.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Account\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/AccountAttribute.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.AccountAttribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Attribute.java:[35,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Attribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/EnrollmentSpan.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.EnrollmentSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/PremiumSpan.java:[40,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.PremiumSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPremium.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberPremium\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Member.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Member\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPhone.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberPhone\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberLanguage.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberLanguage\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberEmail.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberEmail\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberIdentifier.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberIdentifier\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberAddress.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberAddress\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberAttribute.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberAttribute\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project member-mgmt-service: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Account.java:[39,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.Account\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/AccountAttribute.java:[36,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.AccountAttribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Attribute.java:[35,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.Attribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/EnrollmentSpan.java:[39,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.EnrollmentSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/PremiumSpan.java:[40,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.PremiumSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPremium.java:[37,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.MemberPremium\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Member.java:[39,11] cannot find symbol",
+      "qwen_observation": "The build fails at `sb_upgrade_to_3_3` with 'cannot find symbol: variable uuid' in multiple entity classes, indicating that Lombok annotation processing is failing to generate the expected fields/methods after the Spring Boot 3.3 upgrade recipe modified the POM.",
+      "qwen_rationale": "The `UpgradeSpringBoot_3_3` recipe likely removed or altered the Lombok dependency or annotation processor configuration, or the Lombok version in the POM is still too old for the new build context. The previous `lombok_safe_bump` and `lombok_fix` steps were applied, but the subsequent SB upgrade may have overwritten them or the AP path wasn't correctly enforced for the new plugin versions. By inserting a robust `pom_patch` step immediately before the SB upgrade that forces the Lombok version to 1.18.30 and explicitly adds it to the `annotationProcessorPaths` of the `maven-compiler-plugin`, we ensure the processor is available and correctly configured regardless of what the SB recipe does to the dependency management. We also keep the initial lombok bump to ensure the property is set."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "lombok_safe_bump",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "newVersion": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "org.projectlombok.lombok.version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombok-version",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "lombokVersion",
+              "newValue": "1.18.30"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "version.lombok",
+              "newValue": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "ensure_lombok_ap",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "lombok",
+              "version": "1.18.30"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "version": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "reassert_lombok_ap_post_sb",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "lombok",
+              "version": "1.18.30"
+            },
+            {
+              "op": "add_ap_path",
+              "groupId": "org.projectlombok",
+              "artifactId": "lombok",
+              "version": "1.18.30"
+            }
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_sb_upgrade_to_3_3",
+      "aborted_at": "sb_upgrade_to_3_3",
+      "wall_s": 74.9,
+      "steps": [
+        {
+          "step": "lombok_safe_bump",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "ensure_lombok_ap",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "sb_upgrade_to_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `sb_upgrade_to_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[13:01:03] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Account.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Account\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/AccountAttribute.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.AccountAttribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Attribute.java:[35,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Attribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/EnrollmentSpan.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.EnrollmentSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/PremiumSpan.java:[40,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.PremiumSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPremium.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberPremium\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Member.java:[39,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.Member\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPhone.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberPhone\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberLanguage.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberLanguage\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberEmail.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberEmail\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberIdentifier.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberIdentifier\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberAddress.java:[37,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberAddress\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberAttribute.java:[36,11] cannot find symbol\n  symbol:   variable uuid\n  location: class com.brihaspathee.zeus.domain.entity.MemberAttribute\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project member-mgmt-service: Compilation failure: Compilation failure: \n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Account.java:[39,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.Account\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/AccountAttribute.java:[36,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.AccountAttribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Attribute.java:[35,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.Attribute\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/EnrollmentSpan.java:[39,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.EnrollmentSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/PremiumSpan.java:[40,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.PremiumSpan\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/MemberPremium.java:[37,11] cannot find symbol\n[ERROR]   symbol:   variable uuid\n[ERROR]   location: class com.brihaspathee.zeus.domain.entity.MemberPremium\n[ERROR] /work/src/src/main/java/com/brihaspathee/zeus/domain/entity/Member.java:[39,11] cannot find symbol",
+      "qwen_observation": "The sb_upgrade_to_3_3 step fails compilation with 'cannot find symbol: variable uuid' across multiple entity classes, indicating Lombok annotation processing is broken after the Spring Boot 3.3 recipe modifies the POM.",
+      "qwen_rationale": "The UpgradeSpringBoot_3_3 recipe likely alters dependency management or compiler plugin configuration, causing Lombok to stop generating getters/accessors. By explicitly re-adding the Lombok dependency and property within the same step, and reasserting the annotation processor path in a subsequent pom_patch step, we ensure Lombok remains active on the new compiler classpath."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "lombok_safe_bump",
+      "jdk": 17,
+      "recipes": [
+        {
+          "name": "org.openrewrite.maven.UpgradeDependencyVersion",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "newVersion": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "org.projectlombok.lombok.version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok-version",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombokVersion",
+          "newValue": "1.18.30"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "version.lombok",
+          "newValue": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "ensure_lombok_ap",
+      "jdk": 17,
+      "recipes": [
+        {
+          "op": "force_version",
+          "artifactId": "lombok",
+          "version": "1.18.30"
+        },
+        {
+          "op": "add_ap_path",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "version": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "sb_upgrade_to_3_3",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3",
+        {
+          "name": "org.openrewrite.maven.AddDependency",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "version": "1.18.30",
+          "scope": "provided"
+        },
+        {
+          "name": "org.openrewrite.maven.ChangePropertyValue",
+          "key": "lombok.version",
+          "newValue": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "reassert_lombok_ap_post_sb",
+      "jdk": 17,
+      "recipes": [
+        {
+          "op": "force_version",
+          "artifactId": "lombok",
+          "version": "1.18.30"
+        },
+        {
+          "op": "add_ap_path",
+          "groupId": "org.projectlombok",
+          "artifactId": "lombok",
+          "version": "1.18.30"
+        }
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_sb_upgrade_to_3_3"
+}

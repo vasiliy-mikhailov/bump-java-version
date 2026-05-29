@@ -1,0 +1,427 @@
+{
+  "stage": {
+    "repo": "amitrp/spring-examples",
+    "sha_from": "697809cb35552fe0f4c62a9b56ad8d02a3a865ca",
+    "sha_to": "3e21b313ee385384440873ea0615db3a20a80246",
+    "jv_from": 17,
+    "jv_to": 21,
+    "next_version_commit": "3e21b313ee385384440873ea0615db3a20a80246",
+    "commits_back": 20,
+    "pre_pass_count": 22,
+    "pre_fail_count": 0,
+    "pass_rate": 1.0,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 94.4,
+      "steps": [
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[20:02:05] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/spring-webflux-webclient/src/main/java/com/amitph/spring/webclients/ApplicationConfig.java:[61,33] incompatible types: invalid method reference\n    method is4xxClientError in enum org.springframework.http.HttpStatus cannot be applied to given types\n      required: no arguments\n      found:    org.springframework.http.HttpStatusCode\n      reason: actual and formal argument lists differ in length\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project spring-webflux-webclient: Compilation failure\n[ERROR] /work/src/spring-webflux-webclient/src/main/java/com/amitph/spring/webclients/ApplicationConfig.java:[61,33] incompatible types: invalid method reference\n[ERROR]     method is4xxClientError in enum org.springframework.http.HttpStatus cannot be applied to given types\n[ERROR]       required: no arguments\n[ERROR]       found:    org.springframework.http.HttpStatusCode\n[ERROR]       reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :spring-webflux-webclient",
+      "qwen_observation": "Compilation failed in upgrade_spring_boot_3_3 due to HttpStatus.is4xxClientError() signature change in Spring Framework 6, which now takes no arguments instead of a HttpStatusCode.",
+      "qwen_rationale": "Adding org.openrewrite.java.spring.framework.UpgradeSpringFramework_6_1 to the Spring Boot 3.3 upgrade step applies the necessary Spring Framework 6 API migration recipes, fixing the HttpStatus method reference and other related breaking changes before compilation."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3",
+            "org.openrewrite.java.spring.framework.UpgradeSpringFramework_6_1"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 91.6,
+      "steps": [
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[20:05:27] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/spring-webflux-webclient/src/main/java/com/amitph/spring/webclients/ApplicationConfig.java:[61,33] incompatible types: invalid method reference\n    method is4xxClientError in enum org.springframework.http.HttpStatus cannot be applied to given types\n      required: no arguments\n      found:    org.springframework.http.HttpStatusCode\n      reason: actual and formal argument lists differ in length\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project spring-webflux-webclient: Compilation failure\n[ERROR] /work/src/spring-webflux-webclient/src/main/java/com/amitph/spring/webclients/ApplicationConfig.java:[61,33] incompatible types: invalid method reference\n[ERROR]     method is4xxClientError in enum org.springframework.http.HttpStatus cannot be applied to given types\n[ERROR]       required: no arguments\n[ERROR]       found:    org.springframework.http.HttpStatusCode\n[ERROR]       reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :spring-webflux-webclient",
+      "qwen_observation": "Compilation failed during Spring Boot 3.3 upgrade due to `HttpStatus.is4xxClientError` signature change in Spring Framework 6, which expects no arguments but receives `HttpStatusCode`.",
+      "qwen_rationale": "Adding `SpringBoot3BestPractices` alongside `UpgradeSpringBoot_3_3` and `UpgradeSpringFramework_6_1` ensures remaining Spring 6 API incompatibilities, including method reference updates for `HttpStatus`, are migrated before compilation."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3",
+            "org.openrewrite.java.spring.framework.UpgradeSpringFramework_6_1",
+            "org.openrewrite.java.spring.boot3.SpringBoot3BestPractices"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 55.0,
+      "steps": [
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[20:08:36] PROJECT_ROOT=/work/src PHASE=recipe JDK=17\n[WARNING] 1 problem was encountered while building the effective model for org.javassist:javassist:jar:3.20.0-GA during dependency collection step for project (use -X to see details)\n[ERROR] Recipe validation error in org.example.iter.amitrp_spring-examples__J17toJ21.upgrade_spring_boot_3_3 for property initialization: DeclarativeRecipe must not contain uninitialized recipes. Be sure to call .initialize() on DeclarativeRecipe.\n[ERROR] Recipe validation error in org.example.iter.amitrp_spring-examples__J17toJ21.upgrade_spring_boot_3_3 for property org.example.iter.amitrp_spring-examples__J17toJ21.upgrade_spring_boot_3_3.recipeList[2] (in file:/recipes/upgrade_spring_boot_3_3.yml): recipe 'org.openrewrite.java.spring.boot3.SpringBoot3BestPractices' does not exist.\n[ERROR] Failed to execute goal org.openrewrite.maven:rewrite-maven-plugin:6.40.0:run (default-cli) on project spring-boot-exit-codes: Recipe validation errors detected as part of one or more activeRecipe(s). Please check error logs. -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :spring-boot-exit-codes",
+      "qwen_observation": "Recipe validation failed because org.openrewrite.java.spring.boot3.SpringBoot3BestPractices does not exist in the runner's OpenRewrite version.",
+      "qwen_rationale": "Removing the invalid recipe and relying solely on UpgradeSpringBoot_3_3, which internally composes Spring Framework upgrades and Jakarta namespace migrations. The chain follows the standard SB 2.x -> 3.x -> Java 21 progression without unnecessary or broken recipes."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 71.7,
+      "steps": [
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[20:11:08] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/spring-webflux-webclient/src/main/java/com/amitph/spring/webclients/ApplicationConfig.java:[61,33] incompatible types: invalid method reference\n    method is4xxClientError in enum org.springframework.http.HttpStatus cannot be applied to given types\n      required: no arguments\n      found:    org.springframework.http.HttpStatusCode\n      reason: actual and formal argument lists differ in length\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project spring-webflux-webclient: Compilation failure\n[ERROR] /work/src/spring-webflux-webclient/src/main/java/com/amitph/spring/webclients/ApplicationConfig.java:[61,33] incompatible types: invalid method reference\n[ERROR]     method is4xxClientError in enum org.springframework.http.HttpStatus cannot be applied to given types\n[ERROR]       required: no arguments\n[ERROR]       found:    org.springframework.http.HttpStatusCode\n[ERROR]       reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :spring-webflux-webclient",
+      "qwen_observation": "Compilation fails at upgrade_spring_boot_3_3 due to HttpStatus.is4xxClientError(HttpStatusCode) signature change in Spring Framework 6, which the Boot 3.3 meta-recipe does not fully migrate in source code.",
+      "qwen_rationale": "Adding UpgradeSpringFramework_6_1 to the same step as UpgradeSpringBoot_3_3 ensures Spring Framework 6 source compatibility recipes run before the post-step mvn compile check, fixing the HttpStatus method reference error."
+    },
+    {
+      "attempt": 5,
+      "chain": [
+        {
+          "label": "upgrade_spring_boot_2_7",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+          ]
+        },
+        {
+          "label": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3",
+            "org.openrewrite.java.spring.framework.UpgradeSpringFramework_6_1"
+          ]
+        },
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_upgrade_spring_boot_3_3",
+      "aborted_at": "upgrade_spring_boot_3_3",
+      "wall_s": 86.7,
+      "steps": [
+        {
+          "step": "upgrade_spring_boot_2_7",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_spring_boot_3_3",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": false
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `upgrade_spring_boot_3_3` (jdk=17): BUILD FAILED post-recipe, rc=1\n--- first error cluster ---\n[20:14:18] PROJECT_ROOT=/work/src PHASE=build_post JDK=17\n[ERROR] COMPILATION ERROR : \n[ERROR] /work/src/spring-webflux-webclient/src/main/java/com/amitph/spring/webclients/ApplicationConfig.java:[61,33] incompatible types: invalid method reference\n    method is4xxClientError in enum org.springframework.http.HttpStatus cannot be applied to given types\n      required: no arguments\n      found:    org.springframework.http.HttpStatusCode\n      reason: actual and formal argument lists differ in length\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project spring-webflux-webclient: Compilation failure\n[ERROR] /work/src/spring-webflux-webclient/src/main/java/com/amitph/spring/webclients/ApplicationConfig.java:[61,33] incompatible types: invalid method reference\n[ERROR]     method is4xxClientError in enum org.springframework.http.HttpStatus cannot be applied to given types\n[ERROR]       required: no arguments\n[ERROR]       found:    org.springframework.http.HttpStatusCode\n[ERROR]       reason: actual and formal argument lists differ in length\n[ERROR] -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :spring-webflux-webclient",
+      "qwen_observation": "Compilation fails on HttpStatus.is4xxClientError signature change in Spring 6, likely due to recipe conflict or incomplete migration when UpgradeSpringFramework_6_1 is run alongside UpgradeSpringBoot_3_3.",
+      "qwen_rationale": "Removing the explicit UpgradeSpringFramework_6_1 recipe eliminates potential double-processing or recipe interference, allowing UpgradeSpringBoot_3_3 to execute its full internal Spring 6 migration suite cleanly. The chain then proceeds with standard Java 21 plugin and build upgrades."
+    }
+  ],
+  "next_chain_to_try": [
+    {
+      "label": "upgrade_spring_boot_2_7",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7"
+      ]
+    },
+    {
+      "label": "upgrade_spring_boot_3_3",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3"
+      ]
+    },
+    {
+      "label": "upgrade_plugins_for_java21",
+      "jdk": 17,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+      ]
+    },
+    {
+      "label": "upgrade_build_to_java21",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+      ]
+    },
+    {
+      "label": "java21_transforms",
+      "jdk": 21,
+      "recipes": [
+        "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+        "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+        "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+        "org.openrewrite.java.migrate.util.SequencedCollection",
+        "org.openrewrite.java.migrate.util.UseLocaleOf",
+        "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+        "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+        "org.openrewrite.java.migrate.RemovedSubjectMethods"
+      ]
+    }
+  ],
+  "final_verdict": "FAIL_at_upgrade_spring_boot_3_3"
+}

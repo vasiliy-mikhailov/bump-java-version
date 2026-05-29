@@ -1,0 +1,502 @@
+{
+  "stage": {
+    "repo": "cmu-phil/tetrad",
+    "sha_from": "6aa03408b43d44d6af9e7f185672bd8936f0ec45",
+    "sha_to": "d2abdef2970cd726824b71419c5dd2809ea0dda2",
+    "jv_from": 17,
+    "jv_to": 21,
+    "next_version_commit": "d2abdef2970cd726824b71419c5dd2809ea0dda2",
+    "commits_back": 20,
+    "pre_pass_count": 352,
+    "pre_fail_count": 0,
+    "pass_rate": 1.0,
+    "probes_tried": 1
+  },
+  "max_attempts": 5,
+  "history": [
+    {
+      "attempt": 1,
+      "chain": [
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_java21_transforms",
+      "aborted_at": "java21_transforms",
+      "wall_s": 114.6,
+      "steps": [
+        {
+          "step": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java21_transforms",
+          "jdk": 21,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `java21_transforms` (jdk=21): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[13:11:34] PROJECT_ROOT=/work/src PHASE=recipe JDK=21\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile (default-testCompile) on project tetrad-gui: Execution default-testCompile of goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile failed: For input string: \"1.8\" -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :tetrad-gui",
+      "qwen_observation": "The maven-compiler-plugin failed with 'For input string: 1.8' during testCompile, indicating that source/target properties or plugin configurations still reference Java 1.8, which is invalid on JDK 21.",
+      "qwen_rationale": "UpgradeBuildToJava21 may have missed custom property names or direct plugin configurations. Adding explicit ChangePropertyValue steps for common Java version properties (maven.compiler.source, maven.compiler.target, java.version, source, target, maven.compiler.release) to '21' will resolve the NumberFormatException in the compiler plugin before running the Java 21 transforms."
+    },
+    {
+      "attempt": 2,
+      "chain": [
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "fix_java_version",
+          "jdk": 21,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.source",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.target",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "java.version",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "source",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "target",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.release",
+              "newValue": "21"
+            }
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_fix_java_version",
+      "aborted_at": "fix_java_version",
+      "wall_s": 129.0,
+      "steps": [
+        {
+          "step": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "fix_java_version",
+          "jdk": 21,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `fix_java_version` (jdk=21): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[13:15:29] PROJECT_ROOT=/work/src PHASE=recipe JDK=21\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile (default-testCompile) on project tetrad-gui: Execution default-testCompile of goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile failed: For input string: \"1.8\" -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :tetrad-gui",
+      "qwen_observation": "maven-compiler-plugin:3.11.0 throws NumberFormatException for input string '1.8' during testCompile, indicating legacy Java 8 version strings remain in POM properties or plugin configurations despite UpgradeBuildToJava21.",
+      "qwen_rationale": "The UpgradeBuildToJava21 recipe may have missed module-specific or profile-scoped properties, or hardcoded plugin configurations. Expanding ChangePropertyValue to cover all common Java version property names (including source/target variants and java.version) and explicitly forcing them to '21' will resolve the parsing error. Re-running UpgradeBuildToJava21 ensures any missed build configurations are caught."
+    },
+    {
+      "attempt": 3,
+      "chain": [
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21"
+          ]
+        },
+        {
+          "label": "fix_java_version",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradeBuildToJava21",
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.source",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.target",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "java.version",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "source",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "target",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.release",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "java.source",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "java.target",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "project.build.source",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "project.build.target",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.source.version",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.target.version",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "compiler.source",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "compiler.target",
+              "newValue": "21"
+            }
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "FAIL_at_fix_java_version",
+      "aborted_at": "fix_java_version",
+      "wall_s": 122.8,
+      "steps": [
+        {
+          "step": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "upgrade_build_to_java21",
+          "jdk": 21,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "fix_java_version",
+          "jdk": 21,
+          "recipe_ok": false,
+          "build_ok": null
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "regressed_count": null,
+      "regressed_tests": [],
+      "observation": "step `fix_java_version` (jdk=21): RECIPE APPLY FAILED, rc=1\n--- first error cluster ---\n[13:20:52] PROJECT_ROOT=/work/src PHASE=recipe JDK=21\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile (default-testCompile) on project tetrad-gui: Execution default-testCompile of goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile failed: For input string: \"1.8\" -> [Help 1]\n[ERROR] \n[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.\n[ERROR] Re-run Maven using the -X switch to enable full debug logging.\n[ERROR] \n[ERROR] For more information about the errors and possible solutions, please read the following articles:\n[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException\n[ERROR] \n[ERROR] After correcting the problems, you can resume the build with the command\n[ERROR]   mvn <args> -rf :tetrad-gui",
+      "qwen_observation": "maven-compiler-plugin:3.11.0 throws NumberFormatException for input string '1.8' because maven.compiler.release (or source/target) is set to 1.8, which the plugin attempts to parse as an integer for the --release flag.",
+      "qwen_rationale": "Downgrade the compiler plugin to 3.10.1 via POM_PATCH to bypass the strict integer parsing, then safely update Java version properties to 17 under JDK 17. Afterward, upgrade the plugin back to 3.11.0 and update properties to 21 under JDK 21, ensuring the build succeeds at each stage before applying further recipes."
+    },
+    {
+      "attempt": 4,
+      "chain": [
+        {
+          "label": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipes": [
+            "org.openrewrite.java.migrate.UpgradePluginsForJava21"
+          ]
+        },
+        {
+          "label": "pom_patch_downgrade_compiler",
+          "jdk": 17,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "maven-compiler-plugin",
+              "version": "3.10.1"
+            }
+          ]
+        },
+        {
+          "label": "fix_java_version_17",
+          "jdk": 17,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.source",
+              "newValue": "17"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.target",
+              "newValue": "17"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.release",
+              "newValue": "17"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "java.version",
+              "newValue": "17"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "source",
+              "newValue": "17"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "target",
+              "newValue": "17"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "release",
+              "newValue": "17"
+            }
+          ]
+        },
+        {
+          "label": "pom_patch_upgrade_compiler",
+          "jdk": 21,
+          "recipes": [
+            {
+              "op": "force_version",
+              "artifactId": "maven-compiler-plugin",
+              "version": "3.11.0"
+            }
+          ]
+        },
+        {
+          "label": "fix_java_version_21",
+          "jdk": 21,
+          "recipes": [
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.source",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.target",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "maven.compiler.release",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "java.version",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "source",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "target",
+              "newValue": "21"
+            },
+            {
+              "name": "org.openrewrite.maven.ChangePropertyValue",
+              "key": "release",
+              "newValue": "21"
+            }
+          ]
+        },
+        {
+          "label": "java21_transforms",
+          "jdk": 21,
+          "recipes": [
+            "org.openrewrite.java.migrate.RemoveIllegalSemicolons",
+            "org.openrewrite.java.migrate.lang.ThreadStopUnsupported",
+            "org.openrewrite.java.migrate.net.URLConstructorToURICreate",
+            "org.openrewrite.java.migrate.util.SequencedCollection",
+            "org.openrewrite.java.migrate.util.UseLocaleOf",
+            "org.openrewrite.staticanalysis.ReplaceDeprecatedRuntimeExecMethods",
+            "org.openrewrite.java.migrate.DeleteDeprecatedFinalize",
+            "org.openrewrite.java.migrate.RemovedSubjectMethods"
+          ]
+        }
+      ],
+      "verdict": "PASS",
+      "aborted_at": null,
+      "wall_s": 234.3,
+      "steps": [
+        {
+          "step": "upgrade_plugins_for_java21",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "pom_patch_downgrade_compiler",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "fix_java_version_17",
+          "jdk": 17,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "pom_patch_upgrade_compiler",
+          "jdk": 21,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "fix_java_version_21",
+          "jdk": 21,
+          "recipe_ok": true,
+          "build_ok": true
+        },
+        {
+          "step": "java21_transforms",
+          "jdk": 21,
+          "recipe_ok": true,
+          "build_ok": true
+        }
+      ],
+      "test_pre": null,
+      "test_post": null,
+      "test_conservation": null,
+      "observation": "PASS",
+      "qwen_observation": "",
+      "qwen_rationale": ""
+    }
+  ],
+  "next_chain_to_try": null,
+  "final_verdict": "PASS"
+}
