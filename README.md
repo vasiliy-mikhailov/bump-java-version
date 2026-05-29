@@ -42,6 +42,8 @@ Each attempt's champion against the corpus available at the time:
 
 Numbers track Dominanta 2's reward against the one-shot baseline on the same corpus. Caveat: corpus composition changed across attempts, so absolute PASS rate is comparable within an attempt's column but not across rows.
 
+**Corpus state beyond the measured 202.** During attempt 9, Dominanta 3 (dataset rediscovery) found 76 additional candidate stages that were never routed into a measured PASS rate: 3 already yearback-verified and ready to measure (`attempt_9/new_dataset_yearback.json`), 17 lineage candidates pending sha-pin (`attempt_9/new_lineage_candidates.json`), and 59 claude-recipe pattern-positives across 50 unique repos pending yearback-probe (`attempt_9/new_stages/*.json`, broken down as 19 http_status_widen + 18 oauth2_login_scope + 14 webmvctest_import + 8 wsca). 18 yearback-rejected candidates carry negative knowledge in `attempt_9/new_dataset_yearback_skipped.json`. Attempt 10's ready-to-measure universe is therefore 190 stages right now (187 + 3); after Dominanta 3 finishes probing the lineage and pattern-positive candidates, it grows toward ~266.
+
 ## Current winner recipe
 
 The current best-known **measured** recipe is attempt 8's deterministic chain (162/202 = 80 % on the 202-stage corpus), per (jv_from, jv_to=21):
