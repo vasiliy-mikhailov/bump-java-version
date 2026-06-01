@@ -33,7 +33,7 @@ run**:
 
 ## Carried forward (unchanged baseline artifact)
 
-The `bump_java_version` skill (`.agents/skills/...`), the recipe catalog
+The `bump-java-version` skill (`.agents/skills/...`), the recipe catalog
 (`tech.mikhailov.bump_java_version_recipes`), and the `tools/` harness carry over from attempt 11
 (the 95.6%-on-fixed-412 baseline). Attempt 12 changes only **how baselines are drawn**.
 

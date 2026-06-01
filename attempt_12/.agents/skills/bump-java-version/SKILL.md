@@ -1,5 +1,5 @@
 ---
-name: bump_java_version
+name: bump-java-version
 description: Migrate a Maven project from one Java LTS to the next (8->11, 11->17, 17->21) so it still compiles under the new JDK and previously-passing tests still pass. Use when upgrading or bumping the Java version of a Maven project, modernizing to a newer JDK or LTS, or performing the Spring Boot 2 to 3 / javax to jakarta migration that a Java upgrade requires.
 ---
 

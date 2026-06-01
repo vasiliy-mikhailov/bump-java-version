@@ -1,4 +1,4 @@
-# Recipe catalog — bump_java_version
+# Recipe catalog — bump-java-version
 
 The failure-remedy table in `SKILL.md` calls custom OpenRewrite recipes by FQN. They ship as
 one Maven artifact (a dependency, not bundled source):

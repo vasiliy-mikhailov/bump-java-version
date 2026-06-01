@@ -31,7 +31,7 @@ from test_conservation import (  # noqa: E402
 
 ACTIVE = f'{BASE}/active_attempt'                 # operator-moved pointer to the open attempt
 ATTEMPT_NAME = os.path.basename(os.path.realpath(ACTIVE))
-PROMPT_PATH = f'{ACTIVE}/.agents/skills/bump_java_version/SKILL.md'
+SKILLS_DIR = f'{ACTIVE}/.agents/skills'   # bump-java-version skill -> agent_context (trigger-less = always active)
 TRAJ_DIR = f'{ACTIVE}/per_repo_iter'
 os.makedirs(TRAJ_DIR, exist_ok=True)
 DATASET = f'{ACTIVE}/dataset-shas.json'           # stage source: the active attempt's dataset
@@ -82,12 +82,15 @@ def main():
     pre_pass_count = len(pre_passed)
 
     # 3. Run agent
-    prompt = open(PROMPT_PATH).read()
+    prompt = (f"Bump this Maven project from Java {stage['jv_from']} to Java "
+              f"{stage['jv_to']} using the bump-java-version skill.")
     prompt_fp = fingerprint(prompt)
     print(f'\n=== agent run (OpenHands SDK; prompt fingerprint {prompt_fp})', flush=True)
     print(f'=== workdir: {workdir}', flush=True)
 
     from openhands.sdk import LLM, Agent, Conversation, LocalWorkspace
+    from openhands.sdk.skills import load_skills_from_dir
+    from openhands.sdk.context.agent_context import AgentContext
     from openhands.tools.preset.default import get_default_tools
     from openhands.sdk.context.condenser import LLMSummarizingCondenser
     from openhands.sdk.event import MessageEvent
@@ -114,9 +117,15 @@ def main():
         native_tool_calling=False,
     )
     condenser = LLMSummarizingCondenser(llm=compactor_llm, max_size=40, keep_first=2)
+    _merged = {}
+    for _d in load_skills_from_dir(SKILLS_DIR):
+        if isinstance(_d, dict): _merged.update(_d)
+    skills = [_s for _n, _s in _merged.items() if _n == 'bump-java-version']
+    print(f'=== agent_context skills: {[_s.name for _s in skills]} (always-active)', flush=True)
     agent = Agent(llm=llm,
                   tools=get_default_tools(enable_browser=False),
-                  condenser=condenser)
+                  condenser=condenser,
+                  agent_context=AgentContext(skills=skills, load_user_skills=False, load_public_skills=False))
     _conv_id = uuid.uuid4()
     _sink_cb = oh_make_sink_callback(_conv_id, slug=slug)
     conv = Conversation(agent=agent,

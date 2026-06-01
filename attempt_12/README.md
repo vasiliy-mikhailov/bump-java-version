@@ -6,5 +6,5 @@ shas, so the eval is a moving target the skill/recipes must generalize to (inste
 to fixed commits). Sampling across each repo's history also surfaces 8→11 / 11→17 / 17→21 hops
 organically, and validity (compiles under `jv_from`) is a runtime filter, not a curation chore.
 
-The `bump_java_version` skill + recipe catalog + `tools/` harness carry forward unchanged from
+The `bump-java-version` skill + recipe catalog + `tools/` harness carry forward unchanged from
 attempt 11 (the 95.6%-on-fixed-412 baseline). See `PLAN.md`.
