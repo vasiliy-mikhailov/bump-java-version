@@ -3,8 +3,12 @@
 }
 
 inference.mikhailov.tech {
+    handle_path /awq/* {
+        reverse_proxy omega-reptile-vllm-playground:8000 {
+            header_up Host {upstream_hostport}
+        }
+    }
     reverse_proxy inference-vllm:8000 {
         header_up Host {upstream_hostport}
     }
 }
-

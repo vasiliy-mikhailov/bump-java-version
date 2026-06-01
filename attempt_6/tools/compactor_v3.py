@@ -1,9 +1,19 @@
 import json, os, time, urllib.request, re
 from datetime import datetime, timezone
 
+# observability compactor (frog's eye, P10) endpoint/model/key from .env -> Qwen3.6-27B-AWQ via gateway /awq route
+_OBSENV = {}
+for _l in open("/home/vmihaylov/java_8_11_17_to_java_21/.env"):
+    _l = _l.strip()
+    if _l and not _l.startswith("#") and "=" in _l:
+        _k, _v = _l.split("=", 1); _OBSENV[_k] = _v.strip().strip('"').strip("'")
+OBS_URL = _OBSENV.get("OBSERVABILITY_COMPACTOR_URL", "https://inference.mikhailov.tech/awq/v1").rstrip("/")
+OBS_MODEL = _OBSENV.get("OBSERVABILITY_COMPACTOR_MODEL", "qwen3.6-27b-awq")
+OBS_KEY = _OBSENV.get("OBSERVABILITY_COMPACTOR_API_KEY") or _OBSENV.get("VLLM_API_KEY", "")
+
 OBS_DIR = "/var/log/observe"
 DIGEST = f"{OBS_DIR}/digest.jsonl"
-CTX_BUDGET = 128 * 1024
+CTX_BUDGET = 64 * 1024   # AWQ max-model-len = 65536
 OUTPUT_BUDGET = 16000
 SAFETY = 2000  # system prompt + wrappers
 COMPACT_AT = int(CTX_BUDGET * 0.40)   # trigger compaction at 40% of budget
@@ -27,12 +37,12 @@ def approx_tokens(t): return (len(t) + 1) // 2  # conservative upper bound
 
 
 def ask_qwen(system, user, max_tokens=16000):
-    body = {"model":"qwen3.6-27b-fp8","messages":[
+    body = {"model":OBS_MODEL,"messages":[
             {"role":"system","content":system},{"role":"user","content":user}],
             "temperature":0.0,"max_tokens":max_tokens,"chat_template_kwargs":{"enable_thinking":False}}
-    req = urllib.request.Request("http://localhost:8000/v1/chat/completions",
+    req = urllib.request.Request(OBS_URL+"/chat/completions",
         data=json.dumps(body).encode(),
-        headers={"Authorization":"Bearer sk-ef2926520a83b7f6efac7f4dc5b049842b4b2baebfdc18b69b76220f29fdf272","Content-Type":"application/json"})
+        headers={"Authorization":"Bearer "+OBS_KEY,"Content-Type":"application/json"})
     for attempt in range(3):
         try:
             with urllib.request.urlopen(req, timeout=240) as r:
