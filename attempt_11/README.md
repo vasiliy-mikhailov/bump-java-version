@@ -15,8 +15,14 @@ a de-noised corpus — the baseline before handing optimization to GEPA + EvoSki
   `recipes/`, rebuilt + installed to the local `.m2` cache).
 - **Docker runs non-root:** the `mvn` wrapper runs containers as the invoking uid (1000), so
   build outputs are user-owned — no more root-owned `target/` / `.m2-fitness`.
-- **Corpus de-noised:** `corpus_clean.json` = 432 datapoints (477 minus 46 unmigratable junk
-  baselines D4 wrongly collected; includes 15 recovered baselines with corrected compiling shas).
+- **Corpus de-noised (two passes) → 412 datapoints.** Pass 1 (a10→a11): 477 − 46 unmigratable
+  junk + 15 recovered (corrected compiling shas) = 432. Pass 2 (post-sweep sha audit): − 20 more
+  junk found by reading the *actual* pom at each recorded sha — **13 already ≥ `jv_to`** (no-op
+  "passes") + **7 that don't compile under `jv_from`** — leaving **412**.
+- **Slugs renamed** `owner_repo__J17toJ21` → `owner_repo_<sha>`. The `__J17toJ21` label was never
+  read at runtime (the skill detects `jv_from` from the pom and targets the next LTS; the verdict
+  hardcodes ≥ 21), so the sha now names the exact baseline commit and fixes latent same-repo
+  slug collisions.
 
 ## Skill validated across the full rung ladder
 
@@ -31,20 +37,39 @@ scripts):
 `fast-food` also exercised the skill's "tests that error at baseline aren't your
 responsibility" judgment (its `contextLoads` needs a MySQL DB absent in the sandbox) — both
 LLM rungs correctly excluded it rather than failing the bump. Every rung's dialogue is
-preserved under `per_repo_iter/<slug>/` (`dialogue.claude_opus.log`,
-`dialogue.qwen.messages.json`, `dialogue.oh_qwen.log`).
+preserved under `per_repo_iter/<slug>/`.
 
 ## Corpus sweep — attempt-11 PASS rate (production rung)
 
-Fresh, full re-run of **all 432** clean datapoints through **OpenHands+Qwen** with the skill
-(verdict = pom ≥ jv_to, dialogues preserved per datapoint):
+Fresh, full re-run of **every** clean datapoint through **OpenHands+Qwen** with the skill
+(verdict = pom ≥ `jv_to`; every datapoint re-executed from its baseline sha; dialogues preserved):
 
-> **In progress — 142 / 432 so far: 128 PASS · 14 not-bumped · 0 clone-fail → ~90% PASS.**
-> (Final pending; this section is updated on completion.)
+| Corpus | PASS | Rate |
+|---|---|---|
+| Raw (432, pre-audit) | 407 / 432 | 94.2% |
+| **Cleaned (412, junk dropped)** | **394 / 412** | **95.6%** |
+| + rung-1 escalation (Claude+Opus) | 397 / 412 | **96.4%** |
 
 This is the first apples-to-apples, every-datapoint-re-executed corpus PASS rate for the skill.
-The ~14 not-bumped so far are the genuinely-harder tail (agent reaches the bump but pom doesn't
-hit `jv_to` — SB2/preview/turn-limit cases) — the long tail GEPA/EvoSkills will target.
+A checkout audit confirmed the sweep uses the recorded baseline sha (HEAD matched in 19/19
+spot-checks; the skill itself does no `git pull` / `checkout`); the junk that audit surfaced was
+dropped (above).
+
+### Rung-1 escalation — the rung-ladder thesis in action
+
+The skill caps the weak executor (Qwen) to table-listed fixes; the strong rung (Claude+Opus) is
+not so constrained. Of the 18 remaining NOT-BUMPED, rung-1 recovered **3** (all verified pom→21):
+
+| Datapoint | Why Qwen bailed | Rung-1 fix | Result |
+|---|---|---|---|
+| bigboxer23/solar-moon-common | `SPOTLESS_GOOGLE_JAVA_FORMAT_JDK21_INCOMPATIBLE` — fix not in table | bump google-java-format 1.15→1.19.2 + spotless-plugin 2.38→2.43 | pom→21, compile + test-compile clean |
+| rajeshcr716/Project | `SB2_BOM_NEEDS_SB3_BUMP` — needed a Spring-Security-6 recipe outside the table | full `sb2_to_sb3` + bump (no hand source edits needed) | pom→21, JDK21 compile clean |
+| phani-kb/nvd-tool | `SB2_BOM_NEEDS_SB3_BUMP` | full `sb2_to_sb3` + bump | pom→21, compile clean |
+
+The other ~15 are genuinely-hard SB2→SB3 needing manual source migration (andrmikej, entur's
+residual Swagger 1.x→2.x, navikt, folio-mod-circulation-item, happycows×3) or substrate/env
+issues (kismon's Vaadin `user.home`, mcollovati, Opetushallitus) — the long tail GEPA/EvoSkills
+will target.
 
 ## Attempt 10, for comparison
 
@@ -55,11 +80,11 @@ hit `jv_to` — SB2/preview/turn-limit cases) — the long tail GEPA/EvoSkills w
 | With hardened artifact + recovery | ≈ 416 / 431 = 96.5% |
 
 Caveat: attempt 10's 96.5% was **not** a single fresh sweep — it credited the original 358
-PASS (not re-run) plus the re-checked fixable subset plus recovery. The attempt-11 sweep above
-re-executes *every* datapoint, so it is the honest end-to-end figure for the skill.
+PASS (not re-run) plus the re-checked fixable subset plus recovery. The attempt-11 sweep
+re-executes *every* datapoint, so 95.6% (96.4% with rung-1) is the honest end-to-end figure.
 
 ## Next
 
 Automate the optimization loop: **GEPA** evolves `SKILL.md` by reflecting on the preserved
 dialogues, **EvoSkills** evolves the recipe catalog from failed trajectories, both scored
-against `corpus_clean.json`. See `PLAN.md`.
+against `corpus_clean.json` (412). See `PLAN.md`.
