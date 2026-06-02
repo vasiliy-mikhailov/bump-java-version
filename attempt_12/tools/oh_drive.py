@@ -167,18 +167,20 @@ def main():
     post_passed, post_failed = parse_surefire_dir(workdir)
     print(f'    rc={rc_post}  passed={len(post_passed)}  failed={len(post_failed)}  wall={int(time.time()-t0)}s', flush=True)
 
-    # 5. Score
-    if pre_pass_count == 0:
-        verdict = 'PASS_compile_only' if rc_post == 0 else 'FAIL_build_post'
+    # 5. Score. rc_post is the `mvn test` exit code -- non-zero when tests merely ERROR,
+    # not only when compilation fails. Compile success = the build reached the test phase
+    # (or succeeded outright). Baseline-failing tests are excluded from conservation, so a
+    # repo whose only tests error at baseline still PASSes (compile-only) once it compiles.
+    compile_ok = (rc_post == 0) or ('Tests run:' in (log_post or ''))
+    if not compile_ok:
+        verdict = 'FAIL_build_post'
+        regressed = set()
+    elif pre_pass_count == 0:
+        verdict = 'PASS_compile_only'
         regressed = set()
     else:
         ok, regressed = check_test_conservation(pre_passed, post_passed)
-        if rc_post != 0:
-            verdict = 'FAIL_build_post'
-        elif ok:
-            verdict = 'PASS'
-        else:
-            verdict = 'FAIL_test_conservation'
+        verdict = 'PASS' if ok else 'FAIL_test_conservation'
 
     print(f'\n=== VERDICT: {verdict}')
     if regressed:
