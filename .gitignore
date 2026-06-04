@@ -49,3 +49,4 @@ target/
 *.bak.*
 # observability outputs (regenerated per run)
 attempt_*/telemetry/
+HANDOFF.md

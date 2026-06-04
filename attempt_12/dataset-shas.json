@@ -1,31 +1,66 @@
 [
  {
-  "repo": "dschadow/JavaSecurity",
-  "sha": "bd4e8df83cceb2fd7c57497607edbf335841e485",
-  "jv_from": 11,
-  "jv_to": 17,
+  "repo": "jhipster/jhipster-sample-app-microservice",
+  "sha": "5950f020b43ffbff8ed2cdb2c3d7df7dd0a9130d",
+  "jv_from": 8,
+  "jv_to": 11,
   "baseline_tests_pass": true
  },
  {
-  "repo": "amanzat/java-utils",
-  "sha": "f08eaa6338db3b6353ac5286c5368158375db7e9",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
+  "repo": "develproper/ewqewq",
+  "sha": "e86d5b6820e90c9670255418ec1552a754ad0be0",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
  },
  {
-  "repo": "khnnyy/LeninSystem",
-  "sha": "26453d500d21eca97c033d61ec759747150ac7a1",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
+  "repo": "xlate/property-inject",
+  "sha": "16d5cf0416538a8676c2f9d8aec62932896c384a",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
  },
  {
-  "repo": "egalli64/jeed",
-  "sha": "fdd3f02e2a04206ea5022017be35e35e77a2a166",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
+  "repo": "ozimov/spring-boot-email-tools",
+  "sha": "729ac0a4c587893601af744e5795f9a92671552c",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "openanalytics/shinyproxy",
+  "sha": "758dddca43118112e6ad3acd2f672a9bf3f99617",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "sahilmahale11/webgoat",
+  "sha": "0e160c19f5b047c4f416548dacca74852c5eb166",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "afs/rdf-delta",
+  "sha": "3d4e80b00f81bc85cce02f9a153f94769329806e",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "solante1012/chatSQLtoBI",
+  "sha": "d2306464a66f01db183f6372cfde1ecbe7ecd1b9",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "jegarps/webgoat",
+  "sha": "0de784eb32d85f37d275e5a2373e0898d696f1dd",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
  },
  {
   "repo": "RyanDozier/webgoat",
@@ -35,267 +70,22 @@
   "baseline_tests_pass": true
  },
  {
-  "repo": "sko1399/WebGoat",
-  "sha": "cb9503d4a34c3dad5c6aeb3ed80055d3ee624894",
+  "repo": "hendisantika/spring-thymeleaf-pagination",
+  "sha": "3152ef80da012f4c8e73f5ba4f6afe63ccd2772c",
   "jv_from": 8,
   "jv_to": 11,
   "baseline_tests_pass": true
  },
  {
-  "repo": "msgoat/cnj-hello-backend-spring",
-  "sha": "ba88abf59492f1f8e424e38dd7e57ec3af45b61d",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 2
- },
- {
-  "repo": "eh3rrera/graphql-java-spring-boot-example",
-  "sha": "566cc686d7653f4aad637c367dbf4f308046a64c",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "mwarnes/MLEAProxy",
-  "sha": "92552570021cdfe4206270652662dd0c600778d1",
+  "repo": "TomerSegev241/WebGoat-tomer",
+  "sha": "b67bc85ad671151318a1a1e81417cba62d186ae4",
   "jv_from": 8,
   "jv_to": 11,
   "baseline_tests_pass": true
  },
  {
-  "repo": "akash-singh773/webgoat",
-  "sha": "0fd704bb5407748ef76a5348b1e625c74bcfb4ee",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "Blackdread/canon-sdk-java",
-  "sha": "1ff6de544efa758daabd82d5c61be21d757bde0a",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "mincong-h/java-examples",
-  "sha": "40993ea9fda5cccbd004a85f3aa58c63653d44cc",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "damouu/library-app-catalogue",
-  "sha": "c3444ce64651a3eb392eb0b577ce9c2f115cf3d6",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "BordeauxJUG/bdxjug-api",
-  "sha": "603248bcf6a29b91b7726b287b3d519c4e12fb1f",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "sid-digi-gh-explore-org/vuln-app-js",
-  "sha": "12e2624eeefff9325c57f19f3f8d167120f60c42",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "leonarduk/unison",
-  "sha": "5c6172067cebf272911487c0ac53369c9298016c",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "HugoHERVIER/gestionRessource-backend",
-  "sha": "43c2e1bddbc2d102974eae00a0d5e965ac892d08",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "ucsb-cs156-f25/proj-happycows-f25-16",
-  "sha": "5567885a20ed10c94ad76b82c21600d78111fad6",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 2
- },
- {
-  "repo": "folio-org/mod-invoice",
-  "sha": "fdde2f45f1c2b27f12c7cfae7542680897d0f4a3",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "ningpp/hibernate-self-reference",
-  "sha": "5093215ef11f87690e714e5e6eb453e85dbad6d8",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "user823/Sophie-mall",
-  "sha": "7046a9fbf86cb2fa7c4a87414c93c5163f92126c",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "gorju/WEBB",
-  "sha": "99435a107320df6e3cdca06afac813f48b4b86ca",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "sukumarrkv/spring-boot-microservices",
-  "sha": "4d9dffc69318f26197fdbf58e6a7f4f39fa2780f",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "cmu-phil/tetrad",
-  "sha": "a6308aaf6fa6a176bf6200851a2719d7bb898fea",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "thalysf/tax-challange",
-  "sha": "78b56a0e0f017ab8b7b865079eb34d15d3bb7373",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "folio-org/mod-circulation-bff",
-  "sha": "957ba08bca2aeada96600bdebb5b3f1108e8bec3",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "prebid/prebid-cache-java",
-  "sha": "febba9e95b26953438f5ce69587ec4777c95ddc7",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "blkdk/MyWebGoat",
-  "sha": "de4e581ee45238d461f089679ce24efb3f003f2c",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "Rendy520/ai-code",
-  "sha": "c8920feb5c34214769e62454e34633145b477d37",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "SkillPanel/friendly-id",
-  "sha": "76ab88eba9f3e155331ea5b775942cb03428adf4",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "camjjames/dsm-api-client",
-  "sha": "e7ae0fb9a7b20fedf8202c102674eaebcfb3f3a9",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "folio-org/mod-invoice-storage",
-  "sha": "18bd6827a4219b29208ed2749c6e79e520c10c6c",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "encircled/Joiner",
-  "sha": "a8617e77a3aaf2151a8bd3152312dfc443b39b59",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "dimatana/ecommerce",
-  "sha": "72be4a0d950cd80a43edde24f4ca9551979b4c3f",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "SomeUnusualProgramming/product-service",
-  "sha": "8d2b43f5687a9c46459f7c8189deeb01f69dd776",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "JasonHHouse/gaps",
-  "sha": "71df517c7d0af44d7861b8dae11bfd3b965fc866",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "didclab/Transfer-Service",
-  "sha": "f1e29ebea799f38bfc384d2a078f16c1b4f79274",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "SAST-G-STG-UP/WebGoat",
-  "sha": "ee11381a63a428b6777a85f203a52344d80c8b54",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "SharonKoch/WebGoat8_Demo",
-  "sha": "bad60c43c0f3fb72523f38d6a5de614dab8dcf52",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "ruanrongman/IntelliConnect",
-  "sha": "a234a61e6bdf55c7b6b39beb3c8d3157ca9f5f11",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "ssherwood/spring-boot-jpa",
-  "sha": "4ac2f3b2ebb046f093443ee3b6737285895a5260",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "checkstyle/checkstyle",
-  "sha": "55620a9d2197356d8549273188633fd1da297d29",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "skjolber/mockito-rest-spring",
-  "sha": "5948fda454016445650c0c2dbd056f87f5158cbc",
+  "repo": "ISGA/webgoat",
+  "sha": "576333af7c08abd24479e89c18652e4fab5cca3f",
   "jv_from": 8,
   "jv_to": 11,
   "baseline_tests_pass": true
@@ -308,87 +98,304 @@
   "baseline_tests_pass": true
  },
  {
-  "repo": "Lewis090/esasy-api-spring",
-  "sha": "219abc8cf7a95922182b79bc20e157e75c420e3b",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "jonathanlermitage/manon",
-  "sha": "0562dc76b689e9ad0621c30ca166d4237cbdda8e",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "IlCanMert/seng326-checkstyle",
-  "sha": "55620a9d2197356d8549273188633fd1da297d29",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "Akritai1/Mission_JF",
-  "sha": "c7a714a590c1ba21ce7d888d6a6b26f6accfeabc",
+  "repo": "sko1399/WebGoat",
+  "sha": "cb9503d4a34c3dad5c6aeb3ed80055d3ee624894",
   "jv_from": 8,
   "jv_to": 11,
   "baseline_tests_pass": true
  },
  {
-  "repo": "jinhua10/ai-reviewer-base-file-rag",
-  "sha": "faf3ce9d1d93f14e03e363898866dde4e63bff7b",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "faresabdeldaym/test10",
-  "sha": "d11635f9da1d3338761b440589db53363846320e",
+  "repo": "m5c/BookStoreInternals",
+  "sha": "83e8ddee4fa836075bb26b1bfe2378579404b4f7",
   "jv_from": 8,
   "jv_to": 11,
   "baseline_tests_pass": true
  },
  {
-  "repo": "networknt/light-lambda-native",
-  "sha": "42ae205fac2d700ae6f623882fde414e2a98187a",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "google/google-java-format",
-  "sha": "3c191c1326b77aabbf2a48c3edc19b628f4327d6",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "JasonHHouse/gaps",
-  "sha": "cc092288edefd9579b70897875cd5d243f1fb39d",
+  "repo": "DatavenueLiveObjects/Azure-IoT-Hub-connector-to-install-on-Azure",
+  "sha": "53eea6a2231ebd113caf9011b36a6c909c432476",
   "jv_from": 8,
   "jv_to": 11,
   "baseline_tests_pass": true
  },
  {
-  "repo": "danieltikamori/online-food-ordering-react-springboot-mysql-stripe",
-  "sha": "be51cb4d9bc661a6697a9a6f706692b7f55c2d17",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 2
+  "repo": "wouter-bauweraerts/instancio-fixture-builder",
+  "sha": "8adadc8b8f5c2c6a23f2cddbf0649ed4a9375f9c",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
  },
  {
-  "repo": "folio-org/mod-notes",
-  "sha": "c09296b493b4ac20f60e8faff98b072b56fd207d",
+  "repo": "jhipster/jhipster-sample-app-gateway",
+  "sha": "7605c1da1679564a7eb86b18292936728a04ee5c",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "jhipster/jhipster-sample-app-dto",
+  "sha": "c59b14f4470594ef2b4767992dce86fecc3c304d",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "esign-consulting/logistics",
+  "sha": "ac6caea948a978101f619f9f3349cf733c376683",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "Yohann0617/oci-helper",
+  "sha": "f20f2cca502b1c4af010128920c1b7a8325264bc",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "daggerok/distributed-lock-mongodb-spring-boot-starter",
+  "sha": "509301d89b1c9aa8b2574c89a428362f3292dcc8",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "cmu-phil/tetrad",
+  "sha": "b0cde7c1f8424e9c26220334fa83eea460066adb",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "kojoampia/jaweb",
+  "sha": "f6e0de657734ec906a9e585e1246bce0dd1c00e5",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "eclipse-ee4j/glassfish-concurro",
+  "sha": "8c341ee791dbda7e7c493df36f2a7caba554fa04",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "kumuluz/kumuluzee-openapi-mp",
+  "sha": "8936778181a481291b69b06be82b92b3665fc677",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "bezkoder/spring-jpa-query-example",
+  "sha": "195230e3df04aeb196c78159939b65343973b4d3",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "hendisantika/user-management",
+  "sha": "465cfd3041581f1413a4046d59a080ddb2c840e5",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "hendisantika/spring-session-jdbc",
+  "sha": "4068340ef69560b3e18ac7d0070eff0d0ced1bdd",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "maiaimei/example",
+  "sha": "0c4fd2690c6eaebf21a961fb36fde97634fdb3b2",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "cesardl/spring-mongodb-web",
+  "sha": "8109bb26421dee2018b5bcc7cd52610d28dd271d",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "Krrithen/Distributed-ECommerce-Microservices",
+  "sha": "f27010246cc15668a02e98663ecbf397b5946903",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ministero-salute/it-fse-gtw-validator",
+  "sha": "33679e3868a0ab3aa0c542bafc022a3b208a53b2",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "in28minutes/spring-boot-examples",
+  "sha": "c33d944b7178bf9eab69d8a9760b93662ab930e6",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "adrianArimany/CC2016_Hojas_trabajos",
+  "sha": "b3acb4fb2ec5d06b6dde9cf7cde8c9ab07fd62f9",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "andrei-punko/spring-boot-2-jsonb",
+  "sha": "6c95ff50d27fb26ed197868280b24e616175b085",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "gal16v8d/admin-server",
+  "sha": "e95748aa32e344d9b480b06a6378d36a08b2350f",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "jhipster/jhipster-sample-app-react",
+  "sha": "b5671566cac6b4f88c45a2d862fe5b7e3e572aa6",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "guanxwei/stream",
+  "sha": "a80b21f6ab85d6d43c76dac0e2eb93a8803dddfc",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "TiagoAlb12/TQS_112901",
+  "sha": "0e635f59b79f71783ccf3fd2df76e8146842b7b3",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "kennyk65/Microservices-With-Spring-Student-Files",
+  "sha": "b11dfa741f3952d849b76c0ead8d9bb6d8411289",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "wouter-bauweraerts/UnitSocializer",
+  "sha": "0062ee74966f5371f8e68e413f7ab2b77d516de1",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "red6/dmn-check",
+  "sha": "3e3a5715ab55792cb3371ebcc7f166cec84a7696",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "Pamuditha1/overleaf-rnd",
+  "sha": "3389615ef69d7cae836767d6efba618691a6df29",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "navikt/altinn-rettigheter-proxy-klient",
+  "sha": "4e85035b8d63e3062ddedad9a7165ee62cda806e",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ppashapu/my-personal-repository",
+  "sha": "c33d944b7178bf9eab69d8a9760b93662ab930e6",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "making/oauth2-sso-demo",
+  "sha": "bb3c95fee3f0297c4fe617db4dffab97bcb56aeb",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ayaka-notes/overleaf-pro",
+  "sha": "3389615ef69d7cae836767d6efba618691a6df29",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "xpinjection/test-driven-spring-boot",
+  "sha": "77a120063a0be7067a8404d389b0860719849a45",
+  "jv_from": 8,
+  "jv_to": 11,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "a-oleynik/junit-workshop",
+  "sha": "db1d6befd3aab927ae7e228cefda69ea496c93f3",
   "jv_from": 11,
   "jv_to": 17,
   "baseline_tests_pass": true
  },
  {
-  "repo": "ozimov/spring-boot-email-tools",
-  "sha": "729ac0a4c587893601af744e5795f9a92671552c",
-  "jv_from": 8,
-  "jv_to": 11,
+  "repo": "TelemodemTI/dagserver",
+  "sha": "4abb2fe48b02de3aa190f12a3a0e16fe1e887dd2",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "networknt/light-spa-4j",
+  "sha": "765684ff07b4aad95754aaa6ebd72436deb7d5b9",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "Blackdread/canon-sdk-java",
+  "sha": "1ff6de544efa758daabd82d5c61be21d757bde0a",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "Longwater1234/WedemyServer",
+  "sha": "0b5a10ecdf0d21460bba81b67d580d095097c04a",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "JonathanKBP/TesteUnitarioTDD",
+  "sha": "204a303b4b8bacb3772a9324d3c9baf48e11d7c0",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "HangarMC/Hangar",
+  "sha": "6963b37e6a65036d92314be61487510f61c370a0",
+  "jv_from": 11,
+  "jv_to": 17,
   "baseline_tests_pass": true
  },
  {
@@ -399,157 +406,31 @@
   "baseline_tests_pass": true
  },
  {
-  "repo": "xlate/property-inject",
-  "sha": "16d5cf0416538a8676c2f9d8aec62932896c384a",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "sip49/webgoat-polaris-Dec24",
-  "sha": "63398aaf6dd3dd4ea7b51e4bfbd2b7e6bf72e381",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "querqy/querqy",
-  "sha": "deadf725bd2877986531c8b43a462a350c730747",
+  "repo": "folio-org/mod-invoice",
+  "sha": "fdde2f45f1c2b27f12c7cfae7542680897d0f4a3",
   "jv_from": 11,
   "jv_to": 17,
   "baseline_tests_pass": true
  },
  {
-  "repo": "indiana-university/lms-canvas-course-setup-wizard",
-  "sha": "635ae0b2defbc0d448536e2c745bbe8ef0a787fa",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "OKaluzny/spring-boot-rest-api-postgresql",
-  "sha": "04ca1503d151e3b1af3bb4a7aed12c80f3434728",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "Ezequiel1109/react-springboot-backend",
-  "sha": "177e565cb5f41e75aa586178ad5bdbe965b47665",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "iridescent0null/leaningDockerDocs",
-  "sha": "f958964c3cf5866260b9a62c5442287205ce5dd1",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "spring-petclinic/spring-framework-petclinic",
-  "sha": "f958964c3cf5866260b9a62c5442287205ce5dd1",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "filipve1994/spring-boot-maven-starter-template",
-  "sha": "2e705cf719fb6affe20c76cb819f57e0cc6606d2",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "naveenkolli-tech/jenkins-jhipster-app",
-  "sha": "766d6bd7a0ac17b7520c63a10e0d68b402fe1e6f",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "msgoat/cnj-rest-backend-spring",
-  "sha": "3d061c4abc09afb0bc292e4eed68463ab84b48b5",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "namnn269/SpringBootDemo",
-  "sha": "6e45efc38181743f31d7ea04c96e5ad24a91e8ae",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "jkbelcher/AudioStemsPlugin",
-  "sha": "c92f4b493dd4946300d24e3bdaa20599f87cbcb4",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "jhipster/jhipster-sample-app-oauth2",
-  "sha": "583aa7fc31cf8f3a56afef8758b6d86f7d502dd0",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "tlandeka/authentication-microservice-with-domain-driven-design",
-  "sha": "f883165dea9190dde6eb8f3d49b4e8309a7e882d",
+  "repo": "prebid/prebid-cache-java",
+  "sha": "febba9e95b26953438f5ce69587ec4777c95ddc7",
   "jv_from": 11,
   "jv_to": 17,
   "baseline_tests_pass": true
  },
  {
-  "repo": "skltp-integration/cooperation",
-  "sha": "30646cfb3f0bb33bce267afafea5e8c87b6980a8",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "leonarduk/pension-risk-management-system",
-  "sha": "17917e138742d21991977fd070a9d6bc3b80bda6",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "zalando/problem-spring-web",
-  "sha": "12e44ebab444a29e043188a2e27fc891bc902c35",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "Cantara/xorcery-jsonapi-jdk11",
-  "sha": "cb7c8b2fcbc92549bba010cbf762d869dff1787b",
+  "repo": "nilg5120/demo",
+  "sha": "e2d366d73471af0c075d4c9348700632ae570fb7",
   "jv_from": 11,
   "jv_to": 17,
   "baseline_tests_pass": true
  },
  {
-  "repo": "folio-org/mod-data-export-spring",
-  "sha": "fe0914dced9f24a763acfa8b2ca15371728bc670",
+  "repo": "vaadin/kubernetes-kit",
+  "sha": "bbb1cba314e6798fa1639dfd4c6634678ad8e059",
   "jv_from": 11,
   "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "vakser/gym-service",
-  "sha": "642aca5cd33222024b31d09f491ca33c0a8038b6",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "mincong-h/java-examples",
-  "sha": "ec58b6c49e8751e7ddc246c035f1cc4e0937514e",
-  "jv_from": 8,
-  "jv_to": 11,
   "baseline_tests_pass": true
  },
  {
@@ -560,120 +441,36 @@
   "baseline_tests_pass": true
  },
  {
-  "repo": "IvanKozhevnikov/job4j_accidents",
-  "sha": "3fe80d5da4189f4053b99d34cf5317c11b8f8776",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "finnyb/javampd",
-  "sha": "f6d82b838d5f91d828a247384eb85580be7bbe11",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "Mom0aut/DynamicRelations",
-  "sha": "7cd98b5ed7c5bde6877b4537996fa832298a35e0",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "powertac/powertac-core",
-  "sha": "5a79da532d8538259ad1d253b82b7c246c224462",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "MDecker-MobileComputing/Maven_SpringBoot_BadNews",
-  "sha": "fd6675c581cff3bf889520d55bd696621c7e96a4",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 2
- },
- {
-  "repo": "HangarMC/Hangar",
-  "sha": "6963b37e6a65036d92314be61487510f61c370a0",
+  "repo": "rocketbase-io/commons-auth",
+  "sha": "3f494213a3525963f73dc2dada564f659d86389e",
   "jv_from": 11,
   "jv_to": 17,
   "baseline_tests_pass": true
  },
  {
-  "repo": "junior-vs/studio-quarkus",
-  "sha": "f29a89025d753f40ad54ac62ea0dfa4c06432c31",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "luversof/bluesky-boot",
-  "sha": "6b8a899bfcf765aa65a7ad0623aaf50b29ba63f1",
+  "repo": "kagkarlsson/db-scheduler",
+  "sha": "324e8b92f1030ed8000c0d4552aa3641cf1614de",
   "jv_from": 11,
   "jv_to": 17,
   "baseline_tests_pass": true
  },
  {
-  "repo": "jaisonyi/webgoat",
-  "sha": "00deb66ad98a385f0867121368398ad93d950029",
+  "repo": "albonidrizi/asteral",
+  "sha": "d8dd5e4b6ef3692fa9e56c4198c7c571da8a5f04",
   "jv_from": 11,
   "jv_to": 17,
   "baseline_tests_pass": true
  },
  {
-  "repo": "tdb-turma-balaco-baco/ms-bantads-auth",
-  "sha": "adfc655921c7e459d215b49ad8893fe6f7e00fc4",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "rubenlagus/TelegramBots",
-  "sha": "679ad618b9ad3862abbb3b491c53a4710bb9b817",
+  "repo": "adlnet/elrr-datasync",
+  "sha": "f59794c4979d55610254385eb9d407f8e88b2ff8",
   "jv_from": 11,
   "jv_to": 17,
   "baseline_tests_pass": true
  },
  {
-  "repo": "jhipster/jhipster-sample-app-gateway",
-  "sha": "659c79de2b1f94777ed8629166aa99422dec1432",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "osipov-slava/job4j_mock",
-  "sha": "b5d09a7d7005501becfd53751cf8a6e279050d5a",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
- },
- {
-  "repo": "openwms/org.openwms.parent",
-  "sha": "19393197d5af430a9e85fb1b9b2fe98292be56ca",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "encircled/Joiner",
-  "sha": "146b1ceb7a388e03043d453ef33d67577e07318e",
-  "jv_from": 11,
-  "jv_to": 17,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "darshant2003/webgoat",
-  "sha": "3ccfcac8ffcd0d516cbc847c02bf6a28fa33de58",
-  "jv_from": 8,
-  "jv_to": 11,
-  "baseline_tests_pass": true
- },
- {
-  "repo": "nilg5120/demo",
-  "sha": "e2d366d73471af0c075d4c9348700632ae570fb7",
+  "repo": "networknt/light-lambda-native",
+  "sha": "42ae205fac2d700ae6f623882fde414e2a98187a",
   "jv_from": 11,
   "jv_to": 17,
   "baseline_tests_pass": true
@@ -686,17 +483,220 @@
   "baseline_tests_pass": true
  },
  {
-  "repo": "Dornith/GJA_2023",
-  "sha": "ab9719c24f076540554e98ad78acff85a2417c8b",
-  "jv_from": 17,
-  "jv_to": 21,
-  "attempts": 1
+  "repo": "daxyonis/pdi-fundraising",
+  "sha": "15f1ae2ddce73aa861f7e5522178b6ff32a2a196",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
  },
  {
-  "repo": "jhipster/jhipster-sample-app-cassandra",
-  "sha": "d12f0d0845759a79b69f945218ebf1b49ec56481",
-  "jv_from": 8,
-  "jv_to": 11,
+  "repo": "ucsb-cs156-s25/team02-s25-14",
+  "sha": "8491dd966b24e0d003705241740734e6b2089a0b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ucsb-cs156-s25/team02-s25-03",
+  "sha": "8491dd966b24e0d003705241740734e6b2089a0b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "uhafner/codingstyle",
+  "sha": "963c64cb8dbc1857c19ee8d5e2cdbadce84f9236",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "hbz/to.science.forms.v2",
+  "sha": "a76420127095e20d932b2818660feef88b7eeef7",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ucsb-cs156-s25/proj-rec-s25-14",
+  "sha": "8491dd966b24e0d003705241740734e6b2089a0b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ucsb-cs156-f25/proj-dining-f25-08",
+  "sha": "8491dd966b24e0d003705241740734e6b2089a0b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ucsb-cs156/proj-dining",
+  "sha": "92b7a787955325335e289b9dba8181fcc1ebb2a5",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "it-at-m/dave-backend",
+  "sha": "1128ce0aedea0bf57f04bc2fac03dc36fb69f98e",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ucsb-cs156-s25/proj-rec-s25-13",
+  "sha": "8491dd966b24e0d003705241740734e6b2089a0b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "Helenlongjiao/UCSB-dining-portal",
+  "sha": "8491dd966b24e0d003705241740734e6b2089a0b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ucsb-cs156-s25/proj-rec-s25-15",
+  "sha": "8491dd966b24e0d003705241740734e6b2089a0b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ucsb-cs156-s25/team02-s25-16",
+  "sha": "8491dd966b24e0d003705241740734e6b2089a0b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ACANX/MetaOpen",
+  "sha": "03ae1927c7b3b695fff3311ac851d2c9a654b7df",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "ucsb-cs156-s25/team02-s25-09",
+  "sha": "8491dd966b24e0d003705241740734e6b2089a0b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "jesperancinha/jeorg-camel-test-drives",
+  "sha": "0686981f434c15798223dd9dbd1a42ea19584cb3",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "BjoernKW/Schematic",
+  "sha": "4ff60cc001b2c95aa569ac7e8f785e83f8d5aac2",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "rslakra/SpringSecurity",
+  "sha": "76d774b1a03e40497aea9f59dc5985a793314e28",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "Ivinman/java-shareit",
+  "sha": "72cdc17f604dc1073ec59669e3ae3a876ada5a38",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "66910sheremet/moex-john",
+  "sha": "20a76d9c061aa04e6a33ad74875f512b3bd440c2",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "shui-dun/SandboxTown",
+  "sha": "256bffb37fd639cdb755794f3e8743a204787a0d",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "sineverba/online-banking-backend",
+  "sha": "c2c91a435b8b495d96a68f848e2b3f39e39146a2",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "Farzan6118/controller-advice",
+  "sha": "f37c85f9fce93c2e1e306ee26dd7de17581850dd",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "alliance-genome/agr_mati",
+  "sha": "d61f50f26860a2ba3d8475e7d9842ff6f124b09b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "psiquelaboral/psique-api",
+  "sha": "dd915548db8dd76c82b7c030f9d1475e699c69d9",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "MarlonLuan/jhipster-starter",
+  "sha": "bb30b292cee8dbce67a986062dec0960b20f4cff",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "xstefank/quarkus-in-action",
+  "sha": "e01f01662676a08dae9ed1739b4ad5d24d6fd67a",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "JanKotekFactoryPal/quarkus-in-action",
+  "sha": "e01f01662676a08dae9ed1739b4ad5d24d6fd67a",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "stvali2/spring-data-rest",
+  "sha": "04b401710e09729251d1c2472c7a8f68e73cee78",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "TranDat2000-coder/spring-cloud-consul-microservice",
+  "sha": "d73cd2e1c2a18b43288b47009725f2cf795fd20a",
+  "jv_from": 11,
+  "jv_to": 17,
+  "baseline_tests_pass": true
+ },
+ {
+  "repo": "indiana-university/lms-canvas-viewem",
+  "sha": "c9e0a1caf0f41db3a05ba541c6a4ca809607f84f",
+  "jv_from": 11,
+  "jv_to": 17,
   "baseline_tests_pass": true
  }
 ]

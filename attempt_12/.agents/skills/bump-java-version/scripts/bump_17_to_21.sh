@@ -11,9 +11,10 @@ COORDS="org.openrewrite.recipe:rewrite-migrate-java:3.35.0,tech.mikhailov.bump_j
 PLUGIN="org.openrewrite.maven:rewrite-maven-plugin:6.40.0"
 
 # Write the compound lombok rewrite.yml INSIDE the workdir so it's visible inside
-# the mvn docker container at /work/src/.bump_lombok.yml.
-LOMBOK_YML="$WORK/.bump_lombok.yml"
-trap "rm -f $LOMBOK_YML" EXIT
+# the mvn docker container at rewrite.yml.
+LOMBOK_YML="$WORK/rewrite.yml"; LOMBOK_BAK="$WORK/.rewrite.yml.bumpbak"
+[ -f "$LOMBOK_YML" ] && mv "$LOMBOK_YML" "$LOMBOK_BAK"
+trap 'rm -f "$LOMBOK_YML"; [ -f "$LOMBOK_BAK" ] && mv "$LOMBOK_BAK" "$LOMBOK_YML"' EXIT
 cat > "$LOMBOK_YML" <<'EOF'
 type: specs.openrewrite.org/v1beta/recipe
 name: smoke.bump.lombok_safe_bump
@@ -36,7 +37,6 @@ run_recipe_yml() {
   echo "=== [$label] JDK=$jdk yml=$yml" >&2
   JDK=$jdk mvn -B -ntp "$PLUGIN:run" \
     "-Drewrite.activeRecipes=$recipe_name" \
-    "-Drewrite.configLocation=$yml" \
     "-Drewrite.recipeArtifactCoordinates=$COORDS"
   local rc=$?
   if [ $rc -ne 0 ]; then echo "=== [$label] FAILED rc=$rc" >&2; return $rc; fi
@@ -59,7 +59,7 @@ run_recipe() {
 
 # Lombok 1.18.<29 + javac21 = NoSuchFieldError JCTree$JCImport.qualid.
 # Run the lombok safe bump under JDK=17 (jv_from) BEFORE switching to JDK 21.
-run_recipe_yml 17 "/work/src/.bump_lombok.yml" lombok_safe_bump smoke.bump.lombok_safe_bump || exit $?
+run_recipe_yml 17 "rewrite.yml" lombok_safe_bump smoke.bump.lombok_safe_bump || exit $?
 run_recipe 17 org.openrewrite.java.migrate.UpgradePluginsForJava21 plugins21 || exit $?
 run_recipe 21 org.openrewrite.java.migrate.UpgradeBuildToJava21 build21 || exit $?
 run_recipe 21 \

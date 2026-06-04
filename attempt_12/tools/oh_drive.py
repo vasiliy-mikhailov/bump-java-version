@@ -23,8 +23,9 @@ for ln in open('/home/vmihaylov/java_8_11_17_to_java_21/.env'):
     os.environ.setdefault(k, v)
 
 BASE = '/home/vmihaylov/java_8_11_17_to_java_21'
-sys.path.insert(0, f'{BASE}/attempt_7/tools')
-from run_sequenced_java import shallow_fetch, docker_phase  # noqa: E402
+sys.path.insert(0, f'{BASE}/attempt_7/tools')                          # unmodified shared helpers (test_conservation)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))        # active attempt OWNS its build harness (run_sequenced_java -> sibling run_one_stage_v2.sh)
+from run_sequenced_java import shallow_fetch, docker_phase  # noqa: E402  # resolves to the active-attempt copy
 from test_conservation import (  # noqa: E402
     parse_surefire_dir, check_test_conservation, fmt_regression, clear_surefire,
 )
@@ -158,6 +159,25 @@ def main():
                 t = getattr(c, 'text', '') or ''
                 if t: last_text = t
 
+    # 3b. Harness-applied deterministic compat layer (does NOT depend on the agent
+    #     completing the bump script). The Qwen agent often runs the bump as its last
+    #     action and hits the iteration/time limit before the bump script's compat tail
+    #     lands, so the recurring Java-EE/Jadira fixes never reach the poms. Apply them
+    #     here, after the agent and before the post-test. java11_compat.sh is pure-Python
+    #     pom edits and idempotent, so it's a no-op if the agent already applied them.
+    harness_compat = None
+    if (int(stage['jv_from']), int(stage['jv_to'])) == (8, 11):
+        compat_sh = f'{SKILLS_DIR}/bump-java-version/scripts/java11_compat.sh'
+        print(f'\n=== harness compat: java11_compat.sh {workdir}', flush=True)
+        cp = subprocess.run(['bash', compat_sh, workdir], capture_output=True, text=True)
+        compat_log = (cp.stdout or '') + (cp.stderr or '')
+        open(f'{logs}/java11_compat.log', 'w').write(compat_log)
+        harness_compat = {'rc': cp.returncode,
+                          'added_ee': 'added EE deps' in compat_log,
+                          'jadira_override': 'java.version override added' in compat_log,
+                          'build_plugin_bump': 'bumped build plugin' in compat_log}
+        print(f'    compat rc={cp.returncode}  {harness_compat}', flush=True)
+
     # 4. Post-test under jv_to
     print(f'\n=== post-test (mvn test under jdk{stage["jv_to"]})', flush=True)
     clear_surefire(workdir)
@@ -211,6 +231,7 @@ def main():
         'regressed_test_count': len(regressed),
         'regressed_tests': sorted([f'{c}.{m}' for (c, m) in regressed])[:50],
         'event_stream_summary': event_summary,
+        'harness_compat': harness_compat,
         'agent_wall_s': agent_wall,
         'rc_pre': rc_pre, 'rc_post': rc_post,
         'last_agent_text': last_text[-1500:],

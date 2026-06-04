@@ -38,6 +38,7 @@ cache that the `mvn` wrapper bind-mounts, so a consumer must build+install it on
   OpenRewrite cascade for that one LTS step (lombok-safe bump → plugins → build → transforms).
 - `scripts/sb2_to_sb3.sh` upgrades Spring Boot 2 → 3.3 for the SB2-BOM / `major version 65`
   cohort, before the Java bump.
+- `scripts/sb1_to_sb2.sh` upgrades Spring Boot 1.x to 2.7 (OpenRewrite `UpgradeSpringBoot_2_7` from rewrite-spring) for very old apps whose runtime won't start under JDK 11+, before the Java bump.
 
 # How OpenHands consumes this skill
 
