@@ -5,6 +5,8 @@ set -uo pipefail
 WORK=${1:?usage: bump_8_to_11.sh <workdir>}
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"   # resolve sibling scripts by path, not PATH (portability)
 cd "$WORK"
+# nested project: descend into the shallowest pom.xml dir if the workdir root has none
+[ -f pom.xml ] || { _p=$(find . -maxdepth 6 -name pom.xml -not -path "*/target/*" -not -path "*/build/*" -not -path "*/.git/*" 2>/dev/null | awk -F/ "{print NF, \$0}" | sort -n | head -1 | cut -d" " -f2-); [ -n "$_p" ] && cd "$(dirname "$_p")"; }
 _jh(){ local v="JAVA_HOME_$1"; printf "%s" "${!v:-${JDK_HOME_BASE:-/opt/jdk}/$1}"; }
 MVN="${MVN:-$(command -v mvn >/dev/null 2>&1 && echo mvn || { [ -x ./mvnw ] && echo ./mvnw || echo mvn; })}"
 
