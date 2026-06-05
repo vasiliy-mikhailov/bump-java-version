@@ -1,6 +1,6 @@
 #!/bin/bash
 # Unified per-repo driver for ALL THREE agents (opencode | kilo | openhands). Identical flow,
-# skill, scripts, env, and scoring — the AGENT (6th arg) is the only variable. No force-apply.
+# skill, env, and scoring — the AGENT (6th arg) is the only variable. No force-apply.
 # Args: REPO SHA FROM TO SLUG AGENT ; env: OC_KEY. Emits /out/$SLUG/result.json.
 set -uo pipefail
 REPO=$1; SHA=$2; FROM=$3; TO=$4; SLUG=$5; AGENT=$6
@@ -51,12 +51,11 @@ find . -path '*/target/surefire-reports' -type d -exec rm -rf {} + 2>/dev/null |
 
 cat > AGENTS.md <<A
 # How to bump this project's Java version
-Use the bump-java-version skill in \`.bump-skill/\` (read \`.bump-skill/SKILL.md\`).
-To go from Java $FROM to Java $TO run: \`bash .bump-skill/scripts/bump_${FROM}_to_${TO}.sh \$(pwd)\`
-JDKs are at /opt/jdk/{8,11,17,21}; the scripts pick the JDK via JAVA_HOME. System Maven (\`mvn\`) is installed; select the JDK with JAVA_HOME.
+Use the bump-java-version skill in \`.bump-skill/\`: read \`.bump-skill/SKILL.md\`, a step-by-step manual you carry out YOURSELF. It uses only standard tools — JDKs, Maven, and OpenRewrite (recipes from Maven Central). There are NO bump scripts to run; perform each step in the manual by hand.
+JDKs are at /opt/jdk/{8,11,17,21}; select one with JAVA_HOME. System Maven (\`mvn\`) is installed.
 Baseline: \`JAVA_HOME=/opt/jdk/$FROM mvn -B -ntp test\` ; verify: \`JAVA_HOME=/opt/jdk/$TO mvn -B -ntp test\`.
 A
-PROMPT="Bump this Maven project from Java $FROM to Java $TO using the bump-java-version skill in AGENTS.md and .bump-skill/SKILL.md. First read .bump-skill/SKILL.md. Then run bash .bump-skill/scripts/bump_${FROM}_to_${TO}.sh $(pwd), then run the tests under Java $TO with JAVA_HOME=/opt/jdk/$TO mvn -B -ntp test and conserve every previously-passing test. If a step fails, read the .bump-skill/SKILL.md failure table and apply the listed fix, then re-run the failed step. Report the final test result."
+PROMPT="Bump this Maven project from Java $FROM to Java $TO by following the bump-java-version manual in .bump-skill/SKILL.md. First read .bump-skill/SKILL.md in full. Then carry out its numbered steps YOURSELF with the standard tools (there are no bump scripts): establish the Java $FROM baseline, make Lombok safe, run the OpenRewrite migration command the manual gives for this hop, apply the deterministic pom edits it lists, then run the tests under Java $TO with JAVA_HOME=/opt/jdk/$TO mvn -B -ntp test and conserve every previously-passing test. If a step fails, find it in the manual's troubleshooting table, apply the listed fix, and re-run that step. Report the final test result."
 
 # --- the ONLY agent-specific step ---
 case "$AGENT" in
