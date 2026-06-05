@@ -106,4 +106,47 @@ for p in poms:
     if s != orig:
         open(p, "w").write(s); print("bumped build plugin version(s) in "+p)
 PY
+# 4. Old maven-surefire-plugin (2.20.x / 2.21.x and earlier) throws a NullPointerException under
+#    JDK 9+ at test-fork startup (a surefire bug fixed in 2.22.0). Three delivery paths:
+#      (a) version PINNED in the pom (literal <version> or maven-surefire-plugin.version property) -> bump it.
+#      (b) version INHERITED from an old spring-boot-starter-parent (< 2.2 manages surefire < 2.22 via the
+#          maven-surefire-plugin.version property) and not otherwise overridden -> ADD that property as a
+#          2.22.2 floor; spring-boot-dependencies reads the property, so the child override wins.
+#    Only fires when an old surefire is actually in effect, so it is a no-op on modern projects.
+echo "=== [surefire_compat] floor JDK9+-incompatible surefire (2.20/2.21 -> 2.22.2; pinned or SB<2.2-inherited)" >&2
+python3 - <<'PY'
+import glob, re
+FLOOR = "2.22.2"
+def old_ver(v):                      # True if v < 2.22
+    m = re.match(r"(\d+)\.(\d+)", v or "")
+    return bool(m) and (int(m.group(1)), int(m.group(2))) < (2, 22)
+def old_sb_parent(s):                # spring-boot-starter-parent < 2.2 pins surefire < 2.22
+    m = re.search(r"<parent>(?:(?!</parent>).)*?<artifactId>spring-boot-starter-parent</artifactId>(?:(?!</parent>).)*?</parent>", s, flags=re.S)
+    if not m: return False
+    vm = re.search(r"<version>\s*([0-9][0-9.]*)", m.group(0))
+    if not vm: return False
+    pm = re.match(r"(\d+)\.(\d+)", vm.group(1))
+    return bool(pm) and (int(pm.group(1)), int(pm.group(2))) < (2, 2)
+poms = sorted(set(glob.glob("pom.xml")+glob.glob("*/pom.xml")+glob.glob("*/*/pom.xml")), key=len)
+for p in poms:
+    s = open(p).read(); orig = s
+    # (a) literal: <artifactId>maven-surefire-plugin</artifactId> ... <version>2.OLD</version>
+    s = re.sub(r"(<artifactId>maven-surefire-plugin</artifactId>\s*<version>)\s*([0-9][0-9.]*)\s*(</version>)",
+               lambda m: m.group(1)+FLOOR+m.group(3) if old_ver(m.group(2)) else m.group(0), s, flags=re.S)
+    # (a') property: <maven-surefire-plugin.version>2.OLD</...>
+    s = re.sub(r"(<maven-surefire-plugin\.version>)\s*([0-9][0-9.]*)\s*(</maven-surefire-plugin\.version>)",
+               lambda m: m.group(1)+FLOOR+m.group(3) if old_ver(m.group(2)) else m.group(0), s)
+    # (b) inherited from an old spring-boot-starter-parent, no explicit override -> add property floor
+    if old_sb_parent(s) and "<maven-surefire-plugin.version>" not in s:
+        prop = "<maven-surefire-plugin.version>%s</maven-surefire-plugin.version>" % FLOOR
+        if "<properties>" in s:
+            s = s.replace("<properties>", "<properties>"+prop, 1)
+        elif "</parent>" in s:
+            s = s.replace("</parent>", "</parent><properties>"+prop+"</properties>", 1)
+        elif "</project>" in s:
+            s = s.replace("</project>", "<properties>"+prop+"</properties></project>", 1)
+    if s != orig:
+        open(p, "w").write(s); print("surefire floor applied to "+p)
+PY
+
 echo "=== java11_compat complete" >&2
