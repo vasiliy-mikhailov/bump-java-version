@@ -40,6 +40,10 @@ git remote add origin "https://github.com/$REPO.git"
 if ! ( git fetch -q --depth 1 origin "$SHA" && git checkout -q FETCH_HEAD ); then
   emit "$OUT" "$SLUG" "$REPO" "$FROM->$TO" FETCH_FAIL 0 0 0 1 1 1; exit 0; fi
 chmod +x ./mvnw 2>/dev/null || true
+# opencode/kilo sandbox to the working dir and auto-reject reads of external dirs (e.g. /skill),
+# so they cannot read SKILL.md / the failure table. Copy the skill INTO the workdir (read-only)
+# so all three agents read it as a local path. (OpenHands isn't sandboxed, but this is harmless.)
+cp -r /skill ./.bump-skill && chmod -R a-w ./.bump-skill
 
 JAVA_HOME=/opt/jdk/$FROM mvn -B -ntp test -Dmaven.test.failure.ignore=true > "$OUT/pre.log" 2>&1 || true
 PRE=$(passet "$(pwd)" "$OUT/pre_set.txt"); PRERC=0
@@ -47,12 +51,12 @@ find . -path '*/target/surefire-reports' -type d -exec rm -rf {} + 2>/dev/null |
 
 cat > AGENTS.md <<A
 # How to bump this project's Java version
-Use the bump-java-version skill at \`/skill\` (read \`/skill/SKILL.md\`).
-To go from Java $FROM to Java $TO run: \`bash /skill/scripts/bump_${FROM}_to_${TO}.sh \$(pwd)\`
+Use the bump-java-version skill in \`.bump-skill/\` (read \`.bump-skill/SKILL.md\`).
+To go from Java $FROM to Java $TO run: \`bash .bump-skill/scripts/bump_${FROM}_to_${TO}.sh \$(pwd)\`
 JDKs are at /opt/jdk/{8,11,17,21}; the scripts pick the JDK via JAVA_HOME. System Maven (\`mvn\`) is installed; select the JDK with JAVA_HOME.
 Baseline: \`JAVA_HOME=/opt/jdk/$FROM mvn -B -ntp test\` ; verify: \`JAVA_HOME=/opt/jdk/$TO mvn -B -ntp test\`.
 A
-PROMPT="Bump this Maven project from Java $FROM to Java $TO using the bump-java-version skill in AGENTS.md and /skill/SKILL.md. Run bash /skill/scripts/bump_${FROM}_to_${TO}.sh $(pwd), then run the tests under Java $TO with JAVA_HOME=/opt/jdk/$TO mvn -B -ntp test and conserve every previously-passing test. If a step fails, consult the SKILL.md failure table and apply the listed fix. Report the final test result."
+PROMPT="Bump this Maven project from Java $FROM to Java $TO using the bump-java-version skill in AGENTS.md and .bump-skill/SKILL.md. First read .bump-skill/SKILL.md. Then run bash .bump-skill/scripts/bump_${FROM}_to_${TO}.sh $(pwd), then run the tests under Java $TO with JAVA_HOME=/opt/jdk/$TO mvn -B -ntp test and conserve every previously-passing test. If a step fails, read the .bump-skill/SKILL.md failure table and apply the listed fix, then re-run the failed step. Report the final test result."
 
 # --- the ONLY agent-specific step ---
 case "$AGENT" in
