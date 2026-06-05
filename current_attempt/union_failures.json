@@ -308,7 +308,7 @@
       "verdict": "FAIL_test_conservation",
       "cluster": "test-exc: NullPointerException",
       "rung1_class": "JHIPSTER_COMPLEX",
-      "rung1_note": "jhipster Angular frontend-coupled build / recipe step fails (or needs Cassandra/Mongo/ES DB)"
+      "rung1_note": "JHIPSTER_COMPLEX confirmed, root cause CORRECTED (not frontend-coupled). Deterministic bump_8_to_11 fails at the Java8toJava11 recipe step: the recipe compiles the project under JDK11, but the JHipster-8 ANNOTATION-PROCESSING stack has a cascade of JDK11 incompatibilities, peeled one by one: (1) NoClassDefFoundError javax/xml/bind/JAXBException (JAXB removed in 11) -- jaxb on <annotationProcessorPaths> fixes it [java11_compat only adds EE deps to <dependencies>, which annotationProcessorPaths excludes]; (2) NoClassDefFoundError javax/annotation/Generated (MapStruct @Generated; javax.annotation removed) -- annotation-api on the processor path fixes it; (3) Fatal NullPointerException inside the processor itself (old MapStruct/jpamodelgen NPE under JDK11). Baseline green (149). Neither the surefire nor the new Mockito floor is reached (recipe aborts first). Proper remedy is a JHipster/Spring-Boot version upgrade (brings JDK11-safe processors + drops JAXB), out of scope for a one-LTS-step bump -> genuine bail. Likely the same for the H2-based jhipster samples; the Cassandra/Mongo/ES variants additionally need a DB container."
     },
     {
       "slug": "jhipster_jhipster-sample-app-elasticsearch_95b01cc1ea9b",
