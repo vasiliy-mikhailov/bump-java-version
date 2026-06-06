@@ -100,7 +100,7 @@ for repo in REPOS:
             print(f"  noncompile {repo} {sha[:8]} jv {jv} (attempt {compiles}/{MAX_ATTEMPTS})", flush=True)
     if found:
         for jv, sha in sorted(found.items()):
-            out.append({"repo": repo, "sha": sha, "jv_from": jv, "jv_to": NEXT[jv], "attempts": compiles})
+            out.append({"repo": repo, "sha": sha, "jv_from": jv, "attempts": compiles})
     else:
         print(f"  NO-VALID-BASELINE {repo} (scanned {scanned}, {compiles} compile attempts)", flush=True)
     reap(wd)

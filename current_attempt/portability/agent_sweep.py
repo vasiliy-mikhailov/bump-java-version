@@ -23,9 +23,10 @@ IMAGE = "bump-allagents-sweep:latest"
 OC_KEY = os.environ["OC_KEY"]
 
 ds = json.load(open(os.environ.get("DATASET_FILE", f"{ACTIVE}/dataset-shas.json")))
+NEXT = {8: 11, 11: 17, 17: 21, 21: 25}   # jv_to = next LTS, derived
 byhop = defaultdict(list)
 for e in ds:
-    byhop[f"{e['jv_from']}->{e['jv_to']}"].append(e)
+    byhop[f"{e['jv_from']}->{NEXT[e['jv_from']]}"].append(e)
 hops = sorted(byhop)
 per = N // len(hops)
 examples = []
@@ -34,11 +35,11 @@ for h in hops:
 examples = examples[:N]
 os.makedirs(OUT, exist_ok=True)
 print(f"[{AGENT}] {len(examples)} examples: " +
-      ", ".join(f"{h}:{sum(1 for e in examples if f'''{e['jv_from']}->{e['jv_to']}''' == h)}" for h in hops), flush=True)
+      ", ".join(f"{h}:{sum(1 for e in examples if f'''{e['jv_from']}->{NEXT[e['jv_from']]}''' == h)}" for h in hops), flush=True)
 
 
 def run_one(e):
-    repo, sha, frm, to = e["repo"], e["sha"], e["jv_from"], e["jv_to"]
+    repo, sha, frm, to = e["repo"], e["sha"], e["jv_from"], NEXT[e["jv_from"]]
     slug = repo.replace("/", "_") + "_" + sha[:8]
     cname = "a3_" + uuid.uuid4().hex[:10]
     cmd = ["docker", "run", "--rm", "--name", cname, "--network", "mvn-cache", "-e", f"OC_KEY={OC_KEY}",
