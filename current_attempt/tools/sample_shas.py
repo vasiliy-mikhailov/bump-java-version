@@ -29,6 +29,7 @@ LIMIT = arg("--limit"); REPOS_OVERRIDE = arg("--repos")
 REPOS_FILE = arg("--repos-file"); OUT = arg("--out")
 ONLY = arg("--only-from")  # restrict to a single jv_from (e.g. 21 for the 21->25 sweep)
 NEXT = {int(ONLY): NEXT_ALL[int(ONLY)]} if ONLY else NEXT_ALL
+MULTI = "--multi" in sys.argv   # find a baseline per Java version, not just the first
 if REPOS_FILE:
     REPOS = [r.strip() for r in open(REPOS_FILE) if r.strip()]
 elif REPOS_OVERRIDE:
@@ -45,6 +46,12 @@ def sh(c, to=300):
         class R: returncode = 124; stdout = ""; stderr = ""
         return R()
 
+def reap(wd):
+    # build container writes root-owned target/ files; remove via a root container
+    import os as _os
+    sh("docker run --rm --user root -v /tmp:/scratch --entrypoint sh j21-fitness:latest -c 'rm -rf /scratch/" + _os.path.basename(wd) + "'", 180)
+
+
 def detect_jv(wd):
     out = sh("grep -rhoE '<(maven.compiler.release|java.version|maven.compiler.target|release|source)>[0-9]+' "
              + wd + " --include=pom.xml 2>/dev/null | grep -oE '[0-9]+'").stdout.split()
@@ -54,35 +61,41 @@ def detect_jv(wd):
 out = []
 for repo in REPOS:
     wd = "/tmp/samp_" + repo.replace("/", "_")
-    sh("rm -rf " + wd, 60)
-    sh(f"git clone -q https://github.com/{repo} {wd}", 600)
+    reap(wd)
+    mirror = "/var/cache/git-mirrors/" + repo + ".git"
+    if os.path.isdir(mirror):
+        sh(f"git clone -q {mirror} {wd}", 300)            # local mirror: instant, no GitHub throttle
+    else:
+        sh(f'git clone -q -c credential.helper="!gh auth git-credential" https://github.com/{repo} {wd}', 600)  # authed (token via helper, not argv)
     if not os.path.isdir(wd + "/.git"):
         print("CLONE-FAIL", repo, flush=True); continue
     commits = sh(f"git -C {wd} log --all --pretty=%H", 60).stdout.split()
     random.Random(f"{SEED}:{repo}").shuffle(commits)  # per-(seed,repo): order-independent, parallel-safe
-    accepted = None; compiles = 0; scanned = 0
+    found = {}; compiles = 0; scanned = 0
+    target_n = len(NEXT) if MULTI else 1
     for sha in commits:
-        if scanned >= SCAN_CAP or compiles >= MAX_ATTEMPTS:
+        if scanned >= SCAN_CAP or compiles >= MAX_ATTEMPTS or len(found) >= target_n:
             break
         scanned += 1
         sh(f"git -C {wd} checkout -q {sha} 2>/dev/null", 60)
         if not os.path.isfile(wd + "/pom.xml"):
             continue                       # cheap reject: no pom (doesn't count as a compile attempt)
         jv = detect_jv(wd)
-        if jv not in NEXT:
-            continue                       # cheap reject: not 8/11/17 (e.g. already 21)
+        if jv not in NEXT or jv in found:
+            continue                       # not 8/11/17/21, or this version already captured
         compiles += 1                      # this IS a compile attempt
         rc = sh(f"export PATH=$HOME/bin:$PATH; cd {wd} && JDK={jv} mvn -q -B -ntp -DskipTests test-compile", 600).returncode
         if rc == 0:
-            accepted = {"repo": repo, "sha": sha, "jv_from": jv, "jv_to": NEXT[jv], "attempts": compiles}
-            print(f"  FOUND {repo} {sha[:8]} jv {jv}->{NEXT[jv]} (compile attempt {compiles}/{MAX_ATTEMPTS})", flush=True)
-            break
-        print(f"  noncompile {repo} {sha[:8]} jv {jv} (attempt {compiles}/{MAX_ATTEMPTS})", flush=True)
-    if accepted:
-        out.append(accepted)
+            found[jv] = sha
+            print(f"  FOUND {repo} {sha[:8]} jv {jv}->{NEXT[jv]} ({len(found)}/{target_n}, attempt {compiles}/{MAX_ATTEMPTS})", flush=True)
+        else:
+            print(f"  noncompile {repo} {sha[:8]} jv {jv} (attempt {compiles}/{MAX_ATTEMPTS})", flush=True)
+    if found:
+        for jv, sha in sorted(found.items()):
+            out.append({"repo": repo, "sha": sha, "jv_from": jv, "jv_to": NEXT[jv], "attempts": compiles})
     else:
         print(f"  NO-VALID-BASELINE {repo} (scanned {scanned}, {compiles} compile attempts)", flush=True)
-    sh("rm -rf " + wd, 60)
+    reap(wd)
 
 ds = OUT if OUT else A + "/dataset-shas.json"
 json.dump(out, open(ds, "w"), indent=1)
