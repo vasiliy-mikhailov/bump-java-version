@@ -17,6 +17,7 @@ Kept in sync as PRs are opened / merged / bailed.
 | monodot/hello-java-spring-boot | — | [#6](https://github.com/monodot/hello-java-spring-boot/issues/6) | 11→17 | `java.version` 11→17, Dockerfile base `openjdk:11-jre-slim`→`eclipse-temurin:17-jre-slim` | no test lost | [#10](https://github.com/monodot/hello-java-spring-boot/pull/10) | open |
 | ghusta/FakeSMTP | — | [#30](https://github.com/ghusta/FakeSMTP/issues/30) | 17→21 | `java.version` 17→21 + CI JDK | 13/13 | [#50](https://github.com/ghusta/FakeSMTP/pull/50) | open |
 | sagar-arora/LogAgent | 5 | [#6](https://github.com/sagar-arora/LogAgent/issues/6) | 11→17 | compiler source/target 11→17 + CI JDK | 1/1 | [#13](https://github.com/sagar-arora/LogAgent/pull/13) | open |
+| mars-sim/mars-sim | 164 | [#1956](https://github.com/mars-sim/mars-sim/issues/1956) | 21→25 | `maven.compiler.source`/`target` 21→25 + 4 CI workflows | 721/721 | [#1959](https://github.com/mars-sim/mars-sim/pull/1959) | open |
 
 ## Bailed (no clean PASS → no PR, per P12 discipline)
 
@@ -30,6 +31,6 @@ Kept in sync as PRs are opened / merged / bailed.
 
 ## Tally
 
-- **9 PRs opened**, all 4 LTS hops covered (8→11, 11→17, 17→21, 21→25), every one verified green under the repo's own `mvn verify`.
+- **10 PRs opened**, all 4 LTS hops covered (8→11, 11→17, 17→21, 21→25), every one verified green under the repo's own `mvn verify`.
 - **5 bailed** on P12 discipline (no green baseline / out of scope / unresolvable deps).
 - _Reward = merged PRs (primary)._ The feed's clean, resolvable tail is largely exhausted; re-run `find_bump_issues.py` later for fresh demand rather than grinding low-yield targets.
