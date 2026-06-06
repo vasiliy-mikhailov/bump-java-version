@@ -66,19 +66,18 @@ def detect_jv(wd):
             vs.append(v)
     return max(vs) if vs else None
 
-out = []
-for repo in REPOS:
+def process_repo(repo):
     wd = "/tmp/samp_" + repo.replace("/", "_")
     reap(wd)
     mirror = "/var/cache/git-mirrors/" + repo + ".git"
     if os.path.isdir(mirror):
-        sh(f"git clone -q {mirror} {wd}", 300)            # local mirror: instant, no GitHub throttle
+        sh(f"git clone -q {mirror} {wd}", 300)
     else:
-        sh(f'git clone -q -c credential.helper="!gh auth git-credential" https://github.com/{repo} {wd}', 600)  # authed (token via helper, not argv)
+        sh(f'git clone -q -c credential.helper="!gh auth git-credential" https://github.com/{repo} {wd}', 600)
     if not os.path.isdir(wd + "/.git"):
-        print("CLONE-FAIL", repo, flush=True); continue
+        print("CLONE-FAIL", repo, flush=True); return []
     commits = sh(f"git -C {wd} log --all --pretty=%H", 60).stdout.split()
-    random.Random(f"{SEED}:{repo}").shuffle(commits)  # per-(seed,repo): order-independent, parallel-safe
+    random.Random(f"{SEED}:{repo}").shuffle(commits)
     found = {}; compiles = 0; scanned = 0
     target_n = len(NEXT) if MULTI else 1
     for sha in commits:
@@ -87,25 +86,43 @@ for repo in REPOS:
         scanned += 1
         sh(f"git -C {wd} checkout -q {sha} 2>/dev/null", 60)
         if not os.path.isfile(wd + "/pom.xml"):
-            continue                       # cheap reject: no pom (doesn't count as a compile attempt)
+            continue
         jv = detect_jv(wd)
         if jv not in NEXT or jv in found:
-            continue                       # not 8/11/17/21, or this version already captured
-        compiles += 1                      # this IS a compile attempt
+            continue
+        compiles += 1
         rc = sh(f"export PATH=$HOME/bin:$PATH; cd {wd} && JDK={jv} mvn -q -B -ntp -DskipTests test-compile", 600).returncode
         if rc == 0:
             found[jv] = sha
             print(f"  FOUND {repo} {sha[:8]} jv {jv}->{NEXT[jv]} ({len(found)}/{target_n}, attempt {compiles}/{MAX_ATTEMPTS})", flush=True)
         else:
             print(f"  noncompile {repo} {sha[:8]} jv {jv} (attempt {compiles}/{MAX_ATTEMPTS})", flush=True)
-    if found:
-        for jv, sha in sorted(found.items()):
-            out.append({"repo": repo, "sha": sha, "jv_from": jv, "attempts": compiles})
-    else:
-        print(f"  NO-VALID-BASELINE {repo} (scanned {scanned}, {compiles} compile attempts)", flush=True)
     reap(wd)
+    if found:
+        return [{"repo": repo, "sha": sha, "jv_from": jv, "attempts": compiles} for jv, sha in sorted(found.items())]
+    print(f"  NO-VALID-BASELINE {repo} (scanned {scanned}, {compiles} compile attempts)", flush=True)
+    return []
 
+WORKERS = int(arg("--workers", "1"))
 ds = OUT if OUT else A + "/dataset-shas.json"
+out = []
+if WORKERS > 1:
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    _lock = threading.Lock()
+    _jl = open(ds + ".jsonl", "a")            # incremental + crash-safe; workers pull next repo from the pool queue
+    def _run(repo):
+        res = process_repo(repo)
+        with _lock:
+            for e in res:
+                _jl.write(json.dumps(e) + "\n"); _jl.flush()
+            out.extend(res)
+    with ThreadPoolExecutor(max_workers=WORKERS) as _ex:
+        list(_ex.map(_run, REPOS))
+    _jl.close()
+else:
+    for repo in REPOS:
+        out.extend(process_repo(repo))
 json.dump(out, open(ds, "w"), indent=1)
 print(f"\nSEED={SEED} max_attempts={MAX_ATTEMPTS}: {len(out)}/{len(REPOS)} repos got a valid compiling "
       f"8/11/17 baseline -> dataset-shas.json (seed {SEED})", flush=True)
