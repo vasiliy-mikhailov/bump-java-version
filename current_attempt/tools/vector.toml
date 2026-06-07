@@ -1,0 +1,37 @@
+data_dir = "/var/lib/vector"
+
+[sources.docker]
+type = "docker_logs"
+
+[sources.host]
+type = "host_metrics"
+scrape_interval_secs = 60
+collectors = ["cpu", "memory", "filesystem", "load"]
+
+[sources.app_logs]
+type = "file"
+include = ["/host-tmp/*.log"]
+exclude = ["/host-tmp/compactor_v3.log", "/host-tmp/metrics_frog*.log"]
+ignore_older_secs = 600
+
+[transforms.host_as_log]
+type = "metric_to_log"
+inputs = ["host"]
+
+[sinks.docker_jsonl]
+type = "file"
+inputs = ["docker"]
+path = "/var/log/observe/docker.jsonl"
+encoding.codec = "json"
+
+[sinks.host_jsonl]
+type = "file"
+inputs = ["host_as_log"]
+path = "/var/log/observe/host_metrics.jsonl"
+encoding.codec = "json"
+
+[sinks.app_logs_jsonl]
+type = "file"
+inputs = ["app_logs"]
+path = "/var/log/observe/app_logs.jsonl"
+encoding.codec = "json"
