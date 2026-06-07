@@ -1,21 +1,15 @@
 data_dir = "/var/lib/vector"
 
-# Container stdout (not under /var/log; captured via docker API) and host metrics.
-[sources.docker]
-type = "docker_logs"
-
+# Host resource metrics (the one synthesized stream).
 [sources.host]
 type = "host_metrics"
 scrape_interval_secs = 60
 collectors = ["cpu", "memory", "filesystem", "load"]
 
-# Frog's eye watches the WHOLE /var/log tree. Every process writes a file under /var/log
-# (project processes: /var/log/observe/app/*.log). No content filtering or throttling — noise
-# is fixed at the source, not hidden. Excludes only unreadable files (binaries, compressed/
-# rotated, the journal binary dir) and our own JSONL sinks + compactor log (feedback loops).
+# (1) The whole /var/log tree — host + project process logs.
 [sources.varlog]
 type = "file"
-include = ["/var/log/**"]
+include = ["/var/log/*", "/var/log/**/*"]
 exclude = [
   "/var/log/observe/*.jsonl",
   "/var/log/observe/compactor.log",
@@ -27,13 +21,31 @@ exclude = [
 ]
 ignore_older_secs = 600
 
+# (2) All Docker container stdout, file-based — auto-discovers every container
+# (new ones appear as new files matching the glob; no per-container wiring, no API).
+[sources.docker_files]
+type = "file"
+include = ["/var/lib/docker/containers/**/*-json.log"]
+ignore_older_secs = 600
+
+# Unwrap the docker json-file envelope ({"log","stream","time"}) so the digest sees
+# the clean message, not raw JSON. We watch all containers' logs; no per-container id.
+[transforms.docker_parse]
+type = "remap"
+inputs = ["docker_files"]
+source = '''
+wrapper = parse_json(.message) ?? {}
+msg = string(wrapper.log) ?? string(.message) ?? ""
+.message = strip_whitespace(msg)
+'''
+
 [transforms.host_as_log]
 type = "metric_to_log"
 inputs = ["host"]
 
 [sinks.docker_jsonl]
 type = "file"
-inputs = ["docker"]
+inputs = ["docker_parse"]
 path = "/var/log/observe/docker.jsonl"
 encoding.codec = "json"
 
