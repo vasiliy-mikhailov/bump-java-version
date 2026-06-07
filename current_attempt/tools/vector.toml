@@ -9,7 +9,8 @@ collectors = ["cpu", "memory", "filesystem", "load"]
 # (1) The whole /var/log tree — host + project process logs.
 [sources.varlog]
 type = "file"
-include = ["/var/log/*", "/var/log/**/*"]
+read_from = "end"
+include = ["/var/log/**/*"]
 exclude = [
   "/var/log/observe/*.jsonl",
   "/var/log/observe/compactor.log",
@@ -25,6 +26,7 @@ ignore_older_secs = 600
 # (new ones appear as new files matching the glob; no per-container wiring, no API).
 [sources.docker_files]
 type = "file"
+read_from = "end"
 include = ["/var/lib/docker/containers/**/*-json.log"]
 ignore_older_secs = 600
 
