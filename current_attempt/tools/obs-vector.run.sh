@@ -6,7 +6,6 @@ set -e
 docker rm -f obs-vector >/dev/null 2>&1 || true
 mkdir -p /home/vmihaylov/vector-data
 docker run -d --name obs-vector --restart unless-stopped \
-  -e VECTOR_LOG=warn \
   -v /home/vmihaylov/java_8_11_17_to_java_21/current_attempt/tools/vector.toml:/etc/vector/vector.toml:ro \
   -v /var/log:/var/log:ro \
   -v /var/log/observe:/var/log/observe:rw \
