@@ -28,8 +28,12 @@ STREAMS = {"host": f"{OBS_DIR}/host_metrics.jsonl",
 
 COMPACT_SYSTEM = (
     "You receive a rolling trajectory of host events possibly with a prior compacted summary. "
+    "Repeated events are pre-collapsed: each event carries an integer field \"n\" = how many times "
+    "it occurred in this window. ALWAYS surface these counts in the output (e.g. 'veth churn n=8400', "
+    "'jboss SocketTimeout n=37') so frequency/repetition is visible — a high n is itself a signal. "
     "Return JSON: {\"compacted_summary\":\"<paragraph compressing to ~20% of input, preserving "
-    "notable patterns, sustained anomalies, drifts, recurring failures>\",\"sustained_anomalies\":[\"<fact>\"]} "
+    "notable patterns, sustained anomalies, drifts, recurring failures, each with its n count>\","
+    "\"sustained_anomalies\":[\"<fact with n=count>\"]} "
     "JSON only, no prose.")
 
 
@@ -187,7 +191,8 @@ def collapse(buf):
         s = _sig(b)
         g = groups.get(s)
         if g is None:
-            groups[s] = dict(b); groups[s]["n"] = 1
+            # "n" first so the count survives the per-event serialization truncation
+            groups[s] = {"n": 1, "s": b.get("s"), "t": b.get("t"), "e": b.get("e")}
         else:
             g["n"] += 1
     return list(groups.values())
