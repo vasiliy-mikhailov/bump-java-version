@@ -53,6 +53,30 @@ def detect_jv(text):
             vs.append(v)
     return max(vs) if vs else None
 
+def detect_jv_gradle(text):
+    # Same floor logic as sample_shas.detect_jv_gradle, over the fetched build-file text.
+    vs = []
+    vs += [int(m) for m in re.findall(r"JavaLanguageVersion\.of\(\s*(\d+)\s*\)", text)]
+    vs += [8 for _ in re.findall(r"VERSION_1_8", text)]
+    vs += [int(m) for m in re.findall(r"VERSION_(\d+)\b", text)]
+    vs += [int(m) for m in re.findall(r"(?:source|target)Compatibility\s*=?\s*[\"\']?(?:1\.)?(\d{1,2})\b", text)]
+    vs += [int(m) for m in re.findall(r"languageVersion\s*=\s*[\"\']?(\d{1,2})\b", text)]
+    vs += [int(m) for m in re.findall(r"jvmToolchain\(\s*(\d{1,2})\s*\)", text)]
+    vs = [v for v in vs if v in (8, 11, 17, 21, 25)]
+    return max(vs) if vs else None
+
+
+def _fetch_text(rp, path):
+    r = gh("-X", "GET", f"repos/{rp}/contents/{path}")
+    try:
+        c = json.loads(r.stdout)
+        if isinstance(c, dict) and c.get("content"):
+            return base64.b64decode(c["content"]).decode("utf-8", "ignore")
+    except Exception:
+        pass
+    return None
+
+
 def target_from_title(t):
     nums = [int(x) for x in re.findall(r"(?:java|jdk)\s*([0-9]{1,2})", t, re.I) if 8 <= int(x) <= 25]
     return max(nums) if nums else None
@@ -104,22 +128,27 @@ for rp, it in byrepo.items():
     maintained = bool((not archived) and pushed and
                       (now - datetime.datetime.fromisoformat(pushed.replace("Z", "+00:00"))).days <= 730)
     target = target_from_title(it["title"])
-    cur = None
-    pr = gh("-X", "GET", f"repos/{rp}/contents/pom.xml")
-    try:
-        c = json.loads(pr.stdout)
-        if isinstance(c, dict) and c.get("content"):
-            cur = detect_jv(base64.b64decode(c["content"]).decode("utf-8", "ignore"))
-    except Exception:
-        pass
+    cur = None; build_tool = None
+    pom = _fetch_text(rp, "pom.xml")
+    if pom is not None:
+        build_tool = "maven"
+        cur = detect_jv(pom)
+    else:
+        for gf in ("build.gradle", "build.gradle.kts"):
+            gtxt = _fetch_text(rp, gf)
+            if gtxt is not None:
+                build_tool = "gradle"
+                cur = detect_jv_gradle(gtxt)
+                break
     if target and cur is not None:
         status = "satisfied(stale-open)" if cur >= target else "unsatisfied"
     elif cur is None:
-        status = "unknown(no-root-pom)"
+        status = "unknown(no-build-version)" if build_tool else "unknown(no-build-file)"
     else:
         status = "unsatisfied(no-target)"
     out.append({**it, "stars": stars, "pushed_at": (pushed or "")[:10], "archived": archived,
-                "maintained": maintained, "current_jv": cur, "target_jv": target, "status": status})
+                "maintained": maintained, "build_tool": build_tool, "current_jv": cur,
+                "target_jv": target, "status": status})
     time.sleep(0.15)
 
 keep = [r for r in out if r["maintained"] and not r["status"].startswith("satisfied")]
