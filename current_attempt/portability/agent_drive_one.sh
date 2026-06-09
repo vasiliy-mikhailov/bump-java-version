@@ -22,7 +22,7 @@ passet() { python3 - "$1" "$2" <<'PY'
 import sys, glob, xml.etree.ElementTree as ET
 root, dst = sys.argv[1], sys.argv[2]
 s = set()
-for x in glob.glob(root + "/**/target/surefire-reports/TEST-*.xml", recursive=True):
+for x in glob.glob(root + "/**/target/surefire-reports/TEST-*.xml", recursive=True) + glob.glob(root + "/**/build/test-results/test/TEST-*.xml", recursive=True):
     try: r = ET.parse(x).getroot()
     except Exception: continue
     for tc in r.iter("testcase"):
@@ -39,23 +39,28 @@ git config --global user.email a@b.c; git config --global user.name x
 git remote add origin "https://github.com/$REPO.git"
 if ! ( git fetch -q --depth 1 origin "$SHA" && git checkout -q FETCH_HEAD ); then
   emit "$OUT" "$SLUG" "$REPO" "$FROM->$TO" FETCH_FAIL 0 0 0 1 1 1; exit 0; fi
-chmod +x ./mvnw 2>/dev/null || true
+chmod +x ./mvnw ./gradlew 2>/dev/null || true
 # opencode/kilo sandbox to the working dir and auto-reject reads of external dirs (e.g. /skill),
 # so they cannot read SKILL.md / the failure table. Copy the skill INTO the workdir (read-only)
 # so all three agents read it as a local path. (OpenHands isn't sandboxed, but this is harmless.)
 cp -r /skill ./.bump-skill && chmod -R a-w ./.bump-skill
 
-JAVA_HOME=/opt/jdk/$FROM mvn -B -ntp test -Dmaven.test.failure.ignore=true > "$OUT/pre.log" 2>&1 || true
+# build-tool detection: Maven (pom.xml) else Gradle (build.gradle/.kts via the repo's ./gradlew)
+if [ -f pom.xml ]; then BT=mvn; BCMD="mvn -B -ntp test"; else BT=gradle; BCMD="./gradlew test --no-daemon --continue"; fi
+runtest() { if [ "$BT" = mvn ]; then JAVA_HOME=/opt/jdk/$1 mvn -B -ntp test -Dmaven.test.failure.ignore=true; else JAVA_HOME=/opt/jdk/$1 ./gradlew test --no-daemon --continue; fi; }
+docompile() { if [ "$BT" = mvn ]; then JAVA_HOME=/opt/jdk/$1 mvn -B -ntp -DskipTests compile; else JAVA_HOME=/opt/jdk/$1 ./gradlew testClasses --no-daemon; fi; }
+
+runtest "$FROM" > "$OUT/pre.log" 2>&1 || true
 PRE=$(passet "$(pwd)" "$OUT/pre_set.txt"); PRERC=0
-find . -path '*/target/surefire-reports' -type d -exec rm -rf {} + 2>/dev/null || true
+find . \( -path '*/target/surefire-reports' -o -path '*/build/test-results/test' \) -type d -exec rm -rf {} + 2>/dev/null || true
 
 cat > AGENTS.md <<A
 # How to bump this project's Java version
 Use the bump-java-version skill in \`.bump-skill/\`: read \`.bump-skill/SKILL.md\`, a step-by-step manual you carry out YOURSELF. It uses only standard tools — JDKs, Maven, and OpenRewrite (recipes from Maven Central). There are NO bump scripts to run; perform each step in the manual by hand.
 JDKs are at /opt/jdk/{8,11,17,21}; select one with JAVA_HOME. System Maven (\`mvn\`) is installed.
-Baseline: \`JAVA_HOME=/opt/jdk/$FROM mvn -B -ntp test\` ; verify: \`JAVA_HOME=/opt/jdk/$TO mvn -B -ntp test\`.
+Build tool: **$BT**. Baseline: \`JAVA_HOME=/opt/jdk/$FROM $BCMD\` ; verify: \`JAVA_HOME=/opt/jdk/$TO $BCMD\`. For a Gradle project follow SKILL.md **section G**.
 A
-PROMPT="Bump this Maven project from Java $FROM to Java $TO by following the bump-java-version manual in .bump-skill/SKILL.md. First read .bump-skill/SKILL.md in full. Then carry out its numbered steps YOURSELF with the standard tools (there are no bump scripts): establish the Java $FROM baseline, make Lombok safe, run the OpenRewrite migration command the manual gives for this hop, apply the deterministic pom edits it lists, then run the tests under Java $TO with JAVA_HOME=/opt/jdk/$TO mvn -B -ntp test and conserve every previously-passing test. If a step fails, find it in the manual's troubleshooting table, apply the listed fix, and re-run that step. Report the final test result."
+PROMPT="Bump this $BT project from Java $FROM to Java $TO by following the bump-java-version manual in .bump-skill/SKILL.md (if this is a Gradle project, follow section G of the manual). First read .bump-skill/SKILL.md in full. Then carry out its numbered steps YOURSELF with the standard tools (there are no bump scripts): establish the Java $FROM baseline, make Lombok safe, run the OpenRewrite migration the manual gives for this hop, apply the deterministic build-file edits it lists, then run the tests under Java $TO (JAVA_HOME=/opt/jdk/$TO $BCMD) and conserve every previously-passing test. If a step fails, find it in the manual's troubleshooting table, apply the listed fix, and re-run that step. Report the final test result."
 
 # --- the ONLY agent-specific step ---
 case "$AGENT" in
@@ -70,8 +75,8 @@ case "$AGENT" in
   *) echo "unknown agent $AGENT" > "$OUT/agent.log" ;;
 esac
 
-JAVA_HOME=/opt/jdk/$TO mvn -B -ntp -DskipTests compile > "$OUT/compile.log" 2>&1; COMPRC=$?
-JAVA_HOME=/opt/jdk/$TO mvn -B -ntp test -Dmaven.test.failure.ignore=true > "$OUT/post.log" 2>&1; POSTRC=$?
+docompile "$TO" > "$OUT/compile.log" 2>&1; COMPRC=$?
+runtest "$TO" > "$OUT/post.log" 2>&1; POSTRC=$?
 POST=$(passet "$(pwd)" "$OUT/post_set.txt")
 LOST=$(python3 - "$OUT/pre_set.txt" "$OUT/post_set.txt" <<'PY'
 import sys
