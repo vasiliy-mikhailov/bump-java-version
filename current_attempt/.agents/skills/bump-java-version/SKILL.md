@@ -1,13 +1,15 @@
 ---
 name: bump-java-version
-description: Migrate a Maven project from one Java LTS to the next (8->11, 11->17, 17->21, 21->25) so it still compiles under the new JDK and previously-passing tests still pass — by hand, using only standard tools (JDKs, Maven, and OpenRewrite recipes from Maven Central; no project-specific scripts). Use when upgrading or bumping the Java version of a Maven project, modernizing to a newer JDK or LTS, or performing the Spring Boot 1->2 / 2->3 and javax->jakarta migration that a Java upgrade requires.
+description: Migrate a Maven or Gradle project from one Java LTS to the next (8->11, 11->17, 17->21, 21->25) so it still compiles under the new JDK and previously-passing tests still pass — by hand, using only standard tools (JDKs, Maven or Gradle, and OpenRewrite recipes from Maven Central; no project-specific scripts). Use when upgrading or bumping the Java version of a Maven or Gradle project, modernizing to a newer JDK or LTS, or performing the Spring Boot 1->2 / 2->3 and javax->jakarta migration that a Java upgrade requires.
 ---
 
-# Bumping a Maven project one Java LTS step — by hand
+# Bumping a Maven or Gradle project one Java LTS step — by hand
 
 Migrate a Maven project **one** Java LTS step (8→11, 11→17, 17→21, or 21→25) so it **compiles** under the
 new JDK and every test that **passed before still passes**. Uses only standard tools — **JDKs,
-Maven, and OpenRewrite** (recipes pulled from Maven Central). No project-specific scripts.
+Maven, and OpenRewrite** (recipes pulled from Maven Central). No project-specific scripts. **If the
+project is Gradle** (`build.gradle`/`.kts` + `gradlew`, no `pom.xml`), follow **section G** at the end
+instead of the Maven steps §1–§7.
 
 ---
 
@@ -190,3 +192,44 @@ report the failed step + the unresolved `[ERROR]`. Known genuine bails:
 - **Source genuinely uses a removed JDK API** that no recipe can rewrite.
 
 An honest bail with the reason beats a green build that hides a dropped test.
+
+
+---
+
+## G. Gradle projects (`build.gradle` / `build.gradle.kts`) — use *instead of* §1–§7
+
+Same goal — compile under `jv_to` and conserve every previously-passing test — with Gradle tools.
+Detect: a `build.gradle`/`.kts` + `gradlew` at the root and **no `pom.xml`**.
+
+1. **Baseline:** `JAVA_HOME=<jdk_from> ./gradlew test`. Read `build/test-results/test/TEST-*.xml`; the
+   0-failure tests are your conserve set. Always use the repo's `./gradlew`, never a system `gradle`.
+2. **Set the Java version to `jv_to`** in the build script: the toolchain
+   `java { toolchain { languageVersion = JavaLanguageVersion.of(<jv_to>) } }`, or
+   `sourceCompatibility`/`targetCompatibility`/`options.release`, or for Kotlin `kotlin { jvmToolchain(<jv_to>) }`.
+   Often this single change is the whole bump (verified: a Spring Boot 2.7 / Gradle 8.10 project went
+   11→17 with only the toolchain edit).
+3. **Bump the Gradle wrapper if it predates `jv_to` — the #1 Gradle wall:** JDK 17 needs Gradle ≥ 7.3,
+   JDK 21 ≥ 8.5, JDK 25 ≥ 9.0. `./gradlew wrapper --gradle-version <X>` (run it under the OLD JDK if the
+   current wrapper won't even start on `jv_to`).
+4. **Lombok:** same floors as §2 (Maven) — set the Lombok dependency / `lombok.version` to **1.18.30+**
+   for 17/21, **1.18.40+** for 25.
+5. **If step 2 still doesn't compile, run the SAME OpenRewrite recipes via the `rewrite-gradle-plugin`
+   init-script** (no build edits; verified end-to-end):
+   ```bash
+   cat > /tmp/rw.init.gradle <<'G2'
+   initscript {
+     repositories { gradlePluginPortal(); mavenCentral() }
+     dependencies { classpath("org.openrewrite:plugin:latest.release") }
+   }
+   rootProject {
+     apply plugin: org.openrewrite.gradle.RewritePlugin
+     dependencies { rewrite("org.openrewrite.recipe:rewrite-migrate-java:latest.release") }
+     rewrite { activeRecipe("org.openrewrite.java.migrate.UpgradeToJava17") }   // or UpgradeBuildToJava21 / UpgradeBuildToJava25
+   }
+   G2
+   JAVA_HOME=<jdk_to> ./gradlew --no-daemon --init-script /tmp/rw.init.gradle rewriteRun
+   ```
+6. **Conserve:** `JAVA_HOME=<jdk_to> ./gradlew test` — the conserve set ⊆ post-pass.
+
+The Spring Boot upgrades (§6) and the Troubleshooting table (§7) apply the same; Gradle equivalents:
+extra deps go in `dependencies {}`, and test-JVM `--add-opens` go in `tasks.test { jvmArgs("--add-opens=...") }`.
