@@ -12,6 +12,10 @@ skill is scored against (P4). Two build tools: **Maven** (`pom.xml`) and **Gradl
 
 Repo root: `/home/vmihaylov/java_8_11_17_to_java_21` (the open attempt is `current_attempt/`).
 
+> **Distribution: internal only.** This skill lives solely in the `bump_java_version` research
+> repo. It is **never** published to the public `bump-java-version-skill` repo — P11 ships only the
+> portable `bump-java-version` SKILL.md (verbatim) plus packaging. Do not sync this skill across.
+
 ---
 
 ## 0. Tools
