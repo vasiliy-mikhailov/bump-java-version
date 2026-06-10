@@ -46,6 +46,7 @@ Kept in sync as PRs are opened / merged / bailed.
 
 | scc-digitalhub/AAC | [#534](https://github.com/scc-digitalhub/AAC/issues/534) | 17→21 | baseline **not green in a generic env** — 62/189 tests fail on JDK 17 (OAuth/SAML/auth-code return 302≠200; needs AAC's CI test/security setup). Frontend-skip worked, SB 2.7.18 supports 21 via Spring 5.3.31 — but no conservable baseline |
 | capital-com-sv/api-java-samples | [#1](https://github.com/capital-com-sv/api-java-samples/issues/1) | 17→21 | **0 tests** — nothing to conserve (samples repo, like s4u/api-java-samples) |
+| apache/arrow-java | [#68](https://github.com/apache/arrow-java/issues/68) | 17→21 | **Not a version bump.** #68 is an umbrella *build-toolchain/CI* issue ("upgrade the JDK used to build Arrow"), not a bytecode/runtime bump — the pom is already `maven.compiler.release=17`, CI already runs Java 17, and the core **builds clean on JDK 21** (verified `memory-core` install, RC=0). Remaining work is Apache-committer-owned sub-tasks (JDK cross-testing infra + an enforcer rule), not a skill bump; and the native modules (gandiva/dataset/c — CMake/C++) + Flight/JDBC integration tests make a clean full-reactor conserve infeasible in a generic env. No honest single PR closes it. |
 
 ## Tally
 
@@ -54,5 +55,5 @@ Kept in sync as PRs are opened / merged / bailed.
 - **Gradle phantom-hop finding** (from archie): `find_bump_issues.py` reads the Gradle **toolchain** for `current_jv`, but the toolchain sets *bytecode target*, not the build floor — archie declared `of(8)` yet needs JDK 11 to build (ANTLR Tool). So a declared-8 Gradle repo can be a real 11→N single hop, not 8→N multi-hop. Gradle twin of the Maven-enforcer phantom hop; same P4 fix shape.
 - **"Java N support" ≠ a version bump** (from hivemq #775): the maintainer-proposed fix (bump jctools) was empirically false — jctools 4.0.5 still calls terminally-deprecated `sun.misc.Unsafe` on JDK 25. The real fix was a library-API swap to the Unsafe-free `atomic` queue. Lesson: verify the *proposed* fix on the target JDK before shipping it; for `Unsafe`-deprecation issues, look for an Unsafe-free code path, not just a newer dependency.
 - **1 MERGED** (the primary reward — ground-truth adoption): `mars-sim/mars-sim` #1959 (21→25), merged by the maintainer with thanks. First demand PR landed.
-- **5 bailed** on P12 discipline (no green baseline / out of scope / unresolvable deps).
+- **6 bailed** on P12 discipline (no green baseline / out of scope / unresolvable deps).
 - _Reward = merged PRs (primary)._ The feed's clean, resolvable tail is largely exhausted; re-run `find_bump_issues.py` later for fresh demand rather than grinding low-yield targets.
