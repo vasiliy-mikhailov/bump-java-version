@@ -15,7 +15,7 @@ Usage: python3 sample_shas.py --seed N [--max-attempts 10] [--scan-cap 150] [--l
 Output: current_attempt/dataset-shas.json = [{repo, sha, jv_from, jv_to, attempts}] (regenerated per run)
 """
 import json, subprocess, sys, os, random
-A = "/home/vmihaylov/java_8_11_17_to_java_21/current_attempt"
+import _paths; A = str(_paths.ATTEMPT)
 NEXT_ALL = {8: 11, 11: 17, 17: 21, 21: 25}  # bumpable LTS -> next LTS
 
 def arg(n, d=None):
@@ -149,20 +149,25 @@ def process_repo(repo):
         print("CLONE-FAIL", repo, flush=True); return []
     db = sh(f"git -C {wd} rev-parse --abbrev-ref HEAD", 30).stdout.strip()
     ref = db if db and db != "HEAD" else "HEAD"        # main/default branch only (commits to main), not --all
-    rows = sh(f"git -C {wd} log {ref} --date=format:%Y --pretty=format:'%H %cd'", 60).stdout.split("\n")
+    rows = sh(f"git -C {wd} log {ref} --date=format:%Y-%m --pretty=format:'%H %cd'", 60).stdout.split("\n")
     by_year = {}
-    for r in rows:                                     # bucket main commits by the year they landed
+    for r in rows:                                     # bucket main commits by the QUARTER they landed
         pp = r.split()
         if len(pp) >= 2:
-            by_year.setdefault(pp[1], []).append(pp[0])
+            try:
+                _y, _mo = pp[1].split("-"); _q = (int(_mo) - 1) // 3 + 1
+            except Exception:
+                continue
+            by_year.setdefault(f"{_y}-Q{_q}", []).append(pp[0])
     out = []
     # For EACH year on main: randomly pick commits and try to compile, up to MAX_ATTEMPTS
     # compile tries (~10). First that compiles is that year's baseline; if none in the budget, the
     # year yields nothing. jv is DERIVED from each commit's artifacts (no version specified).
-    for year in sorted(by_year):
-        shas = by_year[year][:]
-        random.Random(f"{SEED}:{repo}:{year}").shuffle(shas)   # random pick WITHIN the year
+    for period in sorted(by_year):
+        shas = by_year[period][:]
+        random.Random(f"{SEED}:{repo}:{period}").shuffle(shas)   # random pick WITHIN the year
         tries = 0; scanned = 0
+        _yy = int(period.split("-Q")[0]); _qq = int(period.split("-Q")[1])
         for sha in shas:
             if tries >= MAX_ATTEMPTS or scanned >= SCAN_CAP:
                 break
@@ -177,7 +182,7 @@ def process_repo(repo):
                 continue
             ntests = count_tests(wd)                                 # cheap static @Test count BEFORE the costly compile
             if MIN_TESTS and ntests < MIN_TESTS:
-                print(f"  skip-lowtest {repo} {sha[:8]} jv {jv} year {year} tests={ntests}<{MIN_TESTS}", flush=True)
+                print(f"  skip-lowtest {repo} {sha[:8]} jv {jv} period {period} tests={ntests}<{MIN_TESTS}", flush=True)
                 continue
             tries += 1
             if is_mvn:
@@ -186,11 +191,11 @@ def process_repo(repo):
                 rc = sh(f"export PATH=$HOME/bin:$PATH; cd {wd} && INNER_TIMEOUT=870 JDK={jv} WORK_DIR={wd} gradle -q testClasses", 900).returncode
             if rc == 0:
                 mk = detect_mock(wd)
-                out.append({"repo": repo, "sha": sha, "jv_from": jv, "year": int(year), "attempts": tries, "tests": ntests, "mock": mk})
-                print(f"  FOUND {repo} {sha[:8]} jv {jv}->{NEXT[jv]} year {year} tests={ntests} mock={mk} (try {tries}/{MAX_ATTEMPTS})", flush=True)
+                out.append({"repo": repo, "sha": sha, "jv_from": jv, "year": _yy, "quarter": _qq, "attempts": tries, "tests": ntests, "mock": mk})
+                print(f"  FOUND {repo} {sha[:8]} jv {jv}->{NEXT[jv]} period {period} tests={ntests} mock={mk} (try {tries}/{MAX_ATTEMPTS})", flush=True)
                 break
             else:
-                print(f"  noncompile {repo} {sha[:8]} jv {jv} year {year} (try {tries}/{MAX_ATTEMPTS})", flush=True)
+                print(f"  noncompile {repo} {sha[:8]} jv {jv} period {period} (try {tries}/{MAX_ATTEMPTS})", flush=True)
     reap(wd)
     if out:
         return out

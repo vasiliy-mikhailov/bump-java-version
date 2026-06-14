@@ -2,7 +2,8 @@
 # P12 request feed: OPEN GitHub issues asking to bump the Java/JDK version, enriched with the
 # triage signals P12's contract requires — stars, maintenance (pushedAt/archived), and a
 # genuinely-unsatisfied check (current Java version via the root pom vs the requested target).
-import subprocess, json, time, re, base64, datetime
+import subprocess, json, time, re, base64, datetime, os, _paths as _P
+os.makedirs(_P.P12_FEED, exist_ok=True)
 
 QUERIES = [
     '"upgrade java" in:title', '"bump java" in:title', '"migrate to java" in:title',
@@ -164,8 +165,8 @@ for rp, it in byrepo.items():
 
 keep = [r for r in out if r["maintained"] and not r["status"].startswith("satisfied")]
 keep.sort(key=lambda r: r["stars"], reverse=True)
-json.dump(keep, open("/home/vmihaylov/bump_issues.json", "w"), indent=1)
-json.dump(out, open("/home/vmihaylov/bump_issues_all.json", "w"), indent=1)
+json.dump(keep, open(str(_P.P12_FEED / "bump_issues.json"), "w"), indent=1)
+json.dump(out, open(str(_P.P12_FEED / "bump_issues_all.json"), "w"), indent=1)
 sat = sum(1 for r in out if r["status"].startswith("satisfied"))
 unm = sum(1 for r in out if not r["maintained"])
 print(f"\n{len(out)} genuine -> kept {len(keep)} (maintained & unsatisfied) | dropped {sat} stale-open + {unm} unmaintained/archived")

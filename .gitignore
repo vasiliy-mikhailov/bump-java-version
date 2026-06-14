@@ -59,3 +59,15 @@ handoff*
 per_repo_iter.*/
 *.bak
 sweep_results*.json
+
+# 2026-06-14: dig corpus + sweep output + p12 clones are regenerating data, not source
+current_attempt/corpus/baselines_peryear.json*
+current_attempt/corpus/dig_remaining.txt
+current_attempt/corpus/legacy/
+current_attempt/corpus/datasets/
+current_attempt/current_sweep/out/
+current_attempt/current_sweep/datasets/
+current_attempt/current_sweep/logs/
+current_attempt/p12/
+current_attempt/scripts/
+*.loose

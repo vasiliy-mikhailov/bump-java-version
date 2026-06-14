@@ -9,11 +9,21 @@ inference.mikhailov.tech {
 		}
 	}
 	handle_path /qwen-3.6-35b-a3b-awq/* {
-		reverse_proxy omega-reptile-vllm-playground:8000 {
+		reverse_proxy obs-vllm:8000 {
 			header_up Host {upstream_hostport}
 		}
 	}
 	handle {
 		respond "Not found. Models are served at /qwen-3.6-27b-fp8/v1 (FP8) and /qwen-3.6-35b-a3b-awq/v1 (AWQ)." 404
+	}
+}
+
+nexus.mikhailov.tech {
+	basic_auth {
+		puller $2a$14$ANlRLKbYpOKbuuqgZGNK4OAdfnJ5Oa/jIf9A5t6ICiZ6b928QmGZm
+	}
+	reverse_proxy nexus:8081 {
+		header_up -Authorization
+		header_up Host {upstream_hostport}
 	}
 }

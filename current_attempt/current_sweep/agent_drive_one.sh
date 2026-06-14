@@ -8,6 +8,40 @@ export HOME=/root
 export OPENAI_API_KEY="$OC_KEY"; export QWEN_API_KEY="$OC_KEY"
 QWEN_BASE="https://inference.mikhailov.tech/qwen-3.6-27b-fp8/v1"; QWEN_MODEL="qwen-3.6-27b-fp8"
 OUT=/out/$SLUG; mkdir -p "$OUT"
+# P5: route this build's Gradle through the Nexus proxy (init.d auto-load; per-container home)
+mkdir -p "$HOME/.gradle/init.d"
+cat > "$HOME/.gradle/init.d/nexus-mirror.gradle" <<'NXEOF'
+// P5 Nexus mirror — FAIL-OPEN and Gradle 4.x–9.x compatible.
+// Any error here is swallowed: the worst case is "this build resolves directly" (status quo),
+// never "this build breaks". Nexus is prepended (preferred); the project's own repos are kept.
+def NEXUS = "http://nexus:8081/repository/maven-public/"
+
+def addNexus = { repos ->
+    try {
+        if (repos.findByName("nexusMirror") != null) return
+        def nx = repos.maven { r -> r.name = "nexusMirror"; r.url = NEXUS }
+        // Gradle 6+ blocks HTTP repos unless this is set; pre-6 the property doesn't exist (HTTP allowed there).
+        try { nx.allowInsecureProtocol = true } catch (ignored) {}
+        // prefer Nexus first; on containers where reorder is unsupported it stays appended (still a valid source).
+        try { repos.remove(nx); repos.add(0, nx) } catch (ignored) {}
+    } catch (ignored) {}
+}
+
+try {
+    settingsEvaluated { settings ->
+        try { settings.pluginManagement.repositories { addNexus(delegate) } } catch (ignored) {}
+        try { settings.dependencyResolutionManagement.repositoriesMode.set(RepositoriesMode.PREFER_PROJECT) } catch (ignored) {}
+    }
+} catch (ignored) {}
+
+try {
+    allprojects {
+        try { buildscript.repositories { addNexus(delegate) } } catch (ignored) {}
+        try { repositories { addNexus(delegate) } } catch (ignored) {}
+    }
+} catch (ignored) {}
+NXEOF
+
 
 emit() { python3 - "$@" <<'PY'
 import sys, json
@@ -51,7 +85,9 @@ runtest() { if [ "$BT" = mvn ]; then JAVA_HOME=/opt/jdk/$1 mvn -B -ntp test -Dma
 docompile() { if [ "$BT" = mvn ]; then JAVA_HOME=/opt/jdk/$1 mvn -B -ntp -DskipTests compile; else JAVA_HOME=/opt/jdk/$1 ./gradlew testClasses --no-daemon; fi; }
 
 runtest "$FROM" > "$OUT/pre.log" 2>&1 || true
-PRE=$(passet "$(pwd)" "$OUT/pre_set.txt"); PRERC=0
+PRE=$(passet "$(pwd)" "$OUT/pre_set.txt")
+PRECOMPRC=0
+if [ "$PRE" -eq 0 ]; then docompile "$FROM" > "$OUT/pre_compile.log" 2>&1; PRECOMPRC=$?; fi
 find . \( -path '*/target/surefire-reports' -o -path '*/build/test-results/test' \) -type d -exec rm -rf {} + 2>/dev/null || true
 
 cat > AGENTS.md <<A
@@ -80,13 +116,49 @@ runtest "$TO" > "$OUT/post.log" 2>&1; POSTRC=$?
 POST=$(passet "$(pwd)" "$OUT/post_set.txt")
 LOST=$(python3 - "$OUT/pre_set.txt" "$OUT/post_set.txt" <<'PY'
 import sys
-pre=set(open(sys.argv[1]).read().split("\n"))-{""}
-post=set(open(sys.argv[2]).read().split("\n"))-{""}
-print(len(pre-post))
+from collections import Counter
+def lines(p):
+    return [x for x in open(p).read().split("\n") if x.strip()]
+def norm(line):
+    # method-name component, param list / [index] stripped, lowercased -> rename-robust key
+    m = line.rsplit("#", 1)[-1]
+    m = m.split("(")[0].split("[")[0]
+    return m.strip().lower()
+pre = lines(sys.argv[1]); post = lines(sys.argv[2])
+# pass 1: consume exact full-identity matches first (collision-free)
+post_exact = Counter(post)
+unmatched = []
+for p in pre:
+    if post_exact[p] > 0: post_exact[p] -= 1
+    else: unmatched.append(p)
+# pass 2: match the rest by normalized method name -> tolerates class/method @DisplayName renames
+post_norm = Counter()
+for x, c in post_exact.items():
+    if c > 0: post_norm[norm(x)] += c
+resid = []
+for p in unmatched:
+    k = norm(p)
+    if post_norm[k] > 0: post_norm[k] -= 1
+    else: resid.append(p)
+# pass 3: digit-stripped names on what remains -> version-bearing renames (Jdk17->Jdk21) pair up;
+# ordinary numbered siblings (test1/test2) are already consumed by the exact passes above
+import re as _re
+_VOL = _re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|@[0-9a-f]{6,}|\b[0-9a-f]{6,}\b|\d+")
+post_dig = Counter()
+for x, c in post_norm.items():
+    if c > 0: post_dig[_VOL.sub("", x)] += c
+lost = 0
+for p in resid:
+    dk = _VOL.sub("", norm(p))
+    if post_dig[dk] > 0: post_dig[dk] -= 1
+    else: lost += 1
+print(lost)
 PY
 )
-if [ "$PRE" -eq 0 ]; then V=NO_BASELINE
+if [ "$PRE" -eq 0 ]; then
+  if [ "$PRECOMPRC" -ne 0 ]; then V=NO_BASELINE_NOCOMPILE
+  else V=NO_BASELINE_NOTESTS; fi
 elif [ "$COMPRC" -ne 0 ]; then V=FAIL_build_post
 elif [ "$LOST" -ne 0 ]; then V=FAIL_test_conservation
 else V=PASS; fi
-emit "$OUT" "$SLUG" "$REPO" "$FROM->$TO" "$V" "$PRE" "$POST" "$LOST" "$PRERC" "$POSTRC" "$COMPRC"
+emit "$OUT" "$SLUG" "$REPO" "$FROM->$TO" "$V" "$PRE" "$POST" "$LOST" "$PRECOMPRC" "$POSTRC" "$COMPRC"
