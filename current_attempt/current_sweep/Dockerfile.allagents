@@ -12,3 +12,5 @@ COPY gradle-8.10.2 /opt/gradle-8.10.2
 RUN ln -sf /opt/gradle-8.10.2 /opt/gradle \
  && ln -sf /opt/apache-maven-3.9.9 /opt/maven \
  && ln -sf /opt/gradle/bin/gradle /usr/local/bin/gradle
+# UTF-8 locale so non-ASCII identifiers (e.g. Kotlin backtick names) compile; ASCII default breaks the class-file write
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
