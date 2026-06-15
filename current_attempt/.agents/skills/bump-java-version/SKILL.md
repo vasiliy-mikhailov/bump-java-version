@@ -105,10 +105,10 @@ run with **JDK 25** as `<jdk_to>`:
    `java { toolchain { languageVersion = JavaLanguageVersion.of(<jv_to>) } }`, or
    `sourceCompatibility`/`targetCompatibility`/`options.release` (Kotlin: also `kotlin { jvmToolchain(<jv_to>) }`, see §4).
    (Verified: a Spring Boot 2.7 / Gradle 8.10 project went 11→17 with only the toolchain edit.)
-2. **Bump the Gradle wrapper if it predates `jv_to` — the #1 Gradle wall:** JDK 17 needs Gradle ≥ 7.3,
+2. **Bump the Gradle wrapper if it predates `jv_to` — the #1 Gradle wall:** JDK 11 needs Gradle ≥ 5.0, JDK 17 ≥ 7.3,
    JDK 21 ≥ 8.5, JDK 25 ≥ 9.0 — Gradle 8.x can't even *run* a JDK-25 toolchain (it fails parsing the
-   version string), so ≥ 9.0 is required to build/test **on** 25, not just to emit 25 bytecode.
-   `./gradlew wrapper --gradle-version <X>` (run under the OLD JDK if the current wrapper won't start on `jv_to`). **Hard gate — do this FIRST on the 25 hop, never skip it:** `JAVA_HOME=/opt/jdk/<jv_to> ./gradlew --version` must succeed before any build; an `Unsupported class file major version 69` in `_BuildScript_` / while Gradle *configures* is the wrapper itself (not your code) — bump it and re-verify before anything else.
+   version string), so the matching floor is required to build/test **on** `jv_to`, not just to emit its bytecode.
+   `./gradlew wrapper --gradle-version <X>` (run under the OLD JDK if the current wrapper won't start on `jv_to`). **Hard gate — do this FIRST on EVERY hop, never skip it:** `JAVA_HOME=/opt/jdk/<jv_to> ./gradlew --version` must succeed before any build; two signatures mean the wrapper itself (not your code) is too old — bump it and re-verify before anything else: `Unsupported class file major version <N>` in `_BuildScript_` / while Gradle *configures*, and `Could not determine java version from '<v>'` (an old wrapper that can't parse the running JDK's version string, e.g. `11.0.31` / `25.0.3`).
 3. **If it still won't compile, run the SAME recipes via the `rewrite-gradle-plugin` init-script**
    (no build edits; verified end-to-end):
    ```bash
