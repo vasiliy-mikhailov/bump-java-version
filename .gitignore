@@ -71,3 +71,6 @@ current_attempt/current_sweep/logs/
 current_attempt/p12/
 current_attempt/scripts/
 *.loose
+
+current_attempt/current_sweep/gradle-8.10.2/
+current_attempt/current_sweep/.dockerignore

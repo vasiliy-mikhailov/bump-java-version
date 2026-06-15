@@ -1,0 +1,8 @@
+# Overlay: add gradle 8.10.2 + /opt/maven symlink to the EXISTING bump-allagents-sweep
+# (canonical lineage is Dockerfile.allagents; its base bump-kilocode-sweep was pruned, so we
+# extend the live image to unify the build env with the dig). Re-runnable / idempotent.
+FROM bump-allagents-sweep:latest
+COPY gradle-8.10.2 /opt/gradle-8.10.2
+RUN ln -sf /opt/gradle-8.10.2 /opt/gradle \
+ && ln -sf /opt/apache-maven-3.9.9 /opt/maven \
+ && ln -sf /opt/gradle/bin/gradle /usr/local/bin/gradle

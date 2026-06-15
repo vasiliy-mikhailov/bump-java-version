@@ -5,3 +5,10 @@ FROM bump-kilocode-sweep:latest
 RUN apt-get update && apt-get install -y --no-install-recommends python3-pip curl ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN pip3 install --no-cache-dir --break-system-packages uv
 RUN uv venv --python 3.12 /opt/ohvenv && uv pip install --python /opt/ohvenv/bin/python openhands-sdk==1.17.0 openhands-tools==1.18.1
+
+# Unify build env with the dig: port j21-fitness gradle 8.10.2 + /opt/maven symlink
+# so the dig and the conversion compile in the same image with the same tools.
+COPY gradle-8.10.2 /opt/gradle-8.10.2
+RUN ln -sf /opt/gradle-8.10.2 /opt/gradle \
+ && ln -sf /opt/apache-maven-3.9.9 /opt/maven \
+ && ln -sf /opt/gradle/bin/gradle /usr/local/bin/gradle

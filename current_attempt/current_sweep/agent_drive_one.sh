@@ -67,6 +67,9 @@ print(len(s))
 PY
 }
 
+# reproducible deps: reuse the dig's read-only dep cache + shared gradle distributions when mounted
+[ -d /ro ] && export GRADLE_RO_DEP_CACHE=/ro
+[ -d /dists ] && { mkdir -p "$HOME/.gradle/wrapper"; ln -sfn /dists "$HOME/.gradle/wrapper/dists"; }
 cd /root; rm -rf work; mkdir work; cd work
 git init -q; git config --global advice.detachedHead false
 git config --global user.email a@b.c; git config --global user.name x
@@ -80,9 +83,10 @@ chmod +x ./mvnw ./gradlew 2>/dev/null || true
 cp -r /skill ./.bump-skill && chmod -R a-w ./.bump-skill
 
 # build-tool detection: Maven (pom.xml) else Gradle (build.gradle/.kts via the repo's ./gradlew)
-if [ -f pom.xml ]; then BT=mvn; BCMD="mvn -B -ntp test"; else BT=gradle; BCMD="./gradlew test --no-daemon --continue"; fi
-runtest() { if [ "$BT" = mvn ]; then JAVA_HOME=/opt/jdk/$1 mvn -B -ntp test -Dmaven.test.failure.ignore=true; else JAVA_HOME=/opt/jdk/$1 ./gradlew test --no-daemon --continue; fi; }
-docompile() { if [ "$BT" = mvn ]; then JAVA_HOME=/opt/jdk/$1 mvn -B -ntp -DskipTests compile; else JAVA_HOME=/opt/jdk/$1 ./gradlew testClasses --no-daemon; fi; }
+if [ -f pom.xml ]; then BT=mvn; BCMD="mvn -B -ntp test"; else BT=gradle; if [ -x ./gradlew ]; then BCMD="./gradlew test --no-daemon --continue"; else BCMD="gradle test --no-daemon --continue"; fi; fi
+GW() { local jh=$1; shift; if [ -x ./gradlew ]; then JAVA_HOME=/opt/jdk/$jh ./gradlew --no-daemon "$@"; else JAVA_HOME=/opt/jdk/$jh gradle --no-daemon "$@"; fi; }
+runtest() { if [ "$BT" = mvn ]; then JAVA_HOME=/opt/jdk/$1 mvn -B -ntp test -Dmaven.test.failure.ignore=true; else GW "$1" test --continue; fi; }
+docompile() { if [ "$BT" = mvn ]; then JAVA_HOME=/opt/jdk/$1 mvn -B -ntp -DskipTests test-compile; else GW "$1" testClasses; fi; }
 
 runtest "$FROM" > "$OUT/pre.log" 2>&1 || true
 PRE=$(passet "$(pwd)" "$OUT/pre_set.txt")
@@ -93,7 +97,7 @@ find . \( -path '*/target/surefire-reports' -o -path '*/build/test-results/test'
 cat > AGENTS.md <<A
 # How to bump this project's Java version
 Use the bump-java-version skill in \`.bump-skill/\`: read \`.bump-skill/SKILL.md\`, a step-by-step manual you carry out YOURSELF. It uses only standard tools — JDKs, Maven, and OpenRewrite (recipes from Maven Central). There are NO bump scripts to run; perform each step in the manual by hand.
-JDKs are at /opt/jdk/{8,11,17,21}; select one with JAVA_HOME. System Maven (\`mvn\`) is installed.
+JDKs are at /opt/jdk/{8,11,17,21,25}; select one with JAVA_HOME. System Maven (\`mvn\`) and Gradle (\`gradle\`) are installed; for Gradle use the repo's \`./gradlew\` when present, else \`gradle\`.
 Build tool: **$BT**. Baseline: \`JAVA_HOME=/opt/jdk/$FROM $BCMD\` ; verify: \`JAVA_HOME=/opt/jdk/$TO $BCMD\`. For a Gradle project follow SKILL.md **section G**.
 A
 PROMPT="Bump this $BT project from Java $FROM to Java $TO by following the bump-java-version manual in .bump-skill/SKILL.md (if this is a Gradle project, follow section G of the manual). First read .bump-skill/SKILL.md in full. Then carry out its numbered steps YOURSELF with the standard tools (there are no bump scripts): establish the Java $FROM baseline, make Lombok safe, run the OpenRewrite migration the manual gives for this hop, apply the deterministic build-file edits it lists, then run the tests under Java $TO (JAVA_HOME=/opt/jdk/$TO $BCMD) and conserve every previously-passing test. If a step fails, find it in the manual's troubleshooting table, apply the listed fix, and re-run that step. Report the final test result."

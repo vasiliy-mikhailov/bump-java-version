@@ -32,6 +32,7 @@ def run_one(e):
     cmd = ["docker", "run", "--rm", "--name", cname, "--network", "mvn-cache", "-e", f"OC_KEY={OC_KEY}",
            "-v", f"{SKILL}:/skill:ro", "-v", f"{CFG}:/cfg:ro", "-v", f"{OUT}:/out",
            "-v", f"{M2}:/root/.m2", "-v", f"{SETTINGS}:/root/.m2/settings.xml:ro",
+           "-v", "/home/vmihaylov/.gradle-fitness:/ro:ro", "-v", "/home/vmihaylov/.gradle-dists:/dists",
            "-v", f"{DRIVE}:/drive.sh:ro", "-v", f"{OHRUN}:/oh_run.py:ro",
            "--entrypoint", "bash", IMAGE, "/drive.sh", repo, sha, str(frm), str(to), slug, AGENT]
     try:
