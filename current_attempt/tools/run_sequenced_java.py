@@ -20,7 +20,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 BASE = "/home/vmihaylov/java_8_11_17_to_java_21"
 ATTEMPT7 = f"{BASE}/attempt_7"
-IMAGE = "j21-fitness:latest"
+IMAGE = "bump-allagents-sweep:latest"
 ENTRY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "run_one_stage_v2.sh")  # sibling entry script (attempt-owned)
 MAVEN_SETTINGS = "/home/vmihaylov/maven-config/settings.xml"
 M2_CACHE = "/home/vmihaylov/.m2-fitness"

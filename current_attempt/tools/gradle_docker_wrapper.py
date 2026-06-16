@@ -9,7 +9,7 @@ JDK   = os.environ.get('JDK', '21')
 WORK  = os.environ.get('WORK_DIR', os.getcwd())
 GHOME = os.environ.get('GRADLE_CACHE', '/home/vmihaylov/.gradle-fitness')
 NET   = os.environ.get('MVN_NET', 'mvn-cache')
-IMAGE = os.environ.get('IMAGE', 'j21-fitness:latest')
+IMAGE = os.environ.get('IMAGE', 'bump-allagents-sweep:latest')
 os.makedirs(GHOME, exist_ok=True)
 INNER = (f'export HOME=/tmp; export JAVA_HOME=/opt/jdk/{JDK}; '
          f'export PATH="$JAVA_HOME/bin:/opt/gradle/bin:$PATH"; '

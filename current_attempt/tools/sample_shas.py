@@ -52,7 +52,7 @@ def sh(c, to=300):
 def reap(wd):
     # build container writes root-owned target/ files; remove via a root container
     import os as _os
-    sh("docker run --rm --user root -v /tmp:/scratch --entrypoint sh j21-fitness:latest -c 'rm -rf /scratch/" + _os.path.basename(wd) + "'", 180)
+    sh("docker run --rm --user root -v /tmp:/scratch --entrypoint sh alpine:latest -c 'rm -rf /scratch/" + _os.path.basename(wd) + "'", 180)
 
 
 def detect_jv(wd):
