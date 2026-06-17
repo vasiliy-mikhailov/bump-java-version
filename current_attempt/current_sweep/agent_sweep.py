@@ -36,7 +36,7 @@ def run_one(e):
            "-v", f"{DRIVE}:/drive.sh:ro", "-v", f"{OHRUN}:/oh_run.py:ro",
            "--entrypoint", "bash", IMAGE, "/drive.sh", repo, sha, str(frm), str(to), slug, AGENT]
     try:
-        subprocess.run(cmd, capture_output=True, timeout=3300)
+        subprocess.run(cmd, capture_output=True, timeout=86400)
     except subprocess.TimeoutExpired:
         subprocess.run(["docker", "kill", cname], capture_output=True)
         subprocess.run(["docker", "rm", "-f", cname], capture_output=True)
