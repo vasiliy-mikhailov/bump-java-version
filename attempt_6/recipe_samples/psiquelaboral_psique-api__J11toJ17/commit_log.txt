@@ -1,1 +1,0 @@
-recipe: UpgradeToJava17+UpgradeSpringBoot_3_3

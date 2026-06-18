@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 4,
-  "antipattern_clearance": 5,
-  "diff_coherence": 5,
-  "overall": 4,
-  "justification": "The diff correctly migrates from Spring Boot 2 (Java 17) to Spring Boot 3 (Java 21), updating javax to jakarta, replacing deprecated springfox with springdoc-openapi, and using Java 21 idioms like `String.formatted()` and `List.getFirst()`. The `@Serial` annotation is correctly applied to serialVersionUID fields. The migration of SQL initialization properties is also correct. However, the `maven-compiler-plugin.version` is left at 3.8.1, which is quite old for Java 21 (3.11+ is recommended), preventing a perfect score."
-}

@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 4,
-  "antipattern_clearance": 5,
-  "diff_coherence": 4,
-  "overall": 4,
-  "justification": "The diff demonstrates excellent migration to Java 21 idioms, including pattern matching for instanceof (e.g., `server instanceof ConfigurableServletWebServerFactory servletWebServer`), text blocks for multi-line strings, `Optional.isEmpty()`, `List.getFirst()/getLast()`, and `@Serial` annotations. It thoroughly clears deprecated patterns by migrating from `javax.*` to `jakarta.*` namespaces, updating Spring Security to the lambda DSL, and replacing deprecated Maven compiler settings with `<release>`. The diff is coherent with minimal spurious churn, though some test files have unnecessary import removals that don't affect functionality but add noise."
-}

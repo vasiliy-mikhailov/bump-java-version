@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 2,
-  "antipattern_clearance": 4,
-  "diff_coherence": 5,
-  "overall": 3,
-  "justification": "The diff performs a mechanical javax -> jakarta namespace migration and updates build tooling (Spring 6.1, Maven plugins, Java 21 release), but introduces no Java 21 idioms (e.g., pattern matching for switch, record patterns, virtual threads). The removal of JUnit 4/Vintage dependencies is a positive cleanup, though the diff is purely mechanical and lacks modernization of the Java code itself."
-}

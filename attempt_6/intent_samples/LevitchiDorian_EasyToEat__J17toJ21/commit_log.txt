@@ -1,2 +1,0 @@
-2ef8345 Initial JHipster project generate
-cd42572 first commit

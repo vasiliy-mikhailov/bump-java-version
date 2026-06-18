@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 4,
-  "antipattern_clearance": 5,
-  "diff_coherence": 4,
-  "overall": 4,
-  "justification": "The diff comprehensively migrates javax.* to jakarta.* and Spring Boot 2.x to 3.x, while adopting Java 21 idioms like text blocks (e.g., WebServiceApplication.java) and pattern matching for instanceof (e.g., AOP.java). It also replaces String.format with String.formatted() across multiple DAOs. However, the migration of Swagger annotations to OpenAPI 3 is incomplete in some files (e.g., missing @Schema on some fields or inconsistent usage), and the pom.xml changes introduce some spurious churn by removing version properties that might be managed by the parent BOM. The removal of junit-vintage-engine is correct for a pure JUnit 5 setup."
-}

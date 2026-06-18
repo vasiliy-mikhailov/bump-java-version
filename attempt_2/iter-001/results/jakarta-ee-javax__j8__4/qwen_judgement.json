@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 4,
-  "antipattern_clearance": 5,
-  "diff_coherence": 5,
-  "overall": 4,
-  "justification": "The diff correctly migrates dependencies (Spring 5->6, Jakarta EE, JUnit 4->5) and updates annotations (@Serial, @GetMapping, @SpringJUnitConfig) appropriately for Java 21. However, it doesn't leverage newer Java 21 features like virtual threads or pattern matching for switch, keeping idiomatic score at 4. Antipattern clearance is perfect with removal of deprecated JUnit 4 and javax.servlet. Diff coherence is excellent with no spurious changes."
-}

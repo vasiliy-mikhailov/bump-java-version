@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 3,
-  "antipattern_clearance": 4,
-  "diff_coherence": 3,
-  "overall": 3,
-  "justification": "The diff successfully updates Spring to 6.x, Jakarta EE 10, and Java 21 compiler settings, and removes @Autowired in favor of constructor injection. It uses pattern matching for instanceof and String.formatted(), which are good Java 14/15+ idioms. However, it misses upgrading Hibernate (still 4.3.11.Final in pom.xml, though hibernate-entitymanager is removed, leaving the project in a broken state regarding JPA provider), and the test file is truncated/incomplete (only imports changed, no test methods shown). The removal of hibernate-entitymanager without adding a replacement JPA provider (like hibernate-core or hibernate-jpa-model-generator) is a critical coherence issue."
-}

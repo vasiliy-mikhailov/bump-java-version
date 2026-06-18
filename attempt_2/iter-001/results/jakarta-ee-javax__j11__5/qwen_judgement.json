@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 3,
-  "antipattern_clearance": 4,
-  "diff_coherence": 3,
-  "overall": 3,
-  "justification": "The diff successfully migrates javax.* to jakarta.* and updates Spring Boot to 3.x, but introduces a manual migration comment in SecurityConfig.java that suggests incomplete automation. While it removes @Autowired annotations in favor of constructor injection (good practice), it leaves a deprecated WebSecurityConfigurerAdapter class structure with a comment rather than fully refactoring it. The diff also removes some dependencies but leaves orphaned junit dependencies in pom.xml."
-}

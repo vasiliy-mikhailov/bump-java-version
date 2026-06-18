@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 3,
-  "antipattern_clearance": 4,
-  "diff_coherence": 4,
-  "overall": 3,
-  "justification": "The diff correctly updates Spring Boot to 3.x (requiring Java 17+), switches to `jakarta.persistence`, and updates the MySQL connector artifact, but it does not leverage any Java 21-specific idioms (e.g., records, pattern matching, virtual threads). It also removes unused imports and fixes the compiler plugin configuration, which is good, but the lack of Java 21 features limits the idiomatic score."
-}

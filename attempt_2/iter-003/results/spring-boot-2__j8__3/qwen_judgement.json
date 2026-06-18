@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 2,
-  "antipattern_clearance": 2,
-  "diff_coherence": 2,
-  "overall": 2,
-  "justification": "The diff attempts a Spring Boot 2 -> 3 migration but fails critically: it retains the deprecated `WebSecurityConfigurerAdapter` (only commented out, not removed) and mis-nests the new lambda-based `HttpSecurity` DSL (e.g., `.csrf(csrf -> csrf.sessionManagement(...))` is invalid; `sessionManagement` is not a method on `CsrfConfigurer`). The `pom.xml` version jump is correct, and `javax` -> `jakarta` imports are updated, but the security config is broken and non-compilable."
-}

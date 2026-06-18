@@ -1,3 +1,0 @@
-c6955a6 updated versions of dependencies
-d726d8f updated versions of dependencies, licence
-f066fbb updated versions of junit, opencsv, lombok, junit pioneer, maven plugins

@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 4,
-  "antipattern_clearance": 4,
-  "diff_coherence": 4,
-  "overall": 4,
-  "justification": "The diff correctly migrates javax.* to jakarta.* and updates Spring Boot 2.x Redis properties to Spring Boot 3.x (spring.data.redis.*). It also modernizes code with Java 21 features like text blocks, pattern matching for instanceof, and String.formatted(). However, the Swagger migration is incomplete; it removes @EnableSwagger2 and replaces @Api/@ApiOperation with @Tag/@Operation but leaves the old springfox imports and classes in place (e.g., SwaggerConfig.java still imports springfox classes), which will cause compilation errors. Also, the text block in LimitAspect.java has a trailing backslash that might be unintended."
-}

@@ -1,3 +1,0 @@
-# bump-kilocode-sweep = bump-opencode-sweep + the Kilo Code headless CLI.
-FROM bump-opencode-sweep:latest
-RUN npm install -g @kilocode/cli

@@ -1,9 +1,0 @@
-type: specs.openrewrite.org/v1beta/recipe
-name: com.fitness.attempt4.iter2.Stage1
-displayName: Stage 1 — Java 8 → 11
-description: |
-  Runs under JDK 11. Single umbrella recipe — the catalog's distilled J8→J11
-  migration covers JAXB/JAX-WS deps, Lombok bump, Base64, Paths→Path, plugin
-  upgrades, deprecation cleanups, etc.
-recipeList:
-- org.openrewrite.java.migrate.Java8toJava11

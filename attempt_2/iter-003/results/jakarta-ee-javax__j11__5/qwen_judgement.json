@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 3,
-  "antipattern_clearance": 4,
-  "diff_coherence": 3,
-  "overall": 3,
-  "justification": "The diff successfully migrates javax.* to jakarta.* and updates Spring Boot to 3.x, but it introduces spurious churn by removing @Autowired annotations and replacing wildcard imports with explicit ones, which are not required for Java 21. The SecurityConfig migration is incomplete, leaving a comment marker instead of fully removing WebSecurityConfigurerAdapter. The pom.xml changes are mostly correct but remove some dependencies that might be needed."
-}

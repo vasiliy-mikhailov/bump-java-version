@@ -74,3 +74,4 @@ current_attempt/scripts/
 
 current_attempt/current_sweep/gradle-8.10.2/
 current_attempt/current_sweep/.dockerignore
+history/

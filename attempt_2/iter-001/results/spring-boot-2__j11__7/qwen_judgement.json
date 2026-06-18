@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 3,
-  "antipattern_clearance": 4,
-  "diff_coherence": 5,
-  "overall": 3,
-  "justification": "The diff correctly updates Spring Boot from 2.5.5 to 3.3.13 and Java version from 11 to 21, and systematically replaces javax.* imports with jakarta.* equivalents across controllers and models, which is necessary for Spring Boot 3 compatibility. However, it doesn't leverage any Java 21-specific idioms (like records, pattern matching, or virtual threads), and the migration is purely mechanical without evidence of deeper modernization."
-}

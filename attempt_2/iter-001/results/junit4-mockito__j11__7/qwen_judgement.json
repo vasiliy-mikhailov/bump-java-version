@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 3,
-  "antipattern_clearance": 4,
-  "diff_coherence": 3,
-  "overall": 3,
-  "justification": "The diff successfully migrates javax to jakarta, updates Spring Boot to 3.x, and modernizes JUnit 4 to JUnit 5, but introduces unnecessary churn by removing unused imports and reformatting code (e.g., String.format to formatted) that isn't strictly required for the migration. The removal of junit-vintage-engine is correct for JUnit 5, but the diff lacks Java 21-specific idioms like records or pattern matching."
-}

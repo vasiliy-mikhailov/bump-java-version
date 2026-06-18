@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 3,
-  "antipattern_clearance": 4,
-  "diff_coherence": 3,
-  "overall": 3,
-  "justification": "The diff updates Spring Boot to 3.x and Java to 21, migrating javax to jakarta and using String.formatted(), but removes critical imports (SpringApplication, SpringBootApplication) from the main class, likely breaking the app. JUnit 5 migration is incomplete (missing @ExtendWith or proper test structure)."
-}

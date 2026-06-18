@@ -1,3 +1,0 @@
-cb18bb6 upgrades
-942bfa6 test strategies example added
-f7288ef class order example added

@@ -1,0 +1,27 @@
+# JDK-LESS controller for the bump-java hop harness.
+# Contains ONLY: Python+OpenHands (via uv's self-contained 3.12), the docker CLI,
+# git, and the hop tools. NO java/mvn/gradle -> the agent literally cannot build
+# anything itself; its only path to a build is the sealed bjv-jvm<N> images via `bjv`.
+FROM debian:bookworm-slim
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates curl git jq bash coreutils \
+    && rm -rf /var/lib/apt/lists/*
+
+# docker CLI only (static binary) — talks to the host daemon via the mounted socket.
+ARG DOCKER_VERSION=27.3.1
+RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz" \
+      | tar xz -C /tmp \
+    && mv /tmp/docker/docker /usr/local/bin/docker \
+    && rm -rf /tmp/docker
+
+# OpenHands in a self-contained uv python 3.12 venv (no system python/JDK needed).
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && ln -sf /root/.local/bin/uv /usr/local/bin/uv
+RUN uv venv --python 3.12 /opt/ohvenv \
+    && uv pip install --python /opt/ohvenv/bin/python openhands-sdk==1.17.0 openhands-tools==1.18.1
+
+COPY hoptools/jvm-run hoptools/bjv /usr/local/bin/
+RUN chmod +x /usr/local/bin/jvm-run /usr/local/bin/bjv
+
+ENV PATH="/opt/ohvenv/bin:/usr/local/bin:${PATH}"
+WORKDIR /work

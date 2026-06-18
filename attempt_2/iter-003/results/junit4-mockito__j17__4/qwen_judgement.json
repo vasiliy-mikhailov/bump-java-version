@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 2,
-  "antipattern_clearance": 3,
-  "diff_coherence": 4,
-  "overall": 2,
-  "justification": "The diff performs a mechanical javax -> jakarta namespace migration and updates Maven plugin/compiler versions to target Java 21, but introduces no Java 21 idioms (e.g., pattern matching for switch, record patterns, virtual threads, or sequence protocols). While it removes deprecated JUnit 4/Vintage dependencies and javax.jms-api, the core logic remains unchanged boilerplate adapters without modernization."
-}

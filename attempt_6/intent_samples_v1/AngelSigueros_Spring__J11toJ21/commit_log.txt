@@ -1,3 +1,0 @@
-a37a9ed Cambios en configuraciones, nuevas versiones...
-d6aa94b Spring Boot Hibernate Full
-e008f0a bbdd properties

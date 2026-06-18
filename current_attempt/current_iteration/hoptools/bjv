@@ -1,0 +1,25 @@
+#!/bin/bash
+# Agent-facing hop tool. The from/to JDKs are sealed images; this picks the right one.
+#   bjv from build | bjv from test       (establish the Java <from> baseline)
+#   bjv to   build | bjv to   test       (verify under Java <to>)
+#   bjv to   run '<cmd>'                  (arbitrary cmd in the <to> env, e.g. an OpenRewrite recipe)
+#   bjv from run '<cmd>'                  (e.g. run a recipe under the OLD JDK where the code still compiles)
+#   bjv scan                              (offline CWE scan of resolved deps; reported)
+# Env (set by the driver): BJV_FROM, BJV_TO. Run from the workspace root.
+set -uo pipefail
+[ "${1:-}" = scan ] && exec bjv-scan
+case "${1:-}" in
+  from) VER="${BJV_FROM:?}";;
+  to)   VER="${BJV_TO:?}";;
+  *) echo "usage: bjv <from|to> <build|test|run [cmd]>  |  bjv scan" >&2; exit 2;;
+esac
+shift; ACT="${1:-}"; shift || true
+if [ -f pom.xml ]; then BT=mvn; else BT=gradle; fi
+GW="gradle"; [ -x ./gradlew ] && GW="./gradlew"
+case "$ACT" in
+  build) [ "$BT" = mvn ] && C="mvn -B -ntp -DskipTests test-compile" || C="$GW --no-daemon testClasses";;
+  test)  [ "$BT" = mvn ] && C="mvn -B -ntp test -Dmaven.test.failure.ignore=true" || C="$GW --no-daemon test --continue";;
+  run)   C="$*";;
+  *) echo "usage: bjv <from|to> <build|test|run [cmd]>  |  bjv scan" >&2; exit 2;;
+esac
+exec jvm-run "$VER" "$C"

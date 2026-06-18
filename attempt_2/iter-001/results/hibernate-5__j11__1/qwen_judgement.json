@@ -1,7 +1,0 @@
-{
-  "idiomatic_java21": 3,
-  "antipattern_clearance": 4,
-  "diff_coherence": 5,
-  "overall": 3,
-  "justification": "The diff correctly updates dependencies to Jakarta EE 9+ (Hibernate 6, Spring 6, Jakarta Servlet 6) and replaces deprecated `javax.*` imports with `jakarta.*`, which is necessary for Java 21 compatibility. However, it doesn't leverage any Java 21-specific idioms (e.g., virtual threads, pattern matching, records) and only performs a baseline migration. The changes are coherent and focused without spurious churn."
-}

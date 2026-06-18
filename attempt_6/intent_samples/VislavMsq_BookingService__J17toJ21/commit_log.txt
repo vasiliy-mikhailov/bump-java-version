@@ -1,9 +1,0 @@
-97992b4 PS-17 add booking flow
-d828039 Merge pull request #1 from iflat-online/PS-13
-040e930 Merge remote-tracking branch 'origin/PS-13' into PS-13
-977486b Fixed all DB naming
-abef11c Fixed all DB naming
-ba70e52 Fixed comment problems
-bfeee41 fix problems for DB + create new Entity -> BaseEntity with base fields
-c5f342d Fix table user/apartment - colum parent_id -> nullable "true".
-5648de0 create entity + create DB.
