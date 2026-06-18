@@ -74,8 +74,20 @@ def lost(pre, post):
 
 def cwe_summary(path):
     """parse osv-scanner --format json -> (n_vulns, n_packages, by_severity dict)."""
-    try: d = json.load(open(path))
-    except Exception: return {"vulns": -1, "packages": -1, "by_severity": {}, "note": "scan_unreadable"}
+    try: raw = open(path).read()
+    except Exception: raw = ""
+    try:
+        d = json.loads(raw)
+    except Exception:
+        # osv emits non-JSON when there's nothing to scan (e.g. Gradle .kts w/o a lockfile) — that is
+        # "no known CWEs", NOT an error. Strip any preamble; else treat no-sources/empty as clean.
+        i, j = raw.find("{"), raw.rfind("}")
+        try:
+            d = json.loads(raw[i:j+1])
+        except Exception:
+            if not raw.strip() or "no package sources" in raw.lower() or "no sources" in raw.lower():
+                return {"vulns": 0, "packages": 0, "by_severity": {}, "note": "no_scannable_sources"}
+            return {"vulns": -1, "packages": -1, "by_severity": {}, "note": "scan_unreadable"}
     sev = Counter(); ids = set(); pkgs = set()
     for res in d.get("results", []):
         for pkg in res.get("packages", []):

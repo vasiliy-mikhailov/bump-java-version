@@ -18,8 +18,10 @@ QWEN_BASE="https://inference.mikhailov.tech/qwen-3.6-27b-fp8/v1"; QWEN_MODEL="qw
 PY() { docker run --rm -v "$WS:$WS" -v "$OUT:$OUT" -v "$ITER/tools:/t:ro" python:3-slim python3 /t/score.py "$@"; }
 emit_simple() { printf '{\n "slug": "%s",\n "hop": "%s->%s",\n "verdict": "%s"\n}\n' "$SLUG" "$FROM" "$TO" "$1" > "$OUT/result.json"; }
 
-# 1. workspace (restore write first so a prior run's read-only skill file doesn't block rm)
-chmod -R u+w "$WS" 2>/dev/null || true; rm -rf "$WS"; mkdir -p "$WS"
+# 1. workspace — reap any prior run via a ROOT container (sealed builds write root-owned build/.gradle),
+#    then clone fresh. A host-side rm can't remove root-owned files; a root container can.
+docker run --rm -v /tmp/bjv_ws:/wsroot alpine rm -rf "/wsroot/$SLUG" 2>/dev/null || true
+mkdir -p "$WS"
 git clone -q "https://github.com/$REPO.git" "$WS" 2>>"$OUT/clone.log" || { echo CLONE_FAIL >> "$OUT/clone.log"; emit_simple FETCH_FAIL; exit 0; }
 git -C "$WS" checkout -q "$SHA" 2>>"$OUT/clone.log" || { emit_simple FETCH_FAIL; exit 0; }
 # sandbox the skill: copy only the manual, read-only FILE (dir stays writable so cleanup works next run)
