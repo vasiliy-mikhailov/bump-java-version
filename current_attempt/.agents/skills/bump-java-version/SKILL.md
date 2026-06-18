@@ -12,38 +12,40 @@ newer (CVE-free) dependency versions — **not merely new bytecode**. A bump is 
 2. its **effective compiler target is `jv_to`** (source/`release`/toolchain == `jv_to`; a project left at `--release 8` that merely *compiles* under a newer JDK has **not** been bumped);
 3. its resolved dependencies carry **no known CWEs** (checked offline, see §5) — the bump must not ship into a vulnerable dependency set.
 
-**Your build environment (sealed, no JDK on your shell).** You have **no `java`/`mvn`/`gradle`** directly.
-Two sealed JDK environments are exposed as tools — one with `jv_from`, one with `jv_to` — over your
-workspace. Use them, never a raw `JAVA_HOME`:
-- `bjv from build` / `bjv from test` — compile / run tests under **`jv_from`** (the baseline).
-- `bjv to build`   / `bjv to test`   — compile / run tests under **`jv_to`** (the verify).
-- `bjv to run '<cmd>'` / `bjv from run '<cmd>'` — run any command (e.g. an OpenRewrite `rewriteRun`/`rewrite:run`) in the `jv_to` (or `jv_from`) env.
-- `bjv scan` — offline CWE scan of the resolved dependencies (reports known vulnerabilities).
-Build-tool detection is automatic (Maven if `pom.xml`, else Gradle via the repo's `./gradlew`). **No internet:**
-recipes and dependencies resolve through an offline Maven mirror; the CWE database is a frozen offline snapshot.
+**You emit a program; you do not run anything (v2).** Given `(jv_from, jv_to, build files)`, output an
+**ordered conversion program** — a list of operations the harness will apply and score. You have **no shell,
+no `java`/`mvn`/`gradle`, no file access**. Each operation is exactly one of:
+- **`recipe`** — one unparametrized OpenRewrite recipe by FQN (from §3/§6, drawn from the allowed catalog),
+  tagged with the env it runs in (`from` or `to`). The harness runs it via the rewrite plugin.
+- **`intent`** — one of the predefined deterministic toolchain operations the harness applies: **`set_target`**
+  (set source/`release`/toolchain to `jv_to`) and **`bump_wrapper`** (Gradle wrapper → the pinned floor version).
+Nothing else is expressible — no hand-edit, no `skipTests`, no test deletion. A wall no recipe/intent covers →
+emit the bail label (§8), never improvise. The harness runs on a single all-JDK env over an **offline** mirror
++ **frozen** CWE snapshot, applies your program, then scores the combined gate (§5).
 
-Do **one** step at a time (8→17 = do 8→11 fully green, then 11→17).
+A bump program is judged done only when **all** of: tests conserved under `jv_to`, effective target == `jv_to`,
+and no known CWEs (§5). Do **one** LTS step at a time (8→17 = the 8→11 program, then the 11→17 program).
 
 **Discipline — recipes only, never by hand (this governs every step below):**
 - **Apply every change with an OpenRewrite recipe.** Prefer the *unparametrized* meta-recipes (`UpgradeBuildToJava<N>`, `UpgradeSpringBoot_<X>`, §3) that bundle the dep/plugin/flag fixes; a recipe you must parametrize is a weaker, less-portable form.
 - **Allowance is by intent, not by operation.** Besides recipes, a short allow-list of *deterministic toolchain intents* is OK — **update the build wrapper to its required version floor**, **set the Java toolchain/`release` to `jv_to`** (necessary, auditable, not improvisation; these regenerate `gradlew`+`gradlew.bat` etc. and don't count as hand-edits). For **any other** change — above all improvised source/dependency edits — do **not** make it and do **not** ask: **bail `I_MADE_MANUAL_EDIT`**. The unmet need is a recipe/intent gap for the operator to close between runs, never something to improvise or negotiate mid-bump. Never silently fabricate a migration from your own head — that is unauditable fantasy, not a bump.
 - **Verify the recipe path first.** Before migrating, confirm the recipe artifacts resolve (Maven Central / the proxy is reachable); if they don't, **bail `RECIPE_PATH_UNREACHABLE`** up front — never fall back to manual edits.
 
-**How to read this:** §0–§5 are the procedure — follow them in order. When a step fails, find your error
-in **§7** (grouped by kind) and apply the fix, then re-run the failed step. **§6** (Spring Boot) and **§8**
-(when to bail) are entered only when §7 sends you there.
+**How to read this (you COMPOSE a program, you don't run steps):** §3/§6 name the **recipes** to put in your
+program; §4 is recognition (the §3 recipes apply it — don't add ops for it); §7 maps a **wall → the recipe/intent
+op** that addresses it; §8 lists the **bail labels** for walls no op covers. Wherever the text says "run X", that
+means **emit a `recipe`/`intent` op for X** — the harness runs it. Keep the ops in order; do one LTS step's
+program at a time.
 
 ---
 
-## 0. Tools you have (sealed environments + git)
+## 0. What the harness provides (you don't touch it)
 
-- The **two sealed JDK envs**, reached only via `bjv from …` (`jv_from`) and `bjv to …` (`jv_to`) — there is
-  no `java`/`mvn`/`gradle` on your own shell. `bjv` picks the project's wrapper (`./mvnw`/`./gradlew`) inside.
-- **`bjv scan`** — offline CWE scan of resolved dependencies.
-- **No internet.** OpenRewrite recipes and dependencies resolve through an **offline Maven mirror** (so the
-  recipe/dep versions below must exist in it); the CWE database is a **frozen offline snapshot** ("clean as
-  of the snapshot"). Never reach for the network.
-- **git** — commit a baseline first so you can `diff`/revert.
+- A single **all-JDK env** (JDKs 8–25 + Maven + Gradle) over an **offline Maven mirror** — so every recipe FQN and
+  dependency version you reference **must already exist in the mirror** (no internet). The harness applies your
+  program there: `recipe` ops via the rewrite plugin, `intent` ops deterministically.
+- The combined **gate** then builds/tests under `jv_to`, checks the effective bytecode target, and runs an
+  **offline CWE scan** (frozen snapshot, "clean as of the snapshot") — see §5. You never run these; they score you.
 
 Versions used below are known-good; newer point releases are fine:
 - rewrite-maven-plugin `6.40.0`, `rewrite-migrate-java` `3.35.0`, `rewrite-spring` `6.31.0`.
