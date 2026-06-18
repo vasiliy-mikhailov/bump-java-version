@@ -17,7 +17,8 @@ try:
                max_output_tokens=32768, temperature=0.0, native_tool_calling=False)
     agent = Agent(llm=llm, tools=get_default_tools(enable_browser=False),
                   condenser=LLMSummarizingCondenser(llm=cond, max_size=40, keep_first=2))
-    conv = Conversation(agent=agent, workspace=LocalWorkspace(working_dir=workdir), max_iteration_per_run=300)
+    # NO step/iteration cap (RLVR: a budget/limit teaches the model to give up and emit noise — AGENTS.md P3).
+    conv = Conversation(agent=agent, workspace=LocalWorkspace(working_dir=workdir), max_iteration_per_run=100000)
     conv.send_message(prompt)
     conv.run()
     print("OH_RUN_DONE")
