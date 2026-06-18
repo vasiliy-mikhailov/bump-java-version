@@ -6,6 +6,8 @@
 #   jvmjob build | test | scan | run "<cmd>"
 set -uo pipefail
 # Java-env setup belongs HERE (this is the JVM): resolve gradle distributions + deps offline.
+# The wrapper dist cache covers gradle 7.0-9.5 in BOTH -bin and -all classifiers, so a wrapper
+# bump to a pinned version (see SKILL §G) resolves locally and NEVER downloads (no hang, no timeout).
 [ -d /dists ] && { mkdir -p "$HOME/.gradle/wrapper"; ln -sfn /dists "$HOME/.gradle/wrapper/dists"; }
 [ -d /ro/caches/modules-2 ] && export GRADLE_RO_DEP_CACHE=/ro/caches
 cd /work || exit 2

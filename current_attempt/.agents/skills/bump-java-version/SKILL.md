@@ -122,7 +122,9 @@ run with **JDK 25** as `<jdk_to>`:
 2. **Bump the Gradle wrapper if it predates `jv_to` — the #1 Gradle wall:** JDK 11 needs Gradle ≥ 5.0, JDK 17 ≥ 7.3,
    JDK 21 ≥ 8.5, JDK 25 ≥ 9.0 — Gradle 8.x can't even *run* a JDK-25 toolchain (it fails parsing the
    version string), so the matching floor is required to build/test **on** `jv_to`, not just to emit its bytecode.
-   `bjv from run './gradlew wrapper --gradle-version <X>'` (bump under the OLD JDK if the current wrapper won't start on `jv_to`). **Hard gate — do this FIRST on EVERY hop, never skip it:** `bjv to run './gradlew --version'` must succeed before any build; two signatures mean the wrapper itself (not your code) is too old — bump it and re-verify before anything else: `Unsupported class file major version <N>` in `_BuildScript_` / while Gradle *configures*, and `Could not determine java version from '<v>'` (an old wrapper that can't parse the running JDK's version string, e.g. `11.0.31` / `25.0.3`).
+   **Bump to one of these EXACT versions** (only these resolve offline — any other version downloads from the
+   internet, which is unavailable, and the build will hang): **`jv_to`=17 → `7.6`**, **21 → `8.10.2`**, **25 → `9.0.0`**.
+   Run `bjv from run './gradlew wrapper --gradle-version <pinned>'` (bump under the OLD JDK if the current wrapper won't start on `jv_to`); keep the distribution type the project already uses. **Hard gate — do this FIRST on EVERY hop, never skip it:** `bjv to run './gradlew --version'` must succeed before any build; two signatures mean the wrapper itself (not your code) is too old — bump it and re-verify before anything else: `Unsupported class file major version <N>` in `_BuildScript_` / while Gradle *configures*, and `Could not determine java version from '<v>'` (an old wrapper that can't parse the running JDK's version string, e.g. `11.0.31` / `25.0.3`).
 3. **If it still won't compile, run the SAME recipes via the `rewrite-gradle-plugin` init-script**
    (no build edits; verified end-to-end):
    ```bash
