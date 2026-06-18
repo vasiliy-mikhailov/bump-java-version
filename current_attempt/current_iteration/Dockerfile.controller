@@ -20,8 +20,8 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && ln -sf /root/.local/bin/u
 RUN uv venv --python 3.12 /opt/ohvenv \
     && uv pip install --python /opt/ohvenv/bin/python openhands-sdk==1.17.0 openhands-tools==1.18.1
 
-COPY hoptools/jvm-run hoptools/bjv /usr/local/bin/
-RUN chmod +x /usr/local/bin/jvm-run /usr/local/bin/bjv
+COPY hoptools/jvm-run hoptools/bjv hoptools/bjv-scan /usr/local/bin/
+RUN chmod +x /usr/local/bin/jvm-run /usr/local/bin/bjv /usr/local/bin/bjv-scan
 
 ENV PATH="/opt/ohvenv/bin:/usr/local/bin:${PATH}"
 WORKDIR /work
