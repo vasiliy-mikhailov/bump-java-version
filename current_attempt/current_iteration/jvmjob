@@ -1,0 +1,26 @@
+#!/bin/bash
+# jvmjob — lives INSIDE the sealed single-JDK image and runs at /work.
+# Owns ALL Java-specific logic: gradle-dist staging, RO dep cache, build-tool detection
+# (prefer the repo's ./mvnw / ./gradlew), and the build/test/scan jobs. The harness
+# (jvm-run / bjv) only picks the image and mounts the workspace — it carries no Java knowledge.
+#   jvmjob build | test | scan | run "<cmd>"
+set -uo pipefail
+# Java-env setup belongs HERE (this is the JVM): resolve gradle distributions + deps offline.
+[ -d /dists ] && { mkdir -p "$HOME/.gradle/wrapper"; ln -sfn /dists "$HOME/.gradle/wrapper/dists"; }
+[ -d /ro/caches/modules-2 ] && export GRADLE_RO_DEP_CACHE=/ro/caches
+cd /work || exit 2
+tool() { if [ -f pom.xml ]; then echo mvn; elif [ -x ./gradlew ]; then echo gradlew; else echo gradle; fi; }
+mvncmd() { if [ -x ./mvnw ]; then echo ./mvnw; else echo mvn; fi; }
+case "${1:-}" in
+  build) case "$(tool)" in
+           mvn)     exec "$(mvncmd)" -B -ntp -DskipTests test-compile;;
+           gradlew) exec ./gradlew --no-daemon testClasses;;
+           gradle)  exec gradle --no-daemon testClasses;; esac;;
+  test)  case "$(tool)" in
+           mvn)     exec "$(mvncmd)" -B -ntp test -Dmaven.test.failure.ignore=true;;
+           gradlew) exec ./gradlew --no-daemon test --continue;;
+           gradle)  exec gradle --no-daemon test --continue;; esac;;
+  scan)  exec osv-scanner scan source --offline-vulnerabilities -r .;;
+  run)   shift; exec bash -lc "$*";;
+  *) echo "usage: jvmjob build|test|scan|run \"<cmd>\"" >&2; exit 2;;
+esac

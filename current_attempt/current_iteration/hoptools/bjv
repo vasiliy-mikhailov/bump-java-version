@@ -1,25 +1,20 @@
 #!/bin/bash
-# Agent-facing hop tool. The from/to JDKs are sealed images; this picks the right one.
-#   bjv from build | bjv from test       (establish the Java <from> baseline)
+# Agent-facing verbs — thin mapper, NO Java knowledge. Maps from/to -> sealed image version and the
+# verb -> the image's `jvmjob` action; the sealed single-JDK image does all the Java work.
+#   bjv from build | bjv from test       (baseline under Java <from>)
 #   bjv to   build | bjv to   test       (verify under Java <to>)
-#   bjv to   run '<cmd>'                  (arbitrary cmd in the <to> env, e.g. an OpenRewrite recipe)
-#   bjv from run '<cmd>'                  (e.g. run a recipe under the OLD JDK where the code still compiles)
-#   bjv scan                              (offline CWE scan of resolved deps; reported)
-# Env (set by the driver): BJV_FROM, BJV_TO. Run from the workspace root.
+#   bjv to   run '<cmd>' | bjv from run '<cmd>'   (run an OpenRewrite recipe etc. in that env)
+#   bjv scan                              (offline CWE scan in the <to> env)
 set -uo pipefail
-[ "${1:-}" = scan ] && exec bjv-scan
+[ "${1:-}" = scan ] && exec jvm-run "${BJV_TO:?}" jvmjob scan
 case "${1:-}" in
-  from) VER="${BJV_FROM:?}";;
-  to)   VER="${BJV_TO:?}";;
+  from) V="${BJV_FROM:?}";;
+  to)   V="${BJV_TO:?}";;
   *) echo "usage: bjv <from|to> <build|test|run [cmd]>  |  bjv scan" >&2; exit 2;;
 esac
 shift; ACT="${1:-}"; shift || true
-if [ -f pom.xml ]; then BT=mvn; else BT=gradle; fi
-GW="gradle"; [ -x ./gradlew ] && GW="./gradlew"
 case "$ACT" in
-  build) [ "$BT" = mvn ] && C="mvn -B -ntp -DskipTests test-compile" || C="$GW --no-daemon testClasses";;
-  test)  [ "$BT" = mvn ] && C="mvn -B -ntp test -Dmaven.test.failure.ignore=true" || C="$GW --no-daemon test --continue";;
-  run)   C="$*";;
+  build|test) exec jvm-run "$V" jvmjob "$ACT";;
+  run)        exec jvm-run "$V" jvmjob run "$*";;
   *) echo "usage: bjv <from|to> <build|test|run [cmd]>  |  bjv scan" >&2; exit 2;;
 esac
-exec jvm-run "$VER" "$C"

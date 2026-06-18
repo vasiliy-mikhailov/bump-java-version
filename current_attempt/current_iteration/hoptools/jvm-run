@@ -1,21 +1,14 @@
 #!/bin/bash
-# jvm-run <feature-version> <command...>
-# Runs <command> in the sealed bjv-jvm<version> image over the shared workspace.
-# The workspace is the host dir $BJV_WS, mounted at /work in BOTH the controller
-# and the sealed image (same host path), so edits the agent makes are visible here.
-# Reproducibility mounts (Nexus dep cache / gradle dists) are attached read-only.
+# jvm-run <ver> <cmd> [args...] — PURE docker mechanics, NO Java knowledge.
+# Runs the sealed bjv-jvm<ver> image over the shared workspace + offline caches, then hands off
+# to the image's own command (e.g. `jvmjob build`). All Java logic lives inside the image.
 set -uo pipefail
 VER="$1"; shift
 : "${BJV_WS:?BJV_WS (host workspace path) must be set}"
-IMG="bjv-jvm${VER}"
 MOUNTS=()
-[ -d "${BJV_M2:-}" ]    && MOUNTS+=(-v "${BJV_M2}:/root/.m2")
-[ -f "${BJV_SETTINGS:-}" ] && MOUNTS+=(-v "${BJV_SETTINGS}:/root/.m2/settings.xml:ro")
-[ -d "${BJV_GRADLE_RO:-}" ] && MOUNTS+=(-v "${BJV_GRADLE_RO}:/ro:ro")
+[ -d "${BJV_M2:-}" ]          && MOUNTS+=(-v "${BJV_M2}:/root/.m2")
+[ -f "${BJV_SETTINGS:-}" ]    && MOUNTS+=(-v "${BJV_SETTINGS}:/root/.m2/settings.xml:ro")
+[ -d "${BJV_GRADLE_RO:-}" ]   && MOUNTS+=(-v "${BJV_GRADLE_RO}:/ro:ro")
 [ -d "${BJV_GRADLE_DISTS:-}" ] && MOUNTS+=(-v "${BJV_GRADLE_DISTS}:/dists")
-NET="${BJV_NET:-mvn-cache}"
-exec docker run --rm --network "$NET" \
-  -e HOME=/root \
-  -v "$BJV_WS:/work" -w /work \
-  "${MOUNTS[@]}" \
-  --entrypoint bash "$IMG" -lc "$*"
+exec docker run --rm --network "${BJV_NET:-mvn-cache}" -e HOME=/root \
+  -v "$BJV_WS:/work" -w /work "${MOUNTS[@]}" "bjv-jvm${VER}" "$@"

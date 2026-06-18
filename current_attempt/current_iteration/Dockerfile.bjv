@@ -27,7 +27,9 @@ RUN curl -fsSL --retry 6 --retry-delay 5 --retry-all-errors --connect-timeout 30
 # No internet at runtime: the DB is baked at $HOME/.cache so --offline-vulnerabilities resolves it.
 COPY osv-scanner /usr/local/bin/osv-scanner
 COPY osv-db/ /root/.cache/osv-scanner/
-RUN chmod +x /usr/local/bin/osv-scanner
+# jvmjob: the in-image Java job runner — owns build-tool detection, dist staging, build/test/scan.
+COPY jvmjob /usr/local/bin/jvmjob
+RUN chmod +x /usr/local/bin/osv-scanner /usr/local/bin/jvmjob
 
 # temurin base already exports JAVA_HOME=/opt/java/openjdk (the only JDK present).
 ENV PATH="/opt/maven/bin:/opt/gradle/bin:${PATH}" \

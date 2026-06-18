@@ -1,9 +1,5 @@
 #!/bin/bash
-# Offline CWE scan of the project's dependency manifests, run in the jv_to sealed env.
-# Reads pom.xml / build.gradle(.kts) / lockfiles (DECLARED deps; full transitive needs a lockfile
-# present in the repo — a known v1 limitation) and checks them against the FROZEN offline OSV DB
-# baked into the sealed image. Prints the OSV table (PACKAGE / VERSION / FIXED VERSION / CVSS) so the
-# agent sees exactly what to upgrade. Exit: nonzero iff known vulnerabilities were found.
+# Offline CWE scan of the project's (bumped) dependencies in the jv_to sealed env.
+# Thin alias — the scan itself is the sealed image's `jvmjob scan` (osv-scanner, frozen offline DB).
 set -uo pipefail
-VER="${BJV_TO:?BJV_TO must be set}"
-exec jvm-run "$VER" "osv-scanner scan source --offline-vulnerabilities -r ."
+exec jvm-run "${BJV_TO:?BJV_TO must be set}" jvmjob scan
