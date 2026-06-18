@@ -13,10 +13,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ARG MAVEN_VERSION=3.9.9
 ARG GRADLE_VERSION=8.10.2
-RUN curl -fsSL "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
+RUN curl -fsSL --retry 6 --retry-delay 5 --retry-all-errors --connect-timeout 30 \
+      "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
       | tar -xz -C /opt \
     && ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven
-RUN curl -fsSL "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/g.zip \
+RUN curl -fsSL --retry 6 --retry-delay 5 --retry-all-errors --connect-timeout 30 \
+      "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" -o /tmp/g.zip \
     && unzip -q /tmp/g.zip -d /opt \
     && ln -s /opt/gradle-${GRADLE_VERSION} /opt/gradle \
     && rm /tmp/g.zip
