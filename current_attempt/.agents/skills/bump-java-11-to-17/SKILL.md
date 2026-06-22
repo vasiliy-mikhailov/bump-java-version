@@ -1,44 +1,69 @@
 ---
 name: bump-java-11-to-17
-description: Emit the rewrite.yml that migrates a Maven or Gradle project from Java 11 to Java 17 — an OpenRewrite declarative composite recipe whose recipeList the harness runs, then scores. Use for an 11→17 Java LTS bump.
+description: Migrate a Maven or Gradle project one Java LTS step from Java 11 to Java 17 — it must compile under JDK 17, conserve every previously-passing test, and raise the effective compiler target to 17, using only standard tools (JDKs, Maven or Gradle, OpenRewrite recipes from Maven Central; no project-specific scripts). Use for an 11→17 Java LTS bump.
 ---
 
-# Java 11 → 17 — emit a `rewrite.yml`
+# Bump Java 11 → 17
 
-You output **one executable `rewrite.yml`** — an OpenRewrite declarative composite recipe (`name: com.bjv.Bump`)
-whose **`recipeList`** is the ordered recipe sequence the harness runs (one `mvn rewrite:run` / `gradle rewriteRun`),
-then scores. You run nothing, edit nothing — and a `rewrite.yml` can only list recipes, so a hand-edit is impossible.
+Migrate the project in your working directory from Java 11 to Java 17. GOAL: it COMPILES and passes its TESTS under JDK 17, conserving every test that passed under JDK 11, with the effective compiler target raised to 17 (a project that merely compiles under 17 but still targets 11 is NOT a bump). Work autonomously until done.
 
-The "intents" are recipes too:
-- **set target → 17** → `org.openrewrite.java.migrate.UpgradeJavaVersion` with `version: 17`.
-- **bump Gradle wrapper** (only if below the JDK-17 floor 7.3) → `org.openrewrite.gradle.UpdateGradleWrapper` with `version: "7.6"`.
+## Tools — standard only (JDKs 11 and 17, Maven or Gradle, OpenRewrite from Maven Central)
+Three operations recur below; run each with the two JDKs — no project-specific scripts:
+- **compile under JDK N** — Maven: `JAVA_HOME=<jdkN> mvn -B -ntp -DskipTests compile`; Gradle: `./gradlew -Dorg.gradle.java.home=<jdkN> compileJava` (also `compileKotlin`/`compileTestJava`).
+- **test under JDK N** — Maven: `JAVA_HOME=<jdkN> mvn -B -ntp test`; Gradle: `./gradlew -Dorg.gradle.java.home=<jdkN> test`.
+- **apply the OpenRewrite program** — write `rewrite.yml` (below), then run it **under JDK 11 with the Java-17 recipe artifacts**:
+  - Maven: `JAVA_HOME=<jdk11> mvn -B -ntp -U -Denforcer.skip=true org.openrewrite.maven:rewrite-maven-plugin:6.40.0:run -Drewrite.configLocation=$(pwd)/rewrite.yml -Drewrite.activeRecipes=com.bjv.Bump -Drewrite.recipeArtifactCoordinates=org.openrewrite.recipe:rewrite-migrate-java:3.35.0,org.openrewrite.recipe:rewrite-spring:6.31.0,org.openrewrite.recipe:rewrite-java-dependencies:1.55.0` — the **absolute** `configLocation` (`$(pwd)/rewrite.yml`) is required, else multi-module submodules report `Recipe(s) not found`.
+  - Gradle: apply the OpenRewrite plugin through an init-script with `rewrite-migrate-java:3.35.0` / `rewrite-spring:6.31.0` / `rewrite-java-dependencies:1.55.0` on the `rewrite` configuration, then run `rewriteRun`.
 
-Every recipe FQN you use must be in the catalog and resolvable in the **offline** mirror. **Done** = tests still
-pass under 17, effective compiler target == 17, no known CWEs. A wall no recipe covers → emit a **bail** (bottom).
+CRITICAL — NEVER time-box these builds. Cold Gradle/Maven runs download distributions + the OpenRewrite jars and take MINUTES; let them finish. An apply that was cut off means the recipe was NOT applied (tests may still pass at the OLD Java level, but the bytecode-target check FAILS) — after applying, confirm BUILD SUCCESS and that the build files actually changed.
 
-## Default `rewrite.yml`
-```yaml
+## How to work (graded on a CORRECT migration that conserves tests — nothing else counts if a test is lost or the bytecode isn't really at 17)
+- Prefer the off-the-shelf transforms: the unparametrized meta-recipes + setting the Java version to 17 + (only if needed) the pinned Gradle wrapper are the clean path — use them first.
+- Treat every manual edit and every project-specific dependency/plugin change as a LIABILITY. Make the FEWEST changes that genuinely work; reach for a hand edit or a project-specific recipe only when a real wall demands it.
+- Never touch or weaken test code (see FORBIDDEN).
+
+## START HERE — write `rewrite.yml`, then apply it
+```
 type: specs.openrewrite.org/v1beta/recipe
 name: com.bjv.Bump
 recipeList:
-  - org.openrewrite.gradle.UpdateGradleWrapper:      # ONLY if wrapper < 7.3 (Gradle projects)
-      version: "7.6"
   - org.openrewrite.java.migrate.UpgradePluginsForJava17
   - org.openrewrite.java.migrate.UpgradeBuildToJava17
-  - org.openrewrite.java.migrate.UpgradeJavaVersion:  # sets source/release/toolchain (+ Kotlin jvmToolchain) to 17
+  - org.openrewrite.java.migrate.UpgradeJavaVersion:
       version: 17
 ```
-Drop `UpdateGradleWrapper` if the wrapper already ≥ 7.3, or for Maven. `UpgradeBuildToJava17` already adds the
-test-fork `--add-opens`, the EE deps (if still javax-era), JaCoCo ≥ 0.8.12, surefire ≥ 2.22.2 — don't add ops for those.
+Then compile under JDK 17. If it compiles, test under JDK 17. If tests pass and none are lost, you are done.
 
-## Add to `recipeList` when a wall shows (else bail)
-| Symptom | Recipe to add |
-|---|---|
-| `Unsupported class file major version 61` / ASM / Spring component-scan `SimpleMetadataReader` NPE | `org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_3` (or `…boot2.UpgradeSpringBoot_2_7` for SB 2.0–2.4 on the 5.3 ASM floor). On SB ≥ 3.2 it's a *transitive* old ASM no recipe forces → **bail `I_MADE_MANUAL_EDIT`**. |
-| Lombok / Mockito / ByteBuddy too old for 17 | covered by `UpgradeBuildToJava17`; if it persists, no unparametrized recipe forces the transitive version → **bail**. |
-| `package javax.xml.bind does not exist` while the recipe runs | the harness runs the recipe under jv_from where it still compiles — no action. |
+## Reflect loop — if compile or test under 17 fails, read the error, fix the FIRST wall, re-run (no iteration limit)
+JDK-17 class-file version is **61** — a tool that reads bytecode via ASM must be new enough for v61.
+- **Lombok breaks javac:** `NoSuchFieldError: JCTree$JCImport.qualid` / `Could not initialize class lombok.javac.Javac`. Floor Lombok to **1.18.30** via `org.openrewrite.java.dependencies.UpgradeDependencyVersion` {org.projectlombok, lombok, 1.18.30} (and its annotationProcessor).
+- **Test fork strong-encapsulation:** `InaccessibleObjectException` / `module {A} does not "opens {pkg}" to unnamed module` (deep reflection via setAccessible). Hand-edit the test fork args (Maven `maven-surefire-plugin` `<argLine>`, Gradle `tasks.test { jvmArgs(...) }`) adding the opens the error names — one token each joined with `=`, e.g. `--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED` (also commonly java.lang.reflect, java.text, java.io, java.nio, java.time, sun.nio.ch). Preserve any existing argLine (e.g. JaCoCo's `@{argLine}`). This whole arg block = ONE edit.
+- **Spring component-scan fails:** `Unsupported class file major version 61`, OR a bare `IllegalArgumentException at ClassReader` wrapped in `BeanDefinitionStoreException` → `SimpleMetadataReader` (no "major version" text). Spring < 5.3 (SB 2.0–2.4) bundles an ASM that can't read v61 → add `org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7`. Do NOT hand-pick an intermediate < SB 2.5 — it fails with the IDENTICAL error and looks like "the bump didn't help".
+- **Mockito** `cannot mock`/`Cannot define class using reflection`/`sun.misc.Unsafe.defineClass`: its shaded ByteBuddy is too old. Bump Mockito (≥ 5.x) or force `net.bytebuddy:byte-buddy(:agent)` ≥ **1.14.12** (a plain bump is often overridden by the Spring BOM — force it). UpgradeDependencyVersion.
+- **JaCoCo** `Unsupported class file major version 61`: floor jacoco to **0.8.12** (Maven `jacoco-maven-plugin`, Gradle `jacoco { toolVersion }`).
+- **Embedded compiler** `target level should be in '1.1'...'N'` (AspectJ ajc / Eclipse ECJ doing the compiling): bump it (aspectjtools/aspectjrt/plugin ≥ 1.9.8 for 17), not the JDK flags.
+- **Gradle wrapper below the JDK-17 floor (7.3):** bump via `org.openrewrite.gradle.UpdateGradleWrapper` {version: "7.6"} (the pinned value), or set gradle-wrapper.properties by hand. Two wrapper-too-old signatures: `Unsupported class file major version N` while Gradle CONFIGURES (in `_BuildScript_`), and `Could not determine java version from '17.0.x'`. NEVER point distributionUrl at a `file://` path.
+- **Gradle + Kotlin:** `Inconsistent JVM-target compatibility … compileJava (17) and compileKotlin (M)` → set `kotlin { jvmToolchain(17) }`, not just the Java toolchain.
+- **`cannot find symbol: WebSecurityConfigurerAdapter`** etc. needing Spring Security 6 → that requires SB 3 (a 17→21-era jump); on the 11→17 hop, prefer staying on SB 2.7.
+- **Multi-module:** a JDK bump is per-BUILD, not per-module. `Dependency resolution is looking for a library compatible with JVM runtime version N, but 'project :X' is only compatible with M` = you set the target in some modules but not others — set the SAME target in every module (root `allprojects`/`subprojects`).
+- **`Cannot find a Java installation … matching {languageVersion=N}`** (often a foojay resolver timeout, no network): point Gradle at the installed JDKs `-Porg.gradle.java.installations.paths=<jdk11>,<jdk17>` and DROP any `vendor`/`implementation` pins from `toolchain{}` — `languageVersion` alone is enough.
+- **`Entry <path> is a duplicate but no duplicate handling strategy has been set`** (Gradle 7 made this a hard error): `tasks.withType(Copy).configureEach { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }`.
+- **A removed/changed JDK API in the project's OWN source:** hand-edit minimally.
 
-## Bail labels (emit instead of improvising)
-- `RECIPE_PATH_UNREACHABLE` — a recipe artifact doesn't resolve in the mirror.
-- `CWE_UNFIXABLE_OFFLINE` — a resolved dep has a known CWE and no fixed version is in the mirror.
-- `I_MADE_MANUAL_EDIT` — a wall needs a change no catalog recipe provides (forced transitive ByteBuddy/ASM, SB1.x app on SB2-removed APIs, a removed-API source rewrite).
+## General discipline (these stop you chasing non-problems)
+- **EDIT HYGIENE:** after EVERY build-file edit, BEFORE rebuilding, validate it — `./gradlew help -q` (Maven `mvn -q validate`). If that fails naming the file you just edited, YOUR edit broke the script: fix/revert it, do not chase it as a migration error. Make minimal, validated edits.
+- **NOT YOUR TESTS:** tests needing Docker/Testcontainers/a database/Selenium/the network were already failing in the baseline — they are NOT in your conserve-set. Don't try to fix them and don't count them as regressions; only tests that PASSED under 11 must still pass.
+- OOM during tests is usually DOWNSTREAM of an earlier real error — fix the FIRST error; only raise the test `-Xmx` if it's genuinely heap.
+- Stale generated classes (`ClassAlreadyExistsException`, jsonschema2pojo): `./gradlew clean` / `rm -rf target`, then re-run.
+- Use `--add-opens` for deep reflection (`setAccessible`), `--add-exports` only for compile/link access to a non-exported API. Do NOT use `--illegal-access=permit` — JEP 403 removed it in JDK 17 (no-op/error). Canonical opens set if you can't tell which: `--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.time=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED --add-opens=java.management/java.lang.management=ALL-UNNAMED`.
+
+## When to bail (report honestly instead of forcing)
+- A **Spring-Boot-1.x app** whose custom code calls SB-2-removed APIs (won't compile on SB2).
+- A **semantic JDK change** in the project's own code (its annotation processor crashes / `java.beans.Introspector`-derived behavior changed) — confirm with a pristine-checkout probe failing the same way under JDK 17.
+- An abandoned dependency with no JDK-17 release.
+- Native (CMake/JNI) modules that don't build in a plain JVM.
+
+## Absolutely forbidden (cheating — fails the run)
+Do NOT delete/skip/disable/weaken any test or assertion; no `-DskipTests`/`<skip>true`; do NOT delete test files; do NOT touch test code to make it pass. Conservation is checked independently.
+
+When the project passes its tests under JDK 17 with no tests lost and the effective target is 17, say you are done and summarize what you changed.

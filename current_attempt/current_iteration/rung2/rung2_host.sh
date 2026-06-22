@@ -19,7 +19,7 @@ set -a; . /home/vmihaylov/java_8_11_17_to_java_21/.env; set +a
 OHRUN=/home/vmihaylov/java_8_11_17_to_java_21/current_attempt/current_iteration/oh_run.py
 docker run --rm --network mvn-cache -e OC_KEY="$PROPOSER_API_KEY" \
   -v "$BJV_WS:/work" -v "$OHRUN:/oh_run.py:ro" -v /home/vmihaylov/java_8_11_17_to_java_21/current_attempt/current_iteration/rung2/bin:/r2bin:ro \
-  -v /home/vmihaylov/java_8_11_17_to_java_21/current_attempt/current_iteration/rung2/rung2_drive.sh:/drive.sh:ro -v /tmp/prompts/rung2_prompt_${FROM}_${TO}.txt:/prompt.txt:ro \
+  -v /home/vmihaylov/java_8_11_17_to_java_21/current_attempt/current_iteration/rung2/rung2_drive.sh:/drive.sh:ro -v /home/vmihaylov/java_8_11_17_to_java_21/current_attempt/.agents/skills/bump-java-${FROM}-to-${TO}/SKILL.md:/skill.md:ro \
   -v /home/vmihaylov/.m2-fitness:/root/.m2 -v /home/vmihaylov/maven-config/settings.xml:/root/.m2/settings.xml:ro \
   -v /home/vmihaylov/.gradle-fitness:/ro:ro -v /home/vmihaylov/.gradle-dists:/dists:ro \
   --entrypoint bash bump-allagents-sweep:latest /drive.sh "$FROM" "$TO" > "$O/agent.log" 2>&1
