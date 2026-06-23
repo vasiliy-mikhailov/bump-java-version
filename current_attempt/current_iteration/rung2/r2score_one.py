@@ -18,7 +18,7 @@ hand_files = []; pending = None
 for cmd, pth in toks:
     if cmd: pending = cmd
     elif pending:
-        if pending in ('str_replace', 'insert', 'create') and pth and not pth.endswith('rewrite.yml'):
+        if pending in ('str_replace', 'insert', 'create') and pth and not pth.endswith('rewrite.yml') and 'rewrite-init.gradle' not in pth and not pth.endswith('rw.init.gradle'):
             f = pth.replace('/work/', '')
             if f not in hand_files: hand_files.append(f)
         pending = None
@@ -33,8 +33,13 @@ for ln in diff.splitlines():
 def pure_target(f):
     lines = filelines.get(f, [])
     return bool(lines) and all(TARGETPAT.search(l) for l in lines)
-edits = [f for f in hand_files if not pure_target(f)]
-free_target = [f for f in hand_files if pure_target(f)]
+def pure_wrapper(f):
+    # a gradle-wrapper.properties edit whose changed lines are only the distributionUrl bump = free wrapper intent
+    if 'gradle-wrapper.properties' not in f: return False
+    lines = filelines.get(f, [])
+    return bool(lines) and all('distributionUrl' in l for l in lines)
+edits = [f for f in hand_files if not pure_target(f) and not pure_wrapper(f)]
+free_target = [f for f in hand_files if pure_target(f) or pure_wrapper(f)]
 cheat = [f for f in hand_files if TESTPAT.search(f)]
 skip = bool(re.search(r'skipTests|<skip>\s*true|maven\.test\.skip|\.enabled\s*=\s*false', diff))
 m = re.search(r'VERDICT (\w+)', rd(os.path.join(O, 'verdict.txt'))); v = m.group(1) if m else ""
