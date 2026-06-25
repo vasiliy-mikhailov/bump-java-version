@@ -24,6 +24,9 @@ CRITICAL — NEVER time-box these builds. Cold Gradle/Maven runs download distri
 - Treat every manual edit and every project-specific dependency/plugin change as a LIABILITY. Make the FEWEST changes that genuinely work; reach for a hand edit or a project-specific recipe only when a real wall demands it.
 - Never touch or weaken test code (see FORBIDDEN).
 
+## Proactive step — Gradle wrapper floor (run BEFORE the first JDK-17 build; gated on a structural signal, not an error)
+If the build tool is **Gradle**, read the wrapper version in `gradle/wrapper/gradle-wrapper.properties` (the `gradle-<N>-bin.zip` in `distributionUrl`). **If it is below 7.3** (the JDK-17 floor), bump `distributionUrl` to **`gradle-7.6-bin.zip`** (the pinned value) *before* applying the recipe / building under JDK 17 — never wait for the error. Gradle itself runs on the build JDK, and Gradle **< 7.3 cannot run on JDK 17**: it dies during *configuration* with `Unsupported class file major version 61` while compiling `settings.gradle`/`build.gradle`, before any project code is touched. That v61 text is the SAME signature JaCoCo and old Spring/ASM emit, so reactive error-matching cannot reliably attribute it to the wrapper — but the **structural trigger (wrapper version < 7.3) is unambiguous**, which is exactly why this is proactive (same test as the Lombok proactive step). Apply via `org.openrewrite.gradle.UpdateGradleWrapper` {version: "7.6"} or by editing `distributionUrl` directly (never a `file://` path). Counts as a **free hop-fixed intent**, like setting the target. The reactive Troubleshooting row below stays as a back-stop.
+
 ## START HERE — write `rewrite.yml`, then apply it
 ```
 type: specs.openrewrite.org/v1beta/recipe
