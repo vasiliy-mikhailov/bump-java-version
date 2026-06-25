@@ -12,7 +12,7 @@ Usage: check_program.py <rewrite.yml> [<ignored>] [<jv_to>]   -> "OK PARAMETRIC=
 import sys, re
 y = open(sys.argv[1]).read()
 TO = sys.argv[3] if len(sys.argv) > 3 else None
-PINNED_WRAPPER = {"11": "7.6", "17": "7.6", "21": "8.10.2", "25": "9.0.0"}
+PINNED_WRAPPER = {"11": "7.6", "17": "7.6", "21": "8.10.2", "25": "9.1.0"}
 TARGET_KEYS = {"java.version", "maven.compiler.source", "maven.compiler.target", "maven.compiler.release"}
 LOMBOK    = {"25": "1.18.46"}
 JACOCO    = {"25": "0.8.13", "21": "0.8.12", "17": "0.8.12"}
