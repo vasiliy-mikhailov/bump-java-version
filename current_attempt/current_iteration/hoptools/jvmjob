@@ -20,12 +20,12 @@ mvncmd() { if [ -x ./mvnw ]; then echo ./mvnw; else echo mvn; fi; }
 case "${1:-}" in
   build) case "$(tool)" in
            mvn)     exec "$(mvncmd)" -B -ntp -DskipTests test-compile;;
-           gradlew) exec ./gradlew --no-daemon testClasses;;
-           gradle)  exec gradle --no-daemon testClasses;; esac;;
+           gradlew) exec ./gradlew --no-daemon --rerun-tasks testClasses;;
+           gradle)  exec gradle --no-daemon --rerun-tasks testClasses;; esac;;
   test)  case "$(tool)" in
            mvn)     exec "$(mvncmd)" -B -ntp test -Dmaven.test.failure.ignore=true;;
-           gradlew) exec ./gradlew --no-daemon test --continue;;
-           gradle)  exec gradle --no-daemon test --continue;; esac;;
+           gradlew) exec ./gradlew --no-daemon test --continue --rerun-tasks;;
+           gradle)  exec gradle --no-daemon test --continue --rerun-tasks;; esac;;
   scan)  exec osv-scanner scan source --offline-vulnerabilities -r .;;
   run)   shift; exec bash -lc "$*";;
   *) echo "usage: jvmjob build|test|scan|run \"<cmd>\"" >&2; exit 2;;
