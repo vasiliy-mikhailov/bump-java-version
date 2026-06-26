@@ -70,5 +70,29 @@
     "from": 17,
     "to": 21,
     "expected": "PASS"
+  },
+  {
+    "situation": "11_17_gradle_wrapper_floor",
+    "dir": "11_17/s_gradle_wrapper",
+    "kind": "hop",
+    "from": 11,
+    "to": 17,
+    "expected": "PASS"
+  },
+  {
+    "situation": "11_17_env_addopens_fixed",
+    "dir": "11_17/s_env_addopens_fixed",
+    "kind": "hop",
+    "from": 11,
+    "to": 17,
+    "expected": "PASS"
+  },
+  {
+    "situation": "11_17_env_addopens_unfixed",
+    "dir": "11_17/s_env_addopens_unfixed",
+    "kind": "hop",
+    "from": 11,
+    "to": 17,
+    "expected": "FAIL_test_conservation"
   }
 ]
