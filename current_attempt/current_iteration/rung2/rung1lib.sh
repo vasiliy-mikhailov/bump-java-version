@@ -19,6 +19,7 @@ r1_clone(){ # repo sha
   [ -f "$BJV_WS/pom.xml" ] && echo "BUILDTOOL=maven" || echo "BUILDTOOL=gradle"
 }
 r1_baseline(){ # echoes integer pre-pass count, or NOCOMPILE
+  find "$BJV_WS" \( -path '*/target/surefire-reports' -o -path '*/build/test-results' \) -type d -exec rm -rf {} + 2>/dev/null  # drop COMMITTED stale test-results so pre_set reflects a REAL baseline run, not checked-in XML (phantom-baseline guard)
   bjv from build >"$O/pre_build.log" 2>&1 || { echo NOCOMPILE; return 1; }
   bjv from test  >"$O/pre_test.log"  2>&1 || true
   PY passet "$BJV_WS" "$O/pre_set.txt" >/dev/null 2>&1
