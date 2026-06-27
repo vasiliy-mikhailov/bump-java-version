@@ -24,6 +24,9 @@ CRITICAL — NEVER time-box these builds. Cold Gradle/Maven runs download distri
 - Treat every manual edit and every project-specific dependency/plugin change as a LIABILITY — more code to get right, more risk. Make the FEWEST changes that genuinely work; reach for a hand edit or a project-specific recipe only when a real wall demands it.
 - Never touch or weaken test code (see FORBIDDEN).
 
+## Proactive step — verify the Java target actually landed (Gradle/Maven pin the recipe leaves at 8; silent FAIL_target_not_bumped)
+`UpgradeJavaVersion` frequently does NOT touch the build file's target pin, so the build compiles cleanly to OLD (Java-8, major 52) bytecode with NO error and silently scores `FAIL_target_not_bumped`. After applying the recipe, grep every build file for a pin still `< 11` and hand-bump it BEFORE the JDK-11 build. Use a SIMPLE grep (do NOT improvise a `find -exec` — a malformed one wastes turns and can get you stuck): `grep -rnE 'JavaLanguageVersion.of|VERSION_1[._]?8|sourceCompat|targetCompat|options.release|<source>|<target>|<release>|maven.compiler|jvmTarget' . 2>/dev/null`. Bump EVERY pin you find (a project can have two): Gradle `java { toolchain { languageVersion = JavaLanguageVersion.of(8) } }` → `of(11)`; `sourceCompatibility`/`targetCompatibility = JavaVersion.VERSION_1_8` (or `'1.8'`) → `VERSION_11`/`'11'`; `options.release = 8` → `11`; Maven `<source>1.8`/`<target>1.8`/`<release>8` / `maven.compiler.source` → `11`; Kotlin `jvmTarget "1.8"` → `"11"`. This applies to PLAIN-Java projects too (not just Kotlin). Counts as a free hop-fixed intent. (Proven: jmini/asciidoctorj-dynamic-include — plain-Java, sole pin `java { toolchain { JavaLanguageVersion.of(8) } }` the recipe left untouched: `of(8)`→`of(11)` flipped FAIL_target_not_bumped `target 8` → VERDICT PASS `target 11`, 35 tests, 0 edits.)
+
 ## START HERE — write `rewrite.yml`, then apply it
 ```
 type: specs.openrewrite.org/v1beta/recipe
