@@ -68,3 +68,5 @@ Wall → fix:
 Do NOT delete/skip/disable/weaken any test or assertion; no `-DskipTests`/`<skip>true`; do NOT delete test files; do NOT touch test code to make it pass. Conservation of the originally-passing tests is checked independently.
 
 When the project passes its tests under JDK 11 with no tests lost and the effective target is 11, say you are done and summarize what you changed.
+
+- **Apply the recipe ONLY via `bapply` (transient init-script) — NEVER add the OpenRewrite plugin to a build file.** If you add `id('org.openrewrite')` / `apply plugin: 'org.openrewrite.rewrite'` / a `rewrite { }` block / `rewrite(...)` deps to `build.gradle` to apply the recipe, it PERSISTS into the gate build, which resolves plugins from the OFFLINE mirror and dies: `Plugin Repositories (could not resolve plugin artifact 'org.openrewrite:org.openrewrite.gradle.plugin:N')` -> FAIL_build_post. `bapply` applies the recipe transiently and leaves no residue; if you already added it, REMOVE the plugin + `rewrite{}` block + `rewrite(...)` deps before the gate. (rr_8_93 aartiPl/tablevis: agent left `id('org.openrewrite') version '6.40.0'` -> gate couldn't resolve it offline.)
