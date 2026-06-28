@@ -88,6 +88,32 @@ def test_inline_comment_on_free_intent_value_not_violation():
     os.unlink(yml)
     assert out.startswith("OK") and rc == 0, f"value-correct UpgradeJavaVersion must be OK, got: {out.strip()}"
 
+# ---------- check_program.py: free-intent table must match the per-hop SKILL recommendations ----------
+# (skill bug-hunt 2026-06-28: the SKILLs recommend floors the table didn't credit -> penalty / FAIL_CHEAT)
+def _udv(group, artifact, ver):
+    return ("  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:\n"
+            f"      groupId: {group}\n      artifactId: {artifact}\n      newVersion: {ver}\n")
+
+def test_free_gradle_wrapper_6_9_at_8to11():
+    # the 8->11 skill recommends wrapper 6.9 (7.x removed compile/testCompile); must be FREE at TO=11,
+    # not a VIOLATION/FAIL_CHEAT (was pinned to 7.6).
+    yml = _rewrite_yml('  - org.openrewrite.gradle.UpdateGradleWrapper:\n      version: "6.9"\n')
+    rc, out = _run(CHECK, yml, "x", "11"); os.unlink(yml)
+    assert out.startswith("OK") and "PARAMETRIC=0" in out, f"wrapper 6.9 must be free at 8->11, got: {out.strip()}"
+
+def test_free_lombok_floor_at_17_and_21():
+    # AGENTS.md lists Lombok as a free hop-fixed floor; the 11->17 and 17->21 skills floor it to 1.18.30.
+    for to in ("17", "21"):
+        yml = _rewrite_yml(_udv("org.projectlombok", "lombok", "1.18.30"))
+        rc, out = _run(CHECK, yml, "x", to); os.unlink(yml)
+        assert "PARAMETRIC=0" in out, f"lombok 1.18.30 must be free at TO={to}, got: {out.strip()}"
+
+def test_free_mockito_floor_at_21():
+    # the 17->21 skill floors Mockito for JDK 21; the credited exact value is 5.18.0.
+    yml = _rewrite_yml(_udv("org.mockito", "mockito-core", "5.18.0"))
+    rc, out = _run(CHECK, yml, "x", "21"); os.unlink(yml)
+    assert "PARAMETRIC=0" in out, f"mockito 5.18.0 must be free at TO=21, got: {out.strip()}"
+
 # ---------- detect_java.py: router (router-1, router-7) ----------
 def _ws(files):
     d = tempfile.mkdtemp()

@@ -12,12 +12,16 @@ Usage: check_program.py <rewrite.yml> [<ignored>] [<jv_to>]   -> "OK PARAMETRIC=
 import sys, re
 y = open(sys.argv[1]).read()
 TO = sys.argv[3] if len(sys.argv) > 3 else None
-PINNED_WRAPPER = {"11": "7.6", "17": "7.6", "21": "8.10.2", "25": "9.1.0"}
+# 8->11 wrapper floor is 6.9 NOT 7.x: Gradle 7 removed compile/testCompile, which breaks Java-8-era build
+# files, so the per-hop skill (correctly) pins 6.9 — credit that exact value, not a 7.x.
+PINNED_WRAPPER = {"11": "6.9", "17": "7.6", "21": "8.10.2", "25": "9.1.0"}
 TARGET_KEYS = {"java.version", "maven.compiler.source", "maven.compiler.target", "maven.compiler.release"}
-LOMBOK    = {"25": "1.18.46"}
+# Lombok/Mockito are JDK-pinned free floors at EVERY hop the skill recommends them, not just 25 — the 11->17
+# and 17->21 skills floor Lombok to 1.18.30 (first JDK-21-capable) and Mockito to 5.18.0 for JDK 21.
+LOMBOK    = {"25": "1.18.46", "21": "1.18.30", "17": "1.18.30"}
 JACOCO    = {"25": "0.8.13", "21": "0.8.12", "17": "0.8.12"}
 BYTEBUDDY = {"25": "1.17.6", "21": "1.14.12", "17": "1.14.12"}
-MOCKITO   = {"25": "5.18.0"}
+MOCKITO   = {"25": "5.18.0", "21": "5.18.0"}
 
 v = []
 if "specs.openrewrite.org/v1beta/recipe" not in y or "recipeList:" not in y:
