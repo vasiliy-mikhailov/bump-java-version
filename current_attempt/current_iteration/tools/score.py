@@ -46,7 +46,7 @@ def efftarget(root):
             if not f.endswith(".class") or f == "module-info.class": continue
             m = _major(os.path.join(dp, f))
             if m: (mains if ismain else tests).append(m)
-    pool = mains or tests
+    pool = mains  # MAIN bytecode only; never derive the target from TEST classes (review score-3)
     return (min(pool) - 44) if pool else -1
 
 # --- rename-robust conservation: how many pre-pass tests are missing post (lifted from agent_drive_one) ---
@@ -66,7 +66,9 @@ def lost(pre, post):
         k = norm(p)
         if post_norm[k] > 0: post_norm[k] -= 1
         else: resid.append(p)
-    VOL = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|@[0-9a-f]{6,}|\b[0-9a-f]{6,}\b|\d+")
+    # strip only CLEARLY-volatile tokens (UUIDs, @hex, long hex runs). The old trailing `|\d+` stripped ALL
+    # digits, bucketing distinct numbered tests (testCase1/2/3) together so a dropped one was masked (review score-2).
+    VOL = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|@[0-9a-f]{6,}|\b[0-9a-f]{6,}\b")
     post_dig = Counter()
     for x, c in post_norm.items():
         if c > 0: post_dig[VOL.sub("", x)] += c
@@ -111,46 +113,49 @@ def cwe_summary(path):
                 sev[band] += 1
     return {"vulns": len(ids), "packages": len(pkgs), "by_severity": dict(sev)}
 
-mode = sys.argv[1]
-if mode == "passet":
-    ws, out = sys.argv[2], sys.argv[3]
-    s = passet(ws)
-    open(out, "w").write("\n".join(sorted(s)))
-    print(len(s))
-    sys.exit(0)
-
-# mode == final
-ws, pre_f, frm, to, comprc, postrc, cwe_json, out_dir = sys.argv[2:10]
-frm, to, comprc, postrc = int(frm), int(to), int(comprc), int(postrc)
-# reward penalty inputs: model-chosen parametric recipes + manual edits (each ×0.9). Optional, default 0.
-parametric = int(sys.argv[10]) if len(sys.argv) > 10 else 0
-edits = int(sys.argv[11]) if len(sys.argv) > 11 else 0
-pre = [x for x in open(pre_f).read().split("\n") if x.strip()] if os.path.exists(pre_f) else []
-post = sorted(passet(ws))
-open(out_dir + "/post_set.txt", "w").write("\n".join(post))
-LOST = lost(pre, post)
-ETGT = efftarget(ws)
-CWE = cwe_summary(cwe_json)
-
-# combined gate
-if not pre:
-    verdict = "NO_BASELINE_NOTESTS"
-elif comprc != 0:
-    verdict = "FAIL_build_post"
-elif LOST != 0:
-    verdict = "FAIL_test_conservation"
-elif ETGT >= 0 and ETGT < to:
-    verdict = "FAIL_target_not_bumped"
-else:
+# --- combined-gate verdict (extracted for unit-testability; behavior preserved) ---
+def decide(pre, comprc, LOST, ETGT, to):
+    if not pre:        return "NO_BASELINE_NOTESTS"
+    if comprc != 0:    return "FAIL_build_post"
+    if LOST != 0:      return "FAIL_test_conservation"
+    if ETGT == -1:     return "FAIL_no_main_bytecode"   # build OK but no inspectable main classes: the bump is unverifiable, never silently PASS (review score-4)
+    if 0 <= ETGT < to: return "FAIL_target_not_bumped"
     # CWE is REPORTED, not yet gating (threshold TBD) — record but don't fail on it
-    verdict = "PASS"
-# reward = gate_pass × 0.9^(parametric recipes + manual edits); 0 if the gate didn't pass
-reward = round(0.9 ** (parametric + edits), 4) if verdict == "PASS" else 0.0
-res = {"slug": os.path.basename(out_dir.rstrip("/")), "hop": f"{frm}->{to}", "verdict": verdict,
-       "pre_pass": len(pre), "post_pass": len(post), "lost": LOST,
-       "compile_rc": comprc, "test_rc": postrc, "effective_target": ETGT,
-       "parametric_recipes": parametric, "edits": edits, "reward": reward,
-       "dep_cwes": CWE}
-json.dump(res, open(out_dir + "/result.json", "w"), indent=1)
-print("VERDICT", verdict, "pre", len(pre), "post", len(post), "lost", LOST,
-      "target", ETGT, "cwes", CWE.get("vulns"), "parametric", parametric, "edits", edits, "reward", reward)
+    return "PASS"
+
+def main():
+    mode = sys.argv[1]
+    if mode == "passet":
+        ws, out = sys.argv[2], sys.argv[3]
+        s = passet(ws)
+        open(out, "w").write("\n".join(sorted(s)))
+        print(len(s))
+        return
+
+    # mode == final
+    ws, pre_f, frm, to, comprc, postrc, cwe_json, out_dir = sys.argv[2:10]
+    frm, to, comprc, postrc = int(frm), int(to), int(comprc), int(postrc)
+    # reward penalty inputs: model-chosen parametric recipes + manual edits (each ×0.9). Optional, default 0.
+    parametric = int(sys.argv[10]) if len(sys.argv) > 10 else 0
+    edits = int(sys.argv[11]) if len(sys.argv) > 11 else 0
+    pre = [x for x in open(pre_f).read().split("\n") if x.strip()] if os.path.exists(pre_f) else []
+    post = sorted(passet(ws))
+    open(out_dir + "/post_set.txt", "w").write("\n".join(post))
+    LOST = lost(pre, post)
+    ETGT = efftarget(ws)
+    CWE = cwe_summary(cwe_json)
+
+    verdict = decide(pre, comprc, LOST, ETGT, to)
+    # reward = gate_pass × 0.9^(parametric recipes + manual edits); 0 if the gate didn't pass
+    reward = round(0.9 ** (parametric + edits), 4) if verdict == "PASS" else 0.0
+    res = {"slug": os.path.basename(out_dir.rstrip("/")), "hop": f"{frm}->{to}", "verdict": verdict,
+           "pre_pass": len(pre), "post_pass": len(post), "lost": LOST,
+           "compile_rc": comprc, "test_rc": postrc, "effective_target": ETGT,
+           "parametric_recipes": parametric, "edits": edits, "reward": reward,
+           "dep_cwes": CWE}
+    json.dump(res, open(out_dir + "/result.json", "w"), indent=1)
+    print("VERDICT", verdict, "pre", len(pre), "post", len(post), "lost", LOST,
+          "target", ETGT, "cwes", CWE.get("vulns"), "parametric", parametric, "edits", edits, "reward", reward)
+
+if __name__ == "__main__":
+    main()

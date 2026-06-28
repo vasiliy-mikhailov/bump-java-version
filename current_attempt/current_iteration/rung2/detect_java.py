@@ -16,7 +16,7 @@ gfiles = glob.glob(ws + "/**/*.gradle", recursive=True) + glob.glob(ws + "/**/*.
 for f in gfiles:
     if "/build/" in f or "/.gradle/" in f: continue
     t = open(f, errors="ignore").read()
-    if re.search(r"`?java-gradle-plugin`?|\bgradlePlugin\s*\{|`?java-library`?.*plugin", t): is_plugin = is_plugin or ("java-gradle-plugin" in t or "gradlePlugin {" in t)
+    if "java-gradle-plugin" in t or re.search(r"gradlePlugin\s*\{", t): is_plugin = True  # match gradlePlugin{ with OR without a space (review router-7)
     for m in re.finditer(r"options\.release(?:\.set)?\s*[=(]\s*(\d+)", t): release.append(int(m.group(1)))
     for m in re.finditer(r"\brelease\.set\(\s*(\d+)\s*\)", t): release.append(int(m.group(1)))
     for m in re.finditer(r"(?:source|target)Compatibility\s*=?\s*(?:JavaVersion\.VERSION_)?[\"']?([\d._]+)", t):
@@ -32,8 +32,11 @@ for f in glob.glob(ws + "/**/pom.xml", recursive=True):
             v = norm(m.group(1))
             if v: (release if "release" in tag else source).append(v)
     for m in re.finditer(r"<release>\s*(\d+)\s*</release>", t): release.append(int(m.group(1)))
-    for m in re.finditer(r"<(?:source|target)>\s*([\d.]+)\s*</(?:source|target)>", t):
-        v = norm(m.group(1));  source.append(v) if v else None
+    # bare <source>/<target> ONLY inside a maven-compiler-plugin <configuration> — javadoc / animal-sniffer /
+    # exec plugins legitimately use these tags and would otherwise pollute the target (review router-1)
+    for cfg in re.findall(r"maven-compiler-plugin.*?<configuration>(.*?)</configuration>", t, re.S):
+        for m in re.finditer(r"<(?:source|target)>\s*([\d.]+)\s*</(?:source|target)>", cfg):
+            v = norm(m.group(1));  source.append(v) if v else None
 release = sorted({x for x in release if x}); source = sorted({x for x in source if x}); toolchain = sorted({x for x in toolchain if x})
 # the bytecode target = explicit release if set, else source/target settings, else the toolchain
 targets = release or source or toolchain

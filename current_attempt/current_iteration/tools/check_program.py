@@ -23,16 +23,28 @@ v = []
 if "specs.openrewrite.org/v1beta/recipe" not in y or "recipeList:" not in y:
     v.append("not a rewrite.yml composite recipe (missing type/recipeList)")
 
+def _strip_comment(s):   # YAML inline comment starts at ' #' (space-hash), not a '#' inside the value
+    return re.sub(r'\s+#.*$', '', s).strip().strip('"\'')
+def _parse_flow(s):      # "{key: val, key2: val2}" -> dict, so FLOW-style params count like BLOCK-style
+    d = {}
+    s = s.strip()
+    if s.startswith("{") and s.endswith("}"):
+        for part in s[1:-1].split(","):
+            if ":" in part:
+                k, _, val = part.partition(":")
+                d[k.strip()] = _strip_comment(val)
+    return d
 recipes = []; in_list = False
 for ln in y.splitlines():
     if re.match(r'^\s*recipeList:\s*$', ln): in_list = True; continue
     if not in_list: continue
     if re.match(r'^[A-Za-z]', ln): in_list = False; continue
-    m = re.match(r'^\s*-\s*([A-Za-z][\w.]+\.[A-Z]\w+)\s*:?\s*$', ln)
-    if m: recipes.append((m.group(1), {})); continue
+    # accept block (`- FQN` / `- FQN:`) AND flow (`- FQN: {k: v}`) style; flow params used to be invisible (review anticheat-1)
+    m = re.match(r'^\s*-\s*([A-Za-z][\w.]+\.[A-Z]\w+)\s*:?\s*(\{.*\})?\s*$', ln)
+    if m: recipes.append((m.group(1), _parse_flow(m.group(2)) if m.group(2) else {})); continue
     pm = re.match(r'^\s+([\w.]+):\s*(.+?)\s*$', ln)
     if pm and recipes and not ln.lstrip().startswith('#'):
-        recipes[-1][1][pm.group(1)] = pm.group(2).strip().strip('"\'')
+        recipes[-1][1][pm.group(1)] = _strip_comment(pm.group(2))   # strip inline comment so `version: 17 # x` == 17 (review anticheat-4)
 if not recipes:
     v.append("recipeList has no recipe FQNs")
 
