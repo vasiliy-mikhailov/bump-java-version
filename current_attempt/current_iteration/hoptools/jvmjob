@@ -19,14 +19,14 @@ tool() { if [ -f pom.xml ]; then echo mvn; elif [ -x ./gradlew ]; then echo grad
 mvncmd() { if [ -x ./mvnw ]; then echo ./mvnw; else echo mvn; fi; }
 case "${1:-}" in
   build) case "$(tool)" in
-           mvn)     exec "$(mvncmd)" -B -ntp -DskipTests test-compile;;
-           gradlew) exec ./gradlew --no-daemon --rerun-tasks testClasses;;
-           gradle)  exec gradle --no-daemon --rerun-tasks testClasses;; esac;;
+           mvn)     exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp -DskipTests test-compile;;
+           gradlew) exec timeout -k 15 "${BJV_INNER:-5100}" ./gradlew --no-daemon --rerun-tasks testClasses;;
+           gradle)  exec timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon --rerun-tasks testClasses;; esac;;
   test)  case "$(tool)" in
-           mvn)     exec "$(mvncmd)" -B -ntp test -Dmaven.test.failure.ignore=true;;
-           gradlew) exec ./gradlew --no-daemon test --continue --rerun-tasks;;
-           gradle)  exec gradle --no-daemon test --continue --rerun-tasks;; esac;;
-  scan)  exec osv-scanner scan source --offline-vulnerabilities -r .;;
-  run)   shift; exec bash -lc "$*";;
+           mvn)     exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp test -Dmaven.test.failure.ignore=true;;
+           gradlew) exec timeout -k 15 "${BJV_INNER:-5100}" ./gradlew --no-daemon test --continue --rerun-tasks;;
+           gradle)  exec timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon test --continue --rerun-tasks;; esac;;
+  scan)  exec timeout -k 15 "${BJV_INNER:-5100}" osv-scanner scan source --offline-vulnerabilities -r .;;
+  run)   shift; exec timeout -k 15 "${BJV_INNER:-5100}" bash -lc "$*";;
   *) echo "usage: jvmjob build|test|scan|run \"<cmd>\"" >&2; exit 2;;
 esac

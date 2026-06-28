@@ -10,5 +10,13 @@ MOUNTS=()
 [ -f "${BJV_SETTINGS:-}" ]     && MOUNTS+=(-v "${BJV_SETTINGS}:/root/.m2/settings.xml:ro")
 [ -d "${BJV_GRADLE_RO:-}" ]    && MOUNTS+=(-v "${BJV_GRADLE_RO}:/ro:ro")
 [ -d "${BJV_GRADLE_DISTS:-}" ] && MOUNTS+=(-v "${BJV_GRADLE_DISTS}:/dists")
-exec timeout -k 60 "${BJV_HANG_GUARD:-5400}" docker run --rm --network "${BJV_NET:-mvn-cache}" -e HOME=/root -e BJV_JDK="$VER" \
+# mount the repo jvmjob over the image-baked one so jvmjob edits (rerun-tasks, inner timeout) take effect without an image rebuild
+HOPTOOLS="$(dirname "$(command -v jvm-run 2>/dev/null || echo "$0")")"
+[ -f "$HOPTOOLS/jvmjob" ] && MOUNTS+=(-v "$HOPTOOLS/jvmjob:/usr/local/bin/jvmjob:ro")
+NAME="bjvjob_$$_${RANDOM}"
+timeout -k 60 "${BJV_HANG_GUARD:-5400}" docker run --rm --init --name "$NAME" --network "${BJV_NET:-mvn-cache}" -e HOME=/root -e BJV_JDK="$VER" -e BJV_INNER="${BJV_INNER:-5100}" \
   -v "$BJV_WS:/work" -w /work "${MOUNTS[@]}" bjv-alljdk "$@"
+rc=$?
+# reaper: host guard (124) / -k SIGKILL (137) can leave the container running after the docker CLIENT is killed -> force-remove
+if [ "$rc" = 124 ] || [ "$rc" = 137 ]; then docker rm -f "$NAME" >/dev/null 2>&1 || true; fi
+exit "$rc"

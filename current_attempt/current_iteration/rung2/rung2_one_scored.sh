@@ -5,7 +5,7 @@ CI=/home/vmihaylov/java_8_11_17_to_java_21/current_attempt/current_iteration
 O=/tmp/hoptest/$SLUG; mkdir -p "$O"
 bash $CI/rung2/rung2_host.sh "$REPO" "$SHA" "$SLUG" "$FROM" "$TO" > "$O/host.log" 2>&1
 if [ ! -f "$O/verdict.txt" ]; then
-  reason=$(grep -aoE "NO_GREEN_BASELINE|CLONE_FAIL|NOCOMPILE|FETCH_FAIL" "$O/host.log" | head -1)
+  reason=$(grep -aoE "UNSCORABLE_BUILD_TIMEOUT|UNSCORABLE_TEST_TIMEOUT|UNSCORABLE_SCORER_ERROR|BASELINE_TIMEOUT|NO_GREEN_BASELINE|CLONE_FAIL|NOCOMPILE|FETCH_FAIL" "$O/host.log" | head -1)
   printf '{"slug":"%s","repo":"%s","hop":"%s->%s","verdict":"%s","skipped":true}\n' "$SLUG" "$REPO" "$FROM" "$TO" "${reason:-NO_RESULT}" > "$O/skip.json"
 else
   docker run --rm -v /tmp/hoptest:/tmp/hoptest -v /tmp/r2score_one.py:/s.py:ro python:3-slim python3 /s.py "$O" "$REPO" >/dev/null 2>&1

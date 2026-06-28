@@ -21,7 +21,8 @@ r1_clone(){ # repo sha
 r1_baseline(){ # echoes integer pre-pass count, or NOCOMPILE
   find "$BJV_WS" \( -path '*/target/surefire-reports' -o -path '*/build/test-results' \) -type d -exec rm -rf {} + 2>/dev/null  # drop COMMITTED stale test-results so pre_set reflects a REAL baseline run, not checked-in XML (phantom-baseline guard)
   bjv from build >"$O/pre_build.log" 2>&1 || { echo NOCOMPILE; return 1; }
-  bjv from test  >"$O/pre_test.log"  2>&1 || true
+  bjv from test  >"$O/pre_test.log"  2>&1; local PTRC=$?
+  if [ "$PTRC" = 124 ] || [ "$PTRC" = 137 ]; then echo BASELINE_TIMEOUT; return 1; fi
   PY passet "$BJV_WS" "$O/pre_set.txt" >/dev/null 2>&1
   local n; n=$(grep -c . "$O/pre_set.txt" 2>/dev/null || echo 0)
   find "$BJV_WS" \( -path '*/target/surefire-reports' -o -path '*/build/test-results/test' \) -type d -exec rm -rf {} + 2>/dev/null
@@ -41,9 +42,12 @@ r1_gate(){ # arg1 = number of manual edits made
   # force a genuine JDK_to recompile: drop stale class outputs (else incremental skip => gate reads jv_from bytecode)
   ALPINE sh -c "cd $BJV_WS && find . \( -name build.gradle -o -name build.gradle.kts -o -name settings.gradle -o -name settings.gradle.kts \) 2>/dev/null | while read g; do d=\$(dirname \"\$g\"); rm -rf \"\$d/build\" \"\$d/.gradle\"; done; find . -name pom.xml 2>/dev/null | while read p; do d=\$(dirname \"\$p\"); rm -rf \"\$d/target\"; done; rm -rf ./.gradle 2>/dev/null; find . -maxdepth 1 -type f \( -name '*.db' -o -name '*.sqlite' -o -name '*.sqlite3' \) -delete 2>/dev/null; find . -type f -name '*.mv.db' -delete 2>/dev/null; true"
   bjv to build >"$O/compile.log" 2>&1; local BRC=$?
+  if [ "$BRC" = 124 ] || [ "$BRC" = 137 ]; then echo "UNSCORABLE_BUILD_TIMEOUT (build_rc=$BRC edits=$EDITS)"; return 0; fi
   bjv to test  >"$O/post.log"    2>&1; local TRC=$?
+  if [ "$TRC" = 124 ] || [ "$TRC" = 137 ]; then echo "UNSCORABLE_TEST_TIMEOUT (test_rc=$TRC edits=$EDITS)"; return 0; fi
   jvm-run "$BJV_TO" jvmjob run "cd /work && osv-scanner scan source --offline-vulnerabilities --format json -r ." >"$O/cwe.json" 2>"$O/scan.err" || true
-  PY final "$BJV_WS" "$O/pre_set.txt" "$BJV_FROM" "$BJV_TO" "$BRC" "$TRC" "$O/cwe.json" "$O" | tee "$O/verdict.txt"
+  PY final "$BJV_WS" "$O/pre_set.txt" "$BJV_FROM" "$BJV_TO" "$BRC" "$TRC" "$O/cwe.json" "$O" | tee "$O/verdict.txt"; local PRC=${PIPESTATUS[0]}
+  if [ "$PRC" != 0 ] || ! grep -aq "^VERDICT " "$O/verdict.txt"; then rm -f "$O/verdict.txt"; echo "UNSCORABLE_SCORER_ERROR (scorer_rc=$PRC edits=$EDITS)"; return 0; fi
   if grep -aq "VERDICT PASS" "$O/verdict.txt"; then
     docker run --rm python:3-slim python3 -c "print(f'SCORE edits=$EDITS  score={0.9**$EDITS:.3f}')" | tee "$O/score.txt"
   else echo "SCORE gate_fail score=0 (edits=$EDITS)" | tee "$O/score.txt"; fi

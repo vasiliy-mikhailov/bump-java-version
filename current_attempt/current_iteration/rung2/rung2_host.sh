@@ -17,13 +17,16 @@ case "$PRE" in ''|*[!0-9]*) echo "RESULT $SLUG NO_GREEN_BASELINE pre=$PRE"; exit
 echo "=== [2] OpenHands+Qwen agent (no limits) ==="
 set -a; . /home/vmihaylov/java_8_11_17_to_java_21/.env; set +a
 OHRUN=/home/vmihaylov/java_8_11_17_to_java_21/current_attempt/current_iteration/oh_run.py
-timeout -k 120 "${BJV_AGENT_GUARD:-14400}" docker run --rm --network mvn-cache -e OC_KEY="$PROPOSER_API_KEY" \
+AGENT_NAME="bjvagent_${SLUG}_$$"
+timeout -k 120 "${BJV_AGENT_GUARD:-14400}" docker run --rm --init --name "$AGENT_NAME" --network mvn-cache -e OC_KEY="$PROPOSER_API_KEY" \
   -v "$BJV_WS:/work" -v "$OHRUN:/oh_run.py:ro" -v /home/vmihaylov/java_8_11_17_to_java_21/current_attempt/current_iteration/rung2/bin:/r2bin:ro \
   -v /home/vmihaylov/java_8_11_17_to_java_21/current_attempt/current_iteration/rung2/rung2_drive.sh:/drive.sh:ro -v /home/vmihaylov/java_8_11_17_to_java_21/current_attempt/.agents/skills/bump-java-${FROM}-to-${TO}/SKILL.md:/skill.md:ro \
   -v /home/vmihaylov/.m2-fitness:/root/.m2 -v /home/vmihaylov/maven-config/settings.xml:/root/.m2/settings.xml:ro \
   -v /home/vmihaylov/.gradle-fitness:/ro:ro -v /home/vmihaylov/.gradle-dists:/dists:ro \
   --entrypoint bash bump-allagents-sweep:latest /drive.sh "$FROM" "$TO" > "$O/agent.log" 2>&1
-echo "agent rc=$?"
+AGRC=$?
+if [ "$AGRC" = 124 ] || [ "$AGRC" = 137 ]; then docker rm -f "$AGENT_NAME" >/dev/null 2>&1 || true; fi
+echo "agent rc=$AGRC"
 
 echo "=== [3] capture diff + program ==="
 git -C "$BJV_WS" diff -- . ':(exclude)*/target/*' ':(exclude)*/build/*' ':(exclude)*/.gradle/*' > "$O/agent.diff" 2>/dev/null || true
