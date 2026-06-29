@@ -15,16 +15,16 @@ mkdir -p "$HOME/.gradle"
 grep -q installations.paths "$HOME/.gradle/gradle.properties" 2>/dev/null || \
   echo 'org.gradle.java.installations.paths=/opt/jdk/8,/opt/jdk/11,/opt/jdk/17,/opt/jdk/21,/opt/jdk/25' >> "$HOME/.gradle/gradle.properties"
 cd /work || exit 2
-tool() { if [ -f pom.xml ]; then echo mvn; elif [ -x ./gradlew ]; then echo gradlew; else echo gradle; fi; }
+tool() { if [ -f pom.xml ]; then echo mvn; elif [ -f ./gradlew ]; then echo gradlew; else echo gradle; fi; }
 mvncmd() { if [ -x ./mvnw ]; then echo ./mvnw; else echo mvn; fi; }
 case "${1:-}" in
   build) case "$(tool)" in
            mvn)     exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp -DskipTests test-compile;;
-           gradlew) exec timeout -k 15 "${BJV_INNER:-5100}" ./gradlew --no-daemon --rerun-tasks testClasses;;
+           gradlew) exec timeout -k 15 "${BJV_INNER:-5100}" sh ./gradlew --no-daemon --rerun-tasks testClasses;;
            gradle)  exec timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon --rerun-tasks testClasses;; esac;;
   test)  case "$(tool)" in
            mvn)     exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp test -Dmaven.test.failure.ignore=true;;
-           gradlew) exec timeout -k 15 "${BJV_INNER:-5100}" ./gradlew --no-daemon test --continue --rerun-tasks;;
+           gradlew) exec timeout -k 15 "${BJV_INNER:-5100}" sh ./gradlew --no-daemon test --continue --rerun-tasks;;
            gradle)  exec timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon test --continue --rerun-tasks;; esac;;
   scan)  exec timeout -k 15 "${BJV_INNER:-5100}" osv-scanner scan source --offline-vulnerabilities -r .;;
   run)   shift; exec timeout -k 15 "${BJV_INNER:-5100}" bash -lc "$*";;
