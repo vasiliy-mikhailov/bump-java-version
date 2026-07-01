@@ -12,6 +12,10 @@ Usage: check_program.py <rewrite.yml> [<ignored>] [<jv_to>]   -> "OK PARAMETRIC=
 import sys, re
 y = open(sys.argv[1]).read()
 TO = sys.argv[3] if len(sys.argv) > 3 else None
+# module-level bump: the free target set is every module's OWN jv_to (a heterogeneous repo sets each module to
+# its own next LTS). Passed as a comma-list 4th arg; defaults to {TO}. A per-module set-target to any of these
+# is a hop-fixed intent (free), NOT a model-chosen parametric value.
+FREE_TARGETS = set(filter(None, (sys.argv[4].split(",") if len(sys.argv) > 4 else []))) | ({TO} if TO else set())
 # 8->11 wrapper floor is 6.9 NOT 7.x: Gradle 7 removed compile/testCompile, which breaks Java-8-era build
 # files, so the per-hop skill (correctly) pins 6.9 — credit that exact value, not a 7.x.
 PINNED_WRAPPER = {"11": "6.9", "17": "7.6", "21": "8.10.2", "25": "9.1.0"}
@@ -57,12 +61,12 @@ def is_free(fqn, p):
     if not p:
         return True
     if name == "UpgradeJavaVersion":
-        return p.get("version") == TO
+        return p.get("version") in FREE_TARGETS
     if name == "UpdateGradleWrapper":
         return p.get("version") == PINNED_WRAPPER.get(TO)
     if name == "ChangePropertyValue":
         k = p.get("key") or p.get("propertyKey") or p.get("propertyName"); nv = p.get("newValue")
-        if k in TARGET_KEYS and nv == TO: return True
+        if k in TARGET_KEYS and nv in FREE_TARGETS: return True
         if k == "jacoco.version" and nv == JACOCO.get(TO): return True
         return False
     if name == "AddProperty":
@@ -78,8 +82,8 @@ def is_free(fqn, p):
 
 for fqn, p in recipes:
     n = fqn.rsplit(".", 1)[-1]
-    if n == "UpgradeJavaVersion" and TO and p.get("version") and p.get("version") != TO:
-        v.append(f"UpgradeJavaVersion version {p.get('version')} != jv_to {TO}")
+    if n == "UpgradeJavaVersion" and TO and p.get("version") and p.get("version") not in FREE_TARGETS:
+        v.append(f"UpgradeJavaVersion version {p.get('version')} not in free targets {sorted(FREE_TARGETS)}")
     if n == "UpdateGradleWrapper" and TO and p.get("version") and p.get("version") != PINNED_WRAPPER.get(TO):
         v.append(f"UpdateGradleWrapper version {p.get('version')} not the pinned {PINNED_WRAPPER.get(TO)}")
 

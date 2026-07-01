@@ -18,9 +18,22 @@ echo "=== [2] OpenHands+Qwen agent (no limits) ==="
 set -a; . /home/vmihaylov/bump-java-version/.env; set +a
 OHRUN=/home/vmihaylov/bump-java-version/current_attempt/current_iteration/oh_run.py
 AGENT_NAME="bjvagent_${SLUG}_$$"
+CIA=/home/vmihaylov/bump-java-version/current_attempt
+# module-level: a heterogeneous repo (modules on >1 hop) runs the per-module iteration executor -- the agent
+# gets the per-module plan + every relevant hop skill (built on the host) instead of a single per-hop SKILL.md.
+MHOPS=$(grep -oE '"from": *[0-9]+, *"to": *[0-9]+' "$O/modules.jsonl" 2>/dev/null | sort -u | grep -c .)
+if [ "${MHOPS:-0}" -gt 1 ]; then
+  BJV_MODE=multihop
+  python3 "$I/hoptools/multihop_stage.py" "$O/modules.jsonl" "$CIA/.agents/skills" "$TO" "$FROM" > "$O/prompt.txt"
+  SKILLMNT=(-v "$O/prompt.txt:/prompt.txt:ro")
+  echo "MULTI-HOP executor: $(grep -c . "$O/prompt.txt") prompt lines, hops=$MHOPS"
+else
+  BJV_MODE=single
+  SKILLMNT=(-v "$CIA/.agents/skills/bump-java-${FROM}-to-${TO}/SKILL.md:/skill.md:ro")
+fi
 timeout -k 120 "${BJV_AGENT_GUARD:-31536000}" docker run --rm --init --name "$AGENT_NAME" --network mvn-cache -e OC_KEY="$PROPOSER_API_KEY" \
-  -v "$BJV_WS:/work" -v "$OHRUN:/oh_run.py:ro" -v /home/vmihaylov/bump-java-version/current_attempt/current_iteration/rung2/bin:/r2bin:ro \
-  -v /home/vmihaylov/bump-java-version/current_attempt/current_iteration/rung2/rung2_drive.sh:/drive.sh:ro -v /home/vmihaylov/bump-java-version/current_attempt/.agents/skills/bump-java-${FROM}-to-${TO}/SKILL.md:/skill.md:ro \
+  -e BJV_MODE="$BJV_MODE" -v "$BJV_WS:/work" -v "$OHRUN:/oh_run.py:ro" -v /home/vmihaylov/bump-java-version/current_attempt/current_iteration/rung2/bin:/r2bin:ro \
+  -v /home/vmihaylov/bump-java-version/current_attempt/current_iteration/rung2/rung2_drive.sh:/drive.sh:ro "${SKILLMNT[@]}" \
   -v /home/vmihaylov/.m2-fitness:/root/.m2 -v /home/vmihaylov/maven-config/settings.xml:/root/.m2/settings.xml:ro \
   -v /home/vmihaylov/.gradle-fitness:/ro:ro -v /home/vmihaylov/.gradle-dists:/dists:ro \
   --entrypoint bash bump-allagents-sweep:latest /drive.sh "$FROM" "$TO" > "$O/agent.log" 2>&1

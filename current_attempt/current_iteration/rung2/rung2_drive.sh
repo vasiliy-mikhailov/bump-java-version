@@ -21,10 +21,16 @@ export GIT_PAGER=cat PAGER=cat
 git config --global core.pager cat 2>/dev/null || true
 # Per-hop SKILL.md is the single source of truth (portable, standard-tools). The harness prepends a small
 # Stage header with the facts the skill leaves generic (P3 stage-header pattern), and strips the YAML frontmatter.
-SKILL="$(awk 'NR==1&&/^---/{f=1;next} f&&/^---/{f=0;next} !f' /skill.md)"
-STAGE="STAGE -- migrate the project in /work from Java $FROM to Java $TO. JDK $FROM is at /opt/jdk/$FROM and JDK $TO at /opt/jdk/$TO (use these for <jdk$FROM>/<jdk$TO> in the skill). Convenience shortcuts on PATH, equivalent to the skill's standard commands: bbuild N = compile under /opt/jdk/N; btest N = run tests under /opt/jdk/N; bapply = apply ./rewrite.yml with this hop's OpenRewrite coordinates. Builds are NOT time-boxed -- let cold builds finish, never abandon a running build. Now follow this skill:"
-PROMPT="$STAGE
+if [ "${BJV_MODE:-single}" = multihop ]; then
+  # per-module iteration executor: the host already rendered the per-module plan + every relevant hop skill.
+  PROMPT="$(cat /prompt.txt)
+Convenience shortcuts on PATH: bbuild N = compile under /opt/jdk/N; btest N = run tests under /opt/jdk/N."
+else
+  SKILL="$(awk 'NR==1&&/^---/{f=1;next} f&&/^---/{f=0;next} !f' /skill.md)"
+  STAGE="STAGE -- migrate the project in /work from Java $FROM to Java $TO. JDK $FROM is at /opt/jdk/$FROM and JDK $TO at /opt/jdk/$TO (use these for <jdk$FROM>/<jdk$TO> in the skill). Convenience shortcuts on PATH, equivalent to the skill's standard commands: bbuild N = compile under /opt/jdk/N; btest N = run tests under /opt/jdk/N; bapply = apply ./rewrite.yml with this hop's OpenRewrite coordinates. Builds are NOT time-boxed -- let cold builds finish, never abandon a running build. Now follow this skill:"
+  PROMPT="$STAGE
 $SKILL"
+fi
 # vLLM TCP keepalive: litellm's aiohttp transport gates SO_KEEPALIVE on these (default OFF). Our topology is
 # agent -> caddy -> shared busy vLLM; without keepalive a slow-inference idle period gets reaped by the proxy/NAT
 # hop into a stalled socket (then 300s wasted before the request timeout fires). KEEPIDLE 60 + KEEPINTVL 30.

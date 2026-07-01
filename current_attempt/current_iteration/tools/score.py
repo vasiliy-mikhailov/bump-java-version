@@ -246,7 +246,8 @@ def main():
     if modules_file and os.path.exists(modules_file):
         try:
             import score_modules
-            mods = [json.loads(l) for l in open(modules_file) if '"module"' in l and '"summary"' not in l]
+            mods = [d for l in open(modules_file) if '"module"' in l and '"summary"' not in l
+                    for d in [json.loads(l)] if isinstance(d.get("to"), int)]   # gate BUMPABLE modules only
             if len(mods) >= 2:
                 MODS = score_modules.score_modules(ws, mods)  # always record the per-module breakdown for analysis
                 tos = {m.get("to") for m in mods if m.get("to")}

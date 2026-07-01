@@ -13,7 +13,15 @@ bumpable=$(echo "$det" | grep -oE '"bumpable": *true')
 # stay NOT_A_BUMP: this never dispatches to a bump-java-$F-to-$T skill that does not exist.
 if [ -z "$bumpable" ] && [ -s "$O/modules.jsonl" ]; then
   hops=$(grep -oE '"from": *[0-9]+, *"to": *[0-9]+' $O/modules.jsonl | sort -u); nhops=$(printf '%s\n' "$hops" | grep -c .)
-  if [ "${nhops:-0}" = "1" ]; then detected=$(printf '%s' "$hops" | grep -oE '"from": *[0-9]+' | grep -oE '[0-9]+'); bumpable=singlehop; fi
+  if [ "${nhops:-0}" = "1" ]; then
+    detected=$(printf '%s' "$hops" | grep -oE '"from": *[0-9]+' | grep -oE '[0-9]+'); bumpable=singlehop
+  elif [ "${nhops:-0}" -gt 1 ]; then
+    # heterogeneous: the per-module iteration executor. Baseline JDK = MAX current module level (so every module
+    # compiles as-is); build JDK = MAX module target (so every module reaches its own release). rung2_host reads
+    # modules.jsonl and switches to multi-hop mode (all skills + the per-module plan) on its own.
+    MHFROM=$(grep -oE '"from": *[0-9]+' $O/modules.jsonl | grep -oE '[0-9]+' | sort -n | tail -1)
+    MHTO=$(grep -oE '"to": *[0-9]+' $O/modules.jsonl | grep -oE '[0-9]+' | sort -n | tail -1); bumpable=multihop
+  fi
 fi
 if [ -z "$bumpable" ]; then
   printf '{"slug":"%s","repo":"%s","verdict":"NOT_A_BUMP","detect":%s}\n' "$SLUG" "$REPO" "${det:-null}" > $O/skip.json
@@ -27,5 +35,6 @@ case $detected in
   21|22|23|24)       F=21; T=25;;
   *) printf '{"slug":"%s","repo":"%s","verdict":"NOT_A_BUMP","detect":%s}\n' "$SLUG" "$REPO" "${det:-null}" > $O/skip.json; echo "NOT_A_BUMP (>=25 or unknown) $REPO"; exit 0;;
 esac
+if [ "$bumpable" = multihop ]; then F=$MHFROM; T=$MHTO; fi
 echo "DISPATCH $REPO  detected=$detected -> hop $F->$T  (bumpable=$bumpable)"
 bash $CI/rung2/rung2_one_scored.sh "$REPO" "$SHA" "$SLUG" "$F" "$T"
