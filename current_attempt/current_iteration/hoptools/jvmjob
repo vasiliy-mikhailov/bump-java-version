@@ -27,7 +27,7 @@ for _wp in $(find . -name gradle-wrapper.properties 2>/dev/null); do
   sed -i '/^distributionSha256Sum=/d' "$_wp" 2>/dev/null || true
 done
 tool() { if [ -f pom.xml ]; then echo mvn; elif [ -f ./gradlew ]; then echo gradlew; else echo gradle; fi; }
-mvncmd() { if [ -x ./mvnw ]; then echo ./mvnw; else echo mvn; fi; }
+mvncmd() { if [ -x ./mvnw ] && { [ -f .mvn/wrapper/maven-wrapper.properties ] || [ -f .mvn/wrapper/maven-wrapper.jar ]; }; then echo ./mvnw; else echo mvn; fi; }   # a mvnw without .mvn/wrapper cannot boot (ClassNotFound MavenWrapperMain); use system mvn
 # Kotlin Multiplatform: under Kotlin 1.9.20+ the plain `test` lifecycle task no longer wires the per-target
 # JVM test task (:jvmTest), so a bare `./gradlew test` runs 0 JVM tests and every pre-pass test looks LOST
 # (false FAIL_test_conservation, e.g. rr_17_158 bip21 17->21: pre 32, post 0). When the multiplatform plugin
