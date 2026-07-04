@@ -11,8 +11,8 @@ screen_one(){
     r1_clone "$REPO" "$SHA" >/dev/null 2>&1 || { echo "$REPO clone_fail" >$RD/$SLUG.res; exit 0; }
     n=$(r1_baseline 2>/dev/null); case "$n" in ''|*[!0-9]*) n=0;; esac
     if [ "$n" -ge "$MIN" ]; then echo "$REPO $SHA green=$n" >$RD/$SLUG.keep; else echo "$REPO green=$n" >$RD/$SLUG.res; fi
-    docker run --rm -v /tmp/bjv_ws:/w alpine rm -rf "/w/$SLUG" >/dev/null 2>&1
-    docker run --rm -v /tmp/hoptest:/h alpine rm -rf "/h/$SLUG" >/dev/null 2>&1 )
+    docker run --rm -v "${BJV_RUNROOT:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/runs}/ws:/w" alpine rm -rf "/w/$SLUG" >/dev/null 2>&1
+    docker run --rm -v "${BJV_RUNROOT:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/runs}/hoptest:/h" alpine rm -rf "/h/$SLUG" >/dev/null 2>&1 )
 }
 export -f screen_one load1
 tried=0

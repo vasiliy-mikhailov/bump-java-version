@@ -2,7 +2,8 @@
 # TWO-STEP bump: detect real Java version, then dispatch to the matching hop skill. Args: REPO SHA SLUG
 REPO=$1; SHA=$2; SLUG=$3
 CI=/home/vmihaylov/bump-java-version/current_attempt/current_iteration
-O=/tmp/hoptest/$SLUG; mkdir -p $O
+RUN=${BJV_RUNROOT:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/runs}
+O=$RUN/hoptest/$SLUG; mkdir -p $O
 bash $CI/rung2/detect_java_version.sh "$REPO" "$SHA" $O/detect.json
 det=$(cat $O/detect.json 2>/dev/null)
 detected=$(echo "$det" | sed -n 's/.*"detected": *\([0-9]*\).*/\1/p')

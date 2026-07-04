@@ -3,16 +3,19 @@
 #           r1_apply (runs $BJV_WS/rewrite.yml under jv_from) ; r1_gate <edits> (writes verdict + score)
 I=/home/vmihaylov/bump-java-version/current_attempt/current_iteration
 export PATH="$I/hoptools:$PATH"
-export BJV_WS=/tmp/bjv_ws/$SLUG BJV_FROM=$FROM BJV_TO=$TO BJV_NET=mvn-cache \
+# run state lives under the project (survives reboots; /tmp is wiped by systemd tmpfiles on boot)
+export BJV_RUNROOT=${BJV_RUNROOT:-$I/runs}
+mkdir -p "$BJV_RUNROOT/hoptest" "$BJV_RUNROOT/ws" 2>/dev/null
+export BJV_WS=$BJV_RUNROOT/ws/$SLUG BJV_FROM=$FROM BJV_TO=$TO BJV_NET=mvn-cache \
   BJV_M2=/home/vmihaylov/.m2-fitness BJV_SETTINGS=/home/vmihaylov/maven-config/settings.xml \
   BJV_GRADLE_RO=/home/vmihaylov/.gradle-fitness BJV_GRADLE_DISTS=/home/vmihaylov/.gradle-dists
-export O=/tmp/hoptest/$SLUG; mkdir -p "$O"
+export O=$BJV_RUNROOT/hoptest/$SLUG; mkdir -p "$O"
 PY(){ docker run --rm -v "$BJV_WS:$BJV_WS" -v "$I/tools:/t:ro" -v "$O:$O" python:3-slim python3 /t/score.py "$@"; }
 EDIT_ADDEXPORTS(){ docker run --rm -v "$BJV_WS:$BJV_WS" -v "$I/tools:/t:ro" python:3-slim python3 /t/edit_pom_addexports.py "$@"; }
 ALPINE(){ docker run --rm -v "$BJV_WS:$BJV_WS" alpine "$@"; }   # for sed/grep edits on the workspace
 
 r1_clone(){ # repo sha
-  docker run --rm -v /tmp/bjv_ws:/w alpine rm -rf "/w/$SLUG" 2>/dev/null
+  docker run --rm -v "$BJV_RUNROOT/ws:/w" alpine rm -rf "/w/$SLUG" 2>/dev/null
   mkdir -p "$BJV_WS"
   git clone -q "https://github.com/$1.git" "$BJV_WS" 2>"$O/clone.log" || { echo FETCH_FAIL; return 1; }
   git -C "$BJV_WS" checkout -q "$2" 2>>"$O/clone.log" || { echo FETCH_FAIL; return 1; }

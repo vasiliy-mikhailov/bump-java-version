@@ -5,7 +5,7 @@
 # both runs and the comparison is valid datapoint-by-datapoint. Reports FAIL->PASS (fixed), PASS->FAIL
 # (regressed), and the still-FAIL set. Example: compare_runs.sh /tmp/hoptest.mixedgenome_20260701_1044
 set -uo pipefail
-OLD="$1"; NEW="${2:-/tmp/hoptest}"
+OLD="$1"; NEW="${2:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/runs/hoptest}"
 [ -d "$OLD" ] || { echo "no old corpus: $OLD" >&2; exit 1; }
 vp(){ grep -aoE "VERDICT [A-Za-z_0-9]+" "$1/verdict.txt" 2>/dev/null | head -1 | awk '{print $2}'; }
 fixed=0; reg=0; sfail=0; spass=0; both=0; rows=""

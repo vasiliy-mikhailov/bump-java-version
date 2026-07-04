@@ -5,7 +5,7 @@
 # "clone+baseline <repo> @ <sha> (jv<from>)" line (NOT a grep of agent.log, which carries the agent
 # framework's own github URLs). Emits <out>/<slug>.txt bundles + <out>/_index.tsv and a tarball.
 set -uo pipefail
-CORPUS="${1:-/tmp/hoptest}"
+CORPUS="${1:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/runs/hoptest}"
 OUT="${2:-/tmp/faildump}"
 rm -rf "$OUT"; mkdir -p "$OUT"; : > "$OUT/_index.tsv"
 cd "$CORPUS" || { echo "no corpus dir: $CORPUS" >&2; exit 1; }

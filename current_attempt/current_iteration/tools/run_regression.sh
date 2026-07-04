@@ -17,7 +17,7 @@ echo "running $(grep -cvE '^#|^[[:space:]]*$' "$FIX") fixture repos through the 
 pids=""
 while IFS=$'\t' read -r slug repo sha frm to cls status verdict; do
   case "$slug" in \#*|"") continue;; esac
-  ( bash "$CI/rung2/run_repo.sh" "$repo" "$sha" "reg_$slug" >"/tmp/hoptest/reg_$slug.launch.log" 2>&1 ) &
+  ( bash "$CI/rung2/run_repo.sh" "$repo" "$sha" "reg_$slug" >"${BJV_RUNROOT:-$CI/runs}/hoptest/reg_$slug.launch.log" 2>&1 ) &
   pids="$pids $!"
   while [ "$(jobs -rp | wc -l)" -ge "$J" ]; do sleep 5; done
 done < "$FIX"
@@ -28,7 +28,7 @@ printf "%-11s %-40s %-13s %-8s %-6s %-8s %s\n" slug repo class status expect got
 pass=0; want=0; reg=0
 while IFS=$'\t' read -r slug repo sha frm to cls status verdict; do
   case "$slug" in \#*|"") continue;; esac
-  got=$(grep -aoE "VERDICT (PASS|FAIL_[a-z_]+|UNSCORABLE_[A-Z_]+|NO_BASELINE[A-Z_]*)" "/tmp/hoptest/reg_$slug/verdict.txt" 2>/dev/null | head -1 | awk '{print $2}')
+  got=$(grep -aoE "VERDICT (PASS|FAIL_[a-z_]+|UNSCORABLE_[A-Z_]+|NO_BASELINE[A-Z_]*)" "${BJV_RUNROOT:-$CI/runs}/hoptest/reg_$slug/verdict.txt" 2>/dev/null | head -1 | awk '{print $2}')
   [ -z "$got" ] && got="(no-verdict)"
   expect=PASS; [ "$status" = open ] && expect="FAIL(open)"
   res=OK
