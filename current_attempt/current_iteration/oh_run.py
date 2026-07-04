@@ -32,10 +32,15 @@ try:
     _TE.__call__ = _no_timeout_call
     print("PATCHED: hard timeout -> 1 year; no-change stall detector -> 1 year (root cause fixed at source, P15)")
     base, model, key = os.environ["OC_BASE"], "openai/" + os.environ["OC_MODEL"], SecretStr(os.environ["OC_KEY"])
+    # Stoic retry (P15): a vLLM restart/outage is infrastructure noise, never a reason for the agent to give
+    # up with zero edits (each such death scored a false FAIL_target_not_bumped on 2026-07-04). The SDK retries
+    # APIConnectionError/ServiceUnavailable/InternalServerError/RateLimit; effectively-unbounded attempts with
+    # the backoff capped at 60s = poll the endpoint about once a minute until it returns.
+    RETRY = dict(num_retries=1_000_000, retry_min_wait=8, retry_max_wait=60)
     llm = LLM(model=model, base_url=base, api_key=key, usage_id="ohrun",
-              max_output_tokens=32768, temperature=0.0, native_tool_calling=True)
+              max_output_tokens=32768, temperature=0.0, native_tool_calling=True, **RETRY)
     cond = LLM(model=model, base_url=base, api_key=key, usage_id="ohcond",
-               max_output_tokens=32768, temperature=0.0, native_tool_calling=False)
+               max_output_tokens=32768, temperature=0.0, native_tool_calling=False, **RETRY)
     agent = Agent(llm=llm, tools=get_default_tools(enable_browser=False),
                   condenser=LLMSummarizingCondenser(llm=cond, max_size=40, keep_first=2))
     # NO step/iteration cap (RLVR: a budget/limit teaches the model to give up and emit noise — AGENTS.md P15).
