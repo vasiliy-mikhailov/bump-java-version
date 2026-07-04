@@ -39,15 +39,15 @@ is_kmp() { grep -rhsE 'kotlin\("multiplatform"\)|kotlin-multiplatform|org\.jetbr
 case "${1:-}" in
   build) case "$(tool)" in
            mvn)     exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp -DskipTests test-compile;;
-           gradlew) exec timeout -k 15 "${BJV_INNER:-5100}" sh ./gradlew --no-daemon --rerun-tasks testClasses;;
+           gradlew) exec timeout -k 15 "${BJV_INNER:-5100}" bash ./gradlew --no-daemon --rerun-tasks testClasses;;
            gradle)  exec timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon --rerun-tasks testClasses;; esac;;
   test)  case "$(tool)" in
            mvn)     exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp test -Dmaven.test.failure.ignore=true;;
-           gradlew) timeout -k 15 "${BJV_INNER:-5100}" sh ./gradlew --no-daemon test --continue --rerun-tasks; trc=$?
+           gradlew) timeout -k 15 "${BJV_INNER:-5100}" bash ./gradlew --no-daemon test --continue --rerun-tasks; trc=$?
                     # KMP: run jvmTest as a SEPARATE invocation. A combined `test jvmTest` aborts at task
                     # SELECTION when jvmTest is absent (--continue only continues past EXECUTION failures) ->
                     # 0 XML -> false FAIL_test_conservation. Separate, its absence cannot suppress `test`.
-                    is_kmp && timeout -k 15 "${BJV_INNER:-5100}" sh ./gradlew --no-daemon jvmTest --continue --rerun-tasks
+                    is_kmp && timeout -k 15 "${BJV_INNER:-5100}" bash ./gradlew --no-daemon jvmTest --continue --rerun-tasks
                     exit "$trc";;
            gradle)  timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon test --continue --rerun-tasks; trc=$?
                     is_kmp && timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon jvmTest --continue --rerun-tasks
