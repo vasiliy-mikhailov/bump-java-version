@@ -33,6 +33,9 @@ ONLY = arg("--only-from")  # restrict to a single jv_from (e.g. 21 for the 21->2
 NEXT = {int(ONLY): NEXT_ALL[int(ONLY)]} if ONLY else NEXT_ALL
 MULTI = "--multi" in sys.argv   # find a baseline per Java version, not just the first
 MIN_TESTS = int(arg("--min-tests", "0"))   # admit only baselines whose @Test count >= this (0 = off)
+MIN_GREEN = int(arg("--min-green", "5"))   # sweep-fidelity gate: runtime green tests >= this (matches BJV_MIN_TESTS)
+SCREEN_TIMEOUT = int(arg("--screen-timeout", "900"))  # BJV_INNER cap per screen build/test leg
+GREENSCREEN = os.path.dirname(os.path.abspath(__file__)) + "/greenscreen.sh"
 if REPOS_FILE:
     REPOS = [r.strip() for r in open(REPOS_FILE) if r.strip()]
 elif REPOS_OVERRIDE:
@@ -185,17 +188,20 @@ def process_repo(repo):
                 print(f"  skip-lowtest {repo} {sha[:8]} jv {jv} period {period} tests={ntests}<{MIN_TESTS}", flush=True)
                 continue
             tries += 1
-            if is_mvn:
-                rc = sh(f"export PATH=$HOME/bin:$PATH; cd {wd} && INNER_TIMEOUT=570 JDK={jv} mvn -q -B -ntp -DskipTests test-compile", 600).returncode
-            else:
-                rc = sh(f"export PATH=$HOME/bin:$PATH; cd {wd} && INNER_TIMEOUT=870 JDK={jv} WORK_DIR={wd} gradle -q testClasses", 900).returncode
-            if rc == 0:
+            # sweep-fidelity screen: the SAME baseline the sweep runs (sealed env, build+test+passet).
+            # A sha that fails here would land as NOCOMPILE / NO_GREEN_BASELINE / BASELINE_TIMEOUT on a
+            # sweep lane, so it is not emitted; the loop digs further shas in this period instead.
+            r = sh(f"BJV_INNER={SCREEN_TIMEOUT} bash {GREENSCREEN} {wd} {jv} {MIN_GREEN}", SCREEN_TIMEOUT * 2 + 600)
+            tail = (r.stdout or "").strip().splitlines()
+            verdict = tail[-1] if tail else "SCREEN_ERROR"
+            if r.returncode == 0 and verdict.startswith("PRE="):
+                pre = int(verdict.split("=")[1])
                 mk = detect_mock(wd)
-                out.append({"repo": repo, "sha": sha, "jv_from": jv, "year": _yy, "quarter": _qq, "attempts": tries, "tests": ntests, "mock": mk})
-                print(f"  FOUND {repo} {sha[:8]} jv {jv}->{NEXT[jv]} period {period} tests={ntests} mock={mk} (try {tries}/{MAX_ATTEMPTS})", flush=True)
+                out.append({"repo": repo, "sha": sha, "jv_from": jv, "year": _yy, "quarter": _qq, "attempts": tries, "tests": ntests, "pre_pass": pre, "mock": mk})
+                print(f"  FOUND {repo} {sha[:8]} jv {jv}->{NEXT[jv]} period {period} green={pre} tests={ntests} mock={mk} (try {tries}/{MAX_ATTEMPTS})", flush=True)
                 break
             else:
-                print(f"  noncompile {repo} {sha[:8]} jv {jv} period {period} (try {tries}/{MAX_ATTEMPTS})", flush=True)
+                print(f"  screen-fail {verdict} {repo} {sha[:8]} jv {jv} period {period} (try {tries}/{MAX_ATTEMPTS})", flush=True)
     reap(wd)
     if out:
         return out
