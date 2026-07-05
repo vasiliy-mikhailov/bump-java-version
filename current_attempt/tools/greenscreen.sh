@@ -23,7 +23,7 @@ bjv from test  >"$OD/pre_test.log"  2>&1; PTRC=$?
 if [ "$PTRC" = 124 ] || [ "$PTRC" = 137 ]; then echo BASELINE_TIMEOUT; exit 1; fi
 docker run --rm -v "$WS:$WS" -v "$I/tools:/t:ro" -v "$OD:$OD" python:3-slim \
   python3 /t/score.py passet "$WS" "$OD/pre_set.txt" >/dev/null 2>&1
-N=$(grep -c . "$OD/pre_set.txt" 2>/dev/null || echo 0)
+N=$(grep -c . "$OD/pre_set.txt" 2>/dev/null); N=${N:-0}
 find "$WS" \( -path '*/target/surefire-reports' -o -path '*/build/test-results/test' \) -type d -exec rm -rf {} + 2>/dev/null
 echo "PRE=$N"
 [ "${N:-0}" -ge "$MIN" ]
