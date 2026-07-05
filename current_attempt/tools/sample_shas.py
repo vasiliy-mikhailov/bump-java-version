@@ -210,6 +210,15 @@ def process_repo(repo):
 
 WORKERS = int(arg("--workers", "1"))
 ds = OUT if OUT else A + "/dataset-shas.json"
+# resume ledger: every repo whose process_repo COMPLETED (found or not) is recorded; a restarted dig
+# skips them, so interruptions (reboots, operator restarts) cost only in-flight repos.
+DONE_F = ds + ".done"
+_done = set()
+if os.path.exists(DONE_F):
+    _done = {l.strip() for l in open(DONE_F) if l.strip()}
+    REPOS = [r for r in REPOS if r not in _done]
+    print(f"resume: {len(_done)} repos already processed, {len(REPOS)} remaining", flush=True)
+_done_fh = open(DONE_F, "a")
 out = []
 if WORKERS > 1:
     import threading
@@ -221,6 +230,7 @@ if WORKERS > 1:
         with _lock:
             for e in res:
                 _jl.write(json.dumps(e) + "\n"); _jl.flush()
+            _done_fh.write(repo + "\n"); _done_fh.flush()
             out.extend(res)
     with ThreadPoolExecutor(max_workers=WORKERS) as _ex:
         list(_ex.map(_run, REPOS))
@@ -228,6 +238,7 @@ if WORKERS > 1:
 else:
     for repo in REPOS:
         out.extend(process_repo(repo))
+        _done_fh.write(repo + "\n"); _done_fh.flush()
 json.dump(out, open(ds, "w"), indent=1)
 print(f"\nSEED={SEED} max_attempts={MAX_ATTEMPTS}: {len(out)}/{len(REPOS)} repos got a valid compiling "
       f"8/11/17 baseline -> dataset-shas.json (seed {SEED})", flush=True)
