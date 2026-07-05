@@ -22,7 +22,13 @@ load1(){ awk '{print int($1)}' /proc/loadavg; }
 while true; do
   td=$(totdone); [ "$td" -ge "$TARGET" ] && break
   avail=''; for h in 8 11 17 21; do [ "${CUR[$h]}" -le "$(qlen $h)" ] && avail="$avail $h"; done
-  [ -z "$avail" ] && break
+  # streaming mode: the queues are a LIVE stream (a feeder appends rows as the dig emits them), so an
+  # empty moment means wait for the producer, not end-of-dataset. Queues are append-only, which keeps
+  # slug = line index deterministic. Exit stays TARGET (or sweepctl stop).
+  if [ -z "$avail" ]; then
+    [ "${BJV_QUEUE_STREAMING:-0}" = 1 ] && { sleep 60; continue; }
+    break
+  fi
   while [ "$(jobs -rp | wc -l)" -ge "$(maxlanes)" ]; do sleep 8; done   # live-adjustable cap via $MAXFILE (echo N > it); no load gate
   best=''; bestm=999999
   for h in $avail; do m=$(( $(donec $h) + LAUNCHED[$h] - $(finc $h) )); [ "$m" -lt "$bestm" ] && { bestm=$m; best=$h; }; done
