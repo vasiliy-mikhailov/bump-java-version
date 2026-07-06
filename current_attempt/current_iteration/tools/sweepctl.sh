@@ -23,7 +23,7 @@ stop_all() {
   echo "stopped clean; purged $n partial/NO_RESULT slugs"
 }
 start_all() {
-  cd "$I" && BJV_RUNROOT="$RUN" setsid nohup bash rung2/roundrobin.sh 1600 4 20 5 >> "$RUN/rr_logs/roundrobin.log" 2>&1 < /dev/null &
+  cd "$I" && BJV_RUNROOT="$RUN" BJV_QUEUE_STREAMING="${BJV_QUEUE_STREAMING:-0}" setsid nohup bash rung2/roundrobin.sh "${BJV_TARGET:-1600}" 4 20 5 >> "$RUN/rr_logs/roundrobin.log" 2>&1 < /dev/null &
   sleep 15
   echo "instances: $(pgrep -cf 'rung2/roundrobin[.]sh')"
   tail -2 "$RUN/rr_logs/roundrobin.log"

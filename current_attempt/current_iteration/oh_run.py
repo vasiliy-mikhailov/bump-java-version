@@ -36,7 +36,11 @@ try:
     # up with zero edits (each such death scored a false FAIL_target_not_bumped on 2026-07-04). The SDK retries
     # APIConnectionError/ServiceUnavailable/InternalServerError/RateLimit; effectively-unbounded attempts with
     # the backoff capped at 60s = poll the endpoint about once a minute until it returns.
-    RETRY = dict(num_retries=1_000_000, retry_min_wait=8, retry_max_wait=60)
+    # timeout is a per-HTTP-call LIVENESS guard, not a work cap: a proxy/server that half-closes the
+    # stream leaves the socket in CLOSE_WAIT, which still ACKs keepalive probes, so a read can block
+    # forever (observed 5h+ on 2026-07-06). One wedged call erroring after an hour lets the stoic retry
+    # resume the same conversation; the agent's work remains unbounded per P15.
+    RETRY = dict(num_retries=1_000_000, retry_min_wait=8, retry_max_wait=60, timeout=3600)
     llm = LLM(model=model, base_url=base, api_key=key, usage_id="ohrun",
               max_output_tokens=32768, temperature=0.0, native_tool_calling=True, **RETRY)
     cond = LLM(model=model, base_url=base, api_key=key, usage_id="ohcond",
