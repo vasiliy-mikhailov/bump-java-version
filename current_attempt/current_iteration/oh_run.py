@@ -40,6 +40,15 @@ try:
     # stream leaves the socket in CLOSE_WAIT, which still ACKs keepalive probes, so a read can block
     # forever (observed 5h+ on 2026-07-06). One wedged call erroring after an hour lets the stoic retry
     # resume the same conversation; the agent's work remains unbounded per P15.
+    # 2026-07-08: the caddy hop turns backend-down into HTTP 502/504, which litellm raises as
+    # BadGatewayError/GatewayTimeoutError, NEITHER in the SDK's default retry tuple: 11 agents died that
+    # way (zero-edit false FAILs) during a restart while raw connection-refused was retried fine. Widen it.
+    import litellm as _ll
+    import openhands.sdk.llm.llm as _sllm
+    _extra = tuple(t for t in (getattr(_ll, "BadGatewayError", None), getattr(_ll, "GatewayTimeoutError", None))
+                   if t is not None and t not in _sllm.LLM_RETRY_EXCEPTIONS)
+    _sllm.LLM_RETRY_EXCEPTIONS = _sllm.LLM_RETRY_EXCEPTIONS + _extra
+    print(f"PATCHED: retry tuple widened by {[t.__name__ for t in _extra]}")
     RETRY = dict(num_retries=1_000_000, retry_min_wait=8, retry_max_wait=60, timeout=3600)
     llm = LLM(model=model, base_url=base, api_key=key, usage_id="ohrun",
               max_output_tokens=32768, temperature=0.0, native_tool_calling=True, **RETRY)
