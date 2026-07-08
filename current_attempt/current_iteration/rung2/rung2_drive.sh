@@ -6,8 +6,8 @@ FROM=$1; TO=$2
 export BJV_FROM="$FROM"
 if [ "$TO" = 25 ]; then export BJV_REWRITE_PLUGIN=6.41.0 BJV_REWRITE_MIGRATE=3.36.0 BJV_REWRITE_DEPS=1.55.3; fi
 export PATH=/r2bin:$PATH
-export OC_BASE="${OC_BASE:-https://inference.mikhailov.tech/qwen-3.6-27b-fp8/v1}"
-export OC_MODEL="${OC_MODEL:-qwen-3.6-27b-fp8}"
+export OC_BASE="${OC_BASE:-https://inference.mikhailov.tech/qwen-3.6-35b-a3b-awq/v1}"
+export OC_MODEL="${OC_MODEL:-qwen-3.6-35b-a3b-awq}"
 # gradle: shared RO dep cache + dists (mirror the host bjv setup) if mounted
 [ -d /ro ] && export GRADLE_RO_DEP_CACHE=/ro
 [ -d /dists ] && { mkdir -p "$HOME/.gradle/wrapper"; ln -sfn /dists "$HOME/.gradle/wrapper/dists"; }
