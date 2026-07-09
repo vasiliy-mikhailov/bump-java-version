@@ -14,11 +14,18 @@ MAXFILE=${BJV_MAXLANES_FILE:-$RUN/q/max_lanes}
 maxlanes(){ local m; m=$(cat "$MAXFILE" 2>/dev/null); case "$m" in ""|*[!0-9]*|0) echo "$JOBS";; *) echo "$m";; esac; }
 declare -A CUR LAUNCHED NEXT
 for h in 8 11 17 21; do CUR[$h]=1; LAUNCHED[$h]=0; done
-qlen(){ wc -l < $RUN/q/cand_$1.txt 2>/dev/null || echo 0; }
-donec(){ ls $RUN/hoptest/rr_$1_*/score.json 2>/dev/null | wc -l; }
-finc(){ ls $RUN/hoptest/rr_$1_*/score.json $RUN/hoptest/rr_$1_*/skip.json 2>/dev/null | wc -l; }
-totdone(){ ls $RUN/hoptest/rr_*_*/score.json 2>/dev/null | wc -l; }
-load1(){ awk '{print int($1)}' /proc/loadavg; }
+# ROBUST COUNTS: under a transient fork storm (host load has spiked to 3000+, `wc`/fork briefly returns EPERM
+# "Operation not permitted"), a count helper must NOT return empty or a falsely-zero value that reads as "queue
+# drained" -- that once false-completed a round and dropped 276 queued candidates. qlen distinguishes genuinely
+# empty (0) from UNREADABLE (-1 = unknown -> the hop stays available so the loop retries, never exits); counters
+# used in arithmetic default to a safe integer so an iteration cannot crash on an empty operand.
+qlen(){ local f=$RUN/q/cand_$1.txt n; [ -f "$f" ] || { echo 0; return; }; n=$(wc -l < "$f" 2>/dev/null); case "$n" in ''|*[!0-9]*) echo -1;; *) echo "$n";; esac; }
+intc(){ local n; n=$("$@" 2>/dev/null | wc -l 2>/dev/null); case "$n" in ''|*[!0-9]*) echo 0;; *) echo "$n";; esac; }
+donec(){ intc ls $RUN/hoptest/rr_$1_*/score.json; }
+finc(){ intc ls $RUN/hoptest/rr_$1_*/score.json $RUN/hoptest/rr_$1_*/skip.json; }
+totdone(){ intc ls $RUN/hoptest/rr_*_*/score.json; }
+njobs(){ local n; n=$(jobs -rp 2>/dev/null | wc -l 2>/dev/null); case "$n" in ''|*[!0-9]*) echo 999;; *) echo "$n";; esac; }  # fork-storm-safe: default high -> WAIT, never over-launch
+load1(){ awk '{print int($1)}' /proc/loadavg 2>/dev/null || echo 0; }
 # --- INDEPENDENT LANES (AGENTS.md stoicism clause: no cap on the agent -- this changes ORCHESTRATION only).
 # Each lane is detached and finishes on its own; the dispatcher NEVER joins it, so a slow-but-legitimate lane
 # (RLVR: uncapped, may run for hours) can never hold the round open. A per-slug .inflight marker holds the
@@ -27,7 +34,9 @@ load1(){ awk '{print int($1)}' /proc/loadavg; }
 lane_live(){ local p; p=$(cat "$RUN/hoptest/$1/.inflight" 2>/dev/null) || return 1; { [ -n "$p" ] && kill -0 "$p" 2>/dev/null; } && return 0; rm -f "$RUN/hoptest/$1/.inflight"; return 1; }
 while true; do
   td=$(totdone); [ "$td" -ge "$TARGET" ] && break
-  avail=''; for h in 8 11 17 21; do [ "${CUR[$h]}" -le "$(qlen $h)" ] && avail="$avail $h"; done
+  # a hop stays available if the cursor is within the queue (q>=CUR) OR the count is UNREADABLE (q=-1, transient
+  # fork failure): never treat "couldn't read the length" as "exhausted", or a load spike false-completes the round
+  avail=''; for h in 8 11 17 21; do q=$(qlen $h); { [ "$q" = -1 ] || [ "${CUR[$h]}" -le "$q" ]; } && avail="$avail $h"; done
   # streaming mode: the queues are a LIVE stream (a feeder appends rows as the dig emits them), so an
   # empty moment means wait for the producer, not end-of-dataset. Queues are append-only, which keeps
   # slug = line index deterministic. Exit stays TARGET (or sweepctl stop).
@@ -35,7 +44,7 @@ while true; do
     [ "${BJV_QUEUE_STREAMING:-0}" = 1 ] && { sleep 60; continue; }
     break
   fi
-  while [ "$(jobs -rp | wc -l)" -ge "$(maxlanes)" ]; do sleep 8; done   # live-adjustable cap via $MAXFILE (echo N > it); no load gate
+  while [ "$(njobs)" -ge "$(maxlanes)" ]; do sleep 8; done   # live-adjustable cap via $MAXFILE; njobs is fork-storm-safe (defaults high -> wait, never over-launch); no load gate
   best=''; bestm=999999
   for h in $avail; do m=$(( $(donec $h) + LAUNCHED[$h] - $(finc $h) )); [ "$m" -lt "$bestm" ] && { bestm=$m; best=$h; }; done
   h=$best
