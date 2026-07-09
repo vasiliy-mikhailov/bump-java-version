@@ -19,6 +19,12 @@ donec(){ ls $RUN/hoptest/rr_$1_*/score.json 2>/dev/null | wc -l; }
 finc(){ ls $RUN/hoptest/rr_$1_*/score.json $RUN/hoptest/rr_$1_*/skip.json 2>/dev/null | wc -l; }
 totdone(){ ls $RUN/hoptest/rr_*_*/score.json 2>/dev/null | wc -l; }
 load1(){ awk '{print int($1)}' /proc/loadavg; }
+# --- INDEPENDENT LANES (AGENTS.md stoicism clause: no cap on the agent -- this changes ORCHESTRATION only).
+# Each lane is detached and finishes on its own; the dispatcher NEVER joins it, so a slow-but-legitimate lane
+# (RLVR: uncapped, may run for hours) can never hold the round open. A per-slug .inflight marker holds the
+# wrap-subshell PID; lane_live lets a relaunch skip a still-running straggler instead of double-running it,
+# and self-reaps a stale marker (dead PID) so a killed lane's candidate is re-runnable. ---
+lane_live(){ local p; p=$(cat "$RUN/hoptest/$1/.inflight" 2>/dev/null) || return 1; { [ -n "$p" ] && kill -0 "$p" 2>/dev/null; } && return 0; rm -f "$RUN/hoptest/$1/.inflight"; return 1; }
 while true; do
   td=$(totdone); [ "$td" -ge "$TARGET" ] && break
   avail=''; for h in 8 11 17 21; do [ "${CUR[$h]}" -le "$(qlen $h)" ] && avail="$avail $h"; done
@@ -36,10 +42,15 @@ while true; do
   line=$(sed -n "${CUR[$h]}p" $RUN/q/cand_$h.txt); CUR[$h]=$(( CUR[$h] + 1 ))
   repo=${line%% *}; sha=${line##* }; [ -z "$repo" ] && continue
   slug=rr_${h}_${LAUNCHED[$h]}; LAUNCHED[$h]=$(( LAUNCHED[$h] + 1 ))
-  { [ -f $RUN/hoptest/$slug/score.json ] || [ -f $RUN/hoptest/$slug/skip.json ]; } && continue   # RESUME GUARD: don't re-run a done candidate
+  { [ -f $RUN/hoptest/$slug/score.json ] || [ -f $RUN/hoptest/$slug/skip.json ] || lane_live "$slug"; } && continue   # RESUME GUARD: skip done OR still-live in-flight candidates
   echo "[$td/$TARGET | jv8=$(donec 8) jv11=$(donec 11) jv17=$(donec 17) jv21=$(donec 21) | load $(load1)] bite jv$h: $repo"
-  ( bash $CI/rung2/run_repo.sh "$repo" "$sha" "$slug" >$RUN/rr_logs/$slug.log 2>&1 ) &
+  mkdir -p $RUN/hoptest/$slug
+  # subshell fully redirected to its own lane log, so a detached straggler never holds the dispatcher's stdout open
+  ( echo $BASHPID > $RUN/hoptest/$slug/.inflight; bash $CI/rung2/run_repo.sh "$repo" "$sha" "$slug"; rm -f $RUN/hoptest/$slug/.inflight ) >$RUN/rr_logs/$slug.log 2>&1 &
   sleep 4
 done
-wait
-echo "ROUNDROBIN_DONE total=$(totdone) jv8=$(donec 8) jv11=$(donec 11) jv17=$(donec 17) jv21=$(donec 21)"
+# INDEPENDENT LANES: do NOT `wait` on stragglers. Dispatch is done (queue drained / TARGET hit); any lane still
+# running finishes detached and writes its own score.json/skip.json, self-clearing its .inflight marker. A single
+# multi-hour reasoning-runaway lane no longer freezes completion or the next round (a relaunch skips it via lane_live).
+still=0; for m in "$RUN"/hoptest/*/.inflight; do [ -e "$m" ] || continue; p=$(cat "$m" 2>/dev/null); { [ -n "$p" ] && kill -0 "$p" 2>/dev/null; } && still=$((still+1)); done
+echo "ROUNDROBIN_DISPATCH_DONE total=$(totdone) jv8=$(donec 8) jv11=$(donec 11) jv17=$(donec 17) jv21=$(donec 21) still_finishing=$still (detached; not joined)"
