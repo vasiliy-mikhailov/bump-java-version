@@ -18,6 +18,14 @@ def _classfile(path, major):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     open(path, "wb").write(b"\xca\xfe\xba\xbe\x00\x00" + struct.pack(">H", major))
 
+def _scala_classfile(path, major):
+    """minimal .class with a Scala attribute name in the constant pool (marks a scalac-produced class)."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    body = (b"\xca\xfe\xba\xbe\x00\x00" + struct.pack(">H", major)  # header
+            + struct.pack(">H", 2)                                  # constant_pool_count = 2 (1 entry)
+            + b"\x01" + struct.pack(">H", 5) + b"Scala")            # CP#1: Utf8 "Scala"
+    open(path, "wb").write(body)
+
 def _run(script, *args):
     p = subprocess.run([sys.executable, script, *args], capture_output=True, text=True)
     return p.returncode, (p.stdout + p.stderr)
@@ -96,6 +104,55 @@ def test_efftarget_kmp_custom_target_name_and_test_split():
         _classfile(os.path.join(d, "build/classes/kotlin/desktop/main/Foo.class"), 61)  # 61 = Java 17 (main)
         _classfile(os.path.join(d, "build/classes/kotlin/desktop/test/Bar.class"), 65)  # 65 = Java 21 (test)
         assert score.efftarget(d) == 17, f"must read KMP main (17), not test (21), got {score.efftarget(d)}"
+
+def test_efftarget_custom_gradle_builddir():
+    # rr_8_51 psxpaul/gradle-execfork-plugin: buildDir="build/gradle" puts main classes at
+    # build/gradle/classes/java/main/, which the fixed "/build/classes/java/main/" substring missed ->
+    # effective_target -1 -> false FAIL_no_main_bytecode on a green, conserved build. Must be read now.
+    with tempfile.TemporaryDirectory() as d:
+        _classfile(os.path.join(d, "build/gradle/classes/java/main/Foo.class"), 55)  # 55 = Java 11
+        assert score.efftarget(d) == 11, f"custom-buildDir main must be read (11), got {score.efftarget(d)}"
+
+def test_efftarget_java_wins_over_uncontrollable_scala():
+    # rr_8_87 apache/gluten: mixed Java+Scala; Scala 2.12 hard-caps bytecode at major 52 on ANY JDK, so the
+    # repo-wide min dragged the target to 8 (52-44) despite all Java at 55 (target 11) and a green build.
+    # Java-compiled mains must win when present.
+    with tempfile.TemporaryDirectory() as d:
+        _classfile(os.path.join(d, "build/classes/java/main/Foo.class"), 55)   # 55 = Java 11
+        _classfile(os.path.join(d, "build/classes/scala/main/Bar.class"), 52)  # Scala 2.12 cap (Java 8)
+        assert score.efftarget(d) == 11, f"Java target (11) must win over scala cap, got {score.efftarget(d)}"
+
+def test_efftarget_pure_scala_still_reports_scala():
+    # guard: a pure-Scala project (no Java main) still reports its own bytecode target (nothing to prefer),
+    # so an uncontrollable-Scala repo is NOT silently credited as reaching a higher Java target.
+    with tempfile.TemporaryDirectory() as d:
+        _classfile(os.path.join(d, "build/classes/scala/main/Bar.class"), 52)  # 52 = Java 8
+        assert score.efftarget(d) == 8, f"pure-scala must fall back to scala major (8), got {score.efftarget(d)}"
+
+def test_efftarget_unbumped_java_still_fails_despite_scala():
+    # guard against a false PASS: if the JAVA class itself did not reach the target, the Java-preference must
+    # still report the low Java target (not silently pass because scala exists).
+    with tempfile.TemporaryDirectory() as d:
+        _classfile(os.path.join(d, "build/classes/java/main/Foo.class"), 52)   # Java still at 8 (not bumped)
+        _classfile(os.path.join(d, "build/classes/scala/main/Bar.class"), 52)
+        assert score.efftarget(d) == 8, f"un-bumped java must report 8, got {score.efftarget(d)}"
+
+def test_efftarget_maven_scala_excluded_by_attribute():
+    # rr_8_87 apache/gluten is MAVEN: java + scala classes co-locate in target/classes/, so path cannot split
+    # them. A scalac class (carries a "Scala" attr) must be excluded by attribute so its major-52 cap does not
+    # drag a green Java-11 build down to target 8.
+    with tempfile.TemporaryDirectory() as d:
+        _classfile(os.path.join(d, "target/classes/Foo.class"), 55)         # Java 11
+        _scala_classfile(os.path.join(d, "target/classes/Bar.class"), 52)   # Scala 2.12 cap, has Scala attr
+        assert score.efftarget(d) == 11, f"maven scala must be excluded (11), got {score.efftarget(d)}"
+
+def test_efftarget_unbumped_kotlin_still_fails():
+    # false-PASS guard: Kotlin jvmTarget IS controllable, so it is NOT exempted like Scala. A mixed repo whose
+    # Java was bumped but Kotlin was not must still FAIL the target (min over controllable classes catches it).
+    with tempfile.TemporaryDirectory() as d:
+        _classfile(os.path.join(d, "build/classes/java/main/Foo.class"), 55)     # Java 11
+        _classfile(os.path.join(d, "build/classes/kotlin/main/Bar.class"), 52)   # Kotlin still Java 8
+        assert score.efftarget(d) == 8, f"un-bumped kotlin must still fail (8), got {score.efftarget(d)}"
 
 def test_verdict_no_main_bytecode_is_not_pass():
     # build OK + tests conserved + ETGT == -1 (no inspectable main classes) used to fall through to PASS,

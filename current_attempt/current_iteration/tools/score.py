@@ -68,15 +68,20 @@ def resetgen(root):
     return removed
 
 # --- effective bytecode target (feature = major-44); skip build-logic + multi-release ---
-MAIN = ("/target/classes/", "/build/classes/java/main/", "/build/classes/kotlin/main/",
-        "/build/classes/groovy/main/", "/build/classes/scala/main/", "/out/production/")
-TEST = ("/target/test-classes/", "/build/classes/java/test/", "/build/classes/kotlin/test/",
-        "/build/classes/groovy/test/", "/out/test/")
-# Kotlin Multiplatform puts JVM bytecode at build/classes/kotlin/<target>/main|test/ (the target name, e.g.
-# `jvm`, sits between kotlin/ and main/test/) -- the fixed tuples miss it, so a KMP build looks like it has
-# NO main bytecode (false FAIL_no_main_bytecode / previously a soft-pin false PASS). js/native targets emit
-# no .class, so a broad match here is safe (the CAFEBABE check filters them out).
-KMP = re.compile(r"/build/classes/kotlin/[^/]+/(main|test)/")
+# Gradle emits <buildDir>/classes/<lang>/<main|test>/. Match /classes/<lang>/<role>/ NOT anchored to /build/,
+# so a CUSTOM buildDir still resolves (rr_8_51 psxpaul/gradle-execfork-plugin: buildDir="build/gradle" ->
+# build/gradle/classes/java/main/, which the fixed "/build/classes/java/main/" substring missed -> effective
+# target -1 -> false FAIL_no_main_bytecode on a green, conserving build). Maven (/target/classes/) and IDEA
+# (/out/production/) carry no language in the path and stay fixed (treated as Java main output).
+GCLS = re.compile(r"/classes/(java|kotlin|groovy|scala)/(main|test)/")
+MAIN_FIXED = ("/target/classes/", "/out/production/")
+TEST_FIXED = ("/target/test-classes/", "/out/test/")
+# Kotlin Multiplatform puts JVM bytecode at <buildDir>/classes/kotlin/<target>/main|test/ (the target name,
+# e.g. `jvm`, sits between kotlin/ and main/test/) -- the language tuple misses it, so a KMP build looks like
+# it has NO main bytecode (false FAIL_no_main_bytecode / previously a soft-pin false PASS). js/native targets
+# emit no .class, so a broad match here is safe (the CAFEBABE check filters them out). Also buildDir-tolerant;
+# disjoint from GCLS (kotlin/<target>/main has a segment between kotlin/ and main/ that GCLS's kotlin/main lacks).
+KMP = re.compile(r"/classes/kotlin/[^/]+/(main|test)/")
 def _major(p):
     try:
         with open(p, "rb") as f: h = f.read(8)
@@ -84,20 +89,57 @@ def _major(p):
         return struct.unpack(">H", h[6:8])[0]
     except Exception as e:
         sys.stderr.write(f"_major: unreadable class {p}: {e}\n"); return None
+# constant-pool tag -> bytes AFTER the 1-byte tag (Utf8 handled separately; Long/Double take two slots)
+_CP_SZ = {3:4, 4:4, 5:8, 6:8, 7:2, 8:2, 9:4, 10:4, 11:4, 12:4, 15:3, 16:2, 17:4, 18:4, 19:2, 20:2}
+def _is_scala(p):
+    """True if the .class carries a scalac attribute (Scala/ScalaSig/ScalaInlineInfo) -> its bytecode major is
+    capped by the Scala backend (2.12 hard-caps at major 52 on any JDK) and is NOT liftable by a Java-version
+    bump, so it must not drag the effective target down. Needed for Maven, where java + scala classes co-locate
+    in target/classes/ and cannot be told apart by path (rr_8_87 apache/gluten)."""
+    try:
+        with open(p, "rb") as f: b = f.read()
+        if b[:4] != b"\xca\xfe\xba\xbe": return False
+        n = struct.unpack(">H", b[8:10])[0]  # constant_pool_count
+        i, slot = 10, 1
+        while slot < n:
+            tag = b[i]; i += 1
+            if tag == 1:  # Utf8
+                ln = struct.unpack(">H", b[i:i+2])[0]; s = b[i+2:i+2+ln]; i += 2 + ln
+                if s in (b"Scala", b"ScalaSig", b"ScalaInlineInfo"): return True
+            else:
+                i += _CP_SZ.get(tag, 0)
+                if tag in (5, 6): slot += 1  # Long/Double occupy two constant-pool slots
+            slot += 1
+        return False
+    except Exception:
+        return False
 def efftarget(root):
-    mains, tests = [], []
+    # Split into targets a Java/Kotlin bump CAN lift (ctrl) vs Scala (uncontrollable, capped by the scala
+    # backend). Kotlin/Groovy stay in ctrl -- their jvmTarget IS controllable, so an un-bumped Kotlin class must
+    # still fail the target (not be exempted like Scala), else a mixed repo false-passes.
+    ctrl_mains, scala_mains = [], []
     for dp, _, fn in os.walk(root):
         pp = dp.replace("\\", "/") + "/"
         if "/META-INF/versions/" in pp or "/buildSrc/" in pp or "/build-logic/" in pp: continue
+        gm = GCLS.search(pp)
         km = KMP.search(pp)
-        ismain = any(h in pp for h in MAIN) or (km is not None and km.group(1) == "main")
-        istest = any(h in pp for h in TEST) or (km is not None and km.group(1) == "test")
-        if not (ismain or istest): continue
+        lang = gm.group(1) if gm else ("kotlin" if km else None)
+        role = gm.group(2) if gm else (km.group(1) if km else None)
+        ismain = role == "main" or any(h in pp for h in MAIN_FIXED)
+        if not ismain: continue  # MAIN bytecode only; never derive the target from TEST classes (review score-3)
         for f in fn:
             if not f.endswith(".class") or f == "module-info.class": continue
-            m = _major(os.path.join(dp, f))
-            if m: (mains if ismain else tests).append(m)
-    pool = mains  # MAIN bytecode only; never derive the target from TEST classes (review score-3)
+            fp = os.path.join(dp, f)
+            m = _major(fp)
+            if not m: continue
+            # scala-path (Gradle) or scala-attribute (Maven co-located) -> uncontrollable, exclude from target.
+            is_scala = lang == "scala" or (lang in (None, "java") and _is_scala(fp))
+            (scala_mains if is_scala else ctrl_mains).append(m)
+    # rr_8_87 apache/gluten: a mixed Java+Scala build's repo-wide min was dragged to Scala 2.12's hard major-52
+    # cap despite every Java class reaching the real target and a green 46/46 build. Use the controllable classes
+    # for the target; a pure-Scala project (no controllable main) still reports its own capped target (no false
+    # credit). An un-bumped Java/Kotlin class still drags min(ctrl_mains) down, so no false PASS is introduced.
+    pool = ctrl_mains or scala_mains
     return (min(pool) - 44) if pool else -1
 
 # --- rename-robust conservation: how many pre-pass tests are missing post (lifted from agent_drive_one) ---
