@@ -26,6 +26,9 @@ CRITICAL. NEVER time-box these builds. Cold Gradle/Maven runs download distribut
 - Treat every manual edit and every project-specific dependency/plugin change as a LIABILITY. Make the FEWEST changes that genuinely work; reach for a hand edit or a project-specific recipe only when a real wall demands it.
 - Never touch or weaken test code (see FORBIDDEN).
 
+## Proactive step: Lombok floor (run BEFORE the first JDK-17 build; gated on a declared dependency, not an error)
+If the build declares Lombok (grep the build files for `org.projectlombok`), FLOOR it to **1.18.22** (the first Lombok that reads JDK-17 javac internals) as part of the START-HERE recipe, before the first JDK-17 build. Never wait for the error. An out-of-date Lombok does not fail with a version string that names it: under JDK 17 it dies with `NoSuchFieldError: Class com.sun.tools.javac.tree.JCTree$JCImport does not have member field 'com.sun.tools.javac.tree.JCTree qualid'` (javac internals moved), and a fail-fast reactor aborts on that during an EARLY module before the run ever reaches the reactive back-stop row. The structural trigger (project declares Lombok) is unambiguous, which is exactly why this is proactive. On Maven with Lombok BOM-managed by a Spring parent, a bare dependency bump loses to the parent BOM, so override the `lombok.version` property in every module that declares Lombok. Apply via `org.openrewrite.java.dependencies.UpgradeDependencyVersion` {groupId: org.projectlombok, artifactId: lombok, newVersion: 1.18.22} or by editing the version directly. Counts as a **free hop-fixed intent**. The reactive Troubleshooting row below stays as a back-stop. (JDK 17 does NOT need `maven.compiler.proc=full`, that is a JDK-23+ requirement, see the 21->25 skill.)
+
 ## Proactive step: Gradle wrapper floor (run BEFORE the first JDK-17 build; gated on a structural signal, not an error)
 If the build tool is **Gradle**, read the wrapper version in `gradle/wrapper/gradle-wrapper.properties` (the `gradle-<N>-bin.zip` in `distributionUrl`). **If it is below 7.3** (the JDK-17 floor), bump `distributionUrl` to **`gradle-7.6-bin.zip`** (the pinned value) *before* applying the recipe / building under JDK 17. Never wait for the error. Gradle itself runs on the build JDK, and Gradle **< 7.3 cannot run on JDK 17**: it dies during *configuration* with `Unsupported class file major version 61` while compiling `settings.gradle`/`build.gradle`, before any project code is touched. That v61 text is the SAME signature JaCoCo and old Spring/ASM emit, so reactive error-matching cannot reliably attribute it to the wrapper, but the **structural trigger (wrapper version < 7.3) is unambiguous**, which is exactly why this is proactive (same test as the Lombok proactive step). Apply via `org.openrewrite.gradle.UpdateGradleWrapper` {version: "7.6"} or by editing `distributionUrl` directly (never a `file://` path). Counts as a **free hop-fixed intent**, like setting the target. The reactive Troubleshooting row below stays as a back-stop.
 
@@ -45,6 +48,11 @@ recipeList:
   - org.openrewrite.java.migrate.UpgradeBuildToJava17
   - org.openrewrite.java.migrate.UpgradeJavaVersion:
       version: 17
+  # PROACTIVE (include ONLY if the project declares Lombok: see Proactive step above):
+  - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
+      groupId: org.projectlombok
+      artifactId: lombok
+      newVersion: 1.18.22
 ```
 Then compile under JDK 17. If it compiles, test under JDK 17. Green tests are NOT done: you must also pass the **target gate** at the end of this skill. A build that compiles and conserves tests but still targets 11 scores `FAIL_target_not_bumped` and earns nothing.
 
