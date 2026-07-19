@@ -39,7 +39,7 @@ recipeList:
   - org.openrewrite.java.migrate.UpgradeJavaVersion:
       version: 21
 ```
-Then compile under JDK 21. If it compiles, test under JDK 21. If tests pass and none are lost, you are done.
+Then compile under JDK 21. If it compiles, test under JDK 21. Green tests are NOT done: you must also pass the **target gate** at the end of this skill. A build that compiles and conserves tests but still targets 17 scores `FAIL_target_not_bumped` and earns nothing.
 
 ## Reflect loop: if compile or test under 21 fails, read the error, fix the FIRST wall, re-run (no iteration limit)
 JDK-21 class-file version is **65**: a tool that reads bytecode via ASM must be new enough for v65.
@@ -82,4 +82,11 @@ JDK-21 class-file version is **65**: a tool that reads bytecode via ASM must be 
 ## Absolutely forbidden (cheating: fails the run)
 Do NOT delete/skip/disable/weaken any test or assertion; no `-DskipTests`/`<skip>true`; do NOT delete test files; do NOT touch test code to make it pass. Conservation is checked independently.
 
-When the project passes its tests under JDK 21 with no tests lost and the effective target is 21, say you are done and summarize what you changed.
+## Target gate: run this before you say done (this is where the reward is won or lost)
+The most common miss is stopping at a green build: a wrapper bump, a `chmod +x gradlew`, a dependency floor, or an OpenRewrite run can all produce a clean compile+test while the bytecode still targets 17 -> `FAIL_target_not_bumped edits 0`, which earns nothing. The reward follows the effective bytecode version, not the build succeeding. So before you declare done, every run:
+1. Grep the WHOLE tree for target pins (one simple grep; do NOT improvise a `find -exec`):
+   `grep -rnE 'JavaLanguageVersion\.of\(|JavaVersion\.VERSION_|source[Cc]ompatibility|target[Cc]ompatibility|options\.release|<source>|<target>|<release>|maven\.compiler\.(source|target|release)|jvmTarget|jvmToolchain' . 2>/dev/null | grep -vE '/build/|/target/'`
+   Read EVERY match. Any pin below 21 (for example `of(17)`, `VERSION_17`, a `"17"` string, `release 17`) must be bumped to 21, in the root AND every module. This whole-tree grep is how you catch the module, or the Kotlin `jvmTarget` block, you would otherwise miss.
+2. Confirm a compiled MAIN class reached major 65: `f=$(find . -path '*classes/*/main/*.class' -o -path '*/target/classes/*.class' 2>/dev/null | grep -v module-info | head -1); od -An -tx1 -j6 -N2 "$f"` -> the second byte must be `41` (=65). A green build whose main classes are still below that is not a bump.
+
+Only when the build is green, no tests are lost, AND both checks pass: say you are done and summarize what you changed.

@@ -37,7 +37,7 @@ recipeList:
   - org.openrewrite.java.migrate.UpgradeJavaVersion:
       version: 11
 ```
-Then compile under JDK 11. If it compiles, test under JDK 11. If tests pass and none are lost, you are done.
+Then compile under JDK 11. If it compiles, test under JDK 11. Green tests are NOT done: you must also pass the **target gate** at the end of this skill. A build that compiles and conserves tests but still targets 8 scores `FAIL_target_not_bumped` and earns nothing.
 
 ## Reflect loop: if compile or test under 11 fails, read the error, fix the FIRST wall, re-run (no iteration limit)
 Keep going until it passes or you have exhausted real options.
@@ -68,7 +68,14 @@ Wall → fix:
 ## Absolutely forbidden (cheating: fails the run)
 Do NOT delete/skip/disable/weaken any test or assertion; no `-DskipTests`/`<skip>true`; do NOT delete test files; do NOT touch test code to make it pass. Conservation of the originally-passing tests is checked independently.
 
-When the project passes its tests under JDK 11 with no tests lost and the effective target is 11, say you are done and summarize what you changed.
+## Target gate: run this before you say done (this is where the reward is won or lost)
+The most common miss is stopping at a green build: a wrapper bump, a `chmod +x gradlew`, a dependency floor, or an OpenRewrite run can all produce a clean compile+test while the bytecode still targets 8 -> `FAIL_target_not_bumped edits 0`, which earns nothing. The reward follows the effective bytecode version, not the build succeeding. So before you declare done, every run:
+1. Grep the WHOLE tree for any target pin still below 11 (one simple grep; do NOT improvise a `find -exec`):
+   `grep -rnE 'JavaLanguageVersion\.of\(([0-9]|10)\)|VERSION_(1_[0-8]|[89]|10)\b|source[Cc]ompatibility|target[Cc]ompatibility|options\.release|<source>|<target>|<release>|maven\.compiler\.(source|target|release)|jvmTarget' . 2>/dev/null | grep -vE '/build/|/target/'`
+   This must return NOTHING below 11. It is how you catch the module, or the Kotlin `jvmTarget` block, you would otherwise miss. Bump EVERY match, in the root AND every module, using the forms listed under "verify the Java target actually landed" above.
+2. Confirm a compiled MAIN class is major 55: `f=$(find . -path '*classes/*/main/*.class' -o -path '*/target/classes/*.class' 2>/dev/null | grep -v module-info | head -1); od -An -tx1 -j6 -N2 "$f"` -> the second byte must be `37` (=55). A green build whose main classes are still `34` (=52) is not a bump.
+
+Only when the build is green, no tests are lost, AND both checks pass: say you are done and summarize what you changed.
 
 - **Apply the recipe ONLY via `bapply` (transient init-script). NEVER add the OpenRewrite plugin to a build file.** If you add `id('org.openrewrite')` / `apply plugin: 'org.openrewrite.rewrite'` / a `rewrite { }` block / `rewrite(...)` deps to `build.gradle` to apply the recipe. It PERSISTS into the gate build, which resolves plugins from the OFFLINE mirror and dies: `Plugin Repositories (could not resolve plugin artifact 'org.openrewrite:org.openrewrite.gradle.plugin:N')` -> FAIL_build_post. `bapply` applies the recipe transiently and leaves no residue; if you already added it, REMOVE the plugin + `rewrite{}` block + `rewrite(...)` deps before the gate. (rr_8_93 aartiPl/tablevis: agent left `id('org.openrewrite') version '6.40.0'` -> gate couldn't resolve it offline.)
 
