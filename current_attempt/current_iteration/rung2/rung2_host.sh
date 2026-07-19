@@ -35,7 +35,7 @@ timeout -k 120 "${BJV_AGENT_GUARD:-31536000}" docker run --rm --init --name "$AG
   -e BJV_MODE="$BJV_MODE" -v "$BJV_WS:/work" -v "$OHRUN:/oh_run.py:ro" -v /home/vmihaylov/bump-java-version/current_attempt/current_iteration/rung2/bin:/r2bin:ro \
   -v /home/vmihaylov/bump-java-version/current_attempt/current_iteration/rung2/rung2_drive.sh:/drive.sh:ro "${SKILLMNT[@]}" \
   -v /home/vmihaylov/.m2-fitness:/root/.m2 -v /home/vmihaylov/maven-config/settings.xml:/root/.m2/settings.xml:ro \
-  -v /home/vmihaylov/.gradle-fitness:/ro:ro -v /home/vmihaylov/.gradle-dists:/dists:ro \
+  -v /home/vmihaylov/.gradle-fitness:/ro:ro -v /home/vmihaylov/.gradle-dists:/dists \
   --entrypoint bash bump-allagents-sweep:latest /drive.sh "$FROM" "$TO" > "$O/agent.log" 2>&1
 AGRC=$?
 if [ "$AGRC" = 124 ] || [ "$AGRC" = 137 ]; then docker rm -f "$AGENT_NAME" >/dev/null 2>&1 || true; fi

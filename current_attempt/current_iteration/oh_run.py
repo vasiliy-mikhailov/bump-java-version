@@ -28,8 +28,23 @@ try:
         except Exception:
             try: action.timeout = ONE_YEAR
             except Exception: pass
+        # P16 stdin root-fix, extended from the bin/ verbs to AGENT-COMPOSED commands. The verbs
+        # (bbuild/btest/bapply) already open with `exec 0</dev/null`, but a command the MODEL composes
+        # runs straight in the pty-backed `bash -i`, where an interactive prompt parks the lane FOREVER:
+        # observed 2026-07-17 as `unzip` overwrite-prompt (78h), `gradle --scan` ToS-prompt (5h), a test
+        # reading stdin (34h). This is not a work cap (P15-safe): the command still runs uncapped, it just
+        # gets EOF instead of a prompt it can never answer. is_input is NEVER wrapped - that IS the tool
+        # feeding stdin to a live process. Validated against simple/pipeline/heredoc/background/multiline.
+        try:
+            if not getattr(action, "is_input", False):
+                _cmd = getattr(action, "command", "") or ""
+                if _cmd.strip() and not _cmd.lstrip().startswith("C-") and "</dev/null" not in _cmd:
+                    object.__setattr__(action, "command", "{\n" + _cmd + "\n} </dev/null")
+        except Exception:
+            pass
         return _orig_call(self, action, *a, **k)
     _TE.__call__ = _no_timeout_call
+    print("PATCHED: agent-composed commands get EOF on stdin (P16 root-fix extended; no work cap)")
     print("PATCHED: hard timeout -> 1 year; no-change stall detector -> 1 year (root cause fixed at source, P15)")
     base, model, key = os.environ["OC_BASE"], "openai/" + os.environ["OC_MODEL"], SecretStr(os.environ["OC_KEY"])
     # Stoic retry (P15): a vLLM restart/outage is infrastructure noise, never a reason for the agent to give
@@ -49,6 +64,26 @@ try:
                    if t is not None and t not in _sllm.LLM_RETRY_EXCEPTIONS)
     _sllm.LLM_RETRY_EXCEPTIONS = _sllm.LLM_RETRY_EXCEPTIONS + _extra
     print(f"PATCHED: retry tuple widened by {[t.__name__ for t in _extra]}")
+    # 2026-07-09 (P15/P16 root-fix): the agent sometimes treats "migration complete" as license to `git push`
+    # + open a PR (OH default <PULL_REQUESTS> permits it "if explicitly asked"). No remote is reachable from the
+    # sealed container, so the push hangs on git-remote-https forever (CLOSE_WAIT, observed 5h+), the run never
+    # returns, and a FINISHED green bump is never scored -- a silent lost PASS. Root-fix at source: rewrite OH's
+    # PULL_REQUESTS guidance so the agent never pushes; the gate scores the local /work tree.
+    try:
+        import openhands.sdk.agent as _oa, re as _re
+        _sp = os.path.join(os.path.dirname(_oa.__file__), "prompts", "system_prompt.j2")
+        _t = open(_sp).read()
+        _repl = ("<PULL_REQUESTS>\n* Never run `git push`, and never open, update, or propose a pull request. "
+                 "There is no remote or reviewer reachable here; the deliverable is the migrated code in the local "
+                 "working tree, which is scored directly. Local commits are fine, but any push hangs the session "
+                 "forever and discards your finished work.\n</PULL_REQUESTS>")
+        _t2, _n = _re.subn(r"<PULL_REQUESTS>.*?</PULL_REQUESTS>", _repl, _t, flags=_re.S)
+        if _n and _t2 != _t:
+            open(_sp, "w").write(_t2); print("PATCHED: neutralized <PULL_REQUESTS> (no push/PR; local tree is the deliverable)")
+        else:
+            print("PR-patch: <PULL_REQUESTS> not found (template changed?)")
+    except Exception as _e:
+        print("PR-patch skipped:", _e)
     RETRY = dict(num_retries=1_000_000, retry_min_wait=8, retry_max_wait=60, timeout=3600)
     llm = LLM(model=model, base_url=base, api_key=key, usage_id="ohrun",
               max_output_tokens=32768, temperature=0.0, native_tool_calling=True, **RETRY)
