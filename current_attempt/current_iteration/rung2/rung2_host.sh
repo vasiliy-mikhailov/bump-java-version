@@ -32,6 +32,7 @@ else
   SKILLMNT=(-v "$CIA/.agents/skills/bump-java-${FROM}-to-${TO}/SKILL.md:/skill.md:ro")
 fi
 timeout -k 120 "${BJV_AGENT_GUARD:-31536000}" docker run --rm --init --name "$AGENT_NAME" --network mvn-cache -e OC_KEY="$PROPOSER_API_KEY" \
+  -e OC_BASE -e OC_MODEL \
   -e BJV_MODE="$BJV_MODE" -v "$BJV_WS:/work" -v "$OHRUN:/oh_run.py:ro" -v /home/vmihaylov/bump-java-version/current_attempt/current_iteration/rung2/bin:/r2bin:ro \
   -v /home/vmihaylov/bump-java-version/current_attempt/current_iteration/rung2/rung2_drive.sh:/drive.sh:ro "${SKILLMNT[@]}" \
   -v /home/vmihaylov/.m2-fitness:/root/.m2 -v /home/vmihaylov/maven-config/settings.xml:/root/.m2/settings.xml:ro \
