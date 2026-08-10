@@ -30,8 +30,10 @@ critical. never time-box these builds. Cold Gradle/Maven runs download distribut
 
 ## Proactive step: Spring Boot line (run BEFORE the first JDK-11 build; gated on a declared dependency, not on an error)
 If the build declares Spring Boot (grep the build files for `org.springframework.boot`), raise the line with the OpenRewrite recipe rather than by hand. The recipe moves the whole managed set together and migrates the code with it, which is what a hand-written version pin cannot do: pinning one member of a managed family (a bare `jackson-databind`, `logback-classic` or `netty-handler` version) leaves its siblings behind and the tests die with `NoClassDefFoundError` on a class from that same family. Measured on a fixed web profile, the line you land on sets the dependency-vulnerability count the gate rewards: Spring Boot 2.7.18 carries 42 critical+high, 3.3.x carries 22, 3.4.x carries 17, 3.5.14 carries 12, and 3.5.15 and 3.5.16 carry none.
-- Spring Boot 3.x requires JDK 17, so it is out of reach on this hop. The best line available here is 2.7.18: if the project declares Spring Boot below it, add `org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7` to the START-HERE recipe list.
-- Spring Boot 1.x cannot run on JDK 11 at all, so the same recipe is the fix there rather than an optional improvement.
+- Include the recipe **only when the project actually resolves an `org.springframework` artifact**. It is not a free add-on: every `UpgradeSpringBoot_*` carries `SpringBoot2JUnit4to5Migration`, which rewrites JUnit 4 to JUnit 5 and removes `junit:junit` from the build. On a project with no Spring that is pure damage: measured on openrewrite/jgit, which has no Spring and 3754 JUnit 4 tests, the recipe deleted `junit:junit`, left JUnit-4-only helpers such as `org.junit.rules.TestRule` unresolvable, and the whole suite was lost. Add it to the START-HERE recipe list yourself, only after the grep confirms Spring is present.
+- Pick the recipe by the line the project is **already on**, not by the JDK you are targeting. A project on Boot 2.x gets `org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7`; a project already on Boot 3.x gets `org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5`. Sending a Boot 2.x project straight to 3.5 drags javax to jakarta plus Spring Security 6 in one step: measured on mosip/commons (Boot 2.0.2) it rewrote 1297 files and lost 1916 of 2409 tests. That jump belongs in the reflect loop, attempted only when a Spring wall actually blocks the build, and kept only if the tests survive.
+- After the recipe runs, compile under the SOURCE jdk before going any further. OpenRewrite edits sources and poms independently and never type-checks the result, so it reports BUILD SUCCESS even when it has emitted code that cannot compile. If that compile fails, the recipe is the cause and its edits are what you fix.
+- Do not jump to Spring Boot 4.x for security: measured 4.0.0 through 4.0.5 score worse than 3.5.6 on the same profile, and 4.x moves Jackson to the `tools.jackson` coordinates, which is an API break you would pay for in lost tests.
 Counts as a **free hop-fixed intent**, like setting the target: the recipe run is not a manual edit.
 
 ## Start here: write `rewrite.yml`, then apply it
@@ -42,8 +44,6 @@ recipeList:
   - org.openrewrite.java.migrate.Java8toJava11
   - org.openrewrite.java.migrate.UpgradeJavaVersion:
       version: 11
-  # MANDATORY when the project declares Spring Boot (see the proactive step above):
-  - org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7
 ```
 Then compile under JDK 11. If it compiles, test under JDK 11. Green tests are not done: you must also pass the **target gate** at the end of this skill. A build that compiles and conserves tests but still targets 8 scores `FAIL_target_not_bumped` and earns nothing.
 
