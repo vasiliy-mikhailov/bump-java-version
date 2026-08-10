@@ -33,6 +33,13 @@ critical. never time-box these builds. Cold Gradle/Maven runs download distribut
 
 - **Gradle wrapper floor (run before the first JDK-25 build; gated on the structural wrapper version, not an error):** if the build tool is **Gradle**, read the wrapper version in `gradle/wrapper/gradle-wrapper.properties` (the `gradle-<N>-bin.zip` in `distributionUrl`). **If it is below 9.1** (the JDK-25 floor), do both of these *before* applying the recipe / building under JDK 25. Never wait for the error: **(1)** set `distributionUrl` to **`gradle-9.1.0-bin.zip`** (the pinned value; via `org.openrewrite.gradle.UpdateGradleWrapper` {version: "9.1.0"} or by editing the line directly. never a `file://` path), and **(2)** ensure the wrapper script is executable (**`chmod +x gradlew`**). Gradle itself runs on the build JDK, and Gradle **8.x cannot run on JDK 25**: it dies during *configuration* with `BUG! ... Unsupported class file major version 69` in `_BuildScript_` while parsing `settings.gradle`/`build.gradle`, before any project code is touched (Gradle 8.5/8.9/8.10 all fail; 9.0.0 also fails; **9.1.0** is the first that runs on JDK 25, verified). That v69 text is the same signature JaCoCo/ByteBuddy/Mockito also emit, so reactive error-matching cannot reliably attribute it to the wrapper, but the **structural trigger (wrapper version < 9.1) is unambiguous**, which is exactly why this is proactive (same test as the Lombok proactive step). The `chmod +x` matters: if `gradlew` is checked in without the executable bit, the build silently falls back to a system `gradle` (e.g. 8.10.2) that the `distributionUrl` edit can never influence, so a wrapper bump that “looks applied” still dies on v69 until `gradlew` is made executable. The reactive Troubleshooting row below stays as a back-stop.
 
+## Proactive step: Spring Boot line (run BEFORE the first JDK-25 build; gated on a declared dependency, not on an error)
+If the build declares Spring Boot (grep the build files for `org.springframework.boot`), raise the line with the OpenRewrite recipe rather than by hand. The recipe moves the whole managed set together and migrates the code with it, which is what a hand-written version pin cannot do: pinning one member of a managed family (a bare `jackson-databind`, `logback-classic` or `netty-handler` version) leaves its siblings behind and the tests die with `NoClassDefFoundError` on a class from that same family. Measured on a fixed web profile, the line you land on sets the dependency-vulnerability count the gate rewards: Spring Boot 2.7.18 carries 42 critical+high, 3.3.x carries 22, 3.4.x carries 17, 3.5.14 carries 12, and 3.5.15 and 3.5.16 carry none.
+- Already on Spring Boot 3.x: add `org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5` to the START-HERE recipe list. On this hop the floor is a compatibility one as well as a security one: Spring Boot 3.3.13 and below cannot boot a context once the target is 25, failing with `Unsupported class file major version 69` from the ASM inside component scan, so 3.4.10 is the lowest line that runs at all and 3.5.x is the lowest that also scores well.
+- Still on Spring Boot 2.x: the 2.x to 3.x move drags javax to jakarta and Spring Security 6 with it and routinely loses conserve-set tests, so it stays conditional and belongs in the reflect loop below.
+- Do not jump to Spring Boot 4.x for security: measured 4.0.0 through 4.0.5 score worse than 3.5.6 on the same profile, and 4.x moves Jackson to the `tools.jackson` coordinates, which is an API break you would pay for in lost tests.
+Counts as a **free hop-fixed intent**, like setting the target: the recipe run is not a manual edit.
+
 ## Start here: write `rewrite.yml`, then apply it
 ```
 type: specs.openrewrite.org/v1beta/recipe
@@ -51,6 +58,8 @@ recipeList:
   - org.openrewrite.maven.AddProperty:
       key: maven.compiler.proc
       value: full
+  # MANDATORY when the project declares Spring Boot (see the proactive step above):
+  - org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5
 ```
 Then compile under JDK 25. If it compiles, test under JDK 25. Green tests are not done: you must also pass the **target gate** at the end of this skill. A build that compiles and conserves tests but still targets 21 scores `FAIL_target_not_bumped` and earns nothing.
 

@@ -28,6 +28,12 @@ critical. never time-box these builds. Cold Gradle/Maven runs download distribut
 ## Proactive step: verify the Java target actually landed (Gradle/Maven pin the recipe leaves at 8; silent FAIL_target_not_bumped)
 `UpgradeJavaVersion` frequently does not touch the build file's target pin, so the build compiles cleanly to old (Java-8, major 52) bytecode with no error and silently scores `FAIL_target_not_bumped`. After applying the recipe, grep every build file for a pin still `< 11` and hand-bump it before the JDK-11 build. Use a simple grep (do not improvise a `find -exec`, a malformed one wastes turns and can get you stuck): `grep -rnE 'JavaLanguageVersion.of|VERSION_1[._]?8|sourceCompat|targetCompat|options.release|<source>|<target>|<release>|maven.compiler|jvmTarget' . 2>/dev/null`. Bump every pin you find (a project can have two): Gradle `java { toolchain { languageVersion = JavaLanguageVersion.of(8) } }` → `of(11)`; `sourceCompatibility`/`targetCompatibility = JavaVersion.VERSION_1_8` (or `'1.8'`) → `VERSION_11`/`'11'`; `options.release = 8` → `11`; Maven `<source>1.8`/`<target>1.8`/`<release>8` / `maven.compiler.source` → `11`; Kotlin `jvmTarget "1.8"` → `"11"`. This applies to plain-Java projects too (not just Kotlin). Counts as a free hop-fixed intent. (Proven: jmini/asciidoctorj-dynamic-include, plain-Java, sole pin `java { toolchain { JavaLanguageVersion.of(8) } }` the recipe left untouched: `of(8)`→`of(11)` flipped FAIL_target_not_bumped `target 8` → VERDICT PASS `target 11`, 35 tests, 0 edits.)
 
+## Proactive step: Spring Boot line (run BEFORE the first JDK-11 build; gated on a declared dependency, not on an error)
+If the build declares Spring Boot (grep the build files for `org.springframework.boot`), raise the line with the OpenRewrite recipe rather than by hand. The recipe moves the whole managed set together and migrates the code with it, which is what a hand-written version pin cannot do: pinning one member of a managed family (a bare `jackson-databind`, `logback-classic` or `netty-handler` version) leaves its siblings behind and the tests die with `NoClassDefFoundError` on a class from that same family. Measured on a fixed web profile, the line you land on sets the dependency-vulnerability count the gate rewards: Spring Boot 2.7.18 carries 42 critical+high, 3.3.x carries 22, 3.4.x carries 17, 3.5.14 carries 12, and 3.5.15 and 3.5.16 carry none.
+- Spring Boot 3.x requires JDK 17, so it is out of reach on this hop. The best line available here is 2.7.18: if the project declares Spring Boot below it, add `org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7` to the START-HERE recipe list.
+- Spring Boot 1.x cannot run on JDK 11 at all, so the same recipe is the fix there rather than an optional improvement.
+Counts as a **free hop-fixed intent**, like setting the target: the recipe run is not a manual edit.
+
 ## Start here: write `rewrite.yml`, then apply it
 ```
 type: specs.openrewrite.org/v1beta/recipe
@@ -36,6 +42,8 @@ recipeList:
   - org.openrewrite.java.migrate.Java8toJava11
   - org.openrewrite.java.migrate.UpgradeJavaVersion:
       version: 11
+  # MANDATORY when the project declares Spring Boot (see the proactive step above):
+  - org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7
 ```
 Then compile under JDK 11. If it compiles, test under JDK 11. Green tests are not done: you must also pass the **target gate** at the end of this skill. A build that compiles and conserves tests but still targets 8 scores `FAIL_target_not_bumped` and earns nothing.
 

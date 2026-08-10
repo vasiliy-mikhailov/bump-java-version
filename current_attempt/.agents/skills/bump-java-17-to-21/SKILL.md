@@ -36,6 +36,13 @@ Two libraries read javac/bytecode internals that changed at JDK 21 (v65), and bo
 
 Each is a **free hop-fixed intent**. The reactive Troubleshooting rows below stay as back-stops.
 
+## Proactive step: Spring Boot line (run BEFORE the first JDK-21 build; gated on a declared dependency, not on an error)
+If the build declares Spring Boot (grep the build files for `org.springframework.boot`), raise the line with the OpenRewrite recipe rather than by hand. The recipe moves the whole managed set together and migrates the code with it, which is what a hand-written version pin cannot do: pinning one member of a managed family (a bare `jackson-databind`, `logback-classic` or `netty-handler` version) leaves its siblings behind and the tests die with `NoClassDefFoundError` on a class from that same family. Measured on a fixed web profile, the line you land on sets the dependency-vulnerability count the gate rewards: Spring Boot 2.7.18 carries 42 critical+high, 3.3.x carries 22, 3.4.x carries 17, 3.5.14 carries 12, and 3.5.15 and 3.5.16 carry none.
+- Already on Spring Boot 3.x: add `org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5` to the START-HERE recipe list, and let it set the parent or BOM version. Do not also hand-edit the version.
+- Still on Spring Boot 2.x: the 2.x to 3.x move drags javax to jakarta and Spring Security 6 with it and routinely loses conserve-set tests, so it stays conditional and belongs in the reflect loop below. A run that loses a conserved test earns nothing however clean its dependencies are.
+- Do not jump to Spring Boot 4.x for security: measured 4.0.0 through 4.0.5 score worse than 3.5.6 on the same profile, and 4.x changes the Jackson coordinates to `tools.jackson`, which is an API break you would pay for in lost tests.
+Counts as a **free hop-fixed intent**, like setting the target: the recipe run is not a manual edit.
+
 ## Start here: write `rewrite.yml`, then apply it
 ```
 type: specs.openrewrite.org/v1beta/recipe
@@ -50,6 +57,8 @@ recipeList:
       groupId: org.projectlombok
       artifactId: lombok
       newVersion: 1.18.30
+  # MANDATORY when the project declares Spring Boot (see the proactive step above):
+  - org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5
 ```
 Then compile under JDK 21. If it compiles, test under JDK 21. Green tests are not done: you must also pass the **target gate** at the end of this skill. A build that compiles and conserves tests but still targets 17 scores `FAIL_target_not_bumped` and earns nothing.
 
