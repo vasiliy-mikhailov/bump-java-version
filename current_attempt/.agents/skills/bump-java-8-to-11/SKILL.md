@@ -36,6 +36,12 @@ If the build declares Spring Boot (grep the build files for `org.springframework
 - Do not jump to Spring Boot 4.x for security: measured 4.0.0 through 4.0.5 score worse than 3.5.6 on the same profile, and 4.x moves Jackson to the `tools.jackson` coordinates, which is an API break you would pay for in lost tests.
 Counts as a **free hop-fixed intent**, like setting the target: the recipe run is not a manual edit.
 
+## Proactive step: JaCoCo floor (run BEFORE the first JDK-11 build; gated on a declared plugin, not on an error)
+If the build declares JaCoCo (grep the build files for `org.jacoco`), floor it to **0.8.12** before the first JDK-11 build. Never wait for the error. The agent has to read the bytecode it instruments, so one too old for class-file major 55 fails, and it does not always fail loudly: when it cannot instrument it may leave the build green and surface later as an assertion difference in a test that reads instrumented output, with jacoco named nowhere in the log. The structural trigger (the project declares `org.jacoco`) is unambiguous, which is why this is proactive.
+- Apply it with `org.openrewrite.java.migrate.jacoco.UpgradeJaCoCo`, which moves every `org.jacoco` artifact and the `jacoco-maven-plugin` to the newest 0.8 patch. That recipe is **not** reachable from `UpgradePluginsForJava11`, so add it to the START-HERE recipe list yourself; running the java-plugin recipes alone leaves JaCoCo untouched.
+- Check where the plugin is actually declared before assuming a root-level change reached it. A version written in a module's own pom (`<version>` inside that module's `<build><plugins>`) is not overridable from the root, so a property bump or a root `pluginManagement` entry silently does nothing and you get the agent on one version and the report on another. Gradle declares it as `jacoco { toolVersion }`, which the Maven recipe cannot reach at all: edit that directly.
+Counts as a **free hop-fixed intent**, like setting the target.
+
 ## Start here: write `rewrite.yml`, then apply it
 ```
 type: specs.openrewrite.org/v1beta/recipe
