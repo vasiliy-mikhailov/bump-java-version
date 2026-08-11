@@ -64,16 +64,20 @@ final class Model {
         HttpClient.Version version = base.startsWith("https://")
                 ? HttpClient.Version.HTTP_2
                 : HttpClient.Version.HTTP_1_1;
+        var jdk = new JdkHttpClientBuilder()
+                .httpClientBuilder(HttpClient.newBuilder().version(version));
         var b = OpenAiChatModel.builder()
-                .httpClientBuilder(new JdkHttpClientBuilder()
-                        .httpClientBuilder(HttpClient.newBuilder().version(version)))
+                // The reasoning is read off the wire, because the server names the field
+                // `reasoning` and the client looks for `reasoning_content`.
+                .httpClientBuilder(trace == null ? jdk : Reasoning.tee(jdk, trace))
                 .baseUrl(base)
                 .apiKey(env("OC_KEY", ""))
                 .modelName(env("OC_MODEL", "qwen-3.6-35b-a3b-awq"))
                 .temperature(0.0)
                 .maxTokens(MAX_TOKENS)
                 .timeout(PATIENCE)
-                // Surface the reasoning instead of dropping it on the floor.
+                // Asked for as well, so a server that does name it `reasoning_content` is covered
+                // by the client's own mapping and the tee simply finds nothing new.
                 .returnThinking(Boolean.TRUE);
         if (trace != null) {
             b.listeners(List.of(listener(trace)));
