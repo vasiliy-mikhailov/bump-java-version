@@ -26,6 +26,15 @@ interface Trace {
     /** A tool an agent used, payloads in full: the argument to edit_file IS the migration step. */
     void tool(String agent, String tool, String arguments, String result);
 
+    /**
+     * The reasoning behind an answer, and why the answer ended.
+     *
+     * <p>An opinion like {@link #asked}, and the one that explains it. Recorded separately because
+     * the runtime returns only the content: without this the thinking is paid for and discarded,
+     * and an answer that ended mid-thought is indistinguishable from one that declined.
+     */
+    void thought(String finishReason, String thinking, String content);
+
     /** A build under a named JDK. The only arbiter in the program. */
     void built(String phase, Runner.Result result);
 

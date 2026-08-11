@@ -137,6 +137,8 @@ public final class Dashboard {
             .ev.asked{border-color:#58a6ff}.ev.built{border-color:#d29922}
             .ev.settled{border-color:#3fb950}.ev.failed{border-color:#f85149}
             .ev.tool{border-color:#30363d}.ev.applied{border-color:#a371f7}
+            .ev.thought{border-color:#8957e5;background:#0f0d14}
+            .cut{color:#d29922;font-size:11px;margin-top:4px}
             .who{color:#58a6ff;font-weight:600}
             .kind{color:#7d8590;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
             margin-left:8px}
@@ -648,9 +650,31 @@ public final class Dashboard {
         }
         int shown = 0;
         int asked = 0;
+        // A thought carries no agent name of its own: it is emitted at the model, before the
+        // runtime attributes the answer. The agent it belongs to is whoever was mid-call, which is
+        // the next 'asked' — so a thought inherits the agent of the reply that follows it.
+        Map<Integer, String> owner = new LinkedHashMap<>();
+        List<Integer> pending = new ArrayList<>();
+        for (int i = 0; i < lines.size(); i++) {
+            Map<String, String> r = row(lines.get(i));
+            String k = r.getOrDefault("kind", "");
+            if (k.equals("thought")) {
+                pending.add(i);
+            } else if (k.equals("asked")) {
+                for (int p : pending) {
+                    owner.put(p, r.getOrDefault("agent", ""));
+                }
+                pending.clear();
+            }
+        }
+        int index = -1;
         for (String line : lines) {
+            index++;
             Map<String, String> r = row(line);
             String kind = r.getOrDefault("kind", "");
+            if (kind.equals("thought")) {
+                r.put("agent", owner.getOrDefault(index, ""));
+            }
             boolean isAsked = kind.equals("asked");
             int myIndex = isAsked ? asked++ : -1;
             shown++;
@@ -724,6 +748,19 @@ public final class Dashboard {
                         .append("<pre>").append(esc(r.get("reply"))).append("</pre>")
                         .append(rate(key, r.get("agent"), askedIndex, r.get("prompt"),
                                 r.get("reply")));
+            }
+            case "thought" -> {
+                // The reasoning behind the answer that follows it, and why the answer ended.
+                // "length" is the one that matters: an answer cut off mid-thought, which is how a
+                // critic ends up saying nothing at all.
+                String finish = r.getOrDefault("finish", "");
+                b.append("<span class=who>thinking</span><span class=kind>")
+                        .append(esc(finish.isBlank() ? "" : "finish " + finish))
+                        .append("</span> <span class=k>").append(when).append("</span>")
+                        .append("LENGTH".equalsIgnoreCase(finish)
+                                ? "<div class=cut>cut off mid-thought: the answer below is what "
+                                + "survived the token budget</div>" : "")
+                        .append(fold("reasoning", r.get("thinking")));
             }
             case "tool" -> b.append("<span class=who>").append(esc(r.get("agent")))
                     .append("</span><span class=kind>").append(esc(r.get("tool")))

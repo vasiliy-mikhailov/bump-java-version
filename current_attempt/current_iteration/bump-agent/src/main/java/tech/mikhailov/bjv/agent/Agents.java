@@ -46,7 +46,7 @@ final class Agents {
     private final String targetJdk;
 
     Agents(ChatModel model, Path ws, Runner runner, String targetJdk, Trace trace) {
-        this(model, Model.forCritic(), ws, runner, targetJdk, trace);
+        this(model, Model.forCritic(trace), ws, runner, targetJdk, trace);
     }
 
     Agents(ChatModel model, ChatModel judging, Path ws, Runner runner, String targetJdk,

@@ -112,7 +112,7 @@ public final class Bump {
         // ---- SURVEY: which hop, actually. The caller's from|to is the detector's guess, not law.
         trace.progress(bump, "survey: which hop is this");
         // The surveyor has tools; the brief is a starting point, not the whole tree.
-        Agents surveying = new Agents(Model.fromEnv(), ws, null, to.isBlank() ? "17" : to, trace);
+        Agents surveying = new Agents(Model.forProducer(trace), ws, null, to.isBlank() ? "17" : to, trace);
         String evidence = buildFiles() + "\nThe deterministic detector's guess: "
                 + (from.isBlank() ? "none" : from + "->" + to);
         String claim = surveying.surveyor().run(evidence);
@@ -134,7 +134,7 @@ public final class Bump {
         walls = new Walls(ws);
         security = new Security(ws, hoptools, trace);
         // The producers' try_build must target the hop the survey settled, so they are built now.
-        agents = new Agents(Model.fromEnv(), ws, runner, to, trace);
+        agents = new Agents(Model.forProducer(trace), ws, runner, to, trace);
 
         // ---- BASELINE: a fact. No baseline, no bump.
         trace.progress(bump, "baseline: building and testing under JDK " + from);

@@ -77,6 +77,9 @@ class TestCodeIsFencedAtTheToolTest {
         public void tool(String a, String t, String args, String result) {
         }
 
+        public void thought(String finish, String thinking, String content) {
+        }
+
         public void built(String phase, Runner.Result r) {
         }
 

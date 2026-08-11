@@ -40,6 +40,11 @@ final class JsonlTrace implements Trace, DeepAgentFlowListener {
     }
 
     @Override
+    public void thought(String finishReason, String thinking, String content) {
+        write("thought", of("finish", finishReason, "thinking", thinking, "content", content));
+    }
+
+    @Override
     public void tool(String agent, String tool, String arguments, String result) {
         write("tool", of("agent", agent, "tool", tool, "arguments", arguments, "result", result));
     }
