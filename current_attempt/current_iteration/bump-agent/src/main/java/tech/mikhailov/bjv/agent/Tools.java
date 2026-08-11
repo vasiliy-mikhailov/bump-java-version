@@ -92,13 +92,28 @@ final class Tools {
         return one;
     }
 
+    /**
+     * What one tool call may add to the conversation.
+     *
+     * <p>The context grows MONOTONICALLY across an agent's tool calls and every call re-prefills all
+     * of it, so an unbounded read is not paid once, it is paid again on every later call. A
+     * generated pom or a vendored file is exactly the read that does this. The trace still records
+     * the whole result; only what travels back into the prompt is bounded.
+     */
+    private static final int MAX_TOOL_RESULT = 20_000;
+
     private static Map<ToolSpecification, ToolExecutor> recorded(
             Map<ToolSpecification, ToolExecutor> tools, Trace trace, String agent) {
         Map<ToolSpecification, ToolExecutor> wrapped = new LinkedHashMap<>();
         tools.forEach((spec, executor) -> wrapped.put(spec, (request, memoryId) -> {
             try {
                 String result = executor.execute(request, memoryId);
+                // Recorded whole, returned bounded: the corpus wants everything, the prompt does not.
                 trace.tool(agent, spec.name(), request.arguments(), result);
+                if (result != null && result.length() > MAX_TOOL_RESULT) {
+                    return result.substring(0, MAX_TOOL_RESULT) + "\n[truncated: " + result.length()
+                            + " chars total. Narrow the request if you need the rest.]";
+                }
                 return result;
             } catch (RuntimeException e) {
                 trace.tool(agent, spec.name(), request.arguments(),

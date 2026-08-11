@@ -17,7 +17,21 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 final class Model {
 
     private static final int MAX_TOKENS = 16_000;
-    private static final Duration PATIENCE = Duration.ofMinutes(12);
+
+    /**
+     * How long one call may take.
+     *
+     * <p>GENEROUS, NOT TIGHT. This is a request timeout, and a request here is not one generation:
+     * it is the whole accumulated conversation re-prefilled, which on a shared local GPU is the slow
+     * part and grows with every tool call the agent has already made. A 12 minute cap cut off a
+     * survey that was working, and the client's own retry then spent the same 12 minutes twice more
+     * on a prompt that was only ever going to get longer.
+     *
+     * <p>The cap exists to bound a stuck lane, not to hurry a working one. Overridable so a loaded
+     * host can be given more without a rebuild.
+     */
+    private static final Duration PATIENCE = Duration.ofMinutes(
+            Integer.parseInt(envOr("BJV_PATIENCE_MINUTES", "45")));
 
     private Model() {
     }
@@ -37,6 +51,10 @@ final class Model {
                 .maxTokens(MAX_TOKENS)
                 .timeout(PATIENCE)
                 .build();
+    }
+
+    private static String envOr(String name, String fallback) {
+        return env(name, fallback);
     }
 
     private static String env(String name, String fallback) {
