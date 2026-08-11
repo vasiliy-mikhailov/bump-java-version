@@ -39,12 +39,19 @@ final class Agents {
     }
 
     private final ChatModel model;
+    private final ChatModel judging;
     private final Path ws;
     private final Runner runner;
     private final Trace trace;
     private final String targetJdk;
 
     Agents(ChatModel model, Path ws, Runner runner, String targetJdk, Trace trace) {
+        this(model, Model.forCritic(), ws, runner, targetJdk, trace);
+    }
+
+    Agents(ChatModel model, ChatModel judging, Path ws, Runner runner, String targetJdk,
+           Trace trace) {
+        this.judging = judging;
         this.model = model;
         this.ws = ws;
         this.runner = runner;
@@ -379,8 +386,13 @@ final class Agents {
 
     /** One agent, already wired to the trace. Callers cannot reach a runtime that is not. */
     private Agent runtime(String name, Map<ToolSpecification, ToolExecutor> tools, String prompt) {
-        SubAgentRuntime runtime = new SubAgentRuntime(model, prompt, tools, "agent:" + name,
-                ToolInvocationLogMode.NONE, trace instanceof JsonlTrace j ? j : null);
+        // A critic judges; a producer works. They get different models because they fail
+        // differently, and a critic that spends its budget thinking answers nothing at all.
+        boolean judges = name.endsWith("-critic") || name.equals("verdict")
+                || name.equals("estimator");
+        SubAgentRuntime runtime = new SubAgentRuntime(judges ? judging : model, prompt, tools,
+                "agent:" + name, ToolInvocationLogMode.NONE,
+                trace instanceof JsonlTrace j ? j : null);
         return task -> {
             String reply;
             try {
@@ -394,6 +406,21 @@ final class Agents {
                 trace.progress("", name + " unreachable: " + e.getMessage());
             }
             reply = reply == null ? "" : reply;
+            if (reply.isBlank()) {
+                // AN EMPTY ANSWER IS NOT A JUDGEMENT, and must not be read as one: every critic's
+                // word list defaults to its approving word, so silence would approve. Ask once
+                // more, plainly, and record both attempts.
+                trace.asked(name, prompt + "\n\n---\n\n" + task, "");
+                trace.progress("", name + " answered nothing; asking once more");
+                try {
+                    reply = runtime.run(task + "\n\nYour previous answer was empty. Reply with the "
+                            + "answer itself, in as few words as the format allows, and nothing "
+                            + "before it.");
+                } catch (RuntimeException e) {
+                    reply = "";
+                }
+                reply = reply == null ? "" : reply;
+            }
             trace.asked(name, prompt + "\n\n---\n\n" + task, reply);
             return reply;
         };

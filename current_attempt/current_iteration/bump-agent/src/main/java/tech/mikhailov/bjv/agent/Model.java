@@ -2,6 +2,7 @@ package tech.mikhailov.bjv.agent;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.util.Map;
 
 import dev.langchain4j.http.client.jdk.JdkHttpClientBuilder;
 import dev.langchain4j.model.chat.ChatModel;
@@ -36,12 +37,46 @@ final class Model {
     private Model() {
     }
 
+    /**
+     * The model a PRODUCER uses: thinking left on, because diagnosing a wall or choosing an edit is
+     * the work.
+     */
+    static ChatModel forProducer() {
+        return build(true);
+    }
+
+    /**
+     * The model a CRITIC uses: thinking OFF.
+     *
+     * <p>A critic answers one word from a closed list. Measured on this endpoint, the same question
+     * costs 537 completion tokens with thinking on and 3 with it off, and the reasoning is not
+     * returned in the content at all: it lands in a separate field the runtime never reads. So the
+     * budget is spent producing something nothing consumes, and when it runs out mid-thought the
+     * content comes back EMPTY.
+     *
+     * <p>That is not a cosmetic loss. An empty reply falls through the word list to its default,
+     * and the default for every critic is the approving word, so a critic that ran out of budget
+     * silently approves. Across the live sweep 13% of replies were empty and 13 of those 15 were
+     * critics: a share of the feedback loops were not running at all.
+     */
+    static ChatModel forCritic() {
+        return build(false);
+    }
+
     static ChatModel fromEnv() {
         String base = env("OC_BASE", "https://inference.mikhailov.tech/qwen-3.6-35b-a3b-awq/v1");
         HttpClient.Version version = base.startsWith("https://")
                 ? HttpClient.Version.HTTP_2
                 : HttpClient.Version.HTTP_1_1;
-        return OpenAiChatModel.builder()
+        return build(true);
+    }
+
+    private static ChatModel build(boolean thinking) {
+        String base = env("OC_BASE", "https://inference.mikhailov.tech/qwen-3.6-35b-a3b-awq/v1");
+        HttpClient.Version version = base.startsWith("https://")
+                ? HttpClient.Version.HTTP_2
+                : HttpClient.Version.HTTP_1_1;
+        var b = OpenAiChatModel.builder()
                 .httpClientBuilder(new JdkHttpClientBuilder()
                         .httpClientBuilder(HttpClient.newBuilder().version(version)))
                 .baseUrl(base)
@@ -49,8 +84,13 @@ final class Model {
                 .modelName(env("OC_MODEL", "qwen-3.6-35b-a3b-awq"))
                 .temperature(0.0)
                 .maxTokens(MAX_TOKENS)
-                .timeout(PATIENCE)
-                .build();
+                .timeout(PATIENCE);
+        if (!thinking) {
+            // The server template's own switch, not a prompt asking nicely for brevity.
+            b.customParameters(Map.of("chat_template_kwargs",
+                    Map.of("enable_thinking", Boolean.FALSE)));
+        }
+        return b.build();
     }
 
     private static String envOr(String name, String fallback) {
