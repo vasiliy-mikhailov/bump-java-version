@@ -67,7 +67,10 @@ public final class Bump {
             String account = b.run();
             String state = account.split("\n", 2)[0];
             trace.settled(bump, state, account, b.baselineGreen, b.gateGreen);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
+            // EVERY failure leaves a row, not only the unchecked ones. A checked IOException
+            // escaping main killed the process with the last settlement still reading "bumping",
+            // so the sweep could not tell a crash from a bump still in flight.
             trace.failed(bump, e);
             e.printStackTrace();
             System.exit(1);

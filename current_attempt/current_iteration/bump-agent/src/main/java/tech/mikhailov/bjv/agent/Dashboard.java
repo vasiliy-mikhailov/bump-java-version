@@ -49,6 +49,25 @@ public final class Dashboard {
     /** Only this shape may select a bump. Everything else is not a slug, whatever it looks like. */
     private static final Pattern SLUG = Pattern.compile("[A-Za-z0-9_-]{1,200}");
 
+    /**
+     * THE CHAIN, DECLARED IN THE ORDER {@link Bump} RUNS IT.
+     *
+     * <p>Rendered whole on every bump page, including the stages a bump never reached, because a
+     * strip that lists only who has spoken shows a chain of ten as a chain of two and hides where
+     * the run actually stopped. A dim stage is information: it is the answer to "how far did this
+     * get", which is the first question anyone asks.
+     *
+     * <p>Each entry is {phase, producer, critic}; the closers have no critic, since nothing
+     * downstream branches on their answer.
+     */
+    private static final String[][] CHAIN = {
+            {"survey", "surveyor", "survey-critic"},
+            {"prepare", "preparer", "prepare-critic"},
+            {"bump", "bumper", "bump-critic"},
+            {"troubleshoot", "troubleshooter", "trouble-critic"},
+            {"close", "verdict", "estimator"},
+    };
+
     private static final String CSS = """
             *{box-sizing:border-box}
             body{margin:0;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -87,11 +106,29 @@ public final class Dashboard {
             td.latest{color:#8b949e;font-size:12px;max-width:52ch}
             .empty{padding:48px 24px;color:#7d8590}
             .back{padding:14px 24px;display:block}
-            .tabs{display:flex;gap:2px;flex-wrap:wrap;padding:10px 24px;
+            .pipe{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:12px 24px;
             border-bottom:1px solid #21262d}
-            .tabs a{padding:5px 11px;border-radius:6px;font-size:12px;color:#8b949e}
-            .tabs a:hover{background:#161b22;text-decoration:none}
-            .tabs a.on{background:#1f6feb;color:#fff}
+            .allpill{padding:5px 11px;border-radius:6px;font-size:12px;color:#8b949e;
+            border:1px solid #21262d;align-self:center}
+            .allpill.on{background:#1f6feb;color:#fff;border-color:#1f6feb}
+            .stage{display:flex;align-items:center;gap:5px;padding:6px 9px;border-radius:8px;
+            border:1px solid #21262d;background:#0f141a;position:relative}
+            .stage.dim{opacity:.42}
+            .stagename{position:absolute;top:-8px;left:9px;font-size:9px;color:#7d8590;
+            text-transform:uppercase;letter-spacing:.08em;background:#0d1117;padding:0 4px}
+            .ag{padding:4px 9px;border-radius:6px;font-size:12px;color:#8b949e;
+            background:#161b22;white-space:nowrap}
+            a.ag:hover{background:#21262d;text-decoration:none}
+            .ag b{color:#c9d1d9;font-weight:600}
+            .ag.never{background:transparent;border:1px dashed #30363d;color:#6e7681}
+            .ag.on{background:#1f6feb;color:#fff}.ag.on b{color:#fff}
+            .link{color:#30363d;font-size:13px}
+            .link.looped{color:#d29922;font-weight:700}
+            .funnel{display:flex;gap:0;flex-wrap:wrap;padding:0 24px 14px}
+            .fstep{padding:6px 12px;border:1px solid #21262d;background:#161b22;
+            border-right:none;font-size:11px;color:#7d8590}
+            .fstep:last-child{border-right:1px solid #21262d}
+            .fstep b{display:block;font-size:15px;color:#c9d1d9}
             .ev{border-left:2px solid #21262d;margin:0 24px;padding:12px 0 12px 16px}
             .ev.asked{border-color:#58a6ff}.ev.built{border-color:#d29922}
             .ev.settled{border-color:#3fb950}.ev.failed{border-color:#f85149}
@@ -296,6 +333,16 @@ public final class Dashboard {
         byState.forEach((s, n) -> b.append("<div class=c><b>").append(n)
                 .append("</b><span class='s ").append(esc(s)).append("'>").append(esc(s))
                 .append("</span></div>"));
+        b.append("</div>");
+        // HOW FAR THE FLEET GETS. A state histogram says what bumps became; this says where they
+        // stop, which is the question a run is actually being watched to answer.
+        b.append("<div class=funnel>");
+        for (int i = 0; i < CHAIN.length; i++) {
+            final int stage = i;
+            long n = facts.stream().filter(f -> f.reached >= stage).count();
+            b.append("<div class=fstep><b>").append(n).append("</b>")
+                    .append(esc(CHAIN[i][0])).append("</div>");
+        }
         return b.append("</div>").toString();
     }
 
@@ -323,6 +370,8 @@ public final class Dashboard {
         Boolean baselineGreen;
         Boolean conserved;
         Boolean targetLanded;
+        /** The furthest stage of CHAIN this bump reached, by index; -1 for a queued one. */
+        int reached = -1;
 
         Facts(String bump, Map<String, String> settlement) {
             this.bump = bump;
@@ -447,6 +496,12 @@ public final class Dashboard {
                     }
                 }
                 case "asked" -> {
+                    String who = r.getOrDefault("agent", "");
+                    for (int i = 0; i < CHAIN.length; i++) {
+                        if (CHAIN[i][1].equals(who) || CHAIN[i][2].equals(who)) {
+                            f.reached = Math.max(f.reached, i);
+                        }
+                    }
                     if ("surveyor".equals(r.get("agent"))) {
                         Matcher m = HOP.matcher(r.getOrDefault("reply", ""));
                         if (m.find() && m.group(3) != null) {
@@ -494,7 +549,7 @@ public final class Dashboard {
         if (!fragment) {
             b = head(esc(key), lines.size() + " event(s)");
             b.append("<a class=back href=\".\">&larr; bumps</a>");
-            b.append(tabs(slug, key, lines, only));
+            b.append(pipeline(slug, key, lines, only));
         }
         int shown = 0;
         int asked = 0;
@@ -519,22 +574,47 @@ public final class Dashboard {
         send(x, b.toString());
     }
 
-    /** One tab per agent that actually spoke, so the reader can follow a single role. */
-    private String tabs(String slug, String key, List<String> lines, String only) {
-        Map<String, Integer> byAgent = new LinkedHashMap<>();
+    /**
+     * The whole chain as a strip: every stage, in order, whether or not it ran.
+     *
+     * <p>A producer counted more than once is a FEEDBACK LOOP made visible: the chain re-asks only
+     * when its critic objected, so "preparer 2" means the prepare-critic sent it back. That is the
+     * single most informative number on the page and it is invisible in a plain tab list.
+     */
+    private String pipeline(String slug, String key, List<String> lines, String only) {
+        Map<String, Integer> spoke = new LinkedHashMap<>();
         for (String line : lines) {
             Map<String, String> r = row(line);
             if ("asked".equals(r.get("kind"))) {
-                byAgent.merge(r.getOrDefault("agent", "?"), 1, Integer::sum);
+                spoke.merge(r.getOrDefault("agent", "?"), 1, Integer::sum);
             }
         }
-        StringBuilder b = new StringBuilder("<div class=tabs><a class='" + (only.isBlank() ? "on" : "")
-                + "' href=\"bump?slug=" + url(slug) + "&amp;key=" + url(key) + "\">everything</a>");
-        byAgent.forEach((agent, n) -> b.append("<a class='")
-                .append(agent.equals(only) ? "on" : "").append("' href=\"bump?slug=").append(url(slug))
-                .append("&amp;key=").append(url(key)).append("&amp;agent=").append(url(agent))
-                .append("\">").append(esc(agent)).append(" ").append(n).append("</a>"));
+        StringBuilder b = new StringBuilder("<div class=pipe>");
+        b.append("<a class='allpill").append(only.isBlank() ? " on" : "").append("' href=\"bump?slug=")
+                .append(url(slug)).append("&amp;key=").append(url(key)).append("\">everything</a>");
+        for (String[] stage : CHAIN) {
+            int producer = spoke.getOrDefault(stage[1], 0);
+            int critic = spoke.getOrDefault(stage[2], 0);
+            boolean reached = producer > 0 || critic > 0;
+            b.append("<div class='stage").append(reached ? "" : " dim").append("'>")
+                    .append("<div class=stagename>").append(esc(stage[0])).append("</div>")
+                    .append(agentPill(slug, key, stage[1], producer, only));
+            // The loop between them, drawn only when it actually turned.
+            b.append("<span class='link").append(producer > 1 ? " looped" : "").append("'>")
+                    .append(producer > 1 ? "\u21ba" : "\u2192").append("</span>")
+                    .append(agentPill(slug, key, stage[2], critic, only))
+                    .append("</div>");
+        }
         return b.append("</div>").toString();
+    }
+
+    private String agentPill(String slug, String key, String agent, int n, String only) {
+        String cls = "ag" + (agent.equals(only) ? " on" : "") + (n == 0 ? " never" : "");
+        if (n == 0) {
+            return "<span class='" + cls + "'>" + esc(agent) + "</span>";
+        }
+        return "<a class='" + cls + "' href=\"bump?slug=" + url(slug) + "&amp;key=" + url(key)
+                + "&amp;agent=" + url(agent) + "\">" + esc(agent) + " <b>" + n + "</b></a>";
     }
 
     private String event(Map<String, String> r, String kind, String key, int askedIndex) {

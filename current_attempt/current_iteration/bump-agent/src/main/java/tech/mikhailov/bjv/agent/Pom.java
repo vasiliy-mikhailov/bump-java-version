@@ -13,14 +13,27 @@ import java.util.regex.Pattern;
  * <p>ElementTree-style re-serialisation strips comments and licence headers and reorders attributes,
  * and these files go through a diff-based gate where every spurious change is noise a reviewer has
  * to argue with. Anchored string edits keep the diff exactly as large as the change.
+ *
+ * <p>EVERY ENTRY POINT TOLERATES A PROJECT WITH NO ROOT POM, because roughly two in five of the
+ * corpus are Gradle and a Maven-shaped edit is simply not applicable there. Each returns whether it
+ * did anything, so a caller can record "not applicable" rather than believe it applied a floor it
+ * did not. Throwing instead killed the whole bump before its baseline was even scored.
  */
 final class Pom {
 
     private Pom() {
     }
 
+    /** True when this project has a root pom at all; everything below is a no-op without one. */
+    static boolean isMaven(Path ws) {
+        return Files.isRegularFile(ws.resolve("pom.xml"));
+    }
+
     /** A dependencyManagement entry in the ROOT pom: beats imported BOMs, covers transitive deps. */
-    static void manage(Path ws, String g, String a, String v) throws IOException {
+    static boolean manage(Path ws, String g, String a, String v) throws IOException {
+        if (!isMaven(ws)) {
+            return false;
+        }
         Path pom = ws.resolve("pom.xml");
         String s = Files.readString(pom);
         String entry = "<dependency><groupId>" + g + "</groupId><artifactId>" + a
@@ -34,11 +47,15 @@ final class Pom {
                             + entry + "\n  </dependencies></dependencyManagement>\n") + "$1");
         }
         Files.writeString(pom, s);
+        return true;
     }
 
     /** A direct dependency in the ROOT pom, inherited by every module. */
-    static void addDependency(Path ws, String g, String a, String v, String scope)
+    static boolean addDependency(Path ws, String g, String a, String v, String scope)
             throws IOException {
+        if (!isMaven(ws)) {
+            return false;
+        }
         Path pom = ws.resolve("pom.xml");
         String s = Files.readString(pom);
         String entry = "<dependency><groupId>" + g + "</groupId><artifactId>" + a
@@ -55,10 +72,14 @@ final class Pom {
                             + "$1");
         }
         Files.writeString(pom, s);
+        return true;
     }
 
     /** Append tokens to the argLine property, creating it when absent. Preserves @{argLine} hooks. */
-    static void extendArgLine(Path ws, List<String> tokens) throws IOException {
+    static boolean extendArgLine(Path ws, List<String> tokens) throws IOException {
+        if (!isMaven(ws)) {
+            return false;
+        }
         Path pom = ws.resolve("pom.xml");
         String s = Files.readString(pom);
         Matcher m = Pattern.compile("<argLine>([^<]*)</argLine>").matcher(s);
@@ -85,6 +106,7 @@ final class Pom {
             }
         }
         Files.writeString(pom, s);
+        return true;
     }
 
     /** Pin a plugin's version wherever it is declared with one. */
@@ -113,6 +135,9 @@ final class Pom {
             }
         }
         if (!anywhere) {
+            if (!isMaven(ws)) {
+                return;
+            }
             Path root = ws.resolve("pom.xml");
             String s = Files.readString(root);
             if (s.contains("<properties>")) {

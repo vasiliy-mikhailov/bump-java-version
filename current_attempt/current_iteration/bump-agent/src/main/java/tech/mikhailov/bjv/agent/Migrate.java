@@ -134,6 +134,12 @@ final class Migrate {
      */
     private String floors(int target) throws IOException {
         StringBuilder did = new StringBuilder("floors: ");
+        if (!Pom.isMaven(ws)) {
+            // The floors below are dependencyManagement entries, which a Gradle build does not
+            // have. The preparer carries the Gradle equivalents; saying so is the honest record.
+            return "floors: skipped, no root pom (Gradle build); the preparer handles this hop's "
+                    + "floors for Gradle";
+        }
         String all = readAllBuildFiles();
         if (all.contains("lombok")) {
             String v = target >= 25 ? "1.18.46" : "1.18.30";
