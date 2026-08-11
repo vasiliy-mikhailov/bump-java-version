@@ -2,13 +2,10 @@ package tech.mikhailov.bjv.agent;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
-import java.util.List;
 
 import dev.langchain4j.http.client.jdk.JdkHttpClientBuilder;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.listener.ChatModelListener;
-import dev.langchain4j.model.chat.listener.ChatModelResponseContext;
-import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 
 /**
  * The one model, from the same OC_* environment the whole bump infrastructure uses.
@@ -23,21 +20,19 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
  * one that ran out of room. Measured here, one closed-list critic answer costs 537 completion
  * tokens with thinking on and 3 with it off: switching it off is the cheap answer and the wrong
  * one, because the reasoning is the most informative thing an agent produces and a judgement whose
- * grounds are not recorded cannot be audited or tuned. So it stays on, {@link #listener} captures
- * it into the trace, and an empty answer is re-asked rather than read as agreement.
+ * grounds are not recorded cannot be audited or tuned. So it stays on, {@link Streamed} captures it
+ * off the stream, and an empty answer is re-asked rather than read as agreement.
  */
 final class Model {
 
     private static final int MAX_TOKENS = 16_000;
 
     /**
-     * How long one call may take.
+     * The transport's own read timeout.
      *
-     * <p>GENEROUS, NOT TIGHT. This is a request timeout, and a request here is not one generation:
-     * it is the whole accumulated conversation re-prefilled, which on a shared local GPU is the slow
-     * part and grows with every tool call already made. A 12 minute cap cut off a survey that was
-     * working, and the client's own retry then spent the same 12 minutes twice more on a prompt only
-     * ever going to get longer. The cap bounds a stuck lane; it does not hurry a working one.
+     * <p>Generous, and no longer the instrument that matters: with the answer streamed, the guard
+     * that decides whether a call is alive is {@link Streamed}'s time-since-last-token. This only
+     * bounds the wait for the very first byte.
      */
     private static final Duration PATIENCE = Duration.ofMinutes(
             Integer.parseInt(env("BJV_PATIENCE_MINUTES", "45")));
@@ -66,46 +61,21 @@ final class Model {
                 : HttpClient.Version.HTTP_1_1;
         var jdk = new JdkHttpClientBuilder()
                 .httpClientBuilder(HttpClient.newBuilder().version(version));
-        var b = OpenAiChatModel.builder()
-                // The reasoning is read off the wire, because the server names the field
-                // `reasoning` and the client looks for `reasoning_content`.
-                .httpClientBuilder(trace == null ? jdk : Reasoning.tee(jdk, trace))
+        // STREAMED, so the guard can be time since the last token rather than time for the whole
+        // request. A blocking client sends and receives nothing while the server prefills a large
+        // context, which is exactly when a proxy reaps the socket and a total timeout fires on work
+        // that is progressing.
+        var s = OpenAiStreamingChatModel.builder()
+                .httpClientBuilder(jdk)
                 .baseUrl(base)
                 .apiKey(env("OC_KEY", ""))
                 .modelName(env("OC_MODEL", "qwen-3.6-35b-a3b-awq"))
                 .temperature(0.0)
                 .maxTokens(MAX_TOKENS)
                 .timeout(PATIENCE)
-                // Asked for as well, so a server that does name it `reasoning_content` is covered
-                // by the client's own mapping and the tee simply finds nothing new.
-                .returnThinking(Boolean.TRUE);
-        if (trace != null) {
-            b.listeners(List.of(listener(trace)));
-        }
-        return b.build();
-    }
-
-    /**
-     * Records the reasoning behind every answer, and why the answer ended.
-     *
-     * <p>At the model rather than at a call site, so a call made by anything — the chain, a
-     * sub-agent runtime, a retry — is covered without either having to remember.
-     */
-    private static ChatModelListener listener(Trace trace) {
-        return new ChatModelListener() {
-            @Override
-            public void onResponse(ChatModelResponseContext ctx) {
-                var msg = ctx.chatResponse().aiMessage();
-                String thinking = msg == null ? null : msg.thinking();
-                if (thinking == null || thinking.isBlank()) {
-                    return;
-                }
-                var meta = ctx.chatResponse().metadata();
-                trace.thought(meta == null || meta.finishReason() == null ? ""
-                                : meta.finishReason().toString(),
-                        thinking, msg.text() == null ? "" : msg.text());
-            }
-        };
+                .returnThinking(Boolean.TRUE)
+                .build();
+        return new Streamed(s, trace);
     }
 
     private static String env(String name, String fallback) {
