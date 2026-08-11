@@ -92,16 +92,22 @@ class TheDashboardIsPubliclyReachableTest {
                 "{\"kind\":\"built\",\"phase\":\"gate\",\"infra\":\"<img src=x onerror=alert(1)>\","
                         + "\"passed\":\"false\",\"summary\":\"ok\"}\n");
         Files.writeString(results.resolve("settlements.jsonl"),
-                "{\"at\":\"1\",\"bump\":\"crafted\",\"state\":\"green onmouseover=alert(1)\","
+                "{\"at\":\"1\",\"bump\":\"crafted\",\"state\":\"green' onmouseover=alert(1)\","
                         + "\"because\":\"x\",\"baseline\":true,\"gate\":true}\n");
         try (Served served = Served.on(results, null)) {
             String detail = served.get("/bump?slug=crafted");
             assertFalse(detail.contains("<img src=x"), "the built row was rendered as markup");
 
             String home = served.get("/");
-            assertFalse(home.contains("s-green onmouseover=alert(1)>"),
-                    "the state value escaped its attribute");
-            assertTrue(home.contains("class=\"s-"), "the attribute must be quoted");
+            // The state lands inside a single-quoted class attribute. The property that matters is
+            // that its quote did not survive as a quote: with it escaped the attribute runs to the
+            // one the template wrote, so onmouseover stays inside the class name and never becomes
+            // an attribute of its own.
+            assertFalse(home.contains("green' onmouseover"),
+                    "the state's quote survived and closed the attribute early");
+            assertTrue(home.contains("green&#39; onmouseover"),
+                    "the state's quote should have been escaped in place");
+            assertTrue(home.contains("class='s "), "the state must sit in a quoted attribute");
         }
     }
 

@@ -363,24 +363,53 @@ public final class Bump {
         return out.toString();
     }
 
-    /** What the workspace has become, from git. The record of a phase, not its claim about itself. */
+    /**
+     * What the workspace has become, from git. The record of a phase, not its claim about itself.
+     *
+     * <p>A FAILED GIT IS AN EMPTY DIFF, NOT A DIFF OF THE ERROR. git writes its usage text to
+     * stdout and exits non-zero when it will not read a repository, and that text is not blank —
+     * so returning it made every phase look as though it had edited something, handed the critic
+     * git's usage message as the evidence to audit, and made a producer answering NOTHING-TO-DO
+     * indistinguishable from one that worked. The honest reading of "git could not tell me" is
+     * "nothing is recorded", loudly.
+     */
     private String diff() {
         try {
-            Shell.Output out = Shell.run(ws, Map.of(), Duration.ofMinutes(3),
-                    "git", "diff", "--stat=200", "--", ".");
-            Shell.Output full = Shell.run(ws, Map.of(), Duration.ofMinutes(3),
-                    "git", "diff", "-U2", "--", ".");
+            Shell.Output stat = git("diff", "--stat=200", "--", ".");
+            Shell.Output full = git("diff", "-U2", "--", ".");
+            if (!stat.ok() || !full.ok()) {
+                trace.progress(bump, "git diff failed: " + Runner.tail(stat.text()));
+                return "";
+            }
             String body = full.text();
-            return out.text() + (body.length() > 20000
+            return stat.text() + (body.length() > 20000
                     ? body.substring(0, 20000) + "\n[diff truncated]" : body);
         } catch (IOException | InterruptedException e) {
-            return "(git diff failed: " + e.getMessage() + ")";
+            trace.progress(bump, "git diff failed: " + e.getMessage());
+            return "";
         }
+    }
+
+    /**
+     * git, told this workspace is safe to read.
+     *
+     * <p>The chain runs as root in its container while the checkout is owned by the user who
+     * cloned it, and git's dubious-ownership guard then refuses the repository. The guard is
+     * protecting against reading a repo someone else controls; this one we cloned ourselves a few
+     * seconds earlier, so the exception is stated per call rather than disabled image-wide.
+     */
+    private Shell.Output git(String... args) throws IOException, InterruptedException {
+        List<String> cmd = new ArrayList<>(List.of("git", "-c", "safe.directory=" + ws));
+        cmd.addAll(List.of(args));
+        return Shell.run(ws, Map.of(), Duration.ofMinutes(3), cmd.toArray(new String[0]));
     }
 
     private void revert() {
         try {
-            Shell.run(ws, Map.of(), Duration.ofMinutes(2), "git", "checkout", "--", ".");
+            Shell.Output out = git("checkout", "--", ".");
+            if (!out.ok()) {
+                trace.progress(bump, "revert failed: " + Runner.tail(out.text()));
+            }
         } catch (IOException | InterruptedException e) {
             trace.progress(bump, "revert failed: " + e.getMessage());
         }
