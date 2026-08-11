@@ -48,7 +48,7 @@ final class Tools {
                                                          Trace trace, String agent) {
         Map<ToolSpecification, ToolExecutor> tools =
                 only(root, Set.of("list_dir", "read_file", "edit_file"));
-        tools.putAll(build(runner, targetJdk));
+        tools.putAll(build(root, runner, targetJdk));
         return recorded(guarded(tools), trace, agent);
     }
 
@@ -75,7 +75,8 @@ final class Tools {
     }
 
     /** Try the target-JDK build. Producers only: feedback for them, never evidence for the chain. */
-    private static Map<ToolSpecification, ToolExecutor> build(Runner runner, String targetJdk) {
+    private static Map<ToolSpecification, ToolExecutor> build(Path root, Runner runner,
+                                                              String targetJdk) {
         ToolSpecification spec = ToolSpecification.builder()
                 .name("try_build")
                 .description("Compile the project under the TARGET jdk and return what the build "
@@ -84,8 +85,25 @@ final class Tools {
                 .parameters(JsonObjectSchema.builder().build())
                 .build();
         ToolExecutor exec = (request, memoryId) -> {
+            // THE SAME STALE-CLASS TRAP THE GATE HAD, and this one is worse: the troubleshooter is
+            // told to check its edit here before answering, and 57 of the 62 calls that answered
+            // COMPILED had in fact compiled nothing — Maven found the old classes newer than the
+            // sources and skipped. A pom-only edit, which is the commonest edit made here, could
+            // never be falsified before the agent committed to it.
+            runner.clearClasses();
             Runner.Result r = runner.build(targetJdk);
-            return (r.infra() ? "DID NOT COMPILE" : "COMPILED") + "\n" + r.summary();
+            String target;
+            try {
+                int eff = Gate.effectiveTarget(root);
+                target = eff < 0 ? "no inspectable main classes" : String.valueOf(eff);
+            } catch (IOException unreadable) {
+                target = "could not be read";
+            }
+            // The number the gate will judge on, said plainly, so a producer can tell a compile
+            // that ran from one that was skipped and a raised pom from a raised target.
+            return (r.infra() ? "DID NOT COMPILE" : "COMPILED")
+                    + "\neffective bytecode target after this build: " + target
+                    + " (the gate requires " + targetJdk + ")\n" + r.summary();
         };
         Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
         one.put(spec, exec);
@@ -191,8 +209,14 @@ final class Tools {
         try (var files = Files.walk(root)) {
             for (Path f : files.filter(Files::isRegularFile).toList()) {
                 String path = f.toString();
-                if (path.contains("/.git/") || path.contains("/target/")
-                        || path.contains("/node_modules/")) {
+                // Build output is skipped unless the pattern asks for it by name. 52 globs aimed
+                // at target/ or *.class returned "no files match", 52 of 52 — and every one was an
+                // agent trying to read the class-file major, which is the single thing the gate
+                // measures. Hiding it made the gate's own evidence unreachable.
+                boolean wantsOutput = pattern.contains("target/") || pattern.contains("build/")
+                        || pattern.endsWith(".class");
+                if (path.contains("/.git/") || path.contains("/node_modules/")
+                        || (!wantsOutput && path.contains("/target/"))) {
                     continue;
                 }
                 if (matcher.matches(root.relativize(f)) || matcher.matches(f)) {
@@ -271,13 +295,17 @@ final class Tools {
         return found == 0 ? "no matches" : hits.toString();
     }
 
+    /**
+     * A tool argument, UNESCAPED.
+     *
+     * <p>It used to substring the raw JSON, so a model sending {@code java\.version} handed the
+     * regex engine {@code java\\.version} — backslash-followed-by-any-char, which is valid, so the
+     * PatternSyntaxException fallback never fired and the search silently matched nothing. 250 of
+     * 850 greps sent an escaped pattern and 233 returned "no matches"; for 57% of those the
+     * correctly unescaped pattern matches text the same agent had already read. It also truncated
+     * any argument containing an escaped quote.
+     */
     private static String field(String json, String key) {
-        int k = json.indexOf('"' + key + '"');
-        if (k < 0) {
-            return "";
-        }
-        int open = json.indexOf('"', json.indexOf(':', k + key.length()) + 1);
-        int close = open < 0 ? -1 : json.indexOf('"', open + 1);
-        return close < 0 ? "" : json.substring(open + 1, close);
+        return Reasoning.field(json, key);
     }
 }

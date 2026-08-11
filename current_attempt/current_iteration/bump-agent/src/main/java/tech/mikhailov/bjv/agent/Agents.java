@@ -385,6 +385,14 @@ final class Agents {
     }
 
     /** One agent, already wired to the trace. Callers cannot reach a runtime that is not. */
+    /** The same agent, asked again without thinking. Built on demand: most calls never need it. */
+    private Agent retry(String name, Map<ToolSpecification, ToolExecutor> tools, String prompt) {
+        SubAgentRuntime r = new SubAgentRuntime(Model.forRetry(trace), prompt, tools,
+                "agent:" + name + ":retry", ToolInvocationLogMode.NONE,
+                trace instanceof JsonlTrace j ? j : null);
+        return r::run;
+    }
+
     private Agent runtime(String name, Map<ToolSpecification, ToolExecutor> tools, String prompt) {
         // A critic judges; a producer works. They get different models because they fail
         // differently, and a critic that spends its budget thinking answers nothing at all.
@@ -411,11 +419,13 @@ final class Agents {
                 // word list defaults to its approving word, so silence would approve. Ask once
                 // more, plainly, and record both attempts.
                 trace.asked(name, prompt + "\n\n---\n\n" + task, "");
-                trace.progress("", name + " answered nothing; asking once more");
+                trace.progress("", name + " answered nothing; asking once more without thinking");
                 try {
-                    reply = runtime.run(task + "\n\nYour previous answer was empty. Reply with the "
-                            + "answer itself, in as few words as the format allows, and nothing "
-                            + "before it.");
+                    // A blank means the reasoning entered a cycle greedy decoding cannot leave, so
+                    // the retry asks a model that does not reason at all. Instructing the thinking
+                    // model to be brief instead was measured to make the second attempt WORSE than
+                    // the first: 80% runaway against a 62.5% control.
+                    reply = retry(name, tools, prompt).run(task);
                 } catch (RuntimeException e) {
                     reply = "";
                 }

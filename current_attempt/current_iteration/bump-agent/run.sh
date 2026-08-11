@@ -41,6 +41,16 @@ settled() { # a slug is done when the settlements file holds a terminal state fo
     grep -qvE '"state":"bumping"'
 }
 
+# A BUMP STILL IN FLIGHT IS NOT AN UNSETTLED BUMP. Its last settlement row reads "bumping", which
+# settled() correctly calls unfinished -- so a relaunched sweep re-bit repos another lane was still
+# working: 42 of 95 sessions were duplicates, and one() then rm -rf'd a workspace a live container
+# was editing. The claim is the same fact the dashboard uses for "in flight", so ask it here too.
+inflight() {
+  [ -e "$RESULTS/claims/$1" ] || return 1
+  docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^bjvagent_" || { rm -f "$RESULTS/claims/$1"; return 1; }
+  return 0
+}
+
 one() {
   local slug=$1 repo=$2 sha=$3 from=$4 to=$5
   local w=$WS/$slug
@@ -88,6 +98,8 @@ done_n=0; skipped=0
 while read -r slug repo sha from to; do
   [ -z "${slug:-}" ] && continue
   if settled "$repo"; then skipped=$((skipped+1)); continue; fi
+  bs=$(printf '%s' "$repo|$sha|$from|$to" | sed 's/[^A-Za-z0-9]\+/_/g')
+  if inflight "$bs"; then echo "[$slug] already in flight, skipping"; skipped=$((skipped+1)); continue; fi
   while [ "$(jobs -rp | wc -l)" -ge "$(lanes)" ]; do wait -n 2>/dev/null || sleep 5; done
   one "$slug" "$repo" "$sha" "$from" "$to" &
   done_n=$((done_n+1))

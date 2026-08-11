@@ -46,19 +46,33 @@ final class Model {
 
     /** Producers and critics share a configuration; what differs is what the chain does with them. */
     static ChatModel forProducer(Trace trace) {
-        return build(trace);
+        return build(trace, true);
     }
 
     static ChatModel forCritic(Trace trace) {
-        return build(trace);
+        return build(trace, true);
+    }
+
+    /**
+     * The model a RE-ASK uses, with thinking off.
+     *
+     * <p>Only for the second attempt after a blank. The first attempt keeps thinking, because the
+     * reasoning is the point; but a blank means the reasoning entered a cycle it cannot leave under
+     * greedy decoding, and asking the same model to think again reproduces it. Measured: the
+     * answer-first instruction this replaces ran 80% runaway against a 62.5% control, so the retry
+     * was making the second attempt worse than the first. Thinking off measured 0 of 10 runaway at
+     * 340 tokens and 17 seconds.
+     */
+    static ChatModel forRetry(Trace trace) {
+        return build(trace, false);
     }
 
     /** For a caller with no trace to write to; the reasoning is then simply not recorded. */
     static ChatModel fromEnv() {
-        return build(null);
+        return build(null, true);
     }
 
-    private static ChatModel build(Trace trace) {
+    private static ChatModel build(Trace trace, boolean thinking) {
         String base = env("OC_BASE", "https://inference.mikhailov.tech/qwen-3.6-35b-a3b-awq/v1");
         HttpClient.Version version = base.startsWith("https://")
                 ? HttpClient.Version.HTTP_2
@@ -79,9 +93,14 @@ final class Model {
                 .temperature(0.0)
                 .maxTokens(MAX_TOKENS)
                 .timeout(PATIENCE)
-                .returnThinking(Boolean.TRUE)
-                .build();
-        return new Streamed(s, trace);
+                .returnThinking(Boolean.TRUE);
+        if (!thinking) {
+            // The server template's own switch, not a prompt asking for brevity: an instruction
+            // to answer first was measured to increase the runaway rate, not reduce it.
+            s.customParameters(java.util.Map.of("chat_template_kwargs",
+                    java.util.Map.of("enable_thinking", Boolean.FALSE)));
+        }
+        return new Streamed(s.build(), trace);
     }
 
     private static String env(String name, String fallback) {
