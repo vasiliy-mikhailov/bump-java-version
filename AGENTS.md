@@ -1,5 +1,16 @@
 # AGENTS.md
 
+> **Branch note (java-chain).** The OpenHands/Qwen rung-2 driver chain lives on the
+> `old-harness` branch and is not on this one. Where the text below describes `oh_run.py`,
+> `rung2_host.sh`, `roundrobin.sh`, `run_repo.sh`, the `detect-java-version` router or the v2
+> `generate_program`/`run_and_score` pipeline, it is describing that branch. On this branch the
+> executor is `current_attempt/current_iteration/bump-agent/`: a fixed-order Java chain of
+> producer/critic pairs whose agents reach the workspace through scoped tools, with the same
+> combined gate reimplemented in `Gate.java` and the same sealed containers via `hoptools/jvm-run`.
+> Everything else the charter says about the problem, the reward and the corpus still holds, and
+> the four shipped per-hop skills are unchanged.
+
+
 **Per-attempt history:** each `attempt_N/README.md` snapshots the AGENTS.md state that attempt ran under — audit only, not read by the agent.
 
 1. **Problem (writing this file):** keep AGENTS.md compact and outcome-named.

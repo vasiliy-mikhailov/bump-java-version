@@ -1,5 +1,0 @@
-#!/bin/bash
-# Offline CWE scan of the project's (bumped) dependencies in the jv_to sealed env.
-# Thin alias — the scan itself is the sealed image's `jvmjob scan` (osv-scanner, frozen offline DB).
-set -uo pipefail
-exec jvm-run "${BJV_TO:?BJV_TO must be set}" jvmjob scan
