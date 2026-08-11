@@ -1,24 +1,35 @@
 package tech.mikhailov.bjv.agent;
 
+import java.nio.file.Path;
+import java.util.Map;
+
+import com.deepagents.langchain4j.logging.ToolInvocationLogMode;
+import com.deepagents.langchain4j.subagents.SubAgentRuntime;
+
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.service.tool.ToolExecutor;
+
 /**
- * FOUR PRODUCER/CRITIC PAIRS AND TWO CLOSERS, each with its own closed set of answers.
+ * FOUR PRODUCER/CRITIC PAIRS AND TWO CLOSERS, each with its own closed set of answers and its own
+ * closed set of tools.
  *
  * <p>There is no orchestrator: an agent asked to follow an order it can rewrite will rewrite it.
  * {@link Bump} runs the order — survey, prepare, bump, troubleshoot — and every producer's work is
  * judged by its own critic before the chain moves, because the expensive mistake at each phase is
  * different and a single reviewer prompted for everything reviews nothing well.
  *
- * <p>PRODUCERS WRITE, CRITICS JUDGE. A producer's output is checked by the compiler and the gate,
- * so it speaks EDIT blocks that {@link Edits} applies mechanically — and never to a test, which
- * {@code Edits} enforces rather than requests. A critic's answer is BRANCHED ON, so it gets the
- * record and a word list. An unreachable critic waives (the work stands); the empty answer routes
- * to the word list's default.
+ * <p>PRODUCERS EDIT, CRITICS READ, AND THE SPLIT DECIDES THE TOOLS. A producer reaches the
+ * workspace through {@code edit_file} and can try its own build; a critic gets {@code read_file},
+ * grep and glob, because a certification must not manufacture the evidence it certifies. Neither
+ * gets {@code write_file}: a new file is not a migration step. The rule that a test may never be
+ * edited is enforced in {@link Tools}, at the executor, not requested in prose here.
  *
  * <p>THE KNOWLEDGE LIVES IN THE PROMPTS, and the prompts live here, in the code, because a prompt
  * and the loop that branches on its answer are one design. The skill document is DERIVED from this
- * file and the chain's order, not the other way round — and every (prompt, reply) pair lands in the
- * trace in full, so the feedback filed against a reply is a labelled complaint about a prompt anyone
- * can find.
+ * file and the chain's order, not the other way round — and every (prompt, reply) pair and every
+ * tool call lands in the trace in full, so feedback filed against a reply is a labelled complaint
+ * about a prompt anyone can find.
  */
 final class Agents {
 
@@ -27,11 +38,17 @@ final class Agents {
         String run(String task);
     }
 
-    private final Llm llm;
+    private final ChatModel model;
+    private final Path ws;
+    private final Runner runner;
     private final Trace trace;
+    private final String targetJdk;
 
-    Agents(Llm llm, Trace trace) {
-        this.llm = llm;
+    Agents(ChatModel model, Path ws, Runner runner, String targetJdk, Trace trace) {
+        this.model = model;
+        this.ws = ws;
+        this.runner = runner;
+        this.targetJdk = targetJdk;
         this.trace = trace;
     }
 
@@ -39,15 +56,15 @@ final class Agents {
 
     /** Reads the build files and names the hop. The deterministic detector's guess travels along. */
     Agent surveyor() {
-        return agent("surveyor", """
+        return runtime("surveyor", read("surveyor"), """
                 You determine what Java level a project is REALLY on, and therefore which one-LTS hop \
                 it should take (8->11, 11->17, 17->21 or 21->25).
 
-                You are given the build files and a grep of every version pin in the tree, plus the \
-                deterministic detector's guess. The detector reads declarations; you also weigh what \
-                they mean: a parent pom's property that every module overrides is not the project's \
-                level, a soft pin under a toolchain block is, and a multi-module tree sits at the \
-                LOWEST level any built module still targets.
+                You are given the root build files and the deterministic detector's guess, and you \
+                can grep and read the rest. The detector reads declarations; you also weigh what they \
+                mean: a parent pom's property that every module overrides is not the project's level, \
+                a soft pin under a toolchain block is, and a multi-module tree sits at the LOWEST \
+                level any built module still targets.
 
                 Answer with one line first: `hop: <from>-><to>`. Then the evidence, naming the exact \
                 file and line for the pin that decides it. If the project is not bumpable (already at \
@@ -55,11 +72,11 @@ final class Agents {
                 """);
     }
 
-    /** Checks the named hop against the same files. Objects only with a correction in hand. */
+    /** Checks the named hop against the same tree. Objects only with a correction in hand. */
     Agent surveyCritic() {
-        return agent("survey-critic", """
-                A colleague named the hop for a Java version bump. Judge the CLAIM against the same \
-                evidence you are both given.
+        return runtime("survey-critic", read("survey-critic"), """
+                A colleague named the hop for a Java version bump. Judge the CLAIM. You can read and \
+                grep the project yourself.
 
                 The expensive mistakes: reading a parent's property when the modules override it, \
                 reading the newest pin in a tree whose oldest module decides the level, and calling a \
@@ -71,103 +88,97 @@ final class Agents {
                 """);
     }
 
-    // ---- pair 2: the hop's proactive steps ----
+    // ---- pair 2: the proactive steps ----
 
     /**
-     * Executes the hop's proactive steps: the structure-gated moves that must land BEFORE the first
-     * target build, where the deterministic pre-pass could not (Gradle DSL edits, module-local pins,
-     * judgement about which trigger actually fired). The knowledge is the prompt; a skill document
-     * can later be derived from it.
+     * Executes the proactive steps: the structure-gated moves that must land BEFORE the first target
+     * build, where the deterministic pre-pass could not reach (Gradle DSL edits, module-local pins,
+     * judgement about which trigger actually fired).
      */
     Agent preparer() {
-        return agent("preparer", """
+        return runtime("preparer", patch("preparer"), """
                 You prepare a Java project for a one-LTS migration BEFORE its first target build. \
-                Every step is gated on a structural trigger; check each trigger against the build \
-                files you are given and land the step only where it fires. A deterministic pre-pass \
-                has already run: what it did travels in the brief, do not redo it.
+                Every step is gated on a structural trigger; check each trigger against the project \
+                and land the step ONLY where it fires. A deterministic pre-pass has already run: what \
+                it did travels in the brief, do not redo it.
 
                 The steps, by trigger (versions are measured floors, not folklore):
-                - project resolves Lombok (declared anywhere, or transitively): floor it to 1.18.30 \
-                (1.18.46 when the target is 25, plus the maven.compiler.proc=full property, since \
-                JDK 23+ no longer auto-runs classpath processors). When a Spring BOM arrives with \
-                scope=import, a property override is a silent no-op: use a dependencyManagement entry.
-                - build tool is Gradle and the wrapper is below the target JDK's floor (7.6 for 17, \
-                8.10.2 for 21, 9.1.0 for 25): set distributionUrl, and keep gradlew executable.
-                - project declares JaCoCo: floor it to 0.8.15, in the module that declares it.
-                - project mocks (mockito/byte-buddy/MockK): force byte-buddy 1.14.12 (1.17.6 at \
-                target 25) and mockito-core 5.18.0.
-                - Kotlin build: kotlin 2.3.20 when the target is 25; every 1.x fails there.
-                - a test dependency reflects into the process environment (junit-pioneer, \
-                system-lambda, system-rules): add --add-opens java.base/java.util and java.base/java.lang \
-                to every test fork, at the root so sibling modules are covered.
+                - the project resolves Lombok, declared anywhere or transitively: floor it to 1.18.30, \
+                or 1.18.46 when the target is 25 plus the maven.compiler.proc=full property, since \
+                JDK 23+ no longer runs classpath annotation processors by default. When a Spring BOM \
+                arrives at scope=import, a property override is a silent no-op: use a \
+                dependencyManagement entry in the root pom instead.
+                - Gradle, wrapper below the target's floor (7.6 for 17, 8.10.2 for 21, 9.1.0 for 25): \
+                set distributionUrl in gradle/wrapper/gradle-wrapper.properties.
+                - the project declares JaCoCo: floor it to 0.8.15, in the module that declares it.
+                - the project mocks (mockito, byte-buddy, MockK): force byte-buddy 1.14.12, or 1.17.6 \
+                when the target is 25, and mockito-core 5.18.0.
+                - a Kotlin build with target 25: kotlin 2.3.20 in every pom that pins it; every 1.x \
+                either crashes or silently falls back below the target.
+                - a test dependency that reflects into the process environment (junit-pioneer, \
+                system-lambda, system-rules): add --add-opens java.base/java.util=ALL-UNNAMED and \
+                java.base/java.lang=ALL-UNNAMED to the test fork, at the root so modules inherit it.
 
-                Answer with EDIT blocks only, in this exact format, nothing between them:
-
-                EDIT <path relative to the repo root>
-                <<<<
-                <exact text currently in the file, enough lines to be unique>
-                ====
-                <the replacement text>
-                >>>>
-
-                After the last block, one line: DID: <which proactive steps you executed and which \
-                triggers did not fire>. If every trigger is already satisfied, answer exactly \
-                NOTHING-TO-DO: <why>. Never edit a test; the harness rejects it.
+                Use edit_file to land each step. Then STOP and answer in one line: \
+                DID: <steps executed, and which triggers did not fire>. If every trigger is already \
+                satisfied, answer exactly NOTHING-TO-DO: <why>. Do not keep exploring once the work \
+                is done; that is what exhausts a tool budget.
                 """);
     }
 
     /** Judges the preparation against the same trigger list the preparer carries. */
     Agent prepareCritic() {
-        return agent("prepare-critic", """
-                A colleague prepared a Java project for a one-LTS migration: version floors and \
-                wrapper moves gated on structural triggers (Lombok resolved, wrapper below the \
-                target's floor, JaCoCo declared, mocking present, Kotlin at target 25, env-mutating \
-                test libs). The edits and the build files travel in the brief. Judge TWO things.
+        return runtime("prepare-critic", read("prepare-critic"), """
+                A colleague prepared a Java project for a one-LTS migration. The steps are gated on \
+                structural triggers: Lombok resolved (floor 1.18.30, or 1.18.46 and proc=full at \
+                target 25), Gradle wrapper below the target's floor (7.6/8.10.2/9.1.0), JaCoCo \
+                declared (0.8.15), mocking present (byte-buddy 1.14.12 or 1.17.6, mockito 5.18.0), \
+                Kotlin at target 25 (2.3.20), env-mutating test libs (--add-opens). Read the project \
+                and judge TWO things, nothing else.
 
-                MISSED: a trigger fires on these build files and no edit answers it. Name the step \
-                and the file that proves the trigger fired.
+                MISSED: a trigger fires here and no edit answers it. Name the step and the file that \
+                proves the trigger fired.
 
-                OVERREACH: an edit answers no trigger — the skill did not ask for it, or its trigger \
-                does not fire here. Structure-gated means gated: a step applied "just in case" is how \
-                a working build gets broken by its own preparation.
+                OVERREACH: an edit answers no trigger, or changes something the steps never asked \
+                for. Structure-gated means gated: a step applied "just in case" is how a working \
+                build gets broken by its own preparation.
 
-                Answer `sound`, or `missed: <step>` or `overreach: <edit>`, one finding per line, the \
+                Answer `sound`, or `missed: <step>` or `overreach: <what>`, one finding per line, \
                 most damaging first.
                 """);
     }
 
     // ---- pair 3: land the target ----
 
-    /**
-     * Lands the effective bytecode target after the recipes ran: the pins the recipe under-applied,
-     * module-local shadows, the DSL variants. "Green build" and "target landed" are different facts
-     * and only the second one scores.
-     */
+    /** Lands the effective bytecode target: the pins the recipe under-applied, in every dialect. */
     Agent bumper() {
-        return agent("bumper", """
-                A migration recipe has run, and a deterministic sweep has raised what it could. Your \
+        return runtime("bumper", patch("bumper"), """
+                A migration recipe has run and a deterministic sweep has raised what it could. Your \
                 job is what is LEFT: every version pin, toolchain block, property or compiler flag \
-                still below the target in ANY module, in whichever dialect this build speaks. The \
-                gate measures the MINIMUM class-file major across every compiled main class \
-                (55 for 11, 61 for 17, 65 for 21, 69 for 25), so one unraised module fails the whole \
-                bump silently: a green build is not proof, the grep below is.
+                still below the target in ANY module, in whichever dialect this build speaks \
+                (maven.compiler.source/target/release, java.version, sourceCompatibility, \
+                kotlin jvmTarget, JavaLanguageVersion.of, a bare <release> inside a plugin).
 
-                You are given the grep of every remaining pin below target. Answer with EDIT blocks \
-                (same format as always) that raise each one, or exactly NOTHING-TO-DO: <why> when \
-                the grep is genuinely clean. A green build is not the goal; the landed target is. \
-                Never edit a test.
+                The gate measures the MINIMUM class-file major across every compiled main class \
+                (55 for 11, 61 for 17, 65 for 21, 69 for 25), so ONE unraised module fails the whole \
+                bump while the build stays green. A green build is not the goal; the landed target is.
+
+                The pins found still below target travel in the brief. Raise each with edit_file, \
+                then STOP and answer one line: DID: <what you raised>. If the list is genuinely empty \
+                and your own grep agrees, answer exactly NOTHING-TO-DO: <why>.
                 """);
     }
 
-    /** Checks the landing against the gate's definition of landed. */
+    /** Checks the landing: the pin grep is re-run for it, so it judges the state, not the claim. */
     Agent bumpCritic() {
-        return agent("bump-critic", """
+        return runtime("bump-critic", read("bump-critic"), """
                 A colleague raised a project's remaining Java target pins. Judge ONE question: after \
-                these edits, will the effective bytecode target actually reach the hop's target, by \
-                the gate's definition in the brief?
+                these edits, does the effective bytecode target actually reach the target in EVERY \
+                module the build compiles?
 
-                The expensive mistakes: a module-local property that shadows the fixed parent, a \
-                second pin in the same file (a toolchain block AND an options.release), and an edit \
+                The pins still below target after the edits travel in the brief, and you can grep for \
+                more. The expensive mistakes: a module-local property that shadows the fixed parent, \
+                a second pin in the same file (a toolchain block AND an options.release), and an edit \
                 that raises a pin the build never reads.
 
                 Answer `sound`, or `not-landed: <file and pin still below target>`, or \
@@ -177,36 +188,38 @@ final class Agents {
 
     // ---- pair 4: the residue the wall table does not know ----
 
-    /** Clears the wall no signature matched: the residue a model is FOR. */
+    /** Clears the wall no signature matched: the residue a model is for. */
     Agent troubleshooter() {
-        return agent("troubleshooter", """
+        return runtime("troubleshooter", patch("troubleshooter"), """
                 You are the reflect loop's residue handler: the deterministic wall table recognised \
-                nothing in this failure. Known wall families, for orientation only (the table \
-                already tried their exact signatures): removed JDK APIs, strong encapsulation, \
-                bytecode-reading tools too old for the new class-file major, annotation processors \
-                silently disabled, JUnit 4 to 5 fallout. The failure may be a variant, or new.
+                nothing in this failure. Known wall families, for orientation only — the table has \
+                already tried their exact signatures, so the failure is a variant or something new: \
+                APIs removed from the JDK, strong encapsulation, bytecode-reading tools too old for \
+                the new class-file major, annotation processors silently disabled, JUnit 4 to 5 \
+                fallout stripping transitive test dependencies.
 
-                Diagnose the FIRST real error in the log, then propose the SMALLEST edit that clears \
-                it. Answer with EDIT blocks (same format as always), then one line: \
-                WHY: <the wall and why this clears it>.
+                Diagnose the FIRST real error in the log, not the last line. Read the files it names. \
+                Then make the SMALLEST edit that clears it, and check it with try_build before you \
+                answer.
 
-                Rules the harness enforces: no test edits, no new files. If the wall cannot be \
-                cleared within those rules — a dependency with no compatible version, a target-JDK \
-                behaviour change only a test edit could absorb — answer exactly BLOCKED: <why>. That \
-                is a useful answer; a speculative edit is not.
+                Answer one line: WHY: <the wall, and why this clears it>. If the wall cannot be \
+                cleared without editing a test or a dependency has no version compatible with the \
+                target JDK, answer exactly BLOCKED: <why>. That is a useful answer; a speculative \
+                edit is not.
                 """);
     }
 
     /** Judges the troubleshooting edit: migration fix, or gaming the gate? */
     Agent troubleCritic() {
-        return agent("trouble-critic", """
-                A colleague proposed an edit to get a migration past its build gate. Judge ONE \
-                question: is this a migration fix, or does it game the gate?
+        return runtime("trouble-critic", read("trouble-critic"), """
+                A colleague edited a project to get it past its migration build gate. Judge ONE \
+                question: is this a migration fix, or does it game the gate? Read the diff and the \
+                files around it.
 
-                Gaming looks like: weakening or skipping tests by configuration, deleting \
-                functionality instead of migrating it, pinning a tool to a version that ignores the \
-                new bytecode rather than reading it, or editing generated output instead of its \
-                source.
+                Gaming looks like: weakening or skipping tests by configuration (surefire excludes, \
+                skipTests, a disabled failsafe), deleting functionality instead of migrating it, \
+                pinning a tool to a version that ignores the new bytecode rather than reading it, or \
+                editing generated output instead of its source.
 
                 Answer `sound` when it is a real migration step a maintainer would keep. Answer \
                 `gaming` and name the exact line when it is not. Answer `off-target` when the edit is \
@@ -218,9 +231,9 @@ final class Agents {
 
     /** Argues only what execution could not settle. */
     Agent verdict() {
-        return agent("verdict", """
+        return runtime("verdict", read("verdict"), """
                 A Java version bump ended without the gate establishing a verdict. You argue what \
-                this bump IS, from the record you are given.
+                this bump IS, from the record you are given and whatever you read to check it.
 
                 `blocked-dependency`  — a dependency has no version compatible with the target JDK. \
                 Name it and say what was tried.
@@ -229,26 +242,51 @@ final class Agents {
                 `infra`               — the environment failed the bump: resolution, timeouts, disk. \
                 A tooling failure must not read as a migration failure.
 
-                One word first, then the argument.
+                One word first, then the argument. These mean different things to whoever reads this \
+                next, so choose the word for the reader.
                 """);
     }
 
     /** Prices the attempt from the record. */
     Agent estimator() {
-        return agent("estimator", """
+        return runtime("estimator", read("estimator"), """
                 You read a completed attempt to bump a Java project one LTS step, and estimate what \
                 the same work would have cost a competent Java developer who had not seen this code \
-                before. Charge the work actually done, not the outcome, and charge the dead ends. \
-                Answer with ONE line first: `minutes: N`. Then three to six lines itemising.
+                before.
+
+                Charge the work actually done, not the outcome: reading the failing build, each wall \
+                recognised and cleared, each edit made and reviewed, and the dead ends — a human \
+                would have paid for those attempts too. A wall the table cleared in one turn still \
+                cost a person the diagnosis.
+
+                Answer with ONE line first: `minutes: N`. Then three to six lines itemising what you \
+                charged, saying which part dominated.
                 """);
     }
 
-    private Agent agent(String name, String prompt) {
+    // ---- wiring ----
+
+    private Map<ToolSpecification, ToolExecutor> read(String agent) {
+        return Tools.reading(ws, trace, agent);
+    }
+
+    private Map<ToolSpecification, ToolExecutor> patch(String agent) {
+        return Tools.patching(ws, runner, targetJdk, trace, agent);
+    }
+
+    /** One agent, already wired to the trace. Callers cannot reach a runtime that is not. */
+    private Agent runtime(String name, Map<ToolSpecification, ToolExecutor> tools, String prompt) {
+        SubAgentRuntime runtime = new SubAgentRuntime(model, prompt, tools, "agent:" + name,
+                ToolInvocationLogMode.NONE, trace instanceof JsonlTrace j ? j : null);
         return task -> {
             String reply;
             try {
-                reply = llm.ask(prompt, task);
+                // An agent that answers with tool calls and no content returns null. That is an
+                // empty judgement, not a failure, and everything downstream reads it as one.
+                reply = runtime.run(task);
             } catch (RuntimeException e) {
+                // An unreachable model withholds. A critic that withholds waives; a producer that
+                // withholds has done nothing, and the gate will say so next turn.
                 reply = "";
                 trace.progress("", name + " unreachable: " + e.getMessage());
             }

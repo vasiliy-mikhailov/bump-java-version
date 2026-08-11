@@ -1,0 +1,257 @@
+package tech.mikhailov.bjv.agent;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import com.deepagents.langchain4j.files.FileToolFactory;
+import com.deepagents.langchain4j.files.WorkspaceFileOperations;
+
+import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
+import dev.langchain4j.service.tool.ToolExecutor;
+
+/**
+ * WHAT EACH AGENT CAN REACH, AND NOTHING MORE.
+ *
+ * <p>Producers get {@code edit_file} and never {@code write_file}: a new file is not a migration
+ * step, it is something a critic would then have to catch in prose. Judges read. Everyone gets grep
+ * and glob, because a model asking for a tool that does not exist does not degrade, it throws.
+ *
+ * <p>TEST CODE IS FENCED AT THE EXECUTOR. The prompts say "never edit a test" and a prompt is a
+ * suggestion; this wrapper is the rule. An {@code edit_file} whose path sits under a test source
+ * root is refused with an answer the model can read, whatever its reasoning said — because a lost
+ * test scores zero regardless of anything else the bump achieves.
+ *
+ * <p>EVERY EXECUTOR IS WRAPPED SO THE TRACE SEES IT WHOLE. The library's flow listener truncates
+ * its payloads, which is fine for watching and useless for the corpus: the argument to
+ * {@code edit_file} IS the migration step. Recording at the executor catches it before anything
+ * shortens it.
+ */
+final class Tools {
+
+    private Tools() {
+    }
+
+    /** Read and look around: what a judge needs to check a claim. */
+    static Map<ToolSpecification, ToolExecutor> reading(Path root, Trace trace, String agent) {
+        return recorded(only(root, Set.of("list_dir", "read_file")), trace, agent);
+    }
+
+    /** Read, look around, and edit EXISTING files — outside the test tree. Producers only. */
+    static Map<ToolSpecification, ToolExecutor> patching(Path root, Runner runner, String targetJdk,
+                                                         Trace trace, String agent) {
+        Map<ToolSpecification, ToolExecutor> tools =
+                only(root, Set.of("list_dir", "read_file", "edit_file"));
+        tools.putAll(build(runner, targetJdk));
+        return recorded(guarded(tools), trace, agent);
+    }
+
+    /** The one boundary that is enforced rather than requested. */
+    static boolean forbidden(String path) {
+        return path.contains("src/test/") || path.contains("src/it/")
+                || path.contains("src/integrationTest/") || path.contains("..");
+    }
+
+    private static Map<ToolSpecification, ToolExecutor> guarded(
+            Map<ToolSpecification, ToolExecutor> tools) {
+        Map<ToolSpecification, ToolExecutor> wrapped = new LinkedHashMap<>();
+        tools.forEach((spec, executor) -> wrapped.put(spec, (request, memoryId) -> {
+            if ("edit_file".equals(spec.name())) {
+                String path = field(request.arguments(), "path");
+                if (forbidden(path)) {
+                    return "REFUSED: " + path + " is test code, which may never be edited. A lost "
+                            + "test scores zero regardless of anything else this bump achieves.";
+                }
+            }
+            return executor.execute(request, memoryId);
+        }));
+        return wrapped;
+    }
+
+    /** Try the target-JDK build. Producers only: feedback for them, never evidence for the chain. */
+    private static Map<ToolSpecification, ToolExecutor> build(Runner runner, String targetJdk) {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("try_build")
+                .description("Compile the project under the TARGET jdk and return what the build "
+                        + "said. Use it to check your own edit before answering. The gate that "
+                        + "decides the bump runs elsewhere; this is for your benefit only.")
+                .parameters(JsonObjectSchema.builder().build())
+                .build();
+        ToolExecutor exec = (request, memoryId) -> {
+            Runner.Result r = runner.build(targetJdk);
+            return (r.infra() ? "DID NOT COMPILE" : "COMPILED") + "\n" + r.summary();
+        };
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, exec);
+        return one;
+    }
+
+    private static Map<ToolSpecification, ToolExecutor> recorded(
+            Map<ToolSpecification, ToolExecutor> tools, Trace trace, String agent) {
+        Map<ToolSpecification, ToolExecutor> wrapped = new LinkedHashMap<>();
+        tools.forEach((spec, executor) -> wrapped.put(spec, (request, memoryId) -> {
+            try {
+                String result = executor.execute(request, memoryId);
+                trace.tool(agent, spec.name(), request.arguments(), result);
+                return result;
+            } catch (RuntimeException e) {
+                trace.tool(agent, spec.name(), request.arguments(),
+                        "threw " + e.getClass().getSimpleName() + ": " + e.getMessage());
+                throw e;
+            }
+        }));
+        return wrapped;
+    }
+
+    /** The built-ins, filtered, plus grep and glob. Fails loudly if an upstream rename strips one. */
+    private static Map<ToolSpecification, ToolExecutor> only(Path root, Set<String> names) {
+        Map<ToolSpecification, ToolExecutor> kept = new LinkedHashMap<>();
+        FileToolFactory.build(new WorkspaceFileOperations(root))
+                .forEach((spec, executor) -> {
+                    if (names.contains(spec.name())) {
+                        kept.put(spec, executor);
+                    }
+                });
+        kept.putAll(grep(root));
+        kept.putAll(glob(root));
+        if (kept.size() != names.size() + 2) {
+            throw new IllegalStateException(
+                    "expected " + names + " plus grep and glob but got " + kept.keySet());
+        }
+        return kept;
+    }
+
+    private static Map<ToolSpecification, ToolExecutor> grep(Path root) {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("grep")
+                .description("Search file CONTENTS for a literal string or regular expression, "
+                        + "optionally filtered by filename. Returns file:line pairs. To find files "
+                        + "by NAME, use glob.")
+                .parameters(JsonObjectSchema.builder()
+                        .addStringProperty("pattern", "a literal string or Java regular expression")
+                        .addStringProperty("glob", "optional filename filter, e.g. *.xml")
+                        .required("pattern")
+                        .build())
+                .build();
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, (request, memoryId) -> search(root, request.arguments()));
+        return one;
+    }
+
+    private static Map<ToolSpecification, ToolExecutor> glob(Path root) {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("glob")
+                .description("Find files by PATH pattern, e.g. **/pom.xml, **/*.gradle. Returns "
+                        + "matching paths. Use grep to search contents.")
+                .parameters(JsonObjectSchema.builder()
+                        .addStringProperty("pattern", "a path glob")
+                        .required("pattern")
+                        .build())
+                .build();
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, (request, memoryId) -> matching(root, field(request.arguments(), "pattern")));
+        return one;
+    }
+
+    private static String matching(Path root, String pattern) {
+        if (pattern.isBlank()) {
+            return "no pattern given";
+        }
+        java.nio.file.PathMatcher matcher;
+        try {
+            matcher = root.getFileSystem().getPathMatcher("glob:"
+                    + (pattern.startsWith("**") || pattern.startsWith("/") ? pattern
+                    : "**/" + pattern));
+        } catch (IllegalArgumentException badPattern) {
+            return "not a glob: " + badPattern.getMessage();
+        }
+        StringBuilder hits = new StringBuilder();
+        int found = 0;
+        try (var files = Files.walk(root)) {
+            for (Path f : files.filter(Files::isRegularFile).toList()) {
+                String path = f.toString();
+                if (path.contains("/.git/") || path.contains("/target/")
+                        || path.contains("/node_modules/")) {
+                    continue;
+                }
+                if (matcher.matches(root.relativize(f)) || matcher.matches(f)) {
+                    hits.append(root.relativize(f)).append('\n');
+                    if (++found >= 200) {
+                        hits.append("more suppressed; narrow the pattern\n");
+                        break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            return "glob failed: " + e.getMessage();
+        }
+        return found == 0 ? "no files match " + pattern : hits.toString();
+    }
+
+    private static String search(Path root, String argumentsJson) {
+        String pattern = field(argumentsJson, "pattern");
+        String glob = field(argumentsJson, "glob");
+        if (pattern.isBlank()) {
+            return "no pattern given";
+        }
+        Pattern re;
+        try {
+            re = Pattern.compile(pattern);
+        } catch (PatternSyntaxException e) {
+            re = Pattern.compile(Pattern.quote(pattern));
+        }
+        StringBuilder hits = new StringBuilder();
+        int found = 0;
+        try (var files = Files.walk(root)) {
+            for (Path f : files.filter(Files::isRegularFile).toList()) {
+                if (found >= 60) {
+                    hits.append("more matches suppressed; narrow the pattern\n");
+                    break;
+                }
+                String name = f.getFileName().toString();
+                if (!glob.isBlank() && !name.matches(glob.replace(".", "\\.").replace("*", ".*"))) {
+                    continue;
+                }
+                String path = f.toString();
+                if (path.contains("/.git/") || path.contains("/target/")
+                        || path.contains("/node_modules/")) {
+                    continue;
+                }
+                try {
+                    int line = 0;
+                    for (String text : Files.readAllLines(f)) {
+                        line++;
+                        if (re.matcher(text).find()) {
+                            hits.append(root.relativize(f)).append(':').append(line).append(": ")
+                                    .append(text.strip()).append('\n');
+                            if (++found >= 60) {
+                                break;
+                            }
+                        }
+                    }
+                } catch (IOException | java.io.UncheckedIOException binary) {
+                    // A file that is not text is not a match.
+                }
+            }
+        } catch (IOException e) {
+            return "search failed: " + e.getMessage();
+        }
+        return found == 0 ? "no matches" : hits.toString();
+    }
+
+    private static String field(String json, String key) {
+        int k = json.indexOf('"' + key + '"');
+        if (k < 0) {
+            return "";
+        }
+        int open = json.indexOf('"', json.indexOf(':', k + key.length()) + 1);
+        int close = open < 0 ? -1 : json.indexOf('"', open + 1);
+        return close < 0 ? "" : json.substring(open + 1, close);
+    }
+}

@@ -35,7 +35,12 @@ final class Runner {
     Runner(Path ws, String hoptools) {
         this.ws = ws;
         this.jvmRun = hoptools + "/jvm-run";
-        this.env = new HashMap<>();
+        this.env = env(ws);
+    }
+
+    /** The sealed-container environment, shared with anything else that shells to the harness. */
+    static Map<String, String> env(Path ws) {
+        Map<String, String> env = new HashMap<>();
         env.put("BJV_WS", ws.toString());
         env.put("BJV_NET", "mvn-cache");
         env.put("BJV_M2", "/home/vmihaylov/.m2-fitness");
@@ -43,6 +48,26 @@ final class Runner {
         env.put("BJV_GRADLE_RO", "/home/vmihaylov/.gradle-fitness");
         env.put("BJV_GRADLE_DISTS", "/home/vmihaylov/.gradle-dists");
         env.put("BJV_HANG_GUARD", "1800");
+        return env;
+    }
+
+    /**
+     * Delete every surefire report before a run.
+     *
+     * <p>A gate that reads leftover XML from the baseline scores tests it never ran. The reports are
+     * the evidence, so stale evidence is worse than none: it reads as conservation holding.
+     */
+    void clearReports() {
+        try (var s = java.nio.file.Files.walk(ws)) {
+            for (Path f : s.filter(java.nio.file.Files::isRegularFile).toList()) {
+                String n = f.getFileName().toString();
+                if (n.startsWith("TEST-") && n.endsWith(".xml")) {
+                    java.nio.file.Files.deleteIfExists(f);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("clearReports: " + e.getMessage());
+        }
     }
 
     Result build(String jdk) {

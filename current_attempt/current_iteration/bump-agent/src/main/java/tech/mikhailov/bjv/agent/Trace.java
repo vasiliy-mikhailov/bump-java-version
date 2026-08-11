@@ -23,6 +23,9 @@ interface Trace {
     /** A deterministic stage did something: a recipe ran, a floor landed, a wall was fixed. A fact. */
     void applied(String stage, String what);
 
+    /** A tool an agent used, payloads in full: the argument to edit_file IS the migration step. */
+    void tool(String agent, String tool, String arguments, String result);
+
     /** A build under a named JDK. The only arbiter in the program. */
     void built(String phase, Runner.Result result);
 
