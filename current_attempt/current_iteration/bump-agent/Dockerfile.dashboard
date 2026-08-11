@@ -1,0 +1,8 @@
+# The dashboard: a reader over the results directory, fronted by the proxy.
+# Separate from the controller image because it needs no docker socket and no git — it only reads
+# JSONL and appends feedback rows, and an image that cannot reach the daemon cannot be talked into
+# starting a build.
+FROM eclipse-temurin:17-jre
+COPY target/bump-agent-0.1.0-SNAPSHOT.jar /bump-agent.jar
+EXPOSE 8086
+ENTRYPOINT ["java", "-cp", "/bump-agent.jar", "tech.mikhailov.bjv.agent.Dashboard", "/results", "8086"]

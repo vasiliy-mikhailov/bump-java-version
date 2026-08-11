@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 /**
  * Explore each bump: the settlements list, the full trace behind any of them, and the feedback form
@@ -22,25 +25,46 @@ import java.util.Map;
  * <p>One process, no framework, no build step for the UI: the JDK's own HttpServer and three pages
  * of handwritten HTML. The dashboard is a READER — the only thing it ever writes is a feedback row,
  * because a dashboard that can edit its subject is a second orchestrator nobody audits.
+ *
+ * <p>IT IS SERVED ON A PUBLIC NAME, so the assumptions a localhost tool gets for free are stated
+ * here instead. The slug that selects a bump is an OPAQUE KEY, not a path: it is matched against an
+ * allowlist and the resolved file is re-checked to be under the results directory, because
+ * {@link Path#resolve} on an absolute argument discards the base entirely. The write endpoint is
+ * bounded and, when a token is configured, authenticated — an unauthenticated append is a way to
+ * write into the corpus that trains the prompts. What the pages render is untrusted throughout: it
+ * is model output and third-party repository source, so every value is escaped on the way out.
  */
 public final class Dashboard {
 
+    /** A feedback note is a sentence, not a payload. Anything larger is not a note. */
+    private static final int MAX_FEEDBACK_BYTES = 64 * 1024;
+
+    /** Only this shape may select a bump. Everything else is not a slug, whatever it looks like. */
+    private static final Pattern SLUG = Pattern.compile("[A-Za-z0-9_-]{1,200}");
+
     public static void main(String[] args) throws IOException {
-        Path results = Path.of(args.length > 0 ? args[0] : "results");
+        Path results = Path.of(args.length > 0 ? args[0] : "results").toAbsolutePath().normalize();
         int port = args.length > 1 ? Integer.parseInt(args[1]) : 8086;
-        HttpServer http = HttpServer.create(new InetSocketAddress(port), 0);
-        Dashboard d = new Dashboard(results);
+        HttpServer http = HttpServer.create(new InetSocketAddress(port), 64);
+        // A single-threaded server is one slow reader away from being unavailable, and a trace is a
+        // slow read by construction.
+        http.setExecutor(Executors.newFixedThreadPool(8));
+        Dashboard d = new Dashboard(results, System.getenv("BJV_DASH_TOKEN"));
         http.createContext("/", d::home);
         http.createContext("/bump", d::bump);
         http.createContext("/feedback", d::feedback);
         http.start();
-        System.out.println("dashboard on :" + port + " over " + results.toAbsolutePath());
+        System.out.println("dashboard on :" + port + " over " + results
+                + (d.token == null ? " (feedback OPEN: set BJV_DASH_TOKEN to require one)"
+                : " (feedback requires a token)"));
     }
 
     private final Path results;
+    private final String token;
 
-    private Dashboard(Path results) {
+    private Dashboard(Path results, String token) {
         this.results = results;
+        this.token = token == null || token.isBlank() ? null : token;
     }
 
     /** The settlements, latest row per bump, newest first. */
@@ -60,10 +84,12 @@ public final class Dashboard {
         for (int i = rows.size() - 1; i >= 0; i--) {
             Map<String, String> r = rows.get(i).getValue();
             String slug = rows.get(i).getKey().replaceAll("[^A-Za-z0-9]+", "_");
-            b.append("<tr><td><a href=\"/bump?slug=").append(slug).append("&key=")
-                    .append(esc(rows.get(i).getKey())).append("\">").append(esc(rows.get(i).getKey()))
-                    .append("</a></td><td class=s-").append(esc(r.getOrDefault("state", "")))
-                    .append(">").append(esc(r.getOrDefault("state", ""))).append("</td><td>")
+            b.append("<tr><td><a href=\"/bump?slug=").append(url(slug)).append("&amp;key=")
+                    .append(url(rows.get(i).getKey())).append("\">").append(esc(rows.get(i).getKey()))
+                    // QUOTED. Escaping cannot rescue an unquoted attribute: a value carrying a
+                    // space ends the attribute and the next word is a new one, onmouseover included.
+                    .append("</a></td><td class=\"s-").append(esc(r.getOrDefault("state", "")))
+                    .append("\">").append(esc(r.getOrDefault("state", ""))).append("</td><td>")
                     .append(flag(r.get("baseline"))).append("</td><td>").append(flag(r.get("gate")))
                     .append("</td><td>").append(when(r.get("at"))).append("</td></tr>");
         }
@@ -74,7 +100,18 @@ public final class Dashboard {
     private void bump(HttpExchange x) throws IOException {
         Map<String, String> q = query(x);
         String slug = q.getOrDefault("slug", "");
-        Path f = results.resolve(slug).resolve("trace.jsonl");
+        if (!SLUG.matcher(slug).matches()) {
+            send(x, page("bump").append("<p><a href=\"/\">&larr; bumps</a></p>")
+                    .append("<p>not a bump key</p>").toString());
+            return;
+        }
+        Path f = results.resolve(slug).resolve("trace.jsonl").normalize();
+        if (!f.startsWith(results)) {
+            // Unreachable given the allowlist, and checked anyway: the allowlist is one edit away
+            // from being loosened, and this is the check that still holds when it is.
+            send(x, page("bump").append("<p>not a bump key</p>").toString());
+            return;
+        }
         StringBuilder b = page(slug);
         b.append("<p><a href=\"/\">&larr; bumps</a></p><h1>").append(esc(q.getOrDefault("key", slug)))
                 .append("</h1>");
@@ -94,6 +131,7 @@ public final class Dashboard {
                     b.append("<pre class=reply>").append(esc(r.get("reply"))).append("</pre>");
                     // The form carries the pair itself, so the corpus row is self-contained.
                     b.append("<form method=post action=/feedback>")
+                            .append(token == null ? "" : hidden("token", token))
                             .append(hidden("bump", q.getOrDefault("key", slug)))
                             .append(hidden("agent", r.get("agent")))
                             .append(hidden("event", String.valueOf(asked)))
@@ -104,8 +142,8 @@ public final class Dashboard {
                     asked++;
                 }
                 case "built" -> b.append(section("built: " + r.get("phase"), when(r.get("at"))))
-                        .append("<pre>").append("infra=").append(r.get("infra"))
-                        .append(" passed=").append(r.get("passed")).append("\n")
+                        .append("<pre>").append("infra=").append(esc(r.get("infra")))
+                        .append(" passed=").append(esc(r.get("passed"))).append("\n")
                         .append(esc(r.get("summary"))).append("</pre>");
                 case "applied" -> b.append(section("applied: " + r.get("stage"), when(r.get("at"))))
                         .append("<pre>").append(esc(r.get("what"))).append("</pre>");
@@ -116,6 +154,14 @@ public final class Dashboard {
                         .append("<pre>").append(esc(r.get("itemisation"))).append("</pre>");
                 case "failed" -> b.append(section("failed", when(r.get("at"))))
                         .append("<pre>").append(esc(r.get("stack"))).append("</pre>");
+                case "tool" -> b.append("<p class=tool><b>").append(esc(r.get("tool")))
+                        .append("</b> <i>").append(esc(r.get("agent"))).append("</i> ")
+                        .append(esc(abbreviate(r.get("arguments"), 300)))
+                        .append("<br><span class=res>").append(esc(abbreviate(r.get("result"), 600)))
+                        .append("</span></p>");
+                case "system" -> b.append(section("system prompt assembled", when(r.get("at"))))
+                        .append("<details><summary>prompt</summary><pre>")
+                        .append(esc(r.get("prompt"))).append("</pre></details>");
                 case "progress" -> b.append("<p class=prog>").append(esc(r.get("note")))
                         .append("</p>");
                 default -> {
@@ -131,15 +177,26 @@ public final class Dashboard {
             x.sendResponseHeaders(405, -1);
             return;
         }
-        Map<String, String> form = form(new String(x.getRequestBody().readAllBytes(),
-                StandardCharsets.UTF_8));
+        byte[] body = x.getRequestBody().readNBytes(MAX_FEEDBACK_BYTES + 1);
+        if (body.length > MAX_FEEDBACK_BYTES) {
+            x.sendResponseHeaders(413, -1);
+            return;
+        }
+        Map<String, String> form = form(new String(body, StandardCharsets.UTF_8));
+        if (token != null && !token.equals(form.get("token"))) {
+            // A feedback row is a training example. An unauthenticated append is a way to write
+            // into the corpus that tunes the prompts, which is worth more than the disk it costs.
+            x.sendResponseHeaders(403, -1);
+            return;
+        }
         new Feedback(form.getOrDefault("bump", ""), form.getOrDefault("agent", ""),
                 Integer.parseInt(form.getOrDefault("event", "0")), form.getOrDefault("note", ""),
                 Instant.now().toString(), form.getOrDefault("prompt", ""),
                 form.getOrDefault("reply", ""))
                 .appendTo(results.resolve("feedback").resolve("feedback.jsonl"));
         x.getResponseHeaders().add("Location", "/bump?slug="
-                + form.getOrDefault("bump", "").replaceAll("[^A-Za-z0-9]+", "_"));
+                + form.getOrDefault("bump", "").replaceAll("[^A-Za-z0-9]+", "_")
+                + "&key=" + url(form.getOrDefault("bump", "")));
         x.sendResponseHeaders(303, -1);
     }
 
@@ -215,6 +272,8 @@ public final class Dashboard {
                 .append("pre{background:#f6f6f6;padding:.6rem;overflow-x:auto;white-space:pre-wrap}")
                 .append(".reply{border-left:3px solid #46a}")
                 .append(".prog{color:#666;font-style:italic}")
+                .append(".tool{background:#fafafa;border-left:2px solid #bbb;padding:.3rem .6rem;margin:.2rem 0;font-size:12px}")
+                .append(".res{color:#666}")
                 .append(".s-green{background:#e6f4e6}.s-infra{background:#fdeaea}")
                 .append("h2{margin:1.2rem 0 .2rem}small{color:#888}")
                 .append("</style>");
@@ -226,6 +285,14 @@ public final class Dashboard {
 
     private static String hidden(String name, String value) {
         return "<input type=hidden name=" + name + " value=\"" + esc(value) + "\">";
+    }
+
+    /** Tool payloads are shown, not hidden, but a 600KB grep result is not a page. */
+    private static String abbreviate(String s, int max) {
+        if (s == null) {
+            return "";
+        }
+        return s.length() <= max ? s : s.substring(0, max) + " … (" + s.length() + " chars)";
     }
 
     private static String flag(String v) {
@@ -241,9 +308,18 @@ public final class Dashboard {
         }
     }
 
+    /**
+     * Everything rendered here is untrusted: model output, and source from third-party repositories.
+     * Single quotes are escaped along with the rest so the output is safe in either attribute style,
+     * not only the double-quoted one this page happens to use today.
+     */
     private static String esc(String s) {
         return s == null ? "" : s.replace("&", "&amp;").replace("<", "&lt;")
-                .replace(">", "&gt;").replace("\"", "&quot;");
+                .replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+    }
+
+    private static String url(String s) {
+        return s == null ? "" : URLEncoder.encode(s, StandardCharsets.UTF_8);
     }
 
     private static void send(HttpExchange x, String html) throws IOException {
