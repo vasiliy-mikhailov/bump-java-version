@@ -170,9 +170,15 @@ public final class Dashboard {
                 var n = JSON.parse(m.data);
                 var seen = +(document.body.dataset.events || 0);
                 if (isList) {
+                  // Refresh on a state change, or when a minute has passed with the run still
+                  // producing. Reacting to every event would re-render a 1439-row page on each of
+                  // a thousand tool calls; reacting only to settlements leaves the page frozen for
+                  // the twenty minutes a bump spends between them, which reads as broken.
                   var s = +(document.body.dataset.settled || 0);
-                  if (n.settled <= s) return;
+                  var last = +(document.body.dataset.at || 0), now = Date.now();
+                  if (n.settled <= s && now - last < 60000) return;
                   document.body.dataset.settled = n.settled;
+                  document.body.dataset.at = now;
                 } else if (n.events <= seen) return;
                 fetch(here + (here.indexOf('?') < 0 ? '?' : '&') + 'from=' + (isList ? 0 : seen),
                       {headers:{'X-Fragment':'1'}})
@@ -300,13 +306,15 @@ public final class Dashboard {
                 && !f.state.equals("queued") && !f.state.equals("interrupted")).count();
         long elapsed = began == Long.MAX_VALUE ? 0 : System.currentTimeMillis() - began;
 
-        StringBuilder b = head("bumps", total + " bump(s) · " + events + " trace event(s)");
+        StringBuilder b = head("bumps", total + " bump(s) · " + events + " trace event(s) · as of "
+                + when(String.valueOf(System.currentTimeMillis())) + "Z");
         if (total == 0) {
             send(x, b.append("<div class=empty>Nothing has run yet.</div>").toString());
             return;
         }
         b.append("<script>document.body.dataset.settled=")
-                .append(read(results.resolve("settlements.jsonl")).size()).append("</script>");
+                .append(read(results.resolve("settlements.jsonl")).size())
+                .append(";document.body.dataset.at=Date.now()</script>");
         b.append(progress(total, settled, elapsed, minutes, facts));
         b.append("<table><tr><th>bump</th><th>hop</th><th>state</th><th>tests</th>"
                 + "<th>target</th><th>cve</th><th>walls</th><th>human-equiv</th><th>took</th>"

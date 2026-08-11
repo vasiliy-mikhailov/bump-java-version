@@ -32,8 +32,8 @@ import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
  * is a liveness probe rather than a budget, which is the distinction this project keeps: never cap
  * the model's work, always notice when the work has stopped.
  *
- * <p>The reasoning arrives on its own channel here, so it is captured as it streams rather than
- * scraped out of a finished body.
+ * <p>The reasoning is captured at the transport by {@link Reasoning}, not here: this server names
+ * the field in a way the client does not read, so the handler's thinking callback never fires.
  */
 final class Streamed implements ChatModel {
 
@@ -69,7 +69,6 @@ final class Streamed implements ChatModel {
         // never block on a consumer that has already given up.
         BlockingQueue<Object> done = new ArrayBlockingQueue<>(1);
         AtomicLong lastToken = new AtomicLong(System.currentTimeMillis());
-        StringBuilder thinking = new StringBuilder();
 
         streaming.chat(request, new StreamingChatResponseHandler() {
             @Override
@@ -79,10 +78,9 @@ final class Streamed implements ChatModel {
 
             @Override
             public void onPartialThinking(PartialThinking partial) {
+                // Counts as liveness even though this server's reasoning never arrives here: the
+                // deltas are read at the transport, where the field name does not have to match.
                 lastToken.set(System.currentTimeMillis());
-                if (partial != null && partial.text() != null) {
-                    thinking.append(partial.text());
-                }
             }
 
             @Override
@@ -106,7 +104,6 @@ final class Streamed implements ChatModel {
                 throw new IllegalStateException("interrupted while streaming", e);
             }
             if (outcome instanceof ChatResponse response) {
-                record(response, thinking.toString());
                 return response;
             }
             if (outcome instanceof Throwable error) {
@@ -122,27 +119,6 @@ final class Streamed implements ChatModel {
                 throw new IllegalStateException("still streaming after " + CEILING.toHours()
                         + "h; giving the lane back");
             }
-        }
-    }
-
-    /** What was thought and why the answer ended, from the stream rather than from a finished body. */
-    private void record(ChatResponse response, String streamedThinking) {
-        if (trace == null) {
-            return;
-        }
-        try {
-            var msg = response.aiMessage();
-            String thought = !streamedThinking.isBlank() ? streamedThinking
-                    : msg == null || msg.thinking() == null ? "" : msg.thinking();
-            if (thought.isBlank()) {
-                return;
-            }
-            var meta = response.metadata();
-            trace.thought(meta == null || meta.finishReason() == null ? ""
-                            : meta.finishReason().toString(),
-                    thought, msg == null || msg.text() == null ? "" : msg.text());
-        } catch (RuntimeException unrecordable) {
-            // A trace that cannot be written must never be why a bump fails.
         }
     }
 

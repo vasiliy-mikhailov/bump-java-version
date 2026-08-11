@@ -22,7 +22,13 @@ I=${BJV_ITER:-/home/vmihaylov/bump-java-version/current_attempt/current_iteratio
 ROOT=${BJV_RUNROOT:-$I/runs_agent}
 WS=$ROOT/ws
 RESULTS=$ROOT/results
-mkdir -p "$WS" "$RESULTS"
+mkdir -p "$WS" "$RESULTS" 2>/dev/null
+# THE RESULTS TREE IS WRITTEN BY BOTH SIDES. The agent containers run as root and create their own
+# directories there, so after the first lane the launcher can no longer write its own bookkeeping
+# into it: the claims went from a fact to a permission error. Containers can write to a
+# host-user-owned tree; the reverse is not true, so ownership goes one way once, here.
+docker run --rm -v "$ROOT:/r" alpine chown -R "$(id -u):$(id -g)" /r/results >/dev/null 2>&1
+mkdir -p "$RESULTS/claims"
 
 # The API key comes from the project .env, never from the manifest or the command line.
 set -a; . "${BJV_ENV:-/home/vmihaylov/bump-java-version/.env}"; set +a
@@ -44,10 +50,8 @@ one() {
   # trap releases it however the lane ends, including a kill.
   local bslug
   bslug=$(printf '%s' "$repo|$sha|$from|$to" | sed 's/[^A-Za-z0-9]\+/_/g')
-  mkdir -p "$RESULTS/claims" 2>/dev/null || docker run --rm -v "$RESULTS:/r" alpine mkdir -p /r/claims
-  : > "$RESULTS/claims/$bslug" 2>/dev/null \
-    || docker run --rm -v "$RESULTS:/r" alpine touch "/r/claims/$bslug"
-  trap 'rm -f "$RESULTS/claims/$bslug" 2>/dev/null || docker run --rm -v "$RESULTS:/r" alpine rm -f "/r/claims/$bslug"' RETURN
+  : > "$RESULTS/claims/$bslug" 2>/dev/null || echo "[$slug] could not claim"
+  trap 'rm -f "$RESULTS/claims/$bslug" 2>/dev/null' RETURN
   # A fresh checkout every time: the chain reads what each phase did back out of git diff, so a
   # workspace carrying a previous attempt's edits would attribute them to this run.
   docker run --rm -v "$WS:/w" alpine rm -rf "/w/$slug" >/dev/null 2>&1
@@ -67,14 +71,13 @@ one() {
     -e BJV_HOPTOOLS="$I/hoptools" -e BJV_PATIENCE_MINUTES="${BJV_PATIENCE_MINUTES:-45}" \
     bjv-agent "$w" "$repo|$sha|$from|$to" "$RESULTS" \
     >> "$ROOT/$slug.log" 2>&1
-  rm -f "$RESULTS/claims/$bslug" 2>/dev/null \
-    || docker run --rm -v "$RESULTS:/r" alpine rm -f "/r/claims/$bslug" >/dev/null 2>&1
+  rm -f "$RESULTS/claims/$bslug" 2>/dev/null
   echo "[$slug] done: $(grep -c . "$ROOT/$slug.log" 2>/dev/null) log lines"
 }
 
 # The queue, where the dashboard can see it: it mounts $RESULTS and nothing else, and a page
 # built only from settlements can never show the work that has not started yet.
-cp "$MAN" "$RESULTS/queue.tsv"
+cp "$MAN" "$RESULTS/queue.tsv" 2>/dev/null || true
 
 LANEFILE=$ROOT/max_lanes
 [ -f "$LANEFILE" ] || echo "$LANES" > "$LANEFILE"

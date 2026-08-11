@@ -66,7 +66,9 @@ final class Model {
         // context, which is exactly when a proxy reaps the socket and a total timeout fires on work
         // that is progressing.
         var s = OpenAiStreamingChatModel.builder()
-                .httpClientBuilder(jdk)
+                // The reasoning is read off the deltas, because the server names the field
+                // `reasoning` and the client looks for `reasoning_content` on this path too.
+                .httpClientBuilder(trace == null ? jdk : Reasoning.tee(jdk, trace))
                 .baseUrl(base)
                 .apiKey(env("OC_KEY", ""))
                 .modelName(env("OC_MODEL", "qwen-3.6-35b-a3b-awq"))
