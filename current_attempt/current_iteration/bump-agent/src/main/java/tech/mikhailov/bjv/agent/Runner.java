@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,6 +63,26 @@ final class Runner {
     }
 
     /**
+     * Delete compiled output before a GATE build.
+     *
+     * <p>THE GATE MEASURES BYTECODE, SO IT MUST COMPILE BYTECODE. Maven's build here is
+     * {@code test-compile} with no {@code clean}, so it compares timestamps, finds the baseline's
+     * class files newer than the sources, prints "Nothing to compile - all classes are up to date"
+     * and leaves them alone. Those classes were compiled at the OLD target, so
+     * {@link Gate#effectiveTarget} reads the level the project started at however correctly the
+     * poms were raised, and the bump is failed for a target it actually reached.
+     *
+     * <p>Measured over the live sweep: 46 of 117 gate builds carried that message, and 13 bumps
+     * were failed FAIL_target_not_bumped with a correctly raised pom. The reflect loop then spends
+     * its turns on it, since the troubleshooter is briefed "the effective bytecode target is 11,
+     * not 17" about a project where nothing is wrong. The Gradle path never had this: it already
+     * passes --rerun-tasks. This is the Maven half of the same idea.
+     */
+    void clearClasses() {
+        wipe(name -> name.equals("classes") || name.equals("test-classes"));
+    }
+
+    /**
      * Delete every surefire report before a run.
      *
      * <p>A gate that reads leftover XML from the baseline scores tests it never ran. The reports are
@@ -77,6 +98,40 @@ final class Runner {
             }
         } catch (IOException e) {
             System.err.println("clearReports: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Remove every output directory whose name the test accepts, under target/ or build/ only.
+     *
+     * <p>Scoped to build output on purpose: a wipe that reached the source tree would be a
+     * different and much worse bug than the one it fixes.
+     */
+    private void wipe(java.util.function.Predicate<String> named) {
+        try (var s = java.nio.file.Files.walk(ws)) {
+            List<Path> doomed = s.filter(java.nio.file.Files::isDirectory)
+                    .filter(d -> {
+                        Path parent = d.getParent();
+                        String p = parent == null ? "" : parent.getFileName().toString();
+                        return (p.equals("target") || p.equals("build"))
+                                && named.test(d.getFileName().toString());
+                    })
+                    .toList();
+            for (Path d : doomed) {
+                try (var inner = java.nio.file.Files.walk(d)) {
+                    inner.sorted(java.util.Comparator.reverseOrder())
+                            .forEach(f -> {
+                                try {
+                                    java.nio.file.Files.deleteIfExists(f);
+                                } catch (IOException stubborn) {
+                                    // root-owned leftovers from a container build; the compile
+                                    // will overwrite what it can and the gate reads what exists.
+                                }
+                            });
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("wipe: " + e.getMessage());
         }
     }
 

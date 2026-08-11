@@ -191,6 +191,10 @@ public final class Bump {
         String lastLog = "";
         for (int turn = 1; turn <= TURNS; turn++) {
             trace.progress(bump, "gate: turn " + turn + " of " + TURNS + " under JDK " + to);
+            // The gate measures bytecode, so it must compile bytecode rather than inherit the
+            // baseline's. Without this Maven finds the old classes newer than the sources and
+            // skips the compile, and the target is read off the level the project started at.
+            runner.clearClasses();
             Runner.Result build = runner.build(to);
             trace.built("gate-build-" + turn, build);
             if (!build.infra()) {

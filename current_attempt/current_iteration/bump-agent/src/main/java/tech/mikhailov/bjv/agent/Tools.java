@@ -229,9 +229,20 @@ final class Tools {
                     hits.append("more matches suppressed; narrow the pattern\n");
                     break;
                 }
+                // MATCH THE FILTER AGAINST WHAT IT LOOKS LIKE. Tested against the bare filename,
+                // a path-shaped filter such as **/pom.xml became a regex containing a slash, which
+                // no filename can ever contain: 338 greps in the live sweep used one and 338
+                // returned "no matches". Agents write path globs because every other tool here
+                // takes one, so the filter accepts both and says which it used.
                 String name = f.getFileName().toString();
-                if (!glob.isBlank() && !name.matches(glob.replace(".", "\\.").replace("*", ".*"))) {
-                    continue;
+                String rel = root.relativize(f).toString();
+                if (!glob.isBlank()) {
+                    String globRe = glob.replace(".", "\\.").replace("**/", "(.*/)?")
+                            .replace("*", "[^/]*");
+                    if (!name.matches(globRe) && !rel.matches(globRe)
+                            && !rel.matches(".*/" + globRe)) {
+                        continue;
+                    }
                 }
                 String path = f.toString();
                 if (path.contains("/.git/") || path.contains("/target/")
