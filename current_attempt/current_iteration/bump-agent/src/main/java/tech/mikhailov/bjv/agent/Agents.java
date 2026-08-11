@@ -88,6 +88,59 @@ final class Agents {
                 """);
     }
 
+    // ---- pair 2: what the project is carrying, before anything touches it ----
+
+    /**
+     * Reads the pre-bump scan and says which of it this hop could plausibly clear.
+     *
+     * <p>ADVISORY, AND IT HAS NO TOOL THAT WRITES. Nothing downstream lifts a dependency for
+     * security: the preparer works a closed trigger list, the bumper raises target pins, the
+     * troubleshooter clears the wall in the log. An edit made here would be charged by the reward
+     * and flagged by the prepare-critic as answering no trigger, and a dependency lifted before the
+     * first target build is the highest-variance edit in this system. So this stage produces a
+     * READING, recorded for whoever decides how a CVE count and a PASS trade against each other.
+     */
+    Agent securityBefore() {
+        return runtime("security-before", read("security-before"), """
+                You are handed a vulnerability scan of a Java project taken BEFORE any migration \
+                work, counting CRITICAL and HIGH only. Say what it means for the one-LTS hop this \
+                project is about to take.
+
+                Answer three things, briefly:
+                REACHABLE:   which of the worst packages a version bump of this hop would plausibly \
+                lift on its own, through the managed floors or a framework BOM moving with the \
+                target. Name packages, not counts.
+                STUCK:       which will still be there afterwards whatever the hop does, and why: \
+                no fixed version published, a committed jar rather than a resolved dependency, or a \
+                transitive pinned by something that is not moving.
+                FAMILIES:    any multi-artifact family here that must move in lockstep (jackson-*, \
+                netty-*, logback-*, spring-*). A family split across versions is a broken build, and \
+                naming it is worth more than any count.
+
+                You are reading, not prescribing. Do not propose edits: nothing in this chain lifts \
+                a dependency for security, and an edit made for it costs reward and risks the tests.
+                """);
+    }
+
+    /** Judges the reading against the same scan: overclaiming is the failure mode. */
+    Agent securityBeforeCritic() {
+        return runtime("security-before-critic", read("security-before-critic"), """
+                A colleague read a pre-migration vulnerability scan and said which findings a Java \
+                LTS bump could plausibly clear. Judge the READING, not the project.
+
+                The expensive mistake is OVERCLAIMING: calling a package reachable when nothing in a \
+                version bump moves it. A committed jar in the tree, a dependency with no fixed \
+                version published, and a transitive pinned by a framework outside this hop are all \
+                stuck, whatever the package name suggests.
+
+                The other mistake is a MISSED FAMILY: a multi-artifact family named only in part, \
+                which is how a build breaks while its version numbers all look raised.
+
+                Answer `sound`, or `overclaimed: <package and why it will not move>`, or \
+                `missed-family: <family>`, one finding per line.
+                """);
+    }
+
     // ---- pair 2: the proactive steps ----
 
     /**
@@ -224,6 +277,56 @@ final class Agents {
                 Answer `sound` when it is a real migration step a maintainer would keep. Answer \
                 `gaming` and name the exact line when it is not. Answer `off-target` when the edit is \
                 honest but aims at the wrong wall: say which wall the log actually shows.
+                """);
+    }
+
+    // ---- pair 6: what the bump actually did to the vulnerabilities ----
+
+    /**
+     * Judges the accounting the chain computed, rather than producing one.
+     *
+     * <p>Cleared, remaining and introduced are a set difference over (module, package, CVE) and are
+     * computed exactly in {@link Security#compare}. Handing that to a model to recompute would turn
+     * an exact answer into a sampled one, which is the thing this chain refuses to do everywhere
+     * else. What is left for a reader is the question arithmetic cannot settle: whether the delta
+     * is a migration outcome or an artefact.
+     */
+    Agent securityAfter() {
+        return runtime("security-after", read("security-after"), """
+                You are handed a before and after vulnerability scan of a Java project that has just \
+                been migrated one LTS step, and the exact accounting the harness computed between \
+                them: how many findings cleared, how many remain, how many are new.
+
+                The arithmetic is settled. Answer the question it cannot:
+
+                ATTRIBUTION: is this delta a migration outcome? A count that fell because the \
+                framework BOM moved with the target is a real outcome. A count that fell because a \
+                dependency dropped out of the graph is not the same thing, and neither is one that \
+                fell because a module stopped resolving.
+                REGRESSION:  if anything is NEW, name it and say what pulled it in. A bump that \
+                clears forty findings and introduces one critical is not obviously a win.
+                RESIDUE:     what remains, in one line: the family or the single package that now \
+                dominates the count.
+
+                Start with one word: `improved`, `regressed`, or `artefact` when you judge the \
+                numbers do not describe a real change. Then the three points.
+                """);
+    }
+
+    /** Checks the judgement against the numbers, since the numbers are the one thing not in doubt. */
+    Agent securityAfterCritic() {
+        return runtime("security-after-critic", read("security-after-critic"), """
+                A colleague judged whether a migration's vulnerability delta is a real outcome. You \
+                are given the same two scans and the same computed accounting. Judge the JUDGEMENT.
+
+                The failure mode is CREDIT FOR A COLLAPSE: reading a count that fell because the \
+                project resolved less as though libraries had been upgraded. The harness flags that \
+                case, so check whether the colleague respected the flag.
+
+                The opposite failure is DISMISSING A REAL WIN: calling a genuine framework-driven \
+                clearance an artefact because it looks too large.
+
+                Answer `sound`, or `wrong-call: <what the numbers actually show>`.
                 """);
     }
 

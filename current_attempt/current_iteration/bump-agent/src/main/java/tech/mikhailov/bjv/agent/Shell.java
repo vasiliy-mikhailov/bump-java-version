@@ -27,9 +27,30 @@ final class Shell {
 
     static Output run(Path cwd, Map<String, String> env, Duration patience, String... cmd)
             throws IOException, InterruptedException {
+        return exec(cwd, env, patience, true, cmd);
+    }
+
+    /**
+     * The same, with stderr discarded rather than merged.
+     *
+     * <p>For a command whose stdout contract is a document. Merging is right for a build, where the
+     * error and the progress are one story; it is fatal for a scanner emitting JSON, since a single
+     * warning line makes the output unparseable.
+     */
+    static Output runSeparate(Path cwd, Map<String, String> env, Duration patience, String... cmd)
+            throws IOException, InterruptedException {
+        return exec(cwd, env, patience, false, cmd);
+    }
+
+    private static Output exec(Path cwd, Map<String, String> env, Duration patience,
+                               boolean mergeErr, String... cmd)
+            throws IOException, InterruptedException {
         ProcessBuilder pb = new ProcessBuilder(List.of(cmd))
                 .directory(cwd.toFile())
-                .redirectErrorStream(true);
+                .redirectErrorStream(mergeErr);
+        if (!mergeErr) {
+            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+        }
         pb.environment().putAll(env);
         Process p = pb.start();
         // Read concurrently: a build writes more than a pipe buffers, and a full pipe deadlocks

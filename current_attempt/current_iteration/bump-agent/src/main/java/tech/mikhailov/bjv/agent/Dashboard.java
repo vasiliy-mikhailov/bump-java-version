@@ -62,9 +62,11 @@ public final class Dashboard {
      */
     private static final String[][] CHAIN = {
             {"survey", "surveyor", "survey-critic"},
+            {"security-before", "security-before", "security-before-critic"},
             {"prepare", "preparer", "prepare-critic"},
             {"bump", "bumper", "bump-critic"},
             {"troubleshoot", "troubleshooter", "trouble-critic"},
+            {"security-after", "security-after", "security-after-critic"},
             {"close", "verdict", "estimator"},
     };
 
@@ -95,6 +97,7 @@ public final class Dashboard {
             @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
             .no-baseline,.not-a-bump{background:#161b22;color:#8b949e}
             .queued{background:#0d1117;color:#6e7681;border:1px solid #21262d}
+            .interrupted{background:#20161f;color:#bc8cff;border:1px solid #21262d}
             .blocked-dependency,.behavior-change{background:#2b2011;color:#d29922}
             .infra{background:#2d1618;color:#f85149}
             .sema{display:flex;gap:5px;margin-top:5px}
@@ -103,6 +106,7 @@ public final class Dashboard {
             .sema i.red{background:#f85149;border-color:#f85149;box-shadow:0 0 5px #f8514966}
             .sema i.none{background:transparent;border-style:dashed}
             .hop{color:#a371f7}
+            .cve-down{color:#3fb950}.cve-up{color:#f85149}.cve-flat{color:#8b949e}
             td.latest{color:#8b949e;font-size:12px;max-width:52ch}
             .empty{padding:48px 24px;color:#7d8590}
             .back{padding:14px 24px;display:block}
@@ -264,12 +268,24 @@ public final class Dashboard {
                 latest.put(bump, r);
             }
         }
+        // A bump is IN FLIGHT only while its lane holds a claim. Without this the page counts a
+        // crashed bump as running forever, and six "bumping" rows behind four lanes is the page
+        // lying about the one number a reader checks first.
+        Set<String> claimed = new LinkedHashSet<>();
+        try (var c = Files.list(results.resolve("claims"))) {
+            c.forEach(f -> claimed.add(f.getFileName().toString()));
+        } catch (IOException none) {
+            // No claims directory yet: nothing is running, or the launcher predates them.
+        }
         List<Facts> facts = new ArrayList<>();
         long began = Long.MAX_VALUE;
         int events = 0;
         int minutes = 0;
         for (Map.Entry<String, Map<String, String>> e : latest.entrySet()) {
             Facts f = measure(e.getKey(), e.getValue());
+            if (f.state.equals("bumping") && !claimed.isEmpty() && !claimed.contains(f.slug)) {
+                f = f.as("interrupted");
+            }
             facts.add(f);
             events += f.events;
             minutes += f.minutes;
@@ -278,8 +294,8 @@ public final class Dashboard {
             }
         }
         int total = facts.size();
-        int settled = (int) facts.stream()
-                .filter(f -> !f.state.equals("bumping") && !f.state.equals("queued")).count();
+        int settled = (int) facts.stream().filter(f -> !f.state.equals("bumping")
+                && !f.state.equals("queued") && !f.state.equals("interrupted")).count();
         long elapsed = began == Long.MAX_VALUE ? 0 : System.currentTimeMillis() - began;
 
         StringBuilder b = head("bumps", total + " bump(s) · " + events + " trace event(s)");
@@ -291,13 +307,15 @@ public final class Dashboard {
                 .append(read(results.resolve("settlements.jsonl")).size()).append("</script>");
         b.append(progress(total, settled, elapsed, minutes, facts));
         b.append("<table><tr><th>bump</th><th>hop</th><th>state</th><th>tests</th>"
-                + "<th>target</th><th>walls</th><th>human-equiv</th><th>took</th>"
+                + "<th>target</th><th>cve</th><th>walls</th><th>human-equiv</th><th>took</th>"
                 + "<th>latest</th></tr>");
         // Active first, then finished newest-first, then the queue in its own order: a reader
         // opens this to see what is happening, not to page through what has not begun.
-        List<Facts> active = facts.stream().filter(f -> f.state.equals("bumping")).toList();
+        List<Facts> active = facts.stream().filter(f -> f.state.equals("bumping")
+                || f.state.equals("interrupted")).toList();
         List<Facts> done = new ArrayList<>(facts.stream()
-                .filter(f -> !f.state.equals("bumping") && !f.state.equals("queued")).toList());
+                .filter(f -> !f.state.equals("bumping") && !f.state.equals("queued")
+                        && !f.state.equals("interrupted")).toList());
         java.util.Collections.reverse(done);
         List<Facts> queued = facts.stream().filter(f -> f.state.equals("queued")).toList();
         active.forEach(f -> b.append(f.row()));
@@ -325,6 +343,17 @@ public final class Dashboard {
                 .append(tile(clock(elapsed), "elapsed"))
                 .append(tile(eta, "eta, extrapolated"))
                 .append(tile(clock(minutes * 60_000L), "human-equivalent"));
+        // Vulnerabilities only over the bumps where BOTH scans exist, since an after-count without
+        // a green gate is not a measurement and averaging it in would flatter the total.
+        List<Facts> scored = facts.stream()
+                .filter(f -> f.cveBefore >= 0 && f.cveAfter >= 0).toList();
+        if (!scored.isEmpty()) {
+            int sumBefore = scored.stream().mapToInt(f -> f.cveBefore).sum();
+            int sumAfter = scored.stream().mapToInt(f -> f.cveAfter).sum();
+            int removedPct = sumBefore == 0 ? 0 : (sumBefore - sumAfter) * 100 / sumBefore;
+            b.append(tile(sumBefore + " \u2192 " + sumAfter, "CRITICAL+HIGH, " + scored.size()
+                    + " scored")).append(tile(removedPct + "%", "vulnerabilities removed"));
+        }
         // One tile per state actually present: a fixed list of every possible verdict would be
         // mostly zeroes, and a zero tile reads as a category that matters.
         Map<String, Integer> byState = new LinkedHashMap<>();
@@ -364,6 +393,8 @@ public final class Dashboard {
         String stamp = "";
         String pre = "";
         String lost = "";
+        int cveBefore = -1;
+        int cveAfter = -1;
         String target = "";
         String required = "";
         final Set<String> walls = new LinkedHashSet<>();
@@ -378,6 +409,29 @@ public final class Dashboard {
             this.slug = slug(bump);
             this.state = settlement.getOrDefault("state", "bumping");
             this.latest = settlement.getOrDefault("because", "");
+        }
+
+        /** The same measurement under a state the FILESYSTEM established, not the trace. */
+        Facts as(String newState) {
+            Facts c = new Facts(bump, Map.of("state", newState, "because", latest));
+            c.stamp = stamp;
+            c.hop = hop;
+            c.events = events;
+            c.minutes = minutes;
+            c.first = first;
+            c.last = last;
+            c.pre = pre;
+            c.lost = lost;
+            c.target = target;
+            c.required = required;
+            c.walls.addAll(walls);
+            c.cveBefore = cveBefore;
+            c.cveAfter = cveAfter;
+            c.baselineGreen = baselineGreen;
+            c.conserved = conserved;
+            c.targetLanded = targetLanded;
+            c.reached = reached;
+            return c;
         }
 
         String row() {
@@ -397,12 +451,43 @@ public final class Dashboard {
                     + sema() + "</td>"
                     + "<td>" + esc(tests) + "</td>"
                     + "<td>" + esc(tgt) + "</td>"
+                    + "<td>" + cves() + "</td>"
                     + "<td class=k>" + esc(walls.isEmpty() ? "—" : String.join(", ", walls))
                     + "</td>"
                     + "<td>" + (minutes > 0 ? esc(clock(minutes * 60_000L)) : "—") + "</td>"
                     + "<td>" + esc(clock(last - first)) + "<div class=k>" + events
-                    + " event(s)</div></td>"
+                    + " event(s)" + quiet() + "</div></td>"
                     + "<td class=latest>" + esc(latest) + "</td></tr>";
+        }
+
+        /**
+         * How long a running bump has been silent. A lane grinding a large model call looks
+         * exactly like a lane that has hung, and the difference is how long it has been quiet.
+         */
+        String quiet() {
+            if (!state.equals("bumping") || last <= 0) {
+                return "";
+            }
+            long since = System.currentTimeMillis() - last;
+            return since < 120_000 ? "" : "<br>quiet " + clock(since);
+        }
+
+        /**
+         * CRITICAL+HIGH before and after, and the direction between them.
+         *
+         * <p>An after-count exists only where the gate went green, because on a failed bump the
+         * count falls when modules stop resolving and that is indistinguishable from a fix.
+         */
+        String cves() {
+            if (cveBefore < 0) {
+                return "<span class=k>—</span>";
+            }
+            if (cveAfter < 0) {
+                return "<b>" + cveBefore + "</b><div class=k>before</div>";
+            }
+            String dir = cveAfter < cveBefore ? "down" : cveAfter > cveBefore ? "up" : "flat";
+            return "<span class=cve-" + dir + "><b>" + cveBefore + "</b> \u2192 <b>" + cveAfter
+                    + "</b></span><div class=k>" + (cveBefore - cveAfter) + " cleared</div>";
         }
 
         /** The gate's three legs, in order: a baseline, tests conserved, the target landed. */
@@ -470,6 +555,16 @@ public final class Dashboard {
                         Matcher m = Pattern.compile(": (\\d+)$").matcher(what.strip());
                         if (m.find()) {
                             f.pre = m.group(1);
+                        }
+                    } else if (stage.equals("security-before") || stage.equals("security-after")) {
+                        Matcher m = Pattern.compile("CRITICAL\\+HIGH (\\d+)").matcher(what);
+                        if (m.find()) {
+                            int n = Integer.parseInt(m.group(1));
+                            if (stage.endsWith("before")) {
+                                f.cveBefore = n;
+                            } else {
+                                f.cveAfter = n;
+                            }
                         }
                     } else if (stage.equals("gate")) {
                         Matcher m = GATE.matcher(what);

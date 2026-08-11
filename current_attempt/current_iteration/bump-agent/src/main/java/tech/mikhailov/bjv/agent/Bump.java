@@ -90,6 +90,10 @@ public final class Bump {
     private boolean gateGreen;
     private Set<String> pre = Set.of();
     private Gate.Verdict lastVerdict;
+    private Security security;
+    private Security.Scan before = Security.Scan.notMeasured("not run");
+    private Security.Scan after = Security.Scan.notMeasured("the gate never went green");
+    private Security.Delta delta = Security.Delta.unknown("not computed", -1, -1);
 
     private Bump(Path ws, String bump, Trace trace) {
         String[] parts = bump.split("\\|");
@@ -128,6 +132,7 @@ public final class Bump {
                 "/home/vmihaylov/bump-java-version/current_attempt/current_iteration/hoptools");
         runner = new Runner(ws, hoptools);
         walls = new Walls(ws);
+        security = new Security(ws, hoptools, trace);
         // The producers' try_build must target the hop the survey settled, so they are built now.
         agents = new Agents(Model.fromEnv(), ws, runner, to, trace);
 
@@ -156,6 +161,15 @@ public final class Bump {
                     + "conserve and a bump here would be unverifiable";
         }
 
+        // ---- SECURITY BEFORE: the project's own state, and the last moment it still is.
+        // Migrate applies recipes, floors and a target sweep next, every one of which moves a
+        // resolved version, so a scan taken after it is not this project's prior state. It also
+        // has to follow a build, because the collect is offline and copies only what the build
+        // already pulled down.
+        trace.progress(bump, "security: scanning before any migration, under JDK " + from);
+        before = security.scan(from, "before");
+        securityBeforePhase();
+
         // ---- PREPARE: deterministic pre-pass first, then the proactive steps, judged.
         String prePass = new Migrate(ws, hoptools, trace).run(from, to);
         preparePhase(prePass);
@@ -181,9 +195,23 @@ public final class Bump {
                         + " lost=" + v.lost() + " effective-target=" + v.effectiveTarget() + ")");
                 if (v.pass()) {
                     gateGreen = true;
+                    // THE ONLY PLACE THE AFTER SCAN MEANS ANYTHING. The workspace has just built
+                    // and tested green at the target, so the offline collect is complete. On any
+                    // other exit the collect copies whatever resolved before the build died, and
+                    // the count falls because modules are missing rather than because anything was
+                    // fixed: the corpus's largest apparent wins are dead builds.
+                    trace.progress(bump, "security: scanning after a green gate, under JDK " + to);
+                    after = security.scan(to, "after");
+                    delta = Security.compare(before, after);
+                    trace.applied("security-delta", delta.valid()
+                            ? delta.before() + " -> " + delta.after() + " CRITICAL+HIGH; cleared "
+                            + delta.cleared() + ", introduced " + delta.introduced()
+                            : "UNKNOWN: " + delta.why());
+                    securityAfterPhase();
                     price();
                     return "PASS\n" + v.preTests() + " tests conserved, effective target "
-                            + v.effectiveTarget() + "; walls cleared: " + walls.appliedSoFar();
+                            + v.effectiveTarget() + "; CRITICAL+HIGH " + securitySummary()
+                            + "; walls cleared: " + walls.appliedSoFar();
                 }
                 lastVerdict = v;
                 lastLog = failureFor(v, test);
@@ -208,6 +236,65 @@ public final class Bump {
                 + walls.appliedSoFar());
         price();
         return word(argued, "blocked-dependency", "behavior-change", "infra") + "\n" + argued;
+    }
+
+    /**
+     * The security reading, and its critic. ADVISORY: neither has a tool that writes.
+     *
+     * <p>Nothing downstream lifts a dependency for security, and an edit made here would be
+     * charged by the reward and flagged by the prepare-critic as answering no trigger. What this
+     * produces is a record: which findings this hop could plausibly reach, for whoever decides how
+     * a CVE count and a PASS trade against each other.
+     */
+    private void securityBeforePhase() {
+        if (!before.measured()) {
+            trace.progress(bump, "security-before: nothing to read (" + before.why() + ")");
+            return;
+        }
+        String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")\n\n"
+                + "The scan, taken before any migration work:\n" + Security.digest(before, 12);
+        String reading = agents.securityBefore().run(brief);
+        String audit = agents.securityBeforeCritic().run(brief + "\n\nThe reading:\n" + reading);
+        if (!word(audit, "sound", "overclaimed", "missed-family").equals("sound")) {
+            // One re-ask, as everywhere else. The answer is a record either way; there is no edit
+            // to revert and nothing downstream blocks on it.
+            agents.securityBefore().run(brief + "\n\nA reviewer objected to your reading:\n"
+                    + audit + "\nAnswer again.");
+        }
+    }
+
+    /** The accounting is computed; this judges whether it describes a real change. */
+    private void securityAfterPhase() {
+        if (!after.measured()) {
+            trace.progress(bump, "security-after: not measured (" + after.why() + ")");
+            return;
+        }
+        String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")\n\n"
+                + "BEFORE:\n" + Security.digest(before, 8)
+                + "\nAFTER:\n" + Security.digest(after, 8)
+                + "\nThe harness computed: " + (delta.valid()
+                ? "cleared " + delta.cleared() + ", remaining " + delta.remaining()
+                + ", introduced " + delta.introduced()
+                + (delta.clearedBy().isEmpty() ? "" : "\nCleared: "
+                + String.join(", ", delta.clearedBy()))
+                : "UNKNOWN, and it flagged why: " + delta.why());
+        String judgement = agents.securityAfter().run(brief);
+        String audit = agents.securityAfterCritic().run(brief + "\n\nThe judgement:\n" + judgement);
+        if (!word(audit, "sound", "wrong-call").equals("sound")) {
+            agents.securityAfter().run(brief + "\n\nA reviewer objected:\n" + audit
+                    + "\nAnswer again.");
+        }
+    }
+
+    /** What to put in the settlement line, in the form the dashboard parses. */
+    private String securitySummary() {
+        if (!before.measured()) {
+            return "not measured";
+        }
+        if (!after.measured() || !delta.valid()) {
+            return before.total() + " -> unknown";
+        }
+        return before.total() + " -> " + after.total();
     }
 
     /** The preparer and its critic: the proactive steps, executed and then audited. */

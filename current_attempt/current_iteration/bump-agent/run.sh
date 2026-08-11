@@ -38,6 +38,16 @@ settled() { # a slug is done when the settlements file holds a terminal state fo
 one() {
   local slug=$1 repo=$2 sha=$3 from=$4 to=$5
   local w=$WS/$slug
+  # THE CLAIM IS WHAT MAKES "IN FLIGHT" A FACT. A bump that dies leaves its last settlement row
+  # reading "bumping" forever, which is indistinguishable from one still working. A claim file
+  # that exists only while the lane does turns that into something a reader can check, and the
+  # trap releases it however the lane ends, including a kill.
+  local bslug
+  bslug=$(printf '%s' "$repo|$sha|$from|$to" | sed 's/[^A-Za-z0-9]\+/_/g')
+  mkdir -p "$RESULTS/claims" 2>/dev/null || docker run --rm -v "$RESULTS:/r" alpine mkdir -p /r/claims
+  : > "$RESULTS/claims/$bslug" 2>/dev/null \
+    || docker run --rm -v "$RESULTS:/r" alpine touch "/r/claims/$bslug"
+  trap 'rm -f "$RESULTS/claims/$bslug" 2>/dev/null || docker run --rm -v "$RESULTS:/r" alpine rm -f "/r/claims/$bslug"' RETURN
   # A fresh checkout every time: the chain reads what each phase did back out of git diff, so a
   # workspace carrying a previous attempt's edits would attribute them to this run.
   docker run --rm -v "$WS:/w" alpine rm -rf "/w/$slug" >/dev/null 2>&1
@@ -57,6 +67,8 @@ one() {
     -e BJV_HOPTOOLS="$I/hoptools" -e BJV_PATIENCE_MINUTES="${BJV_PATIENCE_MINUTES:-45}" \
     bjv-agent "$w" "$repo|$sha|$from|$to" "$RESULTS" \
     >> "$ROOT/$slug.log" 2>&1
+  rm -f "$RESULTS/claims/$bslug" 2>/dev/null \
+    || docker run --rm -v "$RESULTS:/r" alpine rm -f "/r/claims/$bslug" >/dev/null 2>&1
   echo "[$slug] done: $(grep -c . "$ROOT/$slug.log" 2>/dev/null) log lines"
 }
 
