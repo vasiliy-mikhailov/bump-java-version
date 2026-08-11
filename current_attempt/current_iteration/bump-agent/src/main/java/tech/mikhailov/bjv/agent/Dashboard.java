@@ -835,7 +835,10 @@ public final class Dashboard {
         try (var out = x.getResponseBody()) {
             int last = -1;
             int lastSettled = -1;
-            for (int tick = 0; tick < 900; tick++) {
+            // Long enough that a reader who leaves the page open does not watch it silently stop
+            // updating. The browser reconnects when this ends, but a gap in a live view reads as a
+            // stalled run, which is the impression the whole page exists to avoid.
+            for (int tick = 0; tick < 10_800; tick++) {
                 int now = count();
                 int settled = read(results.resolve("settlements.jsonl")).size();
                 // TWO COUNTERS, because the two pages have different appetites. A bump page wants

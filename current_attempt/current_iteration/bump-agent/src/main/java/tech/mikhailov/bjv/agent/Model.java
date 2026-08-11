@@ -28,14 +28,18 @@ final class Model {
     private static final int MAX_TOKENS = 16_000;
 
     /**
-     * The transport's own read timeout.
+     * The transport's own timeout, deliberately set beyond every other guard.
      *
-     * <p>Generous, and no longer the instrument that matters: with the answer streamed, the guard
-     * that decides whether a call is alive is {@link Streamed}'s time-since-last-token. This only
-     * bounds the wait for the very first byte.
+     * <p>THIS MUST NEVER BE THE THING THAT FIRES. The client sets it as the JDK request timeout,
+     * from a method shared by the blocking and streaming paths, so on a stream it bounds the wait
+     * for the response to begin. That reading is right, and the cost of it being wrong is a hard
+     * cut through a generation that was working — which is the exact failure this chain already
+     * paid for once at twelve minutes. So it sits above {@link Streamed}'s ceiling rather than
+     * anywhere near it: whichever guard is correct, the one that fires is the one that watches for
+     * SILENCE, not the one that counts elapsed time.
      */
     private static final Duration PATIENCE = Duration.ofMinutes(
-            Integer.parseInt(env("BJV_PATIENCE_MINUTES", "45")));
+            Integer.parseInt(env("BJV_PATIENCE_MINUTES", "240")));
 
     private Model() {
     }

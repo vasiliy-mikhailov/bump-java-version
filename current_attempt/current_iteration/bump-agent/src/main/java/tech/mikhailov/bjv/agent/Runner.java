@@ -25,7 +25,16 @@ final class Runner {
     record Result(boolean infra, boolean passed, String summary) {
     }
 
-    private static final Duration PATIENCE = Duration.ofSeconds(1900);
+    /**
+     * How long one build may take.
+     *
+     * <p>Matches what the bash sweeps have always used, so a repo that times out here would have
+     * timed out there and the corpus stays comparable. It is a real cap on real work, unlike the
+     * model guards: a build produces no liveness signal this side of its own output, so there is
+     * nothing to watch for silence. Overridable for a host or a reactor that needs longer.
+     */
+    private static final Duration PATIENCE = Duration.ofSeconds(
+            Long.parseLong(System.getenv().getOrDefault("BJV_BUILD_SECONDS", "1900")));
     private static final Pattern TESTS = Pattern.compile("Tests run: (\\d+)");
 
     private final Path ws;
@@ -47,7 +56,8 @@ final class Runner {
         env.put("BJV_SETTINGS", "/home/vmihaylov/maven-config/settings.xml");
         env.put("BJV_GRADLE_RO", "/home/vmihaylov/.gradle-fitness");
         env.put("BJV_GRADLE_DISTS", "/home/vmihaylov/.gradle-dists");
-        env.put("BJV_HANG_GUARD", "1800");
+        env.put("BJV_HANG_GUARD",
+                System.getenv().getOrDefault("BJV_HANG_GUARD", "1800"));
         return env;
     }
 

@@ -45,8 +45,18 @@ import java.util.regex.Pattern;
  */
 public final class Bump {
 
-    /** Turns of the reflect loop. Rung-1's recovered repos took 4-9 iterations; the mean was 6. */
-    private static final int TURNS = 8;
+    /**
+     * Turns of the reflect loop.
+     *
+     * <p>Rung-1's recovered repos took four to nine iterations with a mean of six, so a cap of
+     * eight cut the tail off the very distribution it was drawn from. Walls are serial: each turn
+     * clears one and reveals the next, so the repos needing the most turns are the ones with the
+     * most walls, not the ones making the least progress. The loop already ends on its own when a
+     * turn changes nothing, when the troubleshooter declines, or when its critic calls an edit
+     * gaming; this number is only a backstop against a loop that never converges.
+     */
+    private static final int TURNS = Integer.parseInt(
+            System.getenv().getOrDefault("BJV_TURNS", "16"));
     /** One re-ask per objection, quoting whoever objected. Every pair shares it, stated once. */
     private static final int REASK = 1;
 
