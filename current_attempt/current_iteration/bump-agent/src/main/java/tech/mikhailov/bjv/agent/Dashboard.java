@@ -75,6 +75,7 @@ public final class Dashboard {
             .bumping::before{content:"\\25cf ";animation:p 1.4s ease-in-out infinite}
             @keyframes p{0%,100%{opacity:1}50%{opacity:.25}}
             .no-baseline,.not-a-bump{background:#161b22;color:#8b949e}
+            .queued{background:#0d1117;color:#6e7681;border:1px solid #21262d}
             .blocked-dependency,.behavior-change{background:#2b2011;color:#d29922}
             .infra{background:#2d1618;color:#f85149}
             .sema{display:flex;gap:5px;margin-top:5px}
@@ -125,7 +126,11 @@ public final class Dashboard {
               src.onmessage = function(m){
                 var n = JSON.parse(m.data);
                 var seen = +(document.body.dataset.events || 0);
-                if (n.events <= seen && !isList) return;
+                if (isList) {
+                  var s = +(document.body.dataset.settled || 0);
+                  if (n.settled <= s) return;
+                  document.body.dataset.settled = n.settled;
+                } else if (n.events <= seen) return;
                 fetch(here + (here.indexOf('?') < 0 ? '?' : '&') + 'from=' + (isList ? 0 : seen),
                       {headers:{'X-Fragment':'1'}})
                   .then(function(r){return r.text()}).then(function(html){
@@ -186,6 +191,14 @@ public final class Dashboard {
 
     private final Path results;
     private final String token;
+    /**
+     * Measured bumps, keyed by the trace file's size and mtime.
+     *
+     * <p>A finished bump's trace never changes again, and re-reading every one of them on every
+     * page load and every live update is the difference between a dashboard and a second load on
+     * the machine doing the actual work. A thousand settled traces is hundreds of megabytes.
+     */
+    private final Map<String, Facts> measured = new java.util.concurrent.ConcurrentHashMap<>();
 
     private Dashboard(Path results, String token) {
         this.results = results;
@@ -195,8 +208,18 @@ public final class Dashboard {
     // ---- the fleet ----
 
     private void home(HttpExchange x) throws IOException {
-        // A bump's last settlement row is its state; everything else is measured from its trace.
+        // THE QUEUE COMES FIRST. Work that has not started is still work, and a page built only
+        // from what has already reported shows a thousand-repo sweep as whatever four repos happen
+        // to be in flight, with no denominator and therefore no progress and no ETA.
         Map<String, Map<String, String>> latest = new LinkedHashMap<>();
+        for (String line : read(results.resolve("queue.tsv"))) {
+            String[] col = line.split("\t");
+            if (col.length >= 5) {
+                latest.put(col[1] + "|" + col[2] + "|" + col[3] + "|" + col[4],
+                        Map.of("state", "queued", "because", ""));
+            }
+        }
+        // A bump's last settlement row is its state; everything else is measured from its trace.
         for (String line : read(results.resolve("settlements.jsonl"))) {
             Map<String, String> r = row(line);
             String bump = r.getOrDefault("bump", "");
@@ -218,7 +241,8 @@ public final class Dashboard {
             }
         }
         int total = facts.size();
-        int settled = (int) facts.stream().filter(f -> !f.state.equals("bumping")).count();
+        int settled = (int) facts.stream()
+                .filter(f -> !f.state.equals("bumping") && !f.state.equals("queued")).count();
         long elapsed = began == Long.MAX_VALUE ? 0 : System.currentTimeMillis() - began;
 
         StringBuilder b = head("bumps", total + " bump(s) · " + events + " trace event(s)");
@@ -226,13 +250,22 @@ public final class Dashboard {
             send(x, b.append("<div class=empty>Nothing has run yet.</div>").toString());
             return;
         }
+        b.append("<script>document.body.dataset.settled=")
+                .append(read(results.resolve("settlements.jsonl")).size()).append("</script>");
         b.append(progress(total, settled, elapsed, minutes, facts));
         b.append("<table><tr><th>bump</th><th>hop</th><th>state</th><th>tests</th>"
                 + "<th>target</th><th>walls</th><th>human-equiv</th><th>took</th>"
                 + "<th>latest</th></tr>");
-        for (int i = facts.size() - 1; i >= 0; i--) {
-            b.append(facts.get(i).row());
-        }
+        // Active first, then finished newest-first, then the queue in its own order: a reader
+        // opens this to see what is happening, not to page through what has not begun.
+        List<Facts> active = facts.stream().filter(f -> f.state.equals("bumping")).toList();
+        List<Facts> done = new ArrayList<>(facts.stream()
+                .filter(f -> !f.state.equals("bumping") && !f.state.equals("queued")).toList());
+        java.util.Collections.reverse(done);
+        List<Facts> queued = facts.stream().filter(f -> f.state.equals("queued")).toList();
+        active.forEach(f -> b.append(f.row()));
+        done.forEach(f -> b.append(f.row()));
+        queued.forEach(f -> b.append(f.row()));
         send(x, b.append("</table>").toString());
     }
 
@@ -281,6 +314,7 @@ public final class Dashboard {
         int minutes;
         long first;
         long last;
+        String stamp = "";
         String pre = "";
         String lost = "";
         String target = "";
@@ -338,8 +372,27 @@ public final class Dashboard {
     private static final Pattern JDK_TO = Pattern.compile("under JDK (\\d+)");
     private static final Pattern HOP = Pattern.compile("JDK (\\d+) -> (\\d+)|hop: (\\d+)->(\\d+)");
 
-    /** One pass over a bump's trace: everything the index needs, nothing rendered. */
+    /** One pass over a bump's trace, remembered while the file is unchanged. */
     private Facts measure(String bump, Map<String, String> settlement) {
+        Path trace = results.resolve(slug(bump)).resolve("trace.jsonl");
+        String stamp = settlement.getOrDefault("state", "") + ":";
+        try {
+            stamp += Files.isRegularFile(trace)
+                    ? Files.size(trace) + ":" + Files.getLastModifiedTime(trace).toMillis() : "0";
+        } catch (IOException e) {
+            stamp += "?";
+        }
+        Facts hit = measured.get(bump);
+        if (hit != null && hit.stamp.equals(stamp)) {
+            return hit;
+        }
+        Facts f = read(bump, settlement);
+        f.stamp = stamp;
+        measured.put(bump, f);
+        return f;
+    }
+
+    private Facts read(String bump, Map<String, String> settlement) {
         Facts f = new Facts(bump, settlement);
         String[] parts = bump.split("\\|");
         if (parts.length >= 4) {
@@ -561,10 +614,19 @@ public final class Dashboard {
         x.sendResponseHeaders(200, 0);
         try (var out = x.getResponseBody()) {
             int last = -1;
+            int lastSettled = -1;
             for (int tick = 0; tick < 900; tick++) {
                 int now = count();
-                String msg = now != last ? "data: {\"events\":" + now + "}\n\n" : ": ping\n\n";
+                int settled = read(results.resolve("settlements.jsonl")).size();
+                // TWO COUNTERS, because the two pages have different appetites. A bump page wants
+                // every event; the index wants only state changes, since re-rendering a thousand
+                // rows on each of a thousand tool calls is a denial of service we would be
+                // committing against ourselves.
+                String msg = (now != last || settled != lastSettled)
+                        ? "data: {\"events\":" + now + ",\"settled\":" + settled + "}\n\n"
+                        : ": ping\n\n";
                 last = now;
+                lastSettled = settled;
                 out.write(msg.getBytes(StandardCharsets.UTF_8));
                 out.flush();
                 Thread.sleep(2000);

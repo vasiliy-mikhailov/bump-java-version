@@ -60,6 +60,10 @@ one() {
   echo "[$slug] done: $(grep -c . "$ROOT/$slug.log" 2>/dev/null) log lines"
 }
 
+# The queue, where the dashboard can see it: it mounts $RESULTS and nothing else, and a page
+# built only from settlements can never show the work that has not started yet.
+cp "$MAN" "$RESULTS/queue.tsv"
+
 LANEFILE=$ROOT/max_lanes
 [ -f "$LANEFILE" ] || echo "$LANES" > "$LANEFILE"
 lanes() { local n; n=$(cat "$LANEFILE" 2>/dev/null); case "$n" in ''|*[!0-9]*) echo "$LANES";; *) echo "$n";; esac; }
