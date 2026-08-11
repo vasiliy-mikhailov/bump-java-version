@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>tech.mikhailov.bjv</groupId>
+  <artifactId>bump-agent</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <!-- No framework. The deterministic harness does the tool work; the model stages are plain
+       chat completions over JDK HttpClient, so the whole module compiles against the JDK alone. -->
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.11.4</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build><plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.4.1</version>
+      <configuration><archive><manifest>
+        <mainClass>tech.mikhailov.bjv.agent.Bump</mainClass>
+      </manifest></archive></configuration>
+    </plugin>
+  </plugins></build>
+</project>
