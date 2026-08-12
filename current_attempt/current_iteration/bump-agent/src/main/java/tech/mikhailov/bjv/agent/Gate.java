@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,7 +31,13 @@ import org.w3c.dom.NodeList;
 final class Gate {
 
     /** The verdict, in the corpus's own vocabulary so results are comparable across harnesses. */
-    record Verdict(String state, int preTests, int lost, int effectiveTarget) {
+    record Verdict(String state, int preTests, int lost, int effectiveTarget, List<String> missing) {
+
+        /** A verdict with nothing missing, which is every verdict except a conservation failure. */
+        Verdict(String state, int preTests, int lost, int effectiveTarget) {
+            this(state, preTests, lost, effectiveTarget, List.of());
+        }
+
         boolean pass() {
             return "PASS".equals(state);
         }
@@ -47,9 +54,10 @@ final class Gate {
         if (!built) {
             return new Verdict("FAIL_build_post", pre.size(), 0, effectiveTarget);
         }
-        int lost = lost(pre, post);
-        if (lost != 0) {
-            return new Verdict("FAIL_test_conservation", pre.size(), lost, effectiveTarget);
+        List<String> missing = missing(pre, post);
+        if (!missing.isEmpty()) {
+            return new Verdict("FAIL_test_conservation", pre.size(), missing.size(), effectiveTarget,
+                    missing);
         }
         if (effectiveTarget == -1) {
             // Built, but nothing inspectable: the bump is unverifiable and must never silently pass.
@@ -153,6 +161,18 @@ final class Gate {
      * and disappear.
      */
     static int lost(Set<String> pre, Set<String> post) {
+        return missing(pre, post).size();
+    }
+
+    /**
+     * WHICH tests stopped passing, not how many.
+     *
+     * <p>The count alone is unactionable. A troubleshooter told "4 of 7 tests no longer pass" has to
+     * guess at what broke, and one did: it invented a bean for a captcha library, wrote {@code new}
+     * against an interface, and then reported the resulting compile error as proof the dependency
+     * was incompatible with the JDK. The set was computed all along and thrown away at the door.
+     */
+    static List<String> missing(Set<String> pre, Set<String> post) {
         Map<String, Integer> exact = counted(post);
         List<String> unmatched = new ArrayList<>();
         for (String p : pre) {
@@ -179,13 +199,14 @@ final class Gate {
                 stable.merge(VOLATILE.matcher(k).replaceAll(""), c, Integer::sum);
             }
         });
-        int n = 0;
+        List<String> gone = new ArrayList<>();
         for (String p : residue) {
             if (!take(stable, VOLATILE.matcher(normalise(p)).replaceAll(""))) {
-                n++;
+                gone.add(p);
             }
         }
-        return n;
+        Collections.sort(gone);
+        return gone;
     }
 
     private static Map<String, Integer> counted(Set<String> items) {

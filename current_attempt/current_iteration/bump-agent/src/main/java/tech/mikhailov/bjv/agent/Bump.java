@@ -217,7 +217,8 @@ public final class Bump {
                 Gate.Verdict v = Gate.decide(pre, Gate.passing(ws), !test.infra(),
                         Gate.effectiveTarget(ws), Integer.parseInt(to));
                 trace.applied("gate", "turn " + turn + ": " + v.state() + " (pre=" + v.preTests()
-                        + " lost=" + v.lost() + " effective-target=" + v.effectiveTarget() + ")");
+                        + " lost=" + v.lost() + " effective-target=" + v.effectiveTarget() + ")"
+                        + names(v.missing()));
                 if (v.pass()) {
                     gateGreen = true;
                     // THE ONLY PLACE THE AFTER SCAN MEANS ANYTHING. The workspace has just built
@@ -536,11 +537,34 @@ public final class Bump {
      * <p>A conservation failure and an unraised target are not build errors, and handing either one
      * the build log invites a fix for a problem the build does not have.
      */
+    /**
+     * The lost tests, as a readable tail.
+     *
+     * <p>Capped, because a jakarta migration can drop four figures of them and a brief that is
+     * mostly test names is a brief the model skims. The cap is generous enough to show a pattern,
+     * which is the thing worth reading: one package gone is a different problem from a scatter.
+     */
+    private static String names(java.util.List<String> missing) {
+        if (missing.isEmpty()) {
+            return "";
+        }
+        int show = Math.min(missing.size(), 40);
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < show; i++) {
+            b.append("\n  ").append(missing.get(i));
+        }
+        if (missing.size() > show) {
+            b.append("\n  ... and ").append(missing.size() - show).append(" more");
+        }
+        return b.toString();
+    }
+
     private String failureFor(Gate.Verdict v, Runner.Result test) {
         return switch (v.state()) {
             case "FAIL_test_conservation" -> "The build is green under JDK " + to + " but " + v.lost()
                     + " of " + v.preTests() + " tests that passed under JDK " + from
-                    + " no longer pass. Find what the migration dropped.\n" + test.summary();
+                    + " no longer pass. Find what the migration dropped.\nThe tests that stopped "
+                    + "passing are:" + names(v.missing()) + "\n" + test.summary();
             case "FAIL_target_not_bumped" -> "The build is green and the tests are conserved, but "
                     + "the effective bytecode target is " + v.effectiveTarget() + ", not " + to
                     + ". At least one compiled module is still below the target.";
