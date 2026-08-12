@@ -253,6 +253,53 @@ final class Agents {
     // ---- pair 4: the residue the wall table does not know ----
 
     /** Clears the wall no signature matched: the residue a model is for. */
+    /**
+     * Drives the campaign: decides the NEXT step, or that there is no next step.
+     *
+     * <p>The step agent below fixes one thing and knows nothing of what came before it. Something
+     * has to hold the sequence, notice that three attempts have circled the same wall, and choose
+     * between pressing on and going back. That is a judgement, so it belongs to an agent rather than
+     * to a loop counter, and it is why this one can see the landed steps and rewind past a line that
+     * led nowhere.
+     */
+    Agent troubleshootLoopProposer(Tree tree, String floor) {
+        return runtime("troubleshoot-loop", steer("troubleshoot-loop", tree, floor), """
+                You are running the troubleshooting for one JDK migration. The gate has failed and                 the deterministic wall table recognised nothing in the failure.
+
+                You do not edit anything yourself. You decide what the next step should be, one                 step at a time, and a colleague carries it out and is reviewed for it. Your job is                 the sequence: what to try, in what order, and when to stop.
+
+                Before choosing, look at steps_so_far. If earlier steps circled the same wall                 without moving it, do not order a fourth variation on them. Consider whether the                 line of attack was wrong from the start, and if it was, rewind_to the step it began                 from and say plainly what you are abandoning and why.
+
+                Answer exactly one of:
+                NEXT: <one concrete step, the wall it clears, and where to look>
+                DONE: <what was cleared, and why the gate should now pass>
+                BLOCKED: <the wall, what makes it impassable, and the evidence you checked>
+
+                BLOCKED is a real answer and sometimes the right one. It earns nothing when it                 stands in for not having looked: a dependency is only impassable once inspect_jar                 has shown you which of its classes are the problem and what else it carries.
+                """);
+    }
+
+    /**
+     * Judges the campaign, not the step, and can put the workspace back if it was the wrong campaign.
+     *
+     * <p>The step critic reviews one edit at a time and cannot see a run of individually reasonable
+     * steps adding up to nothing, or a declaration of defeat that had a route left. This one reads
+     * the whole thing and is the only agent that may send the loop back to where it started.
+     */
+    Agent troubleshootLoopCritic(Tree tree, String floor) {
+        return runtime("troubleshoot-loop-critic", steer("troubleshoot-loop-critic", tree, floor), """
+                A colleague ran the troubleshooting for a JDK migration and has stopped. You decide                 whether the job is actually done.
+
+                You are reviewing the CAMPAIGN, not any single edit: a reviewer has already passed                 each step. Read what the sequence adds up to. Use steps_so_far and inspect_jar to                 check the claims rather than take them.
+
+                Two failures to look for. A run of individually sensible steps that never reached                 the wall, each one reasonable and the whole going nowhere. And a BLOCKED that gave                 up early: an artifact called impossible when inspect_jar shows only one or two of                 its classes are the obstacle and the rest is usable, or when the declared                 dependencies underneath it were never looked at.
+
+                Answer `done` if the campaign is finished, right or genuinely blocked.
+
+                Otherwise answer `again: <what was missed, and where to start>`. Say it as a                 colleague would: name the specific thing not tried and the evidence for why it                 would work. If the work so far is in the way of that, rewind_to a step first and                 say so. An objection without a route is the same as `done`.
+                """);
+    }
+
     Agent troubleshooter() {
         return runtime("troubleshooter", patch("troubleshooter"), """
                 You are the reflect loop's residue handler: the deterministic wall table recognised \
@@ -402,6 +449,11 @@ final class Agents {
 
     private Map<ToolSpecification, ToolExecutor> read(String agent) {
         return Tools.reading(ws, trace, agent);
+    }
+
+    /** Read, look inside jars, and move between landed steps. The outer troubleshoot pair. */
+    private Map<ToolSpecification, ToolExecutor> steer(String agent, Tree tree, String floor) {
+        return Tools.steering(ws, tree, floor, trace, agent);
     }
 
     private Map<ToolSpecification, ToolExecutor> patch(String agent) {

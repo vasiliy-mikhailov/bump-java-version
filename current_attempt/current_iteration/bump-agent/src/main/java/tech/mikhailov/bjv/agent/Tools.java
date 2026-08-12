@@ -45,6 +45,71 @@ final class Tools {
         return recorded(tools, trace, agent);
     }
 
+    /**
+     * Read, look around, and move the workspace between landed steps. The outer troubleshoot pair.
+     *
+     * <p>A campaign is a sequence of steps, so the pair running it needs to see that sequence and to
+     * be able to abandon a line that went nowhere. Giving them the rewind as a TOOL rather than as a
+     * branch in the harness means the decision to go back is theirs and is argued for in the trace,
+     * which is the same reason every other judgement here belongs to an agent.
+     *
+     * <p>Bounded at {@code floor}, and the bound is the point: a rewind past the campaign's first
+     * commit deletes the deterministic migration underneath it. That is precisely the failure that
+     * an unscoped revert caused for five bumps, and it must not come back as a tool call.
+     */
+    static Map<ToolSpecification, ToolExecutor> steering(Path root, Tree tree, String floor,
+                                                         Trace trace, String agent) {
+        Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
+        tools.putAll(jar());
+        tools.putAll(rewind(tree, floor));
+        return recorded(tools, trace, agent);
+    }
+
+    private static Map<ToolSpecification, ToolExecutor> rewind(Tree tree, String floor) {
+        Map<ToolSpecification, ToolExecutor> two = new LinkedHashMap<>();
+
+        two.put(ToolSpecification.builder()
+                .name("steps_so_far")
+                .description("The steps this troubleshooting campaign has landed, oldest first, as "
+                        + "<sha>  <what it was>. Use it to see what has already been tried before "
+                        + "deciding what to do next, and to name a commit for rewind_to.")
+                .parameters(JsonObjectSchema.builder().build())
+                .build(), (request, memoryId) -> {
+                    String log = tree.history(floor);
+                    return log.isBlank()
+                            ? "no steps have landed yet in this campaign" : log;
+                });
+
+        two.put(ToolSpecification.builder()
+                .name("rewind_to")
+                .description("Put the workspace back to a landed step, discarding everything after "
+                        + "it. Use it to abandon a line of edits that led nowhere, so the next "
+                        + "attempt starts from a known state instead of on top of the wreckage. "
+                        + "Only commits from steps_so_far are reachable; the migration underneath "
+                        + "this campaign cannot be undone.")
+                .parameters(JsonObjectSchema.builder()
+                        .addStringProperty("sha", "a commit from steps_so_far")
+                        .required("sha")
+                        .build())
+                .build(), (request, memoryId) -> {
+                    String asked = field(request.arguments(), "sha").strip();
+                    String sha = tree.resolve(asked);
+                    if (sha.isBlank()) {
+                        return "no commit called " + asked + ". Use steps_so_far for the list.";
+                    }
+                    if (!tree.isAtOrAfter(sha, floor)) {
+                        return "REFUSED: " + asked + " is older than this campaign. Rewinding there "
+                                + "would delete the migration this troubleshooting sits on top of, "
+                                + "which is not yours to undo. The earliest you may go back to is "
+                                + "the first entry in steps_so_far.";
+                    }
+                    tree.revertTo(sha);
+                    return "workspace is back at " + asked + ". Everything after it is gone.\n"
+                            + tree.history(floor);
+                });
+        return two;
+    }
+
     /** Read, look around, and edit EXISTING files — outside the test tree. Producers only. */
     static Map<ToolSpecification, ToolExecutor> patching(Path root, Runner runner, String targetJdk,
                                                          Trace trace, String agent) {

@@ -59,6 +59,9 @@ public final class Bump {
             System.getenv().getOrDefault("BJV_TURNS", "16"));
     /** One re-ask per objection, quoting whoever objected. Every pair shares it, stated once. */
     private static final int REASK = 1;
+    /** Steps one campaign may order before the loop critic gets to read it. */
+    private static final int STEPS = Integer.parseInt(
+            System.getenv().getOrDefault("BJV_STEPS", "6"));
 
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
@@ -255,7 +258,7 @@ public final class Bump {
                 trace.applied("walls", t.what());
                 continue;
             }
-            if (!troubleshootTurn(lastLog)) {
+            if (!troubleshoot(lastLog)) {
                 break;
             }
         }
@@ -395,39 +398,105 @@ public final class Bump {
         String brief(String diff);
     }
 
-    /** One troubleshooter round. True to keep looping, false to stop. */
-    private boolean troubleshootTurn(String log) throws IOException {
-        String before = tree.diff();
-        String brief = brief(log);
+    /**
+     * THE TROUBLESHOOT CONSTRUCTION: a campaign of steps, and a critic of the campaign.
+     *
+     * <p>Two producer/critic pairs, one inside the other. The inner pair fixes one thing and is
+     * judged on that one thing. The outer pair decides what the sequence should be and whether it
+     * added up to anything, and it is the only thing here that may put the workspace back.
+     *
+     * <p>The levels exist because the two questions are different and were being answered by the
+     * same verdict. A step critic saying "this edit fakes the behaviour" is a correction, not a
+     * conclusion; it used to end the entire bump, discarding the remedy the critic had just written
+     * out and leaving fifteen of sixteen gate turns unspent.
+     *
+     * @return true when a step landed and the gate should be re-run, false when the campaign is over
+     */
+    private boolean troubleshoot(String log) throws IOException {
+        String floor = tree.head();
+        String feedback = "";
+        for (int campaign = 0; campaign <= REASK; campaign++) {
+            boolean landed = campaignOfSteps(log, floor, feedback);
+            String judgement = agents.troubleshootLoopCritic(tree, floor)
+                    .run("The failing build:\n" + log
+                            + "\n\nThe whole campaign, since it began:\n" + tree.diffSince(floor)
+                            + "\n\nThe steps that landed:\n" + tree.history(floor));
+            if (word(judgement, "done", "again").equals("done") || campaign == REASK) {
+                return landed;
+            }
+            trace.progress(bump, "troubleshoot-loop-critic sent the campaign back: "
+                    + judgement.lines().findFirst().orElse(""));
+            // The critic may already have rewound; if it did not, its objection stands on top of
+            // whatever is there, which is its choice to make and not this loop's.
+            feedback = "\n\nA reviewer read your whole campaign and sent it back:\n" + judgement;
+        }
+        return false;
+    }
+
+    /** One campaign: the loop proposer orders steps until it stops or the budget is spent. */
+    private boolean campaignOfSteps(String log, String floor, String feedback) throws IOException {
+        boolean landed = false;
+        for (int step = 0; step < STEPS; step++) {
+            String order = agents.troubleshootLoopProposer(tree, floor)
+                    .run(brief(log) + feedback
+                            + "\n\nSteps landed so far in this campaign:\n" + tree.history(floor)
+                            + "\n\nWhat the campaign has changed:\n" + tree.diffSince(floor));
+            String head = order.stripLeading();
+            if (head.startsWith("DONE:") || head.startsWith("BLOCKED:")) {
+                trace.progress(bump, "troubleshoot-loop: " + head.lines().findFirst().orElse(""));
+                return landed;
+            }
+            if (step(log, order)) {
+                landed = true;
+                tree.land("step: " + head.lines().findFirst().orElse("").strip());
+            } else {
+                // A step nobody could land is a signal about the order, not about the workspace,
+                // and the proposer sees it next time round in the history that did not grow.
+                trace.progress(bump, "troubleshoot-loop: the ordered step did not land");
+            }
+        }
+        trace.progress(bump, "troubleshoot-loop: step budget spent");
+        return landed;
+    }
+
+    /**
+     * One step: an edit, and a reviewer of that edit.
+     *
+     * <p>An objection is a correction and stays inside this method. It reverts the step and re-asks
+     * with the reviewer's own words, which is the whole reason the reviewer wrote them; what it may
+     * never do is end the campaign, because whether the campaign should end is a judgement one
+     * level up.
+     */
+    private boolean step(String log, String order) throws IOException {
+        String brief = brief(log) + "\n\nThe step you have been asked to make:\n" + order;
         String reply = agents.troubleshooter().run(brief);
-        for (int again = 0; again <= REASK; again++) {
+        List<String> rejected = new ArrayList<>();
+        for (int attempt = 0; attempt <= REASK; attempt++) {
             if (reply.stripLeading().startsWith("BLOCKED:")) {
-                trace.progress(bump, "troubleshooter declined: "
-                        + reply.lines().findFirst().orElse(""));
+                trace.progress(bump, "step declined: " + reply.lines().findFirst().orElse(""));
                 return false;
             }
             String now = tree.diff();
-            if (now.equals(before)) {
-                trace.progress(bump, "troubleshooter changed nothing this turn");
+            if (now.isBlank()) {
+                trace.progress(bump, "step reached the workspace as nothing");
                 return false;
             }
             trace.applied("troubleshooter", now);
             String judgement = agents.troubleCritic().run("The failing build said:\n" + log
                     + "\n\nThe edits now in the workspace:\n" + now + "\n\nWhat they said:\n" + reply);
-            String verdict = word(judgement, "sound", "gaming", "off-target");
-            if ("gaming".equals(verdict)) {
-                tree.revert();
-                trace.progress(bump, "trouble-critic: gaming; workspace reverted");
+            if ("sound".equals(word(judgement, "sound", "gaming", "off-target"))) {
+                return true;
+            }
+            tree.revert();
+            rejected.add("You tried:\n" + reply + "\nA reviewer rejected it:\n" + judgement);
+            if (attempt == REASK) {
+                trace.progress(bump, "step rejected twice; handing back to the loop");
                 return false;
             }
-            if ("off-target".equals(verdict) && again < REASK) {
-                tree.revert();
-                reply = agents.troubleshooter().run(brief
-                        + "\nA reviewer judged your edit aims at the wrong wall:\n" + judgement
-                        + "\nYour edit was reverted. Try again.");
-                continue;
-            }
-            return true;
+            reply = agents.troubleshooter().run(brief
+                    + "\n\nYour earlier attempts at this step, and why they were rejected:\n"
+                    + String.join("\n\n", rejected)
+                    + "\nEach was reverted. Do not repeat one.");
         }
         return false;
     }

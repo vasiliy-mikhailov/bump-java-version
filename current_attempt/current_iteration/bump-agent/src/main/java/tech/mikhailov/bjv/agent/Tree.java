@@ -196,6 +196,51 @@ final class Tree {
     }
 
 
+    /**
+     * The landed steps since a floor, newest last, as {@code <sha>  <label>}.
+     *
+     * <p>What a loop needs to reason about its own campaign: which steps stuck, in what order, and
+     * where it could go back to. Bounded at the floor because everything older belongs to a stage
+     * this loop is not reviewing.
+     */
+    String history(String floor) {
+        try {
+            Shell.Output out = git("log", "--reverse", "--format=%h  %s",
+                    floor.isBlank() ? "-20" : floor + "..HEAD");
+            return out.ok() ? out.text() : "";
+        } catch (IOException | InterruptedException e) {
+            return "";
+        }
+    }
+
+    /**
+     * Whether {@code sha} sits at or after {@code floor}, which is what makes a rewind safe.
+     *
+     * <p>THE FLOOR IS NOT ADVISORY. A rewind past it deletes the deterministic migration, and that
+     * is not a thing any agent should be able to do by naming the wrong commit: it is the exact
+     * failure this whole mechanism exists to prevent, re-introduced through the front door.
+     */
+    boolean isAtOrAfter(String sha, String floor) {
+        if (floor.isBlank()) {
+            return true;
+        }
+        try {
+            return git("merge-base", "--is-ancestor", floor, sha).ok();
+        } catch (IOException | InterruptedException e) {
+            return false;
+        }
+    }
+
+    /** Whether a name resolves to a commit at all, so a typo answers instead of throwing. */
+    String resolve(String sha) {
+        try {
+            Shell.Output out = git("rev-parse", "--verify", sha + "^{commit}");
+            return out.ok() ? out.text().strip() : "";
+        } catch (IOException | InterruptedException e) {
+            return "";
+        }
+    }
+
     private Shell.Output git(String... args) throws IOException, InterruptedException {
         List<String> cmd = new ArrayList<>(List.of("git", "-c", "safe.directory=" + ws));
         cmd.addAll(List.of(args));

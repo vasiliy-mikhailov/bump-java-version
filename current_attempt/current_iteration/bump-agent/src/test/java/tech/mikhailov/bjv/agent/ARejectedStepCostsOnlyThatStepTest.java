@@ -131,4 +131,29 @@ class ARejectedStepCostsOnlyThatStepTest {
         cmd.addAll(List.of(args));
         Shell.run(ws, Map.of(), Duration.ofMinutes(1), cmd.toArray(new String[0]));
     }
+
+    @Test
+    void aCampaignCannotRewindPastItsOwnFloor() throws Exception {
+        write("pom.xml", "<project><properties><java.version>21</java.version></properties></project>");
+        tree.land("migrate");
+        String migrate = tree.head();
+        write("A.java", "class A {}");
+        tree.land("step one");
+        String floor = migrate;
+
+        // Inside the campaign: reachable.
+        assertTrue(tree.isAtOrAfter(tree.head(), floor), "the latest step is at or after the floor");
+        assertTrue(tree.isAtOrAfter(floor, floor), "the floor itself is reachable");
+
+        // Older than the campaign: the migration, which no critic may undo by naming a commit.
+        String beforeMigrate = tree.resolve(migrate + "~1");
+        assertFalse(beforeMigrate.isBlank(), "there is an older commit to try to reach");
+        assertFalse(tree.isAtOrAfter(beforeMigrate, floor),
+                "rewinding there would delete the deterministic migration");
+    }
+
+    @Test
+    void aNameThatIsNotACommitAnswersRatherThanThrows() {
+        assertEquals("", tree.resolve("not-a-sha"), "a typo must come back as an answer");
+    }
 }
