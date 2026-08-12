@@ -29,6 +29,9 @@ final class Migrate {
     private static final String RECIPE_JARS = "org.openrewrite.recipe:rewrite-migrate-java:3.36.0,"
             + "org.openrewrite.recipe:rewrite-spring:6.31.0";
 
+    /** The LTS ladder, so a hop can be asked which rungs it crosses. */
+    private static final int[] LTS = {8, 11, 17, 21, 25};
+
     private final Path ws;
     private final String hoptools;
     private final Trace trace;
@@ -44,7 +47,7 @@ final class Migrate {
         StringBuilder did = new StringBuilder();
         int target = Integer.parseInt(to);
 
-        List<String> recipes = program(target);
+        List<String> recipes = program(Integer.parseInt(from), target);
         did.append("recipes: ").append(String.join(", ", recipes)).append('\n');
         if (Files.isRegularFile(ws.resolve("pom.xml"))) {
             Files.writeString(ws.resolve("rewrite.yml"), yaml(recipes));
@@ -66,13 +69,19 @@ final class Migrate {
      * {@code UpgradePluginsForJavaN} — traversing both chains showed the program never called it,
      * while a repo's JaCoCo move was being credited to it.
      */
-    private List<String> program(int target) throws IOException {
+    private List<String> program(int from, int target) throws IOException {
         List<String> recipes = new ArrayList<>(List.of(
                 "org.openrewrite.java.migrate.UpgradePluginsForJava" + target,
                 "org.openrewrite.java.migrate.UpgradeBuildToJava" + target,
                 "org.openrewrite.java.migrate.jacoco.UpgradeJaCoCo"));
-        if (target == 11) {
-            recipes.add("org.openrewrite.java.migrate.Java8toJava11");
+        // EVERY LTS STEP THE HOP SPANS, not just the one it lands on. A hop is prescribed and need
+        // not be one step: 11->25 crosses 17 and 21, and the walls at those levels do not go away
+        // because nothing stopped there. Java8toJava11 in particular is the only recipe that
+        // handles the modules JEP 320 removed, and a 8->17 hop needs it as much as 8->11 does.
+        for (int step : LTS) {
+            if (step > from && step <= target && step == 11) {
+                recipes.add("org.openrewrite.java.migrate.Java8toJava11");
+            }
         }
         int boot = bootLine();
         if (boot == 2) {

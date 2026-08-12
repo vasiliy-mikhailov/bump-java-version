@@ -343,18 +343,16 @@ public final class Dashboard {
         b.append("<table><tr><th>bump</th><th>hop</th><th>state</th><th>tests</th>"
                 + "<th>target</th><th>cve</th><th>walls</th><th>human-equiv</th><th>took</th>"
                 + "<th>latest</th></tr>");
-        // Active first, then finished newest-first, then the queue in its own order: a reader
-        // opens this to see what is happening, not to page through what has not begun.
-        List<Facts> active = facts.stream().filter(f -> f.state.equals("bumping")
-                || f.state.equals("interrupted")).toList();
-        List<Facts> done = new ArrayList<>(facts.stream()
-                .filter(f -> !f.state.equals("bumping") && !f.state.equals("queued")
-                        && !f.state.equals("interrupted")).toList());
-        java.util.Collections.reverse(done);
-        List<Facts> queued = facts.stream().filter(f -> f.state.equals("queued")).toList();
-        active.forEach(f -> b.append(f.row()));
-        done.forEach(f -> b.append(f.row()));
-        queued.forEach(f -> b.append(f.row()));
+        // ALPHABETICAL, ALL OF IT. The state machine above already says what is happening, so
+        // the table's job is to be looked up in, and a row that moves as its state changes cannot
+        // be. It also matches the order the launcher takes the manifest in, so the same corpus
+        // produces the same run twice and a row's neighbours are the same on both.
+        List<Facts> ordered = new ArrayList<>(facts);
+        ordered.sort((one, other) -> {
+            int byRepo = one.bump.compareToIgnoreCase(other.bump);
+            return byRepo != 0 ? byRepo : one.bump.compareTo(other.bump);
+        });
+        ordered.forEach(f -> b.append(f.row()));
         send(x, b.append("</table>").toString());
     }
 

@@ -85,6 +85,14 @@ one() {
   echo "[$slug] done: $(grep -c . "$ROOT/$slug.log" 2>/dev/null) log lines"
 }
 
+# ALPHABETICAL, ALWAYS. The order the manifest happens to be in is not a decision anyone made,
+# and it decides which repos a partial sweep covers -- so two runs over the same corpus answer
+# different questions. Sorting here means the order is a property of the corpus rather than of
+# whoever last edited the file, and the dashboard shows the same order back.
+SORTED=$ROOT/manifest.tsv
+LC_ALL=C sort -t "$(printf '\t')" -k2,2 -k4,4n "$MAN" > "$SORTED"
+MAN=$SORTED
+
 # The queue, where the dashboard can see it: it mounts $RESULTS and nothing else, and a page
 # built only from settlements can never show the work that has not started yet.
 cp "$MAN" "$RESULTS/queue.tsv" 2>/dev/null || true

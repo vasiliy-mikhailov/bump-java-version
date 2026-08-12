@@ -64,34 +64,38 @@ final class Agents {
     /** Reads the build files and names the hop. The deterministic detector's guess travels along. */
     Agent surveyor() {
         return runtime("surveyor", read("surveyor"), """
-                You determine what Java level a project is REALLY on, and therefore which one-LTS hop \
-                it should take (8->11, 11->17, 17->21 or 21->25).
+                You are given a Java project and the hop it has been QUEUED for, as `from -> to`.
+                The hop is prescribed and you cannot change it. Your job is to say whether the \
+                project agrees it is at `from`.
 
-                You are given the root build files and the deterministic detector's guess, and you \
-                can grep and read the rest. The detector reads declarations; you also weigh what they \
-                mean: a parent pom's property that every module overrides is not the project's level, \
-                a soft pin under a toolchain block is, and a multi-module tree sits at the LOWEST \
-                level any built module still targets.
+                Read the build files and weigh what they mean: a parent pom's property that every \
+                module overrides is not the project's level, a soft pin under a toolchain block is, \
+                and a multi-module tree sits at the LOWEST level any built module still targets. A \
+                `release 8` flag on a project whose build itself requires 11 says what the compiler \
+                emits, not what the project runs on.
 
-                Answer with one line first: `hop: <from>-><to>`. Then the evidence, naming the exact \
-                file and line for the pin that decides it. If the project is not bumpable (already at \
-                the top, or not a Java build), answer `hop: none` and say why.
+                Answer one line first: `at: <version>` for the level you actually read. Then the \
+                evidence, naming the exact file and line for the pin that decides it.
+
+                If that differs from `from`, say so plainly in the next line and stop. You are not \
+                choosing a target and nothing you say will redirect this run: a disagreement here \
+                is a note about the queue, and it is read by a person later.
                 """);
     }
 
-    /** Checks the named hop against the same tree. Objects only with a correction in hand. */
+    /** Checks the reading against the same tree. Objects only with a correction in hand. */
     Agent surveyCritic() {
         return runtime("survey-critic", read("survey-critic"), """
-                A colleague named the hop for a Java version bump. Judge the CLAIM. You can read and \
-                grep the project yourself.
+                A colleague read which Java level a project is really on. The hop itself is \
+                prescribed elsewhere and is not in question. Judge the READING.
 
-                The expensive mistakes: reading a parent's property when the modules override it, \
-                reading the newest pin in a tree whose oldest module decides the level, and calling a \
-                project bumpable when its build is not a Java build at all.
+                The expensive mistakes: taking a parent's property when the modules override it, \
+                taking the newest pin in a tree whose oldest module decides the level, and reading \
+                a compiler `release` flag as the level the build itself requires.
 
-                Answer `sound` when the hop stands. Answer `wrong-hop: <from>-><to>` with the file \
-                and line that proves it when it does not. If you cannot name the pin that refutes \
-                them, answer `sound` — an objection without a correction is the same as approving.
+                Answer `sound`, or `reads-as: <version>` with the file and line that proves it. If \
+                you cannot name the pin that refutes them, answer `sound`: an objection without a \
+                correction is the same as approving.
                 """);
     }
 

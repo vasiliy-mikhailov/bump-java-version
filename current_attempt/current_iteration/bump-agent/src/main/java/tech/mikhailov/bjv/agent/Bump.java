@@ -107,37 +107,46 @@ public final class Bump {
 
     private Bump(Path ws, String bump, Trace trace) {
         String[] parts = bump.split("\\|");
-        if (parts.length < 2) {
-            throw new IllegalArgumentException("bump must be repo|sha[|from|to], got: " + bump);
+        // from and to are REQUIRED now: the hop is the experiment's independent variable and there
+        // is no sensible default for it. A row without one is a manifest bug, not a thing to guess.
+        if (parts.length < 4) {
+            throw new IllegalArgumentException("bump must be repo|sha|from|to, got: " + bump);
         }
         this.ws = ws;
         this.bump = bump;
-        this.from = parts.length > 2 ? parts[2] : "";
-        this.to = parts.length > 3 ? parts[3] : "";
+        this.from = parts[2];
+        this.to = parts[3];
         this.trace = trace;
     }
 
     /** The whole bump. Read it top to bottom; that is the order, and nothing can reorder it. */
     private String run() throws IOException {
-        // ---- SURVEY: which hop, actually. The caller's from|to is the detector's guess, not law.
-        trace.progress(bump, "survey: which hop is this");
+        // ---- SURVEY: does the project agree it is where the manifest says?
+        //
+        // THE HOP IS PRESCRIBED, NOT DISCOVERED. It arrives in the manifest row and nothing here
+        // may change it: the target is the experiment's independent variable, and an agent that
+        // picks it makes every run a different experiment. It also went wrong in exactly the way
+        // that predicts — the surveyor demoted three repos from 11->17 to 8->11 off a `release 8`
+        // flag, the chain then baselined at a JDK those projects cannot build on, and all three
+        // were recorded as the project's failure.
+        //
+        // The surveyor still runs, because "this project is not at 11" is worth knowing about a
+        // manifest row. It is recorded as a disagreement and changes nothing.
+        trace.progress(bump, "survey: does the project agree it is at JDK " + from);
         // The surveyor has tools; the brief is a starting point, not the whole tree.
         Agents surveying = new Agents(Model.forProducer(trace), ws, null, to.isBlank() ? "17" : to, trace);
         String evidence = buildFiles() + "\nThe deterministic detector's guess: "
                 + (from.isBlank() ? "none" : from + "->" + to);
         String claim = surveying.surveyor().run(evidence);
-        String[] hop = parseHop(claim);
         String check = surveying.surveyCritic().run(evidence + "\n\nThe claim:\n" + claim);
-        Matcher corrected = Pattern.compile("wrong-hop:\\s*(\\d+)\\s*->\\s*(\\d+)").matcher(check);
-        if (corrected.find()) {
-            hop = new String[]{corrected.group(1), corrected.group(2)};
-            trace.progress(bump, "survey-critic corrected the hop to " + hop[0] + "->" + hop[1]);
+        String[] read = parseHop(claim);
+        if (read != null && !read[0].equals(from)) {
+            // Recorded, not obeyed. A row whose `from` the project disputes is a row worth looking
+            // at; it is not a licence to run a different experiment than the one that was queued.
+            trace.progress(bump, "survey disagrees: it reads the project as JDK " + read[0]
+                    + " while the manifest prescribes " + from + "->" + to
+                    + "; proceeding with the prescribed hop");
         }
-        if (hop == null) {
-            return "not-a-bump\n" + claim;
-        }
-        from = hop[0];
-        to = hop[1];
         String hoptools = System.getenv().getOrDefault("BJV_HOPTOOLS",
                 "/home/vmihaylov/bump-java-version/current_attempt/current_iteration/hoptools");
         runner = new Runner(ws, hoptools);
