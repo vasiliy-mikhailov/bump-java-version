@@ -45,9 +45,21 @@ settled() { # a slug is done when the settlements file holds a terminal state fo
 # settled() correctly calls unfinished -- so a relaunched sweep re-bit repos another lane was still
 # working: 42 of 95 sessions were duplicates, and one() then rm -rf'd a workspace a live container
 # was editing. The claim is the same fact the dashboard uses for "in flight", so ask it here too.
+# THE CLAIM NAMES ITS OWN CONTAINER. Asking whether ANY bjvagent_ is running answers a different
+# question: during a sweep one always is, so a claim left behind by a launcher that was killed
+# stranded its repo for the rest of the run. The claim file now holds the container name, and a
+# claim whose container is gone is stale by definition and gets cleared here.
 inflight() {
-  [ -e "$RESULTS/claims/$1" ] || return 1
-  docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^bjvagent_" || { rm -f "$RESULTS/claims/$1"; return 1; }
+  local claim="$RESULTS/claims/$1"
+  [ -e "$claim" ] || return 1
+  local name
+  name=$(cat "$claim" 2>/dev/null)
+  if [ -z "$name" ]; then
+    # Written by an older build that recorded nothing; fall back to the weaker check it assumed.
+    docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^bjvagent_" || { rm -f "$claim"; return 1; }
+    return 0
+  fi
+  docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "$name" || { rm -f "$claim"; return 1; }
   return 0
 }
 
@@ -60,7 +72,7 @@ one() {
   # trap releases it however the lane ends, including a kill.
   local bslug
   bslug=$(printf '%s' "$repo|$sha|$from|$to" | sed 's/[^A-Za-z0-9]\+/_/g')
-  : > "$RESULTS/claims/$bslug" 2>/dev/null || echo "[$slug] could not claim"
+  echo "bjvagent_$slug" > "$RESULTS/claims/$bslug" 2>/dev/null || echo "[$slug] could not claim"
   trap 'rm -f "$RESULTS/claims/$bslug" 2>/dev/null' RETURN
   # A fresh checkout every time: the chain reads what each phase did back out of git diff, so a
   # workspace carrying a previous attempt's edits would attribute them to this run.
