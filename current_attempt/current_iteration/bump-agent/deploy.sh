@@ -11,8 +11,28 @@ set -euo pipefail
 cd "$(dirname "$0")"
 H=${BJV_HOST:-mh}
 R=${BJV_REMOTE:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/bump-agent}
+RESULTS=${BJV_RESULTS:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/runs_agent/results}
 mvn -B -o package
 rsync -a --delete src/ "$H:$R/src/"
 rsync -a target/bump-agent-0.1.0-SNAPSHOT.jar "$H:$R/target/"
-ssh "$H" "cd $R && docker build -q -t bjv-agent ."
-ssh "$H" "docker image inspect bjv-agent --format 'deployed {{.Id}}'"
+# BOTH IMAGES, BECAUSE BOTH COPY THE SAME JAR. Dockerfile.dashboard has the identical
+# prebuilt-artifact split, so a deploy that rebuilt only the agent left the dashboard rendering
+# yesterday's fold over today's data, and nothing anywhere said so.
+ssh "$H" "cd $R && docker build -q -t bjv-agent . && docker build -q -t bjv-dashboard -f Dockerfile.dashboard ."
+
+# A new image does not reach a running container, so the dashboard is recreated rather than
+# restarted. THE TOKEN IS READ BEFORE THE CONTAINER IS REMOVED, because the only copy of it lives
+# in the container's own environment: reading it afterwards recreates the dashboard with an empty
+# token and silently unauthenticates a page that is on the public internet.
+ssh "$H" '
+  set -e
+  TOKEN=$(docker inspect bjv-dashboard --format "{{range .Config.Env}}{{println .}}{{end}}" 2>/dev/null |
+          sed -n "s/^BJV_DASH_TOKEN=//p" | head -1)
+  if [ -z "$TOKEN" ]; then echo "refusing to recreate the dashboard without its token" >&2; exit 1; fi
+  docker rm -f bjv-dashboard >/dev/null 2>&1 || true
+  docker run -d --name bjv-dashboard --network proxy-net --restart unless-stopped \
+    -e BJV_DASH_TOKEN="$TOKEN" -v '"$RESULTS"':/results bjv-dashboard >/dev/null
+  echo "dashboard recreated"
+'
+
+ssh "$H" "docker image inspect bjv-agent --format 'agent     {{.Id}}'; docker image inspect bjv-dashboard --format 'dashboard {{.Id}}'"
