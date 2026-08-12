@@ -89,13 +89,22 @@ one() {
 # and it decides which repos a partial sweep covers -- so two runs over the same corpus answer
 # different questions. Sorting here means the order is a property of the corpus rather than of
 # whoever last edited the file, and the dashboard shows the same order back.
-SORTED=$ROOT/manifest.tsv
+# TWO LAUNCHERS SHARE THIS TREE, SO NOTHING HERE MAY BE WRITTEN TO A FIXED NAME. A one-row
+# validation run used to sort into $ROOT/manifest.tsv, which is the file the full sweep was still
+# reading from: the truncate landed under an open descriptor, the sweep read EOF, and a 1439-row
+# run ended early and silently. The sorted copy is named after its input, so each launcher owns
+# its own file and neither can shorten the other's.
+SORTED=$ROOT/manifest.$(basename "$MAN" .tsv).sorted.tsv
 LC_ALL=C sort -t "$(printf '\t')" -k2,2 -k4,4n "$MAN" > "$SORTED"
 MAN=$SORTED
 
 # The queue, where the dashboard can see it: it mounts $RESULTS and nothing else, and a page
-# built only from settlements can never show the work that has not started yet.
-cp "$MAN" "$RESULTS/queue.tsv" 2>/dev/null || true
+# built only from settlements can never show the work that has not started yet. It accumulates
+# rather than replaces, for the same reason: a small run is added to what is queued, not mistaken
+# for the whole of it.
+QUEUE=$RESULTS/queue.tsv
+cat "$MAN" "$QUEUE" 2>/dev/null | awk 'NF && !seen[$2"\t"$4]++' |
+  LC_ALL=C sort -t "$(printf '\t')" -k2,2 -k4,4n > "$QUEUE.new" && mv "$QUEUE.new" "$QUEUE"
 
 LANEFILE=$ROOT/max_lanes
 [ -f "$LANEFILE" ] || echo "$LANES" > "$LANEFILE"
