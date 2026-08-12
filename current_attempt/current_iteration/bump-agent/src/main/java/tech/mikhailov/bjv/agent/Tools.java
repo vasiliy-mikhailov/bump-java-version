@@ -40,7 +40,9 @@ final class Tools {
 
     /** Read and look around: what a judge needs to check a claim. */
     static Map<ToolSpecification, ToolExecutor> reading(Path root, Trace trace, String agent) {
-        return recorded(only(root, Set.of("list_dir", "read_file")), trace, agent);
+        Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
+        tools.putAll(jar());
+        return recorded(tools, trace, agent);
     }
 
     /** Read, look around, and edit EXISTING files — outside the test tree. Producers only. */
@@ -49,6 +51,7 @@ final class Tools {
         Map<ToolSpecification, ToolExecutor> tools =
                 only(root, Set.of("list_dir", "read_file", "edit_file"));
         tools.putAll(build(root, runner, targetJdk));
+        tools.putAll(jar());
         return recorded(guarded(tools), trace, agent);
     }
 
@@ -104,6 +107,54 @@ final class Tools {
             return (r.infra() ? "DID NOT COMPILE" : "COMPILED")
                     + "\neffective bytecode target after this build: " + target
                     + " (the gate requires " + targetJdk + ")\n" + r.summary();
+        };
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, exec);
+        return one;
+    }
+
+    /**
+     * Look inside a dependency, which is the one question the workspace cannot answer.
+     *
+     * <p>Given to producers and judges alike. A judge that cannot open the jar cannot check a claim
+     * about what is in it, and the claims worth checking in a Boot 2 to 3 migration are all of that
+     * shape.
+     */
+    private static Map<ToolSpecification, ToolExecutor> jar() {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("inspect_jar")
+                .description("Look inside a DEPENDENCY jar already resolved into the local Maven "
+                        + "repository. Answers what the project's own files cannot: whether an "
+                        + "artifact is compiled against javax or jakarta, how it registers with "
+                        + "Spring (spring.factories is Boot 2 only and Boot 3 ignores it), which "
+                        + "versions are present, what types it holds, and whether a given type is a "
+                        + "class or an interface. Pass `type` to see one type's members.")
+                .parameters(JsonObjectSchema.builder()
+                        .addStringProperty("artifact",
+                                "groupId:artifactId, optionally :version, e.g. "
+                                        + "com.baomidou:kaptcha-spring-boot-starter:1.1.0")
+                        .addStringProperty("type",
+                                "optional fully-qualified type to describe, e.g. "
+                                        + "com.baomidou.kaptcha.Kaptcha")
+                        .required("artifact")
+                        .build())
+                .build();
+        ToolExecutor exec = (request, memoryId) -> {
+            String artifact = field(request.arguments(), "artifact");
+            String type = field(request.arguments(), "type");
+            String[] parts = artifact.split(":");
+            if (parts.length < 2) {
+                return "artifact must be groupId:artifactId or groupId:artifactId:version, got: "
+                        + artifact;
+            }
+            String version = parts.length > 2 ? parts[2] : null;
+            try {
+                Jars jars = Jars.local();
+                return type.isBlank() ? jars.describe(parts[0], parts[1], version)
+                        : jars.describeType(parts[0], parts[1], version, type);
+            } catch (Jars.NotFound absent) {
+                return absent.getMessage();
+            }
         };
         Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
         one.put(spec, exec);
