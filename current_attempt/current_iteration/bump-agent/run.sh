@@ -95,7 +95,13 @@ one() {
 # run ended early and silently. The sorted copy is named after its input, so each launcher owns
 # its own file and neither can shorten the other's.
 SORTED=$ROOT/manifest.$(basename "$MAN" .tsv).sorted.tsv
-LC_ALL=C sort -t "$(printf '\t')" -k2,2 -k4,4n "$MAN" > "$SORTED"
+# CASE-INSENSITIVE, BECAUSE THAT IS WHAT ALPHABETICAL MEANS TO A READER. A plain LC_ALL=C sort is
+# ASCII, so every uppercase-initial repo precedes every lowercase one: aartiPl/tablevis sat at row
+# 524 while the dashboard, which folds case, showed it 14th. Same corpus, two orders, and the sweep
+# looked like it was skipping rows it had simply not reached. LC_ALL=C is kept for reproducibility
+# and the fold is done by the key modifier, so the result is still locale-independent; the
+# case-sensitive key second breaks ties the fold creates, exactly as the dashboard does.
+LC_ALL=C sort -t "$(printf '\t')" -k2,2f -k2,2 -k4,4n "$MAN" > "$SORTED"
 MAN=$SORTED
 
 # The queue, where the dashboard can see it: it mounts $RESULTS and nothing else, and a page
