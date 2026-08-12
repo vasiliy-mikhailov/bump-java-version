@@ -1,0 +1,83 @@
+package tech.mikhailov.bjv.agent;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * The trace was written for the corpus and for people, never for the run living inside it.
+ *
+ * <p>Git can say what LANDED. It cannot say what was tried and rejected, which is the half that
+ * stops a loop repeating itself: a troubleshooter that already established a dependency is
+ * javax-only should not rediscover it, and a proposer ordering a fourth variation on a step three
+ * critics have refused is not reasoning.
+ */
+class TheRunCanReadItsOwnRecordTest {
+
+    private static final String BUMP = "owner/repo|abc123|17|21";
+
+    @Test
+    void rejectedAttemptsAreInItAndLandedOnesAreNotTheWholeStory(@TempDir Path dir) {
+        Trace trace = trace(dir);
+        trace.applied("gate", "turn 1: FAIL_test_conservation (pre=7 lost=4)");
+        trace.asked("troubleshooter", "the prompt", "WHY: added a Kaptcha bean");
+        trace.asked("trouble-critic", "the prompt", "gaming - the stub deletes image rendering");
+        trace.progress(BUMP, "step rejected; handing back to the loop");
+
+        String log = trace.happened("", "", 80);
+
+        assertTrue(log.contains("FAIL_test_conservation"), log);
+        assertTrue(log.contains("gaming"), "the objection is the point of reading this: " + log);
+        assertTrue(log.contains("step rejected"), log);
+        assertEquals(4, log.lines().count(), "one line per event, not the rows themselves");
+    }
+
+    @Test
+    void itIsSummarisedBecauseItIsReadIntoAPrompt(@TempDir Path dir) {
+        Trace trace = trace(dir);
+        // A tool result can be tens of thousands of characters; returning it whole would put the
+        // conversation inside itself.
+        trace.tool("troubleshooter", "inspect_jar", "{\"artifact\":\"a:b\"}", "x".repeat(50_000));
+
+        String log = trace.happened("", "", 80);
+
+        assertTrue(log.length() < 600, "a summary, not the payload: " + log.length() + " chars");
+        assertTrue(log.contains("inspect_jar"), log);
+        assertTrue(log.contains("..."), "and it says it was cut");
+    }
+
+    @Test
+    void filtersNarrowItAndAnEmptyFilterIsNotAnError(@TempDir Path dir) {
+        Trace trace = trace(dir);
+        trace.applied("migrate", "recipes: UpgradeSpringBoot_3_5");
+        trace.applied("prepare", "raised two pins");
+        trace.asked("surveyor", "p", "the project is on 17");
+
+        assertTrue(trace.happened("migrate", "", 80).contains("UpgradeSpringBoot_3_5"));
+        assertFalse(trace.happened("migrate", "", 80).contains("raised two pins"),
+                "a stage filter means that stage");
+        assertTrue(trace.happened("", "surveyor", 80).contains("the project is on 17"));
+        assertEquals("", trace.happened("nosuchstage", "", 80), "an empty answer, never a throw");
+    }
+
+    @Test
+    void theMostRecentEventsAreTheOnesKept(@TempDir Path dir) {
+        Trace trace = trace(dir);
+        for (int i = 1; i <= 10; i++) {
+            trace.progress(BUMP, "event " + i);
+        }
+        String log = trace.happened("", "", 3);
+        assertEquals(3, log.lines().count());
+        assertTrue(log.contains("event 10"), "newest last: " + log);
+        assertFalse(log.contains("event 7"), "older ones drop off the front: " + log);
+    }
+
+    private static Trace trace(Path dir) {
+        return new JsonlTrace(dir.resolve("trace.jsonl"), dir.resolve("settlements.jsonl"), BUMP);
+    }
+}

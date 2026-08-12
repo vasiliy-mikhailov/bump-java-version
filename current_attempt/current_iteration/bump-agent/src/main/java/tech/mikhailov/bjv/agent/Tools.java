@@ -43,7 +43,7 @@ final class Tools {
                                                        String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
         tools.putAll(jar());
-        tools.putAll(history(tree));
+        tools.putAll(history(tree, trace));
         return recorded(tools, trace, agent);
     }
 
@@ -55,8 +55,35 @@ final class Tools {
      * about what came before. Before the commits that context arrived whether it was wanted or not,
      * as one ever-growing diff. This is the same information, asked for rather than dumped.
      */
-    private static Map<ToolSpecification, ToolExecutor> history(Tree tree) {
+    private static Map<ToolSpecification, ToolExecutor> history(Tree tree, Trace trace) {
         Map<ToolSpecification, ToolExecutor> two = new LinkedHashMap<>();
+
+        two.put(ToolSpecification.builder()
+                .name("what_happened")
+                .description("This bump's own event log: every stage, every answer, every objection "
+                        + "and every tool result so far, one line each, oldest first. Git shows what "
+                        + "LANDED; this shows what was TRIED, including the attempts that were "
+                        + "rejected and why. Read it before repeating something. Narrow it with "
+                        + "`stage` (survey, baseline, migrate, prepare, bump, gate, troubleshooter) "
+                        + "or `agent` when the whole log is too much.")
+                .parameters(JsonObjectSchema.builder()
+                        .addStringProperty("stage", "optional stage to filter to")
+                        .addStringProperty("agent", "optional agent to filter to")
+                        .addIntegerProperty("limit", "how many of the most recent events, default 80")
+                        .build())
+                .build(), (request, memoryId) -> {
+                    String stage = field(request.arguments(), "stage");
+                    String agent = field(request.arguments(), "agent");
+                    String asked = field(request.arguments(), "limit");
+                    int limit;
+                    try {
+                        limit = asked.isBlank() ? 80 : Integer.parseInt(asked.strip());
+                    } catch (NumberFormatException notANumber) {
+                        limit = 80;
+                    }
+                    String log = trace.happened(stage, agent, limit);
+                    return log.isBlank() ? "nothing recorded yet for that filter" : log;
+                });
 
         two.put(ToolSpecification.builder()
                 .name("history")
@@ -106,7 +133,7 @@ final class Tools {
                                                          Trace trace, String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
         tools.putAll(jar());
-        tools.putAll(history(tree));
+        tools.putAll(history(tree, trace));
         tools.putAll(rewind(tree, floor));
         return recorded(tools, trace, agent);
     }
@@ -164,7 +191,7 @@ final class Tools {
                 only(root, Set.of("list_dir", "read_file", "edit_file"));
         tools.putAll(build(root, runner, targetJdk));
         tools.putAll(jar());
-        tools.putAll(history(tree));
+        tools.putAll(history(tree, trace));
         return recorded(guarded(tools), trace, agent);
     }
 

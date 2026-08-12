@@ -27,6 +27,23 @@ interface Trace {
     void tool(String agent, String tool, String arguments, String result);
 
     /**
+     * WHAT HAS ALREADY HAPPENED IN THIS BUMP, readable by the agents living inside it.
+     *
+     * <p>The trace records every stage, every answer, every objection and every tool result, and
+     * until now it was written for the corpus and for people, never for the run itself. So a loop
+     * deciding what to try next could be told what LANDED, from git, and never what was tried and
+     * rejected -- which is the more useful half. A troubleshooter that already established a
+     * dependency is javax-only should not rediscover it, and a proposer ordering a fourth variation
+     * on a step three critics have already refused is not reasoning, it is looping.
+     *
+     * <p>Returns an empty string rather than throwing when nothing is readable: an agent that asks
+     * what happened and gets an exception loses its turn.
+     */
+    default String happened(String stage, String agent, int limit) {
+        return "";
+    }
+
+    /**
      * The reasoning behind an answer, and why the answer ended.
      *
      * <p>An opinion like {@link #asked}, and the one that explains it. Recorded separately because

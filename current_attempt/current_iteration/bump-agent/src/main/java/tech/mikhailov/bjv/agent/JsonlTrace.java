@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.deepagents.langchain4j.flow.DeepAgentFlowListener;
@@ -26,6 +28,92 @@ final class JsonlTrace implements Trace, DeepAgentFlowListener {
         this.trace = trace;
         this.settlements = settlements;
         this.bump = bump;
+    }
+
+    /**
+     * The run reading its own record back, one line per event, newest last.
+     *
+     * <p>SUMMARISED, HARD. A trace row carries whole prompts and whole tool results, and this is
+     * read INTO a prompt: returning rows whole would put the conversation inside itself and grow
+     * the context faster than anything else here. One line each is enough to see what was tried,
+     * what was objected to and what a tool answered; the file itself keeps everything.
+     */
+    @Override
+    public String happened(String stage, String agent, int limit) {
+        if (!Files.isReadable(trace)) {
+            return "";
+        }
+        List<String> lines = new ArrayList<>();
+        try (var rows = Files.lines(trace)) {
+            for (String row : rows.toList()) {
+                if (!row.contains("\"bump\":\"" + bump.replace("\"", "") + "\"")
+                        && !row.contains(escape(bump))) {
+                    continue;
+                }
+                String kind = value(row, "kind");
+                String who = value(row, "agent");
+                String where = value(row, "stage");
+                if (!stage.isBlank() && !stage.equalsIgnoreCase(where)) {
+                    continue;
+                }
+                if (!agent.isBlank() && !agent.equalsIgnoreCase(who)) {
+                    continue;
+                }
+                String line = switch (kind) {
+                    case "asked" -> "[" + who + "] answered: " + one(value(row, "reply"));
+                    case "applied" -> "[" + where + "] " + one(value(row, "what"));
+                    case "tool" -> "[" + who + "] " + value(row, "tool") + "("
+                            + one(value(row, "arguments")) + ") -> " + one(value(row, "result"));
+                    case "progress" -> "* " + one(value(row, "note"));
+                    case "built" -> "[build " + value(row, "phase") + "] "
+                            + (row.contains("\"infra\":true") ? "did not run" : "ran");
+                    case "settled" -> "SETTLED " + value(row, "state") + ": "
+                            + one(value(row, "because"));
+                    default -> "";
+                };
+                if (!line.isBlank()) {
+                    lines.add(line);
+                }
+            }
+        } catch (IOException unreadable) {
+            return "";
+        }
+        int from = Math.max(0, lines.size() - Math.max(1, limit));
+        return String.join("\n", lines.subList(from, lines.size()));
+    }
+
+    /** One line, short enough that a hundred of them are still a summary. */
+    private static String one(String text) {
+        String flat = text.replace("\\n", " ").replace('\n', ' ').strip();
+        return flat.length() > 180 ? flat.substring(0, 180) + " ..." : flat;
+    }
+
+    /** A field out of a written row, without parsing JSON the writer already knows the shape of. */
+    private static String value(String row, String key) {
+        String needle = "\"" + key + "\":\"";
+        int at = row.indexOf(needle);
+        if (at < 0) {
+            return "";
+        }
+        int from = at + needle.length();
+        StringBuilder out = new StringBuilder();
+        for (int i = from; i < row.length(); i++) {
+            char c = row.charAt(i);
+            if (c == '\\' && i + 1 < row.length()) {
+                char next = row.charAt(++i);
+                out.append(next == 'n' ? ' ' : next == 't' ? ' ' : next);
+                continue;
+            }
+            if (c == '"') {
+                break;
+            }
+            out.append(c);
+        }
+        return out.toString();
+    }
+
+    private static String escape(String text) {
+        return text.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     @Override
