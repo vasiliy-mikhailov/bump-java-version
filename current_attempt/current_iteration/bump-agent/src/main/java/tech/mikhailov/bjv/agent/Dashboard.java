@@ -108,6 +108,14 @@ public final class Dashboard {
             .hop{color:#a371f7}
             .cve-down{color:#3fb950}.cve-up{color:#f85149}.cve-flat{color:#8b949e}
             .t-ok{color:#3fb950}.t-low{color:#f85149}
+            .deps{margin:0 24px 8px;border:1px solid #21262d;border-radius:6px;padding:8px 12px}
+            .deps summary{font-size:12px;color:#c9d1d9}
+            .deps table{margin-top:8px}
+            .deps th{padding:4px 8px;font-size:10px}
+            .deps td{padding:3px 8px;font-size:12px;border-bottom:1px solid #161b22}
+            .dep.moved td:nth-child(3){color:#3fb950}
+            .dep.added td{background:#0f1a12}.dep.gone td{background:#1a0f11}
+            tr.dep:not(.moved):not(.added):not(.gone) td{color:#6e7681}
             td.latest{color:#8b949e;font-size:12px;max-width:52ch}
             .empty{padding:48px 24px;color:#7d8590}
             .back{padding:14px 24px;display:block}
@@ -684,6 +692,7 @@ public final class Dashboard {
             b = head(esc(key), lines.size() + " event(s)");
             b.append("<a class=back href=\".\">&larr; bumps</a>");
             b.append(pipeline(slug, key, lines, only));
+            b.append(dependencies(lines));
         }
         int shown = 0;
         int asked = 0;
@@ -771,6 +780,85 @@ public final class Dashboard {
         }
         return "<a class='" + cls + "' href=\"bump?slug=" + url(slug) + "&amp;key=" + url(key)
                 + "&amp;agent=" + url(agent) + "\">" + esc(agent) + " <b>" + n + "</b></a>";
+    }
+
+    /**
+     * Every resolved dependency, before against after.
+     *
+     * <p>The count answers whether the bump moved the number; this answers WHAT it moved, which is
+     * the question that follows immediately and could not be asked from a total. A row shows the
+     * version each scan resolved and the CVEs each carried, and the ones that CHANGED sort to the
+     * top, because on most bumps the answer is that almost nothing changed and the exceptions are
+     * the whole story.
+     */
+    private String dependencies(List<String> lines) {
+        Map<String, String[]> before = new LinkedHashMap<>();
+        Map<String, String[]> after = new LinkedHashMap<>();
+        for (String line : lines) {
+            Map<String, String> r = row(line);
+            if (!"applied".equals(r.get("kind"))) {
+                continue;
+            }
+            String stage = r.getOrDefault("stage", "");
+            Map<String, String[]> into = stage.equals("packages-before") ? before
+                    : stage.equals("packages-after") ? after : null;
+            if (into == null) {
+                continue;
+            }
+            for (String row : r.getOrDefault("what", "").split("\n")) {
+                String[] col = row.split("\t");
+                if (col.length >= 4) {
+                    into.put(col[0] + "|" + col[1], new String[]{col[2], col[3]});
+                }
+            }
+        }
+        if (before.isEmpty() && after.isEmpty()) {
+            return "";
+        }
+        Set<String> all = new LinkedHashSet<>(before.keySet());
+        all.addAll(after.keySet());
+        record Row(String name, String vb, String va, int cb, int ca, boolean moved) {
+        }
+        List<Row> rows = new ArrayList<>();
+        int cveB = 0;
+        int cveA = 0;
+        for (String k : all) {
+            String[] b = before.get(k);
+            String[] a = after.get(k);
+            String vb = b == null ? "" : b[0];
+            String va = a == null ? "" : a[0];
+            int cb = b == null ? 0 : (int) num(b[1]);
+            int ca = a == null ? 0 : (int) num(a[1]);
+            cveB += cb;
+            cveA += ca;
+            rows.add(new Row(k.substring(k.indexOf('|') + 1), vb, va, cb, ca,
+                    !vb.equals(va) || cb != ca));
+        }
+        // Changed first, then the worst offenders, then alphabetical: a reader is looking for a
+        // difference, and failing that for what dominates the count.
+        rows.sort((x, y) -> x.moved() != y.moved() ? Boolean.compare(y.moved(), x.moved())
+                : Math.max(y.cb(), y.ca()) != Math.max(x.cb(), x.ca())
+                ? Integer.compare(Math.max(y.cb(), y.ca()), Math.max(x.cb(), x.ca()))
+                : x.name().compareTo(y.name()));
+        long moved = rows.stream().filter(Row::moved).count();
+        StringBuilder b = new StringBuilder("<details class=deps");
+        b.append(moved > 0 ? " open" : "").append("><summary>dependencies: ").append(rows.size())
+                .append(" resolved, ").append(moved).append(" changed, CRITICAL+HIGH ")
+                .append(cveB).append(" &rarr; ").append(cveA).append("</summary>")
+                .append("<table><tr><th>package</th><th>before</th><th>after</th>")
+                .append("<th>cve before</th><th>cve after</th></tr>");
+        for (Row r : rows) {
+            String cls = !r.moved() ? "" : r.va().isEmpty() ? "gone"
+                    : r.vb().isEmpty() ? "added" : "moved";
+            b.append("<tr class='dep ").append(cls).append("'><td>").append(esc(r.name()))
+                    .append("</td><td>").append(esc(r.vb().isEmpty() ? "—" : r.vb()))
+                    .append("</td><td>").append(esc(r.va().isEmpty() ? "—" : r.va()))
+                    .append("</td><td>").append(r.cb() == 0 ? "" : String.valueOf(r.cb()))
+                    .append("</td><td class='").append(r.ca() < r.cb() ? "cve-down"
+                            : r.ca() > r.cb() ? "cve-up" : "").append("'>")
+                    .append(r.ca() == 0 ? "" : String.valueOf(r.ca())).append("</td></tr>");
+        }
+        return b.append("</table></details>").toString();
     }
 
     private String event(Map<String, String> r, String kind, String key, int askedIndex) {

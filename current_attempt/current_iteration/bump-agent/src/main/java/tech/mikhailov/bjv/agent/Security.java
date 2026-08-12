@@ -42,15 +42,28 @@ final class Security {
     /** A scan, or an honest statement that there is no scan. */
     record Scan(boolean measured, String why, int total, int critical, int high,
                 Map<String, Integer> perModule, List<Finding> findings, int packages,
-                Set<String> resolved) {
+                Set<String> resolved, List<Pkg> inventory) {
 
         static Scan notMeasured(String why) {
-            return new Scan(false, why, -1, -1, -1, Map.of(), List.of(), -1, Set.of());
+            return new Scan(false, why, -1, -1, -1, Map.of(), List.of(), -1, Set.of(), List.of());
         }
 
         /** The corpus's reward shape for security: 0.99 per outstanding CRITICAL or HIGH. */
         double multiplier() {
             return measured ? Math.pow(0.99, total) : Double.NaN;
+        }
+    }
+
+    /**
+     * One resolved dependency: what it is, which version arrived, and how much it costs.
+     *
+     * <p>The count alone says whether the number moved; this says WHAT moved. A bump that raises a
+     * framework BOM and drags forty transitives with it, and a bump that raises nothing, both show
+     * a flat count when the versions they resolved are never written down.
+     */
+    record Pkg(String module, String name, String version, int cves) {
+        String key() {
+            return module + "|" + name;
         }
     }
 
@@ -111,6 +124,16 @@ final class Security {
                 ? "CRITICAL+HIGH " + s.total() + " (critical " + s.critical() + ", high " + s.high()
                 + ") over " + s.packages() + " packages in " + s.perModule().size() + " module(s)"
                 : "NOT_MEASURED: " + s.why());
+        if (s.measured()) {
+            // The inventory as its own record, so a reader can see WHICH dependency moved rather
+            // than only that the total did not. One line per package: module, name, version, CVEs.
+            StringBuilder table = new StringBuilder();
+            for (Pkg p : s.inventory()) {
+                table.append(p.module()).append('\t').append(p.name()).append('\t')
+                        .append(p.version()).append('\t').append(p.cves()).append('\n');
+            }
+            trace.applied("packages-" + phase, table.toString());
+        }
         return s;
     }
 
@@ -208,6 +231,7 @@ final class Security {
         Map<String, Integer> perModule = new LinkedHashMap<>();
         Set<String> packages = new LinkedHashSet<>();
         Set<String> resolved = new LinkedHashSet<>();
+        Map<String, Pkg> inventory = new LinkedHashMap<>();
         int critical = 0;
         int high = 0;
         for (String target : arrayObjects(json, "\"Results\"")) {
@@ -234,11 +258,34 @@ final class Security {
             for (String p : arrayObjects(target, "\"Packages\"")) {
                 packages.add(string(p, "Name") + ":" + string(p, "Version"));
                 String fp = string(p, "FilePath");
-                resolved.add(moduleOf(fp.isBlank() ? targetPath : fp));
+                String module = moduleOf(fp.isBlank() ? targetPath : fp);
+                resolved.add(module);
+                Pkg pkg = new Pkg(module, string(p, "Name"), string(p, "Version"), 0);
+                inventory.putIfAbsent(pkg.key(), pkg);
             }
         }
+        // Attribute the findings back onto the packages, so one row carries both facts.
+        Map<String, Integer> cvesFor = new LinkedHashMap<>();
+        for (Finding f : findings) {
+            cvesFor.merge(f.module() + "|" + f.pkg(), 1, Integer::sum);
+        }
+        List<Pkg> full = new ArrayList<>();
+        inventory.forEach((k, pkg) -> full.add(new Pkg(pkg.module(), pkg.name(), pkg.version(),
+                cvesFor.getOrDefault(k, 0))));
+        // A vulnerable package trivy reported without a Packages entry still belongs in the list.
+        cvesFor.forEach((k, n) -> {
+            if (!inventory.containsKey(k)) {
+                Finding any = findings.stream().filter(x -> (x.module() + "|" + x.pkg()).equals(k))
+                        .findFirst().orElse(null);
+                if (any != null) {
+                    full.add(new Pkg(any.module(), any.pkg(), any.version(), n));
+                }
+            }
+        });
+        full.sort((x, y) -> x.cves() != y.cves() ? Integer.compare(y.cves(), x.cves())
+                : x.name().compareTo(y.name()));
         return new Scan(true, "", critical + high, critical, high, perModule, findings,
-                packages.size(), resolved);
+                packages.size(), resolved, full);
     }
 
     /** Which module a jar belongs to, from its path. The corpus attributes findings the same way. */
