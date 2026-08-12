@@ -139,7 +139,11 @@ public final class Dashboard {
             .ag.on{background:#1f6feb;color:#fff}.ag.on b{color:#fff}
             .link{color:#30363d;font-size:13px}
             .link.looped{color:#d29922;font-weight:700}
+            .funnelhead{padding:0 24px 4px;color:#7d8590;font-size:11px;
+            text-transform:uppercase;letter-spacing:.06em}
             .funnel{display:flex;gap:0;flex-wrap:wrap;padding:0 24px 14px}
+            .fstep i{display:block;font-style:normal;color:#6e7681;font-size:10px;margin-top:2px}
+            .fstep.none{opacity:.4}
             .fstep{padding:6px 12px;border:1px solid #21262d;background:#161b22;
             border-right:none;font-size:11px;color:#7d8590}
             .fstep:last-child{border-right:1px solid #21262d}
@@ -386,12 +390,19 @@ public final class Dashboard {
         b.append("</div>");
         // HOW FAR THE FLEET GETS. A state histogram says what bumps became; this says where they
         // stop, which is the question a run is actually being watched to answer.
-        b.append("<div class=funnel>");
+        // WHERE EACH BUMP STOPPED, one bump counted once, so the row partitions the fleet and
+        // sums to the number that started. "How many ran each stage" overlaps — every bump runs
+        // survey — and "how far each got" is worse still on a chain with conditional stages, since
+        // troubleshoot runs only on failure and security-after only on success: a clean PASS was
+        // being credited with troubleshooting it never did, 48 against the 13 that troubleshot.
+        long started = facts.stream().filter(f -> f.last() >= 0).count();
+        b.append("<div class=funnelhead>where each bump stopped &mdash; ").append(started)
+                .append(" started</div><div class=funnel>");
         for (int i = 0; i < CHAIN.length; i++) {
             final int stage = i;
-            long n = facts.stream().filter(f -> f.reached >= stage).count();
-            b.append("<div class=fstep><b>").append(n).append("</b>")
-                    .append(esc(CHAIN[i][0])).append("</div>");
+            long n = facts.stream().filter(f -> f.last() == stage).count();
+            b.append("<div class='fstep").append(n == 0 ? " none" : "").append("'><b>").append(n)
+                    .append("</b>").append(esc(CHAIN[i][0])).append("</div>");
         }
         return b.append("</div>").toString();
     }
@@ -425,8 +436,19 @@ public final class Dashboard {
         Boolean baselineGreen;
         Boolean conserved;
         Boolean targetLanded;
-        /** The furthest stage of CHAIN this bump reached, by index; -1 for a queued one. */
-        int reached = -1;
+        /**
+         * WHICH stages actually ran, not how far the bump got.
+         *
+         * <p>Two stages are conditional: troubleshoot runs only when the gate fails, security-after
+         * only when it passes. A furthest-stage-reached funnel credits a clean PASS with the
+         * troubleshooting it never did — it read 48 where 13 bumps had troubleshot.
+         */
+        final Set<Integer> ran = new LinkedHashSet<>();
+
+        /** The last stage that spoke: where this bump stopped. -1 if it never started. */
+        int last() {
+            return ran.stream().mapToInt(Integer::intValue).max().orElse(-1);
+        }
 
         Facts(String bump, Map<String, String> settlement) {
             this.bump = bump;
@@ -453,10 +475,10 @@ public final class Dashboard {
             c.cveAfter = cveAfter;
             c.lostFirst = lostFirst;
             c.turns = turns;
+            c.ran.addAll(ran);
             c.baselineGreen = baselineGreen;
             c.conserved = conserved;
             c.targetLanded = targetLanded;
-            c.reached = reached;
             return c;
         }
 
@@ -693,7 +715,7 @@ public final class Dashboard {
                     String who = r.getOrDefault("agent", "");
                     for (int i = 0; i < CHAIN.length; i++) {
                         if (CHAIN[i][1].equals(who) || CHAIN[i][2].equals(who)) {
-                            f.reached = Math.max(f.reached, i);
+                            f.ran.add(i);
                         }
                     }
                     if ("surveyor".equals(r.get("agent"))) {
