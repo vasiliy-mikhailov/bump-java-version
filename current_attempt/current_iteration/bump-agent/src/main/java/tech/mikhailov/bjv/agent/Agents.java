@@ -319,6 +319,12 @@ final class Agents {
                 could not create. Everything after it, including page after page of \
                 "ApplicationContext failure threshold exceeded", is that one failure repeating.
 
+                gradle_versions lists the Gradle distributions a build here can actually use. Read it \
+                before touching distributionUrl: the builds are sealed, Gradle's version numbers are \
+                not contiguous, and a wrapper raised to a version that was never published spends \
+                the whole patience budget trying to download it. One troubleshooter went 8.15 to \
+                8.16; neither exists.
+
                 inspect_jar reads a dependency's own class files, which the project's sources cannot \
                 tell you. Use it before you conclude anything about a dependency. It answers whether \
                 a type is a class or an interface, whether the artifact is compiled against javax or \

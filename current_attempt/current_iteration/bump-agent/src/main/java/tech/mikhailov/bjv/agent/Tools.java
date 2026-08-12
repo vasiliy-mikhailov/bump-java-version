@@ -3,7 +3,9 @@ package tech.mikhailov.bjv.agent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -43,6 +45,7 @@ final class Tools {
                                                        String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
         tools.putAll(jar());
+        tools.putAll(gradle());
         tools.putAll(history(tree, trace));
         return recorded(tools, trace, agent);
     }
@@ -127,6 +130,7 @@ final class Tools {
                                                          Trace trace, String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
         tools.putAll(jar());
+        tools.putAll(gradle());
         tools.putAll(history(tree, trace));
         tools.putAll(rewind(tree, floor));
         return recorded(tools, trace, agent);
@@ -185,6 +189,7 @@ final class Tools {
                 only(root, Set.of("list_dir", "read_file", "edit_file"));
         tools.putAll(build(root, runner, targetJdk));
         tools.putAll(jar());
+        tools.putAll(gradle());
         tools.putAll(history(tree, trace));
         return recorded(guarded(tools), trace, agent);
     }
@@ -241,6 +246,69 @@ final class Tools {
             return (r.infra() ? "DID NOT COMPILE" : "COMPILED")
                     + "\neffective bytecode target after this build: " + target
                     + " (the gate requires " + targetJdk + ")\n" + r.summary();
+        };
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, exec);
+        return one;
+    }
+
+    /**
+     * Which Gradle distributions can actually be used here.
+     *
+     * <p>A troubleshooter raised a wrapper from 8.15 to 8.16. Neither exists: Gradle went 8.14.3 to
+     * 9.0, and it was incrementing a number and hoping. The build then spent its patience trying to
+     * download a zip that has never been published. This is the same gap inspect_jar closed for
+     * Maven coordinates -- no way to ask what is real -- and the answer is narrower here, because
+     * the builds run sealed: the distributions staged on this host are not merely the ones that
+     * exist, they are the only ones obtainable.
+     */
+    private static Map<ToolSpecification, ToolExecutor> gradle() {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("gradle_versions")
+                .description("The Gradle distributions available to builds here, oldest first. "
+                        + "Check this before editing distributionUrl in gradle-wrapper.properties: "
+                        + "the builds are sealed, so a version missing from this list cannot be "
+                        + "downloaded and the build will fail trying. Gradle version numbers are "
+                        + "not contiguous, so do not assume the next one up exists.")
+                .parameters(JsonObjectSchema.builder().build())
+                .build();
+        ToolExecutor exec = (request, memoryId) -> {
+            String dists = System.getenv().getOrDefault("BJV_GRADLE_DISTS",
+                    "/home/vmihaylov/.gradle-dists");
+            Path root = Path.of(dists);
+            if (!Files.isDirectory(root)) {
+                return "the distribution cache is not readable from here";
+            }
+            List<String> usable = new ArrayList<>();
+            try (var entries = Files.list(root)) {
+                for (Path dir : entries.filter(Files::isDirectory).toList()) {
+                    String name = dir.getFileName().toString();
+                    if (!name.startsWith("gradle-")) {
+                        continue;
+                    }
+                    // A half-downloaded distribution has no .ok marker and is not usable: offering
+                    // it would send a build to the same download that failed to finish before.
+                    boolean complete;
+                    try (var deep = Files.walk(dir, 3)) {
+                        complete = deep.anyMatch(f -> f.getFileName().toString().endsWith(".ok"));
+                    } catch (IOException unreadable) {
+                        complete = false;
+                    }
+                    if (complete) {
+                        usable.add(name.substring("gradle-".length()));
+                    }
+                }
+            } catch (IOException e) {
+                return "could not read the distribution cache: " + e.getMessage();
+            }
+            if (usable.isEmpty()) {
+                return "no complete Gradle distribution is staged here";
+            }
+            usable.sort((a, b) -> Migrate.compare(a.replaceAll("-(bin|all)$", ""),
+                    b.replaceAll("-(bin|all)$", "")));
+            return "Gradle distributions usable in a sealed build, oldest first:\n  "
+                    + String.join("\n  ", usable)
+                    + "\n\nAnything not on this list cannot be downloaded and will fail the build.";
         };
         Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
         one.put(spec, exec);
