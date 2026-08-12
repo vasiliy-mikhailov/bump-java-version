@@ -139,15 +139,22 @@ public final class Dashboard {
             .ag.on{background:#1f6feb;color:#fff}.ag.on b{color:#fff}
             .link{color:#30363d;font-size:13px}
             .link.looped{color:#d29922;font-weight:700}
-            .funnelhead{padding:0 24px 4px;color:#7d8590;font-size:11px;
-            text-transform:uppercase;letter-spacing:.06em}
-            .funnel{display:flex;gap:0;flex-wrap:wrap;padding:0 24px 14px}
-            .fstep i{display:block;font-style:normal;color:#6e7681;font-size:10px;margin-top:2px}
-            .fstep.none{opacity:.4}
-            .fstep{padding:6px 12px;border:1px solid #21262d;background:#161b22;
-            border-right:none;font-size:11px;color:#7d8590}
-            .fstep:last-child{border-right:1px solid #21262d}
-            .fstep b{display:block;font-size:15px;color:#c9d1d9}
+            .flow{display:flex;margin:0 24px 16px;border-radius:6px;overflow:hidden;
+            border:1px solid #21262d;min-height:48px}
+            .seg{display:flex;flex-direction:column;justify-content:center;align-items:center;
+            padding:5px 4px;min-width:0;overflow:hidden;white-space:nowrap;
+            border-right:1px solid #0d1117}
+            .seg:last-child{border-right:none}
+            .seg b{font-size:15px;line-height:1.15}
+            .seg span{font-size:9px;text-transform:uppercase;letter-spacing:.05em;opacity:.75;
+            text-overflow:ellipsis;overflow:hidden;max-width:100%}
+            .seg.s0{background:#4a1d20;color:#ff9d95}
+            .seg.s1{background:#452317;color:#ffab70}
+            .seg.s2{background:#3d2c14;color:#e3b341}
+            .seg.s3{background:#33321a;color:#d7d16b}
+            .seg.s4{background:#26351f;color:#a2d16b}
+            .seg.s5{background:#1b3524;color:#71d18a}
+            .seg.s6{background:#12331f;color:#3fb950}
             .ev{border-left:2px solid #21262d;margin:0 24px;padding:12px 0 12px 16px}
             .ev.asked{border-color:#58a6ff}.ev.built{border-color:#d29922}
             .ev.settled{border-color:#3fb950}.ev.failed{border-color:#f85149}
@@ -390,19 +397,30 @@ public final class Dashboard {
         b.append("</div>");
         // HOW FAR THE FLEET GETS. A state histogram says what bumps became; this says where they
         // stop, which is the question a run is actually being watched to answer.
-        // WHERE EACH BUMP STOPPED, one bump counted once, so the row partitions the fleet and
-        // sums to the number that started. "How many ran each stage" overlaps — every bump runs
-        // survey — and "how far each got" is worse still on a chain with conditional stages, since
-        // troubleshoot runs only on failure and security-after only on success: a clean PASS was
-        // being credited with troubleshooting it never did, 48 against the 13 that troubleshot.
+        // ONE BAR, THE WHOLE FLEET, SPLIT WHERE THE BUMPS STOPPED. Each bump lands in exactly one
+        // segment, so the widths carry the finding and nothing has to say what is being counted:
+        // a wide band on the left is a fleet dying early, and that reads on sight.
+        //
+        // Overlapping counts cannot do this. Every bump runs survey, so "how many ran each stage"
+        // is all one number; and "how far each got" was worse, crediting a clean PASS with the
+        // troubleshooting it never did — 48 against the 13 bumps that had actually troubleshot.
         long started = facts.stream().filter(f -> f.last() >= 0).count();
-        b.append("<div class=funnelhead>where each bump stopped &mdash; ").append(started)
-                .append(" started</div><div class=funnel>");
+        if (started == 0) {
+            return b.toString();
+        }
+        b.append("<div class=flow>");
         for (int i = 0; i < CHAIN.length; i++) {
             final int stage = i;
             long n = facts.stream().filter(f -> f.last() == stage).count();
-            b.append("<div class='fstep").append(n == 0 ? " none" : "").append("'><b>").append(n)
-                    .append("</b>").append(esc(CHAIN[i][0])).append("</div>");
+            if (n == 0) {
+                continue;
+            }
+            // Red where a bump stopped early, green where it went the distance, so a wide band
+            // reads as good or bad news without a legend to consult.
+            b.append("<div class='seg s").append(i).append("' style='flex:").append(n)
+                    .append("' title='").append(esc(CHAIN[i][0])).append(": ").append(n)
+                    .append(" of ").append(started).append("'><b>").append(n).append("</b><span>")
+                    .append(esc(CHAIN[i][0])).append("</span></div>");
         }
         return b.append("</div>").toString();
     }
