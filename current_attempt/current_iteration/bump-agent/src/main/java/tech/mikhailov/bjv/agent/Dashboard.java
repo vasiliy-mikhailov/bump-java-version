@@ -139,22 +139,22 @@ public final class Dashboard {
             .ag.on{background:#1f6feb;color:#fff}.ag.on b{color:#fff}
             .link{color:#30363d;font-size:13px}
             .link.looped{color:#d29922;font-weight:700}
-            .flow{display:flex;margin:0 24px 16px;border-radius:6px;overflow:hidden;
-            border:1px solid #21262d;min-height:48px}
-            .seg{display:flex;flex-direction:column;justify-content:center;align-items:center;
-            padding:5px 4px;min-width:0;overflow:hidden;white-space:nowrap;
-            border-right:1px solid #0d1117}
-            .seg:last-child{border-right:none}
-            .seg b{font-size:15px;line-height:1.15}
-            .seg span{font-size:9px;text-transform:uppercase;letter-spacing:.05em;opacity:.75;
-            text-overflow:ellipsis;overflow:hidden;max-width:100%}
-            .seg.s0{background:#4a1d20;color:#ff9d95}
-            .seg.s1{background:#452317;color:#ffab70}
-            .seg.s2{background:#3d2c14;color:#e3b341}
-            .seg.s3{background:#33321a;color:#d7d16b}
-            .seg.s4{background:#26351f;color:#a2d16b}
-            .seg.s5{background:#1b3524;color:#71d18a}
-            .seg.s6{background:#12331f;color:#3fb950}
+            .machine{padding:2px 24px 16px}
+            .machine svg{width:100%;height:auto;display:block}
+            .machine .n rect{fill:#161b22;stroke:#30363d}
+            .machine .run rect{fill:#122033;stroke:#1f6feb}
+            .machine .nn{fill:#c9d1d9;font:600 15px ui-monospace,Menlo,monospace}
+            .machine .nl{fill:#7d8590;font:9px ui-monospace,Menlo,monospace;
+            text-transform:uppercase;letter-spacing:.08em}
+            .machine .ml{fill:#7d8590;font:10px ui-monospace,Menlo,monospace}
+            .machine .x rect{fill:#161b22;stroke:#30363d}
+            .machine .x.ok rect{fill:#12331f;stroke:#2ea043}
+            .machine .x.no rect{fill:#1d1517;stroke:#3d2a2d}
+            .machine .xn{fill:#c9d1d9;font:600 13px ui-monospace,Menlo,monospace}
+            .machine .x.ok .xn{fill:#3fb950}
+            .machine .xs{fill:#c9d1d9;font:11px ui-monospace,Menlo,monospace}
+            .machine .x.ok .xs{fill:#3fb950}
+            .machine .xd{fill:#6e7681;font:10px ui-monospace,Menlo,monospace}
             .ev{border-left:2px solid #21262d;margin:0 24px;padding:12px 0 12px 16px}
             .ev.asked{border-color:#58a6ff}.ev.built{border-color:#d29922}
             .ev.settled{border-color:#3fb950}.ev.failed{border-color:#f85149}
@@ -397,32 +397,119 @@ public final class Dashboard {
         b.append("</div>");
         // HOW FAR THE FLEET GETS. A state histogram says what bumps became; this says where they
         // stop, which is the question a run is actually being watched to answer.
-        // ONE BAR, THE WHOLE FLEET, SPLIT WHERE THE BUMPS STOPPED. Each bump lands in exactly one
-        // segment, so the widths carry the finding and nothing has to say what is being counted:
-        // a wide band on the left is a fleet dying early, and that reads on sight.
-        //
-        // Overlapping counts cannot do this. Every bump runs survey, so "how many ran each stage"
-        // is all one number; and "how far each got" was worse, crediting a clean PASS with the
-        // troubleshooting it never did — 48 against the 13 bumps that had actually troubleshot.
-        long started = facts.stream().filter(f -> f.last() >= 0).count();
-        if (started == 0) {
-            return b.toString();
-        }
-        b.append("<div class=flow>");
-        for (int i = 0; i < CHAIN.length; i++) {
-            final int stage = i;
-            long n = facts.stream().filter(f -> f.last() == stage).count();
-            if (n == 0) {
-                continue;
+        // THE STATE MACHINE, DRAWN. A bump is queued until a lane claims it, runs the chain while
+        // bumping, and leaves for exactly one terminal state. Drawing the states says what a list
+        // of stage names could not: that the chain is a loop with one way in and seven ways out,
+        // and which of the seven the fleet is actually taking.
+        return b.append(machine(facts)).toString();
+    }
+
+    /** A terminal state, with where it sits and what it means. */
+    private record Exit(String state, String label, boolean good) {
+    }
+
+    private static final Exit[] EXITS = {
+            new Exit("PASS", "passed the gate", true),
+            new Exit("no-baseline", "not green at its own JDK", false),
+            new Exit("not-a-bump", "already at the top", false),
+            new Exit("behavior-change", "JDK changed behaviour", false),
+            new Exit("blocked-dependency", "no compatible version", false),
+            new Exit("infra", "the environment failed", false),
+            new Exit("interrupted", "the lane died", false),
+    };
+
+    /**
+     * The whole fleet as a state machine: queued, bumping, and the exits.
+     *
+     * <p>Inline SVG rather than boxes and borders, because the two things worth seeing are the
+     * SHAPE (one way in, a loop, seven ways out) and the WEIGHT on each path, and an edge whose
+     * thickness is its traffic shows the second without a number having to be read. The numbers are
+     * there anyway; the picture is what makes them comparable at a glance.
+     */
+    private static String machine(List<Facts> facts) {
+        Map<String, Long> byState = new LinkedHashMap<>();
+        facts.forEach(f -> byState.merge(f.state, 1L, Long::sum));
+        long queued = byState.getOrDefault("queued", 0L);
+        long running = byState.getOrDefault("bumping", 0L);
+        long left = EXITS.length;
+        List<Exit> live = new ArrayList<>();
+        for (Exit e : EXITS) {
+            if (byState.getOrDefault(e.state(), 0L) > 0) {
+                live.add(e);
             }
-            // Red where a bump stopped early, green where it went the distance, so a wide band
-            // reads as good or bad news without a legend to consult.
-            b.append("<div class='seg s").append(i).append("' style='flex:").append(n)
-                    .append("' title='").append(esc(CHAIN[i][0])).append(": ").append(n)
-                    .append(" of ").append(started).append("'><b>").append(n).append("</b><span>")
-                    .append(esc(CHAIN[i][0])).append("</span></div>");
         }
-        return b.append("</div>").toString();
+        if (live.isEmpty() && running == 0) {
+            return "";
+        }
+        long settled = live.stream().mapToLong(e -> byState.getOrDefault(e.state(), 0L)).sum();
+        int rows = Math.max(live.size(), 1);
+        int h = Math.max(150, 34 * rows + 40);
+        int mid = h / 2;
+
+        StringBuilder g = new StringBuilder("<div class=machine><svg viewBox='0 0 940 " + h
+                + "' preserveAspectRatio='xMidYMid meet' role='img'>");
+        g.append("<defs><marker id='a' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='6' "
+                + "markerHeight='6' orient='auto'><path d='M0,0 L10,5 L0,10 z' fill='#484f58'/>"
+                + "</marker></defs>");
+
+        // queued -> bumping -> the exits
+        g.append(node(20, mid - 21, 120, 42, "queued", queued, "wait"));
+        g.append(edge(140, mid, 250, mid, running));
+        g.append(node(250, mid - 26, 150, 52, "bumping", running, "run"));
+        // The loop that makes it a machine rather than a pipeline: the gate hands back to
+        // troubleshoot and troubleshoot hands back to the gate, until one of them stops.
+        g.append("<path d='M325,").append(mid - 26).append(" C305,").append(mid - 72)
+                .append(" 395,").append(mid - 72).append(" 375,").append(mid - 26)
+                .append("' fill='none' stroke='#484f58' stroke-width='1.4' marker-end='url(#a)'/>");
+        g.append("<text x='350' y='").append(mid - 60)
+                .append("' class='ml' text-anchor='middle'>gate \u21c4 troubleshoot</text>");
+
+        int y = (h - 34 * rows) / 2;
+        for (Exit e : live) {
+            long n = byState.getOrDefault(e.state(), 0L);
+            int cy = y + 17;
+            g.append(curve(400, mid, 610, cy, n, settled, e.good()));
+            g.append(exitNode(610, y, e, n));
+            y += 34;
+        }
+        return g.append("</svg></div>").toString();
+    }
+
+    private static String node(int x, int y, int w, int hh, String label, long n, String cls) {
+        return "<g class='n " + cls + "'><rect x='" + x + "' y='" + y + "' width='" + w
+                + "' height='" + hh + "' rx='8'/>"
+                + "<text x='" + (x + w / 2) + "' y='" + (y + hh / 2 - 2) + "' class='nn'"
+                + " text-anchor='middle'>" + n + "</text>"
+                + "<text x='" + (x + w / 2) + "' y='" + (y + hh / 2 + 12) + "' class='nl'"
+                + " text-anchor='middle'>" + esc(label) + "</text></g>";
+    }
+
+    private static String exitNode(int x, int y, Exit e, long n) {
+        return "<g class='x " + (e.good() ? "ok" : "no") + "'>"
+                + "<rect x='" + x + "' y='" + y + "' width='310' height='26' rx='13'/>"
+                + "<text x='" + (x + 14) + "' y='" + (y + 17) + "' class='xn'>" + n + "</text>"
+                + "<text x='" + (x + 52) + "' y='" + (y + 17) + "' class='xs'>"
+                + esc(e.state()) + "</text>"
+                + "<text x='" + (x + 300) + "' y='" + (y + 17) + "' class='xd'"
+                + " text-anchor='end'>" + esc(e.label()) + "</text></g>";
+    }
+
+    private static String edge(int x1, int y1, int x2, int y2, long n) {
+        return "<line x1='" + x1 + "' y1='" + y1 + "' x2='" + x2 + "' y2='" + y2
+                + "' stroke='#484f58' stroke-width='1.6' marker-end='url(#a)'/>"
+                + "<text x='" + ((x1 + x2) / 2) + "' y='" + (y1 - 8) + "' class='ml'"
+                + " text-anchor='middle'>" + n + "</text>";
+    }
+
+    /** An edge whose thickness is its share of the traffic: the weight is the point. */
+    private static String curve(int x1, int y1, int x2, int y2, long n, long total, boolean good) {
+        double share = total <= 0 ? 0 : (double) n / total;
+        double w = 1.0 + Math.sqrt(share) * 7.0;
+        return "<path d='M" + x1 + "," + y1 + " C" + (x1 + 105) + "," + y1 + " "
+                + (x2 - 105) + "," + y2 + " " + x2 + "," + y2 + "' fill='none' stroke='"
+                + (good ? "#2ea043" : "#6e4145") + "' stroke-width='"
+                + String.format(java.util.Locale.ROOT, "%.1f", w)
+                + "' opacity='.85' marker-end='url(#a)'/>";
     }
 
     private static String tile(String big, String label) {
