@@ -203,8 +203,30 @@ final class Gate {
         return true;
     }
 
+    /**
+     * The stable identity of a test: its class, and its method with any per-case decoration removed.
+     *
+     * <p>THE SEPARATOR IS THE FIRST HASH, NOT THE LAST. A key is {@code fqcn#name} and a class name
+     * cannot contain a hash, but a NAME can: Spock renders a parameterised feature as
+     * {@code creates date intervals [timeRange: LAST_6_MONTHS, start: 2020-04-10, #0]}. Splitting on
+     * the last hash took the iteration marker for the separator, so every parameterised case in the
+     * project collapsed to {@code 0]} or {@code 1]} — colliding across unrelated specs, and losing
+     * the class entirely.
+     *
+     * <p>THE CLASS STAYS IN THE KEY. Two specs may each have a feature called "converts correctly",
+     * and a method name alone would let one spec's loss be covered by the other's survivor.
+     *
+     * <p>What this deliberately does NOT distinguish is one iteration of a parameterised feature
+     * from another, because their rendered parameters are not stable: this project's bump moved the
+     * Gradle wrapper from 6.8.1 to 7.6, the runner changed with it, and 23 of 47 tests were reported
+     * lost that had in fact all passed. Iterations are told apart by COUNT instead — four before and
+     * four after is conserved, four before and three after is one lost — which is what the caller's
+     * multiset matching already provides.
+     */
     private static String normalise(String entry) {
-        String method = entry.substring(entry.lastIndexOf('#') + 1);
+        int sep = entry.indexOf('#');
+        String cls = sep < 0 ? "" : entry.substring(0, sep);
+        String method = sep < 0 ? entry : entry.substring(sep + 1);
         int cut = method.length();
         for (char stop : new char[]{'(', '[', '{'}) {
             int at = method.indexOf(stop);
@@ -212,7 +234,7 @@ final class Gate {
                 cut = at;
             }
         }
-        return method.substring(0, cut).strip().toLowerCase();
+        return cls + "#" + method.substring(0, cut).strip().toLowerCase();
     }
 
     // ---- the effective bytecode target ----
