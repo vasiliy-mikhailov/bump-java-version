@@ -262,6 +262,34 @@ final class Reasoning {
      * The named string field, unescaped. Handwritten because the shape is fixed and a JSON library
      * would be this module's only dependency beyond the agent framework itself.
      */
+    /**
+     * A NUMERIC argument, which {@link #field} cannot read.
+     *
+     * <p>field stops at anything not opening with a quote, deliberately: it is parsing values a
+     * model wrote and a bare word there is usually a mistake. But a JSON integer property arrives
+     * unquoted and legitimately, so every numeric argument silently read as absent and fell back to
+     * its default. what_happened's `limit` was ignored on every call an agent ever made.
+     */
+    static int number(String json, String name, int fallback) {
+        int at = json.indexOf("\"" + name + "\":");
+        if (at < 0) {
+            return fallback;
+        }
+        int i = at + name.length() + 3;
+        while (i < json.length() && (Character.isWhitespace(json.charAt(i)) || json.charAt(i) == '"')) {
+            i++;
+        }
+        int from = i;
+        while (i < json.length() && (Character.isDigit(json.charAt(i)) || json.charAt(i) == '-')) {
+            i++;
+        }
+        try {
+            return i > from ? Integer.parseInt(json, from, i, 10) : fallback;
+        } catch (NumberFormatException notANumber) {
+            return fallback;
+        }
+    }
+
     static String field(String json, String name) {
         int at = json.indexOf("\"" + name + "\":");
         if (at < 0) {

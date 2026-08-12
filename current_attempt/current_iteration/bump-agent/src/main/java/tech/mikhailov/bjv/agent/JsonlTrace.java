@@ -72,14 +72,59 @@ final class JsonlTrace implements Trace, DeepAgentFlowListener {
                     default -> "";
                 };
                 if (!line.isBlank()) {
-                    lines.add(line);
+                    lines.add(rank(kind, line) + "\u0000" + line);
                 }
             }
         } catch (IOException unreadable) {
             return "";
         }
-        int from = Math.max(0, lines.size() - Math.max(1, limit));
-        return String.join("\n", lines.subList(from, lines.size()));
+        // MOST IMPORTANT FIRST, THEN BACK INTO ORDER. Returned chronologically, the budget went on
+        // whatever happened to be recent: measured over five real calls, 13 of 349 returned lines
+        // carried a decision and the rest was an hour-old reader reading poms. Ranking first and
+        // re-sorting after means the same budget carries the verdicts, the objections and the
+        // failures, with the routine filling whatever room is left.
+        List<Integer> order = new ArrayList<>();
+        for (int i = 0; i < lines.size(); i++) {
+            order.add(i);
+        }
+        order.sort((a, b) -> {
+            int byRank = lines.get(b).charAt(0) - lines.get(a).charAt(0);
+            return byRank != 0 ? byRank : b - a;
+        });
+        List<Integer> kept = new ArrayList<>(order.subList(0, Math.min(order.size(),
+                Math.max(1, limit))));
+        kept.sort(Integer::compareTo);
+        StringBuilder out = new StringBuilder();
+        for (int i : kept) {
+            String line = lines.get(i);
+            out.append(line, line.indexOf('\u0000') + 1, line.length()).append('\n');
+        }
+        return out.toString().strip();
+    }
+
+    /**
+     * How much a line is worth keeping when the budget runs out.
+     *
+     * <p>A verdict, an objection and a failure are what a reader came for. A tool call is the bulk
+     * of any trace and almost never the point, which is why an unranked log spends its whole budget
+     * on file reads.
+     */
+    private static char rank(String kind, String line) {
+        String low = line.toLowerCase(java.util.Locale.ROOT);
+        if (kind.equals("settled") || low.contains("fail_") || low.contains("pass (")) {
+            return '5';
+        }
+        if (low.contains("gaming") || low.contains("off-target") || low.contains("blocked:")
+                || low.contains("rejected") || low.contains("declined") || low.contains("reverted")) {
+            return '4';
+        }
+        if (kind.equals("progress")) {
+            return '3';
+        }
+        if (kind.equals("asked") || kind.equals("applied")) {
+            return '2';
+        }
+        return '1';
     }
 
     /** One line, short enough that a hundred of them are still a summary. */

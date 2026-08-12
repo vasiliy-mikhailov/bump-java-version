@@ -74,13 +74,7 @@ final class Tools {
                 .build(), (request, memoryId) -> {
                     String stage = field(request.arguments(), "stage");
                     String agent = field(request.arguments(), "agent");
-                    String asked = field(request.arguments(), "limit");
-                    int limit;
-                    try {
-                        limit = asked.isBlank() ? 80 : Integer.parseInt(asked.strip());
-                    } catch (NumberFormatException notANumber) {
-                        limit = 80;
-                    }
+                    int limit = Reasoning.number(request.arguments(), "limit", 60);
                     String log = trace.happened(stage, agent, limit);
                     return log.isBlank() ? "nothing recorded yet for that filter" : log;
                 });

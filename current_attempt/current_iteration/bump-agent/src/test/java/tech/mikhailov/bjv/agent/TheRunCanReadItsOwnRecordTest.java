@@ -3,6 +3,7 @@ package tech.mikhailov.bjv.agent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -79,5 +80,46 @@ class TheRunCanReadItsOwnRecordTest {
 
     private static Trace trace(Path dir) {
         return new JsonlTrace(dir.resolve("trace.jsonl"), dir.resolve("settlements.jsonl"), BUMP);
+    }
+
+    @Test
+    void whenTheBudgetIsShortTheVerdictsSurviveAndTheFileReadsDoNot() {
+        Trace trace = trace(dirFor("rank"));
+        // The shape of a real trace: mostly tool calls, with the decisions buried in them.
+        for (int i = 1; i <= 30; i++) {
+            trace.tool("surveyor", "read_file", "{\"path\":\"pom" + i + ".xml\"}", "<project/>");
+        }
+        trace.applied("gate", "turn 1: FAIL_test_conservation (pre=7 lost=4)");
+        for (int i = 1; i <= 30; i++) {
+            trace.tool("surveyor", "read_file", "{\"path\":\"more" + i + ".xml\"}", "<project/>");
+        }
+        trace.asked("trouble-critic", "p", "gaming - the stub deletes image rendering");
+
+        String log = trace.happened("", "", 5);
+
+        assertEquals(5, log.lines().count());
+        assertTrue(log.contains("FAIL_test_conservation"), "a failure is what a reader came for: " + log);
+        assertTrue(log.contains("gaming"), "and so is an objection: " + log);
+        // Measured on the live run before this: 13 of 349 returned lines carried a decision.
+        assertTrue(log.lines().filter(l -> l.contains("read_file")).count() <= 3,
+                "file reads fill what is left over, they do not take the budget: " + log);
+    }
+
+    @Test
+    void anIntegerArgumentIsReadableAtAll() {
+        // field() stops at anything not opening with a quote, so a JSON integer read as absent and
+        // every what_happened call silently used the default instead of the limit it asked for.
+        assertEquals(50, Reasoning.number("{\"limit\": 50}", "limit", 80));
+        assertEquals(50, Reasoning.number("{\"limit\":\"50\"}", "limit", 80), "quoted works too");
+        assertEquals(80, Reasoning.number("{\"stage\":\"migrate\"}", "limit", 80), "absent falls back");
+        assertEquals(80, Reasoning.number("{\"limit\":\"lots\"}", "limit", 80), "so does nonsense");
+    }
+
+    private static Path dirFor(String name) {
+        try {
+            return Files.createTempDirectory(name);
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }
