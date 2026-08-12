@@ -90,6 +90,7 @@ public final class Bump {
     private final Path ws;
     private final String bump;
     private final Trace trace;
+    private final Tree tree;
     private String from;
     private String to;
     private Agents agents;
@@ -117,6 +118,7 @@ public final class Bump {
         this.from = parts[2];
         this.to = parts[3];
         this.trace = trace;
+        this.tree = new Tree(ws, note -> trace.progress(bump, note));
     }
 
     /** The whole bump. Read it top to bottom; that is the order, and nothing can reorder it. */
@@ -192,7 +194,10 @@ public final class Bump {
         // ---- PREPARE: deterministic pre-pass first, then the proactive steps, judged.
         // The before-scan travels into the migration: the Tomcat floor has to know which line the
         // project actually resolved, and no build file says that.
+        tree.excludeBuildOutput();
         String prePass = new Migrate(ws, hoptools, trace).run(from, to, before);
+        // The deterministic pass is not up for review, so it lands before anyone can object.
+        tree.land("migrate");
         preparePhase(prePass);
 
         // ---- BUMP: land the target, judged against the pin grep re-run after the edits.
@@ -327,7 +332,7 @@ public final class Bump {
     private void preparePhase(String prePass) throws IOException {
         String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
                 + "\n\nThe deterministic pre-pass already did:\n" + prePass + "\n" + buildFiles();
-        judged("prepare", agents.preparer(), agents.prepareCritic(), brief,
+        judgedThenLanded("prepare", agents.preparer(), agents.prepareCritic(), brief,
                 diff -> brief + "\n\nWhat the preparer changed:\n" + diff,
                 "sound", "missed", "overreach");
     }
@@ -337,7 +342,7 @@ public final class Bump {
         String pins = pinGrep();
         String brief = "Migration: JDK " + from + " -> " + to
                 + "\n\nPins found still below " + to + ":\n" + (pins.isBlank() ? "(none)" : pins);
-        judged("bump", agents.bumper(), agents.bumpCritic(), brief, diff -> {
+        judgedThenLanded("bump", agents.bumper(), agents.bumpCritic(), brief, diff -> {
             String left = "";
             try {
                 left = pinGrep();
@@ -360,7 +365,7 @@ public final class Bump {
                         Audit audit, String... words) throws IOException {
         String reply = producer.run(brief);
         for (int again = 0; again <= REASK; again++) {
-            String diff = diff();
+            String diff = tree.diff();
             if (diff.isBlank()) {
                 trace.progress(bump, stage + ": no edit reached the workspace ("
                         + reply.lines().findFirst().orElse("") + ")");
@@ -377,6 +382,13 @@ public final class Bump {
         }
     }
 
+    /** A judged stage whose work then lands, so no later objection can reach back past it. */
+    private void judgedThenLanded(String stage, Agents.Agent producer, Agents.Agent critic,
+                                  String brief, Audit audit, String... words) throws IOException {
+        judged(stage, producer, critic, brief, audit, words);
+        tree.land(stage);
+    }
+
     /** The brief a critic gets, built once the producer's diff is known. */
     @FunctionalInterface
     private interface Audit {
@@ -385,7 +397,7 @@ public final class Bump {
 
     /** One troubleshooter round. True to keep looping, false to stop. */
     private boolean troubleshootTurn(String log) throws IOException {
-        String before = diff();
+        String before = tree.diff();
         String brief = brief(log);
         String reply = agents.troubleshooter().run(brief);
         for (int again = 0; again <= REASK; again++) {
@@ -394,7 +406,7 @@ public final class Bump {
                         + reply.lines().findFirst().orElse(""));
                 return false;
             }
-            String now = diff();
+            String now = tree.diff();
             if (now.equals(before)) {
                 trace.progress(bump, "troubleshooter changed nothing this turn");
                 return false;
@@ -404,12 +416,12 @@ public final class Bump {
                     + "\n\nThe edits now in the workspace:\n" + now + "\n\nWhat they said:\n" + reply);
             String verdict = word(judgement, "sound", "gaming", "off-target");
             if ("gaming".equals(verdict)) {
-                revert();
+                tree.revert();
                 trace.progress(bump, "trouble-critic: gaming; workspace reverted");
                 return false;
             }
             if ("off-target".equals(verdict) && again < REASK) {
-                revert();
+                tree.revert();
                 reply = agents.troubleshooter().run(brief
                         + "\nA reviewer judged your edit aims at the wrong wall:\n" + judgement
                         + "\nYour edit was reverted. Try again.");
@@ -479,57 +491,12 @@ public final class Bump {
         return out.toString();
     }
 
-    /**
-     * What the workspace has become, from git. The record of a phase, not its claim about itself.
-     *
-     * <p>A FAILED GIT IS AN EMPTY DIFF, NOT A DIFF OF THE ERROR. git writes its usage text to
-     * stdout and exits non-zero when it will not read a repository, and that text is not blank —
-     * so returning it made every phase look as though it had edited something, handed the critic
-     * git's usage message as the evidence to audit, and made a producer answering NOTHING-TO-DO
-     * indistinguishable from one that worked. The honest reading of "git could not tell me" is
-     * "nothing is recorded", loudly.
-     */
-    private String diff() {
-        try {
-            Shell.Output stat = git("diff", "--stat=200", "--", ".");
-            Shell.Output full = git("diff", "-U2", "--", ".");
-            if (!stat.ok() || !full.ok()) {
-                trace.progress(bump, "git diff failed: " + Runner.tail(stat.text()));
-                return "";
-            }
-            String body = full.text();
-            return stat.text() + (body.length() > 20000
-                    ? body.substring(0, 20000) + "\n[diff truncated]" : body);
-        } catch (IOException | InterruptedException e) {
-            trace.progress(bump, "git diff failed: " + e.getMessage());
-            return "";
-        }
-    }
-
-    /**
-     * git, told this workspace is safe to read.
-     *
-     * <p>The chain runs as root in its container while the checkout is owned by the user who
-     * cloned it, and git's dubious-ownership guard then refuses the repository. The guard is
-     * protecting against reading a repo someone else controls; this one we cloned ourselves a few
-     * seconds earlier, so the exception is stated per call rather than disabled image-wide.
-     */
     private Shell.Output git(String... args) throws IOException, InterruptedException {
         List<String> cmd = new ArrayList<>(List.of("git", "-c", "safe.directory=" + ws));
         cmd.addAll(List.of(args));
         return Shell.run(ws, Map.of(), Duration.ofMinutes(3), cmd.toArray(new String[0]));
     }
 
-    private void revert() {
-        try {
-            Shell.Output out = git("checkout", "--", ".");
-            if (!out.ok()) {
-                trace.progress(bump, "revert failed: " + Runner.tail(out.text()));
-            }
-        } catch (IOException | InterruptedException e) {
-            trace.progress(bump, "revert failed: " + e.getMessage());
-        }
-    }
 
     /**
      * What to put in front of the next agent: the scorer's finding, in the terms it can act on.
@@ -577,7 +544,7 @@ public final class Bump {
     private void price() {
         String estimate = agents.estimator().run("The bump " + bump + " (JDK " + from + " -> " + to
                 + "); walls cleared mechanically: " + walls.appliedSoFar()
-                + ". What the workspace became:\n" + diff());
+                + ". What the workspace became:\n" + tree.diff());
         Matcher m = Pattern.compile("minutes:\\s*(\\d+)").matcher(estimate);
         trace.priced(bump, m.find() ? m.group(1) : "", estimate);
     }
