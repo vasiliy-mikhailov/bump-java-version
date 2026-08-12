@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -78,8 +79,24 @@ final class Runner {
      * not 17" about a project where nothing is wrong. The Gradle path never had this: it already
      * passes --rerun-tasks. This is the Maven half of the same idea.
      */
+    /**
+     * The names the corpus scorer already strips, for the same reason.
+     *
+     * <p>An annotation processor or a code generator writes into these, and what it writes depends
+     * on the plugin version. causalnet/autojdk-maven-plugin: the baseline generated
+     * {@code generated-sources/plugin/HelpMojo.java}, the migration raised maven-plugin-plugin,
+     * and the raised plugin generated the same mojo into the project's own package. Both survived,
+     * both were compiled, two classes claimed the goal {@code help}, and the descriptor step
+     * aborted. Nothing was wrong with the project or the migration.
+     */
+    private static final Set<String> GENERATED = Set.of("generated", "generated-sources",
+            "generated-src", "generated-java", "generated-test-sources");
+
     void clearClasses() {
-        wipe(name -> name.equals("classes") || name.equals("test-classes"));
+        // Compiled output AND anything a generator wrote. Deleting the classes alone leaves the
+        // sources that produced them, which is the half of the state that collides.
+        wipe(name -> name.equals("classes") || name.equals("test-classes")
+                || GENERATED.contains(name));
     }
 
     /**

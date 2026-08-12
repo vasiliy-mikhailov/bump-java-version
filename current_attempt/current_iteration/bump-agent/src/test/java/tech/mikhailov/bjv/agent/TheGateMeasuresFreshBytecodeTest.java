@@ -41,4 +41,27 @@ class TheGateMeasuresFreshBytecodeTest {
         assertTrue(Files.exists(deps.resolve("lib.jar")),
                 "the collected dependency jars are not compiled output; the scan re-collects them");
     }
+
+    @Test
+    void generatedSourcesGoTooOrTheOldGeneratorsOutputCollidesWithTheNewOne(@TempDir Path ws)
+            throws Exception {
+        // causalnet/autojdk-maven-plugin: the baseline generated HelpMojo into one package, the
+        // raised maven-plugin-plugin generated it into another, both were compiled, and two classes
+        // claimed the same goal. The build aborted on a project where nothing was wrong.
+        Path gen = ws.resolve("target/generated-sources/plugin");
+        Files.createDirectories(gen);
+        Files.writeString(gen.resolve("HelpMojo.java"), "class HelpMojo {}");
+        Path classes = ws.resolve("target/classes");
+        Files.createDirectories(classes);
+        Files.writeString(classes.resolve("Old.class"), "stale");
+        Path src = ws.resolve("src/main/java");
+        Files.createDirectories(src);
+        Files.writeString(src.resolve("Keep.java"), "class Keep {}");
+
+        new Runner(ws, "/nonexistent").clearClasses();
+
+        assertFalse(Files.exists(gen.resolve("HelpMojo.java")), "generated source must go");
+        assertFalse(Files.exists(classes.resolve("Old.class")), "stale class must go");
+        assertTrue(Files.exists(src.resolve("Keep.java")), "real sources must survive");
+    }
 }
