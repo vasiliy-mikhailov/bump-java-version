@@ -280,9 +280,14 @@ final class Migrate {
             return line == 0 ? "" : "spring-boot line " + line + " left alone; ";
         }
         String want = BOOT_3;
+        String was = bootVersion();
+        // THE PARENT FIRST, BECAUSE THAT IS WHAT DECIDES. The recipe moves the parent to whatever
+        // version it was built against; this floor exists to land on the patch the corpus measured
+        // best, and only the parent pin can overrule the recipe on a parent-declared project.
+        boolean parent = Pom.parentVersion(ws, "spring-boot-starter-parent", want);
         Pom.setPropertyEverywhere(ws, "spring-boot.version", want);
         Pom.pluginVersion(ws, "spring-boot-maven-plugin", want);
-        return "spring-boot " + bootVersion() + " -> " + want + "; ";
+        return "spring-boot " + was + " -> " + want + (parent ? " (parent)" : " (property)") + "; ";
     }
 
     /**

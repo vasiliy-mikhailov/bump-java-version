@@ -122,6 +122,50 @@ final class Pom {
         }
     }
 
+    /**
+     * Pin the version of a {@code <parent>} declaration.
+     *
+     * <p>THIS IS THE ONLY THING A PARENT-DECLARED PROJECT READS. Every Maven Spring project in this
+     * corpus declares its Boot line through {@code spring-boot-starter-parent} and none of them
+     * reference {@code ${spring-boot.version}}, so the property pin that was supposed to guarantee
+     * the measured-best patch wrote a property nothing consumed and left the version to whatever
+     * the recipe happened to target.
+     *
+     * <p>Scoped to the matching parent block rather than the file, because a pom's own
+     * {@code <version>} sits a few lines below its parent's and a looser pattern rewrites the
+     * module's own coordinates.
+     */
+    static boolean parentVersion(Path ws, String artifactId, String v) throws IOException {
+        Pattern block = Pattern.compile("<parent>.*?</parent>", Pattern.DOTALL);
+        Pattern names = Pattern.compile("<artifactId>\\s*" + Pattern.quote(artifactId)
+                + "\\s*</artifactId>");
+        boolean any = false;
+        for (Path pom : Walls.poms(ws)) {
+            String s = Files.readString(pom);
+            Matcher m = block.matcher(s);
+            StringBuilder out = new StringBuilder();
+            boolean changed = false;
+            while (m.find()) {
+                String parent = m.group();
+                if (names.matcher(parent).find()) {
+                    String pinned = parent.replaceFirst("(<version>)[^<]+(</version>)",
+                            "$1" + Matcher.quoteReplacement(v) + "$2");
+                    if (!pinned.equals(parent)) {
+                        parent = pinned;
+                        changed = true;
+                    }
+                }
+                m.appendReplacement(out, Matcher.quoteReplacement(parent));
+            }
+            m.appendTail(out);
+            if (changed) {
+                Files.writeString(pom, out.toString());
+                any = true;
+            }
+        }
+        return any;
+    }
+
     /** Set a property in every pom that declares it; child properties shadow the parent's. */
     static void setPropertyEverywhere(Path ws, String name, String value) throws IOException {
         String pat = "(<" + Pattern.quote(name) + ">)[^<]*(</" + Pattern.quote(name) + ">)";
