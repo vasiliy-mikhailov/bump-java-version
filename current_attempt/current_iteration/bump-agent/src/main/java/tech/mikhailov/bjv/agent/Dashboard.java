@@ -532,12 +532,19 @@ public final class Dashboard {
             if (text.isEmpty()) {
                 return "";
             }
-            // The first line that is prose, not a frame: a stack trace's opening line is the
-            // exception, and that is the useful sentence.
+            // The first line worth reading. Not a stack frame, and not the state word: an
+            // account opens with its own verdict, which is already the column immediately to the
+            // left, so leading with it makes every summary on the page identical to its neighbour.
             String head = text.lines()
                     .map(String::strip)
-                    .filter(l -> !l.isEmpty() && !l.startsWith("at ") && !l.startsWith("... "))
-                    .findFirst().orElse(text);
+                    .filter(l -> !l.isEmpty() && !l.startsWith("at ") && !l.startsWith("... ")
+                            && !l.equalsIgnoreCase(state) && !l.replace("*", "").strip()
+                            .equalsIgnoreCase(state))
+                    .findFirst().orElse("");
+            if (head.isEmpty()) {
+                head = text.lines().map(String::strip).filter(l -> !l.isEmpty())
+                        .findFirst().orElse(text);
+            }
             if (head.length() > 160) {
                 head = head.substring(0, 160) + "…";
             }
