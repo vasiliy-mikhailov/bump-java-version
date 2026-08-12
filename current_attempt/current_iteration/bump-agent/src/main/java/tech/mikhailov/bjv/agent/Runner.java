@@ -37,7 +37,18 @@ final class Runner {
      */
     private static final Duration PATIENCE = Duration.ofSeconds(
             Long.parseLong(System.getenv().getOrDefault("BJV_BUILD_SECONDS", "1900")));
-    private static final Pattern TESTS = Pattern.compile("Tests run: (\\d+)");
+    /**
+     * That tests RAN, in the vocabulary of whichever build system ran them.
+     *
+     * <p>THIS USED TO BE SUREFIRE'S PHRASING AND NOTHING ELSE. Gradle prints "8 tests completed, 1
+     * failed", which never matched, so a Gradle run that executed its whole suite and had one
+     * assertion fail exited non-zero, looked to this class like a build that died before testing,
+     * and was reported as an infrastructure failure: "the tests could not be RUN". Maven, whose
+     * baseline carries -Dmaven.test.failure.ignore=true, exits 0 and never reached the question.
+     * That is why 28 of 30 no-baseline verdicts were Gradle against 2 Maven.
+     */
+    private static final Pattern TESTS = Pattern.compile(
+            "Tests run: (\\d+)|(\\d+) tests? completed");
 
     private final Path ws;
     private final String jvmRun;
@@ -180,7 +191,9 @@ final class Runner {
         int n = 0;
         Matcher m = TESTS.matcher(summary);
         while (m.find()) {
-            n += Integer.parseInt(m.group(1));
+            // Whichever alternative matched is the one that carries the number.
+            String surefire = m.group(1);
+            n += Integer.parseInt(surefire != null ? surefire : m.group(2));
         }
         return n;
     }

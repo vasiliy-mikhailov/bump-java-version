@@ -182,21 +182,27 @@ public final class Bump {
         // project is refused. Measured over the corpus: 28 of 30 no-baseline verdicts are Gradle
         // against 2 Maven, while the two pass at an identical rate otherwise, 39 apiece. That gap
         // was this line, not anything about the projects.
-        if (preTest.infra()) {
-            return "no-baseline\nthe tests could not be RUN under the project's own JDK " + from
-                    + ", so there is nothing to conserve:\n" + preTest.summary();
-        }
+        // THE REPORTS DECIDE, NOT THE EXIT CODE. Whether tests ran is a fact about the workspace,
+        // and it is written down: the JUnit XML each runner leaves behind. Asking the log instead
+        // meant asking whether one build system's phrasing appeared in another's output, and a
+        // Gradle suite that ran all eight of its tests and failed one was filed as an
+        // infrastructure failure because the exit code was non-zero and "Tests run:" is Maven's
+        // wording. The set below is read from those reports and is the honest answer to both
+        // questions at once: what ran, and what passed.
         // THE SET, NOT THE COUNT. Conservation is which tests passed, so a bump that loses one and
         // generates another cannot net out to zero.
         pre = Gate.passing(ws);
         baselineGreen = preTest.passed();
+        if (pre.isEmpty()) {
+            return "no-baseline\n" + (preTest.infra()
+                    ? "the tests could not be RUN under the project's own JDK " + from
+                    + ", so there is nothing to conserve:\n" + preTest.summary()
+                    : "no test passed under the project's own JDK " + from + ", so there is nothing"
+                    + " to conserve and a bump here would be unverifiable:\n" + preTest.summary());
+        }
         trace.applied("baseline", "tests passing under JDK " + from + ": " + pre.size()
                 + (baselineGreen ? "" : " (the suite is not all green; the red ones were red before"
                 + " this bump and are not in the set)"));
-        if (pre.isEmpty()) {
-            return "no-baseline\nno test reports under JDK " + from + ", so there is nothing to "
-                    + "conserve and a bump here would be unverifiable";
-        }
 
         // ---- SECURITY BEFORE: the project's own state, and the last moment it still is.
         // Migrate applies recipes, floors and a target sweep next, every one of which moves a

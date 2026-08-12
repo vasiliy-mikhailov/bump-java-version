@@ -66,4 +66,25 @@ class ARedTestBeforeTheBumpIsNotThisBumpsProblemTest {
         Gate.Verdict none = Gate.decide(Set.of(), Set.of("A#one"), true, 21, 21);
         assertEquals("NO_BASELINE_NOTESTS", none.state());
     }
+
+    @Test
+    void aGradleSuiteThatRanIsNotAnInfrastructureFailure() {
+        // Verbatim from 5jyo/message-queue's baseline: eight tests ran, one assertion failed, and
+        // Gradle exited non-zero. The harness read "Tests run:" -- surefire's wording, absent here
+        // -- concluded no test had executed, and reported "the tests could not be RUN".
+        String gradle = String.join("\n",
+                "> Task :test",
+                "com.example.messagequeue.test.KotestUseTest > Then: topic should be empty FAILED",
+                "    io.kotest.assertions.AssertionFailedError at KotestUseTest.kt:84",
+                "> Task :test FAILED",
+                "8 tests completed, 1 failed",
+                "BUILD FAILED in 39s");
+        assertEquals(8, Runner.testsIn(gradle), "the suite plainly ran, in Gradle's own words");
+
+        String maven = "[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0";
+        assertEquals(12, Runner.testsIn(maven), "and surefire still counts");
+
+        String died = "[ERROR] COMPILATION ERROR : cannot find symbol";
+        assertEquals(0, Runner.testsIn(died), "a build that died before testing counts nothing");
+    }
 }
