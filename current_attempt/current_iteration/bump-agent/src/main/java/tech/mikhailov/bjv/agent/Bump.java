@@ -190,7 +190,9 @@ public final class Bump {
         securityBeforePhase();
 
         // ---- PREPARE: deterministic pre-pass first, then the proactive steps, judged.
-        String prePass = new Migrate(ws, hoptools, trace).run(from, to);
+        // The before-scan travels into the migration: the Tomcat floor has to know which line the
+        // project actually resolved, and no build file says that.
+        String prePass = new Migrate(ws, hoptools, trace).run(from, to, before);
         preparePhase(prePass);
 
         // ---- BUMP: land the target, judged against the pin grep re-run after the edits.

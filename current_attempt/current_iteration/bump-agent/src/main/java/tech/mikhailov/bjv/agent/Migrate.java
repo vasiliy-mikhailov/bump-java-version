@@ -42,8 +42,44 @@ final class Migrate {
         this.trace = trace;
     }
 
+    /**
+     * The Tomcat floor for the 17->21 hop.
+     *
+     * <p>Measured, not chosen: this corpus scores tomcat-embed-core 9.0.65 at 22 CRITICAL+HIGH,
+     * 9.0.83 at 19 and 9.0.105 at 14. Nothing in a Java bump ever looked at that. Tomcat moved
+     * because SPRING moved -- Boot 2.7.18 pins tomcat.version 9.0.83 -- so the project inherited
+     * whichever Tomcat its framework happened to carry, and 9.0.83 is the last patch of Boot 2.7's
+     * line rather than of Tomcat's.
+     */
+    private static final String TOMCAT_9 = "9.0.105";
+
+    /**
+     * The Boot line a target JDK can actually run, and the version to land on.
+     *
+     * <p>SPRING BOOT 2.7 DOES NOT SUPPORT JAVA 21. It was the last 2.x line, it went end-of-life in
+     * 2023, and a 17->21 hop that lifts a Boot 2.7.3 project to 2.7.18 has moved it to the newest
+     * patch of a line that cannot run the target. The measurement agrees: this corpus scores Boot
+     * 3.5.x at 1 CRITICAL+HIGH against 2.7.18's tens, and 3.5.16 pins tomcat 10.1.55 -- the exact
+     * version trivy names as the fix for what the newest Tomcat 9 still carries.
+     *
+     * <p>The cost is honest and large: 2 to 3 is the jakarta rename, the highest-variance migration
+     * in this system, and the one measured losing 1916 of 2409 tests on a repo that took the jump
+     * unprepared. It is attempted anyway because the gate is the arbiter -- a migration that loses a
+     * test fails and says so -- and because leaving a project on an EOL line that cannot run its own
+     * target is not a smaller risk, only a quieter one.
+     */
+    private static final String BOOT_3 = "3.5.16";
+
+    /** The family moves in lockstep or the build breaks: they share a version by contract. */
+    private static final List<String> TOMCAT_EMBED = List.of(
+            "tomcat-embed-core", "tomcat-embed-el", "tomcat-embed-websocket");
+
     /** Recipes, then floors, then the target sweep. Returns what to tell the agents was done. */
     String run(String from, String to) throws IOException {
+        return run(from, to, null);
+    }
+
+    String run(String from, String to, Security.Scan before) throws IOException {
         StringBuilder did = new StringBuilder();
         int target = Integer.parseInt(to);
 
@@ -56,7 +92,7 @@ final class Migrate {
             did.append("no pom.xml: the recipe program is Maven-only, floors still apply\n");
         }
 
-        did.append(floors(target)).append('\n');
+        did.append(floors(target, before)).append('\n');
         did.append(propagate(target));
         trace.applied("migrate", did.toString());
         return did.toString();
@@ -84,7 +120,10 @@ final class Migrate {
             }
         }
         int boot = bootLine();
-        if (boot == 2) {
+        if (boot == 2 && target >= 21) {
+            // The line the target can run, not the newest patch of the line it is on.
+            recipes.add("org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5");
+        } else if (boot == 2) {
             recipes.add("org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7");
         } else if (boot == 3) {
             recipes.add("org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5");
@@ -141,7 +180,7 @@ final class Migrate {
      * {@code UpgradeDependencyVersion} reports BUILD SUCCESS while changing zero files in exactly
      * those cases.
      */
-    private String floors(int target) throws IOException {
+    private String floors(int target, Security.Scan before) throws IOException {
         StringBuilder did = new StringBuilder("floors: ");
         if (!Pom.isMaven(ws)) {
             // The floors below are dependencyManagement entries, which a Gradle build does not
@@ -176,7 +215,82 @@ final class Migrate {
             Pom.setPropertyEverywhere(ws, "kotlin.version", "2.3.20");
             did.append("kotlin 2.3.20; ");
         }
+        did.append(spring(target));
+        did.append(tomcat(target, before));
         return did.toString();
+    }
+
+    /**
+     * Land Spring Boot on the measured-best patch of the line the recipe moved it to.
+     *
+     * <p>The recipe knows which LINE to go to; it does not know which patch of that line this
+     * corpus scores best, and it targets whatever it was built against. One property, which is
+     * what a Boot project reads whether the BOM arrives through a parent or an import.
+     */
+    private String spring(int target) throws IOException {
+        if (!Pom.isMaven(ws) || bootLine() == 0) {
+            return "";
+        }
+        String want = target >= 21 ? BOOT_3 : null;
+        if (want == null) {
+            return "";
+        }
+        Pom.setPropertyEverywhere(ws, "spring-boot.version", want);
+        Pom.pluginVersion(ws, "spring-boot-maven-plugin", want);
+        return "spring-boot " + want + "; ";
+    }
+
+    /**
+     * Lift Tomcat to the newest patch of the line the project is already on.
+     *
+     * <p>GATED ON THE LINE, NOT ON THE WORD "TOMCAT". Tomcat 10 renamed javax.* to jakarta.*, so
+     * pinning a 9.0.x onto a Boot 3 project that resolved 10.1.x would not be a floor, it would be
+     * a source-breaking downgrade. The trigger is therefore the version the BEFORE SCAN actually
+     * resolved, which is why the scan runs ahead of this: without a measurement there is no way to
+     * tell a Tomcat 9 project from a Tomcat 10 one by looking at the build files.
+     *
+     * <p>Both mechanisms, because either alone is a silent no-op half the time: the property is
+     * what Boot's BOM reads when it arrives through a parent, and a dependencyManagement entry is
+     * what wins when the BOM arrives at scope=import. That is the same trap the Lombok floor was
+     * measured into.
+     */
+    private String tomcat(int target, Security.Scan before) throws IOException {
+        if (target != 21 || before == null || !before.measured() || !Pom.isMaven(ws)) {
+            return "";
+        }
+        if (bootLine() > 0) {
+            // Spring owns tomcat.version, and Boot 3.5 brings 10.1.55, which is newer than any
+            // Tomcat 9. Pinning a 9.0.x underneath it would be a downgrade across the jakarta line.
+            return "tomcat left to spring-boot " + BOOT_3 + " (pins 10.1.55); ";
+        }
+        String resolved = before.inventory().stream()
+                .filter(p -> p.name().endsWith(":tomcat-embed-core"))
+                .map(Security.Pkg::version).findFirst().orElse("");
+        if (!resolved.startsWith("9.0.")) {
+            return resolved.isBlank() ? "" : "tomcat " + resolved + " left alone (not the 9.0 line); ";
+        }
+        if (compare(resolved, TOMCAT_9) >= 0) {
+            return "tomcat " + resolved + " already at or past " + TOMCAT_9 + "; ";
+        }
+        Pom.setPropertyEverywhere(ws, "tomcat.version", TOMCAT_9);
+        for (String artifact : TOMCAT_EMBED) {
+            Pom.manage(ws, "org.apache.tomcat.embed", artifact, TOMCAT_9);
+        }
+        return "tomcat " + resolved + " -> " + TOMCAT_9 + " (family in lockstep); ";
+    }
+
+    /** Dotted version order, so 9.0.105 is newer than 9.0.83 rather than alphabetically older. */
+    static int compare(String a, String b) {
+        String[] x = a.split("[.-]");
+        String[] y = b.split("[.-]");
+        for (int i = 0; i < Math.max(x.length, y.length); i++) {
+            int p = i < x.length && x[i].matches("\\d+") ? Integer.parseInt(x[i]) : 0;
+            int q = i < y.length && y[i].matches("\\d+") ? Integer.parseInt(y[i]) : 0;
+            if (p != q) {
+                return Integer.compare(p, q);
+            }
+        }
+        return 0;
     }
 
     /**
