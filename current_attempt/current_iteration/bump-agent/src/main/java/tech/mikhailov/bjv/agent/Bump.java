@@ -171,15 +171,28 @@ public final class Bump {
         runner.clearReports();
         Runner.Result preTest = runner.test(from);
         trace.built("baseline-test", preTest);
-        baselineGreen = !preTest.infra() && preTest.passed();
-        if (!baselineGreen) {
-            return "no-baseline\nthe tests are not green under the project's own JDK " + from
-                    + ", so conservation cannot be judged:\n" + preTest.summary();
+        // A RED TEST BEFORE THE BUMP IS NOT THIS BUMP'S PROBLEM. What conservation asks is whether
+        // the tests that passed still pass, and a suite with three broken tests answers that just as
+        // well as a green one: the three were red before anything was touched and stay outside the
+        // set. Refusing here measured nothing and called it rigour.
+        //
+        // IT ALSO JUDGED THE SAME CORPUS BY TWO STANDARDS. jvmjob runs Maven with
+        // -Dmaven.test.failure.ignore=true, so a Maven project with red tests exits 0, passes this
+        // check and conserves its green set; the Gradle invocation has no such flag, so an identical
+        // project is refused. Measured over the corpus: 28 of 30 no-baseline verdicts are Gradle
+        // against 2 Maven, while the two pass at an identical rate otherwise, 39 apiece. That gap
+        // was this line, not anything about the projects.
+        if (preTest.infra()) {
+            return "no-baseline\nthe tests could not be RUN under the project's own JDK " + from
+                    + ", so there is nothing to conserve:\n" + preTest.summary();
         }
         // THE SET, NOT THE COUNT. Conservation is which tests passed, so a bump that loses one and
         // generates another cannot net out to zero.
         pre = Gate.passing(ws);
-        trace.applied("baseline", "tests passing under JDK " + from + ": " + pre.size());
+        baselineGreen = preTest.passed();
+        trace.applied("baseline", "tests passing under JDK " + from + ": " + pre.size()
+                + (baselineGreen ? "" : " (the suite is not all green; the red ones were red before"
+                + " this bump and are not in the set)"));
         if (pre.isEmpty()) {
             return "no-baseline\nno test reports under JDK " + from + ", so there is nothing to "
                     + "conserve and a bump here would be unverifiable";
