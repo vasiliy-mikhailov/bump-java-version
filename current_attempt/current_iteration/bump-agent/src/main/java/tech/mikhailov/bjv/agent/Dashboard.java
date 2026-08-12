@@ -139,22 +139,27 @@ public final class Dashboard {
             .ag.on{background:#1f6feb;color:#fff}.ag.on b{color:#fff}
             .link{color:#30363d;font-size:13px}
             .link.looped{color:#d29922;font-weight:700}
-            .machine{padding:2px 24px 16px}
+            .machine{padding:0 24px 14px}
             .machine svg{width:100%;height:auto;display:block}
-            .machine .n rect{fill:#161b22;stroke:#30363d}
-            .machine .run rect{fill:#122033;stroke:#1f6feb}
-            .machine .nn{fill:#c9d1d9;font:600 15px ui-monospace,Menlo,monospace}
-            .machine .nl{fill:#7d8590;font:9px ui-monospace,Menlo,monospace;
-            text-transform:uppercase;letter-spacing:.08em}
-            .machine .ml{fill:#7d8590;font:10px ui-monospace,Menlo,monospace}
-            .machine .x rect{fill:#161b22;stroke:#30363d}
-            .machine .x.ok rect{fill:#12331f;stroke:#2ea043}
-            .machine .x.no rect{fill:#1d1517;stroke:#3d2a2d}
-            .machine .xn{fill:#c9d1d9;font:600 13px ui-monospace,Menlo,monospace}
+            .machine .c rect{fill:#161b22;stroke:#30363d;stroke-width:.8}
+            .machine .c.off rect{fill:#0d1117;stroke:#21262d}
+            .machine .cn{fill:#c9d1d9;font:600 10px ui-monospace,Menlo,monospace}
+            .machine .c.off .cn{fill:#484f58}
+            .machine .cl{fill:#7d8590;font:6.5px ui-monospace,Menlo,monospace;
+            letter-spacing:.04em}
+            .machine .ml{fill:#6e7681;font:6.5px ui-monospace,Menlo,monospace}
+            .machine .x rect{fill:#12181f;stroke:#21262d;stroke-width:.8}
+            .machine .x.ok rect{fill:#0f2417;stroke:#2ea043}
+            .machine .x.no rect{fill:#1d1416;stroke:#3d2a2d}
+            .machine .x.zero rect{fill:#0d1117;stroke:#1b2027}
+            .machine .xn{fill:#c9d1d9;font:600 9.5px ui-monospace,Menlo,monospace}
             .machine .x.ok .xn{fill:#3fb950}
-            .machine .xs{fill:#c9d1d9;font:11px ui-monospace,Menlo,monospace}
+            .machine .x.zero .xn{fill:#484f58}
+            .machine .xs{fill:#c9d1d9;font:8.5px ui-monospace,Menlo,monospace}
             .machine .x.ok .xs{fill:#3fb950}
-            .machine .xd{fill:#6e7681;font:10px ui-monospace,Menlo,monospace}
+            .machine .x.zero .xs{fill:#565d66}
+            .machine .xd{fill:#5c636b;font:7.5px ui-monospace,Menlo,monospace}
+            .machine .x.zero .xd{fill:#3a4148}
             .ev{border-left:2px solid #21262d;margin:0 24px;padding:12px 0 12px 16px}
             .ev.asked{border-color:#58a6ff}.ev.built{border-color:#d29922}
             .ev.settled{border-color:#3fb950}.ev.failed{border-color:#f85149}
@@ -388,12 +393,8 @@ public final class Dashboard {
         }
         // One tile per state actually present: a fixed list of every possible verdict would be
         // mostly zeroes, and a zero tile reads as a category that matters.
-        Map<String, Integer> byState = new LinkedHashMap<>();
-        facts.forEach(f -> byState.merge(f.state, 1, Integer::sum));
-        b.append("</div><div class=counts>");
-        byState.forEach((s, n) -> b.append("<div class=c><b>").append(n)
-                .append("</b><span class='s ").append(esc(s)).append("'>").append(esc(s))
-                .append("</span></div>"));
+        // The per-state pills used to live here. They are the diagram's nodes now, and showing a
+        // number twice on one screen invites the reader to look for the difference between them.
         b.append("</div>");
         // HOW FAR THE FLEET GETS. A state histogram says what bumps became; this says where they
         // stop, which is the question a run is actually being watched to answer.
@@ -419,70 +420,106 @@ public final class Dashboard {
     };
 
     /**
-     * The whole fleet as a state machine: queued, bumping, and the exits.
+     * THE WHOLE MACHINE: the states a bump moves through, and the ones it leaves for.
      *
-     * <p>Inline SVG rather than boxes and borders, because the two things worth seeing are the
-     * SHAPE (one way in, a loop, seven ways out) and the WEIGHT on each path, and an edge whose
-     * thickness is its traffic shows the second without a number having to be read. The numbers are
-     * there anyway; the picture is what makes them comparable at a glance.
+     * <p>Drawn rather than listed, because the two things worth seeing are the SHAPE — one way in,
+     * a chain with a loop in the middle, several ways out — and the WEIGHT on each path. An edge
+     * whose thickness is its traffic answers "where does the fleet go" before any number is read.
+     *
+     * <p>Every exit is drawn even at zero. A state machine with its unused transitions removed is
+     * a picture of one run rather than of the machine, and "no bump has ever ended here" is itself
+     * worth seeing.
      */
     private static String machine(List<Facts> facts) {
         Map<String, Long> byState = new LinkedHashMap<>();
         facts.forEach(f -> byState.merge(f.state, 1L, Long::sum));
-        long queued = byState.getOrDefault("queued", 0L);
-        long running = byState.getOrDefault("bumping", 0L);
-        long left = EXITS.length;
-        List<Exit> live = new ArrayList<>();
-        for (Exit e : EXITS) {
-            if (byState.getOrDefault(e.state(), 0L) > 0) {
-                live.add(e);
-            }
-        }
-        if (live.isEmpty() && running == 0) {
-            return "";
-        }
-        long settled = live.stream().mapToLong(e -> byState.getOrDefault(e.state(), 0L)).sum();
-        int rows = Math.max(live.size(), 1);
-        int h = Math.max(150, 34 * rows + 40);
-        int mid = h / 2;
 
-        StringBuilder g = new StringBuilder("<div class=machine><svg viewBox='0 0 940 " + h
-                + "' preserveAspectRatio='xMidYMid meet' role='img'>");
-        g.append("<defs><marker id='a' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='6' "
-                + "markerHeight='6' orient='auto'><path d='M0,0 L10,5 L0,10 z' fill='#484f58'/>"
+        // Where each terminal leaves from: the last stage that spoke for the bumps that ended there.
+        Map<String, Integer> leavesAt = new LinkedHashMap<>();
+        for (Exit e : EXITS) {
+            facts.stream().filter(f -> f.state.equals(e.state()) && f.last() >= 0)
+                    .mapToInt(Facts::last).max()
+                    .ifPresent(st -> leavesAt.put(e.state(), st));
+        }
+
+        int n = CHAIN.length;
+        int x0 = 128;
+        int step = 82;
+        int spine = 34;
+        int exitTop = 86;
+        int rowH = 26;
+        int h = exitTop + rowH * EXITS.length + 12;
+
+        StringBuilder g = new StringBuilder("<div class=machine><svg viewBox='0 0 1000 " + h
+                + "' preserveAspectRatio='xMidYMin meet' role='img'>");
+        g.append("<defs><marker id='a' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='5' "
+                + "markerHeight='5' orient='auto'><path d='M0,0 L10,5 L0,10 z' fill='#484f58'/>"
                 + "</marker></defs>");
 
-        // queued -> bumping -> the exits
-        g.append(node(20, mid - 21, 120, 42, "queued", queued, "wait"));
-        g.append(edge(140, mid, 250, mid, running));
-        g.append(node(250, mid - 26, 150, 52, "bumping", running, "run"));
-        // The loop that makes it a machine rather than a pipeline: the gate hands back to
-        // troubleshoot and troubleshoot hands back to the gate, until one of them stops.
-        g.append("<path d='M325,").append(mid - 26).append(" C305,").append(mid - 72)
-                .append(" 395,").append(mid - 72).append(" 375,").append(mid - 26)
-                .append("' fill='none' stroke='#484f58' stroke-width='1.4' marker-end='url(#a)'/>");
-        g.append("<text x='350' y='").append(mid - 60)
-                .append("' class='ml' text-anchor='middle'>gate \u21c4 troubleshoot</text>");
+        // queued, then the chain
+        long queued = byState.getOrDefault("queued", 0L);
+        g.append(chip(14, spine - 13, 96, "" + queued, "queued", "wait"));
+        g.append("<line x1='110' y1='" + spine + "' x2='" + (x0 - 20) + "' y2='" + spine
+                + "' stroke='#484f58' stroke-width='1.2' marker-end='url(#a)'/>");
+        for (int i = 0; i < n; i++) {
+            final int stage = i;
+            long entered = facts.stream().filter(f -> f.ran.contains(stage)).count();
+            int x = x0 + i * step;
+            g.append(chip(x - 20, spine - 13, 74, "" + entered, CHAIN[i][0], entered == 0 ? "off" : "on"));
+            if (i + 1 < n) {
+                g.append("<line x1='" + (x + 54) + "' y1='" + spine + "' x2='" + (x + step - 22)
+                        + "' y2='" + spine + "' stroke='#484f58' stroke-width='1.2'"
+                        + " marker-end='url(#a)'/>");
+            }
+        }
+        // the loop that makes it a machine: the gate hands back to the troubleshooter and back again
+        int lx = x0 + 4 * step + 17;
+        g.append("<path d='M" + (lx - 14) + "," + (spine - 13) + " C" + (lx - 22) + ","
+                + (spine - 34) + " " + (lx + 22) + "," + (spine - 34) + " " + (lx + 14) + ","
+                + (spine - 13) + "' fill='none' stroke='#484f58' stroke-width='1.2'"
+                + " marker-end='url(#a)'/>");
+        g.append("<text x='" + lx + "' y='" + (spine - 27) + "' class='ml' text-anchor='middle'>"
+                + "gate \u21c4</text>");
 
-        int y = (h - 34 * rows) / 2;
-        for (Exit e : live) {
-            long n = byState.getOrDefault(e.state(), 0L);
-            int cy = y + 17;
-            g.append(curve(400, mid, 610, cy, n, settled, e.good()));
-            g.append(exitNode(610, y, e, n));
-            y += 34;
+        long settled = 0;
+        for (Exit e : EXITS) {
+            settled += byState.getOrDefault(e.state(), 0L);
+        }
+        int y = exitTop;
+        for (Exit e : EXITS) {
+            long c = byState.getOrDefault(e.state(), 0L);
+            int from = x0 + leavesAt.getOrDefault(e.state(), 0) * step + 17;
+            if (c > 0) {
+                g.append(curve(from, spine + 13, 712, y + 9, c, settled, e.good()));
+            }
+            g.append(exitChip(712, y, e, c));
+            y += rowH;
         }
         return g.append("</svg></div>").toString();
     }
 
-    private static String node(int x, int y, int w, int hh, String label, long n, String cls) {
-        return "<g class='n " + cls + "'><rect x='" + x + "' y='" + y + "' width='" + w
-                + "' height='" + hh + "' rx='8'/>"
-                + "<text x='" + (x + w / 2) + "' y='" + (y + hh / 2 - 2) + "' class='nn'"
-                + " text-anchor='middle'>" + n + "</text>"
-                + "<text x='" + (x + w / 2) + "' y='" + (y + hh / 2 + 12) + "' class='nl'"
+    /** A state on the spine: its count over its name, small enough that nine fit across. */
+    private static String chip(int x, int y, int w, String num, String label, String cls) {
+        return "<g class='c " + cls + "'><rect x='" + x + "' y='" + y + "' width='" + w
+                + "' height='26' rx='5'/>"
+                + "<text x='" + (x + w / 2) + "' y='" + (y + 11) + "' class='cn'"
+                + " text-anchor='middle'>" + esc(num) + "</text>"
+                + "<text x='" + (x + w / 2) + "' y='" + (y + 21) + "' class='cl'"
                 + " text-anchor='middle'>" + esc(label) + "</text></g>";
     }
+
+    private static String exitChip(int x, int y, Exit e, long n) {
+        String cls = n == 0 ? "zero" : e.good() ? "ok" : "no";
+        return "<g class='x " + cls + "'><rect x='" + x + "' y='" + y + "' width='274' height='19'"
+                + " rx='9'/>"
+                + "<text x='" + (x + 24) + "' y='" + (y + 13) + "' class='xn'"
+                + " text-anchor='end'>" + n + "</text>"
+                + "<text x='" + (x + 32) + "' y='" + (y + 13) + "' class='xs'>"
+                + esc(e.state()) + "</text>"
+                + "<text x='" + (x + 266) + "' y='" + (y + 13) + "' class='xd'"
+                + " text-anchor='end'>" + esc(e.label()) + "</text></g>";
+    }
+
 
     private static String exitNode(int x, int y, Exit e, long n) {
         return "<g class='x " + (e.good() ? "ok" : "no") + "'>"
