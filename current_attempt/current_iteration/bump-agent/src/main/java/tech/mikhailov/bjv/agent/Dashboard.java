@@ -116,7 +116,9 @@ public final class Dashboard {
             .dep.moved td:nth-child(3){color:#3fb950}
             .dep.added td{background:#0f1a12}.dep.gone td{background:#1a0f11}
             tr.dep:not(.moved):not(.added):not(.gone) td{color:#6e7681}
-            td.latest{color:#8b949e;font-size:12px;max-width:52ch}
+            td.latest{color:#8b949e;font-size:12px;max-width:60ch}
+            td.latest details pre{max-height:20rem;overflow:auto;font-size:11px}
+            td.latest summary{color:#8b949e}
             .empty{padding:48px 24px;color:#7d8590}
             .back{padding:14px 24px;display:block}
             .pipe{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:12px 24px;
@@ -495,12 +497,55 @@ public final class Dashboard {
                     + "<td>" + esc(tests) + trend + "</td>"
                     + "<td>" + tgt + "</td>"
                     + "<td>" + cves() + "</td>"
-                    + "<td class=k>" + esc(walls.isEmpty() ? "—" : String.join(", ", walls))
-                    + "</td>"
+                    + "<td class=k>" + wallsCell() + "</td>"
                     + "<td>" + (minutes > 0 ? esc(clock(minutes * 60_000L)) : "—") + "</td>"
                     + "<td>" + esc(clock(last - first)) + "<div class=k>" + events
                     + " event(s)" + quiet() + "</div></td>"
-                    + "<td class=latest>" + esc(latest) + "</td></tr>";
+                    + "<td class=latest>" + latest() + "</td></tr>";
+        }
+
+        /** Every wall that fired, all of them, folded when the list outgrows the column. */
+        String wallsCell() {
+            if (walls.isEmpty()) {
+                return "—";
+            }
+            String all = String.join(", ", walls);
+            if (walls.size() <= 3) {
+                return esc(all);
+            }
+            return "<details><summary>" + walls.size() + " walls</summary>"
+                    + walls.stream().map(Dashboard::esc)
+                    .collect(java.util.stream.Collectors.joining("<br>")) + "</details>";
+        }
+
+        /**
+         * The last thing this bump said, without emptying a stack trace into the table.
+         *
+         * <p>A settlement's argument can be a MySQL connection failure with forty frames and a
+         * "... 14 more" elision in it. Clipped to a column width that reads as a truncated list
+         * with something to click, and there is nothing to click: the elision is javac's, not ours.
+         * So the cell shows the first sentence and opens to the whole thing, and the frames that
+         * follow are indented rather than wrapped into the sentence.
+         */
+        String latest() {
+            String text = latest == null ? "" : latest.strip();
+            if (text.isEmpty()) {
+                return "";
+            }
+            // The first line that is prose, not a frame: a stack trace's opening line is the
+            // exception, and that is the useful sentence.
+            String head = text.lines()
+                    .map(String::strip)
+                    .filter(l -> !l.isEmpty() && !l.startsWith("at ") && !l.startsWith("... "))
+                    .findFirst().orElse(text);
+            if (head.length() > 160) {
+                head = head.substring(0, 160) + "…";
+            }
+            if (text.length() <= head.length() + 8) {
+                return esc(head);
+            }
+            return "<details><summary>" + esc(head) + "</summary><pre>" + esc(text)
+                    + "</pre></details>";
         }
 
         /**
