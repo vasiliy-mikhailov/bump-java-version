@@ -191,6 +191,13 @@ final class Jars {
         if (types.size() > 60) {
             out.append("    ... and ").append(types.size() - 60).append(" more\n");
         }
+        String deps = declared(group, artifact, v);
+        if (!deps.isBlank()) {
+            out.append("\n  IT DECLARES THESE DEPENDENCIES\n").append(deps);
+            out.append("    A class this artifact uses but does not contain lives in one of these.\n"
+                    + "    That matters when only some classes here are the blocker: the pieces\n"
+                    + "    underneath are often untouched by the javax move and still usable.\n");
+        }
         out.append("\n  Ask again with `type` set to one of these for its members.\n");
         return out.toString();
     }
@@ -205,8 +212,15 @@ final class Jars {
         try (JarFile jf = new JarFile(jar.toFile())) {
             JarEntry e = jf.getJarEntry(want);
             if (e == null) {
-                throw new NotFound(type + " is not in " + artifact + "-" + v
-                        + ".jar. Ask without `type` for the list of what is.");
+                // GUESSING THE COORDINATES IS THE FAILURE MODE. A troubleshooter looking for
+                // DefaultKaptcha guessed com.google.code:kaptcha from the package name, got nothing,
+                // and concluded the migration was impossible. The package name is not the artifact
+                // name; the pom next door says which artifact it really is.
+                String deps = declared(group, artifact, v);
+                throw new NotFound(type + " is not in " + artifact + "-" + v + ".jar."
+                        + (deps.isBlank() ? " Ask without `type` for the list of what is."
+                        : " It may be in one of the artifacts this one declares:\n" + deps
+                        + "Do not guess coordinates from the package name; they rarely match."));
             }
             try (InputStream in = jf.getInputStream(e)) {
                 ClassFile cf = ClassFile.read(in);
@@ -232,6 +246,62 @@ final class Jars {
         } catch (IOException io) {
             throw new NotFound("could not read " + type + ": " + io.getMessage());
         }
+    }
+
+    /**
+     * The dependencies an artifact declares, read from the pom beside its jar.
+     *
+     * <p>Deliberately not a search. The local repository holds 139,935 jars and scanning them for a
+     * class name is neither cheap nor necessary: the artifact that owns a type a jar references is
+     * almost always one this pom already names.
+     */
+    private String declared(String group, String artifact, String version) {
+        Path pom = repository.resolve(group.replace('.', '/')).resolve(artifact).resolve(version)
+                .resolve(artifact + "-" + version + ".pom");
+        if (!Files.isRegularFile(pom)) {
+            return "";
+        }
+        String text;
+        try {
+            text = Files.readString(pom);
+        } catch (IOException unreadable) {
+            return "";
+        }
+        int start = text.indexOf("<dependencies>");
+        int end = text.lastIndexOf("</dependencies>");
+        if (start < 0 || end < start) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder();
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("<dependency>(.*?)</dependency>", java.util.regex.Pattern.DOTALL)
+                .matcher(text.substring(start, end));
+        int shown = 0;
+        while (m.find() && shown < 25) {
+            String g = tag(m.group(1), "groupId");
+            String a = tag(m.group(1), "artifactId");
+            String v = tag(m.group(1), "version");
+            String scope = tag(m.group(1), "scope");
+            if (a.isBlank()) {
+                continue;
+            }
+            out.append("    ").append(g).append(':').append(a);
+            if (!v.isBlank()) {
+                out.append(':').append(v);
+            }
+            if (!scope.isBlank()) {
+                out.append("  (").append(scope).append(')');
+            }
+            out.append('\n');
+            shown++;
+        }
+        return out.toString();
+    }
+
+    private static String tag(String xml, String name) {
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("<" + name + ">\\s*([^<]*?)\\s*</" + name + ">").matcher(xml);
+        return m.find() ? m.group(1) : "";
     }
 
     private static String simple(String fqcn) {
