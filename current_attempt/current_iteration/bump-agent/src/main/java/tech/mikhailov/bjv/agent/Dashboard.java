@@ -107,6 +107,7 @@ public final class Dashboard {
             .sema i.none{background:transparent;border-style:dashed}
             .hop{color:#a371f7}
             .cve-down{color:#3fb950}.cve-up{color:#f85149}.cve-flat{color:#8b949e}
+            .t-ok{color:#3fb950}.t-low{color:#f85149}
             td.latest{color:#8b949e;font-size:12px;max-width:52ch}
             .empty{padding:48px 24px;color:#7d8590}
             .back{padding:14px 24px;display:block}
@@ -403,6 +404,9 @@ public final class Dashboard {
         String stamp = "";
         String pre = "";
         String lost = "";
+        /** What the FIRST gate turn lost, so a row can show the loop closing, not only where it stopped. */
+        String lostFirst = "";
+        int turns;
         int cveBefore = -1;
         int cveAfter = -1;
         String target = "";
@@ -437,6 +441,8 @@ public final class Dashboard {
             c.walls.addAll(walls);
             c.cveBefore = cveBefore;
             c.cveAfter = cveAfter;
+            c.lostFirst = lostFirst;
+            c.turns = turns;
             c.baselineGreen = baselineGreen;
             c.conserved = conserved;
             c.targetLanded = targetLanded;
@@ -448,19 +454,38 @@ public final class Dashboard {
             String[] parts = bump.split("\\|");
             String repo = parts.length > 0 ? parts[0] : bump;
             String sha = parts.length > 1 ? parts[1] : "";
+            // A loop that halved its losses and a loop that never moved read identically when only
+            // the last turn is shown, and that difference is the whole point of having a loop:
+            // 47 lost then 23 lost is the reflect loop working, even where it did not win.
+            String trend = turns > 1
+                    ? "<div class=k>turn " + turns
+                    + (lostFirst.isBlank() || lostFirst.equals(lost) ? "" : ", was " + lostFirst)
+                    + "</div>"
+                    : "";
             String tests = pre.isBlank() ? "—"
                     : (lost.isBlank() ? pre + " passing"
                     : ("0".equals(lost) ? pre + " conserved" : lost + " of " + pre + " lost"));
-            String tgt = target.isBlank() ? "—"
-                    : (required.isBlank() ? target : target + " / " + required);
+            // 17 / 17 on a FAILED row is not a contradiction: the target leg passed and another leg
+            // did not. Colouring the leg stops the number reading as the verdict for the whole bump.
+            String tgt;
+            if (target.isBlank()) {
+                tgt = "<span class=k>—</span>";
+            } else if (required.isBlank()) {
+                tgt = esc(target);
+            } else {
+                boolean landed = num(target) >= num(required);
+                tgt = "<span class='t-" + (landed ? "ok" : "low") + "'>" + esc(target) + " / "
+                        + esc(required) + "</span>"
+                        + (landed ? "" : "<div class=k>not landed</div>");
+            }
             return "<tr><td><a href=\"bump?slug=" + url(slug) + "&amp;key=" + url(bump) + "\">"
                     + esc(repo) + "</a><div class=k>" + esc(sha.length() > 8
                     ? sha.substring(0, 8) : sha) + "</div></td>"
                     + "<td class=hop>" + esc(hop.isBlank() ? "—" : hop) + "</td>"
                     + "<td><span class='s " + esc(state) + "'>" + esc(state) + "</span>"
                     + sema() + "</td>"
-                    + "<td>" + esc(tests) + "</td>"
-                    + "<td>" + esc(tgt) + "</td>"
+                    + "<td>" + esc(tests) + trend + "</td>"
+                    + "<td>" + tgt + "</td>"
                     + "<td>" + cves() + "</td>"
                     + "<td class=k>" + esc(walls.isEmpty() ? "—" : String.join(", ", walls))
                     + "</td>"
@@ -579,6 +604,10 @@ public final class Dashboard {
                     } else if (stage.equals("gate")) {
                         Matcher m = GATE.matcher(what);
                         if (m.find()) {
+                            f.turns++;
+                            if (f.lostFirst.isBlank()) {
+                                f.lostFirst = m.group(2);
+                            }
                             f.pre = m.group(1);
                             f.lost = m.group(2);
                             f.target = m.group(3);
