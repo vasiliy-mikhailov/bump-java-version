@@ -39,10 +39,55 @@ final class Tools {
     }
 
     /** Read and look around: what a judge needs to check a claim. */
-    static Map<ToolSpecification, ToolExecutor> reading(Path root, Trace trace, String agent) {
+    static Map<ToolSpecification, ToolExecutor> reading(Path root, Tree tree, Trace trace,
+                                                       String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
         tools.putAll(jar());
+        tools.putAll(history(tree));
         return recorded(tools, trace, agent);
+    }
+
+    /**
+     * What has already been done to this workspace, and what each of those steps changed.
+     *
+     * <p>Given to everyone. Each stage now commits as it lands, which means a critic is handed only
+     * its own producer's diff -- right for judging that producer, and a loss of every bit of context
+     * about what came before. Before the commits that context arrived whether it was wanted or not,
+     * as one ever-growing diff. This is the same information, asked for rather than dumped.
+     */
+    private static Map<ToolSpecification, ToolExecutor> history(Tree tree) {
+        Map<ToolSpecification, ToolExecutor> two = new LinkedHashMap<>();
+
+        two.put(ToolSpecification.builder()
+                .name("history")
+                .description("What has already been done to this workspace, oldest first, as "
+                        + "<sha>  <what it was>. Stages of this migration appear as `bjv: ...`; "
+                        + "anything below them is the project's own history. Use it to find out "
+                        + "what an earlier stage did before assuming it did nothing.")
+                .parameters(JsonObjectSchema.builder().build())
+                .build(), (request, memoryId) -> {
+                    String log = tree.log();
+                    return log.isBlank() ? "no history could be read" : log;
+                });
+
+        two.put(ToolSpecification.builder()
+                .name("changed_in")
+                .description("The edits one entry from `history` actually made. A label says what a "
+                        + "step was called; this says what it did.")
+                .parameters(JsonObjectSchema.builder()
+                        .addStringProperty("sha", "a commit from history")
+                        .required("sha")
+                        .build())
+                .build(), (request, memoryId) -> {
+                    String asked = field(request.arguments(), "sha").strip();
+                    String sha = tree.resolve(asked);
+                    if (sha.isBlank()) {
+                        return "no commit called " + asked + ". Use history for the list.";
+                    }
+                    String shown = tree.show(sha);
+                    return shown.isBlank() ? "nothing readable at " + asked : shown;
+                });
+        return two;
     }
 
     /**
@@ -61,6 +106,7 @@ final class Tools {
                                                          Trace trace, String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
         tools.putAll(jar());
+        tools.putAll(history(tree));
         tools.putAll(rewind(tree, floor));
         return recorded(tools, trace, agent);
     }
@@ -111,12 +157,14 @@ final class Tools {
     }
 
     /** Read, look around, and edit EXISTING files — outside the test tree. Producers only. */
-    static Map<ToolSpecification, ToolExecutor> patching(Path root, Runner runner, String targetJdk,
-                                                         Trace trace, String agent) {
+    static Map<ToolSpecification, ToolExecutor> patching(Path root, Runner runner, Tree tree,
+                                                         String targetJdk, Trace trace,
+                                                         String agent) {
         Map<ToolSpecification, ToolExecutor> tools =
                 only(root, Set.of("list_dir", "read_file", "edit_file"));
         tools.putAll(build(root, runner, targetJdk));
         tools.putAll(jar());
+        tools.putAll(history(tree));
         return recorded(guarded(tools), trace, agent);
     }
 

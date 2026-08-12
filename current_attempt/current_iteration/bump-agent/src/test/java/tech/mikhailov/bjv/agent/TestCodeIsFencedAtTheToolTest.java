@@ -42,7 +42,7 @@ class TestCodeIsFencedAtTheToolTest {
     void aProducerNeverGetsWriteFile(@TempDir Path ws) throws Exception {
         Files.writeString(ws.resolve("pom.xml"), "<project/>");
         Map<ToolSpecification, ToolExecutor> tools =
-                Tools.patching(ws, null, "17", new Silent(), "bumper");
+                Tools.patching(ws, null, tree(ws), "17", new Silent(), "bumper");
         assertFalse(tools.keySet().stream().anyMatch(s -> s.name().equals("write_file")),
                 "a new file is not a migration step");
         assertTrue(tools.keySet().stream().anyMatch(s -> s.name().equals("edit_file")));
@@ -51,7 +51,7 @@ class TestCodeIsFencedAtTheToolTest {
     @Test
     void aCriticCannotEditAtAll(@TempDir Path ws) throws Exception {
         Files.writeString(ws.resolve("pom.xml"), "<project/>");
-        Map<ToolSpecification, ToolExecutor> tools = Tools.reading(ws, new Silent(), "bump-critic");
+        Map<ToolSpecification, ToolExecutor> tools = Tools.reading(ws, tree(ws), new Silent(), "bump-critic");
         assertFalse(tools.keySet().stream().anyMatch(s -> s.name().startsWith("edit")
                         || s.name().startsWith("write")),
                 "a certification must not manufacture the evidence it certifies");
@@ -59,7 +59,7 @@ class TestCodeIsFencedAtTheToolTest {
 
     private static ToolExecutor executor(Path ws, String name) throws Exception {
         Files.writeString(ws.resolve("pom.xml"), "<project/>");
-        return Tools.patching(ws, null, "17", new Silent(), "troubleshooter").entrySet().stream()
+        return Tools.patching(ws, null, tree(ws), "17", new Silent(), "troubleshooter").entrySet().stream()
                 .filter(e -> e.getKey().name().equals(name))
                 .map(Map.Entry::getValue)
                 .findFirst()
@@ -94,5 +94,10 @@ class TestCodeIsFencedAtTheToolTest {
 
         public void priced(String b, String m, String i) {
         }
+    }
+
+    /** A tree over a workspace that is not a git repo: the history tools answer, they do not throw. */
+    private static Tree tree(Path ws) {
+        return new Tree(ws, note -> { });
     }
 }

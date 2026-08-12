@@ -197,6 +197,36 @@ final class Tree {
 
 
     /**
+     * Everything this harness has landed, oldest first, with the project's own HEAD beneath it.
+     *
+     * <p>Committing the stages made this readable for the first time and it should not be a
+     * privilege of the loop that happens to own the commits: a critic judging the bump has every
+     * reason to ask what prepare did, and before this it simply could not.
+     */
+    String log() {
+        try {
+            Shell.Output out = git("log", "--reverse", "--format=%h  %s", "-30");
+            return out.ok() ? out.text() : "";
+        } catch (IOException | InterruptedException e) {
+            return "";
+        }
+    }
+
+    /** What one landed step actually changed, which a one-line label cannot say. */
+    String show(String sha) {
+        try {
+            Shell.Output stat = git("show", "--stat=200", "--format=%h  %s", sha);
+            Shell.Output full = git("show", "-U2", "--format=", sha);
+            if (!stat.ok()) {
+                return "";
+            }
+            return trimmed(stat.text(), full.ok() ? full.text() : "");
+        } catch (IOException | InterruptedException e) {
+            return "";
+        }
+    }
+
+    /**
      * The landed steps since a floor, newest last, as {@code <sha>  <label>}.
      *
      * <p>What a loop needs to reason about its own campaign: which steps stuck, in what order, and

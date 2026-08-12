@@ -44,17 +44,19 @@ final class Agents {
     private final Runner runner;
     private final Trace trace;
     private final String targetJdk;
+    private final Tree tree;
 
-    Agents(ChatModel model, Path ws, Runner runner, String targetJdk, Trace trace) {
-        this(model, Model.forCritic(trace), ws, runner, targetJdk, trace);
+    Agents(ChatModel model, Path ws, Runner runner, Tree tree, String targetJdk, Trace trace) {
+        this(model, Model.forCritic(trace), ws, runner, tree, targetJdk, trace);
     }
 
-    Agents(ChatModel model, ChatModel judging, Path ws, Runner runner, String targetJdk,
-           Trace trace) {
+    Agents(ChatModel model, ChatModel judging, Path ws, Runner runner, Tree tree,
+           String targetJdk, Trace trace) {
         this.judging = judging;
         this.model = model;
         this.ws = ws;
         this.runner = runner;
+        this.tree = tree;
         this.targetJdk = targetJdk;
         this.trace = trace;
     }
@@ -262,8 +264,8 @@ final class Agents {
      * to a loop counter, and it is why this one can see the landed steps and rewind past a line that
      * led nowhere.
      */
-    Agent troubleshootLoopProposer(Tree tree, String floor) {
-        return runtime("troubleshoot-loop", steer("troubleshoot-loop", tree, floor), """
+    Agent troubleshootLoopProposer(String floor) {
+        return runtime("troubleshoot-loop", steer("troubleshoot-loop", floor), """
                 You are running the troubleshooting for one JDK migration. The gate has failed and                 the deterministic wall table recognised nothing in the failure.
 
                 You do not edit anything yourself. You decide what the next step should be, one                 step at a time, and a colleague carries it out and is reviewed for it. Your job is                 the sequence: what to try, in what order, and when to stop.
@@ -286,8 +288,8 @@ final class Agents {
      * steps adding up to nothing, or a declaration of defeat that had a route left. This one reads
      * the whole thing and is the only agent that may send the loop back to where it started.
      */
-    Agent troubleshootLoopCritic(Tree tree, String floor) {
-        return runtime("troubleshoot-loop-critic", steer("troubleshoot-loop-critic", tree, floor), """
+    Agent troubleshootLoopCritic(String floor) {
+        return runtime("troubleshoot-loop-critic", steer("troubleshoot-loop-critic", floor), """
                 A colleague ran the troubleshooting for a JDK migration and has stopped. You decide                 whether the job is actually done.
 
                 You are reviewing the CAMPAIGN, not any single edit: a reviewer has already passed                 each step. Read what the sequence adds up to. Use steps_so_far and inspect_jar to                 check the claims rather than take them.
@@ -448,16 +450,16 @@ final class Agents {
     // ---- wiring ----
 
     private Map<ToolSpecification, ToolExecutor> read(String agent) {
-        return Tools.reading(ws, trace, agent);
+        return Tools.reading(ws, tree, trace, agent);
     }
 
     /** Read, look inside jars, and move between landed steps. The outer troubleshoot pair. */
-    private Map<ToolSpecification, ToolExecutor> steer(String agent, Tree tree, String floor) {
+    private Map<ToolSpecification, ToolExecutor> steer(String agent, String floor) {
         return Tools.steering(ws, tree, floor, trace, agent);
     }
 
     private Map<ToolSpecification, ToolExecutor> patch(String agent) {
-        return Tools.patching(ws, runner, targetJdk, trace, agent);
+        return Tools.patching(ws, runner, tree, targetJdk, trace, agent);
     }
 
     /** One agent, already wired to the trace. Callers cannot reach a runtime that is not. */
