@@ -18,9 +18,19 @@ import java.util.regex.Pattern;
  * ahead of the agents because a step that can be decided by looking is not worth a model call, and
  * because a model that is handed the residue argues about a smaller problem.
  *
- * <p>THE SPRING LINE IS READ FROM THE PROJECT, NEVER FROM THE TARGET JDK. Selecting the 3.x
- * migration because the target is modern sent a Boot 2.0 project through the 2-to-3 jump: 1297 files
- * rewritten and 1916 of 2409 tests lost. The line a project is ON decides which upgrade it can take.
+ * <p>THE SPRING LINE IS READ FROM THE PROJECT, AND OVERRULED ONLY WHERE THE PROJECT'S LINE CANNOT
+ * RUN THE TARGET. Selecting the 3.x migration merely because the target was modern once sent a Boot
+ * 2.0 project through the 2-to-3 jump on an 11-to-17 hop: 1297 files rewritten and 1916 of 2409
+ * tests lost. That lesson stands wherever the project's own line is still viable, which is why
+ * targets through 17 keep the 2.7 ceiling. It stops applying at 21, where Boot 2.x cannot run the
+ * target at all and the quiet alternative is shipping a project that will not start. The rule is
+ * therefore: the line a project is on decides, until that line cannot run the target, and then the
+ * gate decides.
+ *
+ * <p>The distance matters and is recorded rather than assumed. A 2.7 project is one minor plus the
+ * jakarta rename from 3.x; a 2.0 project is seven. Both are attempted, both are traced with the
+ * version they started from, so the corpus can answer which distances survive instead of this
+ * comment guessing.
  */
 final class Migrate {
 
@@ -89,7 +99,13 @@ final class Migrate {
             Files.writeString(ws.resolve("rewrite.yml"), yaml(recipes));
             did.append(rewrite(from)).append('\n');
         } else {
-            did.append("no pom.xml: the recipe program is Maven-only, floors still apply\n");
+            // SAY THAT NONE OF THAT RAN. The recipe list is printed above before anything executes,
+            // so on a Gradle build the trace read as though the Spring migration had been applied
+            // when the rewrite plugin had never been invoked and the floors had all stood down. A
+            // reader cannot audit a decision the log misreports, and this one matters: a Gradle Boot
+            // 2 project bumped to 21 keeps a line that cannot run its target.
+            did.append("no pom.xml: NONE of the recipes above ran, and the floors below are skipped;"
+                    + " this is a Gradle build and the preparer handles its version work\n");
         }
 
         did.append(floors(target, before)).append('\n');
@@ -146,13 +162,37 @@ final class Migrate {
      * the first detector silently routed projects into the wrong migration.
      */
     int bootLine() throws IOException {
+        String v = bootVersion();
+        return v.isEmpty() ? 0 : Integer.parseInt(v.substring(0, v.indexOf('.')));
+    }
+
+    /**
+     * The declared Spring Boot version as {@code major.minor}, or empty for no Spring.
+     *
+     * <p>The minor is kept because the distance being travelled is the interesting number. Boot 2.7
+     * to 3.5 is one minor plus the jakarta rename; Boot 2.0 to 3.5 is seven, and 2.0 is the profile
+     * of the run that lost 1916 of 2409 tests. Reporting only the major made those two the same
+     * fact, so the corpus could not tell them apart afterwards.
+     *
+     * <p>THE SPELLINGS ARE MEASURED, NOT IMAGINED. The property arm used to enumerate three exact
+     * tag names and matched none of the seventeen property declarations in this corpus: real poms
+     * write spring.boot.version and spring-boot-dependencies.version, and the Gradle arm could not
+     * see a buildscript classpath coordinate at all. Six Boot projects read as having no Spring.
+     */
+    String bootVersion() throws IOException {
         Pattern parent = Pattern.compile(
                 "<artifactId>\\s*spring-boot-(?:starter-parent|dependencies)\\s*</artifactId>\\s*"
-                        + "<version>\\s*\\$?\\{?[^<}]*?(\\d+)\\.\\d+", Pattern.DOTALL);
+                        + "<version>\\s*\\$?\\{?[^<}]*?(\\d+)\\.(\\d+)", Pattern.DOTALL);
+        // spring-boot.version, spring.boot.version, spring-boot-version,
+        // spring-boot-dependencies.version, spring.boot.dependencies.version, and so on.
         Pattern property = Pattern.compile(
-                "<spring-boot(?:\\.version|-version|\\.dependencies\\.version)>\\s*(\\d+)\\.\\d+");
+                "<spring[.-]boot[.-]?(?:dependencies[.-])?version>\\s*(\\d+)\\.(\\d+)");
+        // classpath("org.springframework.boot:spring-boot-gradle-plugin:2.7.17")
+        Pattern gradleClasspath = Pattern.compile(
+                "org\\.springframework\\.boot:spring-boot-gradle-plugin:(\\d+)\\.(\\d+)");
+        // id("org.springframework.boot") version "3.1.0"
         Pattern gradlePlugin = Pattern.compile(
-                "org\\.springframework\\.boot[\"']?\\s*\\)?\\s*(?:version)?\\s*[\"']?(\\d+)\\.\\d+");
+                "org\\.springframework\\.boot[\"']?\\s*\\)?\\s*(?:version)?\\s*[\"']?(\\d+)\\.(\\d+)");
         List<Path> files = new ArrayList<>(Walls.poms(ws));
         for (String g : List.of("build.gradle", "build.gradle.kts")) {
             Path f = ws.resolve(g);
@@ -162,14 +202,14 @@ final class Migrate {
         }
         for (Path f : files) {
             String text = Files.readString(f).replaceAll("<!--.*?-->", "");
-            for (Pattern p : List.of(parent, property, gradlePlugin)) {
+            for (Pattern p : List.of(parent, property, gradleClasspath, gradlePlugin)) {
                 Matcher m = p.matcher(text);
                 if (m.find()) {
-                    return Integer.parseInt(m.group(1));
+                    return m.group(1) + "." + m.group(2);
                 }
             }
         }
-        return 0;
+        return "";
     }
 
     /**
@@ -228,16 +268,21 @@ final class Migrate {
      * what a Boot project reads whether the BOM arrives through a parent or an import.
      */
     private String spring(int target) throws IOException {
-        if (!Pom.isMaven(ws) || bootLine() == 0) {
+        if (!Pom.isMaven(ws) || target < 21) {
             return "";
         }
-        String want = target >= 21 ? BOOT_3 : null;
-        if (want == null) {
-            return "";
+        // ONLY THE LINES THIS FLOOR HAS AN OPINION ABOUT. bootLine() reports whatever major it
+        // finds, so an unguarded pin writes 3.5.16 over a Boot 4 project, which is a downgrade, and
+        // over a Boot 1 project, which is a BOM it cannot possibly build against. Neither line
+        // appears in the corpus yet, and the cheapest moment to exclude them is before they do.
+        int line = bootLine();
+        if (line != 2 && line != 3) {
+            return line == 0 ? "" : "spring-boot line " + line + " left alone; ";
         }
+        String want = BOOT_3;
         Pom.setPropertyEverywhere(ws, "spring-boot.version", want);
         Pom.pluginVersion(ws, "spring-boot-maven-plugin", want);
-        return "spring-boot " + want + "; ";
+        return "spring-boot " + bootVersion() + " -> " + want + "; ";
     }
 
     /**
@@ -255,7 +300,11 @@ final class Migrate {
      * measured into.
      */
     private String tomcat(int target, Security.Scan before) throws IOException {
-        if (target != 21 || before == null || !before.measured() || !Pom.isMaven(ws)) {
+        // 21 AND UP, NOT 21 EXACTLY. The floor's whole argument is that 9.0.105 is the newest
+        // patch of the line the project is on and carries the fewest CVEs of any of them. Nothing
+        // in that reasoning mentions the target, so scoping it to one hop left every 21-to-25 bump
+        // on whatever Tomcat it happened to have.
+        if (target < 21 || before == null || !before.measured() || !Pom.isMaven(ws)) {
             return "";
         }
         if (bootLine() > 0) {

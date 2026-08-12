@@ -48,4 +48,52 @@ class TheFloorsPickTheLineTheTargetCanRunTest {
                         + "<version>" + line + ".7.3</version></parent></project>");
         return new Migrate(ws, "/nonexistent", null);
     }
+
+    @Test
+    void theSpellingsRealPomsUseAreTheOnesThatCount() throws Exception {
+        // Every one of these is copied from a repo in the corpus. The detector's property arm used
+        // to enumerate three exact tag names, matched none of them, and reported six Spring
+        // projects as having no Spring at all.
+        assertEquals("2.7", detect("pom.xml",
+                "<project><properties><spring.boot.version>2.7.4</spring.boot.version>"
+                        + "</properties></project>"), "mosip/commons and jaxxy spell it this way");
+        assertEquals("2.7", detect("pom.xml",
+                "<project><properties><spring-boot-dependencies.version>2.7.4"
+                        + "</spring-boot-dependencies.version></properties></project>"),
+                "apache/hertzbeat spells it this way");
+        assertEquals("2.7", detect("build.gradle",
+                "buildscript { dependencies { classpath("
+                        + "\"org.springframework.boot:spring-boot-gradle-plugin:2.7.17\") } }"),
+                "a buildscript classpath coordinate is still a declaration");
+        assertEquals("3.2", detect("pom.xml",
+                "<project><parent><groupId>org.springframework.boot</groupId>"
+                        + "<artifactId>spring-boot-starter-parent</artifactId>"
+                        + "<version>3.2.5</version></parent></project>"), "the parent still wins");
+        assertEquals("", detect("pom.xml",
+                "<project><build><plugins><plugin><artifactId>maven-compiler-plugin</artifactId>"
+                        + "<version>3.8.0</version></plugin></plugins></build></project>"),
+                "a compiler plugin is not a Spring line");
+    }
+
+    @Test
+    void theDistanceIsKeptBecauseTwoPointZeroIsNotTwoPointSeven() throws Exception {
+        // Both are line 2 and both take the same branch, but 2.0 is seven minors from 3.x and is
+        // the profile of the run that lost 1916 of 2409 tests. Collapsing them to "2" made the
+        // corpus unable to tell afterwards which distance had failed.
+        assertEquals("2.0", detect("pom.xml", parentPom("2.0.2")));
+        assertEquals("2.7", detect("pom.xml", parentPom("2.7.18")));
+    }
+
+    private static String parentPom(String v) {
+        return "<project><parent><groupId>org.springframework.boot</groupId>"
+                + "<artifactId>spring-boot-starter-parent</artifactId>"
+                + "<version>" + v + "</version></parent></project>";
+    }
+
+    /** The declared Boot version a workspace containing exactly this one build file reports. */
+    private static String detect(String name, String body) throws Exception {
+        java.nio.file.Path ws = java.nio.file.Files.createTempDirectory("detect");
+        java.nio.file.Files.writeString(ws.resolve(name), body);
+        return new Migrate(ws, "/nonexistent", null).bootVersion();
+    }
 }
