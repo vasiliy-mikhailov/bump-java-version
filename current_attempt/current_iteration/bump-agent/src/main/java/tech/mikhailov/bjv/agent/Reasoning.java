@@ -99,6 +99,18 @@ final class Reasoning {
         private final StringBuilder pending = new StringBuilder();
         private final java.util.Map<String, Integer> seen = new java.util.HashMap<>();
         private String finish = "";
+        /**
+         * Fire ONCE per response.
+         *
+         * <p>Throwing out of the listener does not reliably cancel the stream: the client kept
+         * delivering events, every later line re-tripped the already-satisfied counter, and one
+         * genuine detection became 971 rows for a single bump — 9,916 across the corpus against 776
+         * normal finishes, with a median of 166 characters of thinking each. The detection was
+         * right; repeating it was not.
+         */
+        private boolean detected;
+        /** One thought row per response, whatever order onError, onClose and a detection arrive in. */
+        private boolean written;
 
         Accumulating(ServerSentEventListener delegate, Trace trace) {
             this.delegate = delegate;
@@ -158,7 +170,8 @@ final class Reasoning {
                     continue;
                 }
                 int n = seen.merge(norm, 1, Integer::sum);
-                if (n >= REPEATS) {
+                if (n >= REPEATS && !detected) {
+                    detected = true;
                     // Greedy decoding cannot leave a cycle it has entered: rung-1 restarted 14
                     // trapped generations with 2500 more tokens and 0 escaped. The budget is gone
                     // either way; the only choice is whether to keep paying for it.
@@ -172,7 +185,7 @@ final class Reasoning {
         private void take(ServerSentEvent event) {
             try {
                 String data = event == null ? null : event.data();
-                if (data == null || data.isEmpty() || data.equals("[DONE]")) {
+                if (data == null || data.isEmpty() || data.equals("[DONE]") || detected) {
                     return;
                 }
                 String reasoned = field(data, "reasoning") + field(data, "reasoning_content");
@@ -203,6 +216,10 @@ final class Reasoning {
         }
 
         private void flush() {
+            if (written) {
+                return;
+            }
+            written = true;
             try {
                 // Record whenever there is anything to say about how the answer ended, even with
                 // no reasoning captured: only 75 of 182 empties were visible as `length` before,

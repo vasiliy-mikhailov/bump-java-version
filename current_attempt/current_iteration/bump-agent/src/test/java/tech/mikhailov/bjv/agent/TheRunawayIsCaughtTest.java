@@ -82,6 +82,34 @@ class TheRunawayIsCaughtTest {
     }
 
     @Test
+    void aDetectionFiresExactlyOnceEvenIfTheStreamKeepsComing() throws Exception {
+        // Throwing out of the listener does not reliably cancel the stream. When it does not, every
+        // later line re-trips the already-satisfied counter: one real detection became 971 rows for
+        // a single bump, and 9,916 across the corpus against 776 normal finishes.
+        Recorder r = new Recorder();
+        var l = listener(r);
+        String line = "Let me check each proactive trigger against the build files in turn now.\\n";
+        try {
+            for (int i = 0; i < 40; i++) {
+                l.onEvent(chunk(line));
+            }
+        } catch (RuntimeException expected) {
+            // the first detection
+        }
+        // The client ignored it and kept delivering, as it does in practice.
+        for (int i = 0; i < 200; i++) {
+            try {
+                l.onEvent(chunk(line));
+            } catch (RuntimeException ignored) {
+                throw new AssertionError("a latched detector must not throw again");
+            }
+        }
+        l.onClose();
+        assertEquals(1, r.finishes.size(), "one row per response, not one per line");
+        assertEquals("loop", r.finishes.get(0));
+    }
+
+    @Test
     void ordinaryReasoningIsNotMistakenForALoop() throws Exception {
         Recorder r = new Recorder();
         var l = listener(r);
