@@ -139,27 +139,24 @@ public final class Dashboard {
             .ag.on{background:#1f6feb;color:#fff}.ag.on b{color:#fff}
             .link{color:#30363d;font-size:13px}
             .link.looped{color:#d29922;font-weight:700}
-            .machine{padding:0 24px 14px}
+            .machine{padding:0 24px 12px}
             .machine svg{width:100%;height:auto;display:block}
-            .machine .c rect{fill:#161b22;stroke:#30363d;stroke-width:.8}
-            .machine .c.off rect{fill:#0d1117;stroke:#21262d}
-            .machine .cn{fill:#c9d1d9;font:600 10px ui-monospace,Menlo,monospace}
+            .machine .c rect{fill:#161b22;stroke:#30363d;stroke-width:.7}
+            .machine .c.off rect{fill:#0d1117;stroke:#1b2027}
+            .machine .cn{fill:#c9d1d9;font:600 8.5px ui-monospace,Menlo,monospace}
             .machine .c.off .cn{fill:#484f58}
-            .machine .cl{fill:#7d8590;font:6.5px ui-monospace,Menlo,monospace;
-            letter-spacing:.04em}
-            .machine .ml{fill:#6e7681;font:6.5px ui-monospace,Menlo,monospace}
-            .machine .x rect{fill:#12181f;stroke:#21262d;stroke-width:.8}
+            .machine .cl{fill:#7d8590;font:5.5px ui-monospace,Menlo,monospace;letter-spacing:.03em}
+            .machine .ml{fill:#6e7681;font:8px ui-monospace,Menlo,monospace}
+            .machine .x rect{fill:#12181f;stroke:#21262d;stroke-width:.7}
             .machine .x.ok rect{fill:#0f2417;stroke:#2ea043}
             .machine .x.no rect{fill:#1d1416;stroke:#3d2a2d}
             .machine .x.zero rect{fill:#0d1117;stroke:#1b2027}
-            .machine .xn{fill:#c9d1d9;font:600 9.5px ui-monospace,Menlo,monospace}
+            .machine .xn{fill:#c9d1d9;font:600 9px ui-monospace,Menlo,monospace}
             .machine .x.ok .xn{fill:#3fb950}
             .machine .x.zero .xn{fill:#484f58}
-            .machine .xs{fill:#c9d1d9;font:8.5px ui-monospace,Menlo,monospace}
+            .machine .xs{fill:#8b949e;font:5.5px ui-monospace,Menlo,monospace;letter-spacing:.03em}
             .machine .x.ok .xs{fill:#3fb950}
-            .machine .x.zero .xs{fill:#565d66}
-            .machine .xd{fill:#5c636b;font:7.5px ui-monospace,Menlo,monospace}
-            .machine .x.zero .xd{fill:#3a4148}
+            .machine .x.zero .xs{fill:#484f58}
             .ev{border-left:2px solid #21262d;margin:0 24px;padding:12px 0 12px 16px}
             .ev.asked{border-color:#58a6ff}.ev.built{border-color:#d29922}
             .ev.settled{border-color:#3fb950}.ev.failed{border-color:#f85149}
@@ -442,103 +439,90 @@ public final class Dashboard {
                     .ifPresent(st -> leavesAt.put(e.state(), st));
         }
 
+        int w = 1000;
         int n = CHAIN.length;
-        int x0 = 128;
-        int step = 82;
-        int spine = 34;
-        int exitTop = 86;
-        int rowH = 26;
-        int h = exitTop + rowH * EXITS.length + 12;
+        int spine = 26;
+        int exitY = 88;
+        int x0 = 122;
+        int step = (w - x0 - 30) / n;
+        int chipW = step - 10;
 
-        StringBuilder g = new StringBuilder("<div class=machine><svg viewBox='0 0 1000 " + h
-                + "' preserveAspectRatio='xMidYMin meet' role='img'>");
-        g.append("<defs><marker id='a' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='5' "
-                + "markerHeight='5' orient='auto'><path d='M0,0 L10,5 L0,10 z' fill='#484f58'/>"
+        StringBuilder g = new StringBuilder("<div class=machine><svg viewBox='0 0 " + w + " 118'"
+                + " preserveAspectRatio='xMidYMin meet' role='img'>");
+        g.append("<defs><marker id='a' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='4.5'"
+                + " markerHeight='4.5' orient='auto'><path d='M0,0 L10,5 L0,10 z' fill='#484f58'/>"
                 + "</marker></defs>");
 
-        // queued, then the chain
         long queued = byState.getOrDefault("queued", 0L);
-        g.append(chip(14, spine - 13, 96, "" + queued, "queued", "wait"));
-        g.append("<line x1='110' y1='" + spine + "' x2='" + (x0 - 20) + "' y2='" + spine
-                + "' stroke='#484f58' stroke-width='1.2' marker-end='url(#a)'/>");
+        g.append(chip(12, spine - 11, 90, "" + queued, "queued", "wait"));
+        g.append("<line x1='102' y1='" + spine + "' x2='" + (x0 - 6) + "' y2='" + spine
+                + "' stroke='#484f58' stroke-width='1' marker-end='url(#a)'/>");
+        int[] cx = new int[n];
         for (int i = 0; i < n; i++) {
             final int stage = i;
             long entered = facts.stream().filter(f -> f.ran.contains(stage)).count();
             int x = x0 + i * step;
-            g.append(chip(x - 20, spine - 13, 74, "" + entered, CHAIN[i][0], entered == 0 ? "off" : "on"));
+            cx[i] = x + chipW / 2;
+            g.append(chip(x, spine - 11, chipW, "" + entered, CHAIN[i][0],
+                    entered == 0 ? "off" : "on"));
             if (i + 1 < n) {
-                g.append("<line x1='" + (x + 54) + "' y1='" + spine + "' x2='" + (x + step - 22)
-                        + "' y2='" + spine + "' stroke='#484f58' stroke-width='1.2'"
-                        + " marker-end='url(#a)'/>");
+                g.append("<line x1='" + (x + chipW) + "' y1='" + spine + "' x2='"
+                        + (x + step - 4) + "' y2='" + spine + "' stroke='#484f58'"
+                        + " stroke-width='1' marker-end='url(#a)'/>");
             }
         }
-        // the loop that makes it a machine: the gate hands back to the troubleshooter and back again
-        int lx = x0 + 4 * step + 17;
-        g.append("<path d='M" + (lx - 14) + "," + (spine - 13) + " C" + (lx - 22) + ","
-                + (spine - 34) + " " + (lx + 22) + "," + (spine - 34) + " " + (lx + 14) + ","
-                + (spine - 13) + "' fill='none' stroke='#484f58' stroke-width='1.2'"
-                + " marker-end='url(#a)'/>");
-        g.append("<text x='" + lx + "' y='" + (spine - 27) + "' class='ml' text-anchor='middle'>"
-                + "gate \u21c4</text>");
+        // The loop, over the two states it actually joins.
+        int a = cx[3];
+        int bx = cx[4];
+        g.append("<path d='M" + bx + "," + (spine - 11) + " C" + bx + "," + (spine - 26) + " "
+                + a + "," + (spine - 26) + " " + a + "," + (spine - 11)
+                + "' fill='none' stroke='#484f58' stroke-width='1' marker-end='url(#a)'/>");
+        g.append("<text x='" + ((a + bx) / 2) + "' y='" + (spine - 20)
+                + "' class='ml' text-anchor='middle'>\u21ba</text>");
 
+        // THE EXITS IN ONE LINE, so the picture is a stream with its outfalls under it rather than
+        // a spine beside a list. Every exit is drawn even at zero: a machine with its unused
+        // transitions removed is a picture of one run, not of the machine.
         long settled = 0;
         for (Exit e : EXITS) {
             settled += byState.getOrDefault(e.state(), 0L);
         }
-        int y = exitTop;
-        for (Exit e : EXITS) {
+        int m = EXITS.length;
+        int ew = (w - 24 - (m - 1) * 6) / m;
+        for (int i = 0; i < m; i++) {
+            Exit e = EXITS[i];
             long c = byState.getOrDefault(e.state(), 0L);
-            int from = x0 + leavesAt.getOrDefault(e.state(), 0) * step + 17;
+            int ex = 12 + i * (ew + 6);
             if (c > 0) {
-                g.append(curve(from, spine + 13, 712, y + 9, c, settled, e.good()));
+                g.append(curve(cx[leavesAt.getOrDefault(e.state(), 0)], spine + 11,
+                        ex + ew / 2, exitY - 1, c, settled, e.good()));
             }
-            g.append(exitChip(712, y, e, c));
-            y += rowH;
+            g.append(exitChip(ex, exitY, ew, e, c));
         }
         return g.append("</svg></div>").toString();
     }
 
-    /** A state on the spine: its count over its name, small enough that nine fit across. */
+    /** A state on the spine: its count over its name. */
     private static String chip(int x, int y, int w, String num, String label, String cls) {
         return "<g class='c " + cls + "'><rect x='" + x + "' y='" + y + "' width='" + w
-                + "' height='26' rx='5'/>"
-                + "<text x='" + (x + w / 2) + "' y='" + (y + 11) + "' class='cn'"
+                + "' height='22' rx='4'/>"
+                + "<text x='" + (x + w / 2) + "' y='" + (y + 10) + "' class='cn'"
                 + " text-anchor='middle'>" + esc(num) + "</text>"
-                + "<text x='" + (x + w / 2) + "' y='" + (y + 21) + "' class='cl'"
+                + "<text x='" + (x + w / 2) + "' y='" + (y + 18) + "' class='cl'"
                 + " text-anchor='middle'>" + esc(label) + "</text></g>";
     }
 
-    private static String exitChip(int x, int y, Exit e, long n) {
+    /** A terminal state, in the row beneath. Its meaning is the tooltip; the row has no space. */
+    private static String exitChip(int x, int y, int w, Exit e, long n) {
         String cls = n == 0 ? "zero" : e.good() ? "ok" : "no";
-        return "<g class='x " + cls + "'><rect x='" + x + "' y='" + y + "' width='274' height='19'"
-                + " rx='9'/>"
-                + "<text x='" + (x + 24) + "' y='" + (y + 13) + "' class='xn'"
-                + " text-anchor='end'>" + n + "</text>"
-                + "<text x='" + (x + 32) + "' y='" + (y + 13) + "' class='xs'>"
-                + esc(e.state()) + "</text>"
-                + "<text x='" + (x + 266) + "' y='" + (y + 13) + "' class='xd'"
-                + " text-anchor='end'>" + esc(e.label()) + "</text></g>";
+        return "<g class='x " + cls + "'><title>" + esc(e.state()) + " \u2014 " + esc(e.label())
+                + "</title><rect x='" + x + "' y='" + y + "' width='" + w + "' height='24' rx='4'/>"
+                + "<text x='" + (x + w / 2) + "' y='" + (y + 11) + "' class='xn'"
+                + " text-anchor='middle'>" + n + "</text>"
+                + "<text x='" + (x + w / 2) + "' y='" + (y + 19) + "' class='xs'"
+                + " text-anchor='middle'>" + esc(e.state()) + "</text></g>";
     }
 
-
-    private static String exitNode(int x, int y, Exit e, long n) {
-        return "<g class='x " + (e.good() ? "ok" : "no") + "'>"
-                + "<rect x='" + x + "' y='" + y + "' width='310' height='26' rx='13'/>"
-                + "<text x='" + (x + 14) + "' y='" + (y + 17) + "' class='xn'>" + n + "</text>"
-                + "<text x='" + (x + 52) + "' y='" + (y + 17) + "' class='xs'>"
-                + esc(e.state()) + "</text>"
-                + "<text x='" + (x + 300) + "' y='" + (y + 17) + "' class='xd'"
-                + " text-anchor='end'>" + esc(e.label()) + "</text></g>";
-    }
-
-    private static String edge(int x1, int y1, int x2, int y2, long n) {
-        return "<line x1='" + x1 + "' y1='" + y1 + "' x2='" + x2 + "' y2='" + y2
-                + "' stroke='#484f58' stroke-width='1.6' marker-end='url(#a)'/>"
-                + "<text x='" + ((x1 + x2) / 2) + "' y='" + (y1 - 8) + "' class='ml'"
-                + " text-anchor='middle'>" + n + "</text>";
-    }
-
-    /** An edge whose thickness is its share of the traffic: the weight is the point. */
     private static String curve(int x1, int y1, int x2, int y2, long n, long total, boolean good) {
         double share = total <= 0 ? 0 : (double) n / total;
         double w = 1.0 + Math.sqrt(share) * 7.0;
