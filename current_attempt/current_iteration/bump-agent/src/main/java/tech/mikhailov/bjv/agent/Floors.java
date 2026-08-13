@@ -72,9 +72,14 @@ final class Floors {
                             + "entry, and these floors are Maven-only."),
             new Floor("org.gradle", "gradle-wrapper", "8.10.2", 21, "As above, for target 21."),
             new Floor("org.gradle", "gradle-wrapper", "9.1.0", 25, "As above, for target 25."),
-            new Floor("org.springframework.boot", "spring-boot", "3.5.16", 21,
-                    "Boot 2.7 is end-of-life and cannot run Java 21. This corpus scores 3.5.x at "
-                            + "one CRITICAL+HIGH against 2.7.18's tens, and 4.0.x back at two."));
+            new Floor("org.springframework.boot", "spring-boot", "2.7.18", 0,
+                    "The last of the 2.x line, and the ceiling for a target below 17: Boot 3 and 4 "
+                            + "both require 17, so nothing newer can run here."),
+            new Floor("org.springframework.boot", "spring-boot", "4.1.0", 17,
+                    "Boot 4.1 declares java.version 17, so it is reachable from this target up. "
+                            + "Note the recipe stops at UpgradeSpringBoot_4_0 -- rewrite-spring "
+                            + "6.31.0 has no 4_1 -- so the chain moves the line to 4.0 and this "
+                            + "floor lifts the patch, exactly as 3.5.16 worked."));
 
     private Floors() {
     }

@@ -78,7 +78,6 @@ final class Migrate {
      * test fails and says so -- and because leaving a project on an EOL line that cannot run its own
      * target is not a smaller risk, only a quieter one.
      */
-    private static final String BOOT_3 = "3.5.16";
 
     /** The family moves in lockstep or the build breaks: they share a version by contract. */
     private static final List<String> TOMCAT_EMBED = List.of(
@@ -136,13 +135,14 @@ final class Migrate {
             }
         }
         int boot = bootLine();
-        if (boot == 2 && target >= 21) {
-            // The line the target can run, not the newest patch of the line it is on.
-            recipes.add("org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5");
+        if (boot > 0 && target >= 17) {
+            // THE LINE THE TARGET CAN RUN, not the newest patch of the line it is on. Boot 4
+            // declares java.version 17, so from that target up it is reachable and 2.7 is not
+            // merely old, it is unable to run what it is being asked to run. The recipe stops at
+            // 4_0 because rewrite-spring 6.31.0 has no 4_1; the floor lifts the patch afterwards.
+            recipes.add("org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0");
         } else if (boot == 2) {
             recipes.add("org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7");
-        } else if (boot == 3) {
-            recipes.add("org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5");
         }
         return recipes;
     }
@@ -268,18 +268,26 @@ final class Migrate {
      * what a Boot project reads whether the BOM arrives through a parent or an import.
      */
     private String spring(int target) throws IOException {
-        if (!Pom.isMaven(ws) || target < 21) {
+        if (!Pom.isMaven(ws)) {
             return "";
         }
-        // ONLY THE LINES THIS FLOOR HAS AN OPINION ABOUT. bootLine() reports whatever major it
-        // finds, so an unguarded pin writes 3.5.16 over a Boot 4 project, which is a downgrade, and
-        // over a Boot 1 project, which is a BOM it cannot possibly build against. Neither line
-        // appears in the corpus yet, and the cheapest moment to exclude them is before they do.
         int line = bootLine();
-        if (line != 2 && line != 3) {
-            return line == 0 ? "" : "spring-boot line " + line + " left alone; ";
+        if (line == 0) {
+            return "";
         }
-        String want = BOOT_3;
+        // THE TABLE DECIDES, NOT THIS METHOD. Floors carries 2.7.18 below target 17 and 4.1.0 from
+        // 17 up, and the preparer's instructions are generated from the same rows, so the version
+        // an agent is told and the version the code writes cannot drift apart.
+        String want = Floors.version("spring-boot", target);
+        if (want.isBlank()) {
+            return "";
+        }
+        // NEVER DOWNWARDS. bootLine() reports whatever major it finds, and a project already above
+        // the floor is one this should leave alone: writing 4.1.0 over a Boot 5 project would be a
+        // downgrade dressed as a floor.
+        if (compare(bootVersion(), want) >= 0) {
+            return "spring-boot " + bootVersion() + " already at or above the floor; ";
+        }
         String was = bootVersion();
         // THE PARENT FIRST, BECAUSE THAT IS WHAT DECIDES. The recipe moves the parent to whatever
         // version it was built against; this floor exists to land on the patch the corpus measured
@@ -315,7 +323,7 @@ final class Migrate {
         if (bootLine() > 0) {
             // Spring owns tomcat.version, and Boot 3.5 brings 10.1.55, which is newer than any
             // Tomcat 9. Pinning a 9.0.x underneath it would be a downgrade across the jakarta line.
-            return "tomcat left to spring-boot " + BOOT_3 + " (pins 10.1.55); ";
+            return "tomcat left to spring-boot " + Floors.version("spring-boot", target) + "; ";
         }
         String resolved = before.inventory().stream()
                 .filter(p -> p.name().endsWith(":tomcat-embed-core"))

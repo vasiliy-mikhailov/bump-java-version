@@ -32,7 +32,8 @@ class AnAgentIsBuiltForItsHopTest {
 
         // 8 to 11 cannot reach any of these, so it is not told about them.
         assertFalse(low.contains("2.3.20"), "kotlin 2.3.20 is a target-25 rule: " + low);
-        assertFalse(low.contains("3.5.16"), "spring-boot 3.5.16 is a target-21 rule");
+        assertTrue(low.contains("2.7.18"), "below 17 the Boot ceiling is the last of the 2.x line");
+        assertFalse(low.contains("4.1.0"), "Boot 4 declares java.version 17 and cannot run here");
         assertFalse(low.contains("9.0.105"), "the tomcat floor is a target-21 rule");
         assertFalse(low.contains("1.18.46"), "the JDK 25 lombok is unreachable at 11");
 
@@ -43,6 +44,8 @@ class AnAgentIsBuiltForItsHopTest {
         // 21 to 25 gets the ones 8 to 11 was spared.
         assertTrue(high.contains("1.18.46"), "the JDK 25 lombok");
         assertTrue(high.contains("2.3.20"), "and the kotlin pin");
+        assertTrue(high.contains("4.1.0"), "and Boot 4, which 17 and up can run");
+        assertFalse(high.contains("2.7.18"), "the 2.x ceiling is not mentioned where it cannot apply");
     }
 
     @Test
@@ -72,7 +75,7 @@ class AnAgentIsBuiltForItsHopTest {
             assertTrue(rules <= Floors.all().size(), "and never more than the table holds");
             previous = rules;
         }
-        assertEquals(7, Floors.at(11).size(), "8 to 11 reaches seven of the sixteen");
+        assertEquals(8, Floors.at(11).size(), "8 to 11 reaches eight of the seventeen");
         assertEquals(11, Floors.at(25).size(), "21 to 25 reaches eleven");
     }
 
