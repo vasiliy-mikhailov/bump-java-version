@@ -1411,7 +1411,7 @@ public final class Dashboard {
                     .append("' href='/settings?hop=").append(h).append("'><b>")
                     .append(h.replace("-", " \u2192 ")).append("</b><span>")
                     .append(Floors.at(Integer.parseInt(h.split("-")[1])).size())
-                    .append(" floor rules</span></a>");
+                    .append(" pins</span></a>");
         }
         out.append("</div>");
 
@@ -1422,19 +1422,19 @@ public final class Dashboard {
         }
         out.append("</div>");
 
-        // The floors first: they are what the prompts below quote, and reading an instruction to
-        // "floor Lombok to 1.18.30" without knowing where that number comes from is reading half
-        // of it. Both are generated from the same table, so they cannot disagree.
-        out.append("<section class=prompt id=floors><h2><span class=who>version floors</span>")
+        // THIS HOP'S PINS, not every hop's. They are the same text the preparer below is handed,
+        // because the list and the instruction are one string: a page that showed the union would
+        // show something no bump is ever given.
+        out.append("<section class=prompt id=floors><h2><span class=who>version pins</span>")
                 .append("<span class='role closer'>applied by code</span>")
-                .append("<span class=len>").append(Floors.all().size()).append(" rules</span></h2>")
+                .append("<span class=len>").append(Floors.at(hop.to()).size())
+                .append(" for this hop</span></h2>")
                 .append("<table class=floors><tr><th>artifact</th><th>version</th>")
-                .append("<th>from target</th><th>why</th></tr>");
-        for (Floors.Floor f : Floors.all()) {
+                .append("<th>why</th></tr>");
+        for (Floors.Floor f : Floors.at(hop.to())) {
             out.append("<tr><td>").append(esc(f.coordinates())).append("</td><td><b>")
-                    .append(esc(f.version())).append("</b></td><td>")
-                    .append(f.sinceTarget() == 0 ? "any" : String.valueOf(f.sinceTarget()))
-                    .append("</td><td class=k>").append(esc(f.why())).append("</td></tr>");
+                    .append(esc(f.version())).append("</b></td>")
+                    .append("<td class=k>").append(esc(f.why())).append("</td></tr>");
         }
         out.append("</table></section>");
 
