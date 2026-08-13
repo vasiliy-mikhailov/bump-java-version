@@ -139,7 +139,8 @@ public final class Bump {
         // manifest row. It is recorded as a disagreement and changes nothing.
         trace.progress(bump, "survey: does the project agree it is at JDK " + from);
         // The surveyor has tools; the brief is a starting point, not the whole tree.
-        Agents surveying = new Agents(Model.forProducer(trace), ws, null, tree, to.isBlank() ? "17" : to, trace);
+        Agents surveying = new Agents(Model.forProducer(trace), ws, null, tree,
+                Hop.of(from.isBlank() ? "17" : from, to.isBlank() ? "17" : to), trace);
         String evidence = buildFiles() + "\nThe deterministic detector's guess: "
                 + (from.isBlank() ? "none" : from + "->" + to);
         String claim = surveying.surveyor().run(evidence);
@@ -158,7 +159,7 @@ public final class Bump {
         walls = new Walls(ws);
         security = new Security(ws, hoptools, trace);
         // The producers' try_build must target the hop the survey settled, so they are built now.
-        agents = new Agents(Model.forProducer(trace), ws, runner, tree, to, trace);
+        agents = new Agents(Model.forProducer(trace), ws, runner, tree, Hop.of(from, to), trace);
 
         // ---- BASELINE: a fact. No baseline, no bump.
         trace.progress(bump, "baseline: building and testing under JDK " + from);

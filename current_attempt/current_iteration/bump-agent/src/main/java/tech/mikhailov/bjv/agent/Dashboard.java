@@ -117,6 +117,8 @@ public final class Dashboard {
             font-size:11px;color:#c9d1d9}
             .tab:hover{border-color:#58a6ff;text-decoration:none}
             .tab.critic{color:#d29922}.tab.closer{color:#bc8cff}.tab.floors{color:#3fb950}
+            a.c{text-decoration:none;color:#c9d1d9}
+            a.c.on{border-color:#58a6ff;background:#0d2440}
             table.floors{margin-top:4px}
             table.floors th,table.floors td{padding:7px 12px}
             table.floors td:nth-child(4){font-size:11px;line-height:1.5}
@@ -1381,13 +1383,32 @@ public final class Dashboard {
      * that is the unit -- neither is meaningful without knowing what the other was told.
      */
     private void settings(HttpExchange x) throws IOException {
-        List<Agents.Prompt> prompts = Agents.prompts();
-        StringBuilder out = head("prompts", prompts.size()
-                + " agents, in the order the chain reaches them");
+        // WHICH HOP. The same agent is a different agent on a different hop: the preparer carries
+        // seven floor rules at 8 to 11 and eleven at 21 to 25, and reading the union of all of them
+        // is reading something no bump is ever given.
+        String want = form(x.getRequestURI().getRawQuery() == null ? ""
+                : x.getRequestURI().getRawQuery()).getOrDefault("hop", "17-21");
+        String[] parts = want.split("-");
+        Hop hop = parts.length == 2 ? new Hop(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]))
+                : new Hop(17, 21);
+        List<com.deepagents.langchain4j.subagents.SubAgentDefinition> prompts =
+                Agents.forHop(hop, results);
+        StringBuilder out = head("prompts", prompts.size() + " agents as a "
+                + hop + " bump will be given them");
+
+        out.append("<div class=counts>");
+        for (String h : new String[] {"8-11", "11-17", "17-21", "21-25"}) {
+            out.append("<a class='c").append(h.equals(want) ? " on" : "")
+                    .append("' href='/settings?hop=").append(h).append("'><b>")
+                    .append(h.replace("-", " \u2192 ")).append("</b><span>")
+                    .append(Floors.at(Integer.parseInt(h.split("-")[1])).size())
+                    .append(" floor rules</span></a>");
+        }
+        out.append("</div>");
 
         out.append("<div class=tabs><a class='tab floors' href='#floors'>version floors</a>");
-        for (Agents.Prompt p : prompts) {
-            out.append("<a class='tab ").append(p.role()).append("' href='#")
+        for (var p : prompts) {
+            out.append("<a class='tab ").append(role(p.name())).append("' href='#")
                     .append(esc(p.name())).append("'>").append(esc(p.name())).append("</a>");
         }
         out.append("</div>");
@@ -1408,16 +1429,25 @@ public final class Dashboard {
         }
         out.append("</table></section>");
 
-        for (Agents.Prompt p : prompts) {
+        for (var p : prompts) {
             out.append("<section class=prompt id='").append(esc(p.name())).append("'>")
                     .append("<h2><span class=who>").append(esc(p.name())).append("</span>")
-                    .append("<span class='role ").append(p.role()).append("'>")
-                    .append(p.role()).append("</span>")
-                    .append("<span class=len>").append(p.text().length()).append(" chars</span>")
+                    .append("<span class='role ").append(role(p.name())).append("'>")
+                    .append(role(p.name())).append("</span>")
+                    .append("<span class=len>").append(p.systemPrompt().length()).append(" chars</span>")
                     .append("</h2>")
-                    .append("<pre>").append(esc(p.text())).append("</pre></section>");
+                    .append("<div class=k style='margin:-4px 0 10px'>").append(esc(p.description()))
+                    .append("</div><pre>").append(esc(p.systemPrompt())).append("</pre></section>");
         }
         send(x, out.toString());
+    }
+
+    /** What an agent is for, from its name: the chain has only three kinds. */
+    private static String role(String name) {
+        if (name.endsWith("-critic")) {
+            return "critic";
+        }
+        return name.equals("verdict") || name.equals("estimator") ? "closer" : "producer";
     }
 
     private static StringBuilder head(String title, String sub) {

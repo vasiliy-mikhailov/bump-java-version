@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.deepagents.langchain4j.logging.ToolInvocationLogMode;
+import com.deepagents.langchain4j.subagents.SubAgentDefinition;
 import com.deepagents.langchain4j.subagents.SubAgentRuntime;
 
 import dev.langchain4j.agent.tool.ToolSpecification;
@@ -45,20 +46,22 @@ final class Agents {
     private final Runner runner;
     private final Trace trace;
     private final String targetJdk;
+    private final Hop hop;
     private final Tree tree;
 
-    Agents(ChatModel model, Path ws, Runner runner, Tree tree, String targetJdk, Trace trace) {
-        this(model, Model.forCritic(trace), ws, runner, tree, targetJdk, trace);
+    Agents(ChatModel model, Path ws, Runner runner, Tree tree, Hop hop, Trace trace) {
+        this(model, Model.forCritic(trace), ws, runner, tree, hop, trace);
     }
 
     Agents(ChatModel model, ChatModel judging, Path ws, Runner runner, Tree tree,
-           String targetJdk, Trace trace) {
+           Hop hop, Trace trace) {
         this.judging = judging;
         this.model = model;
         this.ws = ws;
         this.runner = runner;
         this.tree = tree;
-        this.targetJdk = targetJdk;
+        this.hop = hop;
+        this.targetJdk = String.valueOf(hop.to());
         this.trace = trace;
     }
 
@@ -70,18 +73,17 @@ final class Agents {
      * <p>Two prompts typed these numbers out. Raising a floor while the instructions still named
      * the old one would tell an agent to do one thing while the code did another, silently.
      */
-    private static String floors(String prompt) {
-        return prompt
-                .replace("{lombok}", Floors.version("lombok", 21))
-                .replace("{lombok25}", Floors.version("lombok", 25))
-                .replace("{bb}", Floors.version("byte-buddy", 21))
-                .replace("{bb25}", Floors.version("byte-buddy", 25))
-                .replace("{mockito}", Floors.version("mockito-core", 21))
-                .replace("{jacoco}", Floors.version("jacoco-maven-plugin", 21))
-                .replace("{kotlin}", Floors.version("kotlin", 25))
-                .replace("{gradle17}", Floors.version("gradle-wrapper", 17))
-                .replace("{gradle21}", Floors.version("gradle-wrapper", 21))
-                .replace("{gradle25}", Floors.version("gradle-wrapper", 25));
+    /**
+     * The floor rules this hop can actually reach, written into the prompt that applies them.
+     *
+     * <p>The instructions used to name every rule for every target: an 8-to-11 preparer was told
+     * about Kotlin 2.3.20 for JDK 25 and the jakarta move at 21, neither of which it can reach. A
+     * rule that cannot fire is not just wasted context, it is an invitation to apply it anyway.
+     */
+    private String floors(String prompt) {
+        return prompt.replace("{FLOORS}", hop.floorsAsInstructions())
+                .replace("{TARGET}", String.valueOf(hop.to()))
+                .replace("{FROM}", String.valueOf(hop.from()));
     }
 
     private static final String P_SURVEYOR = """
@@ -148,41 +150,41 @@ final class Agents {
                 Answer `sound`, or `overclaimed: <package and why it will not move>`, or \
                 `missed-family: <family>`, one finding per line.
                 """;
-    private static final String P_PREPARER = floors("""
+    private static final String P_PREPARER = """
                 You prepare a Java project for a one-LTS migration BEFORE its first target build. \
                 Every step is gated on a structural trigger; check each trigger against the project \
                 and land the step ONLY where it fires. A deterministic pre-pass has already run: what \
                 it did travels in the brief, do not redo it.
 
-                The steps, by trigger (versions are measured floors, not folklore):
-                - the project resolves Lombok, declared anywhere or transitively: floor it to {lombok}, \
-                or {lombok25} when the target is 25 plus the maven.compiler.proc=full property, since \
-                JDK 23+ no longer runs classpath annotation processors by default. When a Spring BOM \
-                arrives at scope=import, a property override is a silent no-op: use a \
-                dependencyManagement entry in the root pom instead.
-                - Gradle, wrapper below the target's floor ({gradle17} for 17, {gradle21} for 21, {gradle25} for 25): \
-                set distributionUrl in gradle/wrapper/gradle-wrapper.properties.
-                - the project declares JaCoCo: floor it to {jacoco}, in the module that declares it.
-                - the project mocks (mockito, byte-buddy, MockK): force byte-buddy {bb}, or {bb25} \
-                when the target is 25, and mockito-core {mockito}.
-                - a Kotlin build with target 25: kotlin {kotlin} in every pom that pins it; every 1.x \
-                either crashes or silently falls back below the target.
-                - a test dependency that reflects into the process environment (junit-pioneer, \
-                system-lambda, system-rules): add --add-opens java.base/java.util=ALL-UNNAMED and \
-                java.base/java.lang=ALL-UNNAMED to the test fork, at the root so modules inherit it.
+                This hop is JDK {FROM} to {TARGET}. The floors that can fire here, and nothing \
+                else, because a rule you cannot reach is one you should not apply:
+
+{FLOORS}
+
+                Placement matters as much as the version. When a Spring BOM arrives at scope=import, \
+                a property override is a silent no-op: use a dependencyManagement entry in the root \
+                pom. A Gradle build has no dependencyManagement at all, so its floors go in the \
+                wrapper properties and a resolutionStrategy, and they are yours to apply because \
+                the deterministic pass is Maven-only.
+
+                Two triggers that are not version floors: a Kotlin build at target 25 needs kotlin \
+                pinned in every pom that names it, and a test dependency that reflects into the \
+                process environment (junit-pioneer, system-lambda, system-rules) needs \
+                --add-opens java.base/java.util=ALL-UNNAMED and java.base/java.lang=ALL-UNNAMED on \
+                the test fork, at the root so modules inherit it.
 
                 Use edit_file to land each step. Then STOP and answer in one line: \
                 DID: <steps executed, and which triggers did not fire>. If every trigger is already \
                 satisfied, answer exactly NOTHING-TO-DO: <why>. Do not keep exploring once the work \
                 is done; that is what exhausts a tool budget.
-                """);
-    private static final String P_PREPARE_CRITIC = floors("""
-                A colleague prepared a Java project for a one-LTS migration. The steps are gated on \
-                structural triggers: Lombok resolved (floor {lombok}, or {lombok25} and proc=full at \
-                target 25), Gradle wrapper below the target's floor ({gradle17}/{gradle21}/{gradle25}), JaCoCo \
-                declared ({jacoco}), mocking present (byte-buddy {bb} or {bb25}, mockito {mockito}), \
-                Kotlin at target 25 ({kotlin}), env-mutating test libs (--add-opens). Read the project \
-                and judge TWO things, nothing else.
+                """;
+    private static final String P_PREPARE_CRITIC = """
+                A colleague prepared a Java project for JDK {FROM} to {TARGET}. The steps are \
+                gated on structural triggers, and these are the floors that can fire on this hop:
+
+{FLOORS}
+
+                Read the project and judge TWO things, nothing else.
 
                 MISSED: a trigger fires here and no edit answers it. Name the step and the file that \
                 proves the trigger fired.
@@ -193,7 +195,7 @@ final class Agents {
 
                 Answer `sound`, or `missed: <step>` or `overreach: <what>`, one finding per line, \
                 most damaging first.
-                """);
+                """;
     private static final String P_BUMPER = """
                 A migration recipe has run and a deterministic sweep has raised what it could. Your \
                 job is what is LEFT: every version pin, toolchain block, property or compiler flag \
@@ -368,12 +370,12 @@ final class Agents {
 
     /** Reads the build files and names the hop. The deterministic detector's guess travels along. */
     Agent surveyor() {
-        return runtime("surveyor", read("surveyor"), P_SURVEYOR);
+        return agent("surveyor");
     }
 
     /** Checks the reading against the same tree. Objects only with a correction in hand. */
     Agent surveyCritic() {
-        return runtime("survey-critic", read("survey-critic"), P_SURVEY_CRITIC);
+        return agent("survey-critic");
     }
 
     // ---- pair 2: what the project is carrying, before anything touches it ----
@@ -389,12 +391,12 @@ final class Agents {
      * READING, recorded for whoever decides how a CVE count and a PASS trade against each other.
      */
     Agent securityBefore() {
-        return runtime("security-before", read("security-before"), P_SECURITY_BEFORE);
+        return agent("security-before");
     }
 
     /** Judges the reading against the same scan: overclaiming is the failure mode. */
     Agent securityBeforeCritic() {
-        return runtime("security-before-critic", read("security-before-critic"), P_SECURITY_BEFORE_CRITIC);
+        return agent("security-before-critic");
     }
 
     // ---- pair 2: the proactive steps ----
@@ -405,24 +407,24 @@ final class Agents {
      * judgement about which trigger actually fired).
      */
     Agent preparer() {
-        return runtime("preparer", patch("preparer"), P_PREPARER);
+        return agent("preparer");
     }
 
     /** Judges the preparation against the same trigger list the preparer carries. */
     Agent prepareCritic() {
-        return runtime("prepare-critic", read("prepare-critic"), P_PREPARE_CRITIC);
+        return agent("prepare-critic");
     }
 
     // ---- pair 3: land the target ----
 
     /** Lands the effective bytecode target: the pins the recipe under-applied, in every dialect. */
     Agent bumper() {
-        return runtime("bumper", patch("bumper"), P_BUMPER);
+        return agent("bumper");
     }
 
     /** Checks the landing: the pin grep is re-run for it, so it judges the state, not the claim. */
     Agent bumpCritic() {
-        return runtime("bump-critic", read("bump-critic"), P_BUMP_CRITIC);
+        return agent("bump-critic");
     }
 
     // ---- pair 4: the residue the wall table does not know ----
@@ -438,7 +440,8 @@ final class Agents {
      * led nowhere.
      */
     Agent troubleshootLoopProposer(String floor) {
-        return runtime("troubleshoot-loop", steer("troubleshoot-loop", floor), P_TROUBLESHOOT_LOOP);
+        return runtime("troubleshoot-loop", steer("troubleshoot-loop", floor),
+                P_TROUBLESHOOT_LOOP);
     }
 
     /**
@@ -449,16 +452,17 @@ final class Agents {
      * the whole thing and is the only agent that may send the loop back to where it started.
      */
     Agent troubleshootLoopCritic(String floor) {
-        return runtime("troubleshoot-loop-critic", steer("troubleshoot-loop-critic", floor), P_TROUBLESHOOT_LOOP_CRITIC);
+        return runtime("troubleshoot-loop-critic", steer("troubleshoot-loop-critic", floor),
+                P_TROUBLESHOOT_LOOP_CRITIC);
     }
 
     Agent troubleshooter() {
-        return runtime("troubleshooter", patch("troubleshooter"), P_TROUBLESHOOTER);
+        return agent("troubleshooter");
     }
 
     /** Judges the troubleshooting edit: migration fix, or gaming the gate? */
     Agent troubleCritic() {
-        return runtime("trouble-critic", read("trouble-critic"), P_TROUBLE_CRITIC);
+        return agent("trouble-critic");
     }
 
     // ---- pair 6: what the bump actually did to the vulnerabilities ----
@@ -473,24 +477,24 @@ final class Agents {
      * is a migration outcome or an artefact.
      */
     Agent securityAfter() {
-        return runtime("security-after", read("security-after"), P_SECURITY_AFTER);
+        return agent("security-after");
     }
 
     /** Checks the judgement against the numbers, since the numbers are the one thing not in doubt. */
     Agent securityAfterCritic() {
-        return runtime("security-after-critic", read("security-after-critic"), P_SECURITY_AFTER_CRITIC);
+        return agent("security-after-critic");
     }
 
     // ---- the closers ----
 
     /** Argues only what execution could not settle. */
     Agent verdict() {
-        return runtime("verdict", read("verdict"), P_VERDICT);
+        return agent("verdict");
     }
 
     /** Prices the attempt from the record. */
     Agent estimator() {
-        return runtime("estimator", read("estimator"), P_ESTIMATOR);
+        return agent("estimator");
     }
 
     // ---- wiring ----
@@ -515,6 +519,81 @@ final class Agents {
                 "agent:" + name + ":retry", ToolInvocationLogMode.NONE,
                 trace instanceof JsonlTrace j ? j : null);
         return r::run;
+    }
+
+    /**
+     * EVERY AGENT, AS DATA, BUILT FOR THIS HOP.
+     *
+     * <p>{@link SubAgentDefinition} is the framework's own shape and this class used to hand-roll a
+     * worse one: sixteen factory methods each assembled a name, a prompt and a tool set and then
+     * threw the assembly away, which is why the prompts could only be read by opening this file and
+     * why there was no way to ask what a different hop would be told.
+     *
+     * <p>As data they can be listed, rendered, diffed between hops, and composed. The order is the
+     * order the chain reaches them.
+     */
+    List<SubAgentDefinition> definitions() {
+        return List.of(
+                define("surveyor", "reads what JDK the project is actually on", P_SURVEYOR,
+                        read("surveyor")),
+                define("survey-critic", "checks the survey against the build files", P_SURVEY_CRITIC,
+                        read("survey-critic")),
+                define("security-before", "reads the pre-bump vulnerability scan",
+                        P_SECURITY_BEFORE, read("security-before")),
+                define("security-before-critic", "checks that reading", P_SECURITY_BEFORE_CRITIC,
+                        read("security-before-critic")),
+                define("preparer", "applies this hop's structural floors", floors(P_PREPARER),
+                        patch("preparer")),
+                define("prepare-critic", "checks the floors against the triggers that fired",
+                        floors(P_PREPARE_CRITIC), read("prepare-critic")),
+                define("bumper", "raises the target pins the build declares", P_BUMPER,
+                        patch("bumper")),
+                define("bump-critic", "checks every pin reached the target", P_BUMP_CRITIC,
+                        read("bump-critic")),
+                define("troubleshoot-loop", "decides the next step, and when to stop",
+                        P_TROUBLESHOOT_LOOP, steer("troubleshoot-loop", "")),
+                define("troubleshoot-loop-critic", "judges the campaign, not the step",
+                        P_TROUBLESHOOT_LOOP_CRITIC, steer("troubleshoot-loop-critic", "")),
+                define("troubleshooter", "clears one wall the deterministic table did not know",
+                        P_TROUBLESHOOTER, patch("troubleshooter")),
+                define("trouble-critic", "migration fix, or gaming the gate", P_TROUBLE_CRITIC,
+                        read("trouble-critic")),
+                define("security-after", "reads what the bump did to the vulnerability count",
+                        P_SECURITY_AFTER, read("security-after")),
+                define("security-after-critic", "checks that judgement", P_SECURITY_AFTER_CRITIC,
+                        read("security-after-critic")),
+                define("verdict", "argues an unsettled bump into the corpus vocabulary", P_VERDICT,
+                        read("verdict")),
+                define("estimator", "prices the work a developer would have done", P_ESTIMATOR,
+                        read("estimator")));
+    }
+
+    /**
+     * The definitions for a hop, without a model or a workspace: for reading rather than running.
+     *
+     * <p>The settings page asks what a 17-to-21 bump will be told before one is running, which is
+     * the whole point of being able to see them.
+     */
+    static List<SubAgentDefinition> forHop(Hop hop, Path ws) {
+        return new Agents(null, null, ws, null, new Tree(ws, note -> { }), hop, null).definitions();
+    }
+
+    /** One definition. The framework's record, so nothing here reinvents its shape. */
+    private SubAgentDefinition define(String name, String description, String prompt,
+                                      Map<ToolSpecification, ToolExecutor> tools) {
+        return new SubAgentDefinition(name, description, prompt, false, tools);
+    }
+
+    /** The definition by name, which is how the chain asks for one. */
+    SubAgentDefinition definition(String name) {
+        return definitions().stream().filter(d -> d.name().equals(name)).findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("no agent called " + name));
+    }
+
+    /** A runnable agent from its definition. */
+    private Agent agent(String name) {
+        SubAgentDefinition d = definition(name);
+        return runtime(d.name(), d.extraTools(), d.systemPrompt());
     }
 
     private Agent runtime(String name, Map<ToolSpecification, ToolExecutor> tools, String prompt) {
