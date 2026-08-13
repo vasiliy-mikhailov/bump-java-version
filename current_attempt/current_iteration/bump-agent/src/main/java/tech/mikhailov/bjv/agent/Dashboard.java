@@ -107,6 +107,7 @@ public final class Dashboard {
             .no-baseline,.not-a-bump{background:#161b22;color:#8b949e}
             .queued{background:#0d1117;color:#6e7681;border:1px solid #21262d}
             .interrupted{background:#20161f;color:#bc8cff;border:1px solid #21262d}
+            .postponed{background:#1b1f26;color:#7aa2d6;border:1px solid #21262d}
             .blocked-dependency,.behavior-change{background:#2b2011;color:#d29922}
             .infra{background:#2d1618;color:#f85149}
             .sema{display:flex;gap:5px;margin-top:5px}
@@ -325,7 +326,12 @@ public final class Dashboard {
         for (Map.Entry<String, Map<String, String>> e : latest.entrySet()) {
             Facts f = measure(e.getKey(), e.getValue());
             if (f.state.equals("bumping") && !claimed.isEmpty() && !claimed.contains(f.slug)) {
-                f = f.as("interrupted");
+                // A LANE THAT WAS SET ASIDE DID NOT DIE. The supervisor stops a bump that is going
+                // nowhere and the launcher then skips it until the queue holds nothing else, at
+                // which point it runs again. Reading that as "the lane died" reports a deliberate
+                // decision, with a written reason, as a failure of the harness.
+                f = f.as(Files.isRegularFile(results.resolve("postponed").resolve(f.slug))
+                        ? "postponed" : "interrupted");
             }
             facts.add(f);
             events += f.events;
@@ -336,7 +342,8 @@ public final class Dashboard {
         }
         int total = facts.size();
         int settled = (int) facts.stream().filter(f -> !f.state.equals("bumping")
-                && !f.state.equals("queued") && !f.state.equals("interrupted")).count();
+                && !f.state.equals("queued") && !f.state.equals("interrupted")
+                && !f.state.equals("postponed")).count();
         long elapsed = began == Long.MAX_VALUE ? 0 : System.currentTimeMillis() - began;
 
         StringBuilder b = head("bumps", total + " bump(s) · " + events + " trace event(s) · as of "
@@ -422,6 +429,7 @@ public final class Dashboard {
             new Exit("blocked-dependency", "no compatible version", false),
             new Exit("infra", "the environment failed", false),
             new Exit("interrupted", "the lane died", false),
+            new Exit("postponed", "set aside, will run again", false),
     };
 
     /**

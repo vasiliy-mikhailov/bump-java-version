@@ -158,9 +158,13 @@ echo "manifest complete: $done_n launched, $skipped already settled, $postponed_
 # reason to keep them aside is gone and they are the work. Bounded, because a bump that is postponed
 # again the moment it starts would otherwise loop here forever.
   rounds=$((rounds+1))
-  if [ "$done_n" -gt 0 ]; then rounds=0; fi
-  if [ "$postponed_n" -eq 0 ] || [ "$rounds" -ge 3 ]; then
-    [ "$postponed_n" -gt 0 ] && echo "$postponed_n still postponed after $rounds empty rounds; stopping"
+  # ONLY WHEN THEY ARE ALL THAT IS LEFT. A postponement frees a slot for work that can progress, so
+  # it must outlast every round that still had such work: clearing it after a pass that launched 500
+  # repos hands the slot straight back to the lane that was going nowhere. The smoke test caught
+  # this on its first run -- a pass that skipped one bump and launched another cleared the marker
+  # regardless, which made postponing mean nothing at all.
+  if [ "$done_n" -gt 0 ] || [ "$postponed_n" -eq 0 ] || [ "$rounds" -ge 3 ]; then
+    [ "$postponed_n" -gt 0 ] && echo "$postponed_n left postponed; they run when nothing else is waiting"
     break
   fi
   echo "only postponed bumps remain ($postponed_n); clearing them and going again"

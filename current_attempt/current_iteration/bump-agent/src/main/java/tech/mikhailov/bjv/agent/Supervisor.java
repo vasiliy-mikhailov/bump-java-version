@@ -85,13 +85,13 @@ final class Supervisor {
         String digest = sweep.digest(now);
         String open = openFindings();
 
-        String proposed = agent("supervisor", proposing, tools(now), PROPOSER)
+        String proposed = agent("supervisor", proposing, recorded(tools(now), "supervisor"), PROPOSER)
                 .run("The sweep as it stands:\n\n" + digest
                         + "\n\nWhat you have already reported and that still holds:\n"
                         + (open.isBlank() ? "  nothing yet" : open));
 
         for (String claim : claims(proposed)) {
-            String judgement = agent("supervisor-critic", judging, tools(now), CRITIC)
+            String judgement = agent("supervisor-critic", judging, recorded(tools(now), "supervisor-critic"), CRITIC)
                     .run("The sweep as it stands:\n\n" + digest
                             + "\n\nA colleague reports:\n" + claim
                             + "\n\nDoes it hold?");
@@ -145,6 +145,24 @@ final class Supervisor {
     }
 
     // ---- what it can do ----
+
+    /**
+     * Every tool call, in the trace.
+     *
+     * <p>Tools.java wraps its executors so the corpus sees them; this class built its own raw, so
+     * two bumps were postponed with correct reasons and the trace recorded no postpone call at all.
+     * A supervisor whose actions leave no record is the one thing here that must not have one.
+     */
+    private Map<ToolSpecification, ToolExecutor> recorded(Map<ToolSpecification, ToolExecutor> raw,
+                                                          String agent) {
+        Map<ToolSpecification, ToolExecutor> wrapped = new LinkedHashMap<>();
+        raw.forEach((spec, executor) -> wrapped.put(spec, (request, memoryId) -> {
+            String result = executor.execute(request, memoryId);
+            trace.tool(agent, spec.name(), request.arguments(), result);
+            return result;
+        }));
+        return wrapped;
+    }
 
     private Map<ToolSpecification, ToolExecutor> tools(long now) {
         Map<ToolSpecification, ToolExecutor> tools = new LinkedHashMap<>();
