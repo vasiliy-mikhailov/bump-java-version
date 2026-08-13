@@ -71,6 +71,15 @@ public final class Dashboard {
     };
 
     private static final String CSS = """
+            .findings{margin:18px 0;padding:14px 16px;border:1px solid #2a2a2a;border-radius:6px}
+            .findings h2{font-size:13px;font-weight:600;margin:0 0 10px;color:#bbb}
+            .findings ul{margin:0;padding:0;list-style:none}
+            .findings li{margin:0 0 7px;line-height:1.45;font-size:12.5px}
+            .findings .tag{display:inline-block;min-width:54px;text-align:center;padding:1px 6px;
+              margin-right:8px;border-radius:3px;font-size:11px;font-weight:600}
+            .findings .tag.hold{background:#5c1f1f;color:#ffb4b4}
+            .findings .tag.gone{background:#232323;color:#777}
+            .findings .hold{color:#ff8b8b}
             *{box-sizing:border-box}
             body{margin:0;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;
             background:#0d1117;color:#c9d1d9}
@@ -340,6 +349,7 @@ public final class Dashboard {
                 .append(read(results.resolve("settlements.jsonl")).size())
                 .append(";document.body.dataset.at=Date.now()</script>");
         b.append(progress(total, settled, elapsed, minutes, facts));
+        b.append(findings());
         b.append("<table><tr><th>bump</th><th>hop</th><th>state</th><th>tests</th>"
                 + "<th>target</th><th>cve</th><th>walls</th><th>human-equiv</th><th>took</th>"
                 + "<th>latest</th></tr>");
@@ -1364,6 +1374,50 @@ public final class Dashboard {
      * repositories. Both quote characters are escaped so the output is safe in either attribute
      * style, not only the one a given line happens to use today.
      */
+    /**
+     * What the supervisor has reported, and how much of it survived being checked.
+     *
+     * <p>The findings existed for hours before this: a file nobody rendered, which is the same as
+     * not having them. A supervisor's whole output is a list someone reads, and the refuted ones
+     * stay visible on purpose -- a list where everything holds is a list nobody is checking.
+     */
+    private String findings() {
+        List<String> rows = read(results.resolve("findings.jsonl"));
+        if (rows.isEmpty()) {
+            return "";
+        }
+        // The same finding recurs while its cause does, so the newest judgement on each is the one
+        // that counts; showing every repeat would bury twenty facts under two hundred restatements.
+        Map<String, String[]> latest = new LinkedHashMap<>();
+        for (String row : rows) {
+            String finding = Sweep.text(row, "finding");
+            if (!finding.isBlank()) {
+                latest.put(finding, new String[] {Sweep.text(row, "verdict"),
+                        Sweep.text(row, "why"), Sweep.text(row, "at")});
+            }
+        }
+        long holds = latest.values().stream().filter(v -> "holds".equals(v[0])).count();
+
+        StringBuilder out = new StringBuilder("<section class=findings><h2>");
+        out.append(latest.size()).append(" findings from the supervisor &mdash; <span class=hold>")
+                .append(holds).append(" hold</span> &middot; ")
+                .append(latest.size() - holds).append(" refuted</h2><ul>");
+        latest.entrySet().stream()
+                .sorted((a, c) -> {
+                    boolean ah = "holds".equals(a.getValue()[0]);
+                    boolean ch = "holds".equals(c.getValue()[0]);
+                    return ah == ch ? c.getValue()[2].compareTo(a.getValue()[2])
+                            : Boolean.compare(ch, ah);
+                })
+                .limit(60)
+                .forEach(e -> out.append("<li><span class=\"tag ")
+                        .append("holds".equals(e.getValue()[0]) ? "hold" : "gone").append("\">")
+                        .append(esc(e.getValue()[0])).append("</span> <span title=\"")
+                        .append(esc(e.getValue()[1])).append("\">")
+                        .append(esc(e.getKey())).append("</span></li>"));
+        return out.append("</ul></section>").toString();
+    }
+
     private static String esc(String s) {
         return s == null ? "" : s.replace("&", "&amp;").replace("<", "&lt;")
                 .replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");

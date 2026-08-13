@@ -287,11 +287,24 @@ final class Supervisor {
         };
     }
 
-    private static String attempt(SubAgentRuntime runtime, String task) {
+    /**
+     * One try, and the reason it failed if it did.
+     *
+     * <p>SWALLOWING THE EXCEPTION MADE A BROKEN SUPERVISOR LOOK LIKE A CLEAN FLEET. It ran for the
+     * better part of an hour with no credentials at all -- the launcher maps PROPOSER_API_KEY onto
+     * OC_KEY for its lanes and the supervisor's own deployment did not -- and every model call
+     * threw, was caught here, and was returned as an empty answer. An empty answer from a
+     * supervisor reads as "nothing is wrong", which is the most expensive thing it could possibly
+     * say by mistake.
+     */
+    private String attempt(SubAgentRuntime runtime, String task) {
         try {
             String reply = runtime.run(task);
             return reply == null ? "" : reply;
-        } catch (RuntimeException unreachable) {
+        } catch (RuntimeException e) {
+            trace.progress("supervisor", "model call failed: " + e.getClass().getSimpleName()
+                    + ": " + e.getMessage());
+            System.out.println("model call failed: " + e);
             return "";
         }
     }
@@ -317,11 +330,19 @@ final class Supervisor {
             forty minutes may be waiting on a build, and one that has written constantly may be \
             circling.
 
-            You may set a lane aside with postpone when it is going nowhere and its slot would be \
-            better spent. That is not a verdict and does not settle anything; the bump keeps what it \
-            had and is tried again when the queue is otherwise empty. Use it sparingly, say plainly \
-            why, and prefer leaving a slow lane alone: work here takes hours, and a bump killed at \
-            fifty minutes was often about to finish.
+            SET LANES ASIDE. That is half your job and the half that changes anything: a finding is \
+            a note for later, while postpone frees a slot now. A bump keeps whatever it had and is \
+            tried again once the queue is otherwise empty, so this costs a repository nothing.
+
+            Slow is not the same as stuck, and the difference is in the log rather than the clock. A \
+            lane at four hours making progress -- new stages, new walls cleared, a gate turn that \
+            moved -- is working, and builds here genuinely take tens of minutes. A lane at four \
+            hours on the same stage, with an attempt count in double figures, or repeating an edit \
+            its critic has already rejected, is not going to finish: it will burn its slot until \
+            something kills it. Read the log with read_bump and say which one you are looking at.
+
+            When it is the second kind, postpone it. Do not report a lane as looping and leave it \
+            looping; that is the finding and the fix in the same breath, and you have both.
 
             Report ONE FINDING PER LINE, each a single sentence naming the specific thing that is \
             wrong and where you saw it. No preamble, no numbering, no summary at the end. Do not \
