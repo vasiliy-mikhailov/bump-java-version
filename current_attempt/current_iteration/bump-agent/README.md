@@ -43,13 +43,20 @@ certifies. Neither gets `write_file`. An edit under a test source root is refuse
 ## Running
 
 ```
-mvn package
-docker build -t bjv-agent .                             # controller: JDK + docker client
-docker build -t bjv-dashboard -f Dockerfile.dashboard .  # reader, no docker socket
+cp .env.example .env          # set BJV_DASH_TOKEN (required)
+docker compose up -d          # dashboard at http://127.0.0.1:8086
+```
 
+Pulls [`vasiliymikhailov/bjv-agent`](https://hub.docker.com/r/vasiliymikhailov/bjv-agent) from Docker Hub.
+
+Supervisor (needs `OC_KEY`): `docker compose --profile supervisor up -d`.
+
+One bump, same image, docker socket required:
+
+```
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WS:$WS" -e OC_KEY=… -e BJV_HOPTOOLS=…/hoptools \
-  bjv-agent "$WS" 'owner/repo|sha|11|17' "$RESULTS"
+  vasiliymikhailov/bjv-agent "$WS" 'owner/repo|sha|11|17' "$RESULTS"
 ```
 
 ## The record
