@@ -52,10 +52,10 @@ class AnAgentIsBuiltForItsHopTest {
     void everyHopBuildsTheWholeChainAndTheOrderIsTheChains() {
         for (Hop hop : List.of(new Hop(8, 11), new Hop(11, 17), new Hop(17, 21), new Hop(21, 25))) {
             List<SubAgentDefinition> all = Agents.forHop(hop, Path.of("/tmp"));
-            assertEquals(20, all.size(), "every hop gets the whole chain: " + hop);
+            assertEquals(22, all.size(), "every hop gets the whole chain: " + hop);
             assertEquals("surveyor", all.get(0).name(), "which starts where the chain starts");
-            assertEquals("estimator", all.get(all.size() - 1).name(),
-                    "and ends where it ends");
+            assertEquals("estimator-critic", all.get(all.size() - 1).name(),
+                    "and ends where it ends: every producer has a critic, including the last");
             for (SubAgentDefinition d : all) {
                 assertFalse(d.systemPrompt().isBlank(), d.name() + " has no prompt on " + hop);
                 assertFalse(d.systemPrompt().contains("{FLOORS}"),

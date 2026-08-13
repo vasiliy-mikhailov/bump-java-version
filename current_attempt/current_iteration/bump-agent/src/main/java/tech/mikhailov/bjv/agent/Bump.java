@@ -294,10 +294,27 @@ public final class Bump {
         }
 
         // ---- CLOSERS: argue only the unsettled, price everything.
-        String argued = agents.verdict().run(brief(lastLog)
+        String context = brief(lastLog)
                 + (lastVerdict == null ? "" : "\nThe scorer's last verdict: " + lastVerdict.state())
                 + "\nThe reflect loop ended without a green gate. Walls cleared: "
-                + walls.appliedSoFar());
+                + walls.appliedSoFar();
+        String argued = agents.verdict().run(context);
+
+        // THE WORD IS WHAT THE CORPUS RECORDS, and nothing after this re-reads the log to check it.
+        // One verdict here called a dependency incompatible with JDK 21 on the strength of a
+        // compile error the troubleshooter had caused itself, and it stood because no one asked.
+        for (int again = 0; again < REASK; again++) {
+            String judgement = agents.verdictCritic().run(context
+                    + "\n\nYour colleague argues:\n" + argued);
+            if (word(judgement, "sound", "wrong").equals("sound")) {
+                break;
+            }
+            trace.progress(bump, "verdict-critic: " + judgement.lines().findFirst().orElse(""));
+            argued = agents.verdict().run(context
+                    + "\n\nYou argued:\n" + argued
+                    + "\n\nA reviewer checked it against the record and disagrees:\n" + judgement
+                    + "\nArgue it again, or keep your word and answer the objection.");
+        }
         price();
         return word(argued, "blocked-dependency", "behavior-change", "infra") + "\n" + argued;
     }
@@ -696,9 +713,20 @@ public final class Bump {
     }
 
     private void price() {
-        String estimate = agents.estimator().run("The bump " + bump + " (JDK " + from + " -> " + to
+        String context = "The bump " + bump + " (JDK " + from + " -> " + to
                 + "); walls cleared mechanically: " + walls.appliedSoFar()
-                + ". What the workspace became:\n" + tree.diff());
+                + ". What the workspace became:\n" + tree.diff();
+        String estimate = agents.estimator().run(context);
+
+        // NOTHING DOWNSTREAM DEPENDS ON THIS NUMBER, which is exactly why it drifts: an estimate
+        // nobody checks is read later as though it had been measured.
+        String judged = agents.estimatorCritic().run(context + "\n\nThe estimate:\n" + estimate);
+        if (!word(judged, "sound", "off").equals("sound")) {
+            trace.progress(bump, "estimator-critic: " + judged.lines().findFirst().orElse(""));
+            estimate = agents.estimator().run(context + "\n\nYou estimated:\n" + estimate
+                    + "\n\nA reviewer checked it against the log:\n" + judged
+                    + "\nPrice it again.");
+        }
         Matcher m = Pattern.compile("minutes:\\s*(\\d+)").matcher(estimate);
         trace.priced(bump, m.find() ? m.group(1) : "", estimate);
     }

@@ -379,6 +379,57 @@ final class Agents {
                 One word first, then the argument. These mean different things to whoever reads this \
                 next, so choose the word for the reader.
                 """;
+    private static final String P_VERDICT_CRITIC = """
+                A colleague has argued what an unsettled bump IS, in one of the words the corpus
+                records. That word is what this repository will be counted as, and nobody after you
+                re-reads the log to check it, so you are the last chance to catch one that is wrong.
+
+                Check the argument against what actually happened. what_happened gives you the run's
+                own event log, inspect_jar opens any dependency the argument names, and read_file
+                reaches the workspace. The failure mode to look for is a verdict that reads well and
+                is not in the record: this corpus has one where a troubleshooter reported a
+                dependency as incompatible with JDK 21 after writing `new` against an interface, and
+                the verdict repeated that reasoning rather than the compile error underneath it.
+
+                Three things to test, in order.
+
+                Is the word right? `blocked-dependency` needs a dependency with no compatible
+                version, shown rather than asserted -- which versions exist, and why none of them
+                work. `behavior-change` needs the changed behaviour named, not a failing test named.
+                `infra` needs the environment to have failed, and a tooling failure that is really a
+                migration failure is the most expensive mislabel here, because it removes the repo
+                from the results rather than counting it as a loss.
+
+                Is it what the log says? A verdict built on a step that was later reverted, or on a
+                claim some critic rejected, is worse than no verdict.
+
+                Is anything missing that would change the word? A wall nobody tried, a version
+                nobody checked.
+
+                Answer `sound`, with what you verified. Or `wrong: <the word it should be, and the
+                evidence>`. If you cannot check it either way, answer `sound`: an unverifiable
+                objection would replace one guess with another.
+                """;
+
+    private static final String P_ESTIMATOR_CRITIC = """
+                A colleague has priced what this bump would have cost a competent Java developer who
+                had not seen the code before. You check the number.
+
+                It is not a scoring input and nothing downstream depends on it, which is exactly why
+                it drifts: an unchecked number gets read later as though it were measured.
+
+                Read the run with what_happened and ask three things. Does the total match the work
+                the log shows -- the walls actually hit, the edits actually made, the attempts that
+                failed and were retried? Is anything charged that did not happen, or charged twice
+                because the trace records several attempts at the same bump? And is anything real
+                left out: a wall the deterministic table cleared in one turn still cost a person the
+                diagnosis, and a dead end still cost the time it took to abandon.
+
+                Answer `sound`, or `off: <the number it should be, and which items are wrong>`.
+                Being roughly right matters more than being precise -- an estimate within a
+                reasonable band is sound, and only a total that the log does not support is off.
+                """;
+
     private static final String P_ESTIMATOR = """
                 You read a completed attempt to bump a Java project one LTS step, and estimate what \
                 the same work would have cost a competent Java developer who had not seen this code \
@@ -545,6 +596,14 @@ final class Agents {
     }
 
     /** Prices the attempt from the record. */
+    Agent verdictCritic() {
+        return agent("verdict-critic");
+    }
+
+    Agent estimatorCritic() {
+        return agent("estimator-critic");
+    }
+
     Agent estimator() {
         return agent("estimator");
     }
@@ -668,8 +727,12 @@ final class Agents {
                         read("security-after-critic")),
                 define("verdict", "argues an unsettled bump into the corpus vocabulary", P_VERDICT,
                         read("verdict")),
+                define("verdict-critic", "checks that word against what actually happened",
+                        P_VERDICT_CRITIC, read("verdict-critic")),
                 define("estimator", "prices the work a developer would have done", P_ESTIMATOR,
-                        read("estimator")));
+                        read("estimator")),
+                define("estimator-critic", "checks the price against the work in the log",
+                        P_ESTIMATOR_CRITIC, read("estimator-critic")));
     }
 
     /**
