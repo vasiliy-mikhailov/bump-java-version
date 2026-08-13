@@ -409,10 +409,36 @@ final class Migrate {
     }
 
     /** The recipe run itself, in the sealed container, under the SOURCE JDK the project still is. */
+    /**
+     * Run a recipe an agent wrote, under a named JDK.
+     *
+     * <p>The one way a pin reaches a project. An agent that edits a pom by hand is guessing at
+     * placement -- dependencyManagement, a property, a BOM import, a Gradle string -- and the
+     * recipes know which is right for the project in front of them, on either build system.
+     */
+    String apply(String yaml, String jdk) throws IOException {
+        Files.writeString(ws.resolve("rewrite.yml"), yaml);
+        return rewrite(jdk);
+    }
+
+    /** The recipe name in whatever rewrite.yml is on disk, so an agent may name its own. */
+    private String activeRecipe() {
+        try {
+            for (String line : Files.readString(ws.resolve("rewrite.yml")).lines().toList()) {
+                if (line.startsWith("name:")) {
+                    return line.substring(5).strip();
+                }
+            }
+        } catch (IOException unreadable) {
+            // Fall through to the name this class writes itself.
+        }
+        return "com.bjv.Bump";
+    }
+
     private String rewrite(String from) {
         String goal = "mvn -B -ntp -U -Denforcer.skip=true " + REWRITE_PLUGIN + ":run"
                 + " -Drewrite.configLocation=$(pwd)/rewrite.yml"
-                + " -Drewrite.activeRecipes=com.bjv.Bump"
+                + " -Drewrite.activeRecipes=" + activeRecipe()
                 + " -Drewrite.recipeArtifactCoordinates=" + RECIPE_JARS;
         try {
             Shell.Output out = Shell.run(ws, Runner.env(ws), Duration.ofSeconds(2700),

@@ -86,6 +86,58 @@ final class Agents {
                 .replace("{FROM}", String.valueOf(hop.from()));
     }
 
+    private static final String P_PINS = """
+                You raise dependency versions on a Java project that is being moved from JDK {FROM}
+                to JDK {TARGET}. {WHEN}
+
+                THESE, AND NOTHING ELSE:
+
+{PINS}
+
+                Each line is group:artifact, the version it must be at least, and why. They are
+                floors: a project already at or above one is finished, and a project that does not
+                use a dependency at all is not given it. Never lower a version.
+
+                USE apply_recipe. Do not edit a pom or a build.gradle by hand. A version can live in
+                a dependency, in dependencyManagement, in a property the dependency reads, in a
+                Gradle string or in a version catalog, and hand-editing means guessing which -- the
+                recipes know, for both build systems. Emit the maven form AND the gradle form for
+                every pin in one recipe file; the one that does not match this project matches
+                nothing, which is what lets one recipe serve either.
+
+                Then call check_pins and read what the project actually says. If something is still
+                outstanding, look at why -- the wrong recipe for where that version lives, or an
+                artifact this project genuinely does not use -- and run another recipe. The check is
+                the fact; your recollection of what you ran is not.
+
+                Answer one line: DONE: <what you raised, and what was already satisfied>. If a pin
+                cannot be met, say exactly BLOCKED: <which, and what the project does that prevents
+                it>. Both are useful answers. A claim that everything is done when check_pins says
+                otherwise is the one answer that is not.
+                """;
+
+    private static final String P_PINS_CRITIC = """
+                A colleague was asked to raise these versions on a project moving from JDK {FROM} to
+                JDK {TARGET}. {WHEN}
+
+{PINS}
+
+                Call check_pins and read what the build files say. That is the whole question: is
+                every pin at or above its floor, or is one outstanding.
+
+                A dependency the project does not use is satisfied -- these are floors, not
+                requirements, and adding one would be a different bump. A version above the floor is
+                satisfied. Only a version BELOW the floor is outstanding.
+
+                Answer `done` when nothing is outstanding, or when what remains is genuinely
+                unreachable and your colleague said so.
+
+                Otherwise answer `again: <which pins, and what to try>`. Name them from check_pins
+                rather than from the diff, and say something the next attempt can act on: which
+                recipe suits where that version actually lives in this project. An objection without
+                that is the same as `done`.
+                """;
+
     private static final String P_SURVEYOR = """
                 You are given a Java project and the hop it has been QUEUED for, as `from -> to`.
                 The hop is prescribed and you cannot change it. Your job is to say whether the \
@@ -532,6 +584,50 @@ final class Agents {
      * <p>As data they can be listed, rendered, diffed between hops, and composed. The order is the
      * order the chain reaches them.
      */
+    /** The pins this hop owes before the JDK moves, and the ones that must wait until after. */
+    List<Floors.Floor> owed(boolean afterTheJdkMoves) {
+        String text = afterTheJdkMoves ? Floors.after(hop.to()) : Floors.before(hop.to());
+        return Floors.at(hop.to()).stream()
+                .filter(f -> text.contains(f.coordinates() + " " + f.version()))
+                .toList();
+    }
+
+    /** One of the two pin phases, as a pair. The list in the prompt is the list the tool checks. */
+    private String pinPrompt(String base, boolean after) {
+        return base.replace("{PINS}", (after ? Floors.after(hop.to()) : Floors.before(hop.to()))
+                        .lines().map(l -> "                - " + l.strip())
+                        .collect(java.util.stream.Collectors.joining("\n")))
+                .replace("{FROM}", String.valueOf(hop.from()))
+                .replace("{TARGET}", String.valueOf(hop.to()))
+                .replace("{WHEN}", after
+                        ? "The JDK has already been raised. These versions require it, so this is "
+                        + "the first moment they can be applied at all."
+                        : "The JDK has NOT been raised yet. These versions must be in place first, "
+                        + "because the new JDK will not compile without them.");
+    }
+
+    Agent beforePins(Migrate migrate) {
+        return runtime("before-pins", Tools.pinning(ws, migrate, tree, String.valueOf(hop.from()),
+                owed(false), trace, "before-pins"), pinPrompt(P_PINS, false));
+    }
+
+    Agent beforePinsCritic() {
+        return runtime("before-pins-critic",
+                Tools.judging(ws, tree, owed(false), trace, "before-pins-critic"),
+                pinPrompt(P_PINS_CRITIC, false));
+    }
+
+    Agent afterPins(Migrate migrate) {
+        return runtime("after-pins", Tools.pinning(ws, migrate, tree, String.valueOf(hop.to()),
+                owed(true), trace, "after-pins"), pinPrompt(P_PINS, true));
+    }
+
+    Agent afterPinsCritic() {
+        return runtime("after-pins-critic",
+                Tools.judging(ws, tree, owed(true), trace, "after-pins-critic"),
+                pinPrompt(P_PINS_CRITIC, true));
+    }
+
     List<SubAgentDefinition> definitions() {
         return List.of(
                 define("surveyor", "reads what JDK the project is actually on", P_SURVEYOR,
@@ -542,6 +638,10 @@ final class Agents {
                         P_SECURITY_BEFORE, read("security-before")),
                 define("security-before-critic", "checks that reading", P_SECURITY_BEFORE_CRITIC,
                         read("security-before-critic")),
+                define("before-pins", "raises the versions the new JDK needs, before it moves",
+                        pinPrompt(P_PINS, false), read("before-pins")),
+                define("before-pins-critic", "checks every pre-JDK pin actually landed",
+                        pinPrompt(P_PINS_CRITIC, false), read("before-pins-critic")),
                 define("preparer", "applies this hop's structural floors", floors(P_PREPARER),
                         patch("preparer")),
                 define("prepare-critic", "checks the floors against the triggers that fired",
@@ -558,6 +658,10 @@ final class Agents {
                         P_TROUBLESHOOTER, patch("troubleshooter")),
                 define("trouble-critic", "migration fix, or gaming the gate", P_TROUBLE_CRITIC,
                         read("trouble-critic")),
+                define("after-pins", "raises the versions that only run on the new JDK",
+                        pinPrompt(P_PINS, true), read("after-pins")),
+                define("after-pins-critic", "checks every post-JDK pin actually landed",
+                        pinPrompt(P_PINS_CRITIC, true), read("after-pins-critic")),
                 define("security-after", "reads what the bump did to the vulnerability count",
                         P_SECURITY_AFTER, read("security-after")),
                 define("security-after-critic", "checks that judgement", P_SECURITY_AFTER_CRITIC,

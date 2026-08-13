@@ -218,10 +218,20 @@ public final class Bump {
         // The before-scan travels into the migration: the Tomcat floor has to know which line the
         // project actually resolved, and no build file says that.
         tree.excludeBuildOutput();
-        String prePass = new Migrate(ws, hoptools, trace).run(from, to, before);
+        // THE ORDER IS THE POINT. Lombok has to move before the JDK, because a Lombok that cannot
+        // read the new class file kills javac before anything else runs. Spring Boot has to move
+        // after, because Boot 4.1 declares java.version 17 and cannot be resolved by a project
+        // still on 11. Both used to happen in one pass with nothing sequencing them.
+        Migrate migrate = new Migrate(ws, hoptools, trace);
+        pinPhase("before-pins", agents.beforePins(migrate), agents.beforePinsCritic(),
+                agents.owed(false));
+        String prePass = migrate.run(from, to, before);
         // The deterministic pass is not up for review, so it lands before anyone can object.
         tree.land("migrate");
         preparePhase(prePass);
+        // The JDK has moved by now, so the versions that require it are finally applicable.
+        pinPhase("after-pins", agents.afterPins(migrate), agents.afterPinsCritic(),
+                agents.owed(true));
 
         // ---- BUMP: land the target, judged against the pin grep re-run after the edits.
         bumpPhase();
@@ -352,6 +362,39 @@ public final class Bump {
     }
 
     /** The preparer and its critic: the proactive steps, executed and then audited. */
+    /**
+     * One pin phase: raise, check, and go again while anything is outstanding.
+     *
+     * <p>The loop terminates on the build files rather than on anyone's account of them. A producer
+     * that says it raised Lombok and a critic that agrees are two opinions; check_pins reads the
+     * project, and both agents hold it, so the disagreement that ends the loop is with the pom.
+     */
+    private void pinPhase(String stage, Agents.Agent raise, Agents.Agent judge,
+                          List<Floors.Floor> owed) throws IOException {
+        if (owed.isEmpty()) {
+            return;
+        }
+        for (int round = 0; round <= REASK; round++) {
+            String said = raise.run("Raise what this phase owes, then check it.");
+            trace.applied(stage, said + "\n" + tree.diff());
+            List<Pins.State> left = Pins.outstanding(ws, owed);
+            String judgement = judge.run("Your colleague reports:\n" + said
+                    + "\n\nWhat the build files say now:\n"
+                    + left.stream().map(Pins.State::describe)
+                            .collect(java.util.stream.Collectors.joining("\n"))
+                    + (left.isEmpty() ? "nothing outstanding" : ""));
+            if (word(judgement, "done", "again").equals("done") || round == REASK) {
+                trace.progress(bump, stage + ": " + (left.isEmpty() ? "every pin met"
+                        : left.size() + " left outstanding") + " after " + (round + 1)
+                        + " round(s)");
+                tree.land(stage);
+                return;
+            }
+            trace.progress(bump, stage + ": sent back — "
+                    + judgement.lines().findFirst().orElse(""));
+        }
+    }
+
     private void preparePhase(String prePass) throws IOException {
         String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
                 + "\n\nThe deterministic pre-pass already did:\n" + prePass + "\n" + buildFiles();
