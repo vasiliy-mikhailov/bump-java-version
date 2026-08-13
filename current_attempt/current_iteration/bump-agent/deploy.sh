@@ -48,6 +48,7 @@ ssh "$H" '
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v '"$RESULTS"':/results \
     --env-file /home/vmihaylov/bump-java-version/.env \
+    -e OC_KEY="$(sed -n "s/^PROPOSER_API_KEY=//p" /home/vmihaylov/bump-java-version/.env | tr -d "\"" )" \
     -e BJV_SUPERVISOR_MINUTES="${BJV_SUPERVISOR_MINUTES:-20}" \
     bjv-supervisor >/dev/null && echo "supervisor recreated"
 '
