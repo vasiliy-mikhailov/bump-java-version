@@ -230,6 +230,19 @@ final class Supervisor {
                                 + ". A settled bump is finished, and setting it aside would only "
                                 + "hide a verdict that has already been earned.";
                     }
+                    if (!lane.get().live()) {
+                        // POSTPONING A DEAD LANE IS THE OPPOSITE OF USEFUL. It holds no slot, so
+                        // nothing is freed, and the launcher retries an unsettled bump on its own
+                        // -- which the marker then prevents. The first fifteen postponements were
+                        // every one of them a lane that had already died, which delayed exactly the
+                        // work it was meant to unblock.
+                        return "REFUSED: " + repo + " is not running. It holds no slot, so setting "
+                                + "it aside frees nothing, and the launcher already retries an "
+                                + "unsettled bump by itself -- a postponement would only delay "
+                                + "that. Postpone what is RUNNING and going nowhere. If this one "
+                                + "keeps dying in the same place, that is worth reporting as a "
+                                + "finding instead.";
+                    }
                     try {
                         sweep.postpone(lane.get().slug(), why);
                     } catch (IOException e) {
@@ -351,6 +364,12 @@ final class Supervisor {
             SET LANES ASIDE. That is half your job and the half that changes anything: a finding is \
             a note for later, while postpone frees a slot now. A bump keeps whatever it had and is \
             tried again once the queue is otherwise empty, so this costs a repository nothing.
+
+            Only a RUNNING lane, though. Postponing one that has already died frees nothing, because \
+            it holds no slot, and the launcher retries an unsettled bump by itself unless a marker \
+            stops it -- so the postponement delays the very work it was meant to unblock. The digest \
+            separates the two lists for exactly this reason. A bump that keeps dying in the same \
+            place is a finding, not a postponement.
 
             Slow is not the same as stuck, and the difference is in the log rather than the clock. A \
             lane at four hours making progress -- new stages, new walls cleared, a gate turn that \

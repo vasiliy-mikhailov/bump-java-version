@@ -168,5 +168,10 @@ echo "manifest complete: $done_n launched, $skipped already settled, $postponed_
     break
   fi
   echo "only postponed bumps remain ($postponed_n); clearing them and going again"
-  rm -f "$RESULTS/postponed"/* 2>/dev/null
+  # THE MARKERS ARE ROOT-OWNED. The supervisor writes them from inside a container, so the launcher
+  # -- a host user -- cannot remove them, and this clearing silently did nothing at all. The same
+  # asymmetry the results tree already handles once at startup, and the smoke test could not catch
+  # it because its own markers were host-written.
+  docker run --rm -v "$RESULTS/postponed:/p" alpine sh -c 'rm -f /p/*' >/dev/null 2>&1 \
+    || rm -f "$RESULTS/postponed"/* 2>/dev/null
 done
