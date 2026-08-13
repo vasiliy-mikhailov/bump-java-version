@@ -48,6 +48,7 @@ final class Agents {
     private final String targetJdk;
     private final Hop hop;
     private final Tree tree;
+    private Migrate migrate;
 
     Agents(ChatModel model, Path ws, Runner runner, Tree tree, Hop hop, Trace trace) {
         this(model, Model.forCritic(trace), ws, runner, tree, hop, trace);
@@ -109,6 +110,8 @@ final class Agents {
                 outstanding, look at why -- the wrong recipe for where that version lives, or an
                 artifact this project genuinely does not use -- and run another recipe. The check is
                 the fact; your recollection of what you ran is not.
+
+                {ALSO}
 
                 Answer one line: DONE: <what you raised, and what was already satisfied>. If a pin
                 cannot be met, say exactly BLOCKED: <which, and what the project does that prevents
@@ -249,19 +252,28 @@ final class Agents {
                 most damaging first.
                 """;
     private static final String P_BUMPER = """
-                A migration recipe has run and a deterministic sweep has raised what it could. Your \
-                job is what is LEFT: every version pin, toolchain block, property or compiler flag \
-                still below the target in ANY module, in whichever dialect this build speaks \
-                (maven.compiler.source/target/release, java.version, sourceCompatibility, \
-                kotlin jvmTarget, JavaLanguageVersion.of, a bare <release> inside a plugin).
+                You move a Java project from JDK {FROM} to JDK {TARGET}. The dependencies the new
+                JDK needs are already in place; this is the step that actually changes the target.
 
-                The gate measures the MINIMUM class-file major across every compiled main class \
-                (55 for 11, 61 for 17, 65 for 21, 69 for 25), so ONE unraised module fails the whole \
-                bump while the build stays green. A green build is not the goal; the landed target is.
+                START WITH THE RECIPES. apply_recipe runs them, and they do the structural work no
+                hand edit should attempt -- the module changes, the plugin floors, the compatibility
+                settings, on either build system:
 
-                The pins found still below target travel in the brief. Raise each with edit_file, \
-                then STOP and answer one line: DID: <what you raised>. If the list is genuinely empty \
-                and your own grep agrees, answer exactly NOTHING-TO-DO: <why>.
+{RECIPES}
+
+                THEN FINISH WHAT THEY MISSED. check_target reads every build file and reports the
+                source, target, release, sourceCompatibility, jvmTarget and toolchain declarations
+                still below {TARGET}, with file and line. Recipes do not reach every dialect a
+                project can use, so read that list and raise what is left with edit_file.
+
+                Then call check_target AGAIN. It is the same measurement the gate makes, so a
+                declaration you leave behind is a bump that fails four stages later with nothing
+                left to try. Do not answer while it still reports something below {TARGET} unless
+                you can say why that one cannot move.
+
+                Raise, never lower, and change nothing that is not a version or a compatibility
+                setting. Answer one line: DID: <what the recipes moved, what you raised by hand, and
+                what check_target says now>.
                 """;
     private static final String P_BUMP_CRITIC = """
                 A colleague raised a project's remaining Java target pins. Judge ONE question: after \
@@ -652,8 +664,55 @@ final class Agents {
     }
 
     /** One of the two pin phases, as a pair. The list in the prompt is the list the tool checks. */
+    /** The steps in a phase that are not version pins, and only the before phase has any. */
+    private String also(boolean after) {
+        if (after) {
+            return "";
+        }
+        return """
+                TWO THINGS THAT ARE NOT VERSION PINS, and only apply if the project shows the
+                trigger. Use apply_recipe for these too --
+                org.openrewrite.maven.ChangePropertyValue reaches a property in every pom.
+
+                - a test dependency that reflects into the process environment (junit-pioneer,
+                  system-lambda, system-rules): the test fork needs
+                  --add-opens java.base/java.util=ALL-UNNAMED and java.base/java.lang=ALL-UNNAMED,
+                  set at the root so modules inherit it.
+                - target 23 or above with annotation processors on the classpath: set
+                  maven.compiler.proc=full. JDK 23 stopped running them by default, so a floored
+                  Lombok that is never invoked is the same as no Lombok at all.
+                """;
+    }
+
+    /**
+     * The bumper's instructions, carrying the recipe program for THIS hop.
+     *
+     * <p>These recipes used to run in a deterministic pass of their own, which chose them by a
+     * lookup and then inspected the project to pick the Spring one -- judgement, in a step drawn as
+     * code, and wrong on six of 102 workspaces until it was fixed. The recipes are named here and
+     * the agent runs them, checks what moved, and runs more if the target is still not met.
+     */
+    private String bumpPrompt() {
+        StringBuilder recipes = new StringBuilder();
+        recipes.append("                - org.openrewrite.java.migrate.UpgradePluginsForJava")
+                .append(hop.to()).append('\n')
+                .append("                - org.openrewrite.java.migrate.UpgradeBuildToJava")
+                .append(hop.to()).append('\n')
+                .append("                - org.openrewrite.java.migrate.jacoco.UpgradeJaCoCo\n");
+        if (hop.crosses(11)) {
+            recipes.append("                - org.openrewrite.java.migrate.Java8toJava11 "
+                    + "— the only recipe that handles the modules JEP 320 removed, and this hop "
+                    + "crosses rung 11\n");
+        }
+        recipes.append("                - org.openrewrite.gradle.UpdateJavaCompatibility with "
+                + "version ").append(hop.to()).append(" — the Gradle half, a no-op on Maven\n");
+        return P_BUMPER.replace("{RECIPES}", recipes.toString())
+                .replace("{FROM}", String.valueOf(hop.from()))
+                .replace("{TARGET}", String.valueOf(hop.to()));
+    }
+
     private String pinPrompt(String base, boolean after) {
-        return base.replace("{PINS}", (after ? Floors.after(hop.to()) : Floors.before(hop.to()))
+        return base.replace("{ALSO}", also(after)).replace("{PINS}", (after ? Floors.after(hop.to()) : Floors.before(hop.to()))
                         .lines().map(l -> "                - " + l.strip())
                         .collect(java.util.stream.Collectors.joining("\n")))
                 .replace("{FROM}", String.valueOf(hop.from()))
@@ -665,8 +724,8 @@ final class Agents {
                         + "because the new JDK will not compile without them.");
     }
 
-    Agent beforePins(Migrate migrate) {
-        return runtime("before-pins", Tools.pinning(ws, migrate, tree, String.valueOf(hop.from()),
+    Agent beforePins() {
+        return runtime("before-pins", Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()),
                 owed(false), trace, "before-pins"), pinPrompt(P_PINS, false));
     }
 
@@ -676,8 +735,8 @@ final class Agents {
                 pinPrompt(P_PINS_CRITIC, false));
     }
 
-    Agent afterPins(Migrate migrate) {
-        return runtime("after-pins", Tools.pinning(ws, migrate, tree, String.valueOf(hop.to()),
+    Agent afterPins() {
+        return runtime("after-pins", Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()),
                 owed(true), trace, "after-pins"), pinPrompt(P_PINS, true));
     }
 
@@ -685,6 +744,16 @@ final class Agents {
         return runtime("after-pins-critic",
                 Tools.judging(ws, tree, owed(true), trace, "after-pins-critic"),
                 pinPrompt(P_PINS_CRITIC, true));
+    }
+
+    /** The recipe runner, set once the workspace is known. Agents that pin cannot work without it. */
+    Agents withRecipes(Migrate migrate) {
+        this.migrate = migrate;
+        return this;
+    }
+
+    private Migrate recipes() {
+        return migrate != null ? migrate : new Migrate(ws, "", trace);
     }
 
     List<SubAgentDefinition> definitions() {
@@ -698,15 +767,14 @@ final class Agents {
                 define("security-before-critic", "checks that reading", P_SECURITY_BEFORE_CRITIC,
                         read("security-before-critic")),
                 define("before-pins", "raises the versions the new JDK needs, before it moves",
-                        pinPrompt(P_PINS, false), read("before-pins")),
+                        pinPrompt(P_PINS, false),
+                        Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()),
+                                owed(false), trace, "before-pins")),
                 define("before-pins-critic", "checks every pre-JDK pin actually landed",
                         pinPrompt(P_PINS_CRITIC, false), read("before-pins-critic")),
-                define("preparer", "applies this hop's structural floors", floors(P_PREPARER),
-                        patch("preparer")),
-                define("prepare-critic", "checks the floors against the triggers that fired",
-                        floors(P_PREPARE_CRITIC), read("prepare-critic")),
-                define("bumper", "raises the target pins the build declares", P_BUMPER,
-                        Tools.raising(ws, runner, tree, targetJdk, trace, "bumper")),
+
+                define("bumper", "moves the project to the target JDK", bumpPrompt(),
+                        Tools.raising(ws, runner, recipes(), tree, targetJdk, String.valueOf(hop.to()), trace, "bumper")),
                 define("bump-critic", "checks every pin reached the target", P_BUMP_CRITIC,
                         Tools.checking(ws, tree, targetJdk, trace, "bump-critic")),
                 define("troubleshoot-loop", "decides the next step, and when to stop",
@@ -718,7 +786,9 @@ final class Agents {
                 define("trouble-critic", "migration fix, or gaming the gate", P_TROUBLE_CRITIC,
                         read("trouble-critic")),
                 define("after-pins", "raises the versions that only run on the new JDK",
-                        pinPrompt(P_PINS, true), read("after-pins")),
+                        pinPrompt(P_PINS, true),
+                        Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()),
+                                owed(true), trace, "after-pins")),
                 define("after-pins-critic", "checks every post-JDK pin actually landed",
                         pinPrompt(P_PINS_CRITIC, true), read("after-pins-critic")),
                 define("security-after", "reads what the bump did to the vulnerability count",

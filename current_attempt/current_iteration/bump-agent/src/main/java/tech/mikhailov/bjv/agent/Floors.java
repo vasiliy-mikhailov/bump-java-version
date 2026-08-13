@@ -33,6 +33,12 @@ final class Floors {
             com.tngtech.archunit:archunit 1.4.1 — reads bytecode directly and rejects a major it predates
             com.tngtech.archunit:archunit-junit5 1.4.1 — moves with archunit
             org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
+                        javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
+            org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
+            javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
+            org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
+            org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
+            org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
             [after] org.springframework.boot:spring-boot 2.7.18 — the last of the 2.x line, and the ceiling here: Boot 3 and 4 both require Java 17
             """;
 
@@ -45,6 +51,12 @@ final class Floors {
             com.tngtech.archunit:archunit-junit5 1.4.1 — moves with archunit
             org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
             org.gradle:gradle-wrapper 7.6 — older wrappers cannot run the toolchain this target needs
+                        javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
+            org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
+            javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
+            org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
+            org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
+            org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
             [after] org.springframework.boot:spring-boot 4.1.0 — Boot 4.1 declares java.version 17, so it is reachable from here up; the recipe stops at UpgradeSpringBoot_4_0 and this floor lifts the patch
             """;
 
@@ -58,6 +70,12 @@ final class Floors {
             org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
             org.gradle:gradle-wrapper 8.10.2 — older wrappers cannot run the toolchain this target needs
             org.apache.tomcat.embed:tomcat-embed-core 9.0.105 — the newest 9.0 the mirror carries, and the fewest CVEs of that line; only where Spring is absent, since Boot brings a newer Tomcat of its own
+                        javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
+            org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
+            javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
+            org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
+            org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
+            org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
             [after] org.springframework.boot:spring-boot 4.1.0 — Boot 4.1 declares java.version 17, so it is reachable here; the recipe stops at UpgradeSpringBoot_4_0 and this floor lifts the patch
             """;
 
@@ -72,6 +90,12 @@ final class Floors {
             org.jetbrains.kotlin:kotlin 2.3.20 — every Kotlin 1.x either crashes on JDK 25 or silently falls back below the target, which the gate reads as an unraised bump
             org.gradle:gradle-wrapper 9.1.0 — older wrappers cannot run the toolchain this target needs
             org.apache.tomcat.embed:tomcat-embed-core 9.0.105 — the newest 9.0 the mirror carries, and the fewest CVEs of that line; only where Spring is absent, since Boot brings a newer Tomcat of its own
+                        javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
+            org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
+            javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
+            org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
+            org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
+            org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
             [after] org.springframework.boot:spring-boot 4.1.0 — Boot 4.1 declares java.version 17, so it is reachable here; the recipe stops at UpgradeSpringBoot_4_0 and this floor lifts the patch
             """;
 

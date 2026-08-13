@@ -24,35 +24,34 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AnAgentIsBuiltForItsHopTest {
 
     @Test
-    void thePreparerCarriesOnlyTheFloorsItsHopCanReach(@TempDir Path ws) {
-        String low = preparer(new Hop(8, 11), ws);
-        String high = preparer(new Hop(21, 25), ws);
+    void thePinPairCarriesOnlyTheFloorsItsHopCanReach(@TempDir Path ws) {
+        String low = pinsFor(new Hop(8, 11), ws);
+        String high = pinsFor(new Hop(21, 25), ws);
 
         assertNotEquals(low, high, "the same agent, told different things");
 
         // 8 to 11 cannot reach any of these, so it is not told about them.
         assertFalse(low.contains("2.3.20"), "kotlin 2.3.20 is a target-25 rule: " + low);
-        assertTrue(low.contains("2.7.18"), "below 17 the Boot ceiling is the last of the 2.x line");
-        assertFalse(low.contains("4.1.0"), "Boot 4 declares java.version 17 and cannot run here");
+        assertFalse(low.contains("4.1.0"), "spring-boot is the after-JDK pair's business");
         assertFalse(low.contains("9.0.105"), "the tomcat floor is a target-21 rule");
         assertFalse(low.contains("1.18.46"), "the JDK 25 lombok is unreachable at 11");
 
         // What it CAN reach, it is told, with the version that applies rather than a conditional.
         assertTrue(low.contains("1.18.30"), "the lombok floor for this target: " + low);
-        assertTrue(low.contains("JDK 8 to 11"), "and it knows which hop it is on");
+        assertTrue(low.contains("JDK 8") && low.contains("JDK 11"),
+                "and it knows which hop it is on");
 
         // 21 to 25 gets the ones 8 to 11 was spared.
         assertTrue(high.contains("1.18.46"), "the JDK 25 lombok");
         assertTrue(high.contains("2.3.20"), "and the kotlin pin");
-        assertTrue(high.contains("4.1.0"), "and Boot 4, which 17 and up can run");
-        assertFalse(high.contains("2.7.18"), "the 2.x ceiling is not mentioned where it cannot apply");
+
     }
 
     @Test
     void everyHopBuildsTheWholeChainAndTheOrderIsTheChains() {
         for (Hop hop : List.of(new Hop(8, 11), new Hop(11, 17), new Hop(17, 21), new Hop(21, 25))) {
             List<SubAgentDefinition> all = Agents.forHop(hop, Path.of("/tmp"));
-            assertEquals(22, all.size(), "every hop gets the whole chain: " + hop);
+            assertEquals(20, all.size(), "every hop gets the whole chain: " + hop);
             assertEquals("surveyor", all.get(0).name(), "which starts where the chain starts");
             assertEquals("estimator-critic", all.get(all.size() - 1).name(),
                     "and ends where it ends: every producer has a critic, including the last");
@@ -76,8 +75,8 @@ class AnAgentIsBuiltForItsHopTest {
             assertTrue(rules <= Floors.all().size(), "and never more than the table holds");
             previous = rules;
         }
-        assertEquals(8, Floors.at(11).size(), "8 to 11 reaches eight of the seventeen");
-        assertEquals(11, Floors.at(25).size(), "21 to 25 reaches eleven");
+        assertEquals(14, Floors.at(11).size(), "8 to 11 pins fourteen");
+        assertEquals(17, Floors.at(25).size(), "21 to 25 pins seventeen");
     }
 
     @Test
@@ -92,9 +91,10 @@ class AnAgentIsBuiltForItsHopTest {
         assertFalse(new Hop(8, 11).crossesJakarta());
     }
 
-    private static String preparer(Hop hop, Path ws) {
+    /** What the pre-JDK pin pair is told, which is where the hop's versions now live. */
+    private static String pinsFor(Hop hop, Path ws) {
         return Agents.forHop(hop, ws).stream()
-                .filter(d -> d.name().equals("preparer"))
+                .filter(d -> d.name().equals("before-pins"))
                 .findFirst().orElseThrow()
                 .systemPrompt();
     }

@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
  *    ↓
  * reflect loop, bounded:
  *   gate @ to-JDK                     green → settled by the build, no model involved
- *   walls table                       the enumerable rows, free, before any model call
  *   troubleshooter ──→ trouble-critic the residue                    (gaming → revert and stop)
  *    ↓
  * verdict                             argues ONLY what execution could not settle
@@ -98,7 +97,6 @@ public final class Bump {
     private String to;
     private Agents agents;
     private Runner runner;
-    private Walls walls;
     // What the builds actually did, carried to the settlement. An implication is not a record.
     private boolean baselineGreen;
     private boolean gateGreen;
@@ -156,7 +154,6 @@ public final class Bump {
         String hoptools = System.getenv().getOrDefault("BJV_HOPTOOLS",
                 "/home/vmihaylov/bump-java-version/current_attempt/current_iteration/hoptools");
         runner = new Runner(ws, hoptools);
-        walls = new Walls(ws);
         security = new Security(ws, hoptools, trace);
         // The producers' try_build must target the hop the survey settled, so they are built now.
         agents = new Agents(Model.forProducer(trace), ws, runner, tree, Hop.of(from, to), trace);
@@ -222,16 +219,12 @@ public final class Bump {
         // read the new class file kills javac before anything else runs. Spring Boot has to move
         // after, because Boot 4.1 declares java.version 17 and cannot be resolved by a project
         // still on 11. Both used to happen in one pass with nothing sequencing them.
-        Migrate migrate = new Migrate(ws, hoptools, trace);
-        pinPhase("before-pins", agents.beforePins(migrate), agents.beforePinsCritic(),
-                agents.owed(false));
-        String prePass = migrate.run(from, to, before);
+        agents.withRecipes(new Migrate(ws, hoptools, trace));
+        pinPhase("before-pins", agents.beforePins(), agents.beforePinsCritic(), agents.owed(false));
         // The deterministic pass is not up for review, so it lands before anyone can object.
         tree.land("migrate");
-        preparePhase(prePass);
         // The JDK has moved by now, so the versions that require it are finally applicable.
-        pinPhase("after-pins", agents.afterPins(migrate), agents.afterPinsCritic(),
-                agents.owed(true));
+        pinPhase("after-pins", agents.afterPins(), agents.afterPinsCritic(), agents.owed(true));
 
         // ---- BUMP: land the target, judged against the pin grep re-run after the edits.
         bumpPhase();
@@ -275,18 +268,13 @@ public final class Bump {
                     price();
                     return "PASS\n" + v.preTests() + " tests conserved, effective target "
                             + v.effectiveTarget() + "; CRITICAL+HIGH " + securitySummary()
-                            + "; walls cleared: " + walls.appliedSoFar();
+                            + "";
                 }
                 lastVerdict = v;
                 lastLog = failureFor(v, test);
             } else {
                 lastVerdict = null;
                 lastLog = build.summary();
-            }
-            Walls.Turn t = walls.match(lastLog, Integer.parseInt(to));
-            if (t.fixed()) {
-                trace.applied("walls", t.what());
-                continue;
             }
             if (!troubleshoot(lastLog)) {
                 break;
@@ -296,8 +284,7 @@ public final class Bump {
         // ---- CLOSERS: argue only the unsettled, price everything.
         String context = brief(lastLog)
                 + (lastVerdict == null ? "" : "\nThe scorer's last verdict: " + lastVerdict.state())
-                + "\nThe reflect loop ended without a green gate. Walls cleared: "
-                + walls.appliedSoFar();
+                + "\nThe reflect loop ended without a green gate.";
         String argued = agents.verdict().run(context);
 
         // THE WORD IS WHAT THE CORPUS RECORDS, and nothing after this re-reads the log to check it.
@@ -410,14 +397,6 @@ public final class Bump {
             trace.progress(bump, stage + ": sent back — "
                     + judgement.lines().findFirst().orElse(""));
         }
-    }
-
-    private void preparePhase(String prePass) throws IOException {
-        String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
-                + "\n\nThe deterministic pre-pass already did:\n" + prePass + "\n" + buildFiles();
-        judgedThenLanded("prepare", agents.preparer(), agents.prepareCritic(), brief,
-                diff -> brief + "\n\nWhat the preparer changed:\n" + diff,
-                "sound", "missed", "overreach");
     }
 
     /** The bumper and its critic: the pins the recipe under-applied. */
@@ -607,8 +586,7 @@ public final class Bump {
 
     private String brief(String log) throws IOException {
         return "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
-                + "\nWalls already cleared mechanically: " + walls.appliedSoFar()
-                + "\n\nThe failing build:\n" + log;
+                                + "\n\nThe failing build:\n" + log;
     }
 
     private String buildFiles() throws IOException {
@@ -714,7 +692,7 @@ public final class Bump {
 
     private void price() {
         String context = "The bump " + bump + " (JDK " + from + " -> " + to
-                + "); walls cleared mechanically: " + walls.appliedSoFar()
+                + ")"
                 + ". What the workspace became:\n" + tree.diff();
         String estimate = agents.estimator().run(context);
 

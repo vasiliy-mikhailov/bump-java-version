@@ -368,13 +368,14 @@ final class Tools {
     }
 
     /** The bumper: it edits build files by hand, and can see what it has left to do. */
-    static Map<ToolSpecification, ToolExecutor> raising(Path root, Runner runner, Tree tree,
-                                                        String targetJdk, Trace trace,
-                                                        String agent) {
+    static Map<ToolSpecification, ToolExecutor> raising(Path root, Runner runner, Migrate migrate,
+                                                        Tree tree, String targetJdk, String under,
+                                                        Trace trace, String agent) {
         Map<ToolSpecification, ToolExecutor> tools =
                 only(root, Set.of("list_dir", "read_file", "edit_file"));
         tools.putAll(build(root, runner, targetJdk));
         tools.putAll(targets(root, targetJdk));
+        tools.putAll(recipe(migrate, under));
         tools.putAll(history(tree, trace));
         return recorded(guarded(tools), trace, agent);
     }
