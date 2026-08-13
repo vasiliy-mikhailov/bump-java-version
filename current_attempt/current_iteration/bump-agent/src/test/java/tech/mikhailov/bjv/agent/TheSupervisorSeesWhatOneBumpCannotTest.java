@@ -114,4 +114,41 @@ class TheSupervisorSeesWhatOneBumpCannotTest {
         }
         Files.writeString(dir.resolve("trace.jsonl"), rows.toString());
     }
+
+    @Test
+    void livenessIsKeyedTheSameWayTheLauncherKeysIt(@TempDir Path results) throws IOException {
+        // THE BUG THIS EXISTS FOR. A lane's container is named after its manifest id
+        // (bjvagent_rr_17_354) and its results directory after repo, sha and hop. Neither name can
+        // be derived from the other, so matching container names against slugs reported every
+        // running lane as dead: the first supervisor round announced fifteen bumps had "died
+        // without filing a verdict" while three of them were working.
+        String bump = "owner/live|abc|17|21";
+        String key = bump.replaceAll("[^A-Za-z0-9]+", "_");
+        write(results, key, bump, System.currentTimeMillis(), "bump", null);
+
+        // The claim is what run.sh writes while a lane holds it, under exactly this name.
+        Files.createDirectories(results.resolve("claims"));
+        Files.writeString(results.resolve("claims").resolve(key), "");
+
+        var lane = new Sweep(results).lanes().get(0);
+        // Liveness needs an agent container to exist too, which there is not in a test, so the
+        // claim reads as stale. What is pinned here is the KEY: the claim and the results directory
+        // must be the same string, or nothing can ever match.
+        assertTrue(Files.isRegularFile(results.resolve("claims").resolve(lane.slug())),
+                "the claim the launcher writes must be findable from the lane's own slug");
+    }
+
+    @Test
+    void aStaleClaimIsNotAliveLane(@TempDir Path results) throws IOException {
+        // A lane that died leaves its claim behind. With no agent running anywhere, that claim is
+        // leftover rather than evidence, which is the same reading run.sh's inflight() takes.
+        String bump = "owner/ghost|abc|17|21";
+        String key = bump.replaceAll("[^A-Za-z0-9]+", "_");
+        write(results, key, bump, System.currentTimeMillis() - 7_200_000, "gate", null);
+        Files.createDirectories(results.resolve("claims"));
+        Files.writeString(results.resolve("claims").resolve(key), "");
+
+        assertFalse(new Sweep(results).lanes().get(0).live(),
+                "a claim with nothing running behind it is stale, not live");
+    }
 }

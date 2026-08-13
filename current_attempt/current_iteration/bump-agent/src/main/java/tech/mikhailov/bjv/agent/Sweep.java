@@ -67,7 +67,7 @@ final class Sweep {
         if (!Files.isDirectory(results)) {
             return out;
         }
-        List<String> running = liveLanes();
+        List<String> running = claimed();
         try (var dirs = Files.list(results)) {
             for (Path dir : dirs.filter(Files::isDirectory).toList()) {
                 String slug = dir.getFileName().toString();
@@ -124,7 +124,7 @@ final class Sweep {
         String[] parts = bump.split("\\|");
         String repo = parts.length > 0 ? parts[0] : slug;
         String hop = parts.length > 3 ? parts[2] + "->" + parts[3] : "";
-        boolean live = running.stream().anyMatch(name -> name.endsWith(shortSlug(slug)));
+        boolean live = running.contains(slug);
         return new Lane(slug, bump, repo, hop, state, stage, first, last,
                 Math.max(attempts, 1), events, live, postponedReason(slug));
     }
@@ -153,30 +153,70 @@ final class Sweep {
     }
 
     /**
-     * The container names currently running, so "live" is a fact rather than an inference.
+     * Which bumps are in flight, read from the claims the launcher writes.
      *
-     * <p>A trace's last row says when it last WROTE, which is not the same as whether it is alive: a
-     * lane thinking for forty minutes writes nothing and looks identical to one whose container
-     * died an hour ago. Only the daemon knows, so it gets asked.
+     * <p>THE CONTAINER NAMES CANNOT ANSWER THIS. A lane is named after its manifest id --
+     * {@code bjvagent_rr_17_354} -- and its results directory after repo, sha and hop, and nothing
+     * in the results tree maps one to the other. Asking docker and matching on the name reported
+     * every running lane as dead: a first supervisor round announced fifteen bumps had "died
+     * without filing a verdict" while three of them were working.
+     *
+     * <p>The claim file is keyed exactly like the results directory, exists only while a lane holds
+     * it, and is what the launcher itself checks before starting a bump. A claim with no agent
+     * running anywhere is stale rather than live, which is the same reading the launcher takes.
      */
-    private List<String> liveLanes() {
+    private List<String> claimed() {
+        Path claims = results.resolve("claims");
+        if (!Files.isDirectory(claims)) {
+            return List.of();
+        }
+        List<String> held = new ArrayList<>();
+        try (var files = Files.list(claims)) {
+            files.forEach(f -> held.add(f.getFileName().toString()));
+        } catch (IOException unreadable) {
+            return List.of();
+        }
+        return held.isEmpty() || !anyAgentRunning() ? List.of() : held;
+    }
+
+    /** Whether any lane at all is up, which is what makes a leftover claim readable as stale. */
+    private boolean anyAgentRunning() {
         try {
             Shell.Output out = Shell.run(results, java.util.Map.of(),
                     java.time.Duration.ofSeconds(30), "docker", "ps", "--format", "{{.Names}}");
-            if (!out.ok()) {
-                return List.of();
-            }
-            return out.text().lines().filter(n -> n.startsWith("bjvagent_")).toList();
+            return out.ok() && out.text().lines().anyMatch(n -> n.startsWith("bjvagent_"));
         } catch (IOException | InterruptedException unreachable) {
             Thread.currentThread().interrupt();
-            return List.of();
+            return false;
         }
     }
 
-    /** The launcher names containers after the manifest id, which is the slug's own tail. */
-    static String shortSlug(String slug) {
-        int under = slug.lastIndexOf("_rr_");
-        return under < 0 ? slug : slug.substring(under + 1);
+    /**
+     * The container running a given bump, found by what it was started with.
+     *
+     * <p>A lane is named after its manifest id and its results directory after repo, sha and hop,
+     * so neither name can be derived from the other. The bump string is passed to the container as
+     * an argument, though, which makes the container itself the only thing that knows both.
+     */
+    String containerFor(String bump) {
+        try {
+            Shell.Output ps = Shell.run(results, java.util.Map.of(),
+                    java.time.Duration.ofSeconds(30), "docker", "ps", "--format", "{{.Names}}");
+            if (!ps.ok()) {
+                return "";
+            }
+            for (String name : ps.text().lines().filter(n -> n.startsWith("bjvagent_")).toList()) {
+                Shell.Output args = Shell.run(results, java.util.Map.of(),
+                        java.time.Duration.ofSeconds(30),
+                        "docker", "inspect", "--format", "{{json .Args}}", name);
+                if (args.ok() && args.text().contains(bump)) {
+                    return name;
+                }
+            }
+        } catch (IOException | InterruptedException unreachable) {
+            Thread.currentThread().interrupt();
+        }
+        return "";
     }
 
     // ---- the digest a supervisor reads ----

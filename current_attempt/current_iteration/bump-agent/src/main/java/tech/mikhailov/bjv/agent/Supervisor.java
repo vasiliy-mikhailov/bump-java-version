@@ -217,7 +217,7 @@ final class Supervisor {
                     } catch (IOException e) {
                         return "could not record the postponement: " + e.getMessage();
                     }
-                    String stopped = stop(lane.get().slug());
+                    String stopped = stop(lane.get().bump());
                     trace.progress("supervisor", "postponed " + repo + ": " + why);
                     return "set aside: " + repo + ". " + stopped
                             + " The launcher will skip it until nothing else is left to run.";
@@ -249,12 +249,16 @@ final class Supervisor {
     }
 
     /** Stop a lane's container. The claim releases itself once no agent holds it. */
-    private String stop(String slug) {
-        String name = "bjvagent_" + Sweep.shortSlug(slug);
+    private String stop(String bump) {
+        String name = sweep.containerFor(bump);
+        if (name.isEmpty()) {
+            return "It was not running.";
+        }
         try {
             Shell.Output out = Shell.run(sweep.results(), Map.of(), Duration.ofMinutes(2),
                     "docker", "rm", "-f", name);
-            return out.ok() ? "Its container was stopped." : "It was not running.";
+            return out.ok() ? "Its container (" + name + ") was stopped."
+                    : "Its container could not be stopped.";
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             return "Its container could not be stopped: " + e.getMessage();
@@ -266,16 +270,30 @@ final class Supervisor {
         var runtime = new SubAgentRuntime(model, prompt, tools, "agent:" + name,
                 ToolInvocationLogMode.NONE, trace instanceof JsonlTrace j ? j : null);
         return task -> {
-            String reply;
-            try {
-                reply = runtime.run(task);
-            } catch (RuntimeException unreachable) {
-                reply = "";
+            String reply = attempt(runtime, task);
+            if (reply.isBlank()) {
+                // THE SAME EMPTY ANSWER EVERY OTHER AGENT HERE GUARDS AGAINST, and this runner was
+                // written without the guard: both of the supervisor's first two rounds returned
+                // nothing and recorded nothing, which reads exactly like a fleet with no problems.
+                // A blank means the reasoning entered a cycle greedy decoding cannot leave, so the
+                // retry asks a model that does not reason at all.
+                trace.progress("supervisor", name + " answered nothing; asking once more");
+                reply = attempt(new SubAgentRuntime(Model.forRetry(trace), prompt, tools,
+                        "agent:" + name, ToolInvocationLogMode.NONE,
+                        trace instanceof JsonlTrace j2 ? j2 : null), task);
             }
-            reply = reply == null ? "" : reply;
             trace.asked(name, prompt + "\n\n---\n\n" + task, reply);
             return reply;
         };
+    }
+
+    private static String attempt(SubAgentRuntime runtime, String task) {
+        try {
+            String reply = runtime.run(task);
+            return reply == null ? "" : reply;
+        } catch (RuntimeException unreachable) {
+            return "";
+        }
     }
 
     // ---- what they are asked ----
