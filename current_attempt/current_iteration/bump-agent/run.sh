@@ -98,7 +98,7 @@ one() {
     -v /home/vmihaylov/.gradle-dists:/home/vmihaylov/.gradle-dists \
     -e OC_KEY="$KEY" -e OC_BASE="${OC_BASE:-}" -e OC_MODEL="${OC_MODEL:-}" \
     -e BJV_HOPTOOLS="$I/hoptools" -e BJV_PATIENCE_MINUTES="${BJV_PATIENCE_MINUTES:-45}" \
-    bjv-agent "$w" "$repo|$sha|$from|$to" "$RESULTS" \
+    bjv tech.mikhailov.bjv.agent.Bump "$w" "$repo|$sha|$from|$to" "$RESULTS" \
     >> "$ROOT/$slug.log" 2>&1
   rm -f "$RESULTS/claims/$bslug" 2>/dev/null
   echo "[$slug] done: $(grep -c . "$ROOT/$slug.log" 2>/dev/null) log lines"

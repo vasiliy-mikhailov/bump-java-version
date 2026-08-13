@@ -1,9 +1,20 @@
-# The controller: a JDK to run the chain, and a docker client to reach the sealed build images.
-# It never builds anything itself — jvm-run does that in a per-JDK container — so this image carries
-# no build tooling and no Maven cache of its own. Keeping the arbiter outside the process that hosts
-# the agents is the point of the split, not an accident of packaging.
+# ONE IMAGE, THREE ENTRY POINTS. The agent, the dashboard and the supervisor are the same jar with
+# different main classes, and three Dockerfiles copying the same artifact meant three builds, three
+# pushes, and three chances for one of them to be a version behind. The class to run is the command.
+#
+# The jar is built elsewhere and copied in. It cannot be built here: it needs
+# com.deepagents:langchain4j-deepagents in a local repository, which no build host has. See
+# deploy.sh, which does the three steps in the one order that works.
+#
+# THIS TRADES AWAY ONE THING AND IT IS WORTH SAYING. The dashboard used to run from an image with no
+# docker client in it at all, so an image that could not reach the daemon could not be talked into
+# starting a build. Now it carries one, and the only thing between it and the daemon is that its
+# container is run without the socket. The guarantee moved from the image to the run command, which
+# is weaker: it is now a thing to get right every time rather than a thing that cannot go wrong.
 FROM eclipse-temurin:17-jre
 RUN apt-get update && apt-get install -y --no-install-recommends docker.io git ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 COPY target/bump-agent-0.1.0-SNAPSHOT.jar /bump-agent.jar
-ENTRYPOINT ["java", "-jar", "/bump-agent.jar"]
+EXPOSE 8086
+ENTRYPOINT ["java", "-cp", "/bump-agent.jar"]
+CMD ["tech.mikhailov.bjv.agent.Bump"]

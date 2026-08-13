@@ -1,8 +1,0 @@
-# The supervisor: one agent watching the whole sweep from outside it.
-# It carries a docker client because setting a lane aside means stopping the lane, and nothing else:
-# it cannot build, cannot edit a workspace, and has no path to a verdict. The gate settles bumps.
-FROM eclipse-temurin:17-jre
-RUN apt-get update && apt-get install -y --no-install-recommends docker.io ca-certificates \
- && rm -rf /var/lib/apt/lists/*
-COPY target/bump-agent-0.1.0-SNAPSHOT.jar /bump-agent.jar
-ENTRYPOINT ["java", "-cp", "/bump-agent.jar", "tech.mikhailov.bjv.agent.Supervisor", "/results"]
