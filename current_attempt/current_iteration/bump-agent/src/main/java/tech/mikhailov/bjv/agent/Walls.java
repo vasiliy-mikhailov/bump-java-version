@@ -69,7 +69,7 @@ final class Walls {
         if (once("lombok") && Pattern.compile(
                 "ExceptionInInitializerError: com\\.sun\\.tools\\.javac\\.code\\.TypeTags"
                         + "|JCTree\\$JCImport does not have member field").matcher(log).find()) {
-            String v = target >= 25 ? "1.18.46" : "1.18.30";
+            String v = Floors.version("lombok", target);
             Pom.manage(ws, "org.projectlombok", "lombok", v);
             return new Turn(true, "lombok floor " + v + " via dependencyManagement");
         }
@@ -77,7 +77,7 @@ final class Walls {
         if (once("mockito") && Pattern.compile(
                 "Mockito cannot mock this class|Cannot define class using reflection"
                         + "|Could not initialize plugin.*MockMaker").matcher(log).find()) {
-            String bb = target >= 25 ? "1.17.6" : "1.14.12";
+            String bb = Floors.version("byte-buddy", target);
             Pom.manage(ws, "net.bytebuddy", "byte-buddy", bb);
             Pom.manage(ws, "net.bytebuddy", "byte-buddy-agent", bb);
             Pom.manage(ws, "org.mockito", "mockito-core", "5.18.0");

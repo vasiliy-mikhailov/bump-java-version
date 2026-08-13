@@ -62,6 +62,28 @@ final class Agents {
         this.trace = trace;
     }
 
+
+
+    /**
+     * The floor versions the prompts quote, resolved from the one table that also applies them.
+     *
+     * <p>Two prompts typed these numbers out. Raising a floor while the instructions still named
+     * the old one would tell an agent to do one thing while the code did another, silently.
+     */
+    private static String floors(String prompt) {
+        return prompt
+                .replace("{lombok}", Floors.version("lombok", 21))
+                .replace("{lombok25}", Floors.version("lombok", 25))
+                .replace("{bb}", Floors.version("byte-buddy", 21))
+                .replace("{bb25}", Floors.version("byte-buddy", 25))
+                .replace("{mockito}", Floors.version("mockito-core", 21))
+                .replace("{jacoco}", Floors.version("jacoco-maven-plugin", 21))
+                .replace("{kotlin}", Floors.version("kotlin", 25))
+                .replace("{gradle17}", Floors.version("gradle-wrapper", 17))
+                .replace("{gradle21}", Floors.version("gradle-wrapper", 21))
+                .replace("{gradle25}", Floors.version("gradle-wrapper", 25));
+    }
+
     private static final String P_SURVEYOR = """
                 You are given a Java project and the hop it has been QUEUED for, as `from -> to`.
                 The hop is prescribed and you cannot change it. Your job is to say whether the \
@@ -126,24 +148,24 @@ final class Agents {
                 Answer `sound`, or `overclaimed: <package and why it will not move>`, or \
                 `missed-family: <family>`, one finding per line.
                 """;
-    private static final String P_PREPARER = """
+    private static final String P_PREPARER = floors("""
                 You prepare a Java project for a one-LTS migration BEFORE its first target build. \
                 Every step is gated on a structural trigger; check each trigger against the project \
                 and land the step ONLY where it fires. A deterministic pre-pass has already run: what \
                 it did travels in the brief, do not redo it.
 
                 The steps, by trigger (versions are measured floors, not folklore):
-                - the project resolves Lombok, declared anywhere or transitively: floor it to 1.18.30, \
-                or 1.18.46 when the target is 25 plus the maven.compiler.proc=full property, since \
+                - the project resolves Lombok, declared anywhere or transitively: floor it to {lombok}, \
+                or {lombok25} when the target is 25 plus the maven.compiler.proc=full property, since \
                 JDK 23+ no longer runs classpath annotation processors by default. When a Spring BOM \
                 arrives at scope=import, a property override is a silent no-op: use a \
                 dependencyManagement entry in the root pom instead.
-                - Gradle, wrapper below the target's floor (7.6 for 17, 8.10.2 for 21, 9.1.0 for 25): \
+                - Gradle, wrapper below the target's floor ({gradle17} for 17, {gradle21} for 21, {gradle25} for 25): \
                 set distributionUrl in gradle/wrapper/gradle-wrapper.properties.
-                - the project declares JaCoCo: floor it to 0.8.15, in the module that declares it.
-                - the project mocks (mockito, byte-buddy, MockK): force byte-buddy 1.14.12, or 1.17.6 \
-                when the target is 25, and mockito-core 5.18.0.
-                - a Kotlin build with target 25: kotlin 2.3.20 in every pom that pins it; every 1.x \
+                - the project declares JaCoCo: floor it to {jacoco}, in the module that declares it.
+                - the project mocks (mockito, byte-buddy, MockK): force byte-buddy {bb}, or {bb25} \
+                when the target is 25, and mockito-core {mockito}.
+                - a Kotlin build with target 25: kotlin {kotlin} in every pom that pins it; every 1.x \
                 either crashes or silently falls back below the target.
                 - a test dependency that reflects into the process environment (junit-pioneer, \
                 system-lambda, system-rules): add --add-opens java.base/java.util=ALL-UNNAMED and \
@@ -153,13 +175,13 @@ final class Agents {
                 DID: <steps executed, and which triggers did not fire>. If every trigger is already \
                 satisfied, answer exactly NOTHING-TO-DO: <why>. Do not keep exploring once the work \
                 is done; that is what exhausts a tool budget.
-                """;
-    private static final String P_PREPARE_CRITIC = """
+                """);
+    private static final String P_PREPARE_CRITIC = floors("""
                 A colleague prepared a Java project for a one-LTS migration. The steps are gated on \
-                structural triggers: Lombok resolved (floor 1.18.30, or 1.18.46 and proc=full at \
-                target 25), Gradle wrapper below the target's floor (7.6/8.10.2/9.1.0), JaCoCo \
-                declared (0.8.15), mocking present (byte-buddy 1.14.12 or 1.17.6, mockito 5.18.0), \
-                Kotlin at target 25 (2.3.20), env-mutating test libs (--add-opens). Read the project \
+                structural triggers: Lombok resolved (floor {lombok}, or {lombok25} and proc=full at \
+                target 25), Gradle wrapper below the target's floor ({gradle17}/{gradle21}/{gradle25}), JaCoCo \
+                declared ({jacoco}), mocking present (byte-buddy {bb} or {bb25}, mockito {mockito}), \
+                Kotlin at target 25 ({kotlin}), env-mutating test libs (--add-opens). Read the project \
                 and judge TWO things, nothing else.
 
                 MISSED: a trigger fires here and no edit answers it. Name the step and the file that \
@@ -171,7 +193,7 @@ final class Agents {
 
                 Answer `sound`, or `missed: <step>` or `overreach: <what>`, one finding per line, \
                 most damaging first.
-                """;
+                """);
     private static final String P_BUMPER = """
                 A migration recipe has run and a deterministic sweep has raised what it could. Your \
                 job is what is LEFT: every version pin, toolchain block, property or compiler flag \

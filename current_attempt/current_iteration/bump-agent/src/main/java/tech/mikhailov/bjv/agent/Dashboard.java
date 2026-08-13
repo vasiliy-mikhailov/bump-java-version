@@ -116,7 +116,10 @@ public final class Dashboard {
             .tab{padding:4px 10px;border:1px solid #21262d;border-radius:6px;background:#161b22;
             font-size:11px;color:#c9d1d9}
             .tab:hover{border-color:#58a6ff;text-decoration:none}
-            .tab.critic{color:#d29922}.tab.closer{color:#bc8cff}
+            .tab.critic{color:#d29922}.tab.closer{color:#bc8cff}.tab.floors{color:#3fb950}
+            table.floors{margin-top:4px}
+            table.floors th,table.floors td{padding:7px 12px}
+            table.floors td:nth-child(4){font-size:11px;line-height:1.5}
             section.prompt{padding:18px 24px;border-bottom:1px solid #161b22;scroll-margin-top:56px}
             section.prompt h2{margin:0 0 10px;font-size:13px;display:flex;align-items:center;gap:10px}
             section.prompt .who{color:#58a6ff}
@@ -1382,12 +1385,28 @@ public final class Dashboard {
         StringBuilder out = head("prompts", prompts.size()
                 + " agents, in the order the chain reaches them");
 
-        out.append("<div class=tabs>");
+        out.append("<div class=tabs><a class='tab floors' href='#floors'>version floors</a>");
         for (Agents.Prompt p : prompts) {
             out.append("<a class='tab ").append(p.role()).append("' href='#")
                     .append(esc(p.name())).append("'>").append(esc(p.name())).append("</a>");
         }
         out.append("</div>");
+
+        // The floors first: they are what the prompts below quote, and reading an instruction to
+        // "floor Lombok to 1.18.30" without knowing where that number comes from is reading half
+        // of it. Both are generated from the same table, so they cannot disagree.
+        out.append("<section class=prompt id=floors><h2><span class=who>version floors</span>")
+                .append("<span class='role closer'>applied by code</span>")
+                .append("<span class=len>").append(Floors.all().size()).append(" rules</span></h2>")
+                .append("<table class=floors><tr><th>artifact</th><th>version</th>")
+                .append("<th>from target</th><th>why</th></tr>");
+        for (Floors.Floor f : Floors.all()) {
+            out.append("<tr><td>").append(esc(f.coordinates())).append("</td><td><b>")
+                    .append(esc(f.version())).append("</b></td><td>")
+                    .append(f.sinceTarget() == 0 ? "any" : String.valueOf(f.sinceTarget()))
+                    .append("</td><td class=k>").append(esc(f.why())).append("</td></tr>");
+        }
+        out.append("</table></section>");
 
         for (Agents.Prompt p : prompts) {
             out.append("<section class=prompt id='").append(esc(p.name())).append("'>")

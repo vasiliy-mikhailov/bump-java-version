@@ -230,7 +230,7 @@ final class Migrate {
         }
         String all = readAllBuildFiles();
         if (all.contains("lombok")) {
-            String v = target >= 25 ? "1.18.46" : "1.18.30";
+            String v = Floors.version("lombok", target);
             Pom.manage(ws, "org.projectlombok", "lombok", v);
             did.append("lombok ").append(v).append("; ");
             if (target >= 25) {
@@ -245,7 +245,7 @@ final class Migrate {
             did.append("jacoco 0.8.15; ");
         }
         if (all.contains("mockito") || all.contains("byte-buddy") || all.contains("mockk")) {
-            String bb = target >= 25 ? "1.17.6" : "1.14.12";
+            String bb = Floors.version("byte-buddy", target);
             Pom.manage(ws, "net.bytebuddy", "byte-buddy", bb);
             Pom.manage(ws, "net.bytebuddy", "byte-buddy-agent", bb);
             Pom.manage(ws, "org.mockito", "mockito-core", "5.18.0");
