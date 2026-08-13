@@ -139,16 +139,42 @@ class TheSupervisorSeesWhatOneBumpCannotTest {
     }
 
     @Test
-    void aStaleClaimIsNotAliveLane(@TempDir Path results) throws IOException {
-        // A lane that died leaves its claim behind. With no agent running anywhere, that claim is
-        // leftover rather than evidence, which is the same reading run.sh's inflight() takes.
+    void aStaleClaimIsNotAliveLane(@TempDir Path results) throws Exception {
+        // A lane that died leaves its claim behind and stops heartbeating it. Staleness used to be
+        // "no agent container is running anywhere", which needed the docker socket; it is now the
+        // claim's own age, which the watcher can read without one.
         String bump = "owner/ghost|abc|17|21";
         String key = bump.replaceAll("[^A-Za-z0-9]+", "_");
         write(results, key, bump, System.currentTimeMillis() - 7_200_000, "gate", null);
         Files.createDirectories(results.resolve("claims"));
-        Files.writeString(results.resolve("claims").resolve(key), "");
+        Path claim = results.resolve("claims").resolve(key);
+        Files.writeString(claim, "bjvagent_rr_17_9");
+        Files.setLastModifiedTime(claim,
+                java.nio.file.attribute.FileTime.fromMillis(System.currentTimeMillis() - 3_600_000));
 
         assertFalse(new Sweep(results).lanes().get(0).live(),
-                "a claim with nothing running behind it is stale, not live");
+                "a claim nobody has touched for an hour is leftover, not evidence");
+    }
+
+    @Test
+    void livenessIsTheHeartbeatsAgeAndNothingAsksTheDaemon(@TempDir Path results) throws Exception {
+        // The watcher shares a container with a page on the public internet, so it must not hold a
+        // docker socket. A lane heartbeats its own claim every thirty seconds and stops itself when
+        // it sees a postponement, which makes "running" a file's age instead of a question for the
+        // daemon -- and the same conclusion, from something the watcher can already reach.
+        String bump = "owner/beating|abc|17|21";
+        String key = bump.replaceAll("[^A-Za-z0-9]+", "_");
+        write(results, key, bump, System.currentTimeMillis(), "bump", null);
+        Files.createDirectories(results.resolve("claims"));
+        Path claim = results.resolve("claims").resolve(key);
+        Files.writeString(claim, "bjvagent_rr_17_1");
+
+        assertTrue(new Sweep(results).lanes().get(0).live(), "a fresh claim is a running lane");
+
+        // A lane that died leaves its claim behind and stops touching it.
+        Files.setLastModifiedTime(claim,
+                java.nio.file.attribute.FileTime.fromMillis(System.currentTimeMillis() - 600_000));
+        assertFalse(new Sweep(results).lanes().get(0).live(),
+                "a claim nobody has touched for ten minutes is a corpse, not a lane");
     }
 }

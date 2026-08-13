@@ -293,6 +293,15 @@ public final class Dashboard {
         http.createContext("/events", d::events);
         http.createContext("/settings", d::settings);
         http.start();
+
+        // ONE CONTAINER, AND NO DOCKER SOCKET IN IT. The supervisor used to run beside this page in
+        // its own container because it needed the daemon to stop a lane; a lane now stops itself
+        // when it sees its own postponement, so the watcher needs nothing this page does not
+        // already have. Sharing a process is only safe because of that: a public HTTP server in a
+        // container that can reach the daemon would be a poor trade for one fewer container.
+        Thread watcher = new Thread(() -> Supervisor.watch(results), "supervisor");
+        watcher.setDaemon(true);
+        watcher.start();
         System.out.println("dashboard on :" + port + " over " + results
                 + (d.token == null ? " (feedback OPEN: set BJV_DASH_TOKEN to require one)"
                 : " (feedback requires a token)"));

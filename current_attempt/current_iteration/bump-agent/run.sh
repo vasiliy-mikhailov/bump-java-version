@@ -89,6 +89,24 @@ one() {
   fi
   git -C "$w" checkout -q "$sha" 2>/dev/null || { echo "[$slug] no sha $sha"; return 1; }
 
+  # THE LANE WATCHES ITSELF, so nothing outside needs the docker socket to stop it. A heartbeat on
+  # the claim is what makes "running" observable to a reader that cannot ask the daemon, and the
+  # postpone marker is honoured here because this is the one place that already holds the container
+  # name and already has docker. A watcher that had to kill lanes needed the socket; a watcher that
+  # only writes a marker does not, which is what lets it share a container with a page on the
+  # public internet.
+  ( while docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^bjvagent_$slug$"; do
+      touch "$RESULTS/claims/$bslug" 2>/dev/null
+      if [ -e "$RESULTS/postponed/$bslug" ]; then
+        echo "[$slug] postponed: $(cut -c1-90 < "$RESULTS/postponed/$bslug" 2>/dev/null)"
+        docker rm -f "bjvagent_$slug" >/dev/null 2>&1
+        break
+      fi
+      sleep 30
+    done ) &
+  local watchdog=$!
+  trap 'kill '"$watchdog"' 2>/dev/null; rm -f "$RESULTS/claims/'"$bslug"'" 2>/dev/null' RETURN
+
   docker run --rm --name "bjvagent_$slug" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v "$I:$I" -v "$w:$w" \
