@@ -644,7 +644,7 @@ public final class Bump {
     }
 
     /** The first of the allowed words found in the answer; the first option is the default. */
-    private static String word(String reply, String... allowed) {
+    static String word(String reply, String... allowed) {
         String lower = reply == null ? "" : reply.toLowerCase();
         int best = Integer.MAX_VALUE;
         String chosen = allowed[0];

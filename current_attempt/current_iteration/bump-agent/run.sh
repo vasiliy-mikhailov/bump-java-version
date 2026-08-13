@@ -63,6 +63,13 @@ inflight() {
   return 0
 }
 
+# A BUMP THE SUPERVISOR SET ASIDE. Not a verdict and not a skip: it keeps whatever it had, and it
+# comes back the moment there is nothing else to run. The marker is a file rather than a state so
+# that a supervisor writing one and a launcher reading it need agree on nothing else.
+postponed() {
+  [ -e "$RESULTS/postponed/$1" ]
+}
+
 one() {
   local slug=$1 repo=$2 sha=$3 from=$4 to=$5
   local w=$WS/$slug
@@ -129,15 +136,33 @@ LANEFILE=$ROOT/max_lanes
 lanes() { local n; n=$(cat "$LANEFILE" 2>/dev/null); case "$n" in ''|*[!0-9]*) echo "$LANES";; *) echo "$n";; esac; }
 
 echo "manifest $MAN ($(grep -c . "$MAN") rows), $(lanes) lanes (live: $LANEFILE), results -> $RESULTS"
-done_n=0; skipped=0
+rounds=0
+while :; do
+done_n=0; skipped=0; postponed_n=0
 while read -r slug repo sha from to; do
   [ -z "${slug:-}" ] && continue
   if settled "$repo"; then skipped=$((skipped+1)); continue; fi
   bs=$(printf '%s' "$repo|$sha|$from|$to" | sed 's/[^A-Za-z0-9]\+/_/g')
   if inflight "$bs"; then echo "[$slug] already in flight, skipping"; skipped=$((skipped+1)); continue; fi
+  # The slug the supervisor knows is the results directory's, which is the bump slug, not $slug.
+  if postponed "$bs"; then postponed_n=$((postponed_n+1)); continue; fi
   while [ "$(jobs -rp | wc -l)" -ge "$(lanes)" ]; do wait -n 2>/dev/null || sleep 5; done
   one "$slug" "$repo" "$sha" "$from" "$to" &
   done_n=$((done_n+1))
 done < "$MAN"
 wait
-echo "manifest complete: $done_n launched, $skipped already settled"
+echo "manifest complete: $done_n launched, $skipped already settled, $postponed_n postponed"
+
+# NOTHING LEFT BUT THE ONES THAT WERE SET ASIDE. A postponement frees a slot for work that can
+# progress; it is not a way to drop a repo from the corpus. Once the queue holds nothing else, the
+# reason to keep them aside is gone and they are the work. Bounded, because a bump that is postponed
+# again the moment it starts would otherwise loop here forever.
+  rounds=$((rounds+1))
+  if [ "$done_n" -gt 0 ]; then rounds=0; fi
+  if [ "$postponed_n" -eq 0 ] || [ "$rounds" -ge 3 ]; then
+    [ "$postponed_n" -gt 0 ] && echo "$postponed_n still postponed after $rounds empty rounds; stopping"
+    break
+  fi
+  echo "only postponed bumps remain ($postponed_n); clearing them and going again"
+  rm -f "$RESULTS/postponed"/* 2>/dev/null
+done
