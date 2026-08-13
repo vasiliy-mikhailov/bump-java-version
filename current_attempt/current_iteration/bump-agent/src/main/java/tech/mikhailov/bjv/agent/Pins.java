@@ -92,6 +92,49 @@ final class Pins {
         return property.find() ? property.group(1).strip() : "";
     }
 
+    /**
+     * The declared source/target pins still BELOW the target JDK.
+     *
+     * <p>The other half of "did it land": a version floor asks whether a dependency is high enough,
+     * and this asks whether the project has actually been told to compile for the new JDK. Both are
+     * read from the files rather than from a diff, because a diff shows what someone changed and
+     * not what remains.
+     *
+     * <p>Every dialect it can be written in: Maven properties and plugin configuration, Gradle's
+     * sourceCompatibility and jvmTarget, and the toolchain's JavaLanguageVersion.of.
+     */
+    static List<String> belowTarget(Path ws, int target) throws IOException {
+        Pattern pin = Pattern.compile(
+                "<(?:maven\\.compiler\\.(?:source|target|release)|java\\.version|jdk\\.version"
+                        + "|source|target|release|jvmTarget)>\\s*(?:1\\.)?(\\d+)\\s*<"
+                        + "|JavaLanguageVersion\\.of\\((\\d+)\\)"
+                        + "|(?:sourceCompatibility|targetCompatibility|jvmTarget)\\s*[=:]?\\s*"
+                        + "['\"]?(?:1\\.)?(\\d+)");
+        List<Path> files = new ArrayList<>(Walls.poms(ws));
+        try (var walk = Files.walk(ws)) {
+            walk.filter(p -> {
+                String n = p.toString();
+                return (n.endsWith("build.gradle") || n.endsWith("build.gradle.kts"))
+                        && !n.contains("/target/") && !n.contains("/node_modules/");
+            }).forEach(files::add);
+        }
+        List<String> out = new ArrayList<>();
+        for (Path f : files) {
+            List<String> lines = Files.readAllLines(f);
+            for (int i = 0; i < lines.size(); i++) {
+                Matcher m = pin.matcher(lines.get(i));
+                while (m.find()) {
+                    String v = m.group(1) != null ? m.group(1)
+                            : m.group(2) != null ? m.group(2) : m.group(3);
+                    if (v != null && Integer.parseInt(v) < target) {
+                        out.add(ws.relativize(f) + ":" + (i + 1) + "  " + lines.get(i).strip());
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
     /** Every build file, concatenated, because a pin may live in any of them. */
     private static String buildFiles(Path ws) throws IOException {
         StringBuilder all = new StringBuilder();

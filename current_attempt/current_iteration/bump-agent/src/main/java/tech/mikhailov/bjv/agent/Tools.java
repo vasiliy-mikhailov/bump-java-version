@@ -334,6 +334,60 @@ final class Tools {
         return one;
     }
 
+    /**
+     * Which declared pins are still below the target: the bumper's own fact to check.
+     *
+     * <p>The bumper had this already, as text pasted into a brief, which meant it could be read
+     * once and never re-checked after an edit. As a tool both it and its critic can call it after
+     * each attempt, which is what turns one re-ask into a loop that ends on the files.
+     */
+    private static Map<ToolSpecification, ToolExecutor> targets(Path root, String targetJdk) {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("check_target")
+                .description("Read every build file and report the source, target, release, "
+                        + "sourceCompatibility, jvmTarget and toolchain declarations still BELOW "
+                        + "the target JDK, with file and line. This is what the gate measures the "
+                        + "bump by, so it is the fact -- not the diff, which shows what changed and "
+                        + "not what is left.")
+                .parameters(JsonObjectSchema.builder().build())
+                .build();
+        ToolExecutor exec = (request, memoryId) -> {
+            try {
+                List<String> left = Pins.belowTarget(root, Integer.parseInt(targetJdk));
+                return left.isEmpty()
+                        ? "nothing is declared below " + targetJdk + " any more"
+                        : left.size() + " still below " + targetJdk + ":\n  "
+                                + String.join("\n  ", left);
+            } catch (IOException | NumberFormatException e) {
+                return "could not read the build files: " + e.getMessage();
+            }
+        };
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, exec);
+        return one;
+    }
+
+    /** The bumper: it edits build files by hand, and can see what it has left to do. */
+    static Map<ToolSpecification, ToolExecutor> raising(Path root, Runner runner, Tree tree,
+                                                        String targetJdk, Trace trace,
+                                                        String agent) {
+        Map<ToolSpecification, ToolExecutor> tools =
+                only(root, Set.of("list_dir", "read_file", "edit_file"));
+        tools.putAll(build(root, runner, targetJdk));
+        tools.putAll(targets(root, targetJdk));
+        tools.putAll(history(tree, trace));
+        return recorded(guarded(tools), trace, agent);
+    }
+
+    /** Its critic: the same fact, and no way to edit. */
+    static Map<ToolSpecification, ToolExecutor> checking(Path root, Tree tree, String targetJdk,
+                                                          Trace trace, String agent) {
+        Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
+        tools.putAll(targets(root, targetJdk));
+        tools.putAll(history(tree, trace));
+        return recorded(tools, trace, agent);
+    }
+
     /** A pin-phase producer: it may run recipes and check what landed, and edit nothing by hand. */
     static Map<ToolSpecification, ToolExecutor> pinning(Path root, Migrate migrate, Tree tree,
                                                         String jdk, List<Floors.Floor> owed,

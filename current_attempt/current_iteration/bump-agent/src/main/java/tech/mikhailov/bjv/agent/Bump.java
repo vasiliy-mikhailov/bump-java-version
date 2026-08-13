@@ -404,21 +404,43 @@ public final class Bump {
     }
 
     /** The bumper and its critic: the pins the recipe under-applied. */
+    /**
+     * Raise every declared pin to the target, and keep going while any is still below it.
+     *
+     * <p>This was one attempt and a single re-ask, with the list of remaining pins pasted into the
+     * brief as text -- readable once, and stale the moment an edit landed. Both agents now hold
+     * check_target and can ask the files after each attempt, which is the same shape the two pin
+     * phases use and for the same reason: the loop should end on what the project says, not on what
+     * anyone reports having done.
+     *
+     * <p>It is the pin the GATE measures, so a bumper that stops early does not fail here, it fails
+     * four stages later as FAIL_target_not_bumped with nothing left to try.
+     */
     private void bumpPhase() throws IOException {
-        String pins = pinGrep();
-        String brief = "Migration: JDK " + from + " -> " + to
-                + "\n\nPins found still below " + to + ":\n" + (pins.isBlank() ? "(none)" : pins);
-        judgedThenLanded("bump", agents.bumper(), agents.bumpCritic(), brief, diff -> {
-            String left = "";
-            try {
-                left = pinGrep();
-            } catch (IOException e) {
-                left = "(grep failed: " + e.getMessage() + ")";
+        for (int round = 0; round <= REASK; round++) {
+            List<String> left = Pins.belowTarget(ws, Integer.parseInt(to));
+            String brief = "Migration: JDK " + from + " -> " + to
+                    + "\n\nPins still below " + to + ":\n"
+                    + (left.isEmpty() ? "(none)" : String.join("\n", left));
+            String said = agents.bumper().run(brief);
+            trace.applied("bump", said + "\n" + tree.diff());
+
+            List<String> after = Pins.belowTarget(ws, Integer.parseInt(to));
+            String judgement = agents.bumpCritic().run(brief
+                    + "\n\nWhat the bumper says it did:\n" + said
+                    + "\n\nWhat the build files say now:\n"
+                    + (after.isEmpty() ? "nothing is below " + to + " any more"
+                            : String.join("\n", after)));
+            if (word(judgement, "sound", "not-landed", "overreach").equals("sound")
+                    || round == REASK) {
+                trace.progress(bump, "bump: " + (after.isEmpty() ? "every pin reached " + to
+                        : after.size() + " still below " + to) + " after " + (round + 1)
+                        + " round(s)");
+                tree.land("bump");
+                return;
             }
-            return brief + "\n\nWhat the bumper changed:\n" + diff
-                    + "\n\nPins STILL below target after those edits:\n"
-                    + (left.isBlank() ? "(none)" : left);
-        }, "sound", "not-landed", "overreach");
+            trace.progress(bump, "bump: sent back — " + judgement.lines().findFirst().orElse(""));
+        }
     }
 
     /**
