@@ -84,7 +84,10 @@ public final class Dashboard {
             body{margin:0;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;
             background:#0d1117;color:#c9d1d9}
             a{color:#58a6ff;text-decoration:none}a:hover{text-decoration:underline}
-            header{padding:16px 24px;border-bottom:1px solid #21262d}
+            header{padding:16px 24px;border-bottom:1px solid #21262d;position:relative}
+            .gear{position:absolute;right:24px;top:16px;font-size:16px;color:#7d8590;
+            text-decoration:none;line-height:1}
+            .gear:hover{color:#c9d1d9;text-decoration:none}
             h1{margin:0;font-size:14px;font-weight:600}
             .sub{color:#7d8590;font-size:12px;margin-top:3px}
             .bar{height:4px;background:#161b22}
@@ -108,6 +111,23 @@ public final class Dashboard {
             .queued{background:#0d1117;color:#6e7681;border:1px solid #21262d}
             .interrupted{background:#20161f;color:#bc8cff;border:1px solid #21262d}
             .postponed{background:#1b1f26;color:#7aa2d6;border:1px solid #21262d}
+            .tabs{display:flex;flex-wrap:wrap;gap:6px;padding:14px 24px;position:sticky;top:0;
+            background:#0d1117;border-bottom:1px solid #21262d;z-index:5}
+            .tab{padding:4px 10px;border:1px solid #21262d;border-radius:6px;background:#161b22;
+            font-size:11px;color:#c9d1d9}
+            .tab:hover{border-color:#58a6ff;text-decoration:none}
+            .tab.critic{color:#d29922}.tab.closer{color:#bc8cff}
+            section.prompt{padding:18px 24px;border-bottom:1px solid #161b22;scroll-margin-top:56px}
+            section.prompt h2{margin:0 0 10px;font-size:13px;display:flex;align-items:center;gap:10px}
+            section.prompt .who{color:#58a6ff}
+            section.prompt .role{font-size:10px;text-transform:uppercase;letter-spacing:.06em;
+            padding:2px 7px;border-radius:20px;background:#161b22;color:#7d8590}
+            section.prompt .role.critic{background:#2b2011;color:#d29922}
+            section.prompt .role.closer{background:#20161f;color:#bc8cff}
+            section.prompt .len{color:#7d8590;font-size:11px;margin-left:auto}
+            section.prompt pre{margin:0;padding:14px 16px;background:#0b0f14;
+            border:1px solid #21262d;border-radius:8px;white-space:pre-wrap;
+            font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;color:#c9d1d9}
             .blocked-dependency,.behavior-change{background:#2b2011;color:#d29922}
             .infra{background:#2d1618;color:#f85149}
             .sema{display:flex;gap:5px;margin-top:5px}
@@ -266,6 +286,7 @@ public final class Dashboard {
         http.createContext("/bump", d::bump);
         http.createContext("/feedback", d::feedback);
         http.createContext("/events", d::events);
+        http.createContext("/settings", d::settings);
         http.start();
         System.out.println("dashboard on :" + port + " over " + results
                 + (d.token == null ? " (feedback OPEN: set BJV_DASH_TOKEN to require one)"
@@ -1348,13 +1369,46 @@ public final class Dashboard {
         return out;
     }
 
+    /**
+     * WHAT EACH AGENT IS ACTUALLY ASKED, in the order the chain reaches them.
+     *
+     * <p>The prompts are the whole behaviour of this system that is not code, and they were legible
+     * only by opening a Java file: the one part anybody would want to read while a sweep runs was
+     * the one part nobody could see. Producers and their critics sit next to each other because
+     * that is the unit -- neither is meaningful without knowing what the other was told.
+     */
+    private void settings(HttpExchange x) throws IOException {
+        List<Agents.Prompt> prompts = Agents.prompts();
+        StringBuilder out = head("prompts", prompts.size()
+                + " agents, in the order the chain reaches them");
+
+        out.append("<div class=tabs>");
+        for (Agents.Prompt p : prompts) {
+            out.append("<a class='tab ").append(p.role()).append("' href='#")
+                    .append(esc(p.name())).append("'>").append(esc(p.name())).append("</a>");
+        }
+        out.append("</div>");
+
+        for (Agents.Prompt p : prompts) {
+            out.append("<section class=prompt id='").append(esc(p.name())).append("'>")
+                    .append("<h2><span class=who>").append(esc(p.name())).append("</span>")
+                    .append("<span class='role ").append(p.role()).append("'>")
+                    .append(p.role()).append("</span>")
+                    .append("<span class=len>").append(p.text().length()).append(" chars</span>")
+                    .append("</h2>")
+                    .append("<pre>").append(esc(p.text())).append("</pre></section>");
+        }
+        send(x, out.toString());
+    }
+
     private static StringBuilder head(String title, String sub) {
         return new StringBuilder("<!doctype html><meta charset=utf-8>")
                 .append("<meta name=viewport content='width=device-width,initial-scale=1'>")
                 .append("<title>").append(esc(title)).append("</title><style>").append(CSS)
                 .append("</style>").append(LIVE).append(KEEP_OPEN)
-                .append("<header><h1>").append(esc(title)).append("</h1><div class=sub>")
-                .append(esc(sub)).append("</div></header>");
+                .append("<header><a class=gear href='/settings' title='the prompts each agent is "
+                        + "given'>\u2699</a><h1>").append(esc(title))
+                .append("</h1><div class=sub>").append(esc(sub)).append("</div></header>");
     }
 
     private static String hidden(String name, String value) {

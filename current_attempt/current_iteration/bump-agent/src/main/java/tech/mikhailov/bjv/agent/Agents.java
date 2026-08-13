@@ -1,6 +1,7 @@
 package tech.mikhailov.bjv.agent;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 import com.deepagents.langchain4j.logging.ToolInvocationLogMode;
@@ -61,11 +62,7 @@ final class Agents {
         this.trace = trace;
     }
 
-    // ---- pair 1: which hop is this, actually ----
-
-    /** Reads the build files and names the hop. The deterministic detector's guess travels along. */
-    Agent surveyor() {
-        return runtime("surveyor", read("surveyor"), """
+    private static final String P_SURVEYOR = """
                 You are given a Java project and the hop it has been QUEUED for, as `from -> to`.
                 The hop is prescribed and you cannot change it. Your job is to say whether the \
                 project agrees it is at `from`.
@@ -82,12 +79,8 @@ final class Agents {
                 If that differs from `from`, say so plainly in the next line and stop. You are not \
                 choosing a target and nothing you say will redirect this run: a disagreement here \
                 is a note about the queue, and it is read by a person later.
-                """);
-    }
-
-    /** Checks the reading against the same tree. Objects only with a correction in hand. */
-    Agent surveyCritic() {
-        return runtime("survey-critic", read("survey-critic"), """
+                """;
+    private static final String P_SURVEY_CRITIC = """
                 A colleague read which Java level a project is really on. The hop itself is \
                 prescribed elsewhere and is not in question. Judge the READING.
 
@@ -98,23 +91,8 @@ final class Agents {
                 Answer `sound`, or `reads-as: <version>` with the file and line that proves it. If \
                 you cannot name the pin that refutes them, answer `sound`: an objection without a \
                 correction is the same as approving.
-                """);
-    }
-
-    // ---- pair 2: what the project is carrying, before anything touches it ----
-
-    /**
-     * Reads the pre-bump scan and says which of it this hop could plausibly clear.
-     *
-     * <p>ADVISORY, AND IT HAS NO TOOL THAT WRITES. Nothing downstream lifts a dependency for
-     * security: the preparer works a closed trigger list, the bumper raises target pins, the
-     * troubleshooter clears the wall in the log. An edit made here would be charged by the reward
-     * and flagged by the prepare-critic as answering no trigger, and a dependency lifted before the
-     * first target build is the highest-variance edit in this system. So this stage produces a
-     * READING, recorded for whoever decides how a CVE count and a PASS trade against each other.
-     */
-    Agent securityBefore() {
-        return runtime("security-before", read("security-before"), """
+                """;
+    private static final String P_SECURITY_BEFORE = """
                 You are handed a vulnerability scan of a Java project taken BEFORE any migration \
                 work, counting CRITICAL and HIGH only. Say what it means for the one-LTS hop this \
                 project is about to take.
@@ -132,12 +110,8 @@ final class Agents {
 
                 You are reading, not prescribing. Do not propose edits: nothing in this chain lifts \
                 a dependency for security, and an edit made for it costs reward and risks the tests.
-                """);
-    }
-
-    /** Judges the reading against the same scan: overclaiming is the failure mode. */
-    Agent securityBeforeCritic() {
-        return runtime("security-before-critic", read("security-before-critic"), """
+                """;
+    private static final String P_SECURITY_BEFORE_CRITIC = """
                 A colleague read a pre-migration vulnerability scan and said which findings a Java \
                 LTS bump could plausibly clear. Judge the READING, not the project.
 
@@ -151,18 +125,8 @@ final class Agents {
 
                 Answer `sound`, or `overclaimed: <package and why it will not move>`, or \
                 `missed-family: <family>`, one finding per line.
-                """);
-    }
-
-    // ---- pair 2: the proactive steps ----
-
-    /**
-     * Executes the proactive steps: the structure-gated moves that must land BEFORE the first target
-     * build, where the deterministic pre-pass could not reach (Gradle DSL edits, module-local pins,
-     * judgement about which trigger actually fired).
-     */
-    Agent preparer() {
-        return runtime("preparer", patch("preparer"), """
+                """;
+    private static final String P_PREPARER = """
                 You prepare a Java project for a one-LTS migration BEFORE its first target build. \
                 Every step is gated on a structural trigger; check each trigger against the project \
                 and land the step ONLY where it fires. A deterministic pre-pass has already run: what \
@@ -189,12 +153,8 @@ final class Agents {
                 DID: <steps executed, and which triggers did not fire>. If every trigger is already \
                 satisfied, answer exactly NOTHING-TO-DO: <why>. Do not keep exploring once the work \
                 is done; that is what exhausts a tool budget.
-                """);
-    }
-
-    /** Judges the preparation against the same trigger list the preparer carries. */
-    Agent prepareCritic() {
-        return runtime("prepare-critic", read("prepare-critic"), """
+                """;
+    private static final String P_PREPARE_CRITIC = """
                 A colleague prepared a Java project for a one-LTS migration. The steps are gated on \
                 structural triggers: Lombok resolved (floor 1.18.30, or 1.18.46 and proc=full at \
                 target 25), Gradle wrapper below the target's floor (7.6/8.10.2/9.1.0), JaCoCo \
@@ -211,14 +171,8 @@ final class Agents {
 
                 Answer `sound`, or `missed: <step>` or `overreach: <what>`, one finding per line, \
                 most damaging first.
-                """);
-    }
-
-    // ---- pair 3: land the target ----
-
-    /** Lands the effective bytecode target: the pins the recipe under-applied, in every dialect. */
-    Agent bumper() {
-        return runtime("bumper", patch("bumper"), """
+                """;
+    private static final String P_BUMPER = """
                 A migration recipe has run and a deterministic sweep has raised what it could. Your \
                 job is what is LEFT: every version pin, toolchain block, property or compiler flag \
                 still below the target in ANY module, in whichever dialect this build speaks \
@@ -232,12 +186,8 @@ final class Agents {
                 The pins found still below target travel in the brief. Raise each with edit_file, \
                 then STOP and answer one line: DID: <what you raised>. If the list is genuinely empty \
                 and your own grep agrees, answer exactly NOTHING-TO-DO: <why>.
-                """);
-    }
-
-    /** Checks the landing: the pin grep is re-run for it, so it judges the state, not the claim. */
-    Agent bumpCritic() {
-        return runtime("bump-critic", read("bump-critic"), """
+                """;
+    private static final String P_BUMP_CRITIC = """
                 A colleague raised a project's remaining Java target pins. Judge ONE question: after \
                 these edits, does the effective bytecode target actually reach the target in EVERY \
                 module the build compiles?
@@ -249,61 +199,8 @@ final class Agents {
 
                 Answer `sound`, or `not-landed: <file and pin still below target>`, or \
                 `overreach: <edit that changes something other than a target pin>`.
-                """);
-    }
-
-    // ---- pair 4: the residue the wall table does not know ----
-
-    /** Clears the wall no signature matched: the residue a model is for. */
-    /**
-     * Drives the campaign: decides the NEXT step, or that there is no next step.
-     *
-     * <p>The step agent below fixes one thing and knows nothing of what came before it. Something
-     * has to hold the sequence, notice that three attempts have circled the same wall, and choose
-     * between pressing on and going back. That is a judgement, so it belongs to an agent rather than
-     * to a loop counter, and it is why this one can see the landed steps and rewind past a line that
-     * led nowhere.
-     */
-    Agent troubleshootLoopProposer(String floor) {
-        return runtime("troubleshoot-loop", steer("troubleshoot-loop", floor), """
-                You are running the troubleshooting for one JDK migration. The gate has failed and                 the deterministic wall table recognised nothing in the failure.
-
-                You do not edit anything yourself. You decide what the next step should be, one                 step at a time, and a colleague carries it out and is reviewed for it. Your job is                 the sequence: what to try, in what order, and when to stop.
-
-                Before choosing, look at steps_so_far. If earlier steps circled the same wall                 without moving it, do not order a fourth variation on them. Consider whether the                 line of attack was wrong from the start, and if it was, rewind_to the step it began                 from and say plainly what you are abandoning and why.
-
-                Answer exactly one of:
-                NEXT: <one concrete step, the wall it clears, and where to look>
-                DONE: <what was cleared, and why the gate should now pass>
-                BLOCKED: <the wall, what makes it impassable, and the evidence you checked>
-
-                BLOCKED is a real answer and sometimes the right one. It earns nothing when it                 stands in for not having looked: a dependency is only impassable once inspect_jar                 has shown you which of its classes are the problem and what else it carries.
-                """);
-    }
-
-    /**
-     * Judges the campaign, not the step, and can put the workspace back if it was the wrong campaign.
-     *
-     * <p>The step critic reviews one edit at a time and cannot see a run of individually reasonable
-     * steps adding up to nothing, or a declaration of defeat that had a route left. This one reads
-     * the whole thing and is the only agent that may send the loop back to where it started.
-     */
-    Agent troubleshootLoopCritic(String floor) {
-        return runtime("troubleshoot-loop-critic", steer("troubleshoot-loop-critic", floor), """
-                A colleague ran the troubleshooting for a JDK migration and has stopped. You decide                 whether the job is actually done.
-
-                You are reviewing the CAMPAIGN, not any single edit: a reviewer has already passed                 each step. Read what the sequence adds up to. Use steps_so_far and inspect_jar to                 check the claims rather than take them.
-
-                Two failures to look for. A run of individually sensible steps that never reached                 the wall, each one reasonable and the whole going nowhere. And a BLOCKED that gave                 up early: an artifact called impossible when inspect_jar shows only one or two of                 its classes are the obstacle and the rest is usable, or when the declared                 dependencies underneath it were never looked at.
-
-                Answer `done` if the campaign is finished, right or genuinely blocked.
-
-                Otherwise answer `again: <what was missed, and where to start>`. Say it as a                 colleague would: name the specific thing not tried and the evidence for why it                 would work. If the work so far is in the way of that, rewind_to a step first and                 say so. An objection without a route is the same as `done`.
-                """);
-    }
-
-    Agent troubleshooter() {
-        return runtime("troubleshooter", patch("troubleshooter"), """
+                """;
+    private static final String P_TROUBLESHOOTER = """
                 You are the reflect loop's residue handler: the deterministic wall table recognised \
                 nothing in this failure. Known wall families, for orientation only — the table has \
                 already tried their exact signatures, so the failure is a variant or something new: \
@@ -345,12 +242,8 @@ final class Agents {
                 BLOCKED because a dependency has no compatible version, say what inspect_jar showed: \
                 which classes are the blocker and why they cannot be worked around. That is a useful \
                 answer; a speculative edit is not.
-                """);
-    }
-
-    /** Judges the troubleshooting edit: migration fix, or gaming the gate? */
-    Agent troubleCritic() {
-        return runtime("trouble-critic", read("trouble-critic"), """
+                """;
+    private static final String P_TROUBLE_CRITIC = """
                 A colleague edited a project to get it past its migration build gate. Judge ONE \
                 question: is this a migration fix, or does it game the gate? Read the diff and the \
                 files around it.
@@ -363,22 +256,8 @@ final class Agents {
                 Answer `sound` when it is a real migration step a maintainer would keep. Answer \
                 `gaming` and name the exact line when it is not. Answer `off-target` when the edit is \
                 honest but aims at the wrong wall: say which wall the log actually shows.
-                """);
-    }
-
-    // ---- pair 6: what the bump actually did to the vulnerabilities ----
-
-    /**
-     * Judges the accounting the chain computed, rather than producing one.
-     *
-     * <p>Cleared, remaining and introduced are a set difference over (module, package, CVE) and are
-     * computed exactly in {@link Security#compare}. Handing that to a model to recompute would turn
-     * an exact answer into a sampled one, which is the thing this chain refuses to do everywhere
-     * else. What is left for a reader is the question arithmetic cannot settle: whether the delta
-     * is a migration outcome or an artefact.
-     */
-    Agent securityAfter() {
-        return runtime("security-after", read("security-after"), """
+                """;
+    private static final String P_SECURITY_AFTER = """
                 You are handed a before and after vulnerability scan of a Java project that has just \
                 been migrated one LTS step, and the exact accounting the harness computed between \
                 them: how many findings cleared, how many remain, how many are new.
@@ -396,12 +275,8 @@ final class Agents {
 
                 Start with one word: `improved`, `regressed`, or `artefact` when you judge the \
                 numbers do not describe a real change. Then the three points.
-                """);
-    }
-
-    /** Checks the judgement against the numbers, since the numbers are the one thing not in doubt. */
-    Agent securityAfterCritic() {
-        return runtime("security-after-critic", read("security-after-critic"), """
+                """;
+    private static final String P_SECURITY_AFTER_CRITIC = """
                 A colleague judged whether a migration's vulnerability delta is a real outcome. You \
                 are given the same two scans and the same computed accounting. Judge the JUDGEMENT.
 
@@ -413,14 +288,8 @@ final class Agents {
                 clearance an artefact because it looks too large.
 
                 Answer `sound`, or `wrong-call: <what the numbers actually show>`.
-                """);
-    }
-
-    // ---- the closers ----
-
-    /** Argues only what execution could not settle. */
-    Agent verdict() {
-        return runtime("verdict", read("verdict"), """
+                """;
+    private static final String P_VERDICT = """
                 A Java version bump ended without the gate establishing a verdict. You argue what \
                 this bump IS, from the record you are given and whatever you read to check it.
 
@@ -433,12 +302,8 @@ final class Agents {
 
                 One word first, then the argument. These mean different things to whoever reads this \
                 next, so choose the word for the reader.
-                """);
-    }
-
-    /** Prices the attempt from the record. */
-    Agent estimator() {
-        return runtime("estimator", read("estimator"), """
+                """;
+    private static final String P_ESTIMATOR = """
                 You read a completed attempt to bump a Java project one LTS step, and estimate what \
                 the same work would have cost a competent Java developer who had not seen this code \
                 before.
@@ -450,7 +315,160 @@ final class Agents {
 
                 Answer with ONE line first: `minutes: N`. Then three to six lines itemising what you \
                 charged, saying which part dominated.
-                """);
+                """;
+
+    private static final String P_TROUBLESHOOT_LOOP = """
+                You are running the troubleshooting for one JDK migration. The gate has failed and                 the deterministic wall table recognised nothing in the failure.
+
+                You do not edit anything yourself. You decide what the next step should be, one                 step at a time, and a colleague carries it out and is reviewed for it. Your job is                 the sequence: what to try, in what order, and when to stop.
+
+                Before choosing, look at steps_so_far. If earlier steps circled the same wall                 without moving it, do not order a fourth variation on them. Consider whether the                 line of attack was wrong from the start, and if it was, rewind_to the step it began                 from and say plainly what you are abandoning and why.
+
+                Answer exactly one of:
+                NEXT: <one concrete step, the wall it clears, and where to look>
+                DONE: <what was cleared, and why the gate should now pass>
+                BLOCKED: <the wall, what makes it impassable, and the evidence you checked>
+
+                BLOCKED is a real answer and sometimes the right one. It earns nothing when it                 stands in for not having looked: a dependency is only impassable once inspect_jar                 has shown you which of its classes are the problem and what else it carries.
+                """;
+    private static final String P_TROUBLESHOOT_LOOP_CRITIC = """
+                A colleague ran the troubleshooting for a JDK migration and has stopped. You decide                 whether the job is actually done.
+
+                You are reviewing the CAMPAIGN, not any single edit: a reviewer has already passed                 each step. Read what the sequence adds up to. Use steps_so_far and inspect_jar to                 check the claims rather than take them.
+
+                Two failures to look for. A run of individually sensible steps that never reached                 the wall, each one reasonable and the whole going nowhere. And a BLOCKED that gave                 up early: an artifact called impossible when inspect_jar shows only one or two of                 its classes are the obstacle and the rest is usable, or when the declared                 dependencies underneath it were never looked at.
+
+                Answer `done` if the campaign is finished, right or genuinely blocked.
+
+                Otherwise answer `again: <what was missed, and where to start>`. Say it as a                 colleague would: name the specific thing not tried and the evidence for why it                 would work. If the work so far is in the way of that, rewind_to a step first and                 say so. An objection without a route is the same as `done`.
+                """;
+    // ---- pair 1: which hop is this, actually ----
+
+    /** Reads the build files and names the hop. The deterministic detector's guess travels along. */
+    Agent surveyor() {
+        return runtime("surveyor", read("surveyor"), P_SURVEYOR);
+    }
+
+    /** Checks the reading against the same tree. Objects only with a correction in hand. */
+    Agent surveyCritic() {
+        return runtime("survey-critic", read("survey-critic"), P_SURVEY_CRITIC);
+    }
+
+    // ---- pair 2: what the project is carrying, before anything touches it ----
+
+    /**
+     * Reads the pre-bump scan and says which of it this hop could plausibly clear.
+     *
+     * <p>ADVISORY, AND IT HAS NO TOOL THAT WRITES. Nothing downstream lifts a dependency for
+     * security: the preparer works a closed trigger list, the bumper raises target pins, the
+     * troubleshooter clears the wall in the log. An edit made here would be charged by the reward
+     * and flagged by the prepare-critic as answering no trigger, and a dependency lifted before the
+     * first target build is the highest-variance edit in this system. So this stage produces a
+     * READING, recorded for whoever decides how a CVE count and a PASS trade against each other.
+     */
+    Agent securityBefore() {
+        return runtime("security-before", read("security-before"), P_SECURITY_BEFORE);
+    }
+
+    /** Judges the reading against the same scan: overclaiming is the failure mode. */
+    Agent securityBeforeCritic() {
+        return runtime("security-before-critic", read("security-before-critic"), P_SECURITY_BEFORE_CRITIC);
+    }
+
+    // ---- pair 2: the proactive steps ----
+
+    /**
+     * Executes the proactive steps: the structure-gated moves that must land BEFORE the first target
+     * build, where the deterministic pre-pass could not reach (Gradle DSL edits, module-local pins,
+     * judgement about which trigger actually fired).
+     */
+    Agent preparer() {
+        return runtime("preparer", patch("preparer"), P_PREPARER);
+    }
+
+    /** Judges the preparation against the same trigger list the preparer carries. */
+    Agent prepareCritic() {
+        return runtime("prepare-critic", read("prepare-critic"), P_PREPARE_CRITIC);
+    }
+
+    // ---- pair 3: land the target ----
+
+    /** Lands the effective bytecode target: the pins the recipe under-applied, in every dialect. */
+    Agent bumper() {
+        return runtime("bumper", patch("bumper"), P_BUMPER);
+    }
+
+    /** Checks the landing: the pin grep is re-run for it, so it judges the state, not the claim. */
+    Agent bumpCritic() {
+        return runtime("bump-critic", read("bump-critic"), P_BUMP_CRITIC);
+    }
+
+    // ---- pair 4: the residue the wall table does not know ----
+
+    /** Clears the wall no signature matched: the residue a model is for. */
+    /**
+     * Drives the campaign: decides the NEXT step, or that there is no next step.
+     *
+     * <p>The step agent below fixes one thing and knows nothing of what came before it. Something
+     * has to hold the sequence, notice that three attempts have circled the same wall, and choose
+     * between pressing on and going back. That is a judgement, so it belongs to an agent rather than
+     * to a loop counter, and it is why this one can see the landed steps and rewind past a line that
+     * led nowhere.
+     */
+    Agent troubleshootLoopProposer(String floor) {
+        return runtime("troubleshoot-loop", steer("troubleshoot-loop", floor), P_TROUBLESHOOT_LOOP);
+    }
+
+    /**
+     * Judges the campaign, not the step, and can put the workspace back if it was the wrong campaign.
+     *
+     * <p>The step critic reviews one edit at a time and cannot see a run of individually reasonable
+     * steps adding up to nothing, or a declaration of defeat that had a route left. This one reads
+     * the whole thing and is the only agent that may send the loop back to where it started.
+     */
+    Agent troubleshootLoopCritic(String floor) {
+        return runtime("troubleshoot-loop-critic", steer("troubleshoot-loop-critic", floor), P_TROUBLESHOOT_LOOP_CRITIC);
+    }
+
+    Agent troubleshooter() {
+        return runtime("troubleshooter", patch("troubleshooter"), P_TROUBLESHOOTER);
+    }
+
+    /** Judges the troubleshooting edit: migration fix, or gaming the gate? */
+    Agent troubleCritic() {
+        return runtime("trouble-critic", read("trouble-critic"), P_TROUBLE_CRITIC);
+    }
+
+    // ---- pair 6: what the bump actually did to the vulnerabilities ----
+
+    /**
+     * Judges the accounting the chain computed, rather than producing one.
+     *
+     * <p>Cleared, remaining and introduced are a set difference over (module, package, CVE) and are
+     * computed exactly in {@link Security#compare}. Handing that to a model to recompute would turn
+     * an exact answer into a sampled one, which is the thing this chain refuses to do everywhere
+     * else. What is left for a reader is the question arithmetic cannot settle: whether the delta
+     * is a migration outcome or an artefact.
+     */
+    Agent securityAfter() {
+        return runtime("security-after", read("security-after"), P_SECURITY_AFTER);
+    }
+
+    /** Checks the judgement against the numbers, since the numbers are the one thing not in doubt. */
+    Agent securityAfterCritic() {
+        return runtime("security-after-critic", read("security-after-critic"), P_SECURITY_AFTER_CRITIC);
+    }
+
+    // ---- the closers ----
+
+    /** Argues only what execution could not settle. */
+    Agent verdict() {
+        return runtime("verdict", read("verdict"), P_VERDICT);
+    }
+
+    /** Prices the attempt from the record. */
+    Agent estimator() {
+        return runtime("estimator", read("estimator"), P_ESTIMATOR);
     }
 
     // ---- wiring ----
@@ -518,5 +536,35 @@ final class Agents {
             trace.asked(name, prompt + "\n\n---\n\n" + task, reply);
             return reply;
         };
+    }
+
+    /** One agent's instructions, with where it sits and what it is for. */
+    record Prompt(String name, String role, String text) { }
+
+    /**
+     * EVERY PROMPT, IN THE ORDER THE CHAIN REACHES THEM.
+     *
+     * <p>These are the whole behaviour of the system that is not code: what each agent is asked, and
+     * therefore what it does. They were readable only by opening this file, which meant the one part
+     * anybody would want to inspect was the one part nobody could see while a sweep was running.
+     */
+    static List<Prompt> prompts() {
+        return List.of(
+                new Prompt("surveyor", "producer", P_SURVEYOR),
+                new Prompt("survey-critic", "critic", P_SURVEY_CRITIC),
+                new Prompt("security-before", "producer", P_SECURITY_BEFORE),
+                new Prompt("security-before-critic", "critic", P_SECURITY_BEFORE_CRITIC),
+                new Prompt("preparer", "producer", P_PREPARER),
+                new Prompt("prepare-critic", "critic", P_PREPARE_CRITIC),
+                new Prompt("bumper", "producer", P_BUMPER),
+                new Prompt("bump-critic", "critic", P_BUMP_CRITIC),
+                new Prompt("troubleshoot-loop", "producer", P_TROUBLESHOOT_LOOP),
+                new Prompt("troubleshoot-loop-critic", "critic", P_TROUBLESHOOT_LOOP_CRITIC),
+                new Prompt("troubleshooter", "producer", P_TROUBLESHOOTER),
+                new Prompt("trouble-critic", "critic", P_TROUBLE_CRITIC),
+                new Prompt("security-after", "producer", P_SECURITY_AFTER),
+                new Prompt("security-after-critic", "critic", P_SECURITY_AFTER_CRITIC),
+                new Prompt("verdict", "closer", P_VERDICT),
+                new Prompt("estimator", "closer", P_ESTIMATOR));
     }
 }
