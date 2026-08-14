@@ -3,6 +3,7 @@ package tech.mikhailov.bjv.agent;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -49,21 +50,32 @@ class ThePrescribedHopIsNotNegotiableTest {
     }
 
     @Test
-    void aMultiStepHopStillGetsTheRecipesOfEveryRungItCrosses(
-            @org.junit.jupiter.api.io.TempDir java.nio.file.Path ws) throws Exception {
-        // Java8toJava11 is the only recipe that handles what JEP 320 removed, so an 8->17 hop
-        // needs it as much as 8->11 does: nothing stopped at 11, but the wall is still there.
-        var m = Migrate.class.getDeclaredMethod("program", int.class, int.class);
-        m.setAccessible(true);
-        // program() reads the project to pick the Spring line, so it needs a real (empty) tree.
-        Migrate migrate = new Migrate(ws, "/nonexistent", null);
-        @SuppressWarnings("unchecked")
-        var direct = (java.util.List<String>) m.invoke(migrate, 8, 11);
-        @SuppressWarnings("unchecked")
-        var spanning = (java.util.List<String>) m.invoke(migrate, 8, 17);
-        assertTrue(direct.contains("org.openrewrite.java.migrate.Java8toJava11"));
-        assertTrue(spanning.contains("org.openrewrite.java.migrate.Java8toJava11"),
+    void aMultiStepHopStillGetsTheRecipesOfEveryRungItCrosses() {
+        // Java8toJava11 is the only recipe that handles what JEP 320 removed, so an 8->17 hop needs
+        // it as much as 8->11 does: nothing stopped at 11, but the wall is still there.
+        //
+        // ASSERTED AGAINST THE PROMPT, because that is where the decision lives now. It used to be
+        // in Migrate.program(), a deterministic recipe builder that had lost its last caller — the
+        // agents assemble their own recipe file, so a rule the harness computed and never handed to
+        // anyone was doing nothing but passing this test.
+        String direct = bumperPrompt(new Hop(8, 11));
+        String spanning = bumperPrompt(new Hop(8, 17));
+        String above = bumperPrompt(new Hop(17, 21));
+
+        assertTrue(direct.contains("Java8toJava11"), direct);
+        assertTrue(spanning.contains("Java8toJava11"),
                 "a hop that crosses 11 needs 11's recipes even though it does not stop there");
-        assertTrue(spanning.contains("org.openrewrite.java.migrate.UpgradeBuildToJava17"));
+        assertTrue(spanning.contains("UpgradeBuildToJava17"));
+        assertFalse(above.contains("Java8toJava11"),
+                "and a hop that never reaches 11 is not told about it: a rule that cannot fire is "
+                        + "an invitation to apply it anyway");
+    }
+
+    /** What the agent that moves the target is actually handed, for one hop. */
+    private static String bumperPrompt(Hop hop) {
+        return Agents.forHop(hop, java.nio.file.Path.of("/tmp")).stream()
+                .filter(d -> d.name().equals("bump-doer"))
+                .findFirst().orElseThrow()
+                .systemPrompt();
     }
 }

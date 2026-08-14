@@ -12,6 +12,13 @@ cd "$(dirname "$0")"
 H=${BJV_HOST:-mh}
 R=${BJV_REMOTE:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/bump-agent}
 RESULTS=${BJV_RESULTS:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/runs_agent/results}
+# THE FRONTEND FIRST, INTO THE JAR. The pages are a Next.js static export served from the
+# classpath, so the container stays single-process: one JVM, no node beside it. Building it here
+# rather than in the image is the same reason the jar is: the image has no toolchain, and a COPY of
+# a stale bundle reports success. The export is a build output and is gitignored.
+( cd ui && pnpm install --frozen-lockfile && pnpm build )
+rm -rf src/main/resources/ui
+cp -r ui/apps/web/out src/main/resources/ui
 mvn -B -o package
 rsync -a --delete src/ "$H:$R/src/"
 rsync -a target/bump-agent-0.1.0-SNAPSHOT.jar "$H:$R/target/"
@@ -29,6 +36,17 @@ ssh "$H" "cd $R && docker build -q -t bjv ."
 # stops itself when it sees its own postponement, so nothing here needs the daemon and a public
 # page never shares a container with it.
 #
+# AS THE USER THE SWEEP RUNS AS, NOT ROOT. The page can now write into the run root — the lane
+# count and an uploaded registry — and a container writing as root leaves those files unwritable by
+# run.sh. It cost a relaunch: the sort at the top of the sweep failed with "Permission denied" on
+# the manifest the dashboard had just renamed into place, and the run carried on reading a file it
+# could no longer replace.
+#
+# THE RUN ROOT IS MOUNTED, NOT JUST THE RESULTS. `max_lanes` sits beside the results directory and
+# is re-read by run.sh at the top of every round, which is what makes the lane count adjustable
+# while a sweep is going. Mounting one level down meant the settings page could offer a save button
+# for a file the container could not see, which is worse than offering nothing.
+#
 # THE TOKEN IS READ BEFORE THE CONTAINER IS REMOVED. The only copy lives in that container's
 # environment, and reading it afterwards recreates a public page with no authentication.
 ssh "$H" '
@@ -42,8 +60,9 @@ ssh "$H" '
     --env-file /home/vmihaylov/bump-java-version/.env \
     -e OC_KEY="$(sed -n "s/^PROPOSER_API_KEY=//p" /home/vmihaylov/bump-java-version/.env | tr -d "\"" )" \
     -e BJV_SUPERVISOR_MINUTES="${BJV_SUPERVISOR_MINUTES:-20}" \
-    -v '"$RESULTS"':/results \
-    bjv tech.mikhailov.bjv.agent.Dashboard /results 8086 >/dev/null
+    --user "$(id -u):$(id -g)" \
+    -v '"$(dirname "$RESULTS")"':/runroot \
+    bjv tech.mikhailov.bjv.agent.Dashboard /runroot/results 8086 >/dev/null
   echo "dashboard and supervisor recreated as one container"
 '
 

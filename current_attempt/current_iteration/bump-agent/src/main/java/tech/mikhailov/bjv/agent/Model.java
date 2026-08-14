@@ -28,6 +28,35 @@ final class Model {
     private static final int MAX_TOKENS = 16_000;
 
     /**
+     * HOW MUCH THINKING IS EXPECTED, WHICH THIS NEVER SAID.
+     *
+     * <p>{@code thinking_token_budget} is Qwen's own field and it bounds the REASONING: at the
+     * budget the model is made to stop thinking and write its reply, rather than being cut off
+     * wherever it had got to. {@code max_tokens} bounds the OUTPUT, which is a different thing —
+     * having one and not the other is what this had, and it is why a reasoning model given a
+     * question it cannot answer reasons until something else stops it.
+     *
+     * <p>Measured on this endpoint before wiring it, because a parameter being ACCEPTED and being
+     * HONOURED are different claims and vLLM ignores unknown fields silently:
+     *
+     * <pre>
+     * budget 300    reasoning  1,015 chars   content 1,768   finish=stop
+     * budget 4,000  reasoning 13,003 chars   content 1,672   finish=stop
+     * unbounded     no reply within 300s
+     * </pre>
+     *
+     * <p>Four thousand because that is where the answers still arrive: this corpus's aborted
+     * generations died at a median 14,553 characters of reasoning, which is about this budget, and
+     * every one of them returned NOTHING. Bounded, the same length of thinking ends in a reply.
+     *
+     * <p>THE RUNAWAY DETECTOR STAYS. This bounds how long a cycle can run; it does not stop the
+     * model entering one, and a cycle inside the budget still wastes the budget. The two are
+     * complementary and the detector is now the rarer of the two.
+     */
+    private static final int THINKING_TOKENS = Integer.parseInt(
+            System.getenv().getOrDefault("BJV_THINKING_TOKENS", "4000"));
+
+    /**
      * The transport's own timeout, deliberately set beyond every other guard.
      *
      * <p>THIS MUST NEVER BE THE THING THAT FIRES. The client sets it as the JDK request timeout,
@@ -94,13 +123,33 @@ final class Model {
                 .maxTokens(MAX_TOKENS)
                 .timeout(PATIENCE)
                 .returnThinking(Boolean.TRUE);
+
+        java.util.Map<String, Object> extra = extras(thinking);
+        if (!extra.isEmpty()) {
+            s.customParameters(extra);
+        }
+        return new Streamed(s.build(), trace);
+    }
+
+    /**
+     * WHAT TRAVELS IN THE REQUEST BODY BESIDE THE STANDARD FIELDS.
+     *
+     * <p>ONE MAP, BUILT ONCE, because the builder takes the whole thing: setting the template switch
+     * on its own would drop the budget, and the two were added on different days for different
+     * reasons. A test can read this without reflecting into the client's internals, which is the
+     * only way to check it that survives a library upgrade.
+     */
+    static java.util.Map<String, Object> extras(boolean thinking) {
+        java.util.Map<String, Object> extra = new java.util.LinkedHashMap<>();
+        if (THINKING_TOKENS > 0) {
+            extra.put("thinking_token_budget", THINKING_TOKENS);
+        }
         if (!thinking) {
             // The server template's own switch, not a prompt asking for brevity: an instruction
             // to answer first was measured to increase the runaway rate, not reduce it.
-            s.customParameters(java.util.Map.of("chat_template_kwargs",
-                    java.util.Map.of("enable_thinking", Boolean.FALSE)));
+            extra.put("chat_template_kwargs", java.util.Map.of("enable_thinking", Boolean.FALSE));
         }
-        return new Streamed(s.build(), trace);
+        return extra;
     }
 
     private static String env(String name, String fallback) {

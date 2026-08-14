@@ -73,6 +73,32 @@ postponed() {
 one() {
   local slug=$1 repo=$2 sha=$3 from=$4 to=$5
   local w=$WS/$slug
+
+  # WHERE FROM, AND WITH WHOSE CREDENTIAL. An uploaded registry carries a URL, because not every
+  # repository is on github.com, and may carry a token for a private one. Both live beside the
+  # manifest rather than in it: the manifest is keyed by owner/name because the whole record is,
+  # and $RESULTS is what the dashboard serves, so a token in there would be one careless endpoint
+  # away from being published.
+  local origin token
+  origin=$(awk -F'\t' -v r="$repo" '$1==r{print $2; exit}' "$ROOT/origins.tsv" 2>/dev/null)
+  [ -n "${origin:-}" ] || origin="https://github.com/$repo.git"
+  token=$(awk -F'\t' -v r="$repo" '$1==r{print $2; exit}' "$ROOT/credentials.tsv" 2>/dev/null)
+  if [ -n "${token:-}" ]; then
+    # In the URL rather than a helper, so it never lands in a config file inside the workspace that
+    # a later `git diff` or an agent's read_file could surface.
+    origin=$(printf '%s' "$origin" | sed "s#://#://x-access-token:$token@#")
+  fi
+
+  # A BLANK SHA MEANS THE DEFAULT BRANCH, RESOLVED BEFORE ANYTHING IS KEYED BY IT. The claim, the
+  # results directory and the bump key are all derived from the sha below, so resolving it after
+  # the clone would file the work under "-" and then run it under a commit — one bump wearing two
+  # identities. ls-remote answers without a clone, which is why this can happen up here.
+  if [ "$sha" = "-" ] || [ -z "${sha:-}" ]; then
+    sha=$(git ls-remote "$origin" HEAD 2>/dev/null | awk '{print $1; exit}')
+    if [ -z "${sha:-}" ]; then echo "[$slug] cannot resolve default branch: $repo"; return 1; fi
+    echo "[$slug] unpinned; resolved $(printf '%.12s' "$sha")"
+  fi
+
   # THE CLAIM IS WHAT MAKES "IN FLIGHT" A FACT. A bump that dies leaves its last settlement row
   # reading "bumping" forever, which is indistinguishable from one still working. A claim file
   # that exists only while the lane does turns that into something a reader can check, and the
@@ -84,7 +110,8 @@ one() {
   # A fresh checkout every time: the chain reads what each phase did back out of git diff, so a
   # workspace carrying a previous attempt's edits would attribute them to this run.
   docker run --rm -v "$WS:/w" alpine rm -rf "/w/$slug" >/dev/null 2>&1
-  if ! git clone -q "https://github.com/$repo.git" "$w" 2>/dev/null; then
+  # Never echo $origin on failure: it may carry a token.
+  if ! git clone -q "$origin" "$w" 2>/dev/null; then
     echo "[$slug] clone failed: $repo"; return 1
   fi
   git -C "$w" checkout -q "$sha" 2>/dev/null || { echo "[$slug] no sha $sha"; return 1; }
@@ -141,13 +168,30 @@ SORTED=$ROOT/manifest.$(basename "$MAN" .tsv).sorted.tsv
 LC_ALL=C sort -t "$(printf '\t')" -k2,2f -k2,2 -k4,4n "$MAN" > "$SORTED"
 MAN=$SORTED
 
+# WHICH MANIFEST THIS SWEEP IS ACTUALLY READING, written down where the dashboard can find it.
+# The sorted copy is named after its input so two launchers cannot shorten each other's file, which
+# means the name is not predictable from outside. Uploading a registry has to merge into THIS file
+# to join THIS sweep, and guessing which of the manifest.*.sorted.tsv is live would eventually pick
+# the wrong one. The loop below re-reads $MAN every round, so a merge lands on the next one.
+# THE BASENAME, NOT THE PATH. The dashboard reads this from inside a container where the run root
+# is mounted somewhere else entirely, so a host path recorded here does not resolve there and the
+# upload silently falls back to a file no sweep is reading.
+basename "$MAN" > "$ROOT/active_manifest"
+trap 'rm -f "$ROOT/active_manifest" 2>/dev/null' EXIT
+
 # The queue, where the dashboard can see it: it mounts $RESULTS and nothing else, and a page
 # built only from settlements can never show the work that has not started yet. It accumulates
 # rather than replaces, for the same reason: a small run is added to what is queued, not mistaken
 # for the whole of it.
 QUEUE=$RESULTS/queue.tsv
-cat "$MAN" "$QUEUE" 2>/dev/null | awk 'NF && !seen[$2"\t"$4]++' |
+# THE MISSING FILE MUST NOT POISON THE PIPELINE. This was `cat "$MAN" "$QUEUE" 2>/dev/null | ...`,
+# and with `set -o pipefail` a first run has no $QUEUE, so cat exits non-zero, the pipeline does
+# too, the `&&` never fires and the queue is never written. Silently, because there is no `set -e`.
+# The dashboard was promised this file by the comment above and never got it on a clean start: a
+# sweep of 1439 rows showed the four a lane had already picked up.
+{ cat "$MAN"; if [ -f "$QUEUE" ]; then cat "$QUEUE"; fi; } | awk 'NF && !seen[$2"\t"$4]++' |
   LC_ALL=C sort -t "$(printf '\t')" -k2,2 -k4,4n > "$QUEUE.new" && mv "$QUEUE.new" "$QUEUE"
+[ -s "$QUEUE" ] || echo "WARNING: the queue is empty; the dashboard will show only started work"
 
 LANEFILE=$ROOT/max_lanes
 [ -f "$LANEFILE" ] || echo "$LANES" > "$LANEFILE"

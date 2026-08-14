@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+@import '@bjv/ui/tokens.css';
+@import '@bjv/ui/domain.css';
+
+@source "../app";
+@source "../../../packages/ui/src";
+
+/**
+ * THE TYPE IS THE SHARED IDENTITY, and it is one declaration.
+ *
+ * The sibling tool sets exactly this on `body`, and the two of them are meant to read as one
+ * application behind one nav. A zone that picked its own font would be recognisable as a different
+ * product from across the room — before a reader had read a single word of it — which is a louder
+ * difference than any palette.
+ *
+ * So this line is copied for the same reason `tokens.css` is: it is the shell's house style, not
+ * this tool's taste. If it moves there, copy it again.
+ */
+body {
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+  margin: 0;
+}
+
+/* A zone must never make the shell's page scroll sideways; wide content scrolls in its own box. */
+body {
+  overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

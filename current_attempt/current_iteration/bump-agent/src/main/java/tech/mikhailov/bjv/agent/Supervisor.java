@@ -140,7 +140,7 @@ final class Supervisor {
         List<String> held = new ArrayList<>();
         try (var rows = Files.lines(findings)) {
             for (String row : rows.toList()) {
-                if ("holds".equals(Sweep.text(row, "verdict"))) {
+                if ("holds".equals(Sweep.text(row, "verdict-doer"))) {
                     held.add("  - " + Sweep.text(row, "finding"));
                 }
             }

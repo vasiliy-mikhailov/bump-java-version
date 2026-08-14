@@ -1,8 +1,5 @@
 package tech.mikhailov.bjv.agent;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * WHAT EACH HOP PINS, WRITTEN OUT, ONE LIST PER HOP.
  *
@@ -11,9 +8,16 @@ import java.util.List;
  * of explanation, and it meant nobody could answer "what does an 11-to-17 bump pin?" without running
  * it. Four lists answer that by being read.
  *
- * <p>THE LIST IS THE PROMPT. The preparer and its critic are handed this text verbatim, and the
- * deterministic pass parses the same text to apply it, so the version an agent is told and the
- * version the code writes are the same characters rather than two things kept in step.
+ * <p>THE LIST IS THE PROMPT AND NOTHING ELSE READS IT. It is handed to the pin planners verbatim
+ * and they decide, against what {@code declared_versions} reports, which floors a project sits
+ * below. Nothing parses these lines.
+ *
+ * <p>It used to. A positional split turned each line into a record, and those records both drove the
+ * check tool and decided whether an agent was shown the list at all. The split looked for
+ * {@code org.springframework.boot:spring-boot} — an artifact no application declares, since a Maven
+ * project inherits the starter parent or imports the BOM — concluded the floor was met, and skipped
+ * the phase. Every Spring project in the corpus kept its Boot version while the log read "every pin
+ * met". Two readers of one string, and the silent one won.
  *
  * <p>The cost is honest: lombok appears in all four lists, so raising it is four edits rather than
  * one. They sit adjacent in one file where a reader can see them disagree, which is a different risk
@@ -39,7 +43,8 @@ final class Floors {
             org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
             org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
             org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
-            [after] org.springframework.boot:spring-boot 2.7.18 — the last of the 2.x line, and the ceiling here: Boot 3 and 4 both require Java 17
+            [after] org.springframework.boot:spring-boot-starter-parent 2.7.18 — the last of the 2.x line, and the ceiling here: Boot 3 and 4 both require Java 17. AN APPLICATION NEVER DECLARES org.springframework.boot:spring-boot, which is what this used to name, so the pin could not fire on anything
+            [after] org.springframework.boot:spring-boot-dependencies 2.7.18 — the same floor for a project that imports the BOM instead of inheriting the parent
             """;
 
     private static final String TO_17 = """
@@ -57,7 +62,8 @@ final class Floors {
             org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
             org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
             org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
-            [after] org.springframework.boot:spring-boot 4.1.0 — Boot 4.1 declares java.version 17, so it is reachable from here up; the recipe stops at UpgradeSpringBoot_4_0 and this floor lifts the patch
+            [after] org.springframework.boot:spring-boot-starter-parent 3.5.16 — Boot 3 needs Java 17, so it is reachable from here up, and the 3.5 line is where the free tooling ends since the only recipe for 4.1 is proprietary. Reach it by running UpgradeSpringBoot_3_5, never by writing a version into the parent block: the recipe resolves the newest 3.5 patch by itself, and the patch releases are where the CVE fixes are. A project already on an earlier 3.5 patch has NOT met this floor. 3.5.4 manages Tomcat 10.1.43, which carries eleven CRITICAL+HIGH on its own; the head of the same line carries none, and nothing in the pom says so
+            [after] org.springframework.boot:spring-boot-dependencies 3.5.16 — the same floor for a project that imports the BOM instead of inheriting the parent, reached the same way
             """;
 
     private static final String TO_21 = """
@@ -76,7 +82,8 @@ final class Floors {
             org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
             org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
             org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
-            [after] org.springframework.boot:spring-boot 4.1.0 — Boot 4.1 declares java.version 17, so it is reachable here; the recipe stops at UpgradeSpringBoot_4_0 and this floor lifts the patch
+            [after] org.springframework.boot:spring-boot-starter-parent 3.5.16 — Boot 3 needs Java 17, so it is reachable from here up, and the 3.5 line is where the free tooling ends since the only recipe for 4.1 is proprietary. Reach it by running UpgradeSpringBoot_3_5, never by writing a version into the parent block: the recipe resolves the newest 3.5 patch by itself, and the patch releases are where the CVE fixes are. A project already on an earlier 3.5 patch has NOT met this floor. 3.5.4 manages Tomcat 10.1.43, which carries eleven CRITICAL+HIGH on its own; the head of the same line carries none, and nothing in the pom says so
+            [after] org.springframework.boot:spring-boot-dependencies 3.5.16 — the same floor for a project that imports the BOM instead of inheriting the parent, reached the same way
             """;
 
     private static final String TO_25 = """
@@ -96,7 +103,8 @@ final class Floors {
             org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
             org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
             org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
-            [after] org.springframework.boot:spring-boot 4.1.0 — Boot 4.1 declares java.version 17, so it is reachable here; the recipe stops at UpgradeSpringBoot_4_0 and this floor lifts the patch
+            [after] org.springframework.boot:spring-boot-starter-parent 3.5.16 — Boot 3 needs Java 17, so it is reachable from here up, and the 3.5 line is where the free tooling ends since the only recipe for 4.1 is proprietary. Reach it by running UpgradeSpringBoot_3_5, never by writing a version into the parent block: the recipe resolves the newest 3.5 patch by itself, and the patch releases are where the CVE fixes are. A project already on an earlier 3.5 patch has NOT met this floor. 3.5.4 manages Tomcat 10.1.43, which carries eleven CRITICAL+HIGH on its own; the head of the same line carries none, and nothing in the pom says so
+            [after] org.springframework.boot:spring-boot-dependencies 3.5.16 — the same floor for a project that imports the BOM instead of inheriting the parent, reached the same way
             """;
 
     /**
@@ -122,14 +130,6 @@ final class Floors {
                 .collect(java.util.stream.Collectors.joining("\n"));
     }
 
-    /** One pinned dependency, parsed back out of the line an agent is shown. */
-    record Floor(String group, String artifact, String version, String why) {
-
-        String coordinates() {
-            return group + ":" + artifact;
-        }
-    }
-
     private Floors() {
     }
 
@@ -147,45 +147,4 @@ final class Floors {
         return TO_11;
     }
 
-    /** The same list, parsed, for the code that applies it. */
-    static List<Floor> at(int target) {
-        List<Floor> out = new ArrayList<>();
-        for (String line : forTarget(target).lines().toList()) {
-            String[] head = line.strip().replaceFirst("^\\[after\\]\\s*", "").split(" ", 3);
-            if (head.length < 2 || !head[0].contains(":")) {
-                continue;
-            }
-            String[] coordinates = head[0].split(":", 2);
-            out.add(new Floor(coordinates[0], coordinates[1], head[1],
-                    head.length > 2 ? head[2].replaceFirst("^—\\s*", "") : ""));
-        }
-        return out;
-    }
-
-    /**
-     * What this target pins for an artifact, or empty if this hop does not pin it.
-     *
-     * <p>Read out of the same list the agent is shown, so there is no second place to keep in step.
-     */
-    static String version(String artifact, int target) {
-        return at(target).stream()
-                .filter(f -> f.artifact().equals(artifact))
-                .map(Floor::version)
-                .findFirst()
-                .orElse("");
-    }
-
-    /** Every distinct pin across every hop, for a reader who wants the whole picture at once. */
-    static List<Floor> all() {
-        List<Floor> out = new ArrayList<>();
-        for (int target : new int[] {11, 17, 21, 25}) {
-            for (Floor f : at(target)) {
-                if (out.stream().noneMatch(x -> x.coordinates().equals(f.coordinates())
-                        && x.version().equals(f.version()))) {
-                    out.add(f);
-                }
-            }
-        }
-        return out;
-    }
 }

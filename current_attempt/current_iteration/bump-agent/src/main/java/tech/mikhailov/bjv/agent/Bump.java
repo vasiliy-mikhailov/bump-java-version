@@ -12,18 +12,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * THE ORDER: survey, prepare, bump, troubleshoot — four producer/critic pairs, run in a sequence
- * nothing can rewrite, with the gate between every phase that changes the workspace.
+ * THE ORDER, run in a sequence nothing can rewrite, with the gate between every phase that changes
+ * the workspace.
  *
  * <pre>
  * surveyor ──→ survey-critic          which hop is this, actually   (wrong-hop → adopt correction)
  *    ↓
- * baseline @ from-JDK                 a FACT; no baseline, no bump
+ * baseline @ from-JDK                 a FACT; no baseline, no bump; captured per module
  *    ↓
- * Migrate (deterministic)            recipes by the project's own line; floors; target sweep
- * preparer ──→ prepare-critic         the proactive steps            (missed|overreach → once more)
+ * security-before                     the last moment this is still the project's own state
  *    ↓
- * bumper ──→ bump-critic              land the effective target      (not-landed → once more)
+ * module-filter ──→ its critic        which modules this bump leaves alone (a skip is dangerous)
+ *    ↓
+ * modules triad: planner → [ three passes ] → verifier
+ *   before-pins   per module          what the new JDK needs, before it moves
+ *   bump          per module          the step that moves the JDK
+ *   after-pins    per module          what only resolves once it has moved
  *    ↓
  * reflect loop, bounded:
  *   gate @ to-JDK                     green → settled by the build, no model involved
@@ -32,6 +36,11 @@ import java.util.regex.Pattern;
  * verdict                             argues ONLY what execution could not settle
  * estimator                           prices the attempt from the record
  * </pre>
+ *
+ * <p>EVERY STAGE IS PLANNER, DOER, VERIFIER, and the verifier holds the loop. See {@link Triad}.
+ * The three passes are ordered globally rather than per module because one reactor compiles the
+ * whole project with one javac: Lombok has to be in place everywhere before the JDK moves anywhere,
+ * and Spring Boot cannot resolve until after it has.
  *
  * <p>THE GATE IS NOT A TOOL. Producers can try their own build, and what they learn from it is
  * feedback; the build that DECIDES runs here, between the stages, because whether the gate ran after
@@ -70,6 +79,8 @@ public final class Bump {
         Path checkout = Path.of(args[0]);
         String bump = args[1];
         Path results = Path.of(args.length > 2 ? args[2] : "results");
+        // Where an edited prompt would be, if anybody made one. Set before any agent is built.
+        Prompts.beside(results);
 
         String slug = bump.replaceAll("[^A-Za-z0-9]+", "_");
         JsonlTrace trace = new JsonlTrace(results.resolve(slug).resolve("trace.jsonl"),
@@ -102,6 +113,13 @@ public final class Bump {
     private boolean gateGreen;
     private Set<String> pre = Set.of();
     private Gate.Verdict lastVerdict;
+
+    /** Every module the build files declare, which is what scopes a per-module read. */
+    private List<Modules.Module> allModules = List.of();
+    /** The ones this bump works on: everything above, minus what the filter pair set aside. */
+    private List<Modules.Module> modules = List.of();
+    /** Each module's own passing set before anything moved, so a loss is attributed where it happened. */
+    private Map<String, Set<String>> baselineByModule = Map.of();
     private Security security;
     private Security.Scan before = Security.Scan.notMeasured("not run");
     private Security.Scan after = Security.Scan.notMeasured("the gate never went green");
@@ -141,8 +159,13 @@ public final class Bump {
                 Hop.of(from.isBlank() ? "17" : from, to.isBlank() ? "17" : to), trace);
         String evidence = buildFiles() + "\nThe deterministic detector's guess: "
                 + (from.isBlank() ? "none" : from + "->" + to);
-        String claim = surveying.surveyor().run(evidence);
-        String check = surveying.surveyCritic().run(evidence + "\n\nThe claim:\n" + claim);
+        // The planner decides which evidence settles the question; the doer reads it; the verifier
+        // checks the claim against the same files. A pair here had the reader choosing what counted
+        // as proof and then producing it.
+        String look = surveying.surveyPlanner().run(evidence);
+        String claim = surveying.surveyDoer().run(evidence
+                + "\n\nWhat would settle it, and where to look:\n" + look);
+        String check = surveying.surveyVerifier().run(evidence + "\n\nThe claim:\n" + claim);
         String[] read = parseHop(claim);
         if (read != null && !read[0].equals(from)) {
             // Recorded, not obeyed. A row whose `from` the project disputes is a row worth looking
@@ -190,6 +213,10 @@ public final class Bump {
         // THE SET, NOT THE COUNT. Conservation is which tests passed, so a bump that loses one and
         // generates another cannot net out to zero.
         pre = Gate.passing(ws);
+        // The same read, split by module, off the reactor build that just ran. A module's lost tests
+        // have to be measured against its own baseline or every loss lands on the repository and the
+        // record cannot say where it happened.
+        baselineByModule = Gate.baselinePerModule(ws);
         baselineGreen = preTest.passed();
         if (pre.isEmpty()) {
             return "no-baseline\n" + (preTest.infra()
@@ -220,14 +247,11 @@ public final class Bump {
         // after, because Boot 4.1 declares java.version 17 and cannot be resolved by a project
         // still on 11. Both used to happen in one pass with nothing sequencing them.
         agents.withRecipes(new Migrate(ws, hoptools, trace));
-        pinPhase("before-pins", agents.beforePins(), agents.beforePinsCritic(), agents.owed(false));
-        // The deterministic pass is not up for review, so it lands before anyone can object.
-        tree.land("migrate");
-        // The JDK has moved by now, so the versions that require it are finally applicable.
-        pinPhase("after-pins", agents.afterPins(), agents.afterPinsCritic(), agents.owed(true));
 
-        // ---- BUMP: land the target, judged against the pin grep re-run after the edits.
-        bumpPhase();
+        // ---- MODULES: what this repository is actually made of, before anything is asked of it.
+        modules = moduleFilterPhase();
+
+        modulesPhase();
 
         // ---- TROUBLESHOOT: the bounded loop. Free things first, every turn.
         String lastLog = "";
@@ -249,7 +273,8 @@ public final class Bump {
                         Gate.effectiveTarget(ws), Integer.parseInt(to));
                 trace.applied("gate", "turn " + turn + ": " + v.state() + " (pre=" + v.preTests()
                         + " lost=" + v.lost() + " effective-target=" + v.effectiveTarget() + ")"
-                        + names(v.missing()));
+                        + names(v.missing())
+                        + perModule(Integer.parseInt(to)));
                 if (v.pass()) {
                     gateGreen = true;
                     // THE ONLY PLACE THE AFTER SCAN MEANS ANYTHING. The workspace has just built
@@ -285,19 +310,25 @@ public final class Bump {
         String context = brief(lastLog)
                 + (lastVerdict == null ? "" : "\nThe scorer's last verdict: " + lastVerdict.state())
                 + "\nThe reflect loop ended without a green gate.";
-        String argued = agents.verdict().run(context);
+        // The planner names the ONE question execution could not settle. Without it the arguer was
+        // choosing the question and answering it, and a verdict in this corpus once called a
+        // dependency incompatible with JDK 21 on the strength of a compile error the troubleshooter
+        // had caused itself.
+        String question = agents.verdictPlanner().run(context);
+        context = context + "\n\nWhat is actually unsettled here:\n" + question;
+        String argued = agents.verdictDoer().run(context);
 
         // THE WORD IS WHAT THE CORPUS RECORDS, and nothing after this re-reads the log to check it.
         // One verdict here called a dependency incompatible with JDK 21 on the strength of a
         // compile error the troubleshooter had caused itself, and it stood because no one asked.
         for (int again = 0; again < REASK; again++) {
-            String judgement = agents.verdictCritic().run(context
+            String judgement = agents.verdictVerifier().run(context
                     + "\n\nYour colleague argues:\n" + argued);
             if (word(judgement, "sound", "wrong").equals("sound")) {
                 break;
             }
             trace.progress(bump, "verdict-critic: " + judgement.lines().findFirst().orElse(""));
-            argued = agents.verdict().run(context
+            argued = agents.verdictDoer().run(context
                     + "\n\nYou argued:\n" + argued
                     + "\n\nA reviewer checked it against the record and disagrees:\n" + judgement
                     + "\nArgue it again, or keep your word and answer the objection.");
@@ -321,13 +352,34 @@ public final class Bump {
         }
         String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")\n\n"
                 + "The scan, taken before any migration work:\n" + Security.digest(before, 12);
-        String reading = agents.securityBefore().run(brief);
-        String audit = agents.securityBeforeCritic().run(brief + "\n\nThe reading:\n" + reading);
-        if (!word(audit, "sound", "overclaimed", "missed-family").equals("sound")) {
-            // One re-ask, as everywhere else. The answer is a record either way; there is no edit
-            // to revert and nothing downstream blocks on it.
-            agents.securityBefore().run(brief + "\n\nA reviewer objected to your reading:\n"
-                    + audit + "\nAnswer again.");
+        advisory("security-before", agents.securityBeforePlanner(), agents.securityBeforeDoer(),
+                agents.securityBeforeVerifier(), brief);
+    }
+
+    /**
+     * A STAGE THAT PRODUCES A RECORD RATHER THAN AN EDIT, still as plan, do, verify.
+     *
+     * <p>These were pairs, and a pair collapses deciding into doing: the same agent chose what the
+     * reading was about and then wrote it, so a reviewer objecting to the framing had nowhere to
+     * send it back to. The planner here decides RELEVANCE, which is the whole difficulty in a
+     * security reading: a bump that clears a CVE it never came near is the failure being guarded
+     * against, and that is a question about scope, not about prose.
+     *
+     * <p>The facts are the brief itself. Nothing here touches the workspace, so there is nothing to
+     * read back from it, and the verifier judges the answer against the same scan the doer saw.
+     */
+    private void advisory(String stage, Agents.Agent planner, Agents.Agent doer,
+                          Agents.Agent verifier, String brief) {
+        try {
+            new Triad(stage, planner,
+                    (plan, feedback) -> doer.run(brief
+                            + "\n\nWhat this reading should cover:\n" + plan + feedback),
+                    verifier, () -> "Nothing in the workspace changed; this stage only reads.",
+                    trace, bump, REASK + 1)
+                    .run(brief);
+        } catch (IOException impossible) {
+            // No tool here touches the filesystem, so this cannot fire; a record beats a crash.
+            trace.progress(bump, stage + ": " + impossible.getMessage());
         }
     }
 
@@ -346,12 +398,8 @@ public final class Bump {
                 + (delta.clearedBy().isEmpty() ? "" : "\nCleared: "
                 + String.join(", ", delta.clearedBy()))
                 : "UNKNOWN, and it flagged why: " + delta.why());
-        String judgement = agents.securityAfter().run(brief);
-        String audit = agents.securityAfterCritic().run(brief + "\n\nThe judgement:\n" + judgement);
-        if (!word(audit, "sound", "wrong-call").equals("sound")) {
-            agents.securityAfter().run(brief + "\n\nA reviewer objected:\n" + audit
-                    + "\nAnswer again.");
-        }
+        advisory("security-after", agents.securityAfterPlanner(), agents.securityAfterDoer(),
+                agents.securityAfterVerifier(), brief);
     }
 
     /** What to put in the settlement line, in the form the dashboard parses. */
@@ -373,30 +421,204 @@ public final class Bump {
      * that says it raised Lombok and a critic that agrees are two opinions; check_pins reads the
      * project, and both agents hold it, so the disagreement that ends the loop is with the pom.
      */
-    private void pinPhase(String stage, Agents.Agent raise, Agents.Agent judge,
-                          List<Floors.Floor> owed) throws IOException {
-        if (owed.isEmpty()) {
-            return;
+    /**
+     * THE MODULE WORK, AS ONE TRIAD OVER THREE ORDERED PASSES.
+     *
+     * <p>The doer is the three phases; the verifier reads every module and decides whether the
+     * repository is actually done. That verifier is the piece the repo-level gate cannot supply in
+     * time: the gate runs four stages later and reports a single minimum across the tree, so a
+     * module left behind arrives as an unraised repository pointing nowhere.
+     *
+     * <p>THREE PASSES OVER THE MODULES, NOT ONE PASS PER MODULE. The phases are globally ordered and
+     * the modules inside them are not. Lombok has to be in place everywhere before the JDK moves
+     * anywhere, because one reactor compiles the whole project with one javac; Spring Boot has to
+     * wait until after, because Boot 4.1 declares java.version 17 and cannot resolve against a
+     * project still below it. Walking module-major would put module two's "the JDK has not moved
+     * yet" phase after module one had already moved it, and the phase prompts state that as fact.
+     */
+    private void modulesPhase() throws IOException {
+        new Triad("modules", agents.modulesPlanner(),
+                (plan, feedback) -> {
+                    pinPhase("before-pins-doer", false);
+                    tree.land("before-pins-doer");
+
+                    // The step that moves the JDK.
+                    bumpPhase();
+                    tree.land("bump");
+
+                    // The JDK has moved NOW, so the versions that require it are finally
+                    // applicable. This ran BEFORE the bump until the deterministic migrate pass was
+                    // removed from between them, which left the phase whose whole premise is a
+                    // raised JDK running against an unraised one.
+                    pinPhase("after-pins-doer", true);
+                    tree.land("after-pins-doer");
+                    return "The three passes ran over " + modules.size()
+                            + (modules.size() == 1 ? " module." : " modules.");
+                },
+                agents.modulesVerifier(),
+                // The same facts the planners read: what every module declares, and the target
+                // levels still below the hop. Nothing here judges either.
+                () -> Declared.report(ws, modules)
+                        + "\nDeclarations still below JDK " + to + ":\n"
+                        + String.join("\n", Pins.belowTarget(ws, Integer.parseInt(to))),
+                trace, bump, REASK + 1)
+                .run("Migration: JDK " + from + " -> " + to + " (" + bump + ")"
+                        + "\n\nThe modules this bump works on:\n"
+                        + modules.stream().map(m -> "  " + label(m))
+                                .collect(java.util.stream.Collectors.joining("\n")));
+    }
+
+    /**
+     * ONE PIN PHASE: PLAN, DO, VERIFY, AND NOTHING IN FRONT OF IT.
+     *
+     * <p>This used to loop the modules and skip any whose pins a regex called satisfied. The skip
+     * was an optimisation and it was also a veto: the regex decided whether an agent was shown the
+     * instruction at all, and when it was wrong the phase did nothing and reported success. It was
+     * wrong about Spring Boot for the whole corpus.
+     *
+     * <p>So the module loop is gone from here and lives in the PLAN instead, which is where it
+     * belongs: the planner reads {@code declared_versions}, which reports every module without
+     * judging any of it, and says which pins are below their floor in which modules. Working out
+     * what is outstanding is what planning IS, and it is a comparison a model does well and a
+     * positional split does badly.
+     *
+     * <p>The verifier reads the same tool and holds the loop. Nothing between the floors and the
+     * agents parses anything.
+     */
+    private void pinPhase(String stage, boolean after) throws IOException {
+        Agents.Agent planner = after ? agents.afterPinsPlanner() : agents.beforePinsPlanner();
+        Agents.Agent doer = after ? agents.afterPinsDoer() : agents.beforePinsDoer();
+        Agents.Agent verifier = after ? agents.afterPinsVerifier() : agents.beforePinsVerifier();
+
+        String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")\n\n"
+                + "The modules of this project:\n" + moduleList()
+                + "\n\nThe JDK has " + (after ? "already been raised to " + to
+                        + ", so versions that require it can now be resolved."
+                        : "NOT been raised yet; it is still " + from + ".");
+
+        new Triad(stage, planner,
+                (plan, feedback) -> {
+                    if (plan.stripLeading().startsWith("NOTHING-OUTSTANDING")) {
+                        return "NOTHING-OUTSTANDING: the plan found no pin below its floor.";
+                    }
+                    String said = doer.run(brief + "\n\nThe plan you are carrying out:\n"
+                            + plan + feedback);
+                    trace.applied(stage, said + "\n" + tree.diff());
+                    return said;
+                },
+                verifier, () -> Declared.report(ws, modules), trace, bump, REASK + 1)
+                .run(brief);
+        tree.land(stage);
+    }
+
+    /** The modules, as a list the planner can name back. */
+    private String moduleList() {
+        StringBuilder b = new StringBuilder();
+        for (Modules.Module m : modules) {
+            b.append("  ").append(m.isRoot() ? "root" : m.path()).append('\n');
         }
-        for (int round = 0; round <= REASK; round++) {
-            String said = raise.run("Raise what this phase owes, then check it.");
-            trace.applied(stage, said + "\n" + tree.diff());
-            List<Pins.State> left = Pins.outstanding(ws, owed);
-            String judgement = judge.run("Your colleague reports:\n" + said
-                    + "\n\nWhat the build files say now:\n"
-                    + left.stream().map(Pins.State::describe)
-                            .collect(java.util.stream.Collectors.joining("\n"))
-                    + (left.isEmpty() ? "nothing outstanding" : ""));
-            if (word(judgement, "done", "again").equals("done") || round == REASK) {
-                trace.progress(bump, stage + ": " + (left.isEmpty() ? "every pin met"
-                        : left.size() + " left outstanding") + " after " + (round + 1)
-                        + " round(s)");
-                tree.land(stage);
-                return;
+        return b.toString();
+    }
+
+    /** The brief every module-scoped agent starts from. */
+    private String moduleBrief(Modules.Module m) {
+        return "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
+                + "\n\nYou are working on ONE module of this project: " + label(m)
+                + "\nThe project has " + allModules.size()
+                + (allModules.size() == 1 ? " module." : " modules; the others are not yours.");
+    }
+
+    private static String label(Modules.Module m) {
+        return m.isRoot() ? "root" : m.path();
+    }
+
+    /**
+     * WHICH MODULES THIS BUMP SHOULD TOUCH, enumerated deterministically and then filtered by
+     * judgement.
+     *
+     * <p>The enumeration is a read of the build files and is not up for discussion. What needs a
+     * judgement is narrower and genuinely hard to write down: a vendored third-party tree or a
+     * generated module is one this bump should leave alone, and neither is distinguishable from a
+     * real module by its path.
+     *
+     * <p>The asymmetry runs one way, so the critic is told it. Keeping a module that should have
+     * been skipped wastes a diff; skipping one that should have been kept leaves it below the target
+     * and the gate takes the lowest module, which fails the entire bump.
+     */
+    private List<Modules.Module> moduleFilterPhase() throws IOException {
+        allModules = Modules.of(ws);
+        if (allModules.size() == 1) {
+            trace.applied("modules", "one module; no filtering to do");
+            return allModules;
+        }
+        String listing = allModules.stream().map(m -> "  " + label(m))
+                .collect(java.util.stream.Collectors.joining("\n"));
+        String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
+                + "\n\nThe modules, read from the build files:\n" + listing;
+        String[] answer = {""};
+        new Triad("module-filter", agents.moduleFilterPlanner(),
+                (plan, feedback) -> {
+                    answer[0] = agents.moduleFilterDoer().run(brief
+                            + "\n\nWhere to look, and what would count as evidence:\n"
+                            + plan + feedback);
+                    return answer[0];
+                },
+                agents.moduleFilterVerifier(),
+                () -> "The modules, unchanged by this stage:\n" + listing,
+                trace, bump, REASK + 1)
+                .run(brief);
+        String said = answer[0];
+        List<Modules.Module> keep = new ArrayList<>();
+        List<String> skipped = new ArrayList<>();
+        for (Modules.Module m : allModules) {
+            if (!m.isRoot() && skips(said, m)) {
+                skipped.add(label(m));
+            } else {
+                keep.add(m);
             }
-            trace.progress(bump, stage + ": sent back — "
-                    + judgement.lines().findFirst().orElse(""));
         }
+        trace.applied("modules", allModules.size() + " modules, working on " + keep.size()
+                + (skipped.isEmpty() ? "" : "; skipping " + String.join(", ", skipped))
+                + "\n" + listing);
+        return keep;
+    }
+
+    /**
+     * A skip counts only when a SKIP line names EXACTLY this module.
+     *
+     * <p>This matched the path as a bare substring of the whole line, and both collisions that
+     * follow are the common case rather than the exotic one. Module paths nest, so "SKIP
+     * server/protobuf" contains "server" and dropped the aggregator that holds the compiler
+     * settings for the entire subtree. Siblings share prefixes, so skipping "app-generated" dropped
+     * "app". The evidence text after the colon could name a third module and drop that too.
+     *
+     * <p>The asymmetry makes it worse than an ordinary parsing bug: a module wrongly KEPT costs a
+     * wasted diff, and a module wrongly SKIPPED keeps its old target, which the gate reads as the
+     * repository minimum and fails the whole bump. So the match is exact, and the evidence half of
+     * the line is not searched at all.
+     */
+    static boolean skipsForTest(String reply, Modules.Module m) {
+        return skips(reply, m);
+    }
+
+    private static boolean skips(String reply, Modules.Module m) {
+        if (reply == null) {
+            return false;
+        }
+        String want = m.path().toLowerCase();
+        for (String line : reply.lines().toList()) {
+            String l = line.strip().toLowerCase().replaceFirst("^[-*>#`\\s]+", "");
+            if (!l.startsWith("skip ")) {
+                continue;
+            }
+            // Only the token after SKIP is a path; everything from the first colon is prose.
+            String named = l.substring(5).split(":", 2)[0].strip();
+            named = named.replaceAll("^[\"'`]|[\"'`,.]$", "").replaceAll("/+$", "");
+            if (named.equals(want)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** The bumper and its critic: the pins the recipe under-applied. */
@@ -413,70 +635,81 @@ public final class Bump {
      * four stages later as FAIL_target_not_bumped with nothing left to try.
      */
     private void bumpPhase() throws IOException {
-        for (int round = 0; round <= REASK; round++) {
-            List<String> left = Pins.belowTarget(ws, Integer.parseInt(to));
-            String brief = "Migration: JDK " + from + " -> " + to
-                    + "\n\nPins still below " + to + ":\n"
-                    + (left.isEmpty() ? "(none)" : String.join("\n", left));
-            String said = agents.bumper().run(brief);
-            trace.applied("bump", said + "\n" + tree.diff());
-
-            List<String> after = Pins.belowTarget(ws, Integer.parseInt(to));
-            String judgement = agents.bumpCritic().run(brief
-                    + "\n\nWhat the bumper says it did:\n" + said
-                    + "\n\nWhat the build files say now:\n"
-                    + (after.isEmpty() ? "nothing is below " + to + " any more"
-                            : String.join("\n", after)));
-            if (word(judgement, "sound", "not-landed", "overreach").equals("sound")
-                    || round == REASK) {
-                trace.progress(bump, "bump: " + (after.isEmpty() ? "every pin reached " + to
-                        : after.size() + " still below " + to) + " after " + (round + 1)
-                        + " round(s)");
-                tree.land("bump");
-                return;
+        int target = Integer.parseInt(to);
+        int worked = 0;
+        for (Modules.Module m : modules) {
+            // A module that declares no target of its own inherits the parent's, and inventing one
+            // here is the most expensive edit available: a module-local property shadows a correctly
+            // raised parent, and the gate reads the old target off the module that shadowed it.
+            //
+            // THE GUARD IS "DECLARES NOTHING", NOT "NOTHING IS BELOW". Those differ exactly where a
+            // module spells its level in a dialect the pattern does not parse, and skipping THAT is
+            // a module silently left behind for the gate to find as the repository minimum.
+            if (Pins.belowTarget(ws, m, allModules, target).isEmpty()
+                    && !Pins.mentionsTarget(ws, m, allModules)) {
+                continue;
             }
-            trace.progress(bump, "bump: sent back — " + judgement.lines().findFirst().orElse(""));
+            worked++;
+            new Triad("bump:" + label(m), agents.bumpPlanner(),
+                    (plan, feedback) -> {
+                        String said = agents.bumpDoer().run(moduleBrief(m)
+                                + "\n\nThe plan you are carrying out:\n" + plan + feedback);
+                        trace.applied("bump", label(m) + "\n" + said + "\n" + tree.diff());
+                        return said;
+                    },
+                    agents.bumpVerifier(), () -> bumpFacts(m, target), trace, bump, REASK + 1)
+                    .run(moduleBrief(m));
+        }
+        List<String> left = Pins.belowTarget(ws, target);
+        trace.progress(bump, "bump: " + worked + " of " + modules.size()
+                + " modules declared a target of their own; "
+                + (left.isEmpty() ? "nothing is below " + to + " any more"
+                : left.size() + " declaration(s) still below " + to));
+        if (worked == 0 && left.isEmpty()) {
+            // Every module inherits, and nothing in the tree declares a target below the one asked
+            // for. That is a real state and not an error, but it is also how a soft-pinned project
+            // reaches the gate with no edit at all, so it is worth saying out loud.
+            trace.progress(bump, "bump: no module declares a target below " + to
+                    + "; nothing here needed raising");
         }
     }
 
     /**
-     * One producer round with its critic, and one re-ask when the critic objects.
+     * WHICH MODULE IS BEHIND, appended to the gate's own line.
      *
-     * <p>What the producer DID is read from git, not from its answer: the critic judges the
-     * workspace, so a phase that narrates an edit it never made is judged as having made none.
+     * <p>The verdict itself stays a repository verdict and stays all-or-nothing: the gate takes the
+     * lowest module, so a project passes only when every module does. What changes is that the
+     * record can now say which one failed. A single minimum across the whole tree told us a bump had
+     * not been raised and pointed nowhere, and that is most of what makes a
+     * FAIL_target_not_bumped untriageable a week later.
+     *
+     * <p>Advisory and cheap: it re-reads the output the reactor build already wrote, and a failure
+     * to read it is not allowed to change the verdict.
      */
-    private void judged(String stage, Agents.Agent producer, Agents.Agent critic, String brief,
-                        Audit audit, String... words) throws IOException {
-        String reply = producer.run(brief);
-        for (int again = 0; again <= REASK; again++) {
-            String diff = tree.diff();
-            if (diff.isBlank()) {
-                trace.progress(bump, stage + ": no edit reached the workspace ("
-                        + reply.lines().findFirst().orElse("") + ")");
-                return;
+    private String perModule(int target) {
+        try {
+            List<Gate.ModuleState> states = Gate.perModule(ws, baselineByModule);
+            if (states.size() <= 1) {
+                return "";
             }
-            trace.applied(stage, diff);
-            String judgement = critic.run(audit.brief(diff));
-            String verdict = word(judgement, words);
-            if (words[0].equals(verdict) || again == REASK) {
-                return;
-            }
-            reply = producer.run(brief + "\n\nA reviewer objected to what you did:\n" + judgement
-                    + "\nAddress the objection. Do not repeat an edit you already made.");
+            List<Gate.ModuleState> behind = states.stream().filter(s -> !s.ok(target)).toList();
+            return "\nBy module (" + (states.size() - behind.size()) + " of " + states.size()
+                    + " clear):\n" + states.stream().map(s -> "  " + s.describe(target))
+                    .collect(java.util.stream.Collectors.joining("\n"));
+        } catch (IOException e) {
+            return "\nBy module: unreadable (" + e.getMessage() + ")";
         }
     }
 
-    /** A judged stage whose work then lands, so no later objection can reach back past it. */
-    private void judgedThenLanded(String stage, Agents.Agent producer, Agents.Agent critic,
-                                  String brief, Audit audit, String... words) throws IOException {
-        judged(stage, producer, critic, brief, audit, words);
-        tree.land(stage);
-    }
-
-    /** The brief a critic gets, built once the producer's diff is known. */
-    @FunctionalInterface
-    private interface Audit {
-        String brief(String diff);
+    /** What one module says about its own target declarations. */
+    private String bumpFacts(Modules.Module m, int target) throws IOException {
+        List<String> left = Pins.belowTarget(ws, m, allModules, target);
+        return "Module " + label(m) + ", target declarations still below " + target + ":\n"
+                + (left.isEmpty() ? "(none in this module)" : String.join("\n", left))
+                + "\n\nAcross the whole repository, still below " + target + ":\n"
+                + (Pins.belowTarget(ws, target).isEmpty() ? "(none)"
+                : String.join("\n", Pins.belowTarget(ws, target)))
+                + "\n\nThe edits currently in the workspace:\n" + tree.diff();
     }
 
     /**
@@ -496,9 +729,20 @@ public final class Bump {
     private boolean troubleshoot(String log) throws IOException {
         String floor = tree.head();
         String feedback = "";
+        // WHAT THE CAMPAIGN IS FOR, decided before anyone edits. A campaign with no stated end runs
+        // until its budget is spent, and this planner is also the one place a failure that is not
+        // this bump's doing can be named as such: a test red before anything moved is not a wall,
+        // and treating it as one has cost this corpus whole runs.
+        String aim = agents.troubleshootPlanner().run(brief(log)
+                + "\n\nWhat has landed so far:\n" + tree.history(floor));
+        if (aim.stripLeading().startsWith("NOT-OURS")) {
+            trace.progress(bump, "troubleshoot: " + aim.lines().findFirst().orElse(""));
+            return false;
+        }
         for (int campaign = 0; campaign <= REASK; campaign++) {
-            boolean landed = campaignOfSteps(log, floor, feedback);
-            String judgement = agents.troubleshootLoopCritic(floor)
+            boolean landed = campaignOfSteps(log, floor,
+                    "\n\nWhat this campaign is for:\n" + aim + feedback);
+            String judgement = agents.troubleshootVerifier(floor)
                     .run("The failing build:\n" + log
                             + "\n\nThe whole campaign, since it began:\n" + tree.diffSince(floor)
                             + "\n\nThe steps that landed:\n" + tree.history(floor));
@@ -518,7 +762,7 @@ public final class Bump {
     private boolean campaignOfSteps(String log, String floor, String feedback) throws IOException {
         boolean landed = false;
         for (int step = 0; step < STEPS; step++) {
-            String order = agents.troubleshootLoopProposer(floor)
+            String order = agents.stepPlanner(floor)
                     .run(brief(log) + feedback
                             + "\n\nSteps landed so far in this campaign:\n" + tree.history(floor)
                             + "\n\nWhat the campaign has changed:\n" + tree.diffSince(floor));
@@ -550,7 +794,7 @@ public final class Bump {
      */
     private boolean step(String log, String order) throws IOException {
         String brief = brief(log) + "\n\nThe step you have been asked to make:\n" + order;
-        String reply = agents.troubleshooter().run(brief);
+        String reply = agents.stepDoer().run(brief);
         List<String> rejected = new ArrayList<>();
         for (int attempt = 0; attempt <= REASK; attempt++) {
             if (reply.stripLeading().startsWith("BLOCKED:")) {
@@ -562,8 +806,8 @@ public final class Bump {
                 trace.progress(bump, "step reached the workspace as nothing");
                 return false;
             }
-            trace.applied("troubleshooter", now);
-            String judgement = agents.troubleCritic().run("The failing build said:\n" + log
+            trace.applied("step-doer", now);
+            String judgement = agents.stepVerifier().run("The failing build said:\n" + log
                     + "\n\nThe edits now in the workspace:\n" + now + "\n\nWhat they said:\n" + reply);
             if ("sound".equals(word(judgement, "sound", "gaming", "off-target"))) {
                 return true;
@@ -574,7 +818,7 @@ public final class Bump {
                 trace.progress(bump, "step rejected twice; handing back to the loop");
                 return false;
             }
-            reply = agents.troubleshooter().run(brief
+            reply = agents.stepDoer().run(brief
                     + "\n\nYour earlier attempts at this step, and why they were rejected:\n"
                     + String.join("\n\n", rejected)
                     + "\nEach was reverted. Do not repeat one.");
@@ -605,40 +849,6 @@ public final class Bump {
         return b.toString();
     }
 
-    /** Every pin below the target, with its file: the bumper's work list and the critic's proof. */
-    private String pinGrep() throws IOException {
-        int target = to.isBlank() ? 99 : Integer.parseInt(to);
-        Pattern pin = Pattern.compile(
-                "<(?:maven\\.compiler\\.(?:source|target|release)|java\\.version|jdk\\.version"
-                        + "|source|target|release|jvmTarget)>\\s*(?:1\\.)?(\\d+)\\s*<"
-                        + "|JavaLanguageVersion\\.of\\((\\d+)\\)"
-                        + "|(?:sourceCompatibility|targetCompatibility|jvmTarget)\\s*[=:]?\\s*"
-                        + "['\"]?(?:1\\.)?(\\d+)");
-        StringBuilder out = new StringBuilder();
-        List<Path> files = new ArrayList<>(Walls.poms(ws));
-        try (var s = Files.walk(ws)) {
-            s.filter(p -> {
-                String n = p.toString();
-                return (n.endsWith("build.gradle") || n.endsWith("build.gradle.kts"))
-                        && !n.contains("/target/") && !n.contains("/node_modules/");
-            }).forEach(files::add);
-        }
-        for (Path f : files) {
-            List<String> lines = Files.readAllLines(f);
-            for (int i = 0; i < lines.size(); i++) {
-                Matcher m = pin.matcher(lines.get(i));
-                while (m.find()) {
-                    String v = m.group(1) != null ? m.group(1)
-                            : m.group(2) != null ? m.group(2) : m.group(3);
-                    if (v != null && Integer.parseInt(v) < target) {
-                        out.append(ws.relativize(f)).append(':').append(i + 1).append("  ")
-                                .append(lines.get(i).strip()).append('\n');
-                    }
-                }
-            }
-        }
-        return out.toString();
-    }
 
     private Shell.Output git(String... args) throws IOException, InterruptedException {
         List<String> cmd = new ArrayList<>(List.of("git", "-c", "safe.directory=" + ws));
@@ -694,14 +904,19 @@ public final class Bump {
         String context = "The bump " + bump + " (JDK " + from + " -> " + to
                 + ")"
                 + ". What the workspace became:\n" + tree.diff();
-        String estimate = agents.estimator().run(context);
+        // The planner lists the distinct pieces of work that landed, which is where the expensive
+        // error lives: a fix attempted three times and landed once is one piece of work, and the
+        // record shows all three.
+        String pieces = agents.estimatorPlanner().run(context);
+        context = context + "\n\nThe distinct pieces of work that landed:\n" + pieces;
+        String estimate = agents.estimatorDoer().run(context);
 
         // NOTHING DOWNSTREAM DEPENDS ON THIS NUMBER, which is exactly why it drifts: an estimate
         // nobody checks is read later as though it had been measured.
-        String judged = agents.estimatorCritic().run(context + "\n\nThe estimate:\n" + estimate);
+        String judged = agents.estimatorVerifier().run(context + "\n\nThe estimate:\n" + estimate);
         if (!word(judged, "sound", "off").equals("sound")) {
             trace.progress(bump, "estimator-critic: " + judged.lines().findFirst().orElse(""));
-            estimate = agents.estimator().run(context + "\n\nYou estimated:\n" + estimate
+            estimate = agents.estimatorDoer().run(context + "\n\nYou estimated:\n" + estimate
                     + "\n\nA reviewer checked it against the log:\n" + judged
                     + "\nPrice it again.");
         }
@@ -715,18 +930,69 @@ public final class Bump {
         return m.find() ? new String[]{m.group(1), m.group(2)} : null;
     }
 
-    /** The first of the allowed words found in the answer; the first option is the default. */
+    /**
+     * WHICH VERDICT AN AGENT ACTUALLY GAVE, which is not the first place its letters appear.
+     *
+     * <p>This was {@code indexOf} over the whole lowercased reply, taking the earliest hit. Three
+     * collisions follow from that and all three are ordinary English rather than adversarial input:
+     *
+     * <ul>
+     *   <li>{@code done} is inside "not done", "nothing done", "abandoned". A verifier that opens by
+     *       denying completion scored {@code done} before reaching its real verdict.
+     *   <li>{@code again} is inside "against".
+     *   <li>{@code sound} is inside "unsound", so the security critic's rejection read as approval.
+     * </ul>
+     *
+     * <p>The first is the expensive one. {@code done} is both the earliest-colliding word and the
+     * default when nothing matches, so the approving answer was the easiest to trigger by accident,
+     * which is precisely backwards for a construction whose whole purpose is that a reviewer can
+     * stop the work.
+     *
+     * <p>Three rules, in order. A line that STARTS with one of the words is the verdict, because
+     * that is what every prompt asks for. Failing that, a whole-word match wins, which kills
+     * "unsound" and "against" outright. And a match immediately preceded by a negation is not a
+     * match, which kills "not done".
+     */
     static String word(String reply, String... allowed) {
-        String lower = reply == null ? "" : reply.toLowerCase();
+        if (reply == null || reply.isBlank()) {
+            return allowed[0];
+        }
+        for (String line : reply.lines().toList()) {
+            String l = line.strip().toLowerCase().replaceFirst("^[-*>#`\\s]+", "");
+            for (String w : allowed) {
+                if (l.equals(w) || l.startsWith(w + ":") || l.startsWith(w + " ")
+                        || l.startsWith(w + ".") || l.startsWith(w + ",")
+                        || l.startsWith(w + ";") || l.startsWith(w + "!")) {
+                    return w;
+                }
+            }
+        }
+        String lower = reply.toLowerCase();
         int best = Integer.MAX_VALUE;
         String chosen = allowed[0];
         for (String w : allowed) {
-            int at = lower.indexOf(w);
-            if (at >= 0 && at < best) {
-                best = at;
-                chosen = w;
+            Matcher m = Pattern.compile("\\b" + Pattern.quote(w) + "\\b").matcher(lower);
+            while (m.find()) {
+                if (negated(lower, m.start())) {
+                    continue;
+                }
+                if (m.start() < best) {
+                    best = m.start();
+                    chosen = w;
+                }
+                break;
             }
         }
         return chosen;
     }
+
+    /** Whether the words just before a match turn it into its opposite. */
+    private static boolean negated(String text, int at) {
+        String before = text.substring(Math.max(0, at - 24), at);
+        return NEGATION.matcher(before).find();
+    }
+
+    private static final Pattern NEGATION = Pattern.compile(
+            "\\b(not|isn't|isnt|is not|no|never|nothing|cannot|can't|cant|wasn't|wasnt|"
+                    + "aren't|arent|hasn't|hasnt|far from|less than)\\b[\\s\\p{Punct}]*$");
 }

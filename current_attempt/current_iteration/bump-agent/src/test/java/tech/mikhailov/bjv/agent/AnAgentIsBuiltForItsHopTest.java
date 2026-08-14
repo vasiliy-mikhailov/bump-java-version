@@ -32,7 +32,7 @@ class AnAgentIsBuiltForItsHopTest {
 
         // 8 to 11 cannot reach any of these, so it is not told about them.
         assertFalse(low.contains("2.3.20"), "kotlin 2.3.20 is a target-25 rule: " + low);
-        assertFalse(low.contains("4.1.0"), "spring-boot is the after-JDK pair's business");
+        assertFalse(low.contains("3.5.16"), "spring-boot is the after-JDK pair's business");
         assertFalse(low.contains("9.0.105"), "the tomcat floor is a target-21 rule");
         assertFalse(low.contains("1.18.46"), "the JDK 25 lombok is unreachable at 11");
 
@@ -51,10 +51,11 @@ class AnAgentIsBuiltForItsHopTest {
     void everyHopBuildsTheWholeChainAndTheOrderIsTheChains() {
         for (Hop hop : List.of(new Hop(8, 11), new Hop(11, 17), new Hop(17, 21), new Hop(21, 25))) {
             List<SubAgentDefinition> all = Agents.forHop(hop, Path.of("/tmp"));
-            assertEquals(20, all.size(), "every hop gets the whole chain: " + hop);
-            assertEquals("surveyor", all.get(0).name(), "which starts where the chain starts");
-            assertEquals("estimator-critic", all.get(all.size() - 1).name(),
-                    "and ends where it ends: every producer has a critic, including the last");
+            assertEquals(Chain.agentNames().size(), all.size(),
+                    "every hop gets the whole chain, and the chain is declared once: " + hop);
+            assertEquals("survey-planner", all.get(0).name(), "which starts where the chain starts");
+            assertEquals("estimator-verifier", all.get(all.size() - 1).name(),
+                    "and ends where it ends: every stage plans, does and verifies, including the last");
             for (SubAgentDefinition d : all) {
                 assertFalse(d.systemPrompt().isBlank(), d.name() + " has no prompt on " + hop);
                 assertFalse(d.systemPrompt().contains("{FLOORS}"),
@@ -68,15 +69,22 @@ class AnAgentIsBuiltForItsHopTest {
 
     @Test
     void theRuleCountRisesWithTheTargetAndNeverExceedsTheTable() {
+        // COUNTED AS LINES, because lines are all these are now. Floors.at() parsed each one into a
+        // record, and that parse was also what decided whether an agent ever saw the list — it read
+        // an artifact nothing declares, called every floor met, and skipped the phase for the whole
+        // corpus. Nothing parses the floors any more; a planner reads them.
         int previous = 0;
         for (int target : new int[] {11, 17, 21, 25}) {
-            int rules = Floors.at(target).size();
+            int rules = pins(target);
             assertTrue(rules >= previous, "a higher target cannot reach fewer rules");
-            assertTrue(rules <= Floors.all().size(), "and never more than the table holds");
             previous = rules;
         }
-        assertEquals(14, Floors.at(11).size(), "8 to 11 pins fourteen");
-        assertEquals(17, Floors.at(25).size(), "21 to 25 pins seventeen");
+        assertEquals(15, pins(11), "8 to 11 pins fifteen");
+        assertEquals(18, pins(25), "21 to 25 pins eighteen");
+    }
+
+    private static int pins(int target) {
+        return (int) Floors.forTarget(target).lines().filter(l -> !l.isBlank()).count();
     }
 
     @Test
@@ -94,7 +102,7 @@ class AnAgentIsBuiltForItsHopTest {
     /** What the pre-JDK pin pair is told, which is where the hop's versions now live. */
     private static String pinsFor(Hop hop, Path ws) {
         return Agents.forHop(hop, ws).stream()
-                .filter(d -> d.name().equals("before-pins"))
+                .filter(d -> d.name().equals("before-pins-doer"))
                 .findFirst().orElseThrow()
                 .systemPrompt();
     }
@@ -111,7 +119,7 @@ class AnAgentIsBuiltForItsHopTest {
             assertFalse(before.contains("spring-boot"), "boot does not, at " + target);
             assertTrue(after.contains("spring-boot"), "boot goes second at " + target);
             assertFalse(after.contains("lombok"), "and lombok is not repeated there");
-            assertEquals(Floors.at(target).size(),
+            assertEquals(pins(target),
                     before.lines().filter(l -> !l.isBlank()).count()
                             + after.lines().filter(l -> !l.isBlank()).count(),
                     "every pin lands in exactly one phase at " + target);
@@ -121,14 +129,16 @@ class AnAgentIsBuiltForItsHopTest {
     @Test
     void eachPinPairIsToldOnlyItsOwnPhase(@TempDir Path ws) {
         var defs = Agents.forHop(new Hop(21, 25), ws);
-        String beforePins = prompt(defs, "before-pins");
-        String afterPins = prompt(defs, "after-pins");
+        String beforePins = prompt(defs, "before-pins-doer");
+        String afterPins = prompt(defs, "after-pins-doer");
 
         assertTrue(beforePins.contains("1.18.46"), "the pre-JDK pair gets lombok");
-        assertFalse(beforePins.contains("4.1.0"), "and is not shown a pin it cannot apply yet");
+        assertFalse(beforePins.contains("3.5.16"), "and is not shown a pin it cannot apply yet");
         assertTrue(beforePins.contains("has NOT been raised"), "it knows where it stands");
 
-        assertTrue(afterPins.contains("4.1.0"), "the post-JDK pair gets spring-boot");
+        // 3.5, not 4.1: UpgradeSpringBoot_3_5 chains the whole migration and is free, while the
+        // only recipe that reaches 4.1 is under the Moderne Proprietary License.
+        assertTrue(afterPins.contains("3.5.16"), "the post-JDK pair gets spring-boot");
         assertFalse(afterPins.contains("1.18.46"), "and is not asked to redo the first phase");
         assertTrue(afterPins.contains("has already been raised"), "it knows where it stands");
     }

@@ -1,0 +1,735 @@
+package tech.mikhailov.bjv.agent;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.sun.net.httpserver.HttpExchange;
+
+/**
+ * THE RECORD AS JSON, which is all the frontend needs and all it gets.
+ *
+ * <p>The dashboard used to build HTML in Java: 1580 lines in which a colour, a layout decision and a
+ * fact about a bump were the same expression, so none of the three could be changed without reading
+ * the other two. What crosses this boundary now is only the facts. A verdict travels as
+ * {@code FAIL_test_conservation}, never as a colour — the moment a server sends a tone it has made a
+ * design decision that cannot be tested for, and the page stops being the only place that knows what
+ * a state looks like.
+ *
+ * <p>The shapes are declared once, in the frontend's {@code @bjv/types}, and are ADDITIVE ONLY: a
+ * reader's open tab will be older than the server as often as not.
+ */
+final class Api {
+
+    private final Path results;
+
+    Api(Path results) {
+        this.results = results;
+    }
+
+    /** Route within the zone. Returns false when nothing here answers, so static serving can try. */
+    boolean handle(HttpExchange x, String path) throws IOException {
+        switch (path) {
+            case "/.well-known/microfrontend.json" -> Zone.json(x, Zone.manifest());
+            case "/api/health" -> health(x);
+            case "/api/badges" -> badges(x);
+            case "/api/bumps" -> Zone.json(x, bumps());
+            case "/api/summary" -> Zone.json(x, summary());
+            case "/api/bump" -> Zone.json(x, bump(Zone.param(x, "slug")));
+            case "/api/settings" -> Zone.json(x, settings(Zone.param(x, "hop")));
+            case "/api/settings/prompt" -> prompt(x);
+            case "/api/settings/run" -> run(x);
+            case "/api/settings/model" -> Zone.json(x, model());
+            case "/api/settings/subject" -> Zone.json(x, subject());
+            case "/api/settings/registry" -> registry(x);
+            case "/api/settings/supervisor" -> Zone.json(x, supervisor());
+            default -> {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * IT REPORTS ON THE RECORD, NOT ON THE MODEL ENDPOINT.
+     *
+     * <p>The dashboard is worth serving when inference is unreachable: the whole record is still
+     * readable and that is most of what anybody comes for. A health check that went red because a
+     * model was down would have a shell hiding a tool that was working.
+     */
+    private void health(HttpExchange x) throws IOException {
+        boolean ok = Files.isDirectory(results);
+        Zone.send(x, ok ? 200 : 503, "application/json; charset=utf-8",
+                (ok
+                        ? Json.object(Json.field("ok", "true"),
+                                Json.field("version", Json.string(Zone.version())))
+                        : Json.object(Json.field("ok", "false"),
+                                Json.field("why", Json.string("the results directory is not readable"))))
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+
+    /** A count for the shell's navigation, without the shell knowing what a bump is. */
+    private void badges(HttpExchange x) throws IOException {
+        long running = settlements().values().stream()
+                .filter(r -> "bumping".equals(r.getOrDefault("state", ""))).count();
+        Zone.json(x, Json.object(Json.field("running", String.valueOf(running))));
+    }
+
+    /**
+     * The latest settlement per bump, keyed by slug. A bump settles more than once as it runs.
+     *
+     * <p>NOT EVERY ROW IN THAT FILE IS A BUMP. The supervisor writes its own rows there — its last
+     * one on this corpus is an authentication failure against the model endpoint — and rendering
+     * those as repositories put a bump called "supervisor" at the top of the table, verdict
+     * `bumping`, forever. A bump key is {@code repo|sha|from|to} and anything else is another kind
+     * of row that happens to share the file.
+     */
+    private Map<String, Map<String, String>> settlements() {
+        Map<String, Map<String, String>> latest = new LinkedHashMap<>();
+        for (String line : lines(results.resolve("settlements.jsonl"))) {
+            Map<String, String> r = Dashboard.row(line);
+            String bump = r.getOrDefault("bump", "");
+            if (isBump(bump)) {
+                latest.put(slug(bump), r);
+            }
+        }
+        return latest;
+    }
+
+    /** Four fields, and the last two are the hop, which is what makes it a bump and not a note. */
+    static boolean isBump(String key) {
+        String[] parts = key.split("\\|");
+        if (parts.length < 4) {
+            return false;
+        }
+        try {
+            Integer.parseInt(parts[2].trim());
+            Integer.parseInt(parts[3].trim());
+            return true;
+        } catch (NumberFormatException notAHop) {
+            return false;
+        }
+    }
+
+    /**
+     * THE WHOLE CORPUS, NOT JUST THE PART THAT HAS STARTED.
+     *
+     * <p>This listed settlements only, so a sweep of 1439 repositories showed four rows: the ones a
+     * lane had already picked up. Everything still waiting was invisible, and the page that exists
+     * to answer "how far has this got" could not show the denominator.
+     *
+     * <p>{@code run.sh} has written {@code queue.tsv} for the dashboard all along, with a comment
+     * saying why — "a page built only from settlements can never show the work that has not started
+     * yet" — and nothing read it. So the queue is the list, and a settlement overlays the row it
+     * belongs to. A repository with no settlement is queued, which is a state like any other.
+     */
+    /**
+     * HOW BIG THIS IS AND WHEN IT LAST MOVED, which is what a reader checks first.
+     *
+     * <p>COUNTED ONCE PER CHANGE, NOT ONCE PER REQUEST. A trace runs to thousands of lines and there
+     * are as many traces as bumps that have started; re-reading them all to put a number in a header
+     * would make the page slower the longer the sweep ran, which is exactly backwards. Each file is
+     * counted when its modification time moves and remembered otherwise.
+     *
+     * <p>The last-event time is the newest of those modification times and costs nothing to read: a
+     * sweep that has stopped is the thing this number exists to reveal, and a page that had to open
+     * every file to notice would be the last thing to find out.
+     */
+    private String summary() throws IOException {
+        long events = 0;
+        long last = 0;
+        try (var dirs = Files.list(results)) {
+            for (Path dir : dirs.filter(Files::isDirectory).toList()) {
+                Path trace = dir.resolve("trace.jsonl");
+                if (!Files.isRegularFile(trace)) {
+                    continue;
+                }
+                long at = Files.getLastModifiedTime(trace).toMillis();
+                last = Math.max(last, at);
+                events += counted(trace, at);
+            }
+        }
+        return Json.object(
+                Json.field("bumps", String.valueOf(bumpCount())),
+                Json.field("events", String.valueOf(events)),
+                Json.field("lastEventAt", String.valueOf(last)));
+    }
+
+    /**
+     * WHEN A BUMP FIRST SPOKE, AND WHEN IT LAST DID. Both read from the trace, which is the record
+     * of activity; the settlement is not.
+     *
+     * <p>The "last event" column used to be the settlement's timestamp, and a settlement is written
+     * when a bump STARTS and when it ends. So a bump grinding away for an hour showed the moment it
+     * began, and the one question the column exists to answer — is this thing still moving — was the
+     * one it could not answer.
+     *
+     * <p>Started is the first line of the trace and never changes once written, so it is remembered
+     * outright. Last is the file's modification time, which costs nothing and is the truth: an agent
+     * mid-answer has not written a settlement and never will until it finishes.
+     */
+    private final Map<String, Long> began = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private long startedAt(String slug) {
+        return began.computeIfAbsent(slug, key -> {
+            Path trace = results.resolve(key).resolve("trace.jsonl");
+            if (!Files.isRegularFile(trace)) {
+                return 0L;
+            }
+            try (var lines = Files.lines(trace)) {
+                return lines.findFirst().map(l -> num(Dashboard.row(l).get("at"))).orElse(0L);
+            } catch (IOException | RuntimeException unreadable) {
+                return 0L;
+            }
+        });
+    }
+
+    private long lastEventAt(String slug, long fallback) {
+        Path trace = results.resolve(slug).resolve("trace.jsonl");
+        try {
+            return Files.isRegularFile(trace)
+                    ? Files.getLastModifiedTime(trace).toMillis() : fallback;
+        } catch (IOException unreadable) {
+            return fallback;
+        }
+    }
+
+    /** slug -> (mtime, lines), so an unchanged trace is never read twice. */
+    private final Map<Path, long[]> counts = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private long counted(Path trace, long at) throws IOException {
+        long[] known = counts.get(trace);
+        if (known != null && known[0] == at) {
+            return known[1];
+        }
+        long lines;
+        try (var stream = Files.lines(trace)) {
+            lines = stream.count();
+        } catch (java.io.UncheckedIOException partial) {
+            // A trace being appended to right now can hold a half-written line. It will be counted
+            // on the next look; a page that threw here would be a page that breaks while working.
+            return known == null ? 0 : known[1];
+        }
+        counts.put(trace, new long[] {at, lines});
+        return lines;
+    }
+
+    /** The corpus: everything queued, plus anything settled that the queue no longer lists. */
+    private int bumpCount() {
+        Set<String> all = new LinkedHashSet<>(settlements().keySet());
+        for (String row : lines(results.resolve("queue.tsv"))) {
+            String[] c = row.strip().split("\\s+");
+            if (c.length >= 5) {
+                all.add(slug(c[1] + "|" + c[2] + "|" + c[3] + "|" + c[4]));
+            }
+        }
+        return all.size();
+    }
+
+    private String bumps() {
+        Map<String, Map<String, String>> settled = settlements();
+        Map<String, Map<String, String>> all = new LinkedHashMap<>();
+
+        for (String row : lines(results.resolve("queue.tsv"))) {
+            String[] c = row.strip().split("\\s+");
+            if (c.length < 5) {
+                continue;
+            }
+            String key = c[1] + "|" + c[2] + "|" + c[3] + "|" + c[4];
+            all.put(slug(key), Map.of("bump", key, "state", "queued", "at", "0"));
+        }
+        // A settlement is the fresher fact about a row the queue also holds, and it is also the
+        // only fact about a row the queue does not: a manifest can be swapped mid-sweep.
+        all.putAll(settled);
+
+        List<Map<String, String>> rows = new ArrayList<>(all.values());
+        // Anything that has moved first, newest first, then the queue in the order it will run.
+        rows.sort((a, b) -> Long.compare(num(b.get("at")), num(a.get("at"))));
+        return Json.array(rows, this::summary);
+    }
+
+    /** One row of the corpus. `repo|sha|from|to` is the bump key the whole harness is keyed by. */
+    private String summary(Map<String, String> r) {
+        String[] parts = r.getOrDefault("bump", "").split("\\|");
+        String because = r.getOrDefault("because", "");
+        String slug = slug(r.getOrDefault("bump", ""));
+        return Json.object(
+                Json.field("slug", Json.string(slug(r.getOrDefault("bump", "")))),
+                Json.field("repo", Json.string(parts.length > 0 ? parts[0] : "")),
+                Json.field("sha", Json.string(parts.length > 1 ? parts[1] : "")),
+                Json.field("from", parts.length > 2 ? parts[2] : "0"),
+                Json.field("to", parts.length > 3 ? parts[3] : "0"),
+                Json.field("verdict", Json.string(r.getOrDefault("state", "bumping"))),
+                Json.field("because", Json.optional(because)),
+                Json.field("baselineGreen", String.valueOf("true".equals(r.get("baseline")))),
+                Json.field("gateGreen", String.valueOf("true".equals(r.get("gate")))),
+                Json.field("preTests", number(because, TESTS)),
+                Json.field("cvesBefore", number(because, CVES_BEFORE)),
+                Json.field("cvesAfter", number(because, CVES_AFTER)),
+                Json.field("startedAt", String.valueOf(startedAt(slug))),
+                Json.field("at", String.valueOf(lastEventAt(slug, num(r.get("at"))))));
+    }
+
+    /**
+     * THE NUMBERS ARE READ BACK OUT OF THE SENTENCE, and that is worth saying out loud.
+     *
+     * <p>{@code Settlement.note} records the account as prose — "148 tests conserved, effective
+     * target 21; CRITICAL+HIGH 1 -> 1" — and not as fields, so the list either parses that sentence
+     * or reads every bump's trace to build one table. On a corpus of 1439 the second is a directory
+     * walk per page load, which is why the columns were empty rather than expensive.
+     *
+     * <p>Parsing prose is the weaker half of a trade and it is reversible: the honest fix is for the
+     * settlement to carry {@code preTests}, {@code cvesBefore} and {@code cvesAfter} as fields, at
+     * which point this reads them instead and old rows keep working through here. Until then a
+     * changed sentence turns a column back into a dash, which is a visible failure rather than a
+     * wrong number.
+     */
+    private static final java.util.regex.Pattern TESTS =
+            java.util.regex.Pattern.compile("(\\d+) tests conserved");
+    private static final java.util.regex.Pattern CVES_BEFORE =
+            java.util.regex.Pattern.compile("CRITICAL\\+HIGH (\\d+) ->");
+    private static final java.util.regex.Pattern CVES_AFTER =
+            java.util.regex.Pattern.compile("CRITICAL\\+HIGH \\d+ -> (\\d+)");
+
+    /** The captured number, or JSON null: absent is not zero, and a page must be able to tell. */
+    private static String number(String text, java.util.regex.Pattern pattern) {
+        java.util.regex.Matcher m = pattern.matcher(text == null ? "" : text);
+        return m.find() ? m.group(1) : "null";
+    }
+
+    /**
+     * One bump: its chain, everything it did, and what it moved.
+     *
+     * <p>The chain is {@link Chain} with each step's speaking count filled in from the trace, so the
+     * strip is drawn from the same declaration the harness runs. It used to be a hand-typed copy in
+     * the dashboard, which is how the page went on advertising a stage that had been deleted.
+     */
+    private String bump(String slug) {
+        List<String> raw = lines(results.resolve(slug).resolve("trace.jsonl"));
+        List<Map<String, String>> events = raw.stream().map(Dashboard::row).toList();
+
+        Map<String, Integer> spoke = new LinkedHashMap<>();
+        for (Map<String, String> e : events) {
+            if ("asked".equals(e.get("kind"))) {
+                spoke.merge(e.getOrDefault("agent", ""), 1, Integer::sum);
+            }
+        }
+        Map<String, String> settled = settlements().getOrDefault(slug, Map.of());
+
+        return Json.object(
+                Json.field("summary", summary(settled.isEmpty()
+                        ? Map.of("bump", unslug(events), "state", "bumping") : settled)),
+                Json.field("chain", Json.array(Chain.stages(), s -> Json.object(
+                        Json.field("title", Json.string(s.title())),
+                        Json.field("within", Json.string(s.within())),
+                        Json.field("steps", Json.array(s.steps(), step -> Json.object(
+                                Json.field("name", Json.string(step.name())),
+                                Json.field("role", Json.string(step.role())),
+                                Json.field("agent", String.valueOf(step.agent())),
+                                Json.field("spoke",
+                                        String.valueOf(spoke.getOrDefault(step.name(), 0))))))))),
+                Json.field("events", Json.array(events, this::event)),
+                Json.field("packages", packages(events)),
+                Json.field("cves", cves(events)));
+    }
+
+    private String event(Map<String, String> e) {
+        String kind = e.getOrDefault("kind", "");
+        // The BODY is whichever field this kind of event carries it in. A page that had to know
+        // which is which per kind would be a second copy of the record's shape.
+        String text = first(e, "note", "what", "reply", "result", "summary", "content", "thinking",
+                "itemisation");
+        return Json.object(
+                Json.field("at", String.valueOf(num(e.get("at")))),
+                Json.field("kind", Json.string(kind)),
+                Json.field("agent", Json.optional(e.getOrDefault("agent", ""))),
+                Json.field("stage", Json.optional(e.getOrDefault("stage", ""))),
+                Json.field("tool", Json.optional(e.getOrDefault("tool", ""))),
+                Json.field("text", Json.string(text)));
+    }
+
+    /**
+     * THE DEPENDENCIES, WITH THE MODULE THAT RESOLVED EACH ONE.
+     *
+     * <p>The module column is the fix for rows that looked like a rendering bug: the scan reports a
+     * finding once per module, so a six-module project emitted the same package six times with no
+     * way to tell the rows apart. They were six different facts wearing one label.
+     */
+    private String packages(List<Map<String, String>> events) {
+        Map<String, String[]> before = inventory(events, "packages-before");
+        Map<String, String[]> after = inventory(events, "packages-after");
+        Set<String> all = new LinkedHashSet<>(before.keySet());
+        all.addAll(after.keySet());
+        List<String> rows = new ArrayList<>();
+        for (String key : all) {
+            String[] b = before.get(key);
+            String[] a = after.get(key);
+            String[] parts = key.split("\\|", 2);
+            rows.add(Json.object(
+                    Json.field("module", Json.string(parts.length > 0 ? parts[0] : "")),
+                    Json.field("name", Json.string(parts.length > 1 ? parts[1] : key)),
+                    Json.field("versionBefore", Json.optional(b == null ? "" : b[0])),
+                    Json.field("versionAfter", Json.optional(a == null ? "" : a[0])),
+                    Json.field("cvesBefore", String.valueOf(b == null ? 0 : (int) num(b[1]))),
+                    Json.field("cvesAfter", String.valueOf(a == null ? 0 : (int) num(a[1])))));
+        }
+        return "[" + String.join(",", rows) + "]";
+    }
+
+    /**
+     * The counts, occurrence-based AND distinct.
+     *
+     * <p>Both, because they answer different questions and each alone has misled. The occurrence
+     * count is what every number this corpus has already reported was measured in; the distinct
+     * count is what a reader means by "how many vulnerabilities". Measured here, occurrences inflate
+     * by 1.67x overall and 15.5x on a seventeen-module project, which makes the headline
+     * incomparable between repositories: ranking by it ranks by module count.
+     */
+    private String cves(List<Map<String, String>> events) {
+        Map<String, String[]> before = inventory(events, "packages-before");
+        Map<String, String[]> after = inventory(events, "packages-after");
+        return Json.object(
+                Json.field("before", String.valueOf(total(before))),
+                Json.field("after", String.valueOf(total(after))),
+                Json.field("distinctBefore", String.valueOf(distinct(before))),
+                Json.field("distinctAfter", String.valueOf(distinct(after))));
+    }
+
+    private static int total(Map<String, String[]> inventory) {
+        return inventory.values().stream().mapToInt(v -> (int) num(v[1])).sum();
+    }
+
+    /** One count per (package, version), however many modules resolved it. */
+    private static int distinct(Map<String, String[]> inventory) {
+        Map<String, Integer> once = new LinkedHashMap<>();
+        for (Map.Entry<String, String[]> e : inventory.entrySet()) {
+            String name = e.getKey().contains("|")
+                    ? e.getKey().substring(e.getKey().indexOf('|') + 1) : e.getKey();
+            once.put(name + "@" + e.getValue()[0], (int) num(e.getValue()[1]));
+        }
+        return once.values().stream().mapToInt(Integer::intValue).sum();
+    }
+
+    /** {@code module<TAB>name<TAB>version<TAB>cves} rows, as the scan stage records them. */
+    private Map<String, String[]> inventory(List<Map<String, String>> events, String stage) {
+        Map<String, String[]> out = new LinkedHashMap<>();
+        for (Map<String, String> e : events) {
+            if (!stage.equals(e.get("stage"))) {
+                continue;
+            }
+            for (String line : e.getOrDefault("what", "").split("\n")) {
+                String[] p = line.split("\t");
+                if (p.length >= 4) {
+                    out.put(p[0] + "|" + p[1], new String[] {p[2], p[3]});
+                }
+            }
+        }
+        return out;
+    }
+
+    /**
+     * SAVE OR REVERT ONE PROMPT.
+     *
+     * <p>An edit replaces the built-in entirely; there is no merge, because a prompt half from the
+     * code and half from a box is a prompt nobody can read in one place — and reading it in one
+     * place is how anybody works out why an agent did what it did.
+     *
+     * <p>The reply is the state AFTER the write, read back from the store, so the page shows what
+     * landed rather than what was sent.
+     */
+    private void prompt(HttpExchange x) throws IOException {
+        Path root = (results.getParent() == null ? results : results.getParent()).resolve("prompts");
+        String body = new String(x.getRequestBody().readAllBytes(),
+                java.nio.charset.StandardCharsets.UTF_8);
+        String name = field(body, "name");
+        Hop hop = hopOf(field(body, "hop"));
+        boolean reverting = body.contains("\"revert\"") && body.contains("true");
+
+        if (name.isBlank()) {
+            Zone.send(x, 400, "application/json; charset=utf-8",
+                    Json.object(Json.field("why", Json.string("no agent named")))
+                            .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return;
+        }
+        if (reverting) {
+            Prompts.revert(root, name, hop);
+        } else {
+            String text = field(body, "text");
+            if (text.isBlank()) {
+                // A SAVE OF NOTHING IS A REVERT SPELLED WRONG. An agent handed an empty prompt does
+                // something arbitrary, and the reader who cleared the box meant "use the built-in".
+                Zone.send(x, 400, "application/json; charset=utf-8",
+                        Json.object(Json.field("why", Json.string(
+                                "an empty prompt is not a prompt; use revert to go back to the "
+                                        + "code's own")))
+                                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                return;
+            }
+            Prompts.save(root, name, hop, text);
+        }
+        Zone.json(x, Json.object(
+                Json.field("name", Json.string(name)),
+                Json.field("edited", String.valueOf(Prompts.edited(root, name, hop))),
+                Json.field("prompt", Json.string(Prompts.edited(root, name, hop)
+                        ? Prompts.override(name, hop) : ""))));
+    }
+
+    /** One JSON string field out of a small body. The bodies here are three fields deep. */
+    private static String field(String body, String name) {
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("\"" + name + "\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"").matcher(body);
+        if (!m.find()) {
+            return "";
+        }
+        return m.group(1).replace("\\n", "\n").replace("\\t", "\t")
+                .replace("\\r", "\r").replace("\\\"", "\"").replace("\\\\", "\\");
+    }
+
+    private static Hop hopOf(String hop) {
+        String[] pair = (hop.isBlank() ? "17-21" : hop).split("-");
+        return new Hop(Integer.parseInt(pair[0]),
+                Integer.parseInt(pair.length > 1 ? pair[1] : pair[0]));
+    }
+
+    /** Every prompt for one hop, in the order the chain reaches them. */
+    private String settings(String hop) {
+        String[] pair = (hop.isBlank() ? "17-21" : hop).split("-");
+        Hop h = new Hop(Integer.parseInt(pair[0]), Integer.parseInt(pair.length > 1 ? pair[1] : pair[0]));
+        Map<String, String> stageOf = new LinkedHashMap<>();
+        Map<String, String> roleOf = new LinkedHashMap<>();
+        for (Chain.Stage s : Chain.stages()) {
+            for (Chain.Step step : s.steps()) {
+                stageOf.put(step.name(), s.title());
+                roleOf.put(step.name(), step.role());
+            }
+        }
+        Path root = (results.getParent() == null ? results : results.getParent())
+                .resolve("prompts");
+        return Json.array(Agents.forHop(h, results), d -> {
+            // BOTH TEXTS TRAVEL. The page cannot offer a revert without something to revert TO, and
+            // a reader comparing an edit to the built-in should not have to redeploy to see it.
+            boolean edited = Prompts.edited(root, d.name(), h);
+            return Json.object(
+                    Json.field("name", Json.string(d.name())),
+                    Json.field("role", Json.string(roleOf.getOrDefault(d.name(), "doer"))),
+                    Json.field("stage", Json.string(stageOf.getOrDefault(d.name(), ""))),
+                    Json.field("description", Json.string(d.description())),
+                    Json.field("builtIn", Json.string(d.systemPrompt())),
+                    Json.field("edited", String.valueOf(edited)),
+                    Json.field("prompt", Json.string(
+                            edited ? Prompts.override(d.name(), h) : d.systemPrompt())));
+        });
+    }
+
+    /**
+     * HOW MANY BUMPS RUN AT ONCE, and the one setting on this page that is genuinely live.
+     *
+     * <p>{@code run.sh} re-reads {@code max_lanes} at the top of every round rather than at launch,
+     * so a sweep starving the GPU can be throttled without stopping it. That is what makes this
+     * writable when nothing else here is: the mechanism already existed and was reachable only by
+     * someone with a shell on the box.
+     *
+     * <p>THE SERVER CLAMPS, and the reply is what it kept rather than what was sent. A page that
+     * echoed the request would show 40 lanes on a box that will run 16, and the reader would not
+     * find out until the sweep did not speed up.
+     */
+    private void run(HttpExchange x) throws IOException {
+        Path lanes = results.getParent() == null ? results.resolve("max_lanes")
+                : results.getParent().resolve("max_lanes");
+        if ("POST".equalsIgnoreCase(x.getRequestMethod())) {
+            String body = new String(x.getRequestBody().readAllBytes(),
+                    java.nio.charset.StandardCharsets.UTF_8);
+            java.util.regex.Matcher m =
+                    java.util.regex.Pattern.compile("\"lanes\"\\s*:\\s*(\\d+)").matcher(body);
+            if (m.find()) {
+                int kept = Math.max(1, Math.min(16, Integer.parseInt(m.group(1))));
+                Files.writeString(lanes, kept + "\n");
+            }
+        }
+        String now = Files.isRegularFile(lanes)
+                ? Files.readString(lanes).trim() : "";
+        Zone.json(x, Json.object(
+                Json.field("lanes", now.matches("\\d+") ? now : "null"),
+                Json.field("min", "1"),
+                Json.field("max", "16"),
+                Json.field("turns", Json.string(envOr("BJV_TURNS", "16"))),
+                Json.field("steps", Json.string(envOr("BJV_STEPS", "6"))),
+                Json.field("hangGuardMinutes", Json.string(envOr("BJV_HANG_GUARD", "")))));
+    }
+
+    /**
+     * THE ENDPOINT, AND DELIBERATELY NOT THE KEY.
+     *
+     * <p>The sibling tool renders its API key into this page, with the reveal and copy buttons that
+     * cannot work otherwise, and its own mount contract calls that out as the part a shell author
+     * has to read twice: defensible for one person behind their own proxy, not on a portal several
+     * developers reach. This tool is the second one mounted, so it takes the other side of that
+     * trade — whether a key is SET travels, and the key never does. There is no reveal button
+     * because there is nothing behind it.
+     */
+    private String model() {
+        String key = System.getenv().getOrDefault("OC_KEY", "");
+        return Json.object(
+                Json.field("keySet", String.valueOf(!key.isBlank())),
+                Json.field("model", Json.string(envOr("OC_MODEL", "qwen-3.6-35b-a3b-awq"))),
+                Json.field("endpoint", Json.string(
+                        envOr("OC_BASE", "https://inference.mikhailov.tech/qwen-3.6-35b-a3b-awq/v1"))),
+                Json.field("patienceMinutes", Json.string(envOr("BJV_PATIENCE_MINUTES", "240"))));
+    }
+
+    /**
+     * UPLOAD A REGISTRY, AND BE TOLD WHAT IT DID.
+     *
+     * <p>The body is the file's text, not a multipart form: the page reads the file and posts what
+     * is in it, so one path serves both the upload button and the paste box, and no multipart parser
+     * has to exist in a container that already runs strangers' code.
+     *
+     * <p>WHAT COMES BACK IS WHAT LANDED. The count of rows accepted, the count actually new, and
+     * every line that would not parse with its number and reason. A loader that answers "ok" to a
+     * file half of which it discarded is the failure this is built against.
+     *
+     * <p>A GET says where it would go and whether a sweep is live, because "this takes effect on the
+     * next round" and "this takes effect the next time somebody launches a sweep" are different
+     * promises and the reader deserves to know which one they are getting.
+     */
+    private void registry(HttpExchange x) throws IOException {
+        Path root = results.getParent() == null ? results : results.getParent();
+        Path active = root.resolve("active_manifest");
+        Path target = null;
+        if (Files.isRegularFile(active)) {
+            // A BASENAME, RESOLVED AGAINST THE RUN ROOT. run.sh runs on the host and this runs in a
+            // container that mounts the same directory somewhere else, so a path written by one
+            // does not resolve for the other — and the failure is silent: the upload lands in a
+            // file no sweep is reading and reports success.
+            String name = Files.readString(active).trim();
+            Path named = root.resolve(name.contains("/")
+                    ? name.substring(name.lastIndexOf('/') + 1) : name);
+            if (Files.isRegularFile(named)) {
+                target = named;
+            }
+        }
+        // No sweep running: the upload still has somewhere to go, and the next launch can be
+        // pointed at it. Refusing the upload because nothing is running would mean a registry can
+        // only be loaded onto a machine that is already busy.
+        Path fallback = root.resolve("manifest.uploaded.tsv");
+
+        if (!"POST".equalsIgnoreCase(x.getRequestMethod())) {
+            Zone.json(x, Json.object(
+                    Json.field("sweepLive", String.valueOf(target != null)),
+                    Json.field("target", Json.string(
+                            (target == null ? fallback : target).getFileName().toString()))));
+            return;
+        }
+
+        String text = new String(x.getRequestBody().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        Registry.Parsed parsed = Registry.parse(text);
+        int added = 0;
+        if (!parsed.empty()) {
+            added = Registry.mergeInto(target == null ? fallback : target, parsed.rows());
+            // Beside the manifest, never inside results/: that directory is what the page serves.
+            Registry.recordOrigins(root.resolve("origins.tsv"), parsed.rows());
+            Registry.recordKeys(root.resolve("credentials.tsv"), parsed.rows());
+        }
+        Zone.json(x, Json.object(
+                Json.field("accepted", String.valueOf(parsed.rows().size())),
+                Json.field("added", String.valueOf(added)),
+                // COUNTS ONLY. No response here or anywhere carries a key's value.
+                Json.field("keyed", String.valueOf(parsed.keyed())),
+                Json.field("unpinned", String.valueOf(parsed.unpinned())),
+                Json.field("sweepLive", String.valueOf(target != null)),
+                Json.field("target", Json.string(
+                        (target == null ? fallback : target).getFileName().toString())),
+                Json.field("rejected", Json.array(parsed.rejected(), r -> Json.object(
+                        Json.field("line", String.valueOf(r.line())),
+                        Json.field("text", Json.string(r.text())),
+                        Json.field("why", Json.string(r.why())))))));
+    }
+
+    /** What the sweep is working through: the queue, and what it is made of. */
+    private String subject() {
+        List<String> queue = lines(results.resolve("queue.tsv"));
+        Map<String, Integer> hops = new LinkedHashMap<>();
+        for (String row : queue) {
+            String[] c = row.split("\t");
+            if (c.length >= 5) {
+                hops.merge(c[3] + " → " + c[4], 1, Integer::sum);
+            }
+        }
+        return Json.object(
+                Json.field("queued", String.valueOf(queue.size())),
+                Json.field("settled", String.valueOf(settlements().size())),
+                Json.field("hops", Json.map(hops.entrySet().stream().collect(
+                        LinkedHashMap::new, (m, e) -> m.put(e.getKey(), String.valueOf(e.getValue())),
+                        Map::putAll))));
+    }
+
+    /** The watcher that sees what one bump cannot, and what it has found. */
+    private String supervisor() {
+        List<String> findings = lines(results.resolve("findings.jsonl"));
+        List<String> postponed = lines(results.resolve("postponed"));
+        return Json.object(
+                Json.field("everyMinutes", Json.string(envOr("BJV_SUPERVISOR_MINUTES", "20"))),
+                Json.field("findings", String.valueOf(findings.size())),
+                Json.field("postponed", String.valueOf(postponed.size())),
+                Json.field("latest", Json.array(
+                        findings.subList(Math.max(0, findings.size() - 8), findings.size()),
+                        line -> {
+                            Map<String, String> r = Dashboard.row(line);
+                            return Json.object(
+                                    Json.field("at", String.valueOf(num(r.get("at")))),
+                                    Json.field("bump", Json.string(r.getOrDefault("bump", ""))),
+                                    Json.field("kind", Json.string(r.getOrDefault("kind", ""))),
+                                    Json.field("what", Json.string(first(r, "what", "note"))),
+                                    Json.field("held",
+                                            String.valueOf("true".equals(r.get("held")))));
+                        })));
+    }
+
+    private static String envOr(String name, String fallback) {
+        String v = System.getenv().getOrDefault(name, "");
+        return v.isBlank() ? fallback : v;
+    }
+
+    private static String first(Map<String, String> row, String... keys) {
+        for (String k : keys) {
+            String v = row.get(k);
+            if (v != null && !v.isBlank()) {
+                return v;
+            }
+        }
+        return "";
+    }
+
+    /** The directory name a bump's trace lives under: the key with everything unsafe flattened. */
+    private static String slug(String bump) {
+        return bump.replaceAll("[^A-Za-z0-9]+", "_");
+    }
+
+    /** A bump that has not settled yet still has a key, in every event it wrote. */
+    private static String unslug(List<Map<String, String>> events) {
+        return events.stream().map(e -> e.getOrDefault("bump", "")).filter(s -> !s.isBlank())
+                .findFirst().orElse("");
+    }
+
+    private static long num(String s) {
+        try {
+            return s == null || s.isBlank() ? 0 : Long.parseLong(s.trim());
+        } catch (NumberFormatException notANumber) {
+            return 0;
+        }
+    }
+
+    private static List<String> lines(Path p) {
+        try {
+            return Files.isRegularFile(p) ? Files.readAllLines(p) : List.of();
+        } catch (IOException unreadable) {
+            return List.of();
+        }
+    }
+}

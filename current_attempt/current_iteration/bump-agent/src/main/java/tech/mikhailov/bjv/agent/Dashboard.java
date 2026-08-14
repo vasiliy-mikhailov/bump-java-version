@@ -60,15 +60,25 @@ public final class Dashboard {
      * <p>Each entry is {phase, producer, critic}; the closers have no critic, since nothing
      * downstream branches on their answer.
      */
-    private static final String[][] CHAIN = {
-            {"survey", "surveyor", "survey-critic"},
-            {"security-before", "security-before", "security-before-critic"},
-            {"prepare", "preparer", "prepare-critic"},
-            {"bump", "bumper", "bump-critic"},
-            {"troubleshoot", "troubleshooter", "trouble-critic"},
-            {"security-after", "security-after", "security-after-critic"},
-            {"close", "verdict", "estimator"},
-    };
+    /**
+     * DERIVED, NOT RETYPED. This was a hand-maintained array and it drifted: it went on advertising
+     * a {@code prepare} stage with a {@code preparer} and a {@code prepare-critic} for hours after
+     * all three were deleted, and showed none of the agents added in their place. Nothing failed and
+     * no test went red; the page whose whole job is to say what a bump is doing simply said
+     * something untrue. {@link Chain} is now the one declaration, and a test binds it to the agents
+     * that actually exist.
+     */
+    private static final String[][] CHAIN = Chain.stages().stream()
+            .filter(s -> !s.nested())
+            .map(s -> {
+                String[] row = new String[s.steps().size() + 1];
+                row[0] = s.title();
+                for (int i = 0; i < s.steps().size(); i++) {
+                    row[i + 1] = s.steps().get(i).name();
+                }
+                return row;
+            })
+            .toArray(String[][]::new);
 
     private static final String CSS = """
             .findings{margin:18px 0;padding:14px 16px;border:1px solid #2a2a2a;border-radius:6px}
@@ -286,12 +296,39 @@ public final class Dashboard {
             t.setDaemon(true);
             return t;
         }));
+        Prompts.beside(results);
         Dashboard d = new Dashboard(results, System.getenv("BJV_DASH_TOKEN"));
-        http.createContext("/", d::home);
-        http.createContext("/bump", d::bump);
+        Api api = new Api(results);
+
+        // THE ZONE FIRST, THE OLD PAGES BEHIND IT.
+        //
+        // The frontend is a Next.js static export mounted wherever a shell puts it (see Zone), and
+        // the API below it is the only thing that crosses the boundary. The Java-generated HTML is
+        // still reachable under /legacy for as long as it takes to be sure nothing was lost with it,
+        // because a 1580-line page that has been the only way to read this record for months is not
+        // something to delete on the strength of a build passing.
+        //
+        // Root LAST in registration order but broadest in match: com.sun's HttpServer picks the
+        // longest matching context, so "/" only sees what nothing else claimed.
+        http.createContext("/legacy", d::home);
+        http.createContext("/legacy/bump", d::bump);
+        http.createContext("/legacy/settings", d::settings);
         http.createContext("/feedback", d::feedback);
         http.createContext("/events", d::events);
-        http.createContext("/settings", d::settings);
+        http.createContext("/", x -> {
+            String path = Zone.within(x);
+            if (path == null) {
+                Zone.send(x, 404, "text/plain; charset=utf-8", "not this zone".getBytes(StandardCharsets.UTF_8));
+                return;
+            }
+            if (api.handle(x, path)) {
+                return;
+            }
+            if (Zone.serveStatic(x, path)) {
+                return;
+            }
+            Zone.send(x, 404, "text/plain; charset=utf-8", "no such page".getBytes(StandardCharsets.UTF_8));
+        });
         http.start();
 
         // ONE CONTAINER, AND NO DOCKER SOCKET IN IT. The supervisor used to run beside this page in
@@ -850,7 +887,7 @@ public final class Dashboard {
                         if (m.find()) {
                             f.pre = m.group(1);
                         }
-                    } else if (stage.equals("security-before") || stage.equals("security-after")) {
+                    } else if (stage.equals("security-before-doer") || stage.equals("security-after-doer")) {
                         Matcher m = Pattern.compile("CRITICAL\\+HIGH (\\d+)").matcher(what);
                         if (m.find()) {
                             int n = Integer.parseInt(m.group(1));
@@ -891,11 +928,13 @@ public final class Dashboard {
                 case "asked" -> {
                     String who = r.getOrDefault("agent", "");
                     for (int i = 0; i < CHAIN.length; i++) {
-                        if (CHAIN[i][1].equals(who) || CHAIN[i][2].equals(who)) {
-                            f.ran.add(i);
+                        for (int step = 1; step < CHAIN[i].length; step++) {
+                            if (CHAIN[i][step].equals(who)) {
+                                f.ran.add(i);
+                            }
                         }
                     }
-                    if ("surveyor".equals(r.get("agent"))) {
+                    if ("survey-doer".equals(r.get("agent"))) {
                         Matcher m = HOP.matcher(r.getOrDefault("reply", ""));
                         if (m.find() && m.group(3) != null) {
                             f.hop = m.group(3) + "→" + m.group(4);
@@ -1008,18 +1047,28 @@ public final class Dashboard {
         StringBuilder b = new StringBuilder("<div class=pipe>");
         b.append("<a class='allpill").append(only.isBlank() ? " on" : "").append("' href=\"bump?slug=")
                 .append(url(slug)).append("&amp;key=").append(url(key)).append("\">everything</a>");
+        // PLAN, DO, VERIFY, drawn as the three it is. A stage rendered as a pair hid which of the
+        // two roles a "critic" actually held, and the chain had four different words for the same
+        // job. The arrow before a verifier loops when the doer ran more than once, because that is
+        // the verifier having sent it back.
         for (String[] stage : CHAIN) {
-            int producer = spoke.getOrDefault(stage[1], 0);
-            int critic = spoke.getOrDefault(stage[2], 0);
-            boolean reached = producer > 0 || critic > 0;
+            int[] spokeN = new int[stage.length];
+            boolean reached = false;
+            for (int i = 1; i < stage.length; i++) {
+                spokeN[i] = spoke.getOrDefault(stage[i], 0);
+                reached |= spokeN[i] > 0;
+            }
             b.append("<div class='stage").append(reached ? "" : " dim").append("'>")
-                    .append("<div class=stagename>").append(esc(stage[0])).append("</div>")
-                    .append(agentPill(slug, key, stage[1], producer, only));
-            // The loop between them, drawn only when it actually turned.
-            b.append("<span class='link").append(producer > 1 ? " looped" : "").append("'>")
-                    .append(producer > 1 ? "\u21ba" : "\u2192").append("</span>")
-                    .append(agentPill(slug, key, stage[2], critic, only))
-                    .append("</div>");
+                    .append("<div class=stagename>").append(esc(stage[0])).append("</div>");
+            for (int i = 1; i < stage.length; i++) {
+                if (i > 1) {
+                    boolean looped = spokeN[i - 1] > 1;
+                    b.append("<span class='link").append(looped ? " looped" : "").append("'>")
+                            .append(looped ? "\u21ba" : "\u2192").append("</span>");
+                }
+                b.append(agentPill(slug, key, stage[i], spokeN[i], only));
+            }
+            b.append("</div>");
         }
         return b.append("</div>").toString();
     }
@@ -1410,7 +1459,8 @@ public final class Dashboard {
             out.append("<a class='c").append(h.equals(want) ? " on" : "")
                     .append("' href='/settings?hop=").append(h).append("'><b>")
                     .append(h.replace("-", " \u2192 ")).append("</b><span>")
-                    .append(Floors.at(Integer.parseInt(h.split("-")[1])).size())
+                    .append(Floors.forTarget(Integer.parseInt(h.split("-")[1])).lines()
+                            .filter(l -> !l.isBlank()).count())
                     .append(" pins</span></a>");
         }
         out.append("</div>");
@@ -1425,18 +1475,13 @@ public final class Dashboard {
         // THIS HOP'S PINS, not every hop's. They are the same text the preparer below is handed,
         // because the list and the instruction are one string: a page that showed the union would
         // show something no bump is ever given.
+        // THE FLOORS ARE PROSE AND ARE SHOWN AS PROSE. They used to be parsed into rows here,
+        // by the same positional split that decided whether an agent ever saw them — and that split
+        // read org.springframework.boot:spring-boot, which nothing declares, so the pin never fired
+        // on any project in the corpus. There is no parse left to render.
         out.append("<section class=prompt id=floors><h2><span class=who>version pins</span>")
-                .append("<span class='role closer'>applied by code</span>")
-                .append("<span class=len>").append(Floors.at(hop.to()).size())
-                .append(" for this hop</span></h2>")
-                .append("<table class=floors><tr><th>artifact</th><th>version</th>")
-                .append("<th>why</th></tr>");
-        for (Floors.Floor f : Floors.at(hop.to())) {
-            out.append("<tr><td>").append(esc(f.coordinates())).append("</td><td><b>")
-                    .append(esc(f.version())).append("</b></td>")
-                    .append("<td class=k>").append(esc(f.why())).append("</td></tr>");
-        }
-        out.append("</table></section>");
+                .append("<span class='role closer'>read by the planner</span></h2><pre>")
+                .append(esc(Floors.forTarget(hop.to()))).append("</pre></section>");
 
         for (var p : prompts) {
             out.append("<section class=prompt id='").append(esc(p.name())).append("'>")
@@ -1456,7 +1501,7 @@ public final class Dashboard {
         if (name.endsWith("-critic")) {
             return "critic";
         }
-        return name.equals("verdict") || name.equals("estimator") ? "closer" : "producer";
+        return name.equals("verdict-doer") || name.equals("estimator-doer") ? "closer" : "producer";
     }
 
     private static StringBuilder head(String title, String sub) {
@@ -1512,7 +1557,7 @@ public final class Dashboard {
         for (String row : rows) {
             String finding = Sweep.text(row, "finding");
             if (!finding.isBlank()) {
-                latest.put(finding, new String[] {Sweep.text(row, "verdict"),
+                latest.put(finding, new String[] {Sweep.text(row, "verdict-doer"),
                         Sweep.text(row, "why"), Sweep.text(row, "at")});
             }
         }

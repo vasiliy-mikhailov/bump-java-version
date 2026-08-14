@@ -83,77 +83,6 @@ final class Migrate {
     private static final List<String> TOMCAT_EMBED = List.of(
             "tomcat-embed-core", "tomcat-embed-el", "tomcat-embed-websocket");
 
-    /** Recipes, then floors, then the target sweep. Returns what to tell the agents was done. */
-    String run(String from, String to) throws IOException {
-        return run(from, to, null);
-    }
-
-    String run(String from, String to, Security.Scan before) throws IOException {
-        StringBuilder did = new StringBuilder();
-        int target = Integer.parseInt(to);
-
-        List<String> recipes = program(Integer.parseInt(from), target);
-        did.append("recipes: ").append(String.join(", ", recipes)).append('\n');
-        if (Files.isRegularFile(ws.resolve("pom.xml"))) {
-            Files.writeString(ws.resolve("rewrite.yml"), yaml(recipes));
-            did.append(rewrite(from)).append('\n');
-        } else {
-            // SAY THAT NONE OF THAT RAN. The recipe list is printed above before anything executes,
-            // so on a Gradle build the trace read as though the Spring migration had been applied
-            // when the rewrite plugin had never been invoked and the floors had all stood down. A
-            // reader cannot audit a decision the log misreports, and this one matters: a Gradle Boot
-            // 2 project bumped to 21 keeps a line that cannot run its target.
-            did.append("no pom.xml: NONE of the recipes above ran, and the floors below are skipped;"
-                    + " this is a Gradle build and the preparer handles its version work\n");
-        }
-
-        did.append(floors(target, before)).append('\n');
-        did.append(propagate(target));
-        trace.applied("migrate", did.toString());
-        return did.toString();
-    }
-
-    /**
-     * The recipe list, by target and by what the project is on.
-     *
-     * <p>{@code UpgradeJaCoCo} is listed explicitly because it is NOT reachable from
-     * {@code UpgradePluginsForJavaN} — traversing both chains showed the program never called it,
-     * while a repo's JaCoCo move was being credited to it.
-     */
-    private List<String> program(int from, int target) throws IOException {
-        List<String> recipes = new ArrayList<>(List.of(
-                "org.openrewrite.java.migrate.UpgradePluginsForJava" + target,
-                "org.openrewrite.java.migrate.UpgradeBuildToJava" + target,
-                "org.openrewrite.java.migrate.jacoco.UpgradeJaCoCo"));
-        // EVERY LTS STEP THE HOP SPANS, not just the one it lands on. A hop is prescribed and need
-        // not be one step: 11->25 crosses 17 and 21, and the walls at those levels do not go away
-        // because nothing stopped there. Java8toJava11 in particular is the only recipe that
-        // handles the modules JEP 320 removed, and a 8->17 hop needs it as much as 8->11 does.
-        for (int step : LTS) {
-            if (step > from && step <= target && step == 11) {
-                recipes.add("org.openrewrite.java.migrate.Java8toJava11");
-            }
-        }
-        int boot = bootLine();
-        if (boot > 0 && target >= 17) {
-            // THE LINE THE TARGET CAN RUN, not the newest patch of the line it is on. Boot 4
-            // declares java.version 17, so from that target up it is reachable and 2.7 is not
-            // merely old, it is unable to run what it is being asked to run. The recipe stops at
-            // 4_0 because rewrite-spring 6.31.0 has no 4_1; the floor lifts the patch afterwards.
-            recipes.add("org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0");
-        } else if (boot == 2) {
-            recipes.add("org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7");
-        }
-        return recipes;
-    }
-
-    private String yaml(List<String> recipes) {
-        StringBuilder y = new StringBuilder("type: specs.openrewrite.org/v1beta/recipe\n"
-                + "name: com.bjv.Bump\nrecipeList:\n");
-        recipes.forEach(r -> y.append("  - ").append(r).append('\n'));
-        return y.toString();
-    }
-
     /**
      * Which Spring Boot LINE this project is on: 2, 3, or 0 for no Spring.
      *
@@ -212,135 +141,6 @@ final class Migrate {
         return "";
     }
 
-    /**
-     * The measured floors, applied only where the build resolves the thing being floored.
-     *
-     * <p>They go in as direct {@code dependencyManagement} entries in the root pom: a property
-     * override is a silent no-op once a Spring BOM arrives at {@code scope=import}, and
-     * {@code UpgradeDependencyVersion} reports BUILD SUCCESS while changing zero files in exactly
-     * those cases.
-     */
-    private String floors(int target, Security.Scan before) throws IOException {
-        StringBuilder did = new StringBuilder("floors: ");
-        if (!Pom.isMaven(ws)) {
-            // The floors below are dependencyManagement entries, which a Gradle build does not
-            // have. The preparer carries the Gradle equivalents; saying so is the honest record.
-            return "floors: skipped, no root pom (Gradle build); the preparer handles this hop's "
-                    + "floors for Gradle";
-        }
-        String all = readAllBuildFiles();
-        if (all.contains("lombok")) {
-            String v = Floors.version("lombok", target);
-            Pom.manage(ws, "org.projectlombok", "lombok", v);
-            did.append("lombok ").append(v).append("; ");
-            if (target >= 25) {
-                // JDK 23+ stopped running classpath annotation processors by default, so a floored
-                // Lombok that is never invoked is the same as no Lombok at all.
-                Pom.setPropertyEverywhere(ws, "maven.compiler.proc", "full");
-                did.append("maven.compiler.proc=full; ");
-            }
-        }
-        if (all.contains("jacoco")) {
-            Pom.pluginVersion(ws, "jacoco-maven-plugin", "0.8.15");
-            did.append("jacoco 0.8.15; ");
-        }
-        if (all.contains("mockito") || all.contains("byte-buddy") || all.contains("mockk")) {
-            String bb = Floors.version("byte-buddy", target);
-            Pom.manage(ws, "net.bytebuddy", "byte-buddy", bb);
-            Pom.manage(ws, "net.bytebuddy", "byte-buddy-agent", bb);
-            Pom.manage(ws, "org.mockito", "mockito-core", "5.18.0");
-            did.append("byte-buddy ").append(bb).append(" + mockito 5.18.0; ");
-        }
-        if (target >= 25 && all.contains("kotlin")) {
-            Pom.setPropertyEverywhere(ws, "kotlin.version", "2.3.20");
-            did.append("kotlin 2.3.20; ");
-        }
-        did.append(spring(target));
-        did.append(tomcat(target, before));
-        return did.toString();
-    }
-
-    /**
-     * Land Spring Boot on the measured-best patch of the line the recipe moved it to.
-     *
-     * <p>The recipe knows which LINE to go to; it does not know which patch of that line this
-     * corpus scores best, and it targets whatever it was built against. One property, which is
-     * what a Boot project reads whether the BOM arrives through a parent or an import.
-     */
-    private String spring(int target) throws IOException {
-        if (!Pom.isMaven(ws)) {
-            return "";
-        }
-        int line = bootLine();
-        if (line == 0) {
-            return "";
-        }
-        // THE TABLE DECIDES, NOT THIS METHOD. Floors carries 2.7.18 below target 17 and 4.1.0 from
-        // 17 up, and the preparer's instructions are generated from the same rows, so the version
-        // an agent is told and the version the code writes cannot drift apart.
-        String want = Floors.version("spring-boot", target);
-        if (want.isBlank()) {
-            return "";
-        }
-        // NEVER DOWNWARDS. bootLine() reports whatever major it finds, and a project already above
-        // the floor is one this should leave alone: writing 4.1.0 over a Boot 5 project would be a
-        // downgrade dressed as a floor.
-        if (compare(bootVersion(), want) >= 0) {
-            return "spring-boot " + bootVersion() + " already at or above the floor; ";
-        }
-        String was = bootVersion();
-        // THE PARENT FIRST, BECAUSE THAT IS WHAT DECIDES. The recipe moves the parent to whatever
-        // version it was built against; this floor exists to land on the patch the corpus measured
-        // best, and only the parent pin can overrule the recipe on a parent-declared project.
-        boolean parent = Pom.parentVersion(ws, "spring-boot-starter-parent", want);
-        Pom.setPropertyEverywhere(ws, "spring-boot.version", want);
-        Pom.pluginVersion(ws, "spring-boot-maven-plugin", want);
-        return "spring-boot " + was + " -> " + want + (parent ? " (parent)" : " (property)") + "; ";
-    }
-
-    /**
-     * Lift Tomcat to the newest patch of the line the project is already on.
-     *
-     * <p>GATED ON THE LINE, NOT ON THE WORD "TOMCAT". Tomcat 10 renamed javax.* to jakarta.*, so
-     * pinning a 9.0.x onto a Boot 3 project that resolved 10.1.x would not be a floor, it would be
-     * a source-breaking downgrade. The trigger is therefore the version the BEFORE SCAN actually
-     * resolved, which is why the scan runs ahead of this: without a measurement there is no way to
-     * tell a Tomcat 9 project from a Tomcat 10 one by looking at the build files.
-     *
-     * <p>Both mechanisms, because either alone is a silent no-op half the time: the property is
-     * what Boot's BOM reads when it arrives through a parent, and a dependencyManagement entry is
-     * what wins when the BOM arrives at scope=import. That is the same trap the Lombok floor was
-     * measured into.
-     */
-    private String tomcat(int target, Security.Scan before) throws IOException {
-        // 21 AND UP, NOT 21 EXACTLY. The floor's whole argument is that 9.0.105 is the newest
-        // patch of the line the project is on and carries the fewest CVEs of any of them. Nothing
-        // in that reasoning mentions the target, so scoping it to one hop left every 21-to-25 bump
-        // on whatever Tomcat it happened to have.
-        if (target < 21 || before == null || !before.measured() || !Pom.isMaven(ws)) {
-            return "";
-        }
-        if (bootLine() > 0) {
-            // Spring owns tomcat.version, and Boot 3.5 brings 10.1.55, which is newer than any
-            // Tomcat 9. Pinning a 9.0.x underneath it would be a downgrade across the jakarta line.
-            return "tomcat left to spring-boot " + Floors.version("spring-boot", target) + "; ";
-        }
-        String resolved = before.inventory().stream()
-                .filter(p -> p.name().endsWith(":tomcat-embed-core"))
-                .map(Security.Pkg::version).findFirst().orElse("");
-        if (!resolved.startsWith("9.0.")) {
-            return resolved.isBlank() ? "" : "tomcat " + resolved + " left alone (not the 9.0 line); ";
-        }
-        if (compare(resolved, TOMCAT_9) >= 0) {
-            return "tomcat " + resolved + " already at or past " + TOMCAT_9 + "; ";
-        }
-        Pom.setPropertyEverywhere(ws, "tomcat.version", TOMCAT_9);
-        for (String artifact : TOMCAT_EMBED) {
-            Pom.manage(ws, "org.apache.tomcat.embed", artifact, TOMCAT_9);
-        }
-        return "tomcat " + resolved + " -> " + TOMCAT_9 + " (family in lockstep); ";
-    }
-
     /** Dotted version order, so 9.0.105 is newer than 9.0.83 rather than alphabetically older. */
     static int compare(String a, String b) {
         String[] x = a.split("[.-]");
@@ -353,42 +153,6 @@ final class Migrate {
             }
         }
         return 0;
-    }
-
-    /**
-     * Raise the java target in EVERY pom, at text level.
-     *
-     * <p>Not a parser: re-serialising strips comments and licence headers and reorders attributes,
-     * and these files go through a diff-based review where a spurious change is noise someone has to
-     * argue with. Anchored edits keep the diff exactly as large as the change.
-     */
-    private String propagate(int target) throws IOException {
-        int changed = 0;
-        List<Pattern> pins = List.of(
-                Pattern.compile("(<maven\\.compiler\\.(?:source|target|release)>)\\s*(?:1\\.)?(\\d+)\\s*(</)"),
-                Pattern.compile("(<(?:java|jdk|java\\.source)\\.version>)\\s*(?:1\\.)?(\\d+)\\s*(</)"),
-                Pattern.compile("(<(?:source|target|release|testSource|testTarget)>)\\s*(?:1\\.)?(\\d+)\\s*(</)"));
-        for (Path pom : Walls.poms(ws)) {
-            String text = Files.readString(pom);
-            String out = text;
-            for (Pattern p : pins) {
-                Matcher m = p.matcher(out);
-                StringBuilder b = new StringBuilder();
-                while (m.find()) {
-                    int at = Integer.parseInt(m.group(2));
-                    m.appendReplacement(b, Matcher.quoteReplacement(
-                            m.group(1) + (at < target ? String.valueOf(target) : m.group(2))
-                                    + m.group(3)));
-                }
-                m.appendTail(b);
-                out = b.toString();
-            }
-            if (!out.equals(text)) {
-                Files.writeString(pom, out);
-                changed++;
-            }
-        }
-        return "target " + target + " propagated into " + changed + " pom(s)";
     }
 
     private String readAllBuildFiles() throws IOException {
@@ -417,8 +181,78 @@ final class Migrate {
      * recipes know which is right for the project in front of them, on either build system.
      */
     String apply(String yaml, String jdk) throws IOException {
-        Files.writeString(ws.resolve("rewrite.yml"), yaml);
+        Files.writeString(ws.resolve("rewrite.yml"), normalised(yaml));
         return rewrite(jdk);
+    }
+
+    /** The one literal OpenRewrite accepts as a recipe document's type. Anything else is not a recipe. */
+    private static final String RECIPE_TYPE = "specs.openrewrite.org/v1beta/recipe";
+
+    /**
+     * MAKE AN AGENT'S RECIPE FILE RUNNABLE, because measured over a live sweep none of them were.
+     *
+     * <p>Eighty-six apply_recipe calls across seven bumps, none of which reached rc=0, in the one
+     * mechanism this harness documents as the only way a pin reaches a project. Two causes, both
+     * ours to fix rather than the agents':
+     *
+     * <ul>
+     *   <li>THE NAME REACHED MAVEN AS SEVERAL WORDS. It travels as
+     *       {@code -Drewrite.activeRecipes=<name>} inside a command string, and OpenRewrite allows
+     *       spaces in a name, so {@code name: Upgrade Lombok to 1.18.46} made Maven read "Lombok" as
+     *       a goal and fail with {@code Unknown lifecycle phase}. 58 of 77 named recipes had a
+     *       space. Rewriting the name beats quoting it: quoting only moves the problem to whichever
+     *       character the next name contains, and a name is just an identifier, so the recipe still
+     *       does exactly what its author wrote.
+     *   <li>THE TYPE WAS A RECIPE ID RATHER THAN THE DOCUMENT KIND. Agents wrote
+     *       {@code type: org.openrewrite.semver} or the id of the recipe they wanted. The field is
+     *       the document kind and has exactly one legal value; with any other, nothing registers and
+     *       the run fails with {@code Recipe(s) not found} naming the recipe that was right there in
+     *       the file. Five of those named our own fallback, which is a file with no top-level name
+     *       at all.
+     * </ul>
+     *
+     * <p>Both are the harness supplying a fixed header the agent has no reason to memorise. What the
+     * agent actually decides, the recipeList, is untouched.
+     */
+    private static String normalised(String yaml) {
+        List<String> lines = new java.util.ArrayList<>(List.of(yaml.split("\n", -1)));
+        boolean type = false;
+        boolean named = false;
+        boolean display = false;
+        for (int i = 0; i < lines.size(); i++) {
+            String l = lines.get(i);
+            // The header belongs to the FIRST document; later ones are separate recipes.
+            if (l.startsWith("---")) {
+                break;
+            }
+            if (!type && l.startsWith("type:")) {
+                lines.set(i, "type: " + RECIPE_TYPE);
+                type = true;
+            } else if (!named && l.startsWith("name:")) {
+                lines.set(i, "name: " + sanitise(l.substring(5).strip()));
+                named = true;
+            } else if (!display && l.startsWith("displayName:")) {
+                display = true;
+            }
+        }
+        List<String> header = new java.util.ArrayList<>();
+        if (!type) {
+            header.add("type: " + RECIPE_TYPE);
+        }
+        if (!named) {
+            header.add("name: com.bjv.Bump");
+        }
+        if (!display) {
+            header.add("displayName: the pins this phase owes");
+        }
+        lines.addAll(0, header);
+        return String.join("\n", lines);
+    }
+
+    /** A name a shell cannot split, keeping enough of the original to stay recognisable in a log. */
+    private static String sanitise(String given) {
+        String safe = given.replaceAll("[^A-Za-z0-9._-]+", ".").replaceAll("^\\.+|\\.+$", "");
+        return safe.isBlank() ? "com.bjv.Bump" : safe;
     }
 
     /** The recipe name in whatever rewrite.yml is on disk, so an agent may name its own. */
@@ -426,13 +260,29 @@ final class Migrate {
         try {
             for (String line : Files.readString(ws.resolve("rewrite.yml")).lines().toList()) {
                 if (line.startsWith("name:")) {
-                    return line.substring(5).strip();
+                    return sanitise(line.substring(5).strip());
                 }
             }
         } catch (IOException unreadable) {
             // Fall through to the name this class writes itself.
         }
         return "com.bjv.Bump";
+    }
+
+    /**
+     * The recipes the run could not find, named, or empty when every one resolved.
+     *
+     * <p>Read from the output rather than the exit code because the exit code does not carry it: the
+     * plugin prints {@code Recipe class ... cannot be found}, says it will continue regardless, and
+     * returns success.
+     */
+    private static String unknownRecipes(String output) {
+        java.util.LinkedHashSet<String> missing = new java.util.LinkedHashSet<>();
+        Matcher m = Pattern.compile("Recipe class ([\\w.$]+) cannot be found").matcher(output);
+        while (m.find()) {
+            missing.add(m.group(1));
+        }
+        return String.join(", ", missing);
     }
 
     private String rewrite(String from) {
@@ -443,6 +293,17 @@ final class Migrate {
         try {
             Shell.Output out = Shell.run(ws, Runner.env(ws), Duration.ofSeconds(2700),
                     hoptools + "/jvm-run", from, "jvmjob", "run", goal);
+            String said = unknownRecipes(out.text());
+            if (!said.isEmpty()) {
+                // A RECIPE THAT DOES NOT EXIST IS NOT A SUCCESSFUL RUN, whatever the exit code says.
+                // OpenRewrite logs the validation error and continues on purpose -- "Execution will
+                // continue regardless" -- so the build goes green having done nothing. Reported as
+                // rc=0, an agent has no way to learn it guessed the name wrong, and this corpus has
+                // one bump where the same wrong name was tried four times against the same wall.
+                return "no recipe ran: " + said + "\n\nThe run exited 0 because OpenRewrite skips "
+                        + "a recipe it cannot find rather than failing. Nothing was changed. Check "
+                        + "the name against the ones in this tool's description.";
+            }
             return "recipe run rc=" + out.code() + "\n" + Runner.tail(out.text());
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();

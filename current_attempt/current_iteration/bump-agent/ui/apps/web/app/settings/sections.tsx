@@ -1,0 +1,512 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import {
+  Disclosure,
+  EmptyNote,
+  FIELD,
+  LabeledField,
+  Pill,
+  READONLY,
+  RelativeTime,
+  SaveRow,
+  SettingCard,
+} from '@bjv/ui'
+import { read } from '@/lib/api'
+
+type Run = {
+  lanes: number | null
+  min: number
+  max: number
+  turns: string
+  steps: string
+  hangGuardMinutes: string
+}
+
+/**
+ * THE ONE SETTING ON THIS PAGE THAT IS GENUINELY LIVE.
+ *
+ * `run.sh` re-reads `max_lanes` at the top of every round rather than at launch, so a sweep starving
+ * the GPU can be throttled without being stopped. That mechanism already existed and was reachable
+ * only by someone with a shell on the box; this is the same lever with a label on it.
+ *
+ * THE SERVER CLAMPS AND THE PAGE SHOWS WHAT IT KEPT. Echoing the request would show 40 lanes on a
+ * box that will run 16, and the reader would not find out until the sweep failed to speed up.
+ */
+export function RunSection() {
+  const [run, setRun] = useState<Run | null>(null)
+  const [typed, setTyped] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [said, setSaid] = useState<string | undefined>(undefined)
+  const [failed, setFailed] = useState<string | null>(null)
+
+  useEffect(() => {
+    read<Run>('/api/settings/run')
+      .then((r) => {
+        setRun(r)
+        setTyped(String(r.lanes ?? ''))
+      })
+      .catch((e: Error) => setFailed(e.message))
+  }, [])
+
+  if (failed !== null) return <EmptyNote>The run could not be read: {failed}</EmptyNote>
+  if (run === null) return <EmptyNote>Reading the run…</EmptyNote>
+
+  const save = () => {
+    setBusy(true)
+    setSaid(undefined)
+    read<Run>('/api/settings/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lanes: Number(typed) }),
+    })
+      .then((r) => {
+        setRun(r)
+        setTyped(String(r.lanes ?? ''))
+        setSaid(`kept ${r.lanes}`)
+      })
+      .catch((e: Error) => setSaid(e.message))
+      .finally(() => setBusy(false))
+  }
+
+  return (
+    <>
+      <SettingCard
+        title="parallel lanes"
+        provenance={run.lanes === null ? 'not set' : `currently ${run.lanes}`}
+        footnote={
+          <>
+            Takes effect at the start of the next round, not immediately. Lowering it does not stop a
+            bump that is already running — the sweep simply stops replacing finished lanes until it
+            is back under the number.
+          </>
+        }
+      >
+        <p style={{ margin: '0 0 12px', fontSize: '13px', lineHeight: 1.6, maxWidth: '72ch' }}>
+          How many repositories are bumped at the same time. Between {run.min} and {run.max}. The
+          server clamps what you save, so what appears here afterwards is what it kept, not what you
+          typed.
+        </p>
+        <LabeledField label="lanes">
+          <input
+            style={FIELD}
+            value={typed}
+            inputMode="numeric"
+            onChange={(e) => setTyped(e.target.value)}
+          />
+        </LabeledField>
+        <SaveRow onSave={save} busy={busy} said={said} />
+      </SettingCard>
+
+      <div style={{ height: '18px' }} />
+
+      <SettingCard
+        title="the loops"
+        provenance="the environment's"
+        footnote={
+          <>
+            Set on the container and read at launch, so changing one means a redeploy. They are shown
+            because a reader looking at a bump that spent sixteen turns should be able to see that
+            sixteen was the budget.
+          </>
+        }
+      >
+        <LabeledField
+          label="gate turns"
+          hint="How many times the gate may build, judge and hand back to the troubleshooter."
+        >
+          <input style={READONLY} value={run.turns} readOnly />
+        </LabeledField>
+        <LabeledField label="steps per campaign" hint="Steps one troubleshoot campaign may order.">
+          <input style={READONLY} value={run.steps} readOnly />
+        </LabeledField>
+      </SettingCard>
+    </>
+  )
+}
+
+type Model = {
+  keySet: boolean
+  model: string
+  endpoint: string
+  patienceMinutes: string
+}
+
+/**
+ * THE ENDPOINT, AND DELIBERATELY NOT THE KEY.
+ *
+ * The sibling tool renders its API key here, with the reveal and copy buttons that cannot work
+ * otherwise, and its own mount contract flags that as the part a shell author must read twice:
+ * defensible for one person behind their own proxy, not on a portal several developers reach. This
+ * tool is the second one mounted, so it takes the other side of that trade. Whether a key is SET
+ * travels; the key never does. There is no reveal button because there is nothing behind it.
+ */
+export function ModelSection() {
+  const [model, setModel] = useState<Model | null>(null)
+  const [failed, setFailed] = useState<string | null>(null)
+
+  useEffect(() => {
+    read<Model>('/api/settings/model')
+      .then(setModel)
+      .catch((e: Error) => setFailed(e.message))
+  }, [])
+
+  if (failed !== null) return <EmptyNote>The model could not be read: {failed}</EmptyNote>
+  if (model === null) return <EmptyNote>Reading the model…</EmptyNote>
+
+  return (
+    <SettingCard
+      title="the endpoint"
+      provenance="the environment's"
+      footnote={
+        <>
+          This page does not set any of these, and it never shows the key. The sibling tool does show
+          its own, and says in its mount contract why that is a trade rather than an oversight: the
+          reveal and copy buttons cannot work otherwise. On a portal several developers reach, a
+          settings page that renders a credential publishes it to all of them.
+        </>
+      }
+    >
+      <div style={{ margin: '0 0 12px' }}>
+        <Pill tone={model.keySet ? 'good' : 'alarm'}>
+          {model.keySet ? 'key set' : 'no key'}
+        </Pill>
+        <span style={{ marginLeft: '8px', fontSize: '12.5px', color: 'var(--text-secondary)' }}>
+          {model.keySet
+            ? 'the agents are using the key from the environment'
+            : 'every agent call will be refused until one is set on the container'}
+        </span>
+      </div>
+      <LabeledField label="model" hint="What to ask for. Must be a name the endpoint below serves.">
+        <input style={READONLY} value={model.model} readOnly />
+      </LabeledField>
+      <LabeledField
+        label="endpoint"
+        hint="OpenAI-shaped, ending in /v1. The scheme decides the protocol."
+      >
+        <input style={READONLY} value={model.endpoint} readOnly />
+      </LabeledField>
+      <LabeledField
+        label="patience"
+        hint="Minutes one call may take before the harness stops waiting. Generous on purpose: a
+             reasoning model that derails can take two hours, and cutting the budget short turns a
+             rare stall into a common one."
+      >
+        <input style={READONLY} value={`${model.patienceMinutes} minutes`} readOnly />
+      </LabeledField>
+    </SettingCard>
+  )
+}
+
+type Subject = { queued: number; settled: number; hops: Record<string, number> }
+
+type Loaded = {
+  accepted: number
+  added: number
+  /** How many rows carried a credential. The COUNT: no response ever carries a key's value. */
+  keyed: number
+  /** How many left their sha blank, and so will be pinned to whatever the default branch is now. */
+  unpinned: number
+  sweepLive: boolean
+  target: string
+  rejected: { line: number; text: string; why: string }[]
+}
+
+/**
+ * UPLOAD A REGISTRY, AND BE TOLD EXACTLY WHAT IT DID.
+ *
+ * The file is read here and posted as text, so the same path serves the button and the paste box
+ * and no multipart parser has to exist on the server.
+ *
+ * EVERY LINE THAT WOULD NOT PARSE COMES BACK, with its number and the reason. A loader that answers
+ * "ok" to a file half of which it discarded gives back a number smaller than the file and no way to
+ * find out which rows are missing, which is worse than refusing the file outright.
+ */
+function RegistryUpload({ onLoaded }: { onLoaded: () => void }) {
+  const [text, setText] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [result, setResult] = useState<Loaded | null>(null)
+  const [failed, setFailed] = useState<string | null>(null)
+
+  const send = (body: string) => {
+    if (body.trim() === '') return
+    setBusy(true)
+    setFailed(null)
+    read<Loaded>('/api/settings/registry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body,
+    })
+      .then((r) => {
+        setResult(r)
+        onLoaded()
+      })
+      .catch((e: Error) => setFailed(e.message))
+      .finally(() => setBusy(false))
+  }
+
+  return (
+    <SettingCard
+      title="load a registry"
+      {...(result === null ? {} : { provenance: `${result.added} added` })}
+      footnote={
+        <>
+          Rows merge into the manifest the sweep is reading and are picked up at the start of the
+          next round; the round in flight finishes on the file it opened. A repository already in the
+          corpus at the same starting level keeps the commit it was queued at — an upload adds work,
+          it does not re-point work already counted.
+        </>
+      }
+    >
+      <p style={{ margin: '0 0 10px', fontSize: '13px', lineHeight: 1.6, maxWidth: '72ch' }}>
+        One bump per line, five comma-separated fields:
+      </p>
+      <pre
+        style={{
+          margin: '0 0 10px',
+          padding: '10px 12px',
+          overflowX: 'auto',
+          borderRadius: '6px',
+          background: 'var(--bg-subtle)',
+          border: '1px solid var(--border-soft)',
+          fontSize: '12px',
+          lineHeight: 1.5,
+          color: 'var(--text-secondary)',
+        }}
+      >
+        {`url, sha, from, to, key
+
+https://github.com/owner/name, bdc86ebe64e2ec6d…, 11, 17,
+https://github.com/owner/other,                 , 17, 21,
+https://git.internal/team/thing, 9f1c2d…        , 11, 17, ghp_xxx`}
+      </pre>
+      <p style={{ margin: '0 0 12px', fontSize: '13px', lineHeight: 1.6, maxWidth: '72ch' }}>
+        <strong>Every comma is mandatory, including the last one.</strong> The sha and the key may be
+        blank, but they may not be missing: a row with a comma dropped is a row whose columns cannot
+        be told apart, and guessing which optional was left out is how a key gets read as a JDK
+        level.
+      </p>
+      <p style={{ margin: '0 0 12px', fontSize: '13px', lineHeight: 1.6, maxWidth: '72ch' }}>
+        A blank sha takes the default branch and records the commit it resolved, so a re-run still
+        measures the same tree. A branch name is refused for the opposite reason. A key is used to
+        clone and is stored where this page cannot read it back — the reply below says how many rows
+        carried one and never what they were. A line that will not parse is reported back with the
+        others rather than dropped.
+      </p>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '0 0 12px' }}>
+        <input
+          type="file"
+          accept=".tsv,.txt,text/plain,text/tab-separated-values"
+          disabled={busy}
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file !== undefined) {
+              file.text().then(send)
+            }
+          }}
+          style={{ font: 'inherit', fontSize: '12px' }}
+        />
+      </div>
+
+      <Disclosure summary="paste a list instead">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={6}
+          placeholder={'https://github.com/owner/name, bdc86ebe…, 11, 17,'}
+          style={{ ...FIELD, maxWidth: '100%', fontFamily: 'inherit', resize: 'vertical' }}
+        />
+        <div style={{ marginTop: '8px' }}>
+          <SaveRow onSave={() => send(text)} busy={busy} />
+        </div>
+      </Disclosure>
+
+      {failed !== null ? (
+        <p style={{ marginTop: '12px', fontSize: '12.5px', color: 'var(--cve-introduced)' }}>
+          The upload failed: {failed}
+        </p>
+      ) : null}
+
+      {result === null ? null : (
+        <div style={{ marginTop: '14px' }}>
+          <p style={{ margin: '0 0 8px', fontSize: '12.5px' }}>
+            {result.accepted} row(s) parsed, {result.added} new, into{' '}
+            <code>{result.target}</code>.{' '}
+            {result.keyed > 0 ? `${result.keyed} carried a key. ` : ''}
+            {result.unpinned > 0
+              ? `${result.unpinned} had no sha and will be pinned when the lane clones them. `
+              : ''}
+            {result.sweepLive
+              ? 'A sweep is running; the new rows join the next round.'
+              : 'No sweep is running, so this waits for the next launch.'}
+          </p>
+          {result.rejected.length === 0 ? (
+            <Pill tone="good">every line parsed</Pill>
+          ) : (
+            <>
+              <Pill tone="warn">{result.rejected.length} line(s) not loaded</Pill>
+              <ul style={{ listStyle: 'none', margin: '8px 0 0', padding: 0 }}>
+                {result.rejected.map((r) => (
+                  <li key={r.line} style={{ padding: '5px 0', fontSize: '12px' }}>
+                    <span style={{ color: 'var(--text-tertiary)' }}>line {r.line}</span>{' '}
+                    <span style={{ color: 'var(--cve-introduced)' }}>{r.why}</span>
+                    <div
+                      style={{
+                        color: 'var(--text-tertiary)',
+                        overflowX: 'auto',
+                        whiteSpace: 'pre',
+                      }}
+                    >
+                      {r.text}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+    </SettingCard>
+  )
+}
+
+/** What the sweep is working through. The sibling's subject is a marker; this one's is a queue. */
+export function SubjectSection() {
+  const [subject, setSubject] = useState<Subject | null>(null)
+  const [failed, setFailed] = useState<string | null>(null)
+
+  // Remounted by its parent on a successful upload, which is simpler than a refetch signal and
+  // cannot leave the card showing a count from before the rows it just accepted.
+  useEffect(() => {
+    read<Subject>('/api/settings/subject')
+      .then(setSubject)
+      .catch((e: Error) => setFailed(e.message))
+  }, [])
+
+  if (failed !== null) return <EmptyNote>The queue could not be read: {failed}</EmptyNote>
+  if (subject === null) return <EmptyNote>Reading the queue…</EmptyNote>
+
+  const hops = Object.entries(subject.hops)
+  return (
+    <SettingCard
+      title="the queue"
+      provenance="the manifest's"
+      footnote={
+        <>
+          The hop is the experiment&rsquo;s independent variable: it arrives in the manifest row and
+          nothing in the chain may change it. A surveyor that disagrees is recorded as disagreeing
+          and the prescribed hop is run anyway.
+        </>
+      }
+    >
+      <div style={{ display: 'flex', gap: '26px', flexWrap: 'wrap', margin: '0 0 14px' }}>
+        <LabeledField label="rows in the queue">
+          <input style={READONLY} value={String(subject.queued)} readOnly />
+        </LabeledField>
+        <LabeledField label="bumps with a record">
+          <input style={READONLY} value={String(subject.settled)} readOnly />
+        </LabeledField>
+      </div>
+      {hops.length === 0 ? (
+        <EmptyNote>No queue file; this deployment is not running a sweep.</EmptyNote>
+      ) : (
+        <table style={{ borderCollapse: 'collapse', fontSize: '12.5px' }}>
+          <tbody>
+            {hops.map(([hop, n]) => (
+              <tr key={hop}>
+                <td style={{ padding: '3px 24px 3px 0' }}>{hop}</td>
+                <td style={{ padding: '3px 0', color: 'var(--text-tertiary)' }}>{n}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </SettingCard>
+  )
+}
+
+/** The queue, and the way to add to it. */
+export function SubjectPanel() {
+  const [reload, setReload] = useState(0)
+  return (
+    <>
+      <SubjectSection key={reload} />
+      <div style={{ height: '18px' }} />
+      <RegistryUpload onLoaded={() => setReload((n) => n + 1)} />
+    </>
+  )
+}
+
+type Supervisor = {
+  everyMinutes: string
+  findings: number
+  postponed: number
+  latest: { at: number; bump: string; kind: string; what: string; held: boolean }[]
+}
+
+/** Not a setting: a thing that watches the run. Which is why it sits apart in the tab bar. */
+export function SupervisorSection() {
+  const [sup, setSup] = useState<Supervisor | null>(null)
+  const [failed, setFailed] = useState<string | null>(null)
+
+  useEffect(() => {
+    read<Supervisor>('/api/settings/supervisor')
+      .then(setSup)
+      .catch((e: Error) => setFailed(e.message))
+  }, [])
+
+  if (failed !== null) return <EmptyNote>The supervisor could not be read: {failed}</EmptyNote>
+  if (sup === null) return <EmptyNote>Reading the supervisor…</EmptyNote>
+
+  return (
+    <SettingCard
+      title="the watch"
+      provenance={`every ${sup.everyMinutes} minutes`}
+      footnote={
+        <>
+          It reads every bump&rsquo;s trace and looks for what one bump cannot see about itself: a
+          lane that has stopped moving, a failure shape repeating across repositories. It may
+          postpone a bump; it never edits one.
+        </>
+      }
+    >
+      <div style={{ display: 'flex', gap: '26px', flexWrap: 'wrap', margin: '0 0 14px' }}>
+        <LabeledField label="findings">
+          <input style={READONLY} value={String(sup.findings)} readOnly />
+        </LabeledField>
+        <LabeledField label="postponed">
+          <input style={READONLY} value={String(sup.postponed)} readOnly />
+        </LabeledField>
+      </div>
+      {sup.latest.length === 0 ? (
+        <EmptyNote>Nothing found yet. On a healthy sweep that is the expected answer.</EmptyNote>
+      ) : (
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          {sup.latest
+            .slice()
+            .reverse()
+            .map((f, i) => (
+              <li
+                key={`${f.at}-${i}`}
+                style={{
+                  padding: '8px 0',
+                  borderTop: i === 0 ? 'none' : '1px solid var(--border-soft)',
+                  fontSize: '12.5px',
+                }}
+              >
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                  <Pill tone={f.held ? 'warn' : 'quiet'}>{f.held ? 'held' : 'noted'}</Pill>
+                  <span style={{ color: 'var(--text-tertiary)' }}>{f.bump}</span>
+                  <span style={{ marginLeft: 'auto', color: 'var(--text-tertiary)' }}>
+                    <RelativeTime at={f.at} />
+                  </span>
+                </div>
+                <div style={{ marginTop: '3px', color: 'var(--text-secondary)' }}>{f.what}</div>
+              </li>
+            ))}
+        </ul>
+      )}
+    </SettingCard>
+  )
+}

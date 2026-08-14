@@ -13,15 +13,19 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.tool.ToolExecutor;
 
 /**
- * FOUR PRODUCER/CRITIC PAIRS AND TWO CLOSERS, each with its own closed set of answers and its own
- * closed set of tools.
+ * EVERY AGENT IN THE CHAIN, each with its own closed set of answers and its own closed set of tools.
  *
  * <p>There is no orchestrator: an agent asked to follow an order it can rewrite will rewrite it.
- * {@link Bump} runs the order — survey, prepare, bump, troubleshoot — and every producer's work is
- * judged by its own critic before the chain moves, because the expensive mistake at each phase is
- * different and a single reviewer prompted for everything reviews nothing well.
+ * {@link Bump} runs the order and every doer's work is judged before the chain moves, because the
+ * expensive mistake at each phase is different and a single reviewer prompted for everything reviews
+ * nothing well.
  *
- * <p>PRODUCERS EDIT, CRITICS READ, AND THE SPLIT DECIDES THE TOOLS. A producer reaches the
+ * <p>THE UNIT IS A TRIAD, NOT A PAIR. A planner decides, a doer executes one plan once, and a
+ * verifier reads the workspace and returns done, again or replan. The loop belongs to the verifier:
+ * when the producer held it, the critic saw only the end state, and a pin check that answered about
+ * an arbitrary module went unnoticed for as long as that shape existed. See {@link Triad}.
+ *
+ * <p>PLANNERS AND VERIFIERS READ, DOERS EDIT, AND THE SPLIT DECIDES THE TOOLS. A doer reaches the
  * workspace through {@code edit_file} and can try its own build; a critic gets {@code read_file},
  * grep and glob, because a certification must not manufacture the evidence it certifies. Neither
  * gets {@code write_file}: a new file is not a migration step. The rule that a test may never be
@@ -106,17 +110,55 @@ final class Agents {
                 every pin in one recipe file; the one that does not match this project matches
                 nothing, which is what lets one recipe serve either.
 
-                Then call check_pins and read what the project actually says. If something is still
-                outstanding, look at why -- the wrong recipe for where that version lives, or an
-                artifact this project genuinely does not use -- and run another recipe. The check is
-                the fact; your recollection of what you ran is not.
+                Then call declared_versions and read what the project actually says now. It reports
+                what each module declares and where; comparing that to the floors above is your job.
+                If something you meant to raise still reads low, look at why -- usually the recipe
+                did not match where that version lives -- and run another. What the files say is the
+                fact; your recollection of what you ran is not.
+
+                YOU ARE WORKING TO A PLAN SOMEONE ELSE SETTLED, and it names the modules. Raise what
+                the plan names and leave the rest: a sibling that declares the same artifact lower is
+                a different piece of work, and doing it here makes this stage impossible to judge.
 
                 {ALSO}
 
                 Answer one line: DONE: <what you raised, and what was already satisfied>. If a pin
                 cannot be met, say exactly BLOCKED: <which, and what the project does that prevents
-                it>. Both are useful answers. A claim that everything is done when check_pins says
+                it>. Both are useful answers. A claim that everything is done when declared_versions says
                 otherwise is the one answer that is not.
+                """;
+
+    private static final String P_PINS_PLANNER = """
+                A Java project is being moved from JDK {FROM} to JDK {TARGET}, and you decide what
+                the next pass of pin work should be. {WHEN}
+
+{PINS}
+
+                Each line is group:artifact, the version it must be at least, and why. They are
+                floors: at or above one is finished, and a project that does not use a dependency at
+                all is not given it.
+
+                Call declared_versions. It reports what each module declares and WHERE -- a parent
+                block, a dependency, a plugin, a property, a Gradle string, the wrapper -- and it
+                does not judge any of it. Deciding which of those sit below the floors above is your
+                job, and it is the whole job.
+
+                READ WHAT THE DECLARATION MEANS, not just its name. A Maven project says which Spring
+                Boot it is on by inheriting spring-boot-starter-parent or importing
+                spring-boot-dependencies, never by declaring an artifact called spring-boot. A
+                starter with no version is managed by that parent and moves when it moves. A version
+                that reads ${something} is an indirection: the property is what has to change. A tool
+                that matched artifact names literally missed all three, which is why this is a
+                planner's question and not a regex's.
+
+                You do not edit anything. Produce a short ordered list: each pin that is below its
+                floor, the module it is below it in, and where in that module the version lives.
+                Where it lives decides which recipe can move it, and a plan that skips it hands the
+                next agent a guess.
+
+                If nothing is below its floor, say exactly NOTHING-OUTSTANDING and stop. That is a
+                real answer and it is common: most modules inherit their versions, and a project that
+                does not use a dependency is not given it.
                 """;
 
     private static final String P_PINS_CRITIC = """
@@ -125,20 +167,32 @@ final class Agents {
 
 {PINS}
 
-                Call check_pins and read what the build files say. That is the whole question: is
-                every pin at or above its floor, or is one outstanding.
+                Call declared_versions and read what the build files say. That is the whole question: is
+                every pin at or above its floor, in every module, or is one outstanding.
 
-                A dependency the project does not use is satisfied -- these are floors, not
+                A dependency a module does not use is satisfied -- these are floors, not
                 requirements, and adding one would be a different bump. A version above the floor is
                 satisfied. Only a version BELOW the floor is outstanding.
 
-                Answer `done` when nothing is outstanding, or when what remains is genuinely
-                unreachable and your colleague said so.
+                declared_versions answers per module. A pin met in one module says nothing about a sibling,
+                and this project has been wrong about exactly that: the check used to read the whole
+                tree at once and report the first version it found anywhere, so one module could
+                stand in for six that were still below the floor. Read the rows.
 
-                Otherwise answer `again: <which pins, and what to try>`. Name them from check_pins
-                rather than from the diff, and say something the next attempt can act on: which
-                recipe suits where that version actually lives in this project. An objection without
-                that is the same as `done`.
+                You hold the loop. Answer with one of three words.
+
+                `done` when nothing is outstanding, or when what remains is genuinely unreachable and
+                your colleague said so.
+
+                `again: <which pins, in which modules, and what to try>` when the plan was right and
+                the execution fell short. Name them from declared_versions rather than from the diff, and
+                say something the next attempt can act on: which recipe suits where that version
+                actually lives. An objection without that is the same as `done`.
+
+                `replan: <why the plan cannot work>` when the plan itself was wrong -- it named the
+                wrong module, or a placement that does not exist in this project, or an artifact this
+                project does not use. Repeating a wrong plan spends the whole budget on it, so this
+                word exists to stop that. Use it for the plan, not for a bad attempt at a good plan.
                 """;
 
     private static final String P_SURVEYOR = """
@@ -205,52 +259,6 @@ final class Agents {
                 Answer `sound`, or `overclaimed: <package and why it will not move>`, or \
                 `missed-family: <family>`, one finding per line.
                 """;
-    private static final String P_PREPARER = """
-                You prepare a Java project for a one-LTS migration BEFORE its first target build. \
-                Every step is gated on a structural trigger; check each trigger against the project \
-                and land the step ONLY where it fires. A deterministic pre-pass has already run: what \
-                it did travels in the brief, do not redo it.
-
-                This hop is JDK {FROM} to {TARGET}. The floors that can fire here, and nothing \
-                else, because a rule you cannot reach is one you should not apply:
-
-{FLOORS}
-
-                Placement matters as much as the version. When a Spring BOM arrives at scope=import, \
-                a property override is a silent no-op: use a dependencyManagement entry in the root \
-                pom. A Gradle build has no dependencyManagement at all, so its floors go in the \
-                wrapper properties and a resolutionStrategy, and they are yours to apply because \
-                the deterministic pass is Maven-only.
-
-                Two triggers that are not version floors: a Kotlin build at target 25 needs kotlin \
-                pinned in every pom that names it, and a test dependency that reflects into the \
-                process environment (junit-pioneer, system-lambda, system-rules) needs \
-                --add-opens java.base/java.util=ALL-UNNAMED and java.base/java.lang=ALL-UNNAMED on \
-                the test fork, at the root so modules inherit it.
-
-                Use edit_file to land each step. Then STOP and answer in one line: \
-                DID: <steps executed, and which triggers did not fire>. If every trigger is already \
-                satisfied, answer exactly NOTHING-TO-DO: <why>. Do not keep exploring once the work \
-                is done; that is what exhausts a tool budget.
-                """;
-    private static final String P_PREPARE_CRITIC = """
-                A colleague prepared a Java project for JDK {FROM} to {TARGET}. The steps are \
-                gated on structural triggers, and these are the floors that can fire on this hop:
-
-{FLOORS}
-
-                Read the project and judge TWO things, nothing else.
-
-                MISSED: a trigger fires here and no edit answers it. Name the step and the file that \
-                proves the trigger fired.
-
-                OVERREACH: an edit answers no trigger, or changes something the steps never asked \
-                for. Structure-gated means gated: a step applied "just in case" is how a working \
-                build gets broken by its own preparation.
-
-                Answer `sound`, or `missed: <step>` or `overreach: <what>`, one finding per line, \
-                most damaging first.
-                """;
     private static final String P_BUMPER = """
                 You move a Java project from JDK {FROM} to JDK {TARGET}. The dependencies the new
                 JDK needs are already in place; this is the step that actually changes the target.
@@ -275,19 +283,230 @@ final class Agents {
                 setting. Answer one line: DID: <what the recipes moved, what you raised by hand, and
                 what check_target says now>.
                 """;
+    private static final String P_BUMP_PLANNER = """
+                A Java project is being moved to JDK {TARGET}, and you decide what the next pass of
+                target-raising should be. You do not edit anything.
+
+                Call check_target. It reports every source, target, release, sourceCompatibility,
+                jvmTarget and toolchain declaration still below {TARGET}, with module, file and line.
+
+                This is the pin the GATE measures, and it measures the LOWEST module. A plan that
+                fixes the root and leaves a child behind produces a green-looking build and a
+                FAIL_target_not_bumped four stages later, so group what you find by module and say
+                which are genuinely separate declarations rather than one property read from several
+                places.
+
+                Produce a short ordered list: module, file and line, and whether it should move by
+                recipe or by hand. A module-local property that shadows a fixed parent is the mistake
+                that costs most here; if you see one, say so plainly.
+
+                If check_target reports nothing below {TARGET}, say exactly NOTHING-OUTSTANDING.
+                """;
+
     private static final String P_BUMP_CRITIC = """
                 A colleague raised a project's remaining Java target pins. Judge ONE question: after \
                 these edits, does the effective bytecode target actually reach the target in EVERY \
                 module the build compiles?
 
-                The pins still below target after the edits travel in the brief, and you can grep for \
-                more. The expensive mistakes: a module-local property that shadows the fixed parent, \
+                Call check_target rather than reading the diff. It answers per module, and the gate \
+                takes the LOWEST, so a module left behind fails the whole bump however good the root \
+                looks. The expensive mistakes: a module-local property that shadows the fixed parent, \
                 a second pin in the same file (a toolchain block AND an options.release), and an edit \
                 that raises a pin the build never reads.
 
-                Answer `sound`, or `not-landed: <file and pin still below target>`, or \
-                `overreach: <edit that changes something other than a target pin>`.
+                You hold the loop. Answer with one of three words.
+
+                `done` when nothing check_target reports sits below the target, or when what remains \
+                genuinely cannot move and your colleague said which and why.
+
+                `again: <module, file and pin still below target>` when the plan was right and the \
+                execution fell short.
+
+                `replan: <why the plan cannot work>` when the plan named the wrong place -- a pin the \
+                build never reads, a file that does not exist, a property shadowed elsewhere. \
+                Repeating a wrong plan spends the whole budget on it.
+
+                There is a fourth thing worth saying inside any of those: if an edit changes something \
+                other than a target pin, name it. Overreach here is how a bump acquires a behaviour \
+                change nobody asked for.
                 """;
+
+    private static final String P_MODULE_FILTER = """
+                A Java project is being moved from JDK {FROM} to JDK {TARGET}. The harness has read
+                the build files and enumerated the modules; that list is a fact and you are not
+                asked to correct it.
+
+                You are asked a narrower thing: is any module on it something this bump should leave
+                alone? The two that matter are a VENDORED third-party source tree checked into the
+                repository, and a module that is GENERATED by the build rather than written. Editing
+                either produces a diff the project's own tooling will overwrite or reject, and this
+                corpus has spent whole bumps doing exactly that.
+
+                Read before you answer. A directory named `third-party` that turns out to be the
+                project's own code is not vendored, and a module named `generated` that is checked in
+                and hand-edited is not generated. Evidence is a header, a LICENSE that is not the
+                project's, a .gitignore that covers it, or a plugin that writes it.
+
+                Answer either exactly KEEP-ALL, or one line per module to skip:
+                SKIP <module path>: <the evidence>.
+
+                KEEP-ALL is the common and correct answer. A module skipped is a module that keeps
+                its old target, and the gate takes the lowest, so a wrong skip fails the whole bump.
+                """;
+
+    private static final String P_MODULE_FILTER_CRITIC = """
+                A colleague was asked which modules of this project the bump should leave alone, and
+                answered. Judge whether the answer is safe.
+
+                The asymmetry is the whole job. Keeping a module that should have been skipped costs
+                a wasted diff. Skipping a module that should have been kept leaves it on the old
+                target, and the gate takes the LOWEST module, so it fails the entire bump and the
+                evidence points at the wrong place.
+
+                So a skip needs evidence you can see, and you have the tools to look. Read the module.
+                If the reason is a directory name, that is not evidence.
+
+                Answer `done` when the list is safe, `again: <which skip is unevidenced>` when a skip
+                should be dropped or one is missing, or `replan: <why>` if the answer did not address
+                the question asked.
+                """;
+
+    private static final String P_MODULE_PLANNER = """
+                A Java project is being moved from JDK {FROM} to JDK {TARGET}, one module at a time,
+                and you are looking at ONE module. Its path is in the brief.
+
+                Say what this module needs, and nothing about its siblings. Call declared_versions and
+                check_target, both of which answer per module, and read only the rows for yours.
+
+                Most modules need very little. A Maven child usually inherits its versions and its
+                compiler settings from the parent, in which case the honest plan is that the parent
+                carries them and this module has nothing of its own. Say that. A plan that invents
+                work for a module which inherits everything produces edits that shadow the parent,
+                which is the single most expensive mistake available here: a module-local property
+                that overrides a correctly-raised parent leaves the gate reading the old target.
+
+                Answer either exactly INHERITS: <what it takes from the parent>, or a short ordered
+                list of what this module itself declares and must move.
+                """;
+
+    private static final String P_MODULE_VERIFIER = """
+                One module of a Java project has been through its pin and target work. Judge whether
+                it is finished, for that module alone.
+
+                Call declared_versions and check_target and read the rows for this module. Two questions:
+                is every floor met here, and is every target declaration here at {TARGET} or above.
+                A module that declares neither is finished, because it inherits both.
+
+                You hold the loop. `done` when the module is clear or genuinely cannot be moved and
+                your colleague said why. `again: <what is still outstanding here>` when the work fell
+                short. `replan: <why>` when what was attempted does not fit this module -- most often
+                because the declaration being chased lives in the parent, not here.
+
+                Do not send back for something that belongs to a sibling. Each module is judged on its
+                own, and the repository's verdict is the product of theirs.
+                """;
+
+    // ---- the planners of the stages that used to be pairs ----------------------------------
+    //
+    // A pair collapses deciding into doing, and the agent that chose an approach is then the one
+    // asked whether the approach was right. Each of these decides what the stage is actually for
+    // and holds no tool that writes; the verifier can then say `replan` and mean something.
+
+    private static final String P_SURVEY_PLANNER = """
+                A Java project has been QUEUED for a bump from JDK {FROM} to JDK {TARGET}. Before
+                anyone reads it, say what would settle whether the project agrees it is at {FROM}.
+
+                The hop is prescribed and nothing may change it. This is not a decision about where
+                the project should go; it is a decision about which evidence answers where it IS.
+
+                Name the files worth reading and what in them would count. The honest answer is
+                usually short: the compiler pins in the root build file, a toolchain block, a CI
+                workflow that names a JDK, a wrapper properties file. Say which of those exist here.
+
+                A project can also declare several levels at once. If it does, say which one the
+                build actually compiles with, because that is the one the question is about.
+                """;
+
+    private static final String P_SECURITY_PLANNER = """
+                A vulnerability scan of a Java project has been taken, and a colleague will read it.
+                Decide what the reading should cover.
+
+                You do not edit anything and nothing downstream lifts a dependency for security. What
+                this produces is a record, so the useful plan is about RELEVANCE: of the families in
+                this scan, which could a JDK {FROM} to {TARGET} bump plausibly move, and which are
+                untouched by it?
+
+                A bump moves versions, so a finding in a dependency the floors already raise is
+                reachable, and a finding in something the bump never touches is not. Saying which is
+                which is the whole job; a reading that credits a bump with clearing a CVE it never
+                came near is the failure this exists to prevent.
+
+                Answer as a short list of families, each marked reachable or untouched.
+                """;
+
+    private static final String P_MODULE_FILTER_PLANNER = """
+                A Java project being moved from JDK {FROM} to JDK {TARGET} has more than one module,
+                and a colleague will decide whether any should be left alone. Say where to look.
+
+                Only two things justify skipping a module: it is a VENDORED third-party source tree
+                checked into the repository, or it is GENERATED by the build rather than written.
+                Both leave evidence, and the evidence is what you are planning to find: a licence
+                that is not the project's, a file header naming another author, a .gitignore that
+                covers the directory, a plugin configured to write it.
+
+                Name the modules whose paths or contents suggest either, and what to read to confirm
+                it. If nothing does, say exactly NOTHING-SUSPECT: that is the common answer.
+
+                Keep the asymmetry in view. A module wrongly kept costs a wasted diff. A module
+                wrongly skipped keeps its old target, and the gate takes the lowest module, so it
+                fails the entire bump.
+                """;
+
+    private static final String P_TROUBLESHOOT_PLANNER = """
+                A Java project being moved to JDK {TARGET} has failed its gate, and a campaign of
+                fixes is about to start. Decide what the campaign is FOR before anyone edits.
+
+                Read the first real error in the log, not the last line. Then say which of these the
+                failure is, because they call for different campaigns: an API removed from the JDK,
+                strong encapsulation refusing access, a bytecode-reading tool too old for the new
+                class-file major, an annotation processor silently disabled, JUnit 4 to 5 fallout, or
+                something outside all of them.
+
+                Say what a finished campaign would look like -- which error should be gone, and what
+                would show it. A campaign with no stated end runs until its budget is spent.
+
+                If the failure is not this bump's doing, say exactly NOT-OURS and why. A test that
+                was red before anything moved is not a wall, and treating it as one has cost this
+                corpus whole runs.
+                """;
+
+    private static final String P_VERDICT_PLANNER = """
+                A bump from JDK {FROM} to {TARGET} ended without a green gate, and a colleague will
+                argue it into one word. Decide what is actually unsettled.
+
+                Most of the run is already decided by the builds and needs no argument. Your job is
+                to name the ONE question the execution could not answer, and what evidence in the
+                record bears on it.
+
+                Be specific about what would distinguish the candidates. A dependency with no release
+                for this JDK and a dependency nobody tried to raise both look like blocked-dependency
+                in a log, and the difference is whether an attempt appears in the record.
+
+                Answer in two or three lines: the question, and where the answer would be found.
+                """;
+
+    private static final String P_ESTIMATOR_PLANNER = """
+                A bump from JDK {FROM} to {TARGET} has finished, and a colleague will price the work
+                a developer would have done. Decide what there is to price.
+
+                Read the record and list the distinct pieces of work that actually landed: a pin
+                raised, a wall cleared, a test repaired, a module moved. What did not land is not
+                work, and neither is an edit that was reverted.
+
+                Name each piece once. The expensive error here is double counting: a fix attempted
+                three times and landed once is one piece of work, and the record shows all three.
+                """;
+
     private static final String P_TROUBLESHOOTER = """
                 You are the reflect loop's residue handler: the deterministic wall table recognised \
                 nothing in this failure. Known wall families, for orientation only — the table has \
@@ -484,13 +703,13 @@ final class Agents {
     // ---- pair 1: which hop is this, actually ----
 
     /** Reads the build files and names the hop. The deterministic detector's guess travels along. */
-    Agent surveyor() {
-        return agent("surveyor");
+    Agent surveyDoer() {
+        return agent("survey-doer");
     }
 
     /** Checks the reading against the same tree. Objects only with a correction in hand. */
-    Agent surveyCritic() {
-        return agent("survey-critic");
+    Agent surveyVerifier() {
+        return agent("survey-verifier");
     }
 
     // ---- pair 2: what the project is carrying, before anything touches it ----
@@ -505,41 +724,28 @@ final class Agents {
      * first target build is the highest-variance edit in this system. So this stage produces a
      * READING, recorded for whoever decides how a CVE count and a PASS trade against each other.
      */
-    Agent securityBefore() {
-        return agent("security-before");
+    Agent securityBeforeDoer() {
+        return agent("security-before-doer");
     }
 
     /** Judges the reading against the same scan: overclaiming is the failure mode. */
-    Agent securityBeforeCritic() {
-        return agent("security-before-critic");
+    Agent securityBeforeVerifier() {
+        return agent("security-before-verifier");
     }
 
     // ---- pair 2: the proactive steps ----
 
-    /**
-     * Executes the proactive steps: the structure-gated moves that must land BEFORE the first target
-     * build, where the deterministic pre-pass could not reach (Gradle DSL edits, module-local pins,
-     * judgement about which trigger actually fired).
-     */
-    Agent preparer() {
-        return agent("preparer");
-    }
-
-    /** Judges the preparation against the same trigger list the preparer carries. */
-    Agent prepareCritic() {
-        return agent("prepare-critic");
-    }
 
     // ---- pair 3: land the target ----
 
     /** Lands the effective bytecode target: the pins the recipe under-applied, in every dialect. */
-    Agent bumper() {
-        return agent("bumper");
+    Agent bumpDoer() {
+        return agent("bump-doer");
     }
 
     /** Checks the landing: the pin grep is re-run for it, so it judges the state, not the claim. */
-    Agent bumpCritic() {
-        return agent("bump-critic");
+    Agent bumpVerifier() {
+        return agent("bump-verifier");
     }
 
     // ---- pair 4: the residue the wall table does not know ----
@@ -554,8 +760,8 @@ final class Agents {
      * to a loop counter, and it is why this one can see the landed steps and rewind past a line that
      * led nowhere.
      */
-    Agent troubleshootLoopProposer(String floor) {
-        return runtime("troubleshoot-loop", steer("troubleshoot-loop", floor),
+    Agent stepPlanner(String floor) {
+        return runtime("step-planner", steer("step-planner", floor),
                 P_TROUBLESHOOT_LOOP);
     }
 
@@ -566,18 +772,18 @@ final class Agents {
      * steps adding up to nothing, or a declaration of defeat that had a route left. This one reads
      * the whole thing and is the only agent that may send the loop back to where it started.
      */
-    Agent troubleshootLoopCritic(String floor) {
-        return runtime("troubleshoot-loop-critic", steer("troubleshoot-loop-critic", floor),
+    Agent troubleshootVerifier(String floor) {
+        return runtime("troubleshoot-verifier", steer("troubleshoot-verifier", floor),
                 P_TROUBLESHOOT_LOOP_CRITIC);
     }
 
-    Agent troubleshooter() {
-        return agent("troubleshooter");
+    Agent stepDoer() {
+        return agent("step-doer");
     }
 
     /** Judges the troubleshooting edit: migration fix, or gaming the gate? */
-    Agent troubleCritic() {
-        return agent("trouble-critic");
+    Agent stepVerifier() {
+        return agent("step-verifier");
     }
 
     // ---- pair 6: what the bump actually did to the vulnerabilities ----
@@ -591,33 +797,33 @@ final class Agents {
      * else. What is left for a reader is the question arithmetic cannot settle: whether the delta
      * is a migration outcome or an artefact.
      */
-    Agent securityAfter() {
-        return agent("security-after");
+    Agent securityAfterDoer() {
+        return agent("security-after-doer");
     }
 
     /** Checks the judgement against the numbers, since the numbers are the one thing not in doubt. */
-    Agent securityAfterCritic() {
-        return agent("security-after-critic");
+    Agent securityAfterVerifier() {
+        return agent("security-after-verifier");
     }
 
     // ---- the closers ----
 
     /** Argues only what execution could not settle. */
-    Agent verdict() {
-        return agent("verdict");
+    Agent verdictDoer() {
+        return agent("verdict-doer");
     }
 
     /** Prices the attempt from the record. */
-    Agent verdictCritic() {
-        return agent("verdict-critic");
+    Agent verdictVerifier() {
+        return agent("verdict-verifier");
     }
 
-    Agent estimatorCritic() {
-        return agent("estimator-critic");
+    Agent estimatorVerifier() {
+        return agent("estimator-verifier");
     }
 
-    Agent estimator() {
-        return agent("estimator");
+    Agent estimatorDoer() {
+        return agent("estimator-doer");
     }
 
     // ---- wiring ----
@@ -655,13 +861,6 @@ final class Agents {
      * <p>As data they can be listed, rendered, diffed between hops, and composed. The order is the
      * order the chain reaches them.
      */
-    /** The pins this hop owes before the JDK moves, and the ones that must wait until after. */
-    List<Floors.Floor> owed(boolean afterTheJdkMoves) {
-        String text = afterTheJdkMoves ? Floors.after(hop.to()) : Floors.before(hop.to());
-        return Floors.at(hop.to()).stream()
-                .filter(f -> text.contains(f.coordinates() + " " + f.version()))
-                .toList();
-    }
 
     /** One of the two pin phases, as a pair. The list in the prompt is the list the tool checks. */
     /** The steps in a phase that are not version pins, and only the before phase has any. */
@@ -724,26 +923,106 @@ final class Agents {
                         + "because the new JDK will not compile without them.");
     }
 
-    Agent beforePins() {
-        return runtime("before-pins", Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()),
-                owed(false), trace, "before-pins"), pinPrompt(P_PINS, false));
+    Agent beforePinsDoer() {
+        return runtime("before-pins-doer", Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()), trace, "before-pins-doer"), pinPrompt(P_PINS, false));
     }
 
-    Agent beforePinsCritic() {
-        return runtime("before-pins-critic",
-                Tools.judging(ws, tree, owed(false), trace, "before-pins-critic"),
+    Agent beforePinsVerifier() {
+        return runtime("before-pins-verifier",
+                Tools.judging(ws, tree, trace, "before-pins-verifier"),
                 pinPrompt(P_PINS_CRITIC, false));
     }
 
-    Agent afterPins() {
-        return runtime("after-pins", Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()),
-                owed(true), trace, "after-pins"), pinPrompt(P_PINS, true));
+    Agent afterPinsDoer() {
+        return runtime("after-pins-doer", Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()), trace, "after-pins-doer"), pinPrompt(P_PINS, true));
     }
 
-    Agent afterPinsCritic() {
-        return runtime("after-pins-critic",
-                Tools.judging(ws, tree, owed(true), trace, "after-pins-critic"),
+    Agent afterPinsVerifier() {
+        return runtime("after-pins-verifier",
+                Tools.judging(ws, tree, trace, "after-pins-verifier"),
                 pinPrompt(P_PINS_CRITIC, true));
+    }
+
+    /**
+     * The planners: they read and decide, and they hold no tool that writes.
+     *
+     * <p>Separating them from the doers is what lets a verifier say `replan` and mean something. A
+     * producer that both chose the approach and carried it out has no way to be told the approach
+     * was wrong, only that the attempt was, so an objection to the plan came back as another attempt
+     * at the same plan until the budget ran out.
+     */
+    Agent beforePinsPlanner() {
+        return runtime("before-pins-planner",
+                Tools.judging(ws, tree, trace, "before-pins-planner"),
+                pinPrompt(P_PINS_PLANNER, false));
+    }
+
+    Agent afterPinsPlanner() {
+        return runtime("after-pins-planner",
+                Tools.judging(ws, tree, trace, "after-pins-planner"),
+                pinPrompt(P_PINS_PLANNER, true));
+    }
+
+    Agent bumpPlanner() {
+        return runtime("bump-planner",
+                Tools.checking(ws, tree, String.valueOf(hop.to()), trace, "bump-planner"),
+                floors(P_BUMP_PLANNER));
+    }
+
+    /** Which modules this bump should leave alone, and a reviewer of that answer. */
+    Agent moduleFilterDoer() {
+        return runtime("module-filter-doer", read("module-filter-doer"), floors(P_MODULE_FILTER));
+    }
+
+    Agent moduleFilterVerifier() {
+        return runtime("module-filter-verifier", read("module-filter-verifier"),
+                floors(P_MODULE_FILTER_CRITIC));
+    }
+
+    /** One module's own plan, and the verifier that closes it. Both read per module. */
+    Agent modulesPlanner() {
+        return runtime("modules-planner",
+                Tools.judging(ws, tree, trace, "modules-planner"),
+                floors(P_MODULE_PLANNER));
+    }
+
+    Agent modulesVerifier() {
+        return runtime("modules-verifier",
+                Tools.judging(ws, tree, trace, "modules-verifier"),
+                floors(P_MODULE_VERIFIER));
+    }
+
+    /** The planners of the stages that used to be pairs. None of them holds a tool that writes. */
+    Agent surveyPlanner() {
+        return runtime("survey-planner", read("survey-planner"), floors(P_SURVEY_PLANNER));
+    }
+
+    Agent securityBeforePlanner() {
+        return runtime("security-before-planner", read("security-before-planner"),
+                floors(P_SECURITY_PLANNER));
+    }
+
+    Agent securityAfterPlanner() {
+        return runtime("security-after-planner", read("security-after-planner"),
+                floors(P_SECURITY_PLANNER));
+    }
+
+    Agent moduleFilterPlanner() {
+        return runtime("module-filter-planner", read("module-filter-planner"),
+                floors(P_MODULE_FILTER_PLANNER));
+    }
+
+    Agent troubleshootPlanner() {
+        return runtime("troubleshoot-planner", steer("troubleshoot-planner", ""),
+                floors(P_TROUBLESHOOT_PLANNER));
+    }
+
+    Agent verdictPlanner() {
+        return runtime("verdict-planner", read("verdict-planner"), floors(P_VERDICT_PLANNER));
+    }
+
+    Agent estimatorPlanner() {
+        return runtime("estimator-planner", read("estimator-planner"), floors(P_ESTIMATOR_PLANNER));
     }
 
     /** The recipe runner, set once the workspace is known. Agents that pin cannot work without it. */
@@ -758,51 +1037,78 @@ final class Agents {
 
     List<SubAgentDefinition> definitions() {
         return List.of(
-                define("surveyor", "reads what JDK the project is actually on", P_SURVEYOR,
-                        read("surveyor")),
-                define("survey-critic", "checks the survey against the build files", P_SURVEY_CRITIC,
-                        read("survey-critic")),
-                define("security-before", "reads the pre-bump vulnerability scan",
-                        P_SECURITY_BEFORE, read("security-before")),
-                define("security-before-critic", "checks that reading", P_SECURITY_BEFORE_CRITIC,
-                        read("security-before-critic")),
-                define("before-pins", "raises the versions the new JDK needs, before it moves",
+                define("survey-planner", "says what would settle which JDK this project is on",
+                        floors(P_SURVEY_PLANNER), read("survey-planner")),
+                define("survey-doer", "reads what JDK the project is actually on", P_SURVEYOR,
+                        read("survey-doer")),
+                define("survey-verifier", "checks the survey against the build files", P_SURVEY_CRITIC,
+                        read("survey-verifier")),
+                define("security-before-planner", "says which CVE families this hop could move",
+                        floors(P_SECURITY_PLANNER), read("security-before-planner")),
+                define("security-before-doer", "reads the pre-bump vulnerability scan",
+                        P_SECURITY_BEFORE, read("security-before-doer")),
+                define("security-before-verifier", "checks that reading", P_SECURITY_BEFORE_CRITIC,
+                        read("security-before-verifier")),
+                define("module-filter-planner", "says where to look for a vendored or generated module",
+                        floors(P_MODULE_FILTER_PLANNER), read("module-filter-planner")),
+                define("module-filter-doer", "says which modules this bump should leave alone",
+                        floors(P_MODULE_FILTER), read("module-filter-doer")),
+                define("module-filter-verifier", "checks every skip is evidenced",
+                        floors(P_MODULE_FILTER_CRITIC), read("module-filter-verifier")),
+                define("modules-planner", "says what one module needs, and nothing about its siblings",
+                        floors(P_MODULE_PLANNER), read("modules-planner")),
+                define("before-pins-planner", "decides which pins to raise, in which module",
+                        pinPrompt(P_PINS_PLANNER, false), read("before-pins-planner")),
+                define("before-pins-doer", "raises the versions the new JDK needs, before it moves",
                         pinPrompt(P_PINS, false),
-                        Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()),
-                                owed(false), trace, "before-pins")),
-                define("before-pins-critic", "checks every pre-JDK pin actually landed",
-                        pinPrompt(P_PINS_CRITIC, false), read("before-pins-critic")),
+                        Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()), trace, "before-pins-doer")),
+                define("before-pins-verifier", "checks every pre-JDK pin landed, module by module",
+                        pinPrompt(P_PINS_CRITIC, false), read("before-pins-verifier")),
 
-                define("bumper", "moves the project to the target JDK", bumpPrompt(),
-                        Tools.raising(ws, runner, recipes(), tree, targetJdk, String.valueOf(hop.to()), trace, "bumper")),
-                define("bump-critic", "checks every pin reached the target", P_BUMP_CRITIC,
-                        Tools.checking(ws, tree, targetJdk, trace, "bump-critic")),
-                define("troubleshoot-loop", "decides the next step, and when to stop",
-                        P_TROUBLESHOOT_LOOP, steer("troubleshoot-loop", "")),
-                define("troubleshoot-loop-critic", "judges the campaign, not the step",
-                        P_TROUBLESHOOT_LOOP_CRITIC, steer("troubleshoot-loop-critic", "")),
-                define("troubleshooter", "clears one wall the deterministic table did not know",
-                        P_TROUBLESHOOTER, patch("troubleshooter")),
-                define("trouble-critic", "migration fix, or gaming the gate", P_TROUBLE_CRITIC,
-                        read("trouble-critic")),
-                define("after-pins", "raises the versions that only run on the new JDK",
+                define("bump-planner", "groups the remaining target declarations by module",
+                        floors(P_BUMP_PLANNER),
+                        Tools.checking(ws, tree, targetJdk, trace, "bump-planner")),
+                define("bump-doer", "moves the project to the target JDK", bumpPrompt(),
+                        Tools.raising(ws, runner, recipes(), tree, targetJdk, String.valueOf(hop.to()), trace, "bump-doer")),
+                define("bump-verifier", "checks every module reached the target", P_BUMP_CRITIC,
+                        Tools.checking(ws, tree, targetJdk, trace, "bump-verifier")),
+                define("troubleshoot-planner", "says what the campaign is for, and when it is over",
+                        floors(P_TROUBLESHOOT_PLANNER), steer("troubleshoot-planner", "")),
+                define("troubleshoot-verifier", "judges the campaign, not the step",
+                        P_TROUBLESHOOT_LOOP_CRITIC, steer("troubleshoot-verifier", "")),
+                define("step-planner", "decides the next step, and when to stop",
+                        P_TROUBLESHOOT_LOOP, steer("step-planner", "")),
+                define("step-doer", "clears one wall the deterministic table did not know",
+                        P_TROUBLESHOOTER, patch("step-doer")),
+                define("step-verifier", "migration fix, or gaming the gate", P_TROUBLE_CRITIC,
+                        read("step-verifier")),
+                define("after-pins-planner", "decides which post-JDK pins to raise, in which module",
+                        pinPrompt(P_PINS_PLANNER, true), read("after-pins-planner")),
+                define("after-pins-doer", "raises the versions that only run on the new JDK",
                         pinPrompt(P_PINS, true),
-                        Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()),
-                                owed(true), trace, "after-pins")),
-                define("after-pins-critic", "checks every post-JDK pin actually landed",
-                        pinPrompt(P_PINS_CRITIC, true), read("after-pins-critic")),
-                define("security-after", "reads what the bump did to the vulnerability count",
-                        P_SECURITY_AFTER, read("security-after")),
-                define("security-after-critic", "checks that judgement", P_SECURITY_AFTER_CRITIC,
-                        read("security-after-critic")),
-                define("verdict", "argues an unsettled bump into the corpus vocabulary", P_VERDICT,
-                        read("verdict")),
-                define("verdict-critic", "checks that word against what actually happened",
-                        P_VERDICT_CRITIC, read("verdict-critic")),
-                define("estimator", "prices the work a developer would have done", P_ESTIMATOR,
-                        read("estimator")),
-                define("estimator-critic", "checks the price against the work in the log",
-                        P_ESTIMATOR_CRITIC, read("estimator-critic")));
+                        Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()), trace, "after-pins-doer")),
+                define("after-pins-verifier", "checks every post-JDK pin landed, module by module",
+                        pinPrompt(P_PINS_CRITIC, true), read("after-pins-verifier")),
+                define("modules-verifier", "closes one module, or sends it back",
+                        floors(P_MODULE_VERIFIER), read("modules-verifier")),
+                define("security-after-planner", "says which findings the bump could have moved",
+                        floors(P_SECURITY_PLANNER), read("security-after-planner")),
+                define("security-after-doer", "reads what the bump did to the vulnerability count",
+                        P_SECURITY_AFTER, read("security-after-doer")),
+                define("security-after-verifier", "checks that judgement", P_SECURITY_AFTER_CRITIC,
+                        read("security-after-verifier")),
+                define("verdict-planner", "names the one question execution could not settle",
+                        floors(P_VERDICT_PLANNER), read("verdict-planner")),
+                define("verdict-doer", "argues an unsettled bump into the corpus vocabulary", P_VERDICT,
+                        read("verdict-doer")),
+                define("verdict-verifier", "checks that word against what actually happened",
+                        P_VERDICT_CRITIC, read("verdict-verifier")),
+                define("estimator-planner", "lists the distinct pieces of work that landed",
+                        floors(P_ESTIMATOR_PLANNER), read("estimator-planner")),
+                define("estimator-doer", "prices the work a developer would have done", P_ESTIMATOR,
+                        read("estimator-doer")),
+                define("estimator-verifier", "checks the price against the work in the log",
+                        P_ESTIMATOR_CRITIC, read("estimator-verifier")));
     }
 
     /**
@@ -833,11 +1139,28 @@ final class Agents {
         return runtime(d.name(), d.extraTools(), d.systemPrompt());
     }
 
-    private Agent runtime(String name, Map<ToolSpecification, ToolExecutor> tools, String prompt) {
+    /**
+     * THE LIVE AGENT, AND THE ONE PLACE AN EDIT TAKES EFFECT.
+     *
+     * <p>{@link #define} deliberately does NOT consult the store: it builds the catalogue the
+     * settings page reads, and that page has to be able to show the code's own text beside the edit
+     * in order to offer a revert at all. So the built-in travels there and the override lands here,
+     * where an agent is actually about to be asked something.
+     *
+     * <p>Read at construction, which is once per bump. A bump that changed its own instructions
+     * halfway through would be a bump nobody could reproduce.
+     */
+    private Agent runtime(String name, Map<ToolSpecification, ToolExecutor> tools, String built) {
+        String edited = Prompts.override(name, hop);
+        if (!edited.isBlank()) {
+            trace.progress("", "prompt: " + name + " is an edit, not the code's own");
+        }
+        // Effectively final, because the lambda below closes over it.
+        final String prompt = edited.isBlank() ? built : edited;
         // A critic judges; a producer works. They get different models because they fail
         // differently, and a critic that spends its budget thinking answers nothing at all.
-        boolean judges = name.endsWith("-critic") || name.equals("verdict")
-                || name.equals("estimator");
+        boolean judges = name.endsWith("-critic") || name.equals("verdict-doer")
+                || name.equals("estimator-doer");
         SubAgentRuntime runtime = new SubAgentRuntime(judges ? judging : model, prompt, tools,
                 "agent:" + name, ToolInvocationLogMode.NONE,
                 trace instanceof JsonlTrace j ? j : null);
@@ -876,33 +1199,5 @@ final class Agents {
         };
     }
 
-    /** One agent's instructions, with where it sits and what it is for. */
-    record Prompt(String name, String role, String text) { }
 
-    /**
-     * EVERY PROMPT, IN THE ORDER THE CHAIN REACHES THEM.
-     *
-     * <p>These are the whole behaviour of the system that is not code: what each agent is asked, and
-     * therefore what it does. They were readable only by opening this file, which meant the one part
-     * anybody would want to inspect was the one part nobody could see while a sweep was running.
-     */
-    static List<Prompt> prompts() {
-        return List.of(
-                new Prompt("surveyor", "producer", P_SURVEYOR),
-                new Prompt("survey-critic", "critic", P_SURVEY_CRITIC),
-                new Prompt("security-before", "producer", P_SECURITY_BEFORE),
-                new Prompt("security-before-critic", "critic", P_SECURITY_BEFORE_CRITIC),
-                new Prompt("preparer", "producer", P_PREPARER),
-                new Prompt("prepare-critic", "critic", P_PREPARE_CRITIC),
-                new Prompt("bumper", "producer", P_BUMPER),
-                new Prompt("bump-critic", "critic", P_BUMP_CRITIC),
-                new Prompt("troubleshoot-loop", "producer", P_TROUBLESHOOT_LOOP),
-                new Prompt("troubleshoot-loop-critic", "critic", P_TROUBLESHOOT_LOOP_CRITIC),
-                new Prompt("troubleshooter", "producer", P_TROUBLESHOOTER),
-                new Prompt("trouble-critic", "critic", P_TROUBLE_CRITIC),
-                new Prompt("security-after", "producer", P_SECURITY_AFTER),
-                new Prompt("security-after-critic", "critic", P_SECURITY_AFTER_CRITIC),
-                new Prompt("verdict", "closer", P_VERDICT),
-                new Prompt("estimator", "closer", P_ESTIMATOR));
-    }
 }

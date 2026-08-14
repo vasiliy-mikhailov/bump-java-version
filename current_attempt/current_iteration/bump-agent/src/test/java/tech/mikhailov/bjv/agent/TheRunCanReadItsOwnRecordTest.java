@@ -26,8 +26,8 @@ class TheRunCanReadItsOwnRecordTest {
     void rejectedAttemptsAreInItAndLandedOnesAreNotTheWholeStory(@TempDir Path dir) {
         Trace trace = trace(dir);
         trace.applied("gate", "turn 1: FAIL_test_conservation (pre=7 lost=4)");
-        trace.asked("troubleshooter", "the prompt", "WHY: added a Kaptcha bean");
-        trace.asked("trouble-critic", "the prompt", "gaming - the stub deletes image rendering");
+        trace.asked("step-doer", "the prompt", "WHY: added a Kaptcha bean");
+        trace.asked("step-verifier", "the prompt", "gaming - the stub deletes image rendering");
         trace.progress(BUMP, "step rejected; handing back to the loop");
 
         String log = trace.happened("", "", 80);
@@ -43,7 +43,7 @@ class TheRunCanReadItsOwnRecordTest {
         Trace trace = trace(dir);
         // A tool result can be tens of thousands of characters; returning it whole would put the
         // conversation inside itself.
-        trace.tool("troubleshooter", "inspect_jar", "{\"artifact\":\"a:b\"}", "x".repeat(50_000));
+        trace.tool("step-doer", "inspect_jar", "{\"artifact\":\"a:b\"}", "x".repeat(50_000));
 
         String log = trace.happened("", "", 80);
 
@@ -57,12 +57,12 @@ class TheRunCanReadItsOwnRecordTest {
         Trace trace = trace(dir);
         trace.applied("migrate", "recipes: UpgradeSpringBoot_3_5");
         trace.applied("prepare", "raised two pins");
-        trace.asked("surveyor", "p", "the project is on 17");
+        trace.asked("survey-doer", "p", "the project is on 17");
 
         assertTrue(trace.happened("migrate", "", 80).contains("UpgradeSpringBoot_3_5"));
         assertFalse(trace.happened("migrate", "", 80).contains("raised two pins"),
                 "a stage filter means that stage");
-        assertTrue(trace.happened("", "surveyor", 80).contains("the project is on 17"));
+        assertTrue(trace.happened("", "survey-doer", 80).contains("the project is on 17"));
         assertEquals("", trace.happened("nosuchstage", "", 80), "an empty answer, never a throw");
     }
 
@@ -87,13 +87,13 @@ class TheRunCanReadItsOwnRecordTest {
         Trace trace = trace(dirFor("rank"));
         // The shape of a real trace: mostly tool calls, with the decisions buried in them.
         for (int i = 1; i <= 30; i++) {
-            trace.tool("surveyor", "read_file", "{\"path\":\"pom" + i + ".xml\"}", "<project/>");
+            trace.tool("survey-doer", "read_file", "{\"path\":\"pom" + i + ".xml\"}", "<project/>");
         }
         trace.applied("gate", "turn 1: FAIL_test_conservation (pre=7 lost=4)");
         for (int i = 1; i <= 30; i++) {
-            trace.tool("surveyor", "read_file", "{\"path\":\"more" + i + ".xml\"}", "<project/>");
+            trace.tool("survey-doer", "read_file", "{\"path\":\"more" + i + ".xml\"}", "<project/>");
         }
-        trace.asked("trouble-critic", "p", "gaming - the stub deletes image rendering");
+        trace.asked("step-verifier", "p", "gaming - the stub deletes image rendering");
 
         String log = trace.happened("", "", 5);
 

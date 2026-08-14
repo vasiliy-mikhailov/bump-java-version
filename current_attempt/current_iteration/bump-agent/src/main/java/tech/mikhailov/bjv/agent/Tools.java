@@ -270,22 +270,76 @@ final class Tools {
                         + "org.openrewrite.maven.UpgradeDependencyVersion, "
                         + "org.openrewrite.maven.UpgradeParentVersion, "
                         + "org.openrewrite.maven.UpgradePluginVersion, "
+                        // The one for pinning a version a project does not declare directly, which
+                        // was missing from this list. An agent needing it invented
+                        // `AddDependencyManagementDependency`, a plausible name that does not
+                        // exist, and the run reported success having done nothing.
+                        + "org.openrewrite.maven.AddManagedDependency (to pin a version in "
+                        + "dependencyManagement, including one arriving transitively), "
+                        + "org.openrewrite.maven.ChangePropertyValue (when the version lives in a "
+                        + "property a dependency reads), "
                         + "org.openrewrite.gradle.UpgradeDependencyVersion, "
                         + "org.openrewrite.gradle.UpgradeTransitiveDependencyVersion, "
-                        + "org.openrewrite.gradle.UpdateGradleWrapper. Emit BOTH the maven and the "
+                        + "org.openrewrite.gradle.UpdateGradleWrapper. "
+                        // THE FRAMEWORK MIGRATIONS, which were missing entirely. An agent that
+                        // needs to move Spring Boot and is shown only version-bumping recipes will
+                        // assemble the move by hand out of parent bumps and renames, which is far
+                        // more likely to go wrong than one recipe that chains the whole thing.
+                        + "For Spring Boot, prefer the migration recipe over bumping the parent by "
+                        + "hand: org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7, "
+                        + "org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5 (which resolves "
+                        + "the newest 3.5 patch itself and chains Framework 6, Security 6.5, Cloud "
+                        + "2025 and the property renames), and "
+                        // Two doers in one sweep read a floor that named 3.5.4 and wrote exactly
+                        // 3.5.4 into the parent block. It is a real version and the build was
+                        // green, so nothing complained. It is also twelve patch releases behind
+                        // its own line, and it manages Tomcat 10.1.43 with eleven CRITICAL+HIGH.
+                        // The repo whose doer ran the recipe instead landed on 3.5.16 and went
+                        // 63 to 2. The preference stated here is not a style note.
+                        + "A literal parent bump stops at the number you type, and the Boot patch "
+                        + "releases are where the CVE fixes are, so type a version only when no "
+                        + "migration recipe covers the line. "
+                        + "org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0. Note the "
+                        + "package differs by line: boot2, boot3, boot4. There is no free 4.1 "
+                        + "recipe. "
+                        // The jakarta rename, which is what a Boot 2->3 move MEANS in source, and
+                        // which was being attempted by hand with edit_file.
+                        + "Moving from Boot 2 to Boot 3 renames javax to jakarta in source, and "
+                        + "there are recipes for that rather than editing imports by hand: "
+                        + "org.openrewrite.java.migrate.jakarta.JavaxEEApiToJakarta for the lot, or "
+                        + "JavaxMailToJakartaMail and JavaxServletToJakartaServlet for one API. "
+                        + "Emit BOTH the maven and the "
                         + "gradle form for each pin: the one that does not match this project is a "
-                        + "no-op, so one recipe works either way.")
+                        + "no-op, so one recipe works either way. USE ONLY NAMES FROM THIS LIST: a "
+                        + "recipe that does not exist is skipped by OpenRewrite with a warning and "
+                        + "the run still reports success, so a guessed name changes nothing and "
+                        + "looks like it worked.")
                 .parameters(JsonObjectSchema.builder()
-                        .addStringProperty("yaml", "a complete rewrite.yml, including "
-                                + "'type:', 'name:' and 'recipeList:'")
+                        .addStringProperty("yaml", """
+                                A complete rewrite.yml. The header is fixed and the harness supplies \
+                                it if you leave it out, so what matters is the recipeList:
+
+                                type: specs.openrewrite.org/v1beta/recipe
+                                name: com.bjv.Bump
+                                displayName: what this run is for
+                                recipeList:
+                                  - org.openrewrite.maven.UpgradeDependencyVersion:
+                                      groupId: org.projectlombok
+                                      artifactId: lombok
+                                      newVersion: 1.18.46
+
+                                `type` is the document KIND and has exactly one legal value, the one \
+                                above. It is not the id of the recipe you want; that goes in \
+                                recipeList. Every entry there takes its arguments as an indented \
+                                map, as shown.""")
                         .required("yaml")
                         .build())
                 .build();
         ToolExecutor exec = (request, memoryId) -> {
             String yaml = Reasoning.field(request.arguments(), "yaml");
             if (!yaml.contains("recipeList")) {
-                return "that is not a recipe file: it needs type, name and recipeList. "
-                        + "See the tool description for the recipes worth using.";
+                return "that is not a recipe file: it needs a recipeList. "
+                        + "See the tool description for the shape and the recipes worth using.";
             }
             try {
                 return migrate.apply(yaml, jdk);
@@ -305,26 +359,36 @@ final class Tools {
      * record made it necessary: a preparer answering NOTHING-TO-DO while its own stage recorded
      * edits, and a troubleshooter reporting a fix it had already reverted.
      */
-    private static Map<ToolSpecification, ToolExecutor> pins(Path root, List<Floors.Floor> owed) {
+    /**
+     * WHAT THE BUILD FILES SAY, AND NOTHING ABOUT WHETHER IT IS GOOD ENOUGH.
+     *
+     * <p>This was {@code check_pins}: it took the floor list and answered "ok" or "OUTSTANDING" per
+     * pin. To do that it had to be told which artifacts mattered, and it was told by a regex parsing
+     * the same prose the agents were reading. The two readers disagreed exactly once and it was
+     * enough — the regex looked for {@code org.springframework.boot:spring-boot}, an artifact no
+     * application declares, concluded every floor was met, and the phase skipped without showing any
+     * agent the instruction it was gating. Every Spring project in the corpus kept its Boot version
+     * while the log read "every pin met".
+     *
+     * <p>So the verdict moved to the planner, which holds the floor list as prose and can see that a
+     * parent block is how a Maven project states its Boot line. This reports.
+     */
+    private static Map<ToolSpecification, ToolExecutor> declaredVersions(Path root) {
         ToolSpecification spec = ToolSpecification.builder()
-                .name("check_pins")
-                .description("Read the build files and report, for each version this phase is "
-                        + "responsible for, what the project currently declares and whether it "
-                        + "meets the floor. This is the fact; what anyone said they did is not.")
+                .name("declared_versions")
+                .description("Read the build files and report, PER MODULE, every version the module "
+                        + "itself declares and WHERE it declares it: a parent block, a dependency, a "
+                        + "plugin, a property, a Gradle string, the wrapper. A module is described "
+                        + "by its own build files only, so a version in one says nothing about a "
+                        + "sibling, and a module that declares nothing says so rather than being "
+                        + "omitted. Where a version lives decides which recipe can move it. This "
+                        + "reports what the project says; deciding whether it is high enough is "
+                        + "your job, against the floors you were given.")
                 .parameters(JsonObjectSchema.builder().build())
                 .build();
         ToolExecutor exec = (request, memoryId) -> {
             try {
-                List<Pins.State> states = Pins.check(root, owed);
-                StringBuilder out = new StringBuilder();
-                for (Pins.State st : states) {
-                    out.append(st.satisfied() ? "  ok       " : "  OUTSTANDING  ")
-                            .append(st.describe()).append('\n');
-                }
-                long left = states.stream().filter(st -> !st.satisfied()).count();
-                out.append(left == 0 ? "\nevery pin in this phase is at or above its floor"
-                        : "\n" + left + " still outstanding");
-                return out.toString();
+                return Declared.report(root, Modules.of(root));
             } catch (IOException e) {
                 return "could not read the build files: " + e.getMessage();
             }
@@ -391,11 +455,11 @@ final class Tools {
 
     /** A pin-phase producer: it may run recipes and check what landed, and edit nothing by hand. */
     static Map<ToolSpecification, ToolExecutor> pinning(Path root, Migrate migrate, Tree tree,
-                                                        String jdk, List<Floors.Floor> owed,
+                                                        String jdk,
                                                         Trace trace, String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
         tools.putAll(recipe(migrate, jdk));
-        tools.putAll(pins(root, owed));
+        tools.putAll(declaredVersions(root));
         tools.putAll(jar());
         tools.putAll(gradle());
         tools.putAll(history(tree, trace));
@@ -404,10 +468,10 @@ final class Tools {
 
     /** A pin-phase critic: it reads and checks, and cannot run a recipe of its own. */
     static Map<ToolSpecification, ToolExecutor> judging(Path root, Tree tree,
-                                                        List<Floors.Floor> owed, Trace trace,
+                                                        Trace trace,
                                                         String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
-        tools.putAll(pins(root, owed));
+        tools.putAll(declaredVersions(root));
         tools.putAll(jar());
         tools.putAll(history(tree, trace));
         return recorded(tools, trace, agent);

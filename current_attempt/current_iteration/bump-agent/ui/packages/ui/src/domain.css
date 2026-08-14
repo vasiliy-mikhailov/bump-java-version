@@ -1,0 +1,97 @@
+/**
+ * WHAT THIS TOOL'S DOMAIN NEEDS AND THE PORTAL HAS NO WORD FOR.
+ *
+ * Everything in `tokens.css` is the portal's and is copied unchanged. This file is the small set the
+ * portal cannot supply, because it has no concept of a bump that failed test conservation or a
+ * verifier that sent a stage back.
+ *
+ * TWO RULES, so this does not become a second palette:
+ *
+ * 1. Every value is expressed against the portal's tokens where one fits, and is a flat hex only
+ *    where the meaning is genuinely a status colour the portal does not define. A status colour that
+ *    drifts from the surface it sits on is what makes a mounted zone look pasted in.
+ * 2. If the portal grows a semantic status scale, this file shrinks to aliases of it. It is meant to
+ *    be the smallest thing that works, not a design system.
+ *
+ * The names are the states themselves — `--state-blocked-dependency`, not `--colour-grey-2` —
+ * because the next reader's question is always "what colour is blocked-dependency", never "where is
+ * grey 2 used".
+ *
+ * The hexes match the sibling tool's `domain.css` where the meaning matches, deliberately: a PASS
+ * here and a verified marker there are both "this worked", and two tools disagreeing about the
+ * colour of success is the same failure as a zone with its own palette, one level down.
+ */
+
+:root {
+  /* === How a bump settled ===
+     One success, several failures, and the failures are not interchangeable. A lost test is a
+     REGRESSION and reads as alarm; a dependency with no release for this JDK is a fact about the
+     world and reads as informational. Colouring them alike is how a triage queue becomes a wall of
+     red that nobody sorts. */
+  --state-pass: #1a7f37;
+  --state-fail-test-conservation: #cf222e;
+  --state-fail-build-post: #cf222e;
+  --state-fail-target-not-bumped: #bf8700;
+  --state-fail-no-main-bytecode: #bf8700;
+  --state-no-baseline: #6e7781;
+  --state-blocked-dependency: #8250df;
+  --state-behavior-change: #bf8700;
+  --state-infra: #6e7781;
+  --state-bumping: #1f6feb;
+
+  /* === What a step is ===
+     A planner decides, a doer edits, a verifier judges. The reader's question on the chain strip is
+     "which of these can change the workspace", and only the doer can, so only the doer is warm. */
+  --role-planner: #6e7781;
+  --role-doer: #1f6feb;
+  --role-verifier: #8250df;
+
+  /* === Agent or not ===
+     A deterministic step is not a weaker agent; it is a different kind of thing, and the strip has
+     to say so. The gate deciding a bump is the most trustworthy event on the page. */
+  --step-agent: var(--border-strong);
+  --step-deterministic: #1a7f37;
+
+  /* === What a verifier said ===
+     `again` and `replan` are both objections and are not the same objection: one keeps the plan, one
+     throws it away. A strip that drew them alike hid the distinction the loop exists to make. */
+  --verdict-done: #1a7f37;
+  --verdict-again: #bf8700;
+  --verdict-replan: #cf222e;
+
+  /* === CVE movement ===
+     Cleared is good, introduced is not, and remaining is neither: it is the number that was always
+     going to be there. */
+  --cve-cleared: #1a7f37;
+  --cve-introduced: #cf222e;
+  --cve-remaining: var(--text-tertiary);
+}
+
+.dark {
+  /* Lifted for contrast against the portal's dark surfaces, which are darker than these hexes were
+     chosen against. The hues do not move: a reader switching themes must not have to relearn which
+     colour means lost-a-test. */
+  --state-pass: #3fb950;
+  --state-fail-test-conservation: #f85149;
+  --state-fail-build-post: #f85149;
+  --state-fail-target-not-bumped: #d29922;
+  --state-fail-no-main-bytecode: #d29922;
+  --state-no-baseline: #8b949e;
+  --state-blocked-dependency: #a371f7;
+  --state-behavior-change: #d29922;
+  --state-infra: #8b949e;
+  --state-bumping: #58a6ff;
+
+  --role-planner: #8b949e;
+  --role-doer: #58a6ff;
+  --role-verifier: #a371f7;
+
+  --step-deterministic: #3fb950;
+
+  --verdict-done: #3fb950;
+  --verdict-again: #d29922;
+  --verdict-replan: #f85149;
+
+  --cve-cleared: #3fb950;
+  --cve-introduced: #f85149;
+}

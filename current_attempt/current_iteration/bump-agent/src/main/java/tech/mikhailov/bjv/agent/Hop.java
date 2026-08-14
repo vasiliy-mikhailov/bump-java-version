@@ -49,11 +49,6 @@ record Hop(int from, int to) {
         return java.util.Arrays.stream(LTS).filter(this::crosses).boxed().toList();
     }
 
-    /** The pins this hop applies. The rest are other hops' business and are not mentioned. */
-    List<Floors.Floor> floors() {
-        return Floors.at(to);
-    }
-
     /**
      * The floors as instructions, for the agents that are told to apply them.
      *

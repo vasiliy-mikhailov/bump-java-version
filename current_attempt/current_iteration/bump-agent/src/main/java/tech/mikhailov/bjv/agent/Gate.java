@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,19 @@ final class Gate {
      * hide a real loss, so the fold has to be reversible.
      */
     static Set<String> passing(Path root) throws IOException {
+        return passing(root, List.of());
+    }
+
+    /**
+     * The same, stopping where another module begins.
+     *
+     * <p>A module's verdict is read off the reactor build that already ran, by walking one directory
+     * lower rather than by building anything again. Walking a parent descends into its children, so
+     * without this a parent would be credited with every test its modules ran and no module could be
+     * told apart from the aggregate. That aggregate is exactly what the repo-level gate already
+     * measures, and measuring it twice is not a per-module answer.
+     */
+    static Set<String> passing(Path root, List<Path> stopAt) throws IOException {
         Set<String> out = new LinkedHashSet<>();
         if (!Files.isDirectory(root)) {
             return out;
@@ -91,6 +105,7 @@ final class Gate {
         List<Path> reports = new ArrayList<>();
         try (var s = Files.walk(root)) {
             s.filter(Files::isRegularFile)
+                    .filter(p -> !within(p, stopAt))
                     .filter(p -> {
                         String n = p.getFileName().toString();
                         return n.startsWith("TEST-") && n.endsWith(".xml");
@@ -277,10 +292,16 @@ final class Gate {
      * Groovy DO contribute: their target is controllable, so an unbumped one is a real failure.
      */
     static int effectiveTarget(Path root) throws IOException {
+        return effectiveTarget(root, List.of());
+    }
+
+    /** The same, stopping where another module begins. See {@link #passing(Path, List)}. */
+    static int effectiveTarget(Path root, List<Path> stopAt) throws IOException {
         List<Integer> controllable = new ArrayList<>();
         List<Integer> scala = new ArrayList<>();
         try (var walk = Files.walk(root)) {
-            for (Path f : walk.filter(Files::isRegularFile).toList()) {
+            for (Path f : walk.filter(Files::isRegularFile)
+                    .filter(p -> !within(p, stopAt)).toList()) {
                 String name = f.getFileName().toString();
                 if (!name.endsWith(".class") || name.equals("module-info.class")) {
                     continue;
@@ -366,6 +387,77 @@ final class Gate {
             }
         }
         return false;
+    }
+
+    /** Whether a path lies under any of the directories a walk was told to stop at. */
+    private static boolean within(Path p, List<Path> stopAt) {
+        if (stopAt.isEmpty()) {
+            return false;
+        }
+        Path here = p.normalize();
+        return stopAt.stream().anyMatch(here::startsWith);
+    }
+
+    /**
+     * WHICH MODULE IS BEHIND, which the repo-level verdict cannot say.
+     *
+     * <p>{@link #effectiveTarget(Path)} is a single minimum across the whole tree, so one module
+     * left on the old target reads as an unbumped repository and the evidence points nowhere. This
+     * is the same two reads, per module, off the output the one reactor build already wrote. No
+     * second build happens here and none should: builds are the expensive part of a bump.
+     */
+    record ModuleState(Modules.Module module, Set<String> passing, int effectiveTarget, int lost,
+                       List<String> missing) {
+
+        /** A module is clear when it kept its tests and reached the target it was asked for. */
+        boolean ok(int target) {
+            return lost == 0 && (effectiveTarget == -1 || effectiveTarget >= target);
+        }
+
+        String describe(int target) {
+            String where = module.isRoot() ? "root" : module.path();
+            String reached = effectiveTarget == -1 ? "no class files" : String.valueOf(effectiveTarget);
+            return where + "  target " + reached + (effectiveTarget >= target || effectiveTarget == -1
+                    ? "" : " (below " + target + ")")
+                    + ", " + passing.size() + " passing"
+                    + (lost == 0 ? "" : ", lost " + lost + ": " + String.join(", ",
+                            missing.subList(0, Math.min(3, missing.size()))));
+        }
+    }
+
+    /**
+     * Read every module's own state, with each walk stopping where the next module begins.
+     *
+     * <p>The {@code baseline} argument is the same read taken before the bump, so a module's lost
+     * tests are its own rather than the repository's. A module absent from the baseline map is new
+     * to this run and has nothing to conserve.
+     */
+    static List<ModuleState> perModule(Path ws, Map<String, Set<String>> baseline)
+            throws IOException {
+        List<Modules.Module> all = Modules.of(ws);
+        List<ModuleState> out = new ArrayList<>();
+        for (Modules.Module m : all) {
+            List<Path> nested = all.stream()
+                    .filter(x -> !x.path().equals(m.path()))
+                    .filter(x -> m.isRoot() || x.path().startsWith(m.path() + "/"))
+                    .map(x -> x.in(ws).normalize())
+                    .toList();
+            Path root = m.in(ws);
+            Set<String> now = passing(root, nested);
+            Set<String> was = baseline.getOrDefault(m.path(), Set.of());
+            List<String> missing = was.stream().filter(t -> !now.contains(t)).toList();
+            out.add(new ModuleState(m, now, effectiveTarget(root, nested), missing.size(), missing));
+        }
+        return out;
+    }
+
+    /** The same read taken before anything moved, which is what a module's loss is measured against. */
+    static Map<String, Set<String>> baselinePerModule(Path ws) throws IOException {
+        Map<String, Set<String>> out = new LinkedHashMap<>();
+        for (ModuleState s : perModule(ws, Map.of())) {
+            out.put(s.module().path(), s.passing());
+        }
+        return out;
     }
 
     /** Constant-pool tag to the bytes that follow it. Long and Double take two slots. */
