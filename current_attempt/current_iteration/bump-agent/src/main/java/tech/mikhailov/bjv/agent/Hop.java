@@ -49,7 +49,7 @@ record Hop(int from, int to) {
         return java.util.Arrays.stream(LTS).filter(this::crosses).boxed().toList();
     }
 
-    /** The version floors that can fire at this target. The rest cannot, and are not mentioned. */
+    /** The pins this hop applies. The rest are other hops' business and are not mentioned. */
     List<Floors.Floor> floors() {
         return Floors.at(to);
     }
@@ -61,9 +61,9 @@ record Hop(int from, int to) {
      * covering every target. At 11 that is seven rules; the prompt used to carry all sixteen.
      */
     String floorsAsInstructions() {
-        return floors().stream()
-                .map(f -> "                - " + f.coordinates() + ": " + f.version()
-                        + " — " + f.why())
+        return Floors.forTarget(to).lines()
+                .filter(l -> !l.isBlank())
+                .map(l -> "                - " + l.strip())
                 .collect(Collectors.joining("\n"));
     }
 

@@ -153,70 +153,36 @@ final class Sweep {
     }
 
     /**
-     * Which bumps are in flight, read from the claims the launcher writes.
+     * Which bumps are in flight, from the claims the launcher heartbeats.
      *
-     * <p>THE CONTAINER NAMES CANNOT ANSWER THIS. A lane is named after its manifest id --
-     * {@code bjvagent_rr_17_354} -- and its results directory after repo, sha and hop, and nothing
-     * in the results tree maps one to the other. Asking docker and matching on the name reported
-     * every running lane as dead: a first supervisor round announced fifteen bumps had "died
-     * without filing a verdict" while three of them were working.
+     * <p>NOTHING HERE ASKS THE DOCKER DAEMON, and that is the point. A watcher that could stop a
+     * lane needed the socket, and a socket in the same container as a page on the public internet
+     * is a bad trade for one fewer container. The lane heartbeats its own claim every thirty
+     * seconds and stops itself when a postponement appears, so liveness is a file's age and the
+     * kill belongs to the process that was already holding the container name.
      *
-     * <p>The claim file is keyed exactly like the results directory, exists only while a lane holds
-     * it, and is what the launcher itself checks before starting a bump. A claim with no agent
-     * running anywhere is stale rather than live, which is the same reading the launcher takes.
+     * <p>A claim older than the heartbeat is a lane that died without releasing it, which reads as
+     * not running -- the same conclusion the daemon would have given, from a cheaper question.
      */
+    private static final long HEARTBEAT_STALE_MS = 180_000;
+
     private List<String> claimed() {
         Path claims = results.resolve("claims");
         if (!Files.isDirectory(claims)) {
             return List.of();
         }
+        long now = System.currentTimeMillis();
         List<String> held = new ArrayList<>();
         try (var files = Files.list(claims)) {
-            files.forEach(f -> held.add(f.getFileName().toString()));
+            for (Path f : files.toList()) {
+                if (now - Files.getLastModifiedTime(f).toMillis() < HEARTBEAT_STALE_MS) {
+                    held.add(f.getFileName().toString());
+                }
+            }
         } catch (IOException unreadable) {
             return List.of();
         }
-        return held.isEmpty() || !anyAgentRunning() ? List.of() : held;
-    }
-
-    /** Whether any lane at all is up, which is what makes a leftover claim readable as stale. */
-    private boolean anyAgentRunning() {
-        try {
-            Shell.Output out = Shell.run(results, java.util.Map.of(),
-                    java.time.Duration.ofSeconds(30), "docker", "ps", "--format", "{{.Names}}");
-            return out.ok() && out.text().lines().anyMatch(n -> n.startsWith("bjvagent_"));
-        } catch (IOException | InterruptedException unreachable) {
-            Thread.currentThread().interrupt();
-            return false;
-        }
-    }
-
-    /**
-     * The container running a given bump, found by what it was started with.
-     *
-     * <p>A lane is named after its manifest id and its results directory after repo, sha and hop,
-     * so neither name can be derived from the other. The bump string is passed to the container as
-     * an argument, though, which makes the container itself the only thing that knows both.
-     */
-    String containerFor(String bump) {
-        try {
-            Shell.Output ps = Shell.run(results, java.util.Map.of(),
-                    java.time.Duration.ofSeconds(30), "docker", "ps", "--format", "{{.Names}}");
-            if (!ps.ok()) {
-                return "";
-            }
-            for (String name : ps.text().lines().filter(n -> n.startsWith("bjvagent_")).toList()) {
-                Shell.Output args = Shell.run(results, java.util.Map.of(),
-                        java.time.Duration.ofSeconds(30),
-                        "docker", "inspect", "--format", "{{json .Args}}", name);
-                if (args.ok() && args.text().contains(bump)) {
-                    return name;
-                }
-            }
-        } catch (IOException | InterruptedException unreachable) {
-            Thread.currentThread().interrupt();
-        }
-        return "";
+        return held;
     }
 
     // ---- the digest a supervisor reads ----

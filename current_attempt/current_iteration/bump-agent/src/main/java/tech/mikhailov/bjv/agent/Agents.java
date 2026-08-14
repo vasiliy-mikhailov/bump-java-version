@@ -48,6 +48,7 @@ final class Agents {
     private final String targetJdk;
     private final Hop hop;
     private final Tree tree;
+    private Migrate migrate;
 
     Agents(ChatModel model, Path ws, Runner runner, Tree tree, Hop hop, Trace trace) {
         this(model, Model.forCritic(trace), ws, runner, tree, hop, trace);
@@ -85,6 +86,60 @@ final class Agents {
                 .replace("{TARGET}", String.valueOf(hop.to()))
                 .replace("{FROM}", String.valueOf(hop.from()));
     }
+
+    private static final String P_PINS = """
+                You raise dependency versions on a Java project that is being moved from JDK {FROM}
+                to JDK {TARGET}. {WHEN}
+
+                THESE, AND NOTHING ELSE:
+
+{PINS}
+
+                Each line is group:artifact, the version it must be at least, and why. They are
+                floors: a project already at or above one is finished, and a project that does not
+                use a dependency at all is not given it. Never lower a version.
+
+                USE apply_recipe. Do not edit a pom or a build.gradle by hand. A version can live in
+                a dependency, in dependencyManagement, in a property the dependency reads, in a
+                Gradle string or in a version catalog, and hand-editing means guessing which -- the
+                recipes know, for both build systems. Emit the maven form AND the gradle form for
+                every pin in one recipe file; the one that does not match this project matches
+                nothing, which is what lets one recipe serve either.
+
+                Then call check_pins and read what the project actually says. If something is still
+                outstanding, look at why -- the wrong recipe for where that version lives, or an
+                artifact this project genuinely does not use -- and run another recipe. The check is
+                the fact; your recollection of what you ran is not.
+
+                {ALSO}
+
+                Answer one line: DONE: <what you raised, and what was already satisfied>. If a pin
+                cannot be met, say exactly BLOCKED: <which, and what the project does that prevents
+                it>. Both are useful answers. A claim that everything is done when check_pins says
+                otherwise is the one answer that is not.
+                """;
+
+    private static final String P_PINS_CRITIC = """
+                A colleague was asked to raise these versions on a project moving from JDK {FROM} to
+                JDK {TARGET}. {WHEN}
+
+{PINS}
+
+                Call check_pins and read what the build files say. That is the whole question: is
+                every pin at or above its floor, or is one outstanding.
+
+                A dependency the project does not use is satisfied -- these are floors, not
+                requirements, and adding one would be a different bump. A version above the floor is
+                satisfied. Only a version BELOW the floor is outstanding.
+
+                Answer `done` when nothing is outstanding, or when what remains is genuinely
+                unreachable and your colleague said so.
+
+                Otherwise answer `again: <which pins, and what to try>`. Name them from check_pins
+                rather than from the diff, and say something the next attempt can act on: which
+                recipe suits where that version actually lives in this project. An objection without
+                that is the same as `done`.
+                """;
 
     private static final String P_SURVEYOR = """
                 You are given a Java project and the hop it has been QUEUED for, as `from -> to`.
@@ -197,19 +252,28 @@ final class Agents {
                 most damaging first.
                 """;
     private static final String P_BUMPER = """
-                A migration recipe has run and a deterministic sweep has raised what it could. Your \
-                job is what is LEFT: every version pin, toolchain block, property or compiler flag \
-                still below the target in ANY module, in whichever dialect this build speaks \
-                (maven.compiler.source/target/release, java.version, sourceCompatibility, \
-                kotlin jvmTarget, JavaLanguageVersion.of, a bare <release> inside a plugin).
+                You move a Java project from JDK {FROM} to JDK {TARGET}. The dependencies the new
+                JDK needs are already in place; this is the step that actually changes the target.
 
-                The gate measures the MINIMUM class-file major across every compiled main class \
-                (55 for 11, 61 for 17, 65 for 21, 69 for 25), so ONE unraised module fails the whole \
-                bump while the build stays green. A green build is not the goal; the landed target is.
+                START WITH THE RECIPES. apply_recipe runs them, and they do the structural work no
+                hand edit should attempt -- the module changes, the plugin floors, the compatibility
+                settings, on either build system:
 
-                The pins found still below target travel in the brief. Raise each with edit_file, \
-                then STOP and answer one line: DID: <what you raised>. If the list is genuinely empty \
-                and your own grep agrees, answer exactly NOTHING-TO-DO: <why>.
+{RECIPES}
+
+                THEN FINISH WHAT THEY MISSED. check_target reads every build file and reports the
+                source, target, release, sourceCompatibility, jvmTarget and toolchain declarations
+                still below {TARGET}, with file and line. Recipes do not reach every dialect a
+                project can use, so read that list and raise what is left with edit_file.
+
+                Then call check_target AGAIN. It is the same measurement the gate makes, so a
+                declaration you leave behind is a bump that fails four stages later with nothing
+                left to try. Do not answer while it still reports something below {TARGET} unless
+                you can say why that one cannot move.
+
+                Raise, never lower, and change nothing that is not a version or a compatibility
+                setting. Answer one line: DID: <what the recipes moved, what you raised by hand, and
+                what check_target says now>.
                 """;
     private static final String P_BUMP_CRITIC = """
                 A colleague raised a project's remaining Java target pins. Judge ONE question: after \
@@ -327,6 +391,57 @@ final class Agents {
                 One word first, then the argument. These mean different things to whoever reads this \
                 next, so choose the word for the reader.
                 """;
+    private static final String P_VERDICT_CRITIC = """
+                A colleague has argued what an unsettled bump IS, in one of the words the corpus
+                records. That word is what this repository will be counted as, and nobody after you
+                re-reads the log to check it, so you are the last chance to catch one that is wrong.
+
+                Check the argument against what actually happened. what_happened gives you the run's
+                own event log, inspect_jar opens any dependency the argument names, and read_file
+                reaches the workspace. The failure mode to look for is a verdict that reads well and
+                is not in the record: this corpus has one where a troubleshooter reported a
+                dependency as incompatible with JDK 21 after writing `new` against an interface, and
+                the verdict repeated that reasoning rather than the compile error underneath it.
+
+                Three things to test, in order.
+
+                Is the word right? `blocked-dependency` needs a dependency with no compatible
+                version, shown rather than asserted -- which versions exist, and why none of them
+                work. `behavior-change` needs the changed behaviour named, not a failing test named.
+                `infra` needs the environment to have failed, and a tooling failure that is really a
+                migration failure is the most expensive mislabel here, because it removes the repo
+                from the results rather than counting it as a loss.
+
+                Is it what the log says? A verdict built on a step that was later reverted, or on a
+                claim some critic rejected, is worse than no verdict.
+
+                Is anything missing that would change the word? A wall nobody tried, a version
+                nobody checked.
+
+                Answer `sound`, with what you verified. Or `wrong: <the word it should be, and the
+                evidence>`. If you cannot check it either way, answer `sound`: an unverifiable
+                objection would replace one guess with another.
+                """;
+
+    private static final String P_ESTIMATOR_CRITIC = """
+                A colleague has priced what this bump would have cost a competent Java developer who
+                had not seen the code before. You check the number.
+
+                It is not a scoring input and nothing downstream depends on it, which is exactly why
+                it drifts: an unchecked number gets read later as though it were measured.
+
+                Read the run with what_happened and ask three things. Does the total match the work
+                the log shows -- the walls actually hit, the edits actually made, the attempts that
+                failed and were retried? Is anything charged that did not happen, or charged twice
+                because the trace records several attempts at the same bump? And is anything real
+                left out: a wall the deterministic table cleared in one turn still cost a person the
+                diagnosis, and a dead end still cost the time it took to abandon.
+
+                Answer `sound`, or `off: <the number it should be, and which items are wrong>`.
+                Being roughly right matters more than being precise -- an estimate within a
+                reasonable band is sound, and only a total that the log does not support is off.
+                """;
+
     private static final String P_ESTIMATOR = """
                 You read a completed attempt to bump a Java project one LTS step, and estimate what \
                 the same work would have cost a competent Java developer who had not seen this code \
@@ -493,6 +608,14 @@ final class Agents {
     }
 
     /** Prices the attempt from the record. */
+    Agent verdictCritic() {
+        return agent("verdict-critic");
+    }
+
+    Agent estimatorCritic() {
+        return agent("estimator-critic");
+    }
+
     Agent estimator() {
         return agent("estimator");
     }
@@ -532,6 +655,107 @@ final class Agents {
      * <p>As data they can be listed, rendered, diffed between hops, and composed. The order is the
      * order the chain reaches them.
      */
+    /** The pins this hop owes before the JDK moves, and the ones that must wait until after. */
+    List<Floors.Floor> owed(boolean afterTheJdkMoves) {
+        String text = afterTheJdkMoves ? Floors.after(hop.to()) : Floors.before(hop.to());
+        return Floors.at(hop.to()).stream()
+                .filter(f -> text.contains(f.coordinates() + " " + f.version()))
+                .toList();
+    }
+
+    /** One of the two pin phases, as a pair. The list in the prompt is the list the tool checks. */
+    /** The steps in a phase that are not version pins, and only the before phase has any. */
+    private String also(boolean after) {
+        if (after) {
+            return "";
+        }
+        return """
+                TWO THINGS THAT ARE NOT VERSION PINS, and only apply if the project shows the
+                trigger. Use apply_recipe for these too --
+                org.openrewrite.maven.ChangePropertyValue reaches a property in every pom.
+
+                - a test dependency that reflects into the process environment (junit-pioneer,
+                  system-lambda, system-rules): the test fork needs
+                  --add-opens java.base/java.util=ALL-UNNAMED and java.base/java.lang=ALL-UNNAMED,
+                  set at the root so modules inherit it.
+                - target 23 or above with annotation processors on the classpath: set
+                  maven.compiler.proc=full. JDK 23 stopped running them by default, so a floored
+                  Lombok that is never invoked is the same as no Lombok at all.
+                """;
+    }
+
+    /**
+     * The bumper's instructions, carrying the recipe program for THIS hop.
+     *
+     * <p>These recipes used to run in a deterministic pass of their own, which chose them by a
+     * lookup and then inspected the project to pick the Spring one -- judgement, in a step drawn as
+     * code, and wrong on six of 102 workspaces until it was fixed. The recipes are named here and
+     * the agent runs them, checks what moved, and runs more if the target is still not met.
+     */
+    private String bumpPrompt() {
+        StringBuilder recipes = new StringBuilder();
+        recipes.append("                - org.openrewrite.java.migrate.UpgradePluginsForJava")
+                .append(hop.to()).append('\n')
+                .append("                - org.openrewrite.java.migrate.UpgradeBuildToJava")
+                .append(hop.to()).append('\n')
+                .append("                - org.openrewrite.java.migrate.jacoco.UpgradeJaCoCo\n");
+        if (hop.crosses(11)) {
+            recipes.append("                - org.openrewrite.java.migrate.Java8toJava11 "
+                    + "— the only recipe that handles the modules JEP 320 removed, and this hop "
+                    + "crosses rung 11\n");
+        }
+        recipes.append("                - org.openrewrite.gradle.UpdateJavaCompatibility with "
+                + "version ").append(hop.to()).append(" — the Gradle half, a no-op on Maven\n");
+        return P_BUMPER.replace("{RECIPES}", recipes.toString())
+                .replace("{FROM}", String.valueOf(hop.from()))
+                .replace("{TARGET}", String.valueOf(hop.to()));
+    }
+
+    private String pinPrompt(String base, boolean after) {
+        return base.replace("{ALSO}", also(after)).replace("{PINS}", (after ? Floors.after(hop.to()) : Floors.before(hop.to()))
+                        .lines().map(l -> "                - " + l.strip())
+                        .collect(java.util.stream.Collectors.joining("\n")))
+                .replace("{FROM}", String.valueOf(hop.from()))
+                .replace("{TARGET}", String.valueOf(hop.to()))
+                .replace("{WHEN}", after
+                        ? "The JDK has already been raised. These versions require it, so this is "
+                        + "the first moment they can be applied at all."
+                        : "The JDK has NOT been raised yet. These versions must be in place first, "
+                        + "because the new JDK will not compile without them.");
+    }
+
+    Agent beforePins() {
+        return runtime("before-pins", Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()),
+                owed(false), trace, "before-pins"), pinPrompt(P_PINS, false));
+    }
+
+    Agent beforePinsCritic() {
+        return runtime("before-pins-critic",
+                Tools.judging(ws, tree, owed(false), trace, "before-pins-critic"),
+                pinPrompt(P_PINS_CRITIC, false));
+    }
+
+    Agent afterPins() {
+        return runtime("after-pins", Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()),
+                owed(true), trace, "after-pins"), pinPrompt(P_PINS, true));
+    }
+
+    Agent afterPinsCritic() {
+        return runtime("after-pins-critic",
+                Tools.judging(ws, tree, owed(true), trace, "after-pins-critic"),
+                pinPrompt(P_PINS_CRITIC, true));
+    }
+
+    /** The recipe runner, set once the workspace is known. Agents that pin cannot work without it. */
+    Agents withRecipes(Migrate migrate) {
+        this.migrate = migrate;
+        return this;
+    }
+
+    private Migrate recipes() {
+        return migrate != null ? migrate : new Migrate(ws, "", trace);
+    }
+
     List<SubAgentDefinition> definitions() {
         return List.of(
                 define("surveyor", "reads what JDK the project is actually on", P_SURVEYOR,
@@ -542,14 +766,17 @@ final class Agents {
                         P_SECURITY_BEFORE, read("security-before")),
                 define("security-before-critic", "checks that reading", P_SECURITY_BEFORE_CRITIC,
                         read("security-before-critic")),
-                define("preparer", "applies this hop's structural floors", floors(P_PREPARER),
-                        patch("preparer")),
-                define("prepare-critic", "checks the floors against the triggers that fired",
-                        floors(P_PREPARE_CRITIC), read("prepare-critic")),
-                define("bumper", "raises the target pins the build declares", P_BUMPER,
-                        patch("bumper")),
+                define("before-pins", "raises the versions the new JDK needs, before it moves",
+                        pinPrompt(P_PINS, false),
+                        Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()),
+                                owed(false), trace, "before-pins")),
+                define("before-pins-critic", "checks every pre-JDK pin actually landed",
+                        pinPrompt(P_PINS_CRITIC, false), read("before-pins-critic")),
+
+                define("bumper", "moves the project to the target JDK", bumpPrompt(),
+                        Tools.raising(ws, runner, recipes(), tree, targetJdk, String.valueOf(hop.to()), trace, "bumper")),
                 define("bump-critic", "checks every pin reached the target", P_BUMP_CRITIC,
-                        read("bump-critic")),
+                        Tools.checking(ws, tree, targetJdk, trace, "bump-critic")),
                 define("troubleshoot-loop", "decides the next step, and when to stop",
                         P_TROUBLESHOOT_LOOP, steer("troubleshoot-loop", "")),
                 define("troubleshoot-loop-critic", "judges the campaign, not the step",
@@ -558,14 +785,24 @@ final class Agents {
                         P_TROUBLESHOOTER, patch("troubleshooter")),
                 define("trouble-critic", "migration fix, or gaming the gate", P_TROUBLE_CRITIC,
                         read("trouble-critic")),
+                define("after-pins", "raises the versions that only run on the new JDK",
+                        pinPrompt(P_PINS, true),
+                        Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()),
+                                owed(true), trace, "after-pins")),
+                define("after-pins-critic", "checks every post-JDK pin actually landed",
+                        pinPrompt(P_PINS_CRITIC, true), read("after-pins-critic")),
                 define("security-after", "reads what the bump did to the vulnerability count",
                         P_SECURITY_AFTER, read("security-after")),
                 define("security-after-critic", "checks that judgement", P_SECURITY_AFTER_CRITIC,
                         read("security-after-critic")),
                 define("verdict", "argues an unsettled bump into the corpus vocabulary", P_VERDICT,
                         read("verdict")),
+                define("verdict-critic", "checks that word against what actually happened",
+                        P_VERDICT_CRITIC, read("verdict-critic")),
                 define("estimator", "prices the work a developer would have done", P_ESTIMATOR,
-                        read("estimator")));
+                        read("estimator")),
+                define("estimator-critic", "checks the price against the work in the log",
+                        P_ESTIMATOR_CRITIC, read("estimator-critic")));
     }
 
     /**

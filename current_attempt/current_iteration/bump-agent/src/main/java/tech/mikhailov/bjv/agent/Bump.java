@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
  *    ↓
  * reflect loop, bounded:
  *   gate @ to-JDK                     green → settled by the build, no model involved
- *   walls table                       the enumerable rows, free, before any model call
  *   troubleshooter ──→ trouble-critic the residue                    (gaming → revert and stop)
  *    ↓
  * verdict                             argues ONLY what execution could not settle
@@ -98,7 +97,6 @@ public final class Bump {
     private String to;
     private Agents agents;
     private Runner runner;
-    private Walls walls;
     // What the builds actually did, carried to the settlement. An implication is not a record.
     private boolean baselineGreen;
     private boolean gateGreen;
@@ -159,7 +157,6 @@ public final class Bump {
                     "BJV_HOPTOOLS must be the host path of hoptools/ (jvm-run is invoked from it)");
         }
         runner = new Runner(ws, hoptools);
-        walls = new Walls(ws);
         security = new Security(ws, hoptools, trace);
         // The producers' try_build must target the hop the survey settled, so they are built now.
         agents = new Agents(Model.forProducer(trace), ws, runner, tree, Hop.of(from, to), trace);
@@ -221,10 +218,16 @@ public final class Bump {
         // The before-scan travels into the migration: the Tomcat floor has to know which line the
         // project actually resolved, and no build file says that.
         tree.excludeBuildOutput();
-        String prePass = new Migrate(ws, hoptools, trace).run(from, to, before);
+        // THE ORDER IS THE POINT. Lombok has to move before the JDK, because a Lombok that cannot
+        // read the new class file kills javac before anything else runs. Spring Boot has to move
+        // after, because Boot 4.1 declares java.version 17 and cannot be resolved by a project
+        // still on 11. Both used to happen in one pass with nothing sequencing them.
+        agents.withRecipes(new Migrate(ws, hoptools, trace));
+        pinPhase("before-pins", agents.beforePins(), agents.beforePinsCritic(), agents.owed(false));
         // The deterministic pass is not up for review, so it lands before anyone can object.
         tree.land("migrate");
-        preparePhase(prePass);
+        // The JDK has moved by now, so the versions that require it are finally applicable.
+        pinPhase("after-pins", agents.afterPins(), agents.afterPinsCritic(), agents.owed(true));
 
         // ---- BUMP: land the target, judged against the pin grep re-run after the edits.
         bumpPhase();
@@ -268,7 +271,7 @@ public final class Bump {
                     price();
                     return "PASS\n" + v.preTests() + " tests conserved, effective target "
                             + v.effectiveTarget() + "; CRITICAL+HIGH " + securitySummary()
-                            + "; walls cleared: " + walls.appliedSoFar();
+                            + "";
                 }
                 lastVerdict = v;
                 lastLog = failureFor(v, test);
@@ -276,21 +279,32 @@ public final class Bump {
                 lastVerdict = null;
                 lastLog = build.summary();
             }
-            Walls.Turn t = walls.match(lastLog, Integer.parseInt(to));
-            if (t.fixed()) {
-                trace.applied("walls", t.what());
-                continue;
-            }
             if (!troubleshoot(lastLog)) {
                 break;
             }
         }
 
         // ---- CLOSERS: argue only the unsettled, price everything.
-        String argued = agents.verdict().run(brief(lastLog)
+        String context = brief(lastLog)
                 + (lastVerdict == null ? "" : "\nThe scorer's last verdict: " + lastVerdict.state())
-                + "\nThe reflect loop ended without a green gate. Walls cleared: "
-                + walls.appliedSoFar());
+                + "\nThe reflect loop ended without a green gate.";
+        String argued = agents.verdict().run(context);
+
+        // THE WORD IS WHAT THE CORPUS RECORDS, and nothing after this re-reads the log to check it.
+        // One verdict here called a dependency incompatible with JDK 21 on the strength of a
+        // compile error the troubleshooter had caused itself, and it stood because no one asked.
+        for (int again = 0; again < REASK; again++) {
+            String judgement = agents.verdictCritic().run(context
+                    + "\n\nYour colleague argues:\n" + argued);
+            if (word(judgement, "sound", "wrong").equals("sound")) {
+                break;
+            }
+            trace.progress(bump, "verdict-critic: " + judgement.lines().findFirst().orElse(""));
+            argued = agents.verdict().run(context
+                    + "\n\nYou argued:\n" + argued
+                    + "\n\nA reviewer checked it against the record and disagrees:\n" + judgement
+                    + "\nArgue it again, or keep your word and answer the objection.");
+        }
         price();
         return word(argued, "blocked-dependency", "behavior-change", "infra") + "\n" + argued;
     }
@@ -355,30 +369,77 @@ public final class Bump {
     }
 
     /** The preparer and its critic: the proactive steps, executed and then audited. */
-    private void preparePhase(String prePass) throws IOException {
-        String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
-                + "\n\nThe deterministic pre-pass already did:\n" + prePass + "\n" + buildFiles();
-        judgedThenLanded("prepare", agents.preparer(), agents.prepareCritic(), brief,
-                diff -> brief + "\n\nWhat the preparer changed:\n" + diff,
-                "sound", "missed", "overreach");
+    /**
+     * One pin phase: raise, check, and go again while anything is outstanding.
+     *
+     * <p>The loop terminates on the build files rather than on anyone's account of them. A producer
+     * that says it raised Lombok and a critic that agrees are two opinions; check_pins reads the
+     * project, and both agents hold it, so the disagreement that ends the loop is with the pom.
+     */
+    private void pinPhase(String stage, Agents.Agent raise, Agents.Agent judge,
+                          List<Floors.Floor> owed) throws IOException {
+        if (owed.isEmpty()) {
+            return;
+        }
+        for (int round = 0; round <= REASK; round++) {
+            String said = raise.run("Raise what this phase owes, then check it.");
+            trace.applied(stage, said + "\n" + tree.diff());
+            List<Pins.State> left = Pins.outstanding(ws, owed);
+            String judgement = judge.run("Your colleague reports:\n" + said
+                    + "\n\nWhat the build files say now:\n"
+                    + left.stream().map(Pins.State::describe)
+                            .collect(java.util.stream.Collectors.joining("\n"))
+                    + (left.isEmpty() ? "nothing outstanding" : ""));
+            if (word(judgement, "done", "again").equals("done") || round == REASK) {
+                trace.progress(bump, stage + ": " + (left.isEmpty() ? "every pin met"
+                        : left.size() + " left outstanding") + " after " + (round + 1)
+                        + " round(s)");
+                tree.land(stage);
+                return;
+            }
+            trace.progress(bump, stage + ": sent back — "
+                    + judgement.lines().findFirst().orElse(""));
+        }
     }
 
     /** The bumper and its critic: the pins the recipe under-applied. */
+    /**
+     * Raise every declared pin to the target, and keep going while any is still below it.
+     *
+     * <p>This was one attempt and a single re-ask, with the list of remaining pins pasted into the
+     * brief as text -- readable once, and stale the moment an edit landed. Both agents now hold
+     * check_target and can ask the files after each attempt, which is the same shape the two pin
+     * phases use and for the same reason: the loop should end on what the project says, not on what
+     * anyone reports having done.
+     *
+     * <p>It is the pin the GATE measures, so a bumper that stops early does not fail here, it fails
+     * four stages later as FAIL_target_not_bumped with nothing left to try.
+     */
     private void bumpPhase() throws IOException {
-        String pins = pinGrep();
-        String brief = "Migration: JDK " + from + " -> " + to
-                + "\n\nPins found still below " + to + ":\n" + (pins.isBlank() ? "(none)" : pins);
-        judgedThenLanded("bump", agents.bumper(), agents.bumpCritic(), brief, diff -> {
-            String left = "";
-            try {
-                left = pinGrep();
-            } catch (IOException e) {
-                left = "(grep failed: " + e.getMessage() + ")";
+        for (int round = 0; round <= REASK; round++) {
+            List<String> left = Pins.belowTarget(ws, Integer.parseInt(to));
+            String brief = "Migration: JDK " + from + " -> " + to
+                    + "\n\nPins still below " + to + ":\n"
+                    + (left.isEmpty() ? "(none)" : String.join("\n", left));
+            String said = agents.bumper().run(brief);
+            trace.applied("bump", said + "\n" + tree.diff());
+
+            List<String> after = Pins.belowTarget(ws, Integer.parseInt(to));
+            String judgement = agents.bumpCritic().run(brief
+                    + "\n\nWhat the bumper says it did:\n" + said
+                    + "\n\nWhat the build files say now:\n"
+                    + (after.isEmpty() ? "nothing is below " + to + " any more"
+                            : String.join("\n", after)));
+            if (word(judgement, "sound", "not-landed", "overreach").equals("sound")
+                    || round == REASK) {
+                trace.progress(bump, "bump: " + (after.isEmpty() ? "every pin reached " + to
+                        : after.size() + " still below " + to) + " after " + (round + 1)
+                        + " round(s)");
+                tree.land("bump");
+                return;
             }
-            return brief + "\n\nWhat the bumper changed:\n" + diff
-                    + "\n\nPins STILL below target after those edits:\n"
-                    + (left.isBlank() ? "(none)" : left);
-        }, "sound", "not-landed", "overreach");
+            trace.progress(bump, "bump: sent back — " + judgement.lines().findFirst().orElse(""));
+        }
     }
 
     /**
@@ -528,8 +589,7 @@ public final class Bump {
 
     private String brief(String log) throws IOException {
         return "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
-                + "\nWalls already cleared mechanically: " + walls.appliedSoFar()
-                + "\n\nThe failing build:\n" + log;
+                                + "\n\nThe failing build:\n" + log;
     }
 
     private String buildFiles() throws IOException {
@@ -634,9 +694,20 @@ public final class Bump {
     }
 
     private void price() {
-        String estimate = agents.estimator().run("The bump " + bump + " (JDK " + from + " -> " + to
-                + "); walls cleared mechanically: " + walls.appliedSoFar()
-                + ". What the workspace became:\n" + tree.diff());
+        String context = "The bump " + bump + " (JDK " + from + " -> " + to
+                + ")"
+                + ". What the workspace became:\n" + tree.diff();
+        String estimate = agents.estimator().run(context);
+
+        // NOTHING DOWNSTREAM DEPENDS ON THIS NUMBER, which is exactly why it drifts: an estimate
+        // nobody checks is read later as though it had been measured.
+        String judged = agents.estimatorCritic().run(context + "\n\nThe estimate:\n" + estimate);
+        if (!word(judged, "sound", "off").equals("sound")) {
+            trace.progress(bump, "estimator-critic: " + judged.lines().findFirst().orElse(""));
+            estimate = agents.estimator().run(context + "\n\nYou estimated:\n" + estimate
+                    + "\n\nA reviewer checked it against the log:\n" + judged
+                    + "\nPrice it again.");
+        }
         Matcher m = Pattern.compile("minutes:\\s*(\\d+)").matcher(estimate);
         trace.priced(bump, m.find() ? m.group(1) : "", estimate);
     }

@@ -33,10 +33,18 @@ class TheFloorsPickTheLineTheTargetCanRunTest {
         var to17 = (java.util.List<String>) m.invoke(spring, 11, 17);
         @SuppressWarnings("unchecked")
         var to21 = (java.util.List<String>) m.invoke(spring, 17, 21);
-        assertTrue(to17.stream().anyMatch(r -> r.contains("boot2.UpgradeSpringBoot_2_7")),
-                "below 21 the 2.7 line is still the right ceiling");
-        assertTrue(to21.stream().anyMatch(r -> r.contains("boot3.UpgradeSpringBoot_3_5")),
-                "at 21 the project must leave the 2.x line");
+        assertTrue(to17.stream().anyMatch(r -> r.contains("boot4.UpgradeSpringBoot_4_0")),
+                "Boot 4 declares java.version 17, so 17 is where the 2.x line stops being viable");
+        assertTrue(to21.stream().anyMatch(r -> r.contains("boot4.UpgradeSpringBoot_4_0")),
+                "and everything above 17 goes the same way");
+
+        @SuppressWarnings("unchecked")
+        var to11 = (java.util.List<String>) m.invoke(spring, 8, 11);
+        assertTrue(to11.stream().anyMatch(r -> r.contains("boot2.UpgradeSpringBoot_2_7")),
+                "below 17 nothing newer can run, so 2.7 remains the ceiling");
+        assertEquals("2.7.18", Floors.version("spring-boot", 11), "and the floor agrees");
+        assertEquals("4.1.0", Floors.version("spring-boot", 17), "as it does above");
+        assertEquals("4.1.0", Floors.version("spring-boot", 25));
     }
 
     /** A workspace whose root pom declares the given Spring Boot major. */

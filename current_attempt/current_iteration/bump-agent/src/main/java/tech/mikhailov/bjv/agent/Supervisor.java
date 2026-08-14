@@ -59,8 +59,13 @@ final class Supervisor {
         this.judging = Model.forCritic(trace);
     }
 
-    public static void main(String[] args) throws Exception {
-        Path results = Path.of(args.length > 0 ? args[0] : "results");
+    /**
+     * The watch loop, for a caller that is already serving something else.
+     *
+     * <p>It survives its own bad rounds: a supervisor that dies on one stops watching, which is
+     * worse than a round that found nothing.
+     */
+    static void watch(Path results) {
         Trace trace = new JsonlTrace(results.resolve("supervisor.jsonl"),
                 results.resolve("settlements.jsonl"), "supervisor");
         Supervisor supervisor = new Supervisor(results, trace);
@@ -69,12 +74,19 @@ final class Supervisor {
             try {
                 supervisor.round();
             } catch (RuntimeException | IOException surviving) {
-                // A supervisor that dies on a bad round stops watching, which is worse than a bad
-                // round. Every failure here is one it can try again in twenty minutes.
                 System.out.println("round failed: " + surviving);
             }
-            Thread.sleep(EVERY.toMillis());
+            try {
+                Thread.sleep(EVERY.toMillis());
+            } catch (InterruptedException stopping) {
+                Thread.currentThread().interrupt();
+                return;
+            }
         }
+    }
+
+    public static void main(String[] args) {
+        watch(Path.of(args.length > 0 ? args[0] : "results"));
     }
 
     // ---- one round ----
@@ -247,10 +259,10 @@ final class Supervisor {
                     } catch (IOException e) {
                         return "could not record the postponement: " + e.getMessage();
                     }
-                    String stopped = stop(lane.get().bump());
                     trace.progress("supervisor", "postponed " + repo + ": " + why);
-                    return "set aside: " + repo + ". " + stopped
-                            + " The launcher will skip it until nothing else is left to run.";
+                    return "set aside: " + repo + ". Its lane notices within thirty seconds and "
+                            + "stops itself, and the launcher will skip it until nothing else is "
+                            + "left to run.";
                 });
 
         tools.put(ToolSpecification.builder()
@@ -276,23 +288,6 @@ final class Supervisor {
                     }
                 });
         return tools;
-    }
-
-    /** Stop a lane's container. The claim releases itself once no agent holds it. */
-    private String stop(String bump) {
-        String name = sweep.containerFor(bump);
-        if (name.isEmpty()) {
-            return "It was not running.";
-        }
-        try {
-            Shell.Output out = Shell.run(sweep.results(), Map.of(), Duration.ofMinutes(2),
-                    "docker", "rm", "-f", name);
-            return out.ok() ? "Its container (" + name + ") was stopped."
-                    : "Its container could not be stopped.";
-        } catch (IOException | InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return "Its container could not be stopped: " + e.getMessage();
-        }
     }
 
     private Agents.Agent agent(String name, ChatModel model,

@@ -24,35 +24,27 @@ rsync -a Dockerfile run.sh deploy.sh "$H:$R/"
 # of them to be a version behind.
 ssh "$H" "cd $R && docker build -q -t bjv ."
 
-# A new image does not reach a running container, so both long-lived ones are recreated. THE
-# DASHBOARD TOKEN IS READ BEFORE ITS CONTAINER IS REMOVED, because the only copy of it lives in that
-# container's environment: reading it afterwards recreates a public page with no authentication.
+# ONE LONG-LIVED CONTAINER. The dashboard serves the page and runs the supervisor on a daemon
+# thread. They were two because the supervisor needed the docker socket to stop a lane; a lane now
+# stops itself when it sees its own postponement, so nothing here needs the daemon and a public
+# page never shares a container with it.
 #
-# The dashboard gets no docker socket. It used to run from an image with no docker client at all,
-# which was the stronger guarantee; with one image that protection lives here instead, so this line
-# is now load-bearing rather than belt-and-braces.
+# THE TOKEN IS READ BEFORE THE CONTAINER IS REMOVED. The only copy lives in that container's
+# environment, and reading it afterwards recreates a public page with no authentication.
 ssh "$H" '
   set -e
   TOKEN=$(docker inspect bjv-dashboard --format "{{range .Config.Env}}{{println .}}{{end}}" 2>/dev/null |
           sed -n "s/^BJV_DASH_TOKEN=//p" | head -1)
   if [ -z "$TOKEN" ]; then echo "refusing to recreate the dashboard without its token" >&2; exit 1; fi
-  docker rm -f bjv-dashboard >/dev/null 2>&1 || true
+  docker rm -f bjv-dashboard bjv-supervisor >/dev/null 2>&1 || true
   docker run -d --name bjv-dashboard --network proxy-net --restart unless-stopped \
-    -e BJV_DASH_TOKEN="$TOKEN" -v '"$RESULTS"':/results \
-    bjv tech.mikhailov.bjv.agent.Dashboard /results 8086 >/dev/null
-  echo "dashboard recreated"
-'
-
-# The supervisor DOES get the socket: setting a lane aside means stopping the lane.
-ssh "$H" '
-  docker rm -f bjv-supervisor >/dev/null 2>&1 || true
-  docker run -d --name bjv-supervisor --restart unless-stopped \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v '"$RESULTS"':/results \
+    -e BJV_DASH_TOKEN="$TOKEN" \
     --env-file /home/vmihaylov/bump-java-version/.env \
     -e OC_KEY="$(sed -n "s/^PROPOSER_API_KEY=//p" /home/vmihaylov/bump-java-version/.env | tr -d "\"" )" \
     -e BJV_SUPERVISOR_MINUTES="${BJV_SUPERVISOR_MINUTES:-20}" \
-    bjv tech.mikhailov.bjv.agent.Supervisor /results >/dev/null && echo "supervisor recreated"
+    -v '"$RESULTS"':/results \
+    bjv tech.mikhailov.bjv.agent.Dashboard /results 8086 >/dev/null
+  echo "dashboard and supervisor recreated as one container"
 '
 
 ssh "$H" "docker image inspect bjv --format 'bjv {{.Id}}'"

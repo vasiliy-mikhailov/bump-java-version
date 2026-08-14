@@ -253,6 +253,167 @@ final class Tools {
     }
 
     /**
+     * Write and run an OpenRewrite recipe: the one correct way to pin a version.
+     *
+     * <p>Editing a pom by hand means guessing where the version belongs -- a dependency, a
+     * dependencyManagement entry, a property the dependency then reads, a Gradle string, a version
+     * catalog -- and guessing wrong is silent. The recipes know, for both build systems, which is
+     * also what lets one instruction cover a Maven project and a Gradle one.
+     */
+    private static Map<ToolSpecification, ToolExecutor> recipe(Migrate migrate, String jdk) {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("apply_recipe")
+                .description("Run an OpenRewrite recipe against this project. Give the whole "
+                        + "rewrite.yml as `yaml`. This is how a version gets pinned: hand-editing a "
+                        + "pom guesses at placement and guessing wrong is silent, while the recipes "
+                        + "know where a version belongs in Maven AND in Gradle. Useful ones: "
+                        + "org.openrewrite.maven.UpgradeDependencyVersion, "
+                        + "org.openrewrite.maven.UpgradeParentVersion, "
+                        + "org.openrewrite.maven.UpgradePluginVersion, "
+                        + "org.openrewrite.gradle.UpgradeDependencyVersion, "
+                        + "org.openrewrite.gradle.UpgradeTransitiveDependencyVersion, "
+                        + "org.openrewrite.gradle.UpdateGradleWrapper. Emit BOTH the maven and the "
+                        + "gradle form for each pin: the one that does not match this project is a "
+                        + "no-op, so one recipe works either way.")
+                .parameters(JsonObjectSchema.builder()
+                        .addStringProperty("yaml", "a complete rewrite.yml, including "
+                                + "'type:', 'name:' and 'recipeList:'")
+                        .required("yaml")
+                        .build())
+                .build();
+        ToolExecutor exec = (request, memoryId) -> {
+            String yaml = Reasoning.field(request.arguments(), "yaml");
+            if (!yaml.contains("recipeList")) {
+                return "that is not a recipe file: it needs type, name and recipeList. "
+                        + "See the tool description for the recipes worth using.";
+            }
+            try {
+                return migrate.apply(yaml, jdk);
+            } catch (IOException e) {
+                return "could not run the recipe: " + e.getMessage();
+            }
+        };
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, exec);
+        return one;
+    }
+
+    /**
+     * What the build files currently say about each pin this phase owes.
+     *
+     * <p>A critic that reads a diff is judging a claim; this reads the project. Two failures on
+     * record made it necessary: a preparer answering NOTHING-TO-DO while its own stage recorded
+     * edits, and a troubleshooter reporting a fix it had already reverted.
+     */
+    private static Map<ToolSpecification, ToolExecutor> pins(Path root, List<Floors.Floor> owed) {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("check_pins")
+                .description("Read the build files and report, for each version this phase is "
+                        + "responsible for, what the project currently declares and whether it "
+                        + "meets the floor. This is the fact; what anyone said they did is not.")
+                .parameters(JsonObjectSchema.builder().build())
+                .build();
+        ToolExecutor exec = (request, memoryId) -> {
+            try {
+                List<Pins.State> states = Pins.check(root, owed);
+                StringBuilder out = new StringBuilder();
+                for (Pins.State st : states) {
+                    out.append(st.satisfied() ? "  ok       " : "  OUTSTANDING  ")
+                            .append(st.describe()).append('\n');
+                }
+                long left = states.stream().filter(st -> !st.satisfied()).count();
+                out.append(left == 0 ? "\nevery pin in this phase is at or above its floor"
+                        : "\n" + left + " still outstanding");
+                return out.toString();
+            } catch (IOException e) {
+                return "could not read the build files: " + e.getMessage();
+            }
+        };
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, exec);
+        return one;
+    }
+
+    /**
+     * Which declared pins are still below the target: the bumper's own fact to check.
+     *
+     * <p>The bumper had this already, as text pasted into a brief, which meant it could be read
+     * once and never re-checked after an edit. As a tool both it and its critic can call it after
+     * each attempt, which is what turns one re-ask into a loop that ends on the files.
+     */
+    private static Map<ToolSpecification, ToolExecutor> targets(Path root, String targetJdk) {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("check_target")
+                .description("Read every build file and report the source, target, release, "
+                        + "sourceCompatibility, jvmTarget and toolchain declarations still BELOW "
+                        + "the target JDK, with file and line. This is what the gate measures the "
+                        + "bump by, so it is the fact -- not the diff, which shows what changed and "
+                        + "not what is left.")
+                .parameters(JsonObjectSchema.builder().build())
+                .build();
+        ToolExecutor exec = (request, memoryId) -> {
+            try {
+                List<String> left = Pins.belowTarget(root, Integer.parseInt(targetJdk));
+                return left.isEmpty()
+                        ? "nothing is declared below " + targetJdk + " any more"
+                        : left.size() + " still below " + targetJdk + ":\n  "
+                                + String.join("\n  ", left);
+            } catch (IOException | NumberFormatException e) {
+                return "could not read the build files: " + e.getMessage();
+            }
+        };
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, exec);
+        return one;
+    }
+
+    /** The bumper: it edits build files by hand, and can see what it has left to do. */
+    static Map<ToolSpecification, ToolExecutor> raising(Path root, Runner runner, Migrate migrate,
+                                                        Tree tree, String targetJdk, String under,
+                                                        Trace trace, String agent) {
+        Map<ToolSpecification, ToolExecutor> tools =
+                only(root, Set.of("list_dir", "read_file", "edit_file"));
+        tools.putAll(build(root, runner, targetJdk));
+        tools.putAll(targets(root, targetJdk));
+        tools.putAll(recipe(migrate, under));
+        tools.putAll(history(tree, trace));
+        return recorded(guarded(tools), trace, agent);
+    }
+
+    /** Its critic: the same fact, and no way to edit. */
+    static Map<ToolSpecification, ToolExecutor> checking(Path root, Tree tree, String targetJdk,
+                                                          Trace trace, String agent) {
+        Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
+        tools.putAll(targets(root, targetJdk));
+        tools.putAll(history(tree, trace));
+        return recorded(tools, trace, agent);
+    }
+
+    /** A pin-phase producer: it may run recipes and check what landed, and edit nothing by hand. */
+    static Map<ToolSpecification, ToolExecutor> pinning(Path root, Migrate migrate, Tree tree,
+                                                        String jdk, List<Floors.Floor> owed,
+                                                        Trace trace, String agent) {
+        Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
+        tools.putAll(recipe(migrate, jdk));
+        tools.putAll(pins(root, owed));
+        tools.putAll(jar());
+        tools.putAll(gradle());
+        tools.putAll(history(tree, trace));
+        return recorded(tools, trace, agent);
+    }
+
+    /** A pin-phase critic: it reads and checks, and cannot run a recipe of its own. */
+    static Map<ToolSpecification, ToolExecutor> judging(Path root, Tree tree,
+                                                        List<Floors.Floor> owed, Trace trace,
+                                                        String agent) {
+        Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
+        tools.putAll(pins(root, owed));
+        tools.putAll(jar());
+        tools.putAll(history(tree, trace));
+        return recorded(tools, trace, agent);
+    }
+
+    /**
      * Which Gradle distributions can actually be used here.
      *
      * <p>A troubleshooter raised a wrapper from 8.15 to 8.16. Neither exists: Gradle went 8.14.3 to
