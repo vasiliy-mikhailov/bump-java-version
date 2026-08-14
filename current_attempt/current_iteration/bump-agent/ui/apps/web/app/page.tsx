@@ -2,7 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import type { BumpSummary, Summary } from '@bjv/types'
-import { BumpTable, EmptyNote, PageHeader, ProgressBar, relative, STRIP, Tally } from '@bjv/ui'
+import {
+  BumpTable,
+  duration,
+  EmptyNote,
+  PageHeader,
+  ProgressBar,
+  relative,
+  spellMinutes,
+  STRIP,
+  Tally,
+} from '@bjv/ui'
 import { href, read } from '@/lib/api'
 import { Nav } from './nav'
 
@@ -65,6 +75,25 @@ export default function Home() {
   const settled = bumps.length - running - queued
   const pct = bumps.length === 0 ? 0 : Math.trunc((settled * 100) / bumps.length)
 
+  // WHEN THE SWEEP STARTED IS THE EARLIEST BUMP THAT SPOKE, not a field the server keeps. A run
+  // root is archived and refilled between sweeps, so the first trace in it IS this sweep's start,
+  // and nothing has to be written down for that to stay true.
+  const begun = bumps.map((b) => b.startedAt).filter((n) => n > 0)
+  const startedAt = begun.length === 0 ? 0 : Math.min(...begun)
+  const elapsed = startedAt === 0 ? 0 : Math.max(0, now - startedAt)
+
+  // EXTRAPOLATED, AND LABELLED AS SUCH. Per-bump cost is wildly uneven, so this is only ever the
+  // average so far projected onto what is left. It is worth showing because the shape of the
+  // answer (minutes, hours, days) is what a reader is deciding on, and worth labelling because
+  // the digits are not.
+  const remaining = bumps.length - settled
+  const eta = settled === 0 || elapsed === 0 ? null : Math.round((elapsed / settled) * remaining)
+
+  // THE ESTIMATOR'S COLUMN, SUMMED. Only settled bumps carry a price, so this grows with the run
+  // and is never a projection: it is what has actually been done, valued at what a person would
+  // have spent doing it.
+  const humanMinutes = bumps.reduce((sum, b) => sum + (b.humanMinutes ?? 0), 0)
+
   // TWO ADJACENT STRIPS, as the sibling has: the first counts the RUN, the second counts the
   // verdicts. Merging them would put "elapsed" next to "blocked-dependency".
   const byVerdict = new Map<string, number>()
@@ -89,6 +118,12 @@ export default function Home() {
       <ProgressBar pct={pct} />
       <div style={STRIP}>
         <Tally value={`${settled} / ${bumps.length}`} label={`${pct}% settled`} />
+        <Tally value={elapsed === 0 ? '—' : duration(elapsed)} label="elapsed" />
+        <Tally value={eta === null ? '—' : duration(eta)} label="eta, extrapolated" />
+        <Tally
+          value={humanMinutes === 0 ? '—' : spellMinutes(humanMinutes)}
+          label="human-equivalent"
+        />
         <Tally value={passed} label="passed" tone="good" />
         <Tally value={running} label="running" />
         <Tally value={queued} label="queued" />
@@ -101,7 +136,11 @@ export default function Home() {
             <Tally key={verdict} value={n} label={verdict} />
           ))}
       </div>
-      <BumpTable bumps={bumps} hrefFor={(slug) => href(`/bump/?slug=${encodeURIComponent(slug)}`)} />
+      <BumpTable
+        bumps={bumps}
+        now={now}
+        hrefFor={(slug) => href(`/bump/?slug=${encodeURIComponent(slug)}`)}
+      />
     </>
   )
 }

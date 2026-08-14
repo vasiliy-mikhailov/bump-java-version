@@ -1,25 +1,27 @@
 'use client'
 
-import { TabRow } from '@bjv/ui'
+import { CORNER } from '@bjv/ui'
 import { href } from '@/lib/api'
 
 /**
- * The zone's own tabs, which are NOT the shell's nav.
+ * THE CORNER GEAR, which is NOT the shell's nav.
  *
- * The shell reads `nav` from the manifest and draws the top-level entries; these are the pages
- * within this tool that a reader moves between while staying in it. Keeping both means a mounted
- * zone has one row of chrome, not two competing ones.
+ * The shell reads `nav` from the manifest and draws the top-level entries. This was a second row of
+ * tabs under them, which meant a mounted zone wore two rows of chrome disagreeing about which was
+ * in charge, and spent a whole line above the fold on a single destination. Settings is one
+ * destination and it gets one glyph, in the corner, where the sibling tool keeps its own. The way
+ * back is the header's crumb, which the settings page already draws.
  */
 export function Nav({ current }: { current: string }) {
   return (
-    <div style={{ padding: '0 24px' }}>
-    <TabRow
-      label="Sections of this tool"
-      tabs={[
-        { label: 'bumps', href: href('/'), current: current === 'bumps' },
-        { label: 'settings', href: href('/settings/'), current: current === 'settings' },
-      ]}
-    />
-    </div>
+    <a
+      href={href('/settings/')}
+      style={CORNER}
+      aria-label="Settings"
+      title="Settings"
+      aria-current={current === 'settings' ? 'page' : undefined}
+    >
+      {'\u2699'}
+    </a>
   )
 }

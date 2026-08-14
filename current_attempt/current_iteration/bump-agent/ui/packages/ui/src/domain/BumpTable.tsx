@@ -1,6 +1,6 @@
 import type { BumpSummary } from '@bjv/types'
 import { EmptyNote } from '../primitives/EmptyNote'
-import { RelativeTime } from '../primitives/RelativeTime'
+import { RelativeTime, duration, spellMinutes } from '../primitives/RelativeTime'
 import { VerdictPill } from './VerdictPill'
 
 export type BumpTableProps = {
@@ -24,7 +24,8 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
             <th style={th}>verdict</th>
             <th style={{ ...th, textAlign: 'right' }}>tests</th>
             <th style={{ ...th, textAlign: 'right' }}>CVEs</th>
-            <th style={{ ...th, textAlign: 'right' }}>running for</th>
+            <th style={{ ...th, textAlign: 'right' }}>took</th>
+            <th style={{ ...th, textAlign: 'right' }}>a person would have</th>
             <th style={{ ...th, textAlign: 'right' }}>last event</th>
           </tr>
         </thead>
@@ -89,7 +90,23 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                 {b.startedAt === 0 ? (
                   <span style={{ color: 'var(--text-tertiary)' }}>—</span>
                 ) : (
-                  <span>{elapsed(b.startedAt, b.at === 0 ? now : Math.max(b.at, now))}</span>
+                  <>
+                    <span>{duration(took(b, now))}</span>
+                    <div style={{ color: 'var(--text-tertiary)', fontSize: '11px' }}>
+                      {b.events.toLocaleString()} event(s)
+                    </div>
+                  </>
+                )}
+              </td>
+              <td style={{ ...td, textAlign: 'right' }}>
+                {/* THE ESTIMATE, AND ONLY EVER ITS OWN COLUMN. It is what the estimator triad
+                    priced the work that LANDED at, checked against the log by a verifier. Putting
+                    it beside `took` is the whole point; adding it to anything measured would be
+                    laundering a guess into a number. */}
+                {b.humanMinutes == null ? (
+                  <span style={{ color: 'var(--text-tertiary)' }}>—</span>
+                ) : (
+                  <span>{spellMinutes(b.humanMinutes)}</span>
                 )}
               </td>
               <td style={{ ...td, textAlign: 'right' }}>
@@ -112,16 +129,16 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
 
 /** The sibling's `th`: 11px, uppercase, letterspaced, on a strong rule. */
 /**
- * A DURATION, NOT A TIME AGO. `relative` says "3h ago"; this says "3h", which is what a reader wants
- * of a bump that is still going and has no "ago" about it yet.
+ * HOW LONG THIS BUMP HAS COST SO FAR, which for a settled one is how long it took.
+ *
+ * A running bump is measured to now; a settled one to its last event, because a bump that finished
+ * an hour ago did not spend that hour working. Reading the clock for both was the bug that made
+ * every finished row keep growing.
  */
-function elapsed(from: number, to: number): string {
-  const s = Math.max(0, Math.round((to - from) / 1000))
-  if (s < 60) return `${s}s`
-  const m = Math.round(s / 60)
-  if (m < 60) return `${m}m`
-  const h = Math.floor(m / 60)
-  return m % 60 === 0 ? `${h}h` : `${h}h ${m % 60}m`
+function took(b: BumpSummary, now: number): number {
+  const running = b.verdict === 'bumping'
+  const end = running || b.at === 0 ? now : b.at
+  return Math.max(0, end - b.startedAt)
 }
 
 /**

@@ -70,6 +70,16 @@ export type BumpSummary = {
    * showed the moment it began, and the column could not answer the one thing it exists for.
    */
   at: number
+  /** Trace lines this bump has written. Zero while it is only queued. */
+  events: number
+  /**
+   * WHAT THE SAME WORK WOULD HAVE COST A PERSON, in minutes, as the estimator triad priced it.
+   *
+   * Null until the bump settles, because the estimate is taken from what LANDED and a bump still
+   * working has not finished landing it. An estimate, and kept in its own column for that reason:
+   * it must never be added to a measured number.
+   */
+  humanMinutes: number | null
 }
 
 /**

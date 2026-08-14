@@ -220,6 +220,60 @@ final class Api {
         return lines;
     }
 
+    /** How many events this bump has written, or 0 for one that has not started. */
+    private long events(String slug) {
+        Path trace = results.resolve(slug).resolve("trace.jsonl");
+        if (!Files.isRegularFile(trace)) {
+            return 0;
+        }
+        try {
+            return counted(trace, Files.getLastModifiedTime(trace).toMillis());
+        } catch (IOException unreadable) {
+            return 0;
+        }
+    }
+
+    /** slug -> the estimator's minutes. Written once when a bump settles, so it never changes. */
+    private final Map<String, String> priced = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * WHAT THE SAME WORK WOULD HAVE COST A PERSON, as the estimator triad priced it.
+     *
+     * <p>Read from the trace rather than the settlement, because the settlement records the verdict
+     * and this is not one. The estimator plans the distinct pieces of work that LANDED, prices them,
+     * and a verifier checks the price against the log; what lands here is the number that survived
+     * that. It is an estimate and the page says so by putting it in its own column rather than
+     * adding it to anything measured.
+     *
+     * <p>Cached without an mtime, unlike {@link #counted}: price() runs once, at the end, and a
+     * bump that has been priced is a bump that has finished. Only settled bumps are looked up at
+     * all, so a sweep of 1439 mostly-queued rows costs nothing here.
+     */
+    private String humanMinutes(String slug) {
+        String known = priced.get(slug);
+        if (known != null) {
+            return known;
+        }
+        Path trace = results.resolve(slug).resolve("trace.jsonl");
+        if (!Files.isRegularFile(trace)) {
+            return "null";
+        }
+        try (var lines = Files.lines(trace)) {
+            String found = lines.filter(l -> l.contains("\"kind\":\"priced\""))
+                    .map(l -> Dashboard.row(l).getOrDefault("minutes", ""))
+                    .filter(m -> m.matches("\\d+"))
+                    .reduce((first, last) -> last)
+                    .orElse("");
+            if (found.isEmpty()) {
+                return "null";
+            }
+            priced.put(slug, found);
+            return found;
+        } catch (IOException | RuntimeException unreadable) {
+            return "null";
+        }
+    }
+
     /** The corpus: everything queued, plus anything settled that the queue no longer lists. */
     private int bumpCount() {
         Set<String> all = new LinkedHashSet<>(settlements().keySet());
@@ -273,7 +327,9 @@ final class Api {
                 Json.field("cvesBefore", number(because, CVES_BEFORE)),
                 Json.field("cvesAfter", number(because, CVES_AFTER)),
                 Json.field("startedAt", String.valueOf(startedAt(slug))),
-                Json.field("at", String.valueOf(lastEventAt(slug, num(r.get("at"))))));
+                Json.field("at", String.valueOf(lastEventAt(slug, num(r.get("at"))))),
+                Json.field("events", String.valueOf(events(slug))),
+                Json.field("humanMinutes", humanMinutes(slug)));
     }
 
     /**

@@ -16,7 +16,30 @@ RESULTS=${BJV_RESULTS:-/home/vmihaylov/bump-java-version/current_attempt/current
 # classpath, so the container stays single-process: one JVM, no node beside it. Building it here
 # rather than in the image is the same reason the jar is: the image has no toolchain, and a COPY of
 # a stale bundle reports success. The export is a build output and is gitignored.
-( cd ui && pnpm install --frozen-lockfile && pnpm build )
+# THE UI BUILDS IN A CONTAINER, so this script runs wherever docker does.
+#
+# It used to need pnpm on the invoking machine. Exactly one machine had it, that machine was a
+# scratch directory outside the repo, and it drifted three commits behind main without anything
+# noticing. The host has the checkout, maven and docker; what it did not have was node, and
+# installing a language runtime is not a thing a deploy script should assume it may do to a box.
+#
+# corepack reads packageManager from ui/package.json, so the pnpm version is pinned by the repo
+# rather than by whatever the machine happens to carry. Runs as the invoking user so node_modules
+# and the export do not come back owned by root, with HOME redirected because that user has none
+# inside the image.
+mkdir -p "$HOME/.cache/bjv-pnpm"
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -e HOME=/tmp -e COREPACK_HOME=/tmp/corepack -e CI=1 \
+  -v "$PWD/ui:/ui" \
+  -v "$HOME/.cache/bjv-pnpm:/pnpm-store" \
+  -w /ui node:22-bookworm sh -euc '
+    mkdir -p /tmp/bin /tmp/corepack
+    corepack enable --install-directory /tmp/bin
+    export PATH=/tmp/bin:$PATH
+    pnpm config set store-dir /pnpm-store
+    pnpm install --frozen-lockfile
+    pnpm build'
 rm -rf src/main/resources/ui
 cp -r ui/apps/web/out src/main/resources/ui
 mvn -B -o package

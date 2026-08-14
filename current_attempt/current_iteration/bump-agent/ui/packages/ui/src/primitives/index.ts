@@ -17,7 +17,13 @@ export { EmptyNote, type EmptyNoteProps } from './EmptyNote'
 export { FIELD, LabeledField, READONLY, type LabeledFieldProps } from './LabeledField'
 export { Pill, type PillProps, type PillTone } from './Pill'
 export { ProgressBar, type ProgressBarProps } from './ProgressBar'
-export { RelativeTime, relative, type RelativeTimeProps } from './RelativeTime'
+export {
+  RelativeTime,
+  duration,
+  relative,
+  spellMinutes,
+  type RelativeTimeProps,
+} from './RelativeTime'
 export { SaveRow, type SaveRowProps } from './SaveRow'
 export { SettingCard, type SettingCardProps } from './SettingCard'
 export { TabRow, type TabItem, type TabRowProps } from './TabRow'
