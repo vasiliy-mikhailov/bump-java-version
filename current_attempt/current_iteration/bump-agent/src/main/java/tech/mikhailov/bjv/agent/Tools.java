@@ -273,8 +273,10 @@ final class Tools {
                 .parameters(JsonObjectSchema.builder().build())
                 .build();
         ToolExecutor exec = (request, memoryId) -> {
-            String dists = System.getenv().getOrDefault("BJV_GRADLE_DISTS",
-                    "/home/vmihaylov/.gradle-dists");
+            String dists = Env.get("BJV_GRADLE_DISTS");
+            if (dists == null) {
+                return "BJV_GRADLE_DISTS is unset; no sealed Gradle distributions are available";
+            }
             Path root = Path.of(dists);
             if (!Files.isDirectory(root)) {
                 return "the distribution cache is not readable from here";

@@ -10,16 +10,25 @@
 # gate settles it or the chain files an honest verdict, and a hang is an infrastructure bug to fix
 # at its root rather than something to bound here.
 #
-# Manifest is TSV: <slug> <owner/repo> <sha> <from> <to>. The from/to columns are the deterministic
-# detector's guess; the surveyor may correct them, which is the point of having a surveyor.
+# Manifest is TSV: <slug> <group/project> <sha> <from> <to>. The from/to columns are the
+# prescribed hop; the surveyor may disagree, which is recorded and does not change the hop.
 #
-#   LANES=4 ./run.sh /path/to/manifest.tsv
+#   GIT_BASE=https://gitlab.example.com LANES=4 ./run.sh /path/to/manifest.tsv
 set -uo pipefail
 
 MAN=${1:?usage: run.sh <manifest.tsv>}
 LANES=${LANES:-3}
-I=${BJV_ITER:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration}
-ROOT=${BJV_RUNROOT:-$I/runs_agent}
+HERE=$(cd "$(dirname "$0")" && pwd)
+if [ -n "${BJV_ENV:-}" ] && [ -f "$BJV_ENV" ]; then
+  set -a; . "$BJV_ENV"; set +a
+elif [ -f "$HERE/.env" ]; then
+  set -a; . "$HERE/.env"; set +a
+fi
+ROOT=${BJV_RUNROOT:-$HERE/runs_agent}
+HOPTOOLS=${BJV_HOPTOOLS:-${BJV_ITER:+$BJV_ITER/hoptools}}
+HOPTOOLS=${HOPTOOLS:-$(cd "$HERE/../hoptools" 2>/dev/null && pwd)}
+: "${HOPTOOLS:?set BJV_HOPTOOLS to the host path of hoptools/}"
+AGENT_IMAGE=${BJV_IMAGE:-bjv}
 WS=$ROOT/ws
 RESULTS=$ROOT/results
 mkdir -p "$WS" "$RESULTS" 2>/dev/null
@@ -30,9 +39,9 @@ mkdir -p "$WS" "$RESULTS" 2>/dev/null
 docker run --rm -v "$ROOT:/r" alpine chown -R "$(id -u):$(id -g)" /r/results >/dev/null 2>&1
 mkdir -p "$RESULTS/claims"
 
-# The API key comes from the project .env, never from the manifest or the command line.
-set -a; . "${BJV_ENV:-/home/vmihaylov/bump-java-version/.env}"; set +a
+# The API key comes from the environment / .env, never from the manifest or the command line.
 KEY=${OC_KEY:-${PROPOSER_API_KEY:-}}
+: "${GIT_BASE:?set GIT_BASE (e.g. https://gitlab.example.com)}"
 
 settled() { # a slug is done when the settlements file holds a terminal state for it
   [ -f "$RESULTS/settlements.jsonl" ] || return 1
@@ -70,6 +79,21 @@ postponed() {
   [ -e "$RESULTS/postponed/$1" ]
 }
 
+# GIT_BASE is scheme+host with no trailing slash, e.g. https://gitlab.example.com
+# or ssh://git@gitlab.example.com. Manifest repo is group/project.
+clone_repo() {
+  local repo=$1 dest=$2
+  local url="${GIT_BASE%/}/${repo}.git"
+  if [ -n "${GIT_SSH_KEY:-}" ]; then
+    GIT_SSH_COMMAND="ssh -i ${GIT_SSH_KEY} -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new" \
+      git clone -q "$url" "$dest"
+  elif [ -n "${GIT_TOKEN:-}" ]; then
+    git -c http.extraHeader="Authorization: Bearer ${GIT_TOKEN}" clone -q "$url" "$dest"
+  else
+    git clone -q "$url" "$dest"
+  fi
+}
+
 one() {
   local slug=$1 repo=$2 sha=$3 from=$4 to=$5
   local w=$WS/$slug
@@ -84,21 +108,30 @@ one() {
   # A fresh checkout every time: the chain reads what each phase did back out of git diff, so a
   # workspace carrying a previous attempt's edits would attribute them to this run.
   docker run --rm -v "$WS:/w" alpine rm -rf "/w/$slug" >/dev/null 2>&1
-  if ! git clone -q "https://github.com/$repo.git" "$w" 2>/dev/null; then
+  if ! clone_repo "$repo" "$w"; then
     echo "[$slug] clone failed: $repo"; return 1
   fi
   git -C "$w" checkout -q "$sha" 2>/dev/null || { echo "[$slug] no sha $sha"; return 1; }
 
+  local vols=(-v /var/run/docker.sock:/var/run/docker.sock -v "$w:$w" -v "$RESULTS:$RESULTS"
+              -v "$HOPTOOLS:$HOPTOOLS:ro")
+  [ -n "${BJV_ITER:-}" ] && [ -d "$BJV_ITER" ] && vols+=(-v "$BJV_ITER:$BJV_ITER")
+  [ -d "${BJV_M2:-}" ] && vols+=(-v "$BJV_M2:$BJV_M2")
+  [ -e "${BJV_SETTINGS:-}" ] && vols+=(-v "$BJV_SETTINGS:$BJV_SETTINGS:ro")
+  [ -d "${BJV_GRADLE_RO:-}" ] && vols+=(-v "$BJV_GRADLE_RO:$BJV_GRADLE_RO:ro")
+  [ -d "${BJV_GRADLE_DISTS:-}" ] && vols+=(-v "$BJV_GRADLE_DISTS:$BJV_GRADLE_DISTS")
+  [ -e "${BJV_GRADLE_INIT:-}" ] && vols+=(-v "$BJV_GRADLE_INIT:$BJV_GRADLE_INIT:ro")
+
+  local envs=(-e "OC_KEY=$KEY" -e "BJV_HOPTOOLS=$HOPTOOLS"
+              -e "BJV_PATIENCE_MINUTES=${BJV_PATIENCE_MINUTES:-45}")
+  for v in OC_BASE OC_MODEL BJV_NET BJV_M2 BJV_SETTINGS BJV_GRADLE_RO BJV_GRADLE_DISTS \
+           BJV_GRADLE_INIT BJV_JDK_IMAGE BJV_SCAN_IMAGE BJV_THINKING BJV_HANG_GUARD BJV_BUILD_SECONDS; do
+    [ -n "${!v:-}" ] && envs+=(-e "$v=${!v}")
+  done
+
   docker run --rm --name "bjvagent_$slug" \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v "$I:$I" -v "$w:$w" \
-    -v /home/vmihaylov/.m2-fitness:/home/vmihaylov/.m2-fitness \
-    -v /home/vmihaylov/maven-config:/home/vmihaylov/maven-config:ro \
-    -v /home/vmihaylov/.gradle-fitness:/home/vmihaylov/.gradle-fitness \
-    -v /home/vmihaylov/.gradle-dists:/home/vmihaylov/.gradle-dists \
-    -e OC_KEY="$KEY" -e OC_BASE="${OC_BASE:-}" -e OC_MODEL="${OC_MODEL:-}" \
-    -e BJV_HOPTOOLS="$I/hoptools" -e BJV_PATIENCE_MINUTES="${BJV_PATIENCE_MINUTES:-45}" \
-    bjv tech.mikhailov.bjv.agent.Bump "$w" "$repo|$sha|$from|$to" "$RESULTS" \
+    "${vols[@]}" "${envs[@]}" \
+    "$AGENT_IMAGE" tech.mikhailov.bjv.agent.Bump "$w" "$repo|$sha|$from|$to" "$RESULTS" \
     >> "$ROOT/$slug.log" 2>&1
   rm -f "$RESULTS/claims/$bslug" 2>/dev/null
   echo "[$slug] done: $(grep -c . "$ROOT/$slug.log" 2>/dev/null) log lines"

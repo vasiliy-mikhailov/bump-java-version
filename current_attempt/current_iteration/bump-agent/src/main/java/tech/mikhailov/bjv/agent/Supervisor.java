@@ -60,8 +60,7 @@ final class Supervisor {
     }
 
     public static void main(String[] args) throws Exception {
-        Path results = Path.of(args.length > 0 ? args[0]
-                : "/home/vmihaylov/bump-java-version/current_attempt/current_iteration/runs_agent/results");
+        Path results = Path.of(args.length > 0 ? args[0] : "results");
         Trace trace = new JsonlTrace(results.resolve("supervisor.jsonl"),
                 results.resolve("settlements.jsonl"), "supervisor");
         Supervisor supervisor = new Supervisor(results, trace);

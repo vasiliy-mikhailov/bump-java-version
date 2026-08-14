@@ -1,13 +1,19 @@
-# Supervisor (needs OC_KEY): docker compose --profile supervisor up -d
+# Dashboard: docker compose up -d
+# Supervisor: docker compose --profile supervisor up -d
+# One manifest: docker compose --profile batch run --rm launcher
 #
 # The dashboard is a reader: no docker socket. Bind is localhost — Compose otherwise
 # publishes 0.0.0.0 and that bypasses the host firewall.
 # Source: https://docs.docker.com/reference/compose-file/services/#ports
+#
+# Nested builds talk to the host daemon. Workspace, hoptools and caches MUST be mounted
+# at the same absolute host path inside the launcher (and then the agent): jvm-run
+# passes BJV_WS to `docker run -v`.
 name: bjv
 
 services:
   dashboard:
-    image: ${BJV_IMAGE:-vasiliymikhailov/bjv-agent:latest}
+    image: ${BJV_IMAGE:?set BJV_IMAGE}
     build: .
     container_name: bjv-dashboard
     restart: unless-stopped
@@ -16,24 +22,53 @@ services:
     environment:
       BJV_DASH_TOKEN: ${BJV_DASH_TOKEN:?set BJV_DASH_TOKEN in .env}
     volumes:
-      - ${BJV_RESULTS:-./results}:/results
+      - ${BJV_RUNROOT:?set BJV_RUNROOT}/results:/results
     command: ["tech.mikhailov.bjv.agent.Dashboard", "/results", "8086"]
 
   supervisor:
     profiles: ["supervisor"]
-    image: ${BJV_IMAGE:-vasiliymikhailov/bjv-agent:latest}
+    image: ${BJV_IMAGE:?set BJV_IMAGE}
     build: .
     container_name: bjv-supervisor
     restart: unless-stopped
     env_file: .env
     environment:
       OC_KEY: ${OC_KEY:-}
-      OC_BASE: ${OC_BASE:-}
-      OC_MODEL: ${OC_MODEL:-}
+      OC_BASE: ${OC_BASE:?set OC_BASE}
+      OC_MODEL: ${OC_MODEL:?set OC_MODEL}
+      BJV_THINKING: ${BJV_THINKING:-true}
       BJV_SUPERVISOR_MINUTES: ${BJV_SUPERVISOR_MINUTES:-20}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${BJV_RESULTS:-./results}:/results
+      - ${BJV_RUNROOT:?set BJV_RUNROOT}/results:/results
     command: ["tech.mikhailov.bjv.agent.Supervisor", "/results"]
     depends_on:
       - dashboard
+
+  launcher:
+    profiles: ["batch"]
+    image: ${BJV_IMAGE:?set BJV_IMAGE}
+    build: .
+    env_file: .env
+    environment:
+      BJV_IMAGE: ${BJV_IMAGE:?set BJV_IMAGE}
+      BJV_JDK_IMAGE: ${BJV_JDK_IMAGE:-bjv-alljdk}
+      BJV_HOPTOOLS: ${BJV_HOPTOOLS:?set BJV_HOPTOOLS}
+      BJV_RUNROOT: ${BJV_RUNROOT:?set BJV_RUNROOT}
+      BJV_NET: ${BJV_NET:-mvn-cache}
+      GIT_BASE: ${GIT_BASE:?set GIT_BASE}
+      GIT_TOKEN: ${GIT_TOKEN:-}
+      GIT_SSH_KEY: ${GIT_SSH_KEY:-}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${BJV_RUNROOT}:${BJV_RUNROOT}
+      - ${BJV_HOPTOOLS}:${BJV_HOPTOOLS}:ro
+      - ${BJV_MANIFEST:?set BJV_MANIFEST}:${BJV_MANIFEST}:ro
+    networks:
+      - cache
+    entrypoint: ["/bin/bash", "/opt/bjv/run.sh"]
+    command: ["${BJV_MANIFEST}"]
+
+networks:
+  cache:
+    name: ${BJV_NET:-mvn-cache}

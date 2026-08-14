@@ -153,8 +153,11 @@ public final class Bump {
                     + " while the manifest prescribes " + from + "->" + to
                     + "; proceeding with the prescribed hop");
         }
-        String hoptools = System.getenv().getOrDefault("BJV_HOPTOOLS",
-                "/home/vmihaylov/bump-java-version/current_attempt/current_iteration/hoptools");
+        String hoptools = Env.get("BJV_HOPTOOLS");
+        if (hoptools == null) {
+            throw new IllegalStateException(
+                    "BJV_HOPTOOLS must be the host path of hoptools/ (jvm-run is invoked from it)");
+        }
         runner = new Runner(ws, hoptools);
         walls = new Walls(ws);
         security = new Security(ws, hoptools, trace);

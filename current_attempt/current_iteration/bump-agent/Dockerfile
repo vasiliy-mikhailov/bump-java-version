@@ -12,9 +12,11 @@
 # container is run without the socket. The guarantee moved from the image to the run command, which
 # is weaker: it is now a thing to get right every time rather than a thing that cannot go wrong.
 FROM eclipse-temurin:17-jre
-RUN apt-get update && apt-get install -y --no-install-recommends docker.io git ca-certificates \
+RUN apt-get update && apt-get install -y --no-install-recommends docker.io git ca-certificates openssh-client \
  && rm -rf /var/lib/apt/lists/*
 COPY target/bump-agent-0.1.0-SNAPSHOT.jar /bump-agent.jar
+COPY run.sh /opt/bjv/run.sh
+RUN chmod +x /opt/bjv/run.sh
 EXPOSE 8086
 ENTRYPOINT ["java", "-cp", "/bump-agent.jar"]
 CMD ["tech.mikhailov.bjv.agent.Bump"]
