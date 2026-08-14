@@ -85,9 +85,8 @@ final class Supervisor {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        watch(Path.of(args.length > 0 ? args[0]
-                : "/home/vmihaylov/bump-java-version/current_attempt/current_iteration/runs_agent/results"));
+    public static void main(String[] args) {
+        watch(Path.of(args.length > 0 ? args[0] : "results"));
     }
 
     // ---- one round ----

@@ -102,7 +102,7 @@ final class Security {
      */
     Scan scan(String jdk, String phase) {
         Map<String, String> env = new HashMap<>(Runner.env(ws));
-        env.put("BJV_IMAGE", "bjv-alljdk:trivy");
+        env.put("BJV_JDK_IMAGE", Env.get("BJV_SCAN_IMAGE", "bjv-alljdk:trivy"));
         try {
             // Trivy's contract is pure JSON on stdout, so this call must not merge stderr into it
             // the way a build call deliberately does.

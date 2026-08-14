@@ -40,17 +40,75 @@ certifies. Neither gets `write_file`. An edit under a test source root is refuse
 
 **Free things first.** Every loop turn tries `Walls` before spending a model call.
 
-## Running
+## Running on an internal VM
+
+Compose does **not** migrate anything by itself. `dashboard` reads `results/`. `run.sh` (or the
+`launcher` profile) clones the manifest and starts `Bump`. Each bump then spawns `bjv-alljdk`
+through the host docker socket.
 
 ```
-mvn package
-docker build -t bjv-agent .                             # controller: JDK + docker client
-docker build -t bjv-dashboard -f Dockerfile.dashboard .  # reader, no docker socket
+cp .env.example .env          # fill every required value — no author-host defaults
+cp -a ../hoptools "$BJV_HOPTOOLS"
+cp config/settings.xml.example "$BJV_SETTINGS"
+cp config/init.gradle.example "$BJV_GRADLE_INIT"
+mkdir -p "$BJV_RUNROOT" "$BJV_M2" "$BJV_GRADLE_DISTS"
+# attach the Maven proxy container to docker network $BJV_NET (default mvn-cache)
+bash ./smoke.sh               # images, env, network, paths
+docker compose up -d          # dashboard at http://127.0.0.1:8086
+docker compose --profile batch run --rm launcher
+```
 
+Supervisor (needs `OC_KEY`): `docker compose --profile supervisor up -d`.
+
+Same image, one bump, docker socket required — paths are **host** paths, bind-mounted at the same
+absolute location so nested `docker run -v $BJV_WS:/work` hits the checkout:
+
+```
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-  -v "$WS:$WS" -e OC_KEY=… -e BJV_HOPTOOLS=…/hoptools \
-  bjv-agent "$WS" 'owner/repo|sha|11|17' "$RESULTS"
+  -v "$WS:$WS" -v "$BJV_HOPTOOLS:$BJV_HOPTOOLS:ro" \
+  -e OC_KEY -e OC_BASE -e OC_MODEL -e BJV_HOPTOOLS -e BJV_JDK_IMAGE \
+  "$BJV_IMAGE" tech.mikhailov.bjv.agent.Bump \
+  "$WS" 'group/project|sha|11|17' "$RESULTS"
 ```
+
+Manifest TSV: `slug  group/project  sha  from  to`. One row is one LTS hop. 8→21 is three hops.
+Clone URL is `$GIT_BASE/$repo.git`. HTTPS: `GIT_TOKEN`. SSH: `GIT_SSH_KEY` (run `run.sh` on the
+host, or add a same-path volume for the key to the launcher).
+
+`BJV_IMAGE` is the agent. `BJV_JDK_IMAGE` is the all-JDK sandbox. They are different names on
+purpose — do not reuse `BJV_IMAGE` for builds.
+
+`BJV_THINKING=false` if the LLM is not Qwen and rejects `chat_template_kwargs.enable_thinking`.
+The endpoint still needs tool-calling.
+
+## Images
+
+**bjv-agent.** Fat jar. Rebuild needs `com.deepagents:langchain4j-deepagents` in a local Maven
+repo. First copy: retag Hub `vasiliymikhailov/bjv-agent` or `docker load` a save from the research
+host, then `docker push $BJV_IMAGE`.
+
+**bjv-alljdk.** Produced by the `current_sweep/` Dockerfile chain plus
+`current_iteration/Dockerfile.alljdk`.
+
+## Maven, Gradle, LLM, Git
+
+- Put the proxy's **container DNS name** in `config/settings.xml.example` → `$BJV_SETTINGS`.
+  A host IP from inside `bjv-alljdk` is the wrong address.
+- Join the proxy to docker network `$BJV_NET` (Compose creates `mvn-cache` if it does not exist).
+- Gradle: `$BJV_GRADLE_INIT` (see `config/init.gradle.example`) and pre-stage wrapper zips under
+  `$BJV_GRADLE_DISTS` — sealed builds do not download distributions.
+- `OC_BASE` / `OC_KEY` / `OC_MODEL` must reach an OpenAI-compatible chat endpoint with tool-calling.
+  Missing `OC_KEY` must fail visibly, not look like an empty-supervisor "nothing is wrong".
+
+## Smoke
+
+`bash ./smoke.sh` checks env, images, hoptools, settings, and the docker network.
+
+`bash ./smoke.sh --run` then executes `run.sh` against `$BJV_MANIFEST`.
+
+Ready means: `$BJV_RUNROOT/results/settlements.jsonl` has a terminal `PASS` for that hop, and the
+dashboard shows `results/<slug>/trace.jsonl`. A green `compose up` with an empty queue is not a
+migration.
 
 ## The record
 

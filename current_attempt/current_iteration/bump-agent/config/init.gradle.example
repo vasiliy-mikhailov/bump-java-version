@@ -1,0 +1,17 @@
+// Copy to $BJV_GRADLE_INIT. Same proxy DNS name as settings.xml — from inside bjv-alljdk.
+def proxy = 'http://nexus:8081/repository/maven-public/'
+allprojects {
+    buildscript {
+        repositories {
+            maven { url proxy }
+        }
+    }
+    repositories {
+        maven { url proxy }
+    }
+}
+settingsEvaluated { settings ->
+    settings.pluginManagement.repositories {
+        maven { url proxy }
+    }
+}

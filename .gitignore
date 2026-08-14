@@ -76,3 +76,9 @@ current_attempt/current_sweep/gradle-8.10.2/
 current_attempt/current_sweep/.dockerignore
 history/
 current_attempt/current_iteration/runs/
+
+# Cursor-specific
+.cursor/
+
+# Trivy reports
+trivy-report*.*

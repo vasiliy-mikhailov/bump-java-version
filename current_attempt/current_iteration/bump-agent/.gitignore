@@ -1,2 +1,4 @@
 target/
 results/
+.env
+runs_agent/
