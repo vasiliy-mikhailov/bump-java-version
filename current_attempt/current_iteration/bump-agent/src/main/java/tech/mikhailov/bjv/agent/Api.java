@@ -39,7 +39,7 @@ final class Api {
             case "/.well-known/microfrontend.json" -> Zone.json(x, Zone.manifest());
             case "/api/health" -> health(x);
             case "/api/badges" -> badges(x);
-            case "/api/bumps" -> Zone.json(x, bumps());
+            case "/api/bumps" -> Zone.json(x, bumps(Zone.param(x, "since")));
             case "/api/summary" -> Zone.json(x, summary());
             case "/api/bump" -> Zone.json(x, bump(Zone.param(x, "slug")));
             case "/api/settings" -> Zone.json(x, settings(Zone.param(x, "hop")));
@@ -286,7 +286,34 @@ final class Api {
         return all.size();
     }
 
-    private String bumps() {
+    /**
+     * THE WHOLE CORPUS, OR ONLY WHAT HAS MOVED SINCE {@code since}.
+     *
+     * <p>The list is 1439 rows and about a megabyte, so the page loads it once and polls the
+     * summary instead. That left the "last event" column reading a timestamp frozen at page load
+     * while the clock beside it advanced, so the column did not merely lag: it drifted further from
+     * the truth the longer a tab stayed open, and only a manual refresh corrected it.
+     *
+     * <p>Polling the whole thing to fix that would send a megabyte every fifteen seconds to update
+     * six rows. A delta sends the six. Two things qualify: anything whose last event is newer than
+     * the caller's high-water mark, and anything still running, because a lane mid-answer has not
+     * written since the last poll and is exactly the row a reader is watching.
+     *
+     * <p>The mark is the newest {@code at} the caller already holds, not a wall clock. The page's
+     * clock and this one belong to different machines, and a delta keyed on client time drops rows
+     * whenever those disagree.
+     */
+    private String bumps(String since) {
+        long mark;
+        try {
+            mark = since == null || since.isBlank() ? 0L : Long.parseLong(since.trim());
+        } catch (NumberFormatException notANumber) {
+            mark = 0L;
+        }
+        return bumps(mark);
+    }
+
+    private String bumps(long mark) {
         Map<String, Map<String, String>> settled = settlements();
         Map<String, Map<String, String>> all = new LinkedHashMap<>();
 
@@ -303,6 +330,10 @@ final class Api {
         all.putAll(settled);
 
         List<Map<String, String>> rows = new ArrayList<>(all.values());
+        if (mark > 0) {
+            rows.removeIf(r -> num(r.get("at")) <= mark
+                    && !"bumping".equals(r.getOrDefault("state", "")));
+        }
         // Anything that has moved first, newest first, then the queue in the order it will run.
         rows.sort((a, b) -> Long.compare(num(b.get("at")), num(a.get("at"))));
         return Json.array(rows, this::summary);

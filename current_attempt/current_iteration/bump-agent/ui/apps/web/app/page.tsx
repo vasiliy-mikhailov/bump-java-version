@@ -35,12 +35,46 @@ export default function Home() {
       .catch((e: Error) => setFailed(e.message))
   }, [])
 
-  // SEPARATE FROM THE LIST, and polled. The counts are what a reader watches to decide whether the
-  // sweep is alive, and the list is 1439 rows that mostly are not moving; refetching the second to
-  // refresh the first would be a megabyte a tick.
+  // THE LIST IS POLLED AS A DELTA, and `now` is what makes that necessary rather than optional.
+  //
+  // The list is 1439 rows and about a megabyte, so it was fetched once and never again, while this
+  // timer advanced `now` every fifteen seconds. The header stayed right because it reads the
+  // polled summary; every "last event" cell in the table was computed from a timestamp frozen at
+  // page load against a clock that kept moving, so the column drifted further from the truth the
+  // longer the tab stayed open and only a manual refresh corrected it. A frozen column would have
+  // been a smaller lie than a drifting one.
+  //
+  // Refetching everything would send a megabyte to update six rows. `since` returns what moved:
+  // anything newer than the newest `at` already held, plus anything still running. The mark comes
+  // from the data rather than from this machine's clock, because the two disagree and a delta
+  // keyed on the wrong one silently drops rows.
   useEffect(() => {
     const pull = () => {
       read<Summary>('/api/summary').then(setSummary).catch(() => undefined)
+      setBumps((held) => {
+        if (held === null) {
+          return held
+        }
+        const mark = held.reduce((newest, b) => (b.at > newest ? b.at : newest), 0)
+        read<BumpSummary[]>(`/api/bumps?since=${mark}`)
+          .then((moved) => {
+            if (moved.length === 0) {
+              return
+            }
+            setBumps((current) => {
+              if (current === null) {
+                return current
+              }
+              const fresh = new Map(moved.map((b) => [b.slug, b]))
+              // ORDER IS THE SERVER'S AND MUST NOT BECOME THE DELTA'S. Replacing in place keeps
+              // the row a reader is looking at where they are looking; splicing moved rows to the
+              // top would reshuffle the table under the cursor every fifteen seconds.
+              return current.map((b) => fresh.get(b.slug) ?? b)
+            })
+          })
+          .catch(() => undefined)
+        return held
+      })
       setNow(Date.now())
     }
     pull()
