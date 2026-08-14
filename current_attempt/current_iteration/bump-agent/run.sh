@@ -241,7 +241,12 @@ while read -r slug repo sha from to; do
   if inflight "$bs"; then echo "[$slug] already in flight, skipping"; skipped=$((skipped+1)); continue; fi
   # The slug the supervisor knows is the results directory's, which is the bump slug, not $slug.
   if postponed "$bs"; then postponed_n=$((postponed_n+1)); continue; fi
-  while [ "$(jobs -rp | wc -l)" -ge "$(lanes)" ]; do wait -n 2>/dev/null || sleep 5; done
+  # POLLED, NOT PARKED ON A COMPLETION. lanes() re-reads max_lanes on every evaluation, but
+  #  returns only when a lane EXITS, so the file was re-read at exactly the moments its
+  # value could not matter. Raising the limit from the dashboard then did nothing until something
+  # finished: saved as 6, still running 4, with no way to tell the difference from a broken write.
+  # Two seconds of latency reusing a freed slot is nothing against a bump that runs for an hour.
+  while [ "$(jobs -rp | wc -l)" -ge "$(lanes)" ]; do sleep 2; done
   one "$slug" "$repo" "$sha" "$from" "$to" &
   done_n=$((done_n+1))
 done < "$MAN"
