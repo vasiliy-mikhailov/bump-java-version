@@ -57,6 +57,24 @@ KEY=${OC_KEY:-${PROPOSER_API_KEY:-}}
 : "${OC_BASE:?set OC_BASE (bump-agent/.env, or the environment): a lane cannot start without one}"
 : "${OC_MODEL:?set OC_MODEL (bump-agent/.env, or the environment)}"
 
+# AND THE SANDBOX MOUNTS, WHICH FAIL WORSE THAN THE ENDPOINT DOES.
+#
+# A lane with no endpoint dies loudly enough to notice. A lane with no dependency cache runs to
+# completion and produces verdicts. Runner.env copies these only when set and jvm-run mounts each
+# only when it exists, so unset means the build container comes up with an empty /root/.m2 and no
+# settings.xml, and against an offline Nexus nothing resolves. The corpus then fills with results
+# that look ordinary: a project settles no-baseline for "does not build" when it builds fine, and
+# a scan reports CRITICAL+HIGH 0 -> 0 because trivy was handed an empty directory. One repo did
+# both within an hour of PASSing on the same commit.
+#
+# So this refuses rather than warns: a warning is what scrolled past while 112GB of cache sat
+# unmounted. BJV_ALLOW_NO_CACHE=1 is the way out for an install that really has no warm cache and
+# expects to resolve from the network.
+if [ -z "${BJV_ALLOW_NO_CACHE:-}" ]; then
+  [ -d "${BJV_M2:-}" ] || { echo "run.sh: BJV_M2 is not a directory (${BJV_M2:-unset}). An offline sweep resolves nothing without it, and the verdicts it produces will look ordinary and be wrong. Set it, or set BJV_ALLOW_NO_CACHE=1 if that is genuinely what you want." >&2; exit 1; }
+  [ -e "${BJV_SETTINGS:-}" ] || { echo "run.sh: BJV_SETTINGS is not a file (${BJV_SETTINGS:-unset}). Without the mirror settings maven will not reach the local Nexus. Set it, or set BJV_ALLOW_NO_CACHE=1." >&2; exit 1; }
+fi
+
 settled() { # a slug is done when the settlements file holds a terminal state for it
   [ -f "$RESULTS/settlements.jsonl" ] || return 1
   grep -q "\"bump\":\"$1|" "$RESULTS/settlements.jsonl" 2>/dev/null &&
