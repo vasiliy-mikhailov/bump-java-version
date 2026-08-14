@@ -11,9 +11,11 @@
 # starting a build. Now it carries one, and the only thing between it and the daemon is that its
 # container is run without the socket. The guarantee moved from the image to the run command, which
 # is weaker: it is now a thing to get right every time rather than a thing that cannot go wrong.
-FROM eclipse-temurin:17-jre
-RUN apt-get update && apt-get install -y --no-install-recommends docker.io git ca-certificates openssh-client \
- && rm -rf /var/lib/apt/lists/*
+FROM eclipse-temurin:17-jre-alpine
+COPY --from=docker:29-cli /usr/local/bin/docker /usr/local/bin/docker
+
+RUN apk upgrade --no-cache \
+ && apk add --no-cache git bash openssh-client ca-certificates
 COPY target/bump-agent-0.1.0-SNAPSHOT.jar /bump-agent.jar
 COPY run.sh /opt/bjv/run.sh
 RUN chmod +x /opt/bjv/run.sh
