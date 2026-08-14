@@ -79,3 +79,6 @@ current_attempt/current_iteration/runs/
 
 # Cursor-specific
 .cursor/
+
+# Trivy reports
+trivy-report*.*
