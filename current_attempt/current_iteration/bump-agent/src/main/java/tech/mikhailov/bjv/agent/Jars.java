@@ -56,7 +56,7 @@ final class Jars {
 
     /** The default local repository, which is where every resolved dependency already sits. */
     static Jars local() {
-        String m2 = System.getenv().getOrDefault("BJV_M2", "/home/vmihaylov/.m2-fitness");
+        String m2 = Env.get("BJV_M2", System.getProperty("user.home") + "/.m2");
         return new Jars(Path.of(m2, "repository"));
     }
 

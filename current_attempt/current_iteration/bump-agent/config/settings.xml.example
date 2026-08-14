@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copy to $BJV_SETTINGS. Replace PROXY_HOST with the DNS name of the Maven
+     proxy as seen FROM the bjv-alljdk container (docker network BJV_NET), not a host IP. -->
+<settings>
+  <mirrors>
+    <mirror>
+      <id>internal</id>
+      <url>http://nexus:8081/repository/maven-public/</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
+  <profiles>
+    <profile>
+      <id>internal</id>
+      <repositories>
+        <repository>
+          <id>internal</id>
+          <url>http://nexus:8081/repository/maven-public/</url>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>internal</id>
+          <url>http://nexus:8081/repository/maven-public/</url>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>internal</activeProfile>
+  </activeProfiles>
+</settings>

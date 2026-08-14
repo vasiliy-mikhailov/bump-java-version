@@ -64,13 +64,14 @@ final class Runner {
     static Map<String, String> env(Path ws) {
         Map<String, String> env = new HashMap<>();
         env.put("BJV_WS", ws.toString());
-        env.put("BJV_NET", "mvn-cache");
-        env.put("BJV_M2", "/home/vmihaylov/.m2-fitness");
-        env.put("BJV_SETTINGS", "/home/vmihaylov/maven-config/settings.xml");
-        env.put("BJV_GRADLE_RO", "/home/vmihaylov/.gradle-fitness");
-        env.put("BJV_GRADLE_DISTS", "/home/vmihaylov/.gradle-dists");
-        env.put("BJV_HANG_GUARD",
-                System.getenv().getOrDefault("BJV_HANG_GUARD", "1800"));
+        Env.copy(env, "BJV_NET", "mvn-cache");
+        Env.copyIfSet(env, "BJV_M2");
+        Env.copyIfSet(env, "BJV_SETTINGS");
+        Env.copyIfSet(env, "BJV_GRADLE_RO");
+        Env.copyIfSet(env, "BJV_GRADLE_DISTS");
+        Env.copyIfSet(env, "BJV_GRADLE_INIT");
+        Env.copy(env, "BJV_HANG_GUARD", "1800");
+        Env.copyIfSet(env, "BJV_JDK_IMAGE");
         return env;
     }
 

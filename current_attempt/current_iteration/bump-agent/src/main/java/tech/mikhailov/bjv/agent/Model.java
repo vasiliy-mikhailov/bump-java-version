@@ -102,7 +102,16 @@ final class Model {
     }
 
     private static ChatModel build(Trace trace, boolean thinking) {
-        String base = env("OC_BASE", "https://inference.mikhailov.tech/qwen-3.6-35b-a3b-awq/v1");
+        String base = Env.get("OC_BASE");
+        if (base == null) {
+            throw new IllegalStateException(
+                    "OC_BASE must be set to an OpenAI-compatible chat endpoint");
+        }
+        String model = Env.get("OC_MODEL");
+        if (model == null) {
+            throw new IllegalStateException("OC_MODEL must be set");
+        }
+        boolean wantThinking = thinking && Env.flag("BJV_THINKING", true);
         HttpClient.Version version = base.startsWith("https://")
                 ? HttpClient.Version.HTTP_2
                 : HttpClient.Version.HTTP_1_1;
@@ -117,14 +126,14 @@ final class Model {
                 // `reasoning` and the client looks for `reasoning_content` on this path too.
                 .httpClientBuilder(trace == null ? jdk : Reasoning.tee(jdk, trace))
                 .baseUrl(base)
-                .apiKey(env("OC_KEY", ""))
-                .modelName(env("OC_MODEL", "qwen-3.6-35b-a3b-awq"))
+                .apiKey(Env.get("OC_KEY", ""))
+                .modelName(model)
                 .temperature(0.0)
                 .maxTokens(MAX_TOKENS)
                 .timeout(PATIENCE)
                 .returnThinking(Boolean.TRUE);
 
-        java.util.Map<String, Object> extra = extras(thinking);
+        java.util.Map<String, Object> extra = extras(wantThinking);
         if (!extra.isEmpty()) {
             s.customParameters(extra);
         }
@@ -153,7 +162,6 @@ final class Model {
     }
 
     private static String env(String name, String fallback) {
-        String v = System.getenv(name);
-        return v == null || v.isBlank() ? fallback : v;
+        return Env.get(name, fallback);
     }
 }

@@ -1,5 +1,7 @@
 target/
 results/
+.env
+runs_agent/
 
 # The UI is a pnpm workspace that deploy.sh builds before the jar. Everything below is a build
 # product: node_modules and .next are regenerable, and the static export is copied into
