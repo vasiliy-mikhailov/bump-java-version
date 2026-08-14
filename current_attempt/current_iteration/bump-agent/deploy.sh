@@ -11,6 +11,21 @@ set -euo pipefail
 cd "$(dirname "$0")"
 H=${BJV_HOST:-mh}
 R=${BJV_REMOTE:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/bump-agent}
+
+# RUNNING ON THE TARGET IS THE NORMAL CASE NOW, and it used to be the broken one. This script was
+# written to be invoked from the author's laptop, so every step goes through `ssh $H` and $H
+# defaults to `mh`, which is an alias in one person's ssh config and not a name the host itself can
+# resolve. With the ui building in a container, the host can do the whole job and has the checkout
+# already; syncing a directory to itself over an unresolvable hostname is the only thing standing
+# in the way. So: if the source IS the destination, there is nothing to ship.
+HERE=$(cd "$(dirname "$0")" && pwd)
+if [ "$HERE" = "$R" ]; then
+  LOCAL=1
+  run() { sh -c "$1"; }
+else
+  LOCAL=
+  run() { ssh "$H" "$1"; }
+fi
 RESULTS=${BJV_RESULTS:-/home/vmihaylov/bump-java-version/current_attempt/current_iteration/runs_agent/results}
 # THE FRONTEND FIRST, INTO THE JAR. The pages are a Next.js static export served from the
 # classpath, so the container stays single-process: one JVM, no node beside it. Building it here
@@ -43,16 +58,20 @@ docker run --rm \
 rm -rf src/main/resources/ui
 cp -r ui/apps/web/out src/main/resources/ui
 mvn -B -o package
-rsync -a --delete src/ "$H:$R/src/"
-rsync -a target/bump-agent-0.1.0-SNAPSHOT.jar "$H:$R/target/"
+if [ -z "$LOCAL" ]; then
+  rsync -a --delete src/ "$H:$R/src/"
+  rsync -a target/bump-agent-0.1.0-SNAPSHOT.jar "$H:$R/target/"
+fi
 # THE DOCKERFILES TOO. They live here and are built there, so a new one is a build failure and an
 # edited one is silently the old one -- the same shape as this script not shipping itself, which
 # also had to be found the hard way.
-rsync -a Dockerfile run.sh deploy.sh "$H:$R/"
+if [ -z "$LOCAL" ]; then
+  rsync -a Dockerfile run.sh deploy.sh "$H:$R/"
+fi
 # ONE IMAGE. The agent, the dashboard and the supervisor are the same jar with different main
 # classes; three Dockerfiles copying the same artifact meant three builds and three chances for one
 # of them to be a version behind.
-ssh "$H" "cd $R && docker build -q -t bjv ."
+run "cd $R && docker build -q -t bjv ."
 
 # ONE LONG-LIVED CONTAINER. The dashboard serves the page and runs the supervisor on a daemon
 # thread. They were two because the supervisor needed the docker socket to stop a lane; a lane now
@@ -72,7 +91,7 @@ ssh "$H" "cd $R && docker build -q -t bjv ."
 #
 # THE TOKEN IS READ BEFORE THE CONTAINER IS REMOVED. The only copy lives in that container's
 # environment, and reading it afterwards recreates a public page with no authentication.
-ssh "$H" '
+run '
   set -e
   TOKEN=$(docker inspect bjv-dashboard --format "{{range .Config.Env}}{{println .}}{{end}}" 2>/dev/null |
           sed -n "s/^BJV_DASH_TOKEN=//p" | head -1)
@@ -89,4 +108,4 @@ ssh "$H" '
   echo "dashboard and supervisor recreated as one container"
 '
 
-ssh "$H" "docker image inspect bjv --format 'bjv {{.Id}}'"
+run "docker image inspect bjv --format 'bjv {{.Id}}'"

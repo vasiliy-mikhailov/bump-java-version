@@ -43,6 +43,20 @@ mkdir -p "$RESULTS/claims"
 KEY=${OC_KEY:-${PROPOSER_API_KEY:-}}
 : "${GIT_BASE:?set GIT_BASE (e.g. https://gitlab.example.com)}"
 
+# A LANE WITH NO ENDPOINT DIES IN SECONDS AND SAYS SO ONLY IN ITS OWN LOG.
+#
+# Model requires OC_BASE and OC_MODEL now rather than defaulting to one machine's inference host,
+# and that is the right change: the default was a pin to the author's box, and it had gone stale
+# besides, naming a different model from the one this host's .env configures. What it introduced is
+# a silent failure at the other end. This loop passes those two through only when they are set, so
+# an unset pair does not stop anything: it launches lane after lane, each of which starts, throws
+# IllegalStateException and exits. Thirty-five bumps went past that way in under a minute, each
+# leaving a "bumping" heartbeat and no verdict, before anyone opened a log.
+#
+# One refusal here, before the first lane, costs one line and reads as what it is.
+: "${OC_BASE:?set OC_BASE (bump-agent/.env, or the environment): a lane cannot start without one}"
+: "${OC_MODEL:?set OC_MODEL (bump-agent/.env, or the environment)}"
+
 settled() { # a slug is done when the settlements file holds a terminal state for it
   [ -f "$RESULTS/settlements.jsonl" ] || return 1
   grep -q "\"bump\":\"$1|" "$RESULTS/settlements.jsonl" 2>/dev/null &&
