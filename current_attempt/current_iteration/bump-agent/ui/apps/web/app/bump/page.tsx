@@ -145,7 +145,7 @@ function BumpPage() {
             </Section>
           )}
 
-          <section style={{ margin: '0 0 22px' }}>
+          <section id="dependencies" style={{ margin: '0 0 22px', scrollMarginTop: '12px' }}>
             <h2 style={LABEL}>dependencies</h2>
             <PackageTable packages={packages} />
           </section>

@@ -59,10 +59,18 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                 )}
               </td>
               <td style={{ ...td, textAlign: 'right' }}>
+                {/* THE NUMBERS ARE THE LINK. "77 -> 12" is the summary of a table that says which
+                    dependencies moved, and that table was reachable only by clicking the repo name
+                    and scrolling past everything else. A reader who wants the detail is already
+                    pointing at the number that summarises it. */}
                 {b.cvesBefore == null ? (
                   '—'
                 ) : (
-                  <>
+                  <a
+                    href={`${hrefFor(b.slug)}#dependencies`}
+                    style={{ color: 'inherit', textDecoration: 'none' }}
+                    title="which dependencies moved"
+                  >
                     {b.cvesBefore}
                     {b.cvesAfter == null ? null : (
                       <>
@@ -81,7 +89,7 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                         </span>
                       </>
                     )}
-                  </>
+                  </a>
                 )}
               </td>
               <td style={{ ...td, textAlign: 'right' }}>
