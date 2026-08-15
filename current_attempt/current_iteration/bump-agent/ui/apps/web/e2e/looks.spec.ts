@@ -143,4 +143,45 @@ test.describe('bump-java-version, as a reader sees it', () => {
 
     await page.screenshot({ path: `${SHOTS}/04-bumps-dark.png`, fullPage: false })
   })
+
+  test('the list arrives newest-event first, and stays that way on a refresh', async ({ page }) => {
+    // THE SORT KEY AND THE DISPLAYED KEY WERE DIFFERENT FIELDS. bumps() ordered rows by the
+    // settlement's own `at` and emitted lastEventAt in its place, so the list arrived in an order
+    // matching nothing on screen. It looked stable because the page merges deltas in place rather
+    // than reshuffling under the cursor; only a refresh, which refetches, made it visible.
+    //
+    // Asserted over the rendered rows and then again after a reload, because "sorted" and "still
+    // sorted once you fetch it again" are the two halves of what broke.
+    const order = async () => {
+      await page.waitForSelector('table tbody tr', { timeout: 30_000 })
+      const cells = await page.locator('table tbody tr td:last-child').allInnerTexts()
+      // "4s ago", "2m ago", "1h ago" — parse to seconds so the column can be checked as a number.
+      return cells
+        .map((s) => s.trim())
+        .filter((s) => /^\d+[smhd] ago$/.test(s))
+        .map((s) => {
+          const n = Number.parseInt(s, 10)
+          const unit = s.replace(/[^smhd]/g, '')[0]
+          return n * (unit === 's' ? 1 : unit === 'm' ? 60 : unit === 'h' ? 3600 : 86_400)
+        })
+    }
+
+    await page.goto('/')
+    const first = await order()
+    expect(first.length, 'no dated rows to check').toBeGreaterThan(2)
+    for (let i = 1; i < first.length; i += 1) {
+      expect(first[i - 1] ?? 0, `row ${i} is out of order on load`).toBeLessThanOrEqual(
+        first[i] ?? 0,
+      )
+    }
+
+    await page.reload()
+    const again = await order()
+    for (let i = 1; i < again.length; i += 1) {
+      expect(again[i - 1] ?? 0, `row ${i} is out of order after a refresh`).toBeLessThanOrEqual(
+        again[i] ?? 0,
+      )
+    }
+    console.log(`  checked ${first.length} rows on load and ${again.length} after refresh`)
+  })
 })

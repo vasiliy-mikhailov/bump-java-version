@@ -191,6 +191,14 @@ final class Api {
         });
     }
 
+    /**
+     * THE TIMESTAMP THE ROW CARRIES, so that anything ordering or filtering by it agrees with what
+     * the page displays. Cheap: one stat of a file the caller is about to read anyway.
+     */
+    private long shownAt(Map<String, String> r) {
+        return lastEventAt(slug(r.getOrDefault("bump", "")), num(r.get("at")));
+    }
+
     private long lastEventAt(String slug, long fallback) {
         Path trace = results.resolve(slug).resolve("trace.jsonl");
         try {
@@ -332,11 +340,22 @@ final class Api {
 
         List<Map<String, String>> rows = new ArrayList<>(all.values());
         if (mark > 0) {
-            rows.removeIf(r -> num(r.get("at")) <= mark
+            rows.removeIf(r -> shownAt(r) <= mark
                     && !"bumping".equals(r.getOrDefault("state", "")));
         }
         // Anything that has moved first, newest first, then the queue in the order it will run.
-        rows.sort((a, b) -> Long.compare(num(b.get("at")), num(a.get("at"))));
+        //
+        // SORTED ON THE VALUE THE ROW ACTUALLY CARRIES. This sorted on the settlement's own `at`
+        // and then emitted lastEventAt instead, so the two were different facts: a settlement is
+        // written when a bump starts and when it ends, while the row shows the trace's last write.
+        // The list therefore arrived in an order matching nothing on screen, and looked stable only
+        // because the page merges deltas in place -- until a refresh, which fetched it afresh and
+        // shuffled every running row.
+        //
+        // The delta filter above has the same fix for the same reason: comparing a caller's mark,
+        // which came from the row it was given, against a field that row never carried would drop
+        // rows that had in fact moved.
+        rows.sort((a, b) -> Long.compare(shownAt(b), shownAt(a)));
         return Json.array(rows, this::summary);
     }
 
@@ -359,7 +378,7 @@ final class Api {
                 Json.field("cvesBefore", number(because, CVES_BEFORE)),
                 Json.field("cvesAfter", number(because, CVES_AFTER)),
                 Json.field("startedAt", String.valueOf(startedAt(slug))),
-                Json.field("at", String.valueOf(lastEventAt(slug, num(r.get("at"))))),
+                Json.field("at", String.valueOf(shownAt(r))),
                 Json.field("events", String.valueOf(events(slug))),
                 Json.field("humanMinutes", humanMinutes(slug)));
     }
