@@ -52,18 +52,26 @@ export function PackageTable({ packages }: PackageTableProps) {
               <td style={{ ...td, textAlign: 'right' }}>
                 <span style={{ color: 'var(--cve-remaining)' }}>{r.cvesBefore}</span>
                 {' → '}
-                <span
-                  style={{
-                    color:
-                      r.cvesAfter < r.cvesBefore
-                        ? 'var(--cve-cleared)'
-                        : r.cvesAfter > r.cvesBefore
-                          ? 'var(--cve-introduced)'
-                          : 'var(--cve-remaining)',
-                  }}
-                >
-                  {r.cvesAfter}
-                </span>
+                {/* NOT MEASURED IS NOT ZERO. A green 0 here told a reader the dependency had been
+                    cleaned up on bumps that were never scanned a second time at all. */}
+                {r.cvesAfter === null ? (
+                  <span style={{ color: 'var(--text-tertiary)' }} title="no after scan">
+                    —
+                  </span>
+                ) : (
+                  <span
+                    style={{
+                      color:
+                        r.cvesAfter < r.cvesBefore
+                          ? 'var(--cve-cleared)'
+                          : r.cvesAfter > r.cvesBefore
+                            ? 'var(--cve-introduced)'
+                            : 'var(--cve-remaining)',
+                    }}
+                  >
+                    {r.cvesAfter}
+                  </span>
+                )}
               </td>
             </tr>
           ))}
@@ -100,5 +108,37 @@ export function collapse(packages: Package[]): Row[] {
       seen.modules += 1
     }
   }
-  return [...by.values()].sort((a, b) => b.cvesBefore - a.cvesBefore || a.name.localeCompare(b.name))
+  return [...by.values()].sort(best)
+}
+
+/**
+ * BEST OUTCOME FIRST, WORST LAST, which is not the same as most-vulnerable-first.
+ *
+ * This sorted by CVEs BEFORE, so the table was ordered by how bad the project used to be. On a
+ * successful bump that puts the biggest win and the biggest remaining problem in the same place at
+ * the top and sorts everything else by a number the bump has already made obsolete.
+ *
+ * The order now is what the bump DID:
+ *
+ *   1. how many CVEs it cleared, descending, so the wins lead and anything it made worse sinks
+ *      below every row that changed nothing;
+ *   2. then, among rows that cleared the same amount, how many are LEFT, descending, so that
+ *      11 -> 11 sits above 0 -> 0 rather than being buried under a hundred clean dependencies;
+ *   3. then the name, so the order is stable between renders.
+ *
+ * A row whose after was never measured cannot be scored, so it sorts as having cleared nothing and
+ * keeps its place by what it carried.
+ */
+export function best(a: Row, b: Row): number {
+  return cleared(b) - cleared(a) || left(b) - left(a) || a.name.localeCompare(b.name)
+}
+
+/** What the bump removed here, or 0 when there is no after to compare against. */
+function cleared(r: Row): number {
+  return r.cvesAfter === null ? 0 : r.cvesBefore - r.cvesAfter
+}
+
+/** What is still there, or what was there when nothing was measured after. */
+function left(r: Row): number {
+  return r.cvesAfter ?? r.cvesBefore
 }

@@ -131,7 +131,10 @@ function BumpPage() {
             </Section>
           )}
 
-          {cves.before === 0 && cves.after === 0 ? null : (
+          {/* Nothing to show only when there was nothing before AND nothing measured after.
+              `after` is null on every bump that did not reach a green gate, and null is not
+              zero: a project with 337 findings and no second scan still has 337. */}
+          {cves.before === 0 && (cves.after ?? 0) === 0 ? null : (
             <Section title="vulnerabilities">
               <SecurityDelta
                 before={cves.before}

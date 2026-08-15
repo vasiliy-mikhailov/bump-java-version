@@ -464,7 +464,13 @@ final class Api {
                     Json.field("versionBefore", Json.optional(b == null ? "" : b[0])),
                     Json.field("versionAfter", Json.optional(a == null ? "" : a[0])),
                     Json.field("cvesBefore", String.valueOf(b == null ? 0 : (int) num(b[1]))),
-                    Json.field("cvesAfter", String.valueOf(a == null ? 0 : (int) num(a[1])))));
+                    // NULL WHEN THE AFTER SCAN DID NOT SEE IT, not zero. Zero renders green
+                    // as "cleared", so a bump with no after scan at all reported every
+                    // vulnerable dependency as fixed: assertj-core 1 -> 0 on a project that
+                    // had not been scanned once. It also covers the honest case of a
+                    // dependency the bump removed, which is likewise not "zero CVEs".
+                    Json.field("cvesAfter",
+                            a == null ? "null" : String.valueOf((int) num(a[1])))));
         }
         return "[" + String.join(",", rows) + "]";
     }
@@ -481,11 +487,15 @@ final class Api {
     private String cves(List<Map<String, String>> events) {
         Map<String, String[]> before = inventory(events, "packages-before");
         Map<String, String[]> after = inventory(events, "packages-after");
+        // AN AFTER THAT WAS NEVER TAKEN IS NOT ZERO. The after scan runs only on a green
+        // gate, so most bumps have no after inventory at all, and summing an empty map to 0
+        // put "CRITICAL+HIGH 337 -> 0" on the page of a bump that had cleared nothing.
+        boolean measured = !after.isEmpty();
         return Json.object(
                 Json.field("before", String.valueOf(total(before))),
-                Json.field("after", String.valueOf(total(after))),
+                Json.field("after", measured ? String.valueOf(total(after)) : "null"),
                 Json.field("distinctBefore", String.valueOf(distinct(before))),
-                Json.field("distinctAfter", String.valueOf(distinct(after))));
+                Json.field("distinctAfter", measured ? String.valueOf(distinct(after)) : "null"));
     }
 
     private static int total(Map<String, String[]> inventory) {

@@ -2,9 +2,10 @@ import { Tally } from '../primitives/Tally'
 
 export type SecurityDeltaProps = {
   before: number
-  after: number
+  /** Null when no after scan was taken, which is every bump that did not reach a green gate. */
+  after: number | null
   distinctBefore: number
-  distinctAfter: number
+  distinctAfter: number | null
 }
 
 /**
@@ -21,22 +22,22 @@ export type SecurityDeltaProps = {
  * vulnerabilities". Showing one without the other has been wrong in both directions.
  */
 export function SecurityDelta({ before, after, distinctBefore, distinctAfter }: SecurityDeltaProps) {
-  const moved = before - after
+  // AN AFTER THAT WAS NEVER TAKEN IS NOT ZERO, and the difference matters more here than anywhere
+  // else on the page. The after scan runs only on a green gate; treating its absence as zero put
+  // "337 -> 0, cleared 337" above the dependency table of a bump that had cleared nothing.
+  const moved = after === null ? null : before - after
+  const tone = moved === null ? 'plain' : moved > 0 ? 'good' : moved < 0 ? 'alarm' : 'plain'
   return (
     <div style={{ display: 'flex', gap: '26px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
       <Tally label="CRITICAL+HIGH before" value={before} />
+      <Tally label={after === null ? 'after, not measured' : 'after'} value={after ?? '—'} tone={tone} />
       <Tally
-        label="after"
-        value={after}
-        tone={moved > 0 ? 'good' : moved < 0 ? 'alarm' : 'plain'}
-      />
-      <Tally
-        label={moved >= 0 ? 'cleared' : 'introduced'}
-        value={Math.abs(moved)}
-        tone={moved > 0 ? 'good' : moved < 0 ? 'alarm' : 'plain'}
+        label={moved === null ? 'cleared, not measured' : moved >= 0 ? 'cleared' : 'introduced'}
+        value={moved === null ? '—' : Math.abs(moved)}
+        tone={tone}
       />
       <Tally label="distinct before" value={distinctBefore} />
-      <Tally label="distinct after" value={distinctAfter} />
+      <Tally label="distinct after" value={distinctAfter ?? '—'} />
     </div>
   )
 }

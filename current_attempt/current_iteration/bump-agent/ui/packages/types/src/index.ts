@@ -127,7 +127,13 @@ export type Package = {
   versionBefore: string | null
   versionAfter: string | null
   cvesBefore: number
-  cvesAfter: number
+  /**
+   * NULL WHEN THE AFTER SCAN DID NOT SEE THIS PACKAGE, which is not the same as zero.
+   *
+   * The after scan runs only on a green gate, so most bumps never take one. Sending zero made
+   * every vulnerable dependency on those bumps render green as cleared.
+   */
+  cvesAfter: number | null
 }
 
 /** Everything one bump page needs, in one response. */
@@ -137,7 +143,13 @@ export type BumpDetail = {
   events: TraceEvent[]
   packages: Package[]
   /** Distinct CRITICAL+HIGH, which is not the sum of the rows above: see the module column. */
-  cves: { before: number; after: number; distinctBefore: number; distinctAfter: number }
+  /** `after` is null when no after scan was taken, which is most bumps. */
+  cves: {
+    before: number
+    after: number | null
+    distinctBefore: number
+    distinctAfter: number | null
+  }
 }
 
 /** What the supervisor noticed across bumps that no single bump could see. */
