@@ -269,6 +269,28 @@ final class Agents {
 
 {RECIPES}
 
+                IF apply_recipe ANSWERS "no POM in this directory", STOP CALLING IT. That is a
+                Gradle project. The recipe plugin runs through Maven, so on a project with no pom it
+                cannot execute at all -- not this recipe, not any recipe, not on a retry. Measured:
+                roughly a third of this corpus, and every one of those bumps reached the gate having
+                changed nothing while the agent called apply_recipe again.
+
+                On such a project edit_file is the whole toolkit, and it is enough for a version.
+                Read the build files and raise what the pins and the target need, wherever the
+                project keeps it:
+
+                - plugins { id 'org.springframework.boot' version 'X' }, or the Kotlin DSL
+                  id("org.springframework.boot") version "X"
+                - the older buildscript form,
+                  classpath 'org.springframework.boot:spring-boot-gradle-plugin:X'
+                - a property the dependencies read: ext['x.version'] in Groovy,
+                  extra["x.version"] in Kotlin, or a [versions] entry in gradle/libs.versions.toml
+                - the version inside a dependency string, implementation 'group:artifact:version'
+                - distributionUrl in gradle/wrapper/gradle-wrapper.properties for the wrapper floor
+
+                A pin you cannot reach any of those ways is worth saying so about. A pin you did not
+                try because the recipe failed is not.
+
                 THEN FINISH WHAT THEY MISSED. check_target reads every build file and reports the
                 source, target, release, sourceCompatibility, jvmTarget and toolchain declarations
                 still below {TARGET}, with file and line. Recipes do not reach every dialect a
