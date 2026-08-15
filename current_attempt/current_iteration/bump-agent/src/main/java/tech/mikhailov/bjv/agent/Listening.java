@@ -88,8 +88,9 @@ final class Listening implements ChatModelListener {
         ctx.attributes().put(STARTED, System.currentTimeMillis());
         try {
             List<ChatMessage> sent = ctx.chatRequest().messages();
-            trace.exchanged(new Trace.Exchange("to", agentOf(system(sent)), sent.size(),
-                    tail(last(sent)), "", "", "", 0, 0, 0, ""));
+            String agent = agentOf(system(sent));
+            trace.exchanged(new Trace.Exchange("to", agent, sent.size(),
+                    outbound(agent, sent), "", "", "", 0, 0, 0, ""));
         } catch (RuntimeException recordingMustNotBreakTheRun) {
             trace.progress("", "listener: " + recordingMustNotBreakTheRun);
         }
@@ -153,6 +154,67 @@ final class Listening implements ChatModelListener {
             }
         }
         return "";
+    }
+
+    /** Agents whose system prompt this bump has already written down once. */
+    private final java.util.Set<String> promptRecorded = java.util.concurrent.ConcurrentHashMap
+            .newKeySet();
+
+    /**
+     * WHAT ACTUALLY WENT, WHICH INCLUDES THE PROMPT.
+     *
+     * <p>This used to be the LAST message only. On a first call that is {@code [system, user]}, so
+     * the record showed the task and dropped the instruction governing the agent -- the half that
+     * decides what it does. "2 message(s)" was true and told a reader nothing about the one it
+     * could not see.
+     *
+     * <p>THE SYSTEM PROMPT ONCE PER AGENT, then named rather than repeated. It is identical on
+     * every call of that agent and runs to thousands of characters, so writing it each time would
+     * put the same paragraphs on disk a hundred times per bump. Once is what a reader needs, and it
+     * is the prompt IN FORCE, so an edited one shows as edited rather than as whatever the code
+     * ships.
+     */
+    private String outbound(String agent, List<ChatMessage> messages) {
+        StringBuilder out = new StringBuilder();
+        for (ChatMessage m : messages) {
+            if (m instanceof SystemMessage s) {
+                String key = agent + "|" + s.text().length();
+                if (promptRecorded.add(key)) {
+                    out.append("[system: ").append(agent.isBlank() ? "unrecognised" : agent)
+                            .append(", ").append(s.text().length()).append(" chars]\n")
+                            .append(clip(s.text(), 4000)).append("\n\n");
+                } else {
+                    out.append("[system: ").append(agent).append("'s prompt, unchanged, ")
+                            .append(s.text().length()).append(" chars]\n\n");
+                }
+                continue;
+            }
+            out.append('[').append(role(m)).append("]\n").append(clip(text(m), 900))
+                    .append("\n\n");
+        }
+        return out.toString().strip();
+    }
+
+    private static String role(ChatMessage m) {
+        if (m instanceof dev.langchain4j.data.message.UserMessage) {
+            return "user";
+        }
+        if (m instanceof dev.langchain4j.data.message.AiMessage) {
+            return "assistant";
+        }
+        if (m instanceof dev.langchain4j.data.message.ToolExecutionResultMessage) {
+            return "tool result";
+        }
+        return m.getClass().getSimpleName();
+    }
+
+    private static String clip(String text, int limit) {
+        String s = text == null ? "" : text.strip();
+        return s.length() <= limit ? s : s.substring(0, limit) + "\n... (truncated)";
+    }
+
+    private static String text(ChatMessage m) {
+        return last(List.of(m));
     }
 
     /**

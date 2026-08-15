@@ -169,6 +169,60 @@ class TheRecordIsTheWireTest {
         assertTrue(json.contains("31000ms"), json);
     }
 
+
+    @Test
+    void theRequestCarriesThePromptTheFirstTimeAndNamesItAfter() throws Exception {
+        // "2 message(s)" was true and told a reader nothing about the one they could not see. On a
+        // first call the pair is [system, user], and recording only the LAST message showed the
+        // task while dropping the instruction that governs what the agent does with it.
+        //
+        // Once per agent, though: the system prompt is identical on every one of that agent's calls
+        // and runs to thousands of characters, so repeating it would put the same paragraphs on
+        // disk a hundred times in a bump.
+        Listening listener = new Listening(new Quiet());
+        java.lang.reflect.Method m = Listening.class.getDeclaredMethod(
+                "outbound", String.class, java.util.List.class);
+        m.setAccessible(true);
+
+        var system = dev.langchain4j.data.message.SystemMessage.from(
+                "You establish which JDK this project is on.");
+        var user = dev.langchain4j.data.message.UserMessage.from("The root build files: pom.xml");
+
+        String first = (String) m.invoke(listener, "survey-planner",
+                java.util.List.of(system, user));
+        assertTrue(first.contains("You establish which JDK"), "the prompt is there: " + first);
+        assertTrue(first.contains("[system: survey-planner"), first);
+        assertTrue(first.contains("[user]"), "and the task, labelled: " + first);
+        assertTrue(first.contains("The root build files"), first);
+
+        String second = (String) m.invoke(listener, "survey-planner",
+                java.util.List.of(system, user));
+        assertFalse(second.contains("You establish which JDK"),
+                "not written twice: " + second);
+        assertTrue(second.contains("unchanged"), "but said to be the same one: " + second);
+        assertTrue(second.contains("The root build files"),
+                "while the turn's own message still travels: " + second);
+    }
+
+    @Test
+    void aToolResultIsLabelledAndKeepsTheToolThatProducedIt() throws Exception {
+        Listening listener = new Listening(new Quiet());
+        java.lang.reflect.Method m = Listening.class.getDeclaredMethod(
+                "outbound", String.class, java.util.List.class);
+        m.setAccessible(true);
+
+        var result = dev.langchain4j.data.message.ToolExecutionResultMessage.from(
+                "call-1", "glob", "no files match **/*.gradle");
+
+        String said = (String) m.invoke(listener, "survey-planner", java.util.List.of(result));
+
+        // A RESULT WITH NO NAME READS AS AN ANSWER FROM NOWHERE, and by the third turn a request
+        // carries several of them.
+        assertTrue(said.contains("[tool result]"), said);
+        assertTrue(said.contains("glob"), said);
+        assertTrue(said.contains("no files match"), said);
+    }
+
     /** Map.of stops at ten pairs and an exchange carries more than that. */
     private static java.util.Map<String, String> fields(String... pairs) {
         java.util.Map<String, String> m = new java.util.LinkedHashMap<>();
