@@ -13,7 +13,8 @@ import {
   TabRow,
   VerdictPill,
 } from '@bjv/ui'
-import { href, read } from '@/lib/api'
+import type { TraceEvent } from '@bjv/types'
+import { href, live, read } from '@/lib/api'
 import { Nav } from '../nav'
 
 /** Which half of the page is showing. The record is everything that happened, in order. */
@@ -50,6 +51,28 @@ function BumpPage() {
       .then(setDetail)
       .catch((e: Error) => setFailed(e.message))
   }, [])
+
+  // THE RECORD GROWS WHILE YOU READ IT. The trace is append-only, so the stream sends what was
+  // added and the page puts it on the end. Nothing is refetched: a bump that has been running an
+  // hour is thousands of events, and asking for all of them again to learn about one is the
+  // problem this replaces.
+  useEffect(() => {
+    // SUBSCRIBE ONLY ONCE THE HISTORY IS IN, and tell the server how much of it we hold. The trace
+    // is append-only, so a line count is a stable place to resume: start from zero and every event
+    // already on screen arrives again, start from the end and anything written between the fetch
+    // and the subscription is lost.
+    if (slug === '' || detail === null) {
+      return undefined
+    }
+    return live(`/api/live?slug=${encodeURIComponent(slug)}&have=${detail.events.length}`, {
+      trace: (e) =>
+        setDetail((held) =>
+          held === null ? held : { ...held, events: [...held.events, e as TraceEvent] }),
+    })
+    // Deliberately not depending on `detail`: it changes with every event that arrives, and
+    // resubscribing on each one would reopen the stream forever.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, detail !== null])
 
   if (failed !== null) {
     return (

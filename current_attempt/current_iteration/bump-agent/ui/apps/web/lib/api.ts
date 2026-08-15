@@ -32,3 +32,36 @@ export async function read<T>(path: string, init?: RequestInit): Promise<T> {
 export function href(path: string): string {
   return `${BASE}${path}`
 }
+
+/**
+ * THE SERVER TELLING, RATHER THAN THE PAGE ASKING.
+ *
+ * Every view here polled. The list refetched a delta every fifteen seconds, which is a
+ * fifteen-second lie on a column whose job is saying whether a bump is still moving, and the record
+ * did not poll at all: watching a lane work meant pressing refresh.
+ *
+ * EventSource rather than a socket, because everything on these pages travels one way and the
+ * dashboard runs on a server that cannot upgrade a connection. The browser reconnects on its own
+ * when one drops, which is the half of a socket this would otherwise have to write.
+ *
+ * Returns its own teardown, so an effect can hand it straight back to React.
+ */
+export function live(
+  path: string,
+  handlers: Record<string, (data: unknown) => void>,
+): () => void {
+  if (typeof window === 'undefined' || typeof EventSource === 'undefined') {
+    return () => undefined
+  }
+  const source = new EventSource(href(path))
+  for (const [name, handle] of Object.entries(handlers)) {
+    source.addEventListener(name, (e) => {
+      try {
+        handle(JSON.parse((e as MessageEvent).data))
+      } catch {
+        // A malformed frame is one frame, not a broken page: the next one still arrives.
+      }
+    })
+  }
+  return () => source.close()
+}

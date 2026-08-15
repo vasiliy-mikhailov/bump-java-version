@@ -14,7 +14,7 @@ import {
   STRIP,
   Tally,
 } from '@bjv/ui'
-import { href, read } from '@/lib/api'
+import { href, live, read } from '@/lib/api'
 import { Nav } from './nav'
 
 /**
@@ -79,8 +79,15 @@ export default function Home() {
       setNow(Date.now())
     }
     pull()
-    const timer = setInterval(pull, 15_000)
-    return () => clearInterval(timer)
+    // THE SERVER SAYS WHEN. The fifteen-second timer is gone: /api/live emits `changed` on the
+    // next write anywhere under results, and the page fetches its own delta then. The clock still
+    // ticks on its own so "4s ago" keeps counting between writes, which is cheap and local.
+    const stop = live('/api/live', { changed: () => pull() })
+    const clock = setInterval(() => setNow(Date.now()), 1000)
+    return () => {
+      stop()
+      clearInterval(clock)
+    }
   }, [])
 
   if (failed !== null) {
