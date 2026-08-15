@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import type { BumpSummary, Summary } from '@bjv/types'
 import {
   BumpTable,
+  cveTotals,
   duration,
   EmptyNote,
   PageHeader,
@@ -128,6 +129,12 @@ export default function Home() {
   // have spent doing it.
   const humanMinutes = bumps.reduce((sum, b) => sum + (b.humanMinutes ?? 0), 0)
 
+  // OVER THE BUMPS THAT HAVE BOTH NUMBERS, which is not the corpus and must not read as it. The
+  // after scan runs only on a green gate, so a failed bump has a before and no after; counting
+  // its before alone would credit the run with clearing a project it never finished. The
+  // denominator travels with the totals for the same reason.
+  const cve = cveTotals(bumps)
+
   // TWO ADJACENT STRIPS, as the sibling has: the first counts the RUN, the second counts the
   // verdicts. Merging them would put "elapsed" next to "blocked-dependency".
   const byVerdict = new Map<string, number>()
@@ -161,6 +168,19 @@ export default function Home() {
         <Tally value={passed} label="passed" tone="good" />
         <Tally value={running} label="running" />
         <Tally value={queued} label="queued" />
+      </div>
+      <div style={{ ...STRIP, paddingTop: 0 }}>
+        <Tally value={cve.before.toLocaleString()} label="CRITICAL+HIGH before" />
+        <Tally
+          value={cve.after.toLocaleString()}
+          label="after"
+          tone={cve.after < cve.before ? 'good' : cve.after > cve.before ? 'alarm' : 'plain'}
+        />
+        <Tally
+          value={cve.rate === null ? '—' : `${cve.rate}%`}
+          label={`removed, over ${cve.measured.toLocaleString()} measured`}
+          tone={cve.rate !== null && cve.rate > 0 ? 'good' : cve.rate !== null && cve.rate < 0 ? 'alarm' : 'plain'}
+        />
       </div>
       <div style={{ ...STRIP, paddingTop: 0 }}>
         {[...byVerdict.entries()]
