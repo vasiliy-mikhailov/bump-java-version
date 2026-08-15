@@ -499,7 +499,7 @@ final class Api {
                 Json.field("distinctAfter", measured ? String.valueOf(distinct(after)) : "null"));
     }
 
-    /** The version pairs of one package, best outcome first, already rendered as objects. */
+    /** The destinations of one package, best outcome first, already rendered as objects. */
     private static List<String> versionsOf(String name, Map<String, int[]> pairAcc,
                                            Map<String, Integer> pairBumps) {
         List<Map.Entry<String, int[]>> mine = pairAcc.entrySet().stream()
@@ -517,8 +517,7 @@ final class Api {
         for (Map.Entry<String, int[]> e : mine) {
             String[] p = e.getKey().split("\u0000", -1);
             out.add(Json.object(
-                    Json.field("from", Json.optional(p.length > 1 ? p[1] : "")),
-                    Json.field("to", Json.optional(p.length > 2 ? p[2] : "")),
+                    Json.field("to", Json.optional(p.length > 1 ? p[1] : "")),
                     Json.field("before", String.valueOf(e.getValue()[0])),
                     Json.field("after", String.valueOf(e.getValue()[1])),
                     Json.field("bumps", String.valueOf(pairBumps.getOrDefault(e.getKey(), 0)))));
@@ -609,17 +608,23 @@ final class Api {
     }
 
     /**
-     * WHAT EACH DEPENDENCY MOVED FROM, AND TO, IN THIS BUMP.
+     * WHAT EACH DEPENDENCY ENDED UP AT, IN THIS BUMP.
      *
      * <p>A package line saying "tomcat-embed-core 238 -> 81" is the corpus's answer and not an
-     * explanation: it does not say which upgrade did it, and the same package appears both moved
-     * and stuck across a corpus. The pair is the explanation, and it is the level at which a
-     * reader can act — 10.1.16 to 10.1.55 clears nineteen, 10.1.43 to 10.1.43 clears none, and the
-     * second is a project the floor judged compliant.
+     * explanation: it does not say which version is the one that fixed it. The DESTINATION does —
+     * everything that reached 10.1.55 carries nothing, everything still sitting on 10.1.20 carries
+     * all of it — and that is the level a reader can act on, because the destination is the thing
+     * they can go and set.
      *
-     * <p>Keyed by (name, from, to) so identical pairs collapse ACROSS MODULES within a bump, which
-     * is the same rule {@link #distinct} applies and for the same reason: a seventeen-module
-     * project resolving one dependency is one fact, not seventeen.
+     * <p>THE SOURCE IS DROPPED DELIBERATELY. Keeping it turned tomcat into thirteen rows to make
+     * one point: seven separate versions all landing on 10.1.55 and clearing everything, which is
+     * one fact written seven ways. By destination it is six rows and the same conclusion.
+     *
+     * <p>TWO STEPS, and the order matters. The module collapse has to happen first, on the full
+     * (name, from, to), because the scan reports one finding per module that resolves the
+     * dependency and those are duplicates rather than additions. Only then can the sources be
+     * summed into their destination, which are genuinely different projects arriving at the same
+     * place. Collapsing straight to (name, to) would silently discard every source but one.
      */
     private static Map<String, int[]> pairs(Map<String, String[]> before,
                                             Map<String, String[]> after) {
@@ -633,7 +638,16 @@ final class Api {
             once.put(name + "\u0000" + (b == null ? "" : b[0]) + "\u0000" + (a == null ? "" : a[0]),
                     new int[] {b == null ? 0 : (int) num(b[1]), a == null ? 0 : (int) num(a[1])});
         }
-        return once;
+        Map<String, int[]> byDestination = new LinkedHashMap<>();
+        for (Map.Entry<String, int[]> e : once.entrySet()) {
+            String[] p = e.getKey().split("\u0000", -1);
+            String to = p.length > 2 ? p[2] : "";
+            int[] acc = byDestination.computeIfAbsent(
+                    (p.length > 0 ? p[0] : "") + "\u0000" + to, k -> new int[2]);
+            acc[0] += e.getValue()[0];
+            acc[1] += e.getValue()[1];
+        }
+        return byDestination;
     }
 
     private String security() {

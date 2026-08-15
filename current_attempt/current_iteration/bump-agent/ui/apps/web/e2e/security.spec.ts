@@ -73,7 +73,7 @@ test.describe('the corpus security drill-down', () => {
     await expect(page.locator('#dependencies')).toBeVisible()
   })
 
-  test('each package decomposes into the version pairs behind it', async ({ page }) => {
+  test('each package decomposes into the versions it ended up at', async ({ page }) => {
     // THE SECOND LEVEL. "tomcat-embed-core 238 -> 81" says the corpus cleared 157 and does not say
     // which upgrade did it, and the same package is both moved and stuck across a corpus. The pair
     // is the level a reader can act on, so it has to be reachable and it has to be ordered.
@@ -88,9 +88,10 @@ test.describe('the corpus security drill-down', () => {
     const inner = first.locator('table')
     await expect(inner).toBeVisible()
 
-    // The columns the decomposition exists for: which version, to which version.
-    await expect(inner.locator('th').filter({ hasText: 'from' })).toBeVisible()
-    await expect(inner.locator('th').filter({ hasText: 'to' })).toBeVisible()
+    // The column the decomposition exists for: which version this package ended up at. The
+    // source was dropped deliberately — seven versions all landing on 10.1.55 is one fact
+    // written seven times — so asserting on it would hold the table to the shape it outgrew.
+    await expect(inner.locator('th').filter({ hasText: 'ended up at' })).toBeVisible()
 
     const rows = inner.locator('tr[data-row="pair"]')
     const n = await rows.count()
@@ -108,19 +109,23 @@ test.describe('the corpus security drill-down', () => {
     console.log(`  ${n} version pairs, best cleared ${cleared[0]}, worst ${cleared[cleared.length - 1]}`)
   })
 
-  test('a pair that went nowhere is shown, not hidden', async ({ page }) => {
-    // The rows worth acting on are the ones at the BOTTOM: a dependency that arrived and left at
-    // the same version, still carrying its findings. A table that only showed wins would be an
-    // advert rather than a report.
+  test('a destination that is still vulnerable is shown, not hidden', async ({ page }) => {
+    // The rows worth acting on are the ones at the BOTTOM: a version the corpus landed on that
+    // still carries findings. A table that only showed wins would be an advert rather than a
+    // report, and the whole reason to open this fold is to find the version to stop landing on.
+    //
+    // Read as "after > 0" now that the source column is gone. A destination whose after count is
+    // nonzero is one nobody should be arriving at.
     await page.goto('/security/')
     await page.waitForSelector('details', { timeout: 30_000 })
     await page.locator('details summary').first().click()
-    const rows = page.locator('details').first().locator('tr[data-row="pair"]')
-    const texts = await rows.allInnerTexts()
-    const stuck = texts.filter((t) => {
-      const cells = t.split(/\t|\n/).map((s) => s.trim()).filter(Boolean)
-      return cells.length >= 2 && cells[0] === cells[1]
-    })
-    expect(stuck.length, 'no unmoved pair listed; the table is only showing wins').toBeGreaterThan(0)
+    const rows = page.locator('details').first().locator('tr[data-row=\"pair\"]')
+    const afters = await rows.locator('td:nth-child(4)').allInnerTexts()
+    const stillThere = afters.filter((s) => Number.parseInt(s.trim(), 10) > 0)
+    expect(
+      stillThere.length,
+      'every destination reads as clean; the table is only showing wins',
+    ).toBeGreaterThan(0)
+    console.log(`  ${stillThere.length} of ${afters.length} destinations still carry findings`)
   })
 })

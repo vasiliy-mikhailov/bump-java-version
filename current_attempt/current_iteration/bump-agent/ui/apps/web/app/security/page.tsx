@@ -125,19 +125,21 @@ export default function SecurityPage() {
                   </tr>
                   {p.versions.length === 0 ? null : (
                     <tr>
-                      {/* THE SECOND LEVEL. "tomcat-embed-core 238 -> 81" is the corpus's answer and
-                          not an explanation: it does not say WHICH upgrade did it, and the same
-                          package is both moved and stuck across a corpus. The pair is the level a
-                          reader can act on. Folded, because 144 packages unfolded is a wall. */}
+                      {/* THE SECOND LEVEL. "tomcat-embed-core 238 -> 81" is the corpus's answer
+                          and not an explanation: it does not say which version is the one that
+                          fixed it. The DESTINATION does, and it is also the thing a reader can go
+                          and set. The source is dropped on purpose: keeping it turned tomcat into
+                          thirteen rows to make one point, seven versions all landing on 10.1.55
+                          and clearing everything. Folded, because 144 packages unfolded is a
+                          wall. */}
                       <td colSpan={5} style={{ padding: '0 24px 6px' }}>
                         <Disclosure
-                          summary={`${p.versions.length} version pair(s), best first`}
+                          summary={`${p.versions.length} destination version(s), best first`}
                         >
                           <table style={{ ...TABLE, fontSize: '12px' }}>
                             <thead>
                               <tr>
-                                <th style={thin}>from</th>
-                                <th style={thin}>to</th>
+                                <th style={thin}>ended up at</th>
                                 <th style={{ ...thin, textAlign: 'right' }}>bumps</th>
                                 <th style={{ ...thin, textAlign: 'right' }}>before</th>
                                 <th style={{ ...thin, textAlign: 'right' }}>after</th>
@@ -146,8 +148,7 @@ export default function SecurityPage() {
                             </thead>
                             <tbody>
                               {p.versions.map((v) => (
-                                <tr key={`${v.from}-${v.to}`} style={ROW} data-row="pair">
-                                  <td style={tdThin}>{v.from ?? '—'}</td>
+                                <tr key={String(v.to)} style={ROW} data-row="pair">
                                   <td style={tdThin}>
                                     {/* NOT IN THE AFTER SCAN IS NOT A VERSION. The upgrade dropped
                                         or replaced it — fastjson became fastjson2 — and writing a

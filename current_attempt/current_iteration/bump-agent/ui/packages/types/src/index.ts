@@ -225,12 +225,13 @@ export type Security = {
     after: number
     bumps: number
     /**
-     * The version pairs behind that line, best outcome first.
+     * The versions this package ENDED UP AT, best outcome first.
      *
-     * `to` is null when the package was not in the after scan at all: the upgrade dropped it or
-     * replaced it, which is why "cleared" and "still there" are different questions.
+     * The destination, not the pair: the source is what a reader is trying to get away from and
+     * knowing it turned tomcat into thirteen rows to make one point. `to` is null when the package
+     * was not in the after scan at all, which is the upgrade dropping or replacing it.
      */
-    versions: { from: string | null; to: string | null; before: number; after: number; bumps: number }[]
+    versions: { to: string | null; before: number; after: number; bumps: number }[]
   }[]
   byBump: { slug: string; repo: string; from: number; to: number; before: number; after: number }[]
 }
