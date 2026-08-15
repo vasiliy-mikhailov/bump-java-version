@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -66,7 +67,7 @@ class TheRecordIsTheWireTest {
         // answer a question about something else, and adding a wire fact should not break it.
         Trace quiet = new Quiet();
 
-        quiet.exchanged(new Trace.Exchange("survey-doer", 4, "sent", "got", "", "STOP",
+        quiet.exchanged(new Trace.Exchange("back", "survey-doer", 4, "", "got", "", "STOP",
                 1200, 340, 900, ""));
     }
 
@@ -80,7 +81,7 @@ class TheRecordIsTheWireTest {
             }
         };
 
-        capturing.exchanged(new Trace.Exchange("after-pins-doer", 12, "the last message",
+        capturing.exchanged(new Trace.Exchange("back", "after-pins-doer", 12, "",
                 "the answer", "apply_recipe", "TOOL_EXECUTION", 24_000, 512, 8_400, ""));
 
         Trace.Exchange e = seen.get(0);
@@ -119,5 +120,61 @@ class TheRecordIsTheWireTest {
 
         public void priced(String b, String m, String i) {
         }
+    }
+
+
+
+
+    @Test
+    void theRequestIsRecordedWhenItIsSentAndTheReplyWhenItReturns() throws Exception {
+        // ORDER IS THE POINT. Both halves used to be written from onResponse, which stamps them at
+        // completion, so a seventeen-second call filed its own prompt seventeen seconds late --
+        // after the streamed reasoning that prompt had caused. Read top to bottom, the record
+        // showed the model thinking and then what it had been asked.
+        java.lang.reflect.Method m = Api.class.getDeclaredMethod("event", java.util.Map.class);
+        m.setAccessible(true);
+        Api api = new Api(java.nio.file.Path.of("/tmp"));
+
+        String out = (String) m.invoke(api, fields(
+                "kind", "exchange", "at", "1", "direction", "to", "agent", "survey-planner",
+                "messages", "2", "sent", "state what would settle whether it is on 21"));
+        String back = (String) m.invoke(api, fields(
+                "kind", "exchange", "at", "2", "direction", "back", "agent", "survey-planner",
+                "in", "2654", "out", "1138", "ms", "17205", "finish", "TOOL_EXECUTION",
+                "tools", "glob", "got", "reading the root pom"));
+
+        assertTrue(out.contains("sent, 2 message(s)"), out);
+        assertTrue(out.contains("state what would settle"), "the prompt is in the request: " + out);
+        assertFalse(out.contains("out tokens"), "and the counts are not, they are not known yet");
+
+        assertTrue(back.contains("2654 in / 1138 out tokens"), back);
+        assertTrue(back.contains("17205ms"), back);
+        assertFalse(back.contains("state what would settle"),
+                "the reply half does not repeat the prompt: " + back);
+    }
+
+    @Test
+    void aFailedCallIsStillTheReplyHalf() throws Exception {
+        java.lang.reflect.Method m = Api.class.getDeclaredMethod("event", java.util.Map.class);
+        m.setAccessible(true);
+
+        String json = (String) m.invoke(new Api(java.nio.file.Path.of("/tmp")), fields(
+                "kind", "exchange", "at", "1", "direction", "back", "agent", "bump-doer",
+                "ms", "31000", "finish", "ERROR", "in", "0", "out", "0",
+                "error", "SocketTimeoutException: read timed out"));
+
+        // A CALL THAT NEVER ANSWERED USED TO LEAVE NO EVENT AT ALL, because the harness only wrote
+        // one once it had a reply to write down. Its request is already on the record above it.
+        assertTrue(json.contains("FAILED SocketTimeoutException"), json);
+        assertTrue(json.contains("31000ms"), json);
+    }
+
+    /** Map.of stops at ten pairs and an exchange carries more than that. */
+    private static java.util.Map<String, String> fields(String... pairs) {
+        java.util.Map<String, String> m = new java.util.LinkedHashMap<>();
+        for (int i = 0; i + 1 < pairs.length; i += 2) {
+            m.put(pairs[i], pairs[i + 1]);
+        }
+        return m;
     }
 }

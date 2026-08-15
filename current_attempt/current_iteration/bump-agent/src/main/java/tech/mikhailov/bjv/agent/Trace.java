@@ -82,7 +82,8 @@ interface Trace {
     }
 
     /** What went, what came back, what it cost. Summaries: the full conversation is not kept. */
-    record Exchange(String agent, int messages, String sent, String got, String tools,
-                    String finish, long inTokens, long outTokens, long ms, String error) {
+    record Exchange(String direction, String agent, int messages, String sent, String got,
+                    String tools, String finish, long inTokens, long outTokens, long ms,
+                    String error) {
     }
 }

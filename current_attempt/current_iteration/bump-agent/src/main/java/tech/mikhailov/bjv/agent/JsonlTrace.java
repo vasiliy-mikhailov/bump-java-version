@@ -236,6 +236,7 @@ final class JsonlTrace implements Trace, DeepAgentFlowListener {
     @Override
     public void exchanged(Exchange e) {
         write("exchange", of(
+                "direction", e.direction(),
                 "agent", e.agent(),
                 "messages", String.valueOf(e.messages()),
                 "sent", e.sent(),

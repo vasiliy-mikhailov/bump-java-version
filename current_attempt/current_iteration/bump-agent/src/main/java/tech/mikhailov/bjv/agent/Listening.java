@@ -74,9 +74,25 @@ final class Listening implements ChatModelListener {
 
     private static final String STARTED = "bjv.started";
 
+    /**
+     * WRITTEN WHEN IT IS SENT, not when the answer comes back.
+     *
+     * <p>Both halves used to be recorded from onResponse, which stamps them at completion. A call
+     * that takes seventeen seconds then filed its own prompt seventeen seconds late, AFTER the
+     * streamed reasoning it had caused, so the record read backwards: the model thinking, and then
+     * what it had been asked. The listener is handed the request before the call goes out; that is
+     * where the request belongs.
+     */
     @Override
     public void onRequest(ChatModelRequestContext ctx) {
         ctx.attributes().put(STARTED, System.currentTimeMillis());
+        try {
+            List<ChatMessage> sent = ctx.chatRequest().messages();
+            trace.exchanged(new Trace.Exchange("to", agentOf(system(sent)), sent.size(),
+                    tail(last(sent)), "", "", "", 0, 0, 0, ""));
+        } catch (RuntimeException recordingMustNotBreakTheRun) {
+            trace.progress("", "listener: " + recordingMustNotBreakTheRun);
+        }
     }
 
     @Override
@@ -91,9 +107,10 @@ final class Listening implements ChatModelListener {
                     : ai.toolExecutionRequests().stream()
                             .map(t -> t.name()).distinct().reduce((a, b) -> a + "," + b).orElse("");
             trace.exchanged(new Trace.Exchange(
+                    "back",
                     agentOf(system(sent)),
                     sent.size(),
-                    tail(last(sent)),
+                    "",
                     tail(ai == null || ai.text() == null ? "" : ai.text()),
                     tools,
                     meta == null || meta.finishReason() == null ? "" : meta.finishReason().name(),
@@ -115,7 +132,7 @@ final class Listening implements ChatModelListener {
                     : ctx.chatRequest().messages();
             Throwable cause = ctx.error();
             trace.exchanged(new Trace.Exchange(
-                    agentOf(system(sent)), sent.size(), tail(last(sent)), "", "", "ERROR", 0, 0,
+                    "back", agentOf(system(sent)), sent.size(), "", "", "", "ERROR", 0, 0,
                     since(ctx.attributes()),
                     cause == null ? "unknown" : cause.getClass().getSimpleName()
                             + ": " + String.valueOf(cause.getMessage())));
@@ -138,13 +155,44 @@ final class Listening implements ChatModelListener {
         return "";
     }
 
+    /**
+     * THE TEXT OF THE LAST MESSAGE, not its toString.
+     *
+     * <p>The record showed "UserMessage { name = null, contents = [TextContent { text = ..." on the
+     * one view whose job is showing what was said. The wrapper is Java's, not the model's; the
+     * model saw the text.
+     */
     private static String last(List<ChatMessage> messages) {
-        return messages.isEmpty() ? "" : String.valueOf(messages.get(messages.size() - 1));
+        if (messages.isEmpty()) {
+            return "";
+        }
+        ChatMessage m = messages.get(messages.size() - 1);
+        if (m instanceof dev.langchain4j.data.message.UserMessage u) {
+            return u.singleText();
+        }
+        if (m instanceof dev.langchain4j.data.message.AiMessage a) {
+            return a.text() == null ? String.valueOf(m) : a.text();
+        }
+        if (m instanceof dev.langchain4j.data.message.ToolExecutionResultMessage r) {
+            // The tool that produced it matters as much as the text: a result with no name reads
+            // as an answer from nowhere.
+            return r.toolName() + " -> " + r.text();
+        }
+        if (m instanceof SystemMessage s) {
+            return s.text();
+        }
+        return String.valueOf(m);
     }
 
-    /** Enough to recognise, not enough to reproduce the conversation on disk. */
+    /**
+     * Enough to recognise, not enough to reproduce the conversation on disk.
+     *
+     * <p>NEWLINES SURVIVE. They were flattened to keep a trace line short, which turned a prompt
+     * into an unreadable ribbon in the one view whose job is showing what was said. The JSON writer
+     * escapes them; the page renders them.
+     */
     private static String tail(String text) {
-        String flat = text == null ? "" : text.strip().replace('\n', ' ');
-        return flat.length() <= 400 ? flat : flat.substring(0, 400) + "...";
+        String flat = text == null ? "" : text.strip();
+        return flat.length() <= 900 ? flat : flat.substring(0, 900) + "\n... (truncated)";
     }
 }

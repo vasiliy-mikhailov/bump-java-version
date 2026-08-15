@@ -456,16 +456,23 @@ final class Api {
         // cost. Composing the line here rather than in the page keeps the rule that a kind's shape
         // is known in one place, and gives a reader the numbers the curated events never had.
         if ("exchange".equals(kind)) {
+            // TWO EVENTS, IN THE ORDER THEY HAPPENED. The request is written when it is sent and
+            // the response when it returns, so a seventeen-second call no longer files its own
+            // prompt after the reasoning that prompt produced.
             String error = e.getOrDefault("error", "");
-            text = (error.isBlank() ? "" : "FAILED " + error + " · ")
-                    + e.getOrDefault("messages", "0") + " message(s) · "
-                    + e.getOrDefault("in", "0") + " in / " + e.getOrDefault("out", "0")
-                    + " out tokens · " + e.getOrDefault("ms", "0") + "ms"
-                    + (e.getOrDefault("finish", "").isBlank() ? ""
-                            : " · " + e.get("finish"))
-                    + (e.getOrDefault("tools", "").isBlank() ? ""
-                            : " · asked for " + e.get("tools"))
-                    + (e.getOrDefault("got", "").isBlank() ? "" : "\n" + e.get("got"));
+            boolean outbound = "to".equals(e.getOrDefault("direction", "back"));
+            text = outbound
+                    ? "→ sent, " + e.getOrDefault("messages", "0") + " message(s)\n\n"
+                            + e.getOrDefault("sent", "")
+                    : (error.isBlank() ? "← " : "← FAILED " + error + " · ")
+                            + e.getOrDefault("in", "0") + " in / " + e.getOrDefault("out", "0")
+                            + " out tokens · " + e.getOrDefault("ms", "0") + "ms"
+                            + (e.getOrDefault("finish", "").isBlank() ? ""
+                                    : " · " + e.get("finish"))
+                            + (e.getOrDefault("tools", "").isBlank() ? ""
+                                    : " · asked for " + e.get("tools"))
+                            + (e.getOrDefault("got", "").isBlank() ? ""
+                                    : "\n\n" + e.get("got"));
         }
         return Json.object(
                 Json.field("at", String.valueOf(num(e.get("at")))),
