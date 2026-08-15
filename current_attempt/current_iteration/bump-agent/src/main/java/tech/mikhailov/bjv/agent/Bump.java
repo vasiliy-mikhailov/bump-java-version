@@ -185,6 +185,18 @@ public final class Bump {
         agents = new Agents(Model.forProducer(trace), ws, runner, tree, Hop.of(from, to), trace);
 
         // ---- BASELINE: a fact. No baseline, no bump.
+        //
+        // FIRST, THOUGH: IS THE TOOLING EVEN THERE. Builds here are sealed, so a Gradle wrapper
+        // resolves its distribution out of a staged cache and cannot download. Staging can stop
+        // half way and leaves a directory that looks exactly like a distribution; Gradle finds it,
+        // uses it, and dies reaching for a jar that was never unpacked. The verdict that produced
+        // was "the project does not build under its own JDK", about a project not one line of which
+        // had run. Four of this corpus's thirty-one no-baseline verdicts are that.
+        String tooling = Staged.problem(ws, Env.get("BJV_GRADLE_DISTS"));
+        if (!tooling.isEmpty()) {
+            trace.progress(bump, "infra: " + tooling);
+            return "infra\n" + tooling;
+        }
         trace.progress(bump, "baseline: building and testing under JDK " + from);
         Runner.Result preBuild = runner.build(from);
         trace.built("baseline-build", preBuild);
