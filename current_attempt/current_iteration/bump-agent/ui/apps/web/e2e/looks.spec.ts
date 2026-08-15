@@ -34,18 +34,20 @@ test.describe('bump-java-version, as a reader sees it', () => {
     await page.goto('/')
     await page.waitForSelector('table a', { timeout: 30_000 })
     await page.locator('table a').first().click()
-    await page.waitForSelector('text=the chain', { timeout: 30_000 })
+    // The strip is no longer inside a section headed "the chain": it sits above the tabs, because
+    // how far a bump got belongs to neither half of the page.
+    await page.waitForSelector('text=the record', { timeout: 30_000 })
 
-    // The thing the redesign exists for: three roles per stage, not two.
-    //
-    // SCOPED TO THE STRIP. An unscoped `getByText('survey-planner')` matches seven nodes, because
-    // the event feed names the agent that spoke on every line it wrote — which is a strict-mode
-    // failure that reads like a page bug and is not one. The strip is the first section; the feed
-    // is further down and is a different question.
-    const strip = page.locator('section').first()
-    await expect(strip.getByText('survey-planner')).toBeVisible()
-    await expect(strip.getByText('survey-doer')).toBeVisible()
-    await expect(strip.getByText('survey-verifier')).toBeVisible()
+    // The thing the redesign exists for: three roles per stage, not two — and each named for its
+    // ROLE rather than for the stage it already sits under. Selected by title, which is where the
+    // full agent name lives now, so this asserts both halves of that change at once: the pill is
+    // still identified as survey-planner, and it reads "plan".
+    await expect(page.getByTitle('survey-planner')).toHaveText('plan')
+    await expect(page.getByTitle('survey-doer')).toHaveText('do')
+    await expect(page.getByTitle('survey-verifier')).toHaveText('verify')
+
+    // Said once, above them, rather than three times inside them.
+    await expect(page.getByText('survey', { exact: true })).toBeVisible()
 
     await page.screenshot({ path: `${SHOTS}/02-bump.png`, fullPage: false })
   })
@@ -70,16 +72,22 @@ test.describe('bump-java-version, as a reader sees it', () => {
     await page
       .locator('textarea')
       // Two DIFFERENT failures, so the report is shown to distinguish them rather than to count.
-      // "not a row at all" would not do: it is five words, so it passes the field count and fails
-      // on the repo shape — which is the parser being right and the test being lazy.
-      .fill('rr_9_9\towner/name\tmain\t11\t17\noops')
+      //
+      // THESE ARE COMMA-SEPARATED because the registry is: url, sha, from, to, key, every comma
+      // mandatory. This test used to paste the old tab-separated manifest shape, which under the
+      // current parser fails the FIELD COUNT on both lines — two rejections, both for the same
+      // reason, so it went on asserting a message the parser had stopped producing while still
+      // seeing "2 line(s) not loaded" and looking healthy.
+      //
+      // Line one has five fields and a branch where a commit belongs. Line two is not a row.
+      .fill('https://github.com/owner/name.git,main,11,17,\noops')
     await page.getByRole('button', { name: 'save' }).click()
 
     // BOTH lines are reported, with a reason each. A loader that answered "ok" to a file it had
     // discarded half of is the failure this whole path is built against.
     await expect(page.getByText('2 line(s) not loaded')).toBeVisible({ timeout: 30_000 })
-    await expect(page.getByText(/sha should be a commit/)).toBeVisible()
-    await expect(page.getByText(/needs 5 fields/)).toBeVisible()
+    await expect(page.getByText(/sha should be a commit or blank/)).toBeVisible()
+    await expect(page.getByText(/needs exactly 5 comma-separated fields/)).toBeVisible()
 
     await page.screenshot({ path: `${SHOTS}/06-registry-upload.png`, fullPage: false })
   })
