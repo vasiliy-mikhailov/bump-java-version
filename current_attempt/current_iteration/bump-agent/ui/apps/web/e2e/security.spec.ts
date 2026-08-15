@@ -30,7 +30,9 @@ test.describe('the corpus security drill-down', () => {
     await page.goto('/security/')
     await page.waitForSelector('table tbody tr', { timeout: 30_000 })
 
-    const rows = page.locator('table').first().locator('tbody tr')
+    // BY NAME, not by position: the pair tables are nested inside this tbody, so `tbody tr`
+    // matches both levels and would compare a package against a version pair.
+    const rows = page.locator('tr[data-row="package"]')
     const n = await rows.count()
     // A corpus that has cleared anything has cleared it from more than one package. One row means
     // the aggregation did not run, not that the answer is short.
@@ -69,5 +71,56 @@ test.describe('the corpus security drill-down', () => {
     await link.click()
     await page.waitForURL(/#dependencies/, { timeout: 30_000 })
     await expect(page.locator('#dependencies')).toBeVisible()
+  })
+
+  test('each package decomposes into the version pairs behind it', async ({ page }) => {
+    // THE SECOND LEVEL. "tomcat-embed-core 238 -> 81" says the corpus cleared 157 and does not say
+    // which upgrade did it, and the same package is both moved and stuck across a corpus. The pair
+    // is the level a reader can act on, so it has to be reachable and it has to be ordered.
+    await page.goto('/security/')
+    await page.waitForSelector('table tbody tr', { timeout: 30_000 })
+
+    const folds = page.locator('details')
+    expect(await folds.count(), 'no package decomposes').toBeGreaterThan(1)
+
+    const first = folds.first()
+    await first.locator('summary').click()
+    const inner = first.locator('table')
+    await expect(inner).toBeVisible()
+
+    // The columns the decomposition exists for: which version, to which version.
+    await expect(inner.locator('th').filter({ hasText: 'from' })).toBeVisible()
+    await expect(inner.locator('th').filter({ hasText: 'to' })).toBeVisible()
+
+    const rows = inner.locator('tr[data-row="pair"]')
+    const n = await rows.count()
+    expect(n, 'a package that cleared anything moved from at least one version').toBeGreaterThan(0)
+
+    const cleared = (await rows.locator('td:last-child').allInnerTexts()).map((s) => {
+      const v = s.trim()
+      if (v.startsWith('−')) return Number.parseInt(v.slice(1), 10)
+      if (v.startsWith('+')) return -Number.parseInt(v.slice(1), 10)
+      return 0
+    })
+    for (let i = 1; i < cleared.length; i += 1) {
+      expect(cleared[i - 1] ?? 0, `pair ${i} out of order`).toBeGreaterThanOrEqual(cleared[i] ?? 0)
+    }
+    console.log(`  ${n} version pairs, best cleared ${cleared[0]}, worst ${cleared[cleared.length - 1]}`)
+  })
+
+  test('a pair that went nowhere is shown, not hidden', async ({ page }) => {
+    // The rows worth acting on are the ones at the BOTTOM: a dependency that arrived and left at
+    // the same version, still carrying its findings. A table that only showed wins would be an
+    // advert rather than a report.
+    await page.goto('/security/')
+    await page.waitForSelector('details', { timeout: 30_000 })
+    await page.locator('details summary').first().click()
+    const rows = page.locator('details').first().locator('tr[data-row="pair"]')
+    const texts = await rows.allInnerTexts()
+    const stuck = texts.filter((t) => {
+      const cells = t.split(/\t|\n/).map((s) => s.trim()).filter(Boolean)
+      return cells.length >= 2 && cells[0] === cells[1]
+    })
+    expect(stuck.length, 'no unmoved pair listed; the table is only showing wins').toBeGreaterThan(0)
   })
 })

@@ -219,7 +219,19 @@ export type Security = {
   rate: number | null
   occurrencesBefore: number
   occurrencesAfter: number
-  byPackage: { name: string; before: number; after: number; bumps: number }[]
+  byPackage: {
+    name: string
+    before: number
+    after: number
+    bumps: number
+    /**
+     * The version pairs behind that line, best outcome first.
+     *
+     * `to` is null when the package was not in the after scan at all: the upgrade dropped it or
+     * replaced it, which is why "cleared" and "still there" are different questions.
+     */
+    versions: { from: string | null; to: string | null; before: number; after: number; bumps: number }[]
+  }[]
   byBump: { slug: string; repo: string; from: number; to: number; before: number; after: number }[]
 }
 

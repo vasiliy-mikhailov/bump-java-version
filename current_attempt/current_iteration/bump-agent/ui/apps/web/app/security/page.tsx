@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import type { Security } from '@bjv/types'
-import { Card, EmptyNote, PageHeader, STRIP, Tally } from '@bjv/ui'
+import { Card, Disclosure, EmptyNote, PageHeader, STRIP, Tally } from '@bjv/ui'
 import { href, read } from '@/lib/api'
 import { Nav } from '../nav'
 
@@ -111,17 +111,91 @@ export default function SecurityPage() {
             </thead>
             <tbody>
               {data.byPackage.map((p) => (
-                <tr key={p.name} style={ROW}>
-                  <td style={{ ...td, fontFamily: 'ui-monospace, Menlo, monospace' }}>{p.name}</td>
-                  <td style={{ ...td, textAlign: 'right', color: 'var(--text-tertiary)' }}>
-                    {p.bumps}
-                  </td>
-                  <td style={{ ...td, textAlign: 'right' }}>{p.before}</td>
-                  <td style={{ ...td, textAlign: 'right' }}>{p.after}</td>
-                  <td style={{ ...td, textAlign: 'right', color: tone(cleared(p)) }}>
-                    {cleared(p) > 0 ? `−${cleared(p)}` : cleared(p) < 0 ? `+${-cleared(p)}` : '0'}
-                  </td>
-                </tr>
+                <Fragment key={p.name}>
+                  <tr style={ROW} data-row="package">
+                    <td style={{ ...td, fontFamily: 'ui-monospace, Menlo, monospace' }}>{p.name}</td>
+                    <td style={{ ...td, textAlign: 'right', color: 'var(--text-tertiary)' }}>
+                      {p.bumps}
+                    </td>
+                    <td style={{ ...td, textAlign: 'right' }}>{p.before}</td>
+                    <td style={{ ...td, textAlign: 'right' }}>{p.after}</td>
+                    <td style={{ ...td, textAlign: 'right', color: tone(cleared(p)) }}>
+                      {cleared(p) > 0 ? `−${cleared(p)}` : cleared(p) < 0 ? `+${-cleared(p)}` : '0'}
+                    </td>
+                  </tr>
+                  {p.versions.length === 0 ? null : (
+                    <tr>
+                      {/* THE SECOND LEVEL. "tomcat-embed-core 238 -> 81" is the corpus's answer and
+                          not an explanation: it does not say WHICH upgrade did it, and the same
+                          package is both moved and stuck across a corpus. The pair is the level a
+                          reader can act on. Folded, because 144 packages unfolded is a wall. */}
+                      <td colSpan={5} style={{ padding: '0 24px 6px' }}>
+                        <Disclosure
+                          summary={`${p.versions.length} version pair(s), best first`}
+                        >
+                          <table style={{ ...TABLE, fontSize: '12px' }}>
+                            <thead>
+                              <tr>
+                                <th style={thin}>from</th>
+                                <th style={thin}>to</th>
+                                <th style={{ ...thin, textAlign: 'right' }}>bumps</th>
+                                <th style={{ ...thin, textAlign: 'right' }}>before</th>
+                                <th style={{ ...thin, textAlign: 'right' }}>after</th>
+                                <th style={{ ...thin, textAlign: 'right' }}>cleared</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {p.versions.map((v) => (
+                                <tr key={`${v.from}-${v.to}`} style={ROW} data-row="pair">
+                                  <td style={tdThin}>{v.from ?? '—'}</td>
+                                  <td style={tdThin}>
+                                    {/* NOT IN THE AFTER SCAN IS NOT A VERSION. The upgrade dropped
+                                        or replaced it — fastjson became fastjson2 — and writing a
+                                        blank there would read as "unchanged". */}
+                                    {v.to === null ? (
+                                      <span
+                                        style={{ color: 'var(--text-tertiary)' }}
+                                        title="not present in the after scan: dropped or replaced"
+                                      >
+                                        gone
+                                      </span>
+                                    ) : (
+                                      v.to
+                                    )}
+                                  </td>
+                                  <td
+                                    style={{
+                                      ...tdThin,
+                                      textAlign: 'right',
+                                      color: 'var(--text-tertiary)',
+                                    }}
+                                  >
+                                    {v.bumps}
+                                  </td>
+                                  <td style={{ ...tdThin, textAlign: 'right' }}>{v.before}</td>
+                                  <td style={{ ...tdThin, textAlign: 'right' }}>{v.after}</td>
+                                  <td
+                                    style={{
+                                      ...tdThin,
+                                      textAlign: 'right',
+                                      color: tone(cleared(v)),
+                                    }}
+                                  >
+                                    {cleared(v) > 0
+                                      ? `−${cleared(v)}`
+                                      : cleared(v) < 0
+                                        ? `+${-cleared(v)}`
+                                        : '0'}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </Disclosure>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -142,7 +216,7 @@ export default function SecurityPage() {
             </thead>
             <tbody>
               {data.byBump.map((b) => (
-                <tr key={b.slug} style={ROW}>
+                <tr key={b.slug} style={ROW} data-row="bump">
                   <td style={td}>
                     <a
                       href={href(`/bump/?slug=${encodeURIComponent(b.slug)}#dependencies`)}
@@ -186,6 +260,21 @@ const th = {
   borderBottom: '1px solid var(--border-strong)',
 } as const
 const td = { padding: '8px 24px', verticalAlign: 'top' } as const
+const thin = {
+  textAlign: 'left',
+  color: 'var(--text-tertiary)',
+  fontWeight: 500,
+  fontSize: '10.5px',
+  textTransform: 'uppercase',
+  letterSpacing: '.06em',
+  padding: '5px 10px',
+  borderBottom: '1px solid var(--border-soft)',
+} as const
+const tdThin = {
+  padding: '5px 10px',
+  verticalAlign: 'top',
+  fontFamily: 'ui-monospace, Menlo, monospace',
+} as const
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (

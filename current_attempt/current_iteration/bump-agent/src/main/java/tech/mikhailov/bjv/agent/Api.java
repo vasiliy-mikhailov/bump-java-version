@@ -499,6 +499,33 @@ final class Api {
                 Json.field("distinctAfter", measured ? String.valueOf(distinct(after)) : "null"));
     }
 
+    /** The version pairs of one package, best outcome first, already rendered as objects. */
+    private static List<String> versionsOf(String name, Map<String, int[]> pairAcc,
+                                           Map<String, Integer> pairBumps) {
+        List<Map.Entry<String, int[]>> mine = pairAcc.entrySet().stream()
+                .filter(e -> e.getKey().startsWith(name + "\u0000"))
+                // A pair that was never vulnerable at either end explains nothing and there are
+                // thousands of them.
+                .filter(e -> e.getValue()[0] > 0 || e.getValue()[1] > 0)
+                .sorted((a, b) -> {
+                    int ca = a.getValue()[0] - a.getValue()[1];
+                    int cb = b.getValue()[0] - b.getValue()[1];
+                    return cb - ca != 0 ? cb - ca : b.getValue()[1] - a.getValue()[1];
+                })
+                .toList();
+        List<String> out = new ArrayList<>();
+        for (Map.Entry<String, int[]> e : mine) {
+            String[] p = e.getKey().split("\u0000", -1);
+            out.add(Json.object(
+                    Json.field("from", Json.optional(p.length > 1 ? p[1] : "")),
+                    Json.field("to", Json.optional(p.length > 2 ? p[2] : "")),
+                    Json.field("before", String.valueOf(e.getValue()[0])),
+                    Json.field("after", String.valueOf(e.getValue()[1])),
+                    Json.field("bumps", String.valueOf(pairBumps.getOrDefault(e.getKey(), 0)))));
+        }
+        return out;
+    }
+
     private static int total(Map<String, String[]> inventory) {
         return inventory.values().stream().mapToInt(v -> (int) num(v[1])).sum();
     }
@@ -533,7 +560,8 @@ final class Api {
      * occurrences across the corpus would rank packages by how many modules happen to use them.
      */
     private record Measured(String slug, String repo, int from, int to, int before, int after,
-                            int occurrencesBefore, int occurrencesAfter, Map<String, int[]> byName) {
+                            int occurrencesBefore, int occurrencesAfter, Map<String, int[]> byName,
+                            Map<String, int[]> byPair) {
     }
 
     /** slug -> its aggregation. A settled bump's trace does not change, so this is computed once. */
@@ -555,12 +583,13 @@ final class Api {
         Map<String, int[]> byName = new LinkedHashMap<>();
         fold(before, byName, 0);
         fold(after, byName, 1);
+        Map<String, int[]> byPair = pairs(before, after);
         String[] parts = settled.getOrDefault("bump", "").split("\\|");
         Measured m = new Measured(slug,
                 parts.length > 0 ? parts[0] : "",
                 parts.length > 2 ? (int) num(parts[2]) : 0,
                 parts.length > 3 ? (int) num(parts[3]) : 0,
-                distinct(before), distinct(after), total(before), total(after), byName);
+                distinct(before), distinct(after), total(before), total(after), byName, byPair);
         measured.put(slug, m);
         return m;
     }
@@ -579,6 +608,34 @@ final class Api {
         }
     }
 
+    /**
+     * WHAT EACH DEPENDENCY MOVED FROM, AND TO, IN THIS BUMP.
+     *
+     * <p>A package line saying "tomcat-embed-core 238 -> 81" is the corpus's answer and not an
+     * explanation: it does not say which upgrade did it, and the same package appears both moved
+     * and stuck across a corpus. The pair is the explanation, and it is the level at which a
+     * reader can act — 10.1.16 to 10.1.55 clears nineteen, 10.1.43 to 10.1.43 clears none, and the
+     * second is a project the floor judged compliant.
+     *
+     * <p>Keyed by (name, from, to) so identical pairs collapse ACROSS MODULES within a bump, which
+     * is the same rule {@link #distinct} applies and for the same reason: a seventeen-module
+     * project resolving one dependency is one fact, not seventeen.
+     */
+    private static Map<String, int[]> pairs(Map<String, String[]> before,
+                                            Map<String, String[]> after) {
+        Set<String> keys = new LinkedHashSet<>(before.keySet());
+        keys.addAll(after.keySet());
+        Map<String, int[]> once = new LinkedHashMap<>();
+        for (String key : keys) {
+            String name = key.contains("|") ? key.substring(key.indexOf('|') + 1) : key;
+            String[] b = before.get(key);
+            String[] a = after.get(key);
+            once.put(name + "\u0000" + (b == null ? "" : b[0]) + "\u0000" + (a == null ? "" : a[0]),
+                    new int[] {b == null ? 0 : (int) num(b[1]), a == null ? 0 : (int) num(a[1])});
+        }
+        return once;
+    }
+
     private String security() {
         List<Measured> all = new ArrayList<>();
         for (Map.Entry<String, Map<String, String>> e : settlements().entrySet()) {
@@ -593,6 +650,8 @@ final class Api {
         }
         Map<String, int[]> byName = new LinkedHashMap<>();
         Map<String, Integer> bumpsPer = new LinkedHashMap<>();
+        Map<String, int[]> pairAcc = new LinkedHashMap<>();
+        Map<String, Integer> pairBumps = new LinkedHashMap<>();
         int before = 0;
         int after = 0;
         int occBefore = 0;
@@ -607,6 +666,12 @@ final class Api {
                 acc[0] += e.getValue()[0];
                 acc[1] += e.getValue()[1];
                 bumpsPer.merge(e.getKey(), 1, Integer::sum);
+            }
+            for (Map.Entry<String, int[]> e : m.byPair().entrySet()) {
+                int[] acc = pairAcc.computeIfAbsent(e.getKey(), k -> new int[2]);
+                acc[0] += e.getValue()[0];
+                acc[1] += e.getValue()[1];
+                pairBumps.merge(e.getKey(), 1, Integer::sum);
             }
         }
         // ONLY WHAT WAS EVER VULNERABLE. 2,883 packages resolve across this corpus and all but a
@@ -644,7 +709,9 @@ final class Api {
                         Json.field("before", String.valueOf(e.getValue()[0])),
                         Json.field("after", String.valueOf(e.getValue()[1])),
                         Json.field("bumps",
-                                String.valueOf(bumpsPer.getOrDefault(e.getKey(), 0)))))),
+                                String.valueOf(bumpsPer.getOrDefault(e.getKey(), 0))),
+                        Json.field("versions",
+                                Json.array(versionsOf(e.getKey(), pairAcc, pairBumps), v -> v))))),
                 Json.field("byBump", Json.array(bumps, m -> Json.object(
                         Json.field("slug", Json.string(m.slug())),
                         Json.field("repo", Json.string(m.repo())),
