@@ -66,4 +66,23 @@ interface Trace {
 
     /** What the same migration would have cost a person, and the itemisation behind the number. */
     void priced(String bump, String minutes, String itemisation);
+
+    /**
+     * ONE EXCHANGE WITH THE MODEL, AS THE CLIENT SAW IT.
+     *
+     * <p>Everything else on this interface is the harness reporting what it chose to report. This
+     * is the wire: recorded by a listener under all of it, so the record holds what happened rather
+     * than what somebody remembered to save. It carries the two things the curated events could not
+     * -- the server's own token counts, and which agent produced a given piece of reasoning.
+     *
+     * <p>A DEFAULT, deliberately. A trace double in a test exists to answer a question about
+     * something else, and should not have to grow a method every time the wire learns a new fact.
+     */
+    default void exchanged(Exchange exchange) {
+    }
+
+    /** What went, what came back, what it cost. Summaries: the full conversation is not kept. */
+    record Exchange(String agent, int messages, String sent, String got, String tools,
+                    String finish, long inTokens, long outTokens, long ms, String error) {
+    }
 }

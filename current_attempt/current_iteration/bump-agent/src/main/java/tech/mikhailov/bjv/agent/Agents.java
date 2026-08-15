@@ -1162,6 +1162,10 @@ final class Agents {
     /** One definition. The framework's record, so nothing here reinvents its shape. */
     private SubAgentDefinition define(String name, String description, String prompt,
                                       Map<ToolSpecification, ToolExecutor> tools) {
+        // WHO IS SPEAKING, ANSWERABLE LATER. Two models serve all thirty-four agents, so a listener
+        // under them cannot be told the name; the system prompt is what travels with the request,
+        // and every agent's is distinct.
+        Listening.register(name, prompt);
         return new SubAgentDefinition(name, description, prompt, false, tools);
     }
 
@@ -1195,6 +1199,10 @@ final class Agents {
         }
         // Effectively final, because the lambda below closes over it.
         final String prompt = edited.isBlank() ? built : edited;
+        // THE PROMPT ACTUALLY IN FORCE, which is what the listener will see on the wire. Registering
+        // the built-in here instead would leave every edited agent unnamed in the record, and an
+        // edited prompt is exactly the one a reader is trying to follow.
+        Listening.register(name, prompt);
         // A critic judges; a producer works. They get different models because they fail
         // differently, and a critic that spends its budget thinking answers nothing at all.
         boolean judges = name.endsWith("-critic") || name.equals("verdict-doer")

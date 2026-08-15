@@ -109,7 +109,21 @@ export type ChainStage = {
 /** One thing that happened, in the order it happened. */
 export type TraceEvent = {
   at: number
-  kind: 'progress' | 'applied' | 'asked' | 'tool' | 'thought' | 'built' | 'settled' | 'priced'
+  /**
+   * `exchange` is the wire itself, recorded by a listener under the harness rather than by the
+   * harness choosing to report: one per model call, including the ones that errored before any
+   * answer existed. The others are the curated account.
+   */
+  kind:
+    | 'progress'
+    | 'applied'
+    | 'asked'
+    | 'tool'
+    | 'thought'
+    | 'built'
+    | 'settled'
+    | 'priced'
+    | 'exchange'
   /** Which agent spoke, for `asked` and `tool`. */
   agent?: string
   /** Which stage recorded it, for `applied`. */
@@ -117,6 +131,11 @@ export type TraceEvent = {
   tool?: string
   /** The body. Long, frequently: the page folds it rather than the server truncating it. */
   text: string
+  /** The server's own token counts, present on `exchange` and zero elsewhere. */
+  inTokens: number
+  outTokens: number
+  /** Wall time of the call in milliseconds. */
+  ms: number
 }
 
 /** A dependency the scan resolved, and what the bump did to it. */

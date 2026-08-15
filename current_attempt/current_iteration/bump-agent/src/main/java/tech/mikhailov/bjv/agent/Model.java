@@ -132,6 +132,12 @@ final class Model {
                 .maxTokens(MAX_TOKENS)
                 .timeout(PATIENCE)
                 .returnThinking(Boolean.TRUE);
+        // UNDER EVERYTHING THE HARNESS CHOOSES TO RECORD. The listener sees the request as sent and
+        // the response as received, including calls that error before any answer exists, so the
+        // trace stops being a curated account and becomes the wire.
+        if (trace != null) {
+            s.listeners(java.util.List.of(new Listening(trace)));
+        }
 
         java.util.Map<String, Object> extra = extras(wantThinking);
         if (!extra.isEmpty()) {

@@ -452,12 +452,30 @@ final class Api {
         // which is which per kind would be a second copy of the record's shape.
         String text = first(e, "note", "what", "reply", "result", "summary", "content", "thinking",
                 "itemisation");
+        // AN EXCHANGE CARRIES NO SINGLE BODY. It is the wire: what went, what came back, what it
+        // cost. Composing the line here rather than in the page keeps the rule that a kind's shape
+        // is known in one place, and gives a reader the numbers the curated events never had.
+        if ("exchange".equals(kind)) {
+            String error = e.getOrDefault("error", "");
+            text = (error.isBlank() ? "" : "FAILED " + error + " · ")
+                    + e.getOrDefault("messages", "0") + " message(s) · "
+                    + e.getOrDefault("in", "0") + " in / " + e.getOrDefault("out", "0")
+                    + " out tokens · " + e.getOrDefault("ms", "0") + "ms"
+                    + (e.getOrDefault("finish", "").isBlank() ? ""
+                            : " · " + e.get("finish"))
+                    + (e.getOrDefault("tools", "").isBlank() ? ""
+                            : " · asked for " + e.get("tools"))
+                    + (e.getOrDefault("got", "").isBlank() ? "" : "\n" + e.get("got"));
+        }
         return Json.object(
                 Json.field("at", String.valueOf(num(e.get("at")))),
                 Json.field("kind", Json.string(kind)),
                 Json.field("agent", Json.optional(e.getOrDefault("agent", ""))),
                 Json.field("stage", Json.optional(e.getOrDefault("stage", ""))),
                 Json.field("tool", Json.optional(e.getOrDefault("tool", ""))),
+                Json.field("inTokens", String.valueOf((int) num(e.get("in")))),
+                Json.field("outTokens", String.valueOf((int) num(e.get("out")))),
+                Json.field("ms", String.valueOf((int) num(e.get("ms")))),
                 Json.field("text", Json.string(text)));
     }
 

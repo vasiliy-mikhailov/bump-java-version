@@ -31,7 +31,11 @@ export function EventFeed({ events }: EventFeedProps) {
                 fontSize: '10px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
-                color: 'var(--text-tertiary)',
+                // THE WIRE READS DIFFERENTLY FROM THE ACCOUNT. Every other kind is the harness
+                // reporting what it chose to; `exchange` is a listener under all of it recording
+                // what actually went to the model, errors included. Worth telling apart at a
+                // glance, because a run where those two disagree is the interesting case.
+                color: e.kind === 'exchange' ? 'var(--role-verifier)' : 'var(--text-tertiary)',
               }}
             >
               {e.kind}

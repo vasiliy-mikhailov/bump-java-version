@@ -233,6 +233,21 @@ final class JsonlTrace implements Trace, DeepAgentFlowListener {
         write("priced", of("minutes", minutes, "itemisation", itemisation));
     }
 
+    @Override
+    public void exchanged(Exchange e) {
+        write("exchange", of(
+                "agent", e.agent(),
+                "messages", String.valueOf(e.messages()),
+                "sent", e.sent(),
+                "got", e.got(),
+                "tools", e.tools(),
+                "finish", e.finish(),
+                "in", String.valueOf(e.inTokens()),
+                "out", String.valueOf(e.outTokens()),
+                "ms", String.valueOf(e.ms()),
+                "error", e.error()));
+    }
+
     /** A map that tolerates a null value, because an empty model answer is a judgement, not a crash. */
     private static Map<String, String> of(String... pairs) {
         Map<String, String> m = new LinkedHashMap<>();
