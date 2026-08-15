@@ -545,6 +545,12 @@ final class Tools {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
         tools.putAll(declaredVersions(root));
         tools.putAll(jar());
+        // A JUDGE THAT CANNOT CHECK A CLAIM CAN ONLY TRUST IT OR IGNORE IT, and this one
+        // ignored it: a doer reported a pin unreachable because its module is Gradle and
+        // apply_recipe runs the Maven plugin, and the verifier, seeing only that the version
+        // was below the floor, answered `again` twice to a colleague with no tool to try
+        // anything with. Same reason inspect_jar is given to judges.
+        tools.putAll(buildSystem(root));
         tools.putAll(history(tree, trace));
         return recorded(tools, trace, agent);
     }

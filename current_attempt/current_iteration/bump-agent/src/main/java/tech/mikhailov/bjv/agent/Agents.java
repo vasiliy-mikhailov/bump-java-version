@@ -191,6 +191,14 @@ final class Agents {
                 `done` when nothing is outstanding, or when what remains is genuinely unreachable and
                 your colleague said so.
 
+                UNREACHABLE IS A REAL ANSWER AND YOU CAN CHECK IT. apply_recipe runs the OpenRewrite
+                MAVEN plugin and this phase holds no other way to write, so on a Gradle module no
+                pin here can be applied by anyone, however many times you ask. Call build_system.
+                If it says the module is Gradle and your colleague said so too, that is `done`: name
+                the pin and say it is unapplied and why, so the bump phase, which does hold an
+                editor, picks it up. Answering `again` there sends someone back to a tool that
+                cannot start, and it happened twice in one phase before this paragraph existed.
+
                 `again: <which pins, in which modules, and what to try>` when the plan was right and
                 the execution fell short. Name them from declared_versions rather than from the diff, and
                 say something the next attempt can act on: which recipe suits where that version

@@ -151,4 +151,38 @@ class TheAgentCanAskWhichBuildSystemTest {
         public void priced(String b, String m, String i) {
         }
     }
+
+    @Test
+    void theJudgeCanCheckTheClaimRatherThanTrustOrIgnoreIt(@TempDir Path ws) throws IOException {
+        // OBSERVED, TWICE IN ONE PHASE. after-pins-doer reported "BLOCKED: root module is
+        // Gradle-only, so apply_recipe cannot execute", which was true and was the honest answer.
+        // The verifier could see only that the version was below its floor, so it answered
+        // "again: try UpgradeSpringBoot_3_5" to a colleague holding no tool that could try it, and
+        // would have gone on doing that until the phase budget ran out.
+        //
+        // The prompt already allowed `done` for something genuinely unreachable. What was missing
+        // was any way to establish that it was, which is the same reason inspect_jar is given to
+        // judges rather than only to producers.
+        module(ws, "", "build.gradle");
+        var judge = Tools.judging(ws, null, new NoTrace(), "after-pins-verifier");
+
+        assertTrue(judge.keySet().stream().anyMatch(s -> s.name().equals("build_system")),
+                "a judge can establish the build system for itself: "
+                        + judge.keySet().stream().map(s -> s.name()).toList());
+        assertFalse(judge.keySet().stream().anyMatch(s -> s.name().equals("apply_recipe")),
+                "and still cannot act, which is what makes it a judge");
+    }
+
+    @Test
+    void theVerifierIsToldThatUnreachableIsATerminalAnswer(@TempDir Path ws) {
+        String critic = Agents.forHop(new Hop(17, 21), ws).stream()
+                .filter(d -> d.name().equals("after-pins-verifier"))
+                .findFirst().orElseThrow().systemPrompt();
+
+        assertTrue(critic.contains("UNREACHABLE IS A REAL ANSWER"), critic);
+        assertTrue(critic.contains("Call build_system"),
+                "and it is told to check rather than take the claim on trust");
+        assertTrue(critic.contains("cannot start"),
+                "with the reason `again` is wrong there, not just that it is");
+    }
 }
