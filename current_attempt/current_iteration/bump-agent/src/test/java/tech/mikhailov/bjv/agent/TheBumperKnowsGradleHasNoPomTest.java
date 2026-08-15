@@ -28,6 +28,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * miss. What it did not know is that on Gradle the recipes miss everything. That is what this
  * asserts, because it is the difference between a phase with no options and a phase that had one
  * all along and was never told.
+ *
+ * <p>The first version of this fix taught the doer to RECOGNISE the failure. It now asks
+ * {@code build_system} instead, which is the same rule the rest of this codebase follows: a tool
+ * reports the fact, the prompt decides what to do about it.
  */
 class TheBumperKnowsGradleHasNoPomTest {
 
@@ -41,10 +45,13 @@ class TheBumperKnowsGradleHasNoPomTest {
     }
 
     @Test
-    void itRecognisesTheAnswerTheToolActuallyGives(@TempDir Path ws) {
-        // The exact string, because a doer matching on anything else matches nothing.
-        assertTrue(bumper(ws).contains("no POM in this directory"),
-                "the bump doer is told the sentence that means Gradle");
+    void itAsksRatherThanWaitingToBeToldByAFailure(@TempDir Path ws) {
+        // THIS USED TO ASSERT THE ERROR STRING. The first version of this fix taught the doer to
+        // recognise "no POM in this directory" and infer the project type from it: three inference
+        // steps standing in for a question. build_system answers the question, so the instruction
+        // is to ask, and the error string is no longer something an agent should ever need to see.
+        assertTrue(bumper(ws).contains("CALL build_system FIRST"),
+                "the bump doer is told to establish the fact before acting");
     }
 
     @Test
@@ -53,7 +60,7 @@ class TheBumperKnowsGradleHasNoPomTest {
         // "this failed" will try again; it has to be told the failure is structural.
         String p = bumper(ws);
         assertTrue(p.contains("not on a retry"), "retrying is ruled out explicitly: " + p);
-        assertTrue(p.contains("STOP CALLING IT"), "and the instruction is an imperative");
+        assertTrue(p.contains("Ask before you"), "and asking is put ahead of calling: " + p);
     }
 
     @Test

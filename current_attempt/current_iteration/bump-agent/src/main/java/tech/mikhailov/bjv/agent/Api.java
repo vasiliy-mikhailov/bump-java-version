@@ -879,7 +879,21 @@ final class Api {
                 Json.field("max", "16"),
                 Json.field("turns", Json.string(envOr("BJV_TURNS", "16"))),
                 Json.field("steps", Json.string(envOr("BJV_STEPS", "6"))),
-                Json.field("hangGuardMinutes", Json.string(envOr("BJV_HANG_GUARD", "")))));
+                Json.field("hangGuardMinutes", Json.string(envOr("BJV_HANG_GUARD", ""))),
+                // WHERE DEPENDENCIES COME FROM, ON A PAGE, because until now it was knowable only
+                // by reading settings.xml on the host. Maven learns the mirror from that file and
+                // never needed it named anywhere else; Gradle cannot read a Maven settings file, so
+                // the moment a recipe has to run under Gradle the URL has to exist as configuration
+                // rather than as a line inside a file handed to one build tool.
+                //
+                // Read-only here, like the model endpoint beside it. A repository URL that a web
+                // page can rewrite is a supply chain a web page can redirect.
+                Json.field("repository", Json.string(envOr("BJV_REPO_URL", ""))),
+                Json.field("mavenSettings", Json.string(envOr("BJV_SETTINGS", ""))),
+                Json.field("mavenCache", Json.string(envOr("BJV_M2", ""))),
+                Json.field("gradleCache", Json.string(envOr("BJV_GRADLE_RO", ""))),
+                Json.field("gradleDists", Json.string(envOr("BJV_GRADLE_DISTS", ""))),
+                Json.field("offline", String.valueOf(!envOr("BJV_SETTINGS", "").isBlank()))));
     }
 
     /**
@@ -896,9 +910,11 @@ final class Api {
         String key = System.getenv().getOrDefault("OC_KEY", "");
         return Json.object(
                 Json.field("keySet", String.valueOf(!key.isBlank())),
-                Json.field("model", Json.string(envOr("OC_MODEL", "qwen-3.6-35b-a3b-awq"))),
-                Json.field("endpoint", Json.string(
-                        envOr("OC_BASE", "https://inference.mikhailov.tech/qwen-3.6-35b-a3b-awq/v1"))),
+                // NO DEFAULT. These were the author's own endpoint, the same pins removed from
+                // Model, and a page that invents a plausible value for unset configuration is a
+                // page that hides a broken deployment.
+                Json.field("model", Json.string(envOr("OC_MODEL", ""))),
+                Json.field("endpoint", Json.string(envOr("OC_BASE", ""))),
                 Json.field("patienceMinutes", Json.string(envOr("BJV_PATIENCE_MINUTES", "240"))));
     }
 

@@ -97,9 +97,12 @@ run '
           sed -n "s/^BJV_DASH_TOKEN=//p" | head -1)
   if [ -z "$TOKEN" ]; then echo "refusing to recreate the dashboard without its token" >&2; exit 1; fi
   docker rm -f bjv-dashboard bjv-supervisor >/dev/null 2>&1 || true
+  ENVFILE=/home/vmihaylov/bump-java-version/current_attempt/current_iteration/bump-agent/.env
+  [ -f "$ENVFILE" ] || ENVFILE=/dev/null
   docker run -d --name bjv-dashboard --network proxy-net --restart unless-stopped \
     -e BJV_DASH_TOKEN="$TOKEN" \
     --env-file /home/vmihaylov/bump-java-version/.env \
+    --env-file "$ENVFILE" \
     -e OC_KEY="$(sed -n "s/^PROPOSER_API_KEY=//p" /home/vmihaylov/bump-java-version/.env | tr -d "\"" )" \
     -e BJV_SUPERVISOR_MINUTES="${BJV_SUPERVISOR_MINUTES:-20}" \
     --user "$(id -u):$(id -g)" \

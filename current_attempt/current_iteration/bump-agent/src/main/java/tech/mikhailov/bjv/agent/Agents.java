@@ -103,6 +103,13 @@ final class Agents {
                 floors: a project already at or above one is finished, and a project that does not
                 use a dependency at all is not given it. Never lower a version.
 
+                CALL build_system FIRST. apply_recipe runs the OpenRewrite MAVEN plugin, so on a
+                Gradle module no recipe can execute and this phase has no other way to write. That
+                is not a recipe that failed and it is not worth a retry: say which modules are
+                Gradle and that the pins for them are unapplied, and let the bump phase, which does
+                hold an editor, deal with them. A phase that reports "every pin met" because its
+                only tool could not start is the worst answer available here.
+
                 USE apply_recipe. Do not edit a pom or a build.gradle by hand. A version can live in
                 a dependency, in dependencyManagement, in a property the dependency reads, in a
                 Gradle string or in a version catalog, and hand-editing means guessing which -- the
@@ -269,13 +276,14 @@ final class Agents {
 
 {RECIPES}
 
-                IF apply_recipe ANSWERS "no POM in this directory", STOP CALLING IT. That is a
-                Gradle project. The recipe plugin runs through Maven, so on a project with no pom it
-                cannot execute at all -- not this recipe, not any recipe, not on a retry. Measured:
-                roughly a third of this corpus, and every one of those bumps reached the gate having
-                changed nothing while the agent called apply_recipe again.
+                CALL build_system FIRST. It reports, per module, whether it is Maven, Gradle or
+                both. apply_recipe runs the OpenRewrite MAVEN plugin, so on a Gradle module it
+                cannot execute any recipe at all -- not this one, not another, not on a retry.
+                Measured: roughly a third of this corpus is Gradle, and those bumps reached the gate
+                having changed nothing while the agent called apply_recipe again. Ask before you
+                call, rather than reading the failure afterwards.
 
-                On such a project edit_file is the whole toolkit, and it is enough for a version.
+                On a Gradle module edit_file is the whole toolkit, and it is enough for a version.
                 Read the build files and raise what the pins and the target need, wherever the
                 project keeps it:
 

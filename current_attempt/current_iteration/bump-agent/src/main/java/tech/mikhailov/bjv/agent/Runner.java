@@ -65,6 +65,7 @@ final class Runner {
         Map<String, String> env = new HashMap<>();
         env.put("BJV_WS", ws.toString());
         Env.copy(env, "BJV_NET", "mvn-cache");
+        Env.copyIfSet(env, "BJV_REPO_URL");
         Env.copyIfSet(env, "BJV_M2");
         Env.copyIfSet(env, "BJV_SETTINGS");
         Env.copyIfSet(env, "BJV_GRADLE_RO");

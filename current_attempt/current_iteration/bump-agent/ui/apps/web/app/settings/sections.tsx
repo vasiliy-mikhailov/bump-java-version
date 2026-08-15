@@ -21,6 +21,13 @@ type Run = {
   turns: string
   steps: string
   hangGuardMinutes: string
+  /** Where dependencies resolve from, and the caches the sandbox mounts to reach them. */
+  repository: string
+  mavenSettings: string
+  mavenCache: string
+  gradleCache: string
+  gradleDists: string
+  offline: boolean
 }
 
 /**
@@ -119,6 +126,53 @@ export function RunSection() {
         </LabeledField>
         <LabeledField label="steps per campaign" hint="Steps one troubleshoot campaign may order.">
           <input style={READONLY} value={run.steps} readOnly />
+        </LabeledField>
+      </SettingCard>
+
+      <div style={{ height: '18px' }} />
+
+      <SettingCard
+        title="where dependencies come from"
+        provenance={run.repository === '' ? 'not set' : 'the environment\u2019s'}
+        footnote={
+          <>
+            Builds here resolve offline through a local mirror, so what is not in it does not exist
+            as far as a bump is concerned: a version the agent raises to and the mirror has never
+            seen fails the build rather than downloading. Until now this was knowable only by
+            reading settings.xml on the host. Maven learns the mirror from that file and never
+            needed it named anywhere else, but Gradle cannot read a Maven settings file, so the
+            moment a recipe has to run under Gradle the URL has to be configuration rather than a
+            line inside a file handed to one build tool.
+            <br />
+            Read-only, like the model endpoint. A repository URL a web page can rewrite is a supply
+            chain a web page can redirect.
+          </>
+        }
+      >
+        <LabeledField
+          label="repository"
+          hint="The mirror every build resolves through. BJV_REPO_URL."
+        >
+          <input
+            style={READONLY}
+            value={run.repository === '' ? 'not set' : run.repository}
+            readOnly
+          />
+        </LabeledField>
+        <LabeledField label="maven settings" hint="Handed to maven; this is where it reads the mirror.">
+          <input style={READONLY} value={run.mavenSettings || 'not set'} readOnly />
+        </LabeledField>
+        <LabeledField label="maven repository" hint="The warm cache mounted at /root/.m2.">
+          <input style={READONLY} value={run.mavenCache || 'not set'} readOnly />
+        </LabeledField>
+        <LabeledField label="gradle cache" hint="Mounted read-only for gradle builds.">
+          <input style={READONLY} value={run.gradleCache || 'not set'} readOnly />
+        </LabeledField>
+        <LabeledField
+          label="gradle distributions"
+          hint="Which wrapper versions can be staged. A version missing here cannot be downloaded."
+        >
+          <input style={READONLY} value={run.gradleDists || 'not set'} readOnly />
         </LabeledField>
       </SettingCard>
     </>

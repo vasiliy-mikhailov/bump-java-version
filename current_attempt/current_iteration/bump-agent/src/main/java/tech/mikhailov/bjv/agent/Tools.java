@@ -190,6 +190,7 @@ final class Tools {
         tools.putAll(build(root, runner, targetJdk));
         tools.putAll(jar());
         tools.putAll(gradle());
+        tools.putAll(buildSystem(root));
         tools.putAll(history(tree, trace));
         return recorded(guarded(tools), trace, agent);
     }
@@ -373,6 +374,75 @@ final class Tools {
      * <p>So the verdict moved to the planner, which holds the floor list as prose and can see that a
      * parent block is how a Maven project states its Boot line. This reports.
      */
+    /**
+     * WHICH BUILD SYSTEM, AS A FACT RATHER THAN AN INFERENCE FROM A FAILURE.
+     *
+     * <p>{@code apply_recipe} runs the OpenRewrite MAVEN plugin. On a project with no pom it
+     * answers "no POM in this directory" and no recipe can execute: not that one, not any, not on
+     * a retry. Before this tool the only way an agent could learn that was to call the tool, read
+     * the error, and infer the project type from it — three inference steps standing in for a
+     * question it could simply ask, and in the corpus they usually ended in calling it again.
+     *
+     * <p>PER MODULE, and both is a real answer. A repository can carry a pom at the root and Gradle
+     * modules underneath, and a root-level file check calls that Maven and is wrong about half of
+     * it. This reports what each module actually has.
+     *
+     * <p>It reports and does not advise. What to do about a Gradle module is in the prompt, next to
+     * the floors, where the judgement belongs.
+     */
+    private static Map<ToolSpecification, ToolExecutor> buildSystem(Path root) {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("build_system")
+                .description("Report, PER MODULE, whether it is built by Maven, by Gradle, or by "
+                        + "both. Call this before apply_recipe: that tool runs the OpenRewrite "
+                        + "Maven plugin, so on a module with no pom.xml it cannot execute any "
+                        + "recipe at all, and no retry changes that. A repository can be mixed, so "
+                        + "the answer is per module rather than one word for the project.")
+                .parameters(JsonObjectSchema.builder().build())
+                .build();
+        ToolExecutor exec = (request, memoryId) -> {
+            try {
+                List<Modules.Module> modules = Modules.of(root);
+                StringBuilder out = new StringBuilder();
+                int maven = 0;
+                int gradle = 0;
+                for (Modules.Module m : modules) {
+                    Path dir = root.resolve(m.path()).normalize();
+                    boolean hasPom = Files.isRegularFile(dir.resolve("pom.xml"));
+                    boolean hasGradle = Files.isRegularFile(dir.resolve("build.gradle"))
+                            || Files.isRegularFile(dir.resolve("build.gradle.kts"))
+                            || Files.isRegularFile(dir.resolve("settings.gradle"))
+                            || Files.isRegularFile(dir.resolve("settings.gradle.kts"));
+                    String said = hasPom && hasGradle ? "maven and gradle"
+                            : hasPom ? "maven"
+                            : hasGradle ? "gradle"
+                            : "no build file of its own";
+                    if (hasPom) {
+                        maven++;
+                    } else if (hasGradle) {
+                        gradle++;
+                    }
+                    out.append("  ").append(m.name()).append("  ").append(said).append('\n');
+                }
+                if (modules.isEmpty()) {
+                    return "no modules were found under this workspace";
+                }
+                String head = gradle == 0 ? "Every module here is Maven; apply_recipe can run."
+                        : maven == 0
+                                ? "Every module here is Gradle. apply_recipe runs the OpenRewrite "
+                                        + "MAVEN plugin and cannot execute a recipe on any of them."
+                                : "Mixed. apply_recipe can run on the Maven modules and on none of "
+                                        + "the Gradle ones.";
+                return head + "\n" + out;
+            } catch (IOException e) {
+                return "could not read the build files: " + e.getMessage();
+            }
+        };
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, exec);
+        return one;
+    }
+
     private static Map<ToolSpecification, ToolExecutor> declaredVersions(Path root) {
         ToolSpecification spec = ToolSpecification.builder()
                 .name("declared_versions")
@@ -440,6 +510,7 @@ final class Tools {
         tools.putAll(build(root, runner, targetJdk));
         tools.putAll(targets(root, targetJdk));
         tools.putAll(recipe(migrate, under));
+        tools.putAll(buildSystem(root));
         tools.putAll(history(tree, trace));
         return recorded(guarded(tools), trace, agent);
     }
@@ -459,6 +530,7 @@ final class Tools {
                                                         Trace trace, String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
         tools.putAll(recipe(migrate, jdk));
+        tools.putAll(buildSystem(root));
         tools.putAll(declaredVersions(root));
         tools.putAll(jar());
         tools.putAll(gradle());
