@@ -113,9 +113,15 @@ function Stage({
       {nested.length === 0 ? null : (
         <div
           style={{
+            // ACROSS, NOT DOWN. A stage that runs three stages inside it was three times the
+            // height of every other box, and in a wrapping row one tall item sets the height of
+            // the whole line: the strip grew a hole beside it the size of two stages. Sideways,
+            // the widest box is wide rather than tall and the chain reads as the sequence it is.
             display: 'flex',
-            flexDirection: 'column',
-            gap: '5px',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignItems: 'flex-start',
+            gap: '6px',
             marginTop: '2px',
             paddingLeft: '10px',
             borderLeft: '2px solid var(--border-soft)',
@@ -172,7 +178,7 @@ function StepPill({
   }
   const label = (
     <>
-      {step.name}
+      {shortName(step)}
       {step.spoke > 1 ? (
         <span style={{ opacity: 0.75 }}>
           {' '}
@@ -185,14 +191,34 @@ function StepPill({
   // that answers a click with an empty page.
   if (hrefFor === undefined || step.spoke === 0 || !step.agent) {
     return (
-      <span style={style} title={step.agent ? step.role : 'deterministic'}>
+      <span style={style} title={step.agent ? step.name : 'deterministic'}>
         {label}
       </span>
     )
   }
   return (
-    <a href={hrefFor(step.name)} style={style} title={step.role}>
+    <a href={hrefFor(step.name)} style={style} title={step.name}>
       {label}
     </a>
   )
+}
+
+/**
+ * A TRIPLET MEMBER SAYS ITS ROLE, NOT ITS STAGE TWICE.
+ *
+ * The box already carries the stage in small caps, so `survey-planner` inside a box labelled SURVEY
+ * spends most of its width repeating the label directly above it. Three stages of that and the
+ * strip is a column of prefixes with the distinguishing word squeezed off the end. The sibling
+ * writes plan, do, verify, and it reads at a glance because the only thing varying between pills is
+ * the only thing that differs.
+ *
+ * DETERMINISTIC STEPS KEEP THEIR NAMES. `baseline` and `the three passes` are not triplet members
+ * and their names are the whole information: shortening them to "do" would say nothing at all. The
+ * full agent name stays on the hover title either way, since that is the string a reader would take
+ * to the trace.
+ */
+const SHORT = { planner: 'plan', doer: 'do', verifier: 'verify' } as const
+
+function shortName(step: ChainStep): string {
+  return step.agent ? SHORT[step.role] : step.name
 }

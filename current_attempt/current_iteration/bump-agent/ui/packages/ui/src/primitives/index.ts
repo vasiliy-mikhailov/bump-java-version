@@ -11,6 +11,7 @@
  * package both import instead of both copying.
  */
 
+export { Card, type CardProps } from './Card'
 export { CodeBlock, type CodeBlockProps } from './CodeBlock'
 export { Disclosure, type DisclosureProps } from './Disclosure'
 export { EmptyNote, type EmptyNoteProps } from './EmptyNote'

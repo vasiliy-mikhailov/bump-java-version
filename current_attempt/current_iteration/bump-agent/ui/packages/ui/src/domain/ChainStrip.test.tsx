@@ -24,9 +24,11 @@ describe('ChainStrip', () => {
   it('draws all three roles of a stage, not two', () => {
     render(<ChainStrip stages={[stage('bump', '', [1, 1, 1])]} />)
 
-    expect(screen.getByText('bump-planner')).toBeDefined()
-    expect(screen.getByText('bump-doer')).toBeDefined()
-    expect(screen.getByText('bump-verifier')).toBeDefined()
+    expect(screen.getByText('plan')).toBeDefined()
+    expect(screen.getByText('do')).toBeDefined()
+    expect(screen.getByText('verify')).toBeDefined()
+    // The stage is said once, above them, rather than three times inside them.
+    expect(screen.getByText('bump')).toBeDefined()
   })
 
   it('draws stages the bump never reached, dimmed rather than omitted', () => {
@@ -34,7 +36,7 @@ describe('ChainStrip', () => {
     // where the run actually stopped.
     render(<ChainStrip stages={[stage('survey', '', [1, 1, 1]), stage('gate', '', [0, 0, 0])]} />)
 
-    expect(screen.getByText('gate-doer')).toBeDefined()
+    expect(screen.getByTitle('gate-doer')).toBeDefined()
   })
 
   it('marks a deterministic step differently from an agent', () => {
@@ -70,7 +72,7 @@ describe('ChainStrip', () => {
     )
 
     // Rendered once, under its parent, rather than as a peer of it.
-    expect(screen.getAllByText('before-pins-doer')).toHaveLength(1)
+    expect(screen.getAllByTitle('before-pins-doer')).toHaveLength(1)
   })
 
   it('links only the steps a reader can actually filter to', () => {
@@ -83,13 +85,13 @@ describe('ChainStrip', () => {
     )
 
     // A link that filters to nothing answers a click with an empty page.
-    expect(screen.getByText('bump-planner').closest('a')).not.toBeNull()
-    expect(screen.getByText('bump-doer').closest('a')).toBeNull()
+    expect(screen.getByTitle('bump-planner').closest('a')).not.toBeNull()
+    expect(screen.getByTitle('bump-doer').closest('a')).toBeNull()
   })
 
   it('is read-only when no link builder is given', () => {
     render(<ChainStrip stages={[stage('bump', '', [1, 1, 1])]} />)
 
-    expect(screen.getByText('bump-doer').closest('a')).toBeNull()
+    expect(screen.getByTitle('bump-doer').closest('a')).toBeNull()
   })
 })
