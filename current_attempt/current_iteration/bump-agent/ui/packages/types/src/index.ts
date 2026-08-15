@@ -201,4 +201,26 @@ export type Summary = {
   lastEventAt: number
 }
 
+/**
+ * WHERE THE CORPUS'S CLEARED VULNERABILITIES WENT, aggregated over the bumps that were scanned
+ * both before and after.
+ *
+ * Everything named `before`/`after` here is DISTINCT: one count per package and version, however
+ * many modules resolved it. `occurrencesBefore`/`occurrencesAfter` are the same bumps counted the
+ * way the list page counts them, carried so a reader can reconcile the two headline numbers
+ * instead of concluding one of them is broken.
+ */
+export type Security = {
+  before: number
+  after: number
+  removed: number
+  measured: number
+  /** Percent of `before` cleared, null when nothing was vulnerable to begin with. */
+  rate: number | null
+  occurrencesBefore: number
+  occurrencesAfter: number
+  byPackage: { name: string; before: number; after: number; bumps: number }[]
+  byBump: { slug: string; repo: string; from: number; to: number; before: number; after: number }[]
+}
+
 export type Health = { ok: true; version: string } | { ok: false; why: string }

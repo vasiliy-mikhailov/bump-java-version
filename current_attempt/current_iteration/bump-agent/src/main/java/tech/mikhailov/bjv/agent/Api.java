@@ -41,6 +41,7 @@ final class Api {
             case "/api/badges" -> badges(x);
             case "/api/bumps" -> Zone.json(x, bumps(Zone.param(x, "since")));
             case "/api/summary" -> Zone.json(x, summary());
+            case "/api/security" -> Zone.json(x, security());
             case "/api/bump" -> Zone.json(x, bump(Zone.param(x, "slug")));
             case "/api/settings" -> Zone.json(x, settings(Zone.param(x, "hop")));
             case "/api/settings/prompt" -> prompt(x);
@@ -511,6 +512,146 @@ final class Api {
             once.put(name + "@" + e.getValue()[0], (int) num(e.getValue()[1]));
         }
         return once.values().stream().mapToInt(Integer::intValue).sum();
+    }
+
+    /**
+     * WHERE THE CORPUS'S CLEARED VULNERABILITIES ACTUALLY WENT.
+     *
+     * <p>The list page can say 2,354 -> 1,806 because every row carries its own two numbers. It
+     * cannot say WHICH dependency accounts for the difference, because that lives one level down,
+     * in each bump's own inventory. This reads those and adds them up two ways: by package, which
+     * answers "what did raising these frameworks actually fix", and by bump, which answers "which
+     * repositories did the work".
+     *
+     * <p>ONLY BUMPS WITH AN AFTER INVENTORY, for the same reason the totals on the list page count
+     * only bumps with both numbers: the after scan runs on a green gate and nowhere else, so a
+     * bump without one has a before and no comparison, and counting it would credit the corpus
+     * with clearing a project that never finished.
+     *
+     * <p>DISTINCT, NOT OCCURRENCES. The scan reports a finding once per module that resolves the
+     * dependency, which inflates by 1.67x overall and 15.5x on a seventeen-module project. Summing
+     * occurrences across the corpus would rank packages by how many modules happen to use them.
+     */
+    private record Measured(String slug, String repo, int from, int to, int before, int after,
+                            int occurrencesBefore, int occurrencesAfter, Map<String, int[]> byName) {
+    }
+
+    /** slug -> its aggregation. A settled bump's trace does not change, so this is computed once. */
+    private final Map<String, Measured> measured = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private Measured measure(String slug, Map<String, String> settled) {
+        Measured known = measured.get(slug);
+        if (known != null) {
+            return known;
+        }
+        List<Map<String, String>> events =
+                lines(results.resolve(slug).resolve("trace.jsonl")).stream()
+                        .map(Dashboard::row).toList();
+        Map<String, String[]> before = inventory(events, "packages-before");
+        Map<String, String[]> after = inventory(events, "packages-after");
+        if (after.isEmpty()) {
+            return null;
+        }
+        Map<String, int[]> byName = new LinkedHashMap<>();
+        fold(before, byName, 0);
+        fold(after, byName, 1);
+        String[] parts = settled.getOrDefault("bump", "").split("\\|");
+        Measured m = new Measured(slug,
+                parts.length > 0 ? parts[0] : "",
+                parts.length > 2 ? (int) num(parts[2]) : 0,
+                parts.length > 3 ? (int) num(parts[3]) : 0,
+                distinct(before), distinct(after), total(before), total(after), byName);
+        measured.put(slug, m);
+        return m;
+    }
+
+    /** Distinct counts per package name, summed over the versions of it this bump resolved. */
+    private static void fold(Map<String, String[]> inventory, Map<String, int[]> into, int slot) {
+        Map<String, Integer> once = new LinkedHashMap<>();
+        for (Map.Entry<String, String[]> e : inventory.entrySet()) {
+            String name = e.getKey().contains("|")
+                    ? e.getKey().substring(e.getKey().indexOf('|') + 1) : e.getKey();
+            once.put(name + "@" + e.getValue()[0], (int) num(e.getValue()[1]));
+        }
+        for (Map.Entry<String, Integer> e : once.entrySet()) {
+            String name = e.getKey().substring(0, e.getKey().lastIndexOf('@'));
+            into.computeIfAbsent(name, k -> new int[2])[slot] += e.getValue();
+        }
+    }
+
+    private String security() {
+        List<Measured> all = new ArrayList<>();
+        for (Map.Entry<String, Map<String, String>> e : settlements().entrySet()) {
+            String state = e.getValue().getOrDefault("state", "");
+            if (state.isEmpty() || "bumping".equals(state) || "queued".equals(state)) {
+                continue;
+            }
+            Measured m = measure(e.getKey(), e.getValue());
+            if (m != null) {
+                all.add(m);
+            }
+        }
+        Map<String, int[]> byName = new LinkedHashMap<>();
+        Map<String, Integer> bumpsPer = new LinkedHashMap<>();
+        int before = 0;
+        int after = 0;
+        int occBefore = 0;
+        int occAfter = 0;
+        for (Measured m : all) {
+            before += m.before();
+            after += m.after();
+            occBefore += m.occurrencesBefore();
+            occAfter += m.occurrencesAfter();
+            for (Map.Entry<String, int[]> e : m.byName().entrySet()) {
+                int[] acc = byName.computeIfAbsent(e.getKey(), k -> new int[2]);
+                acc[0] += e.getValue()[0];
+                acc[1] += e.getValue()[1];
+                bumpsPer.merge(e.getKey(), 1, Integer::sum);
+            }
+        }
+        // ONLY WHAT WAS EVER VULNERABLE. 2,883 packages resolve across this corpus and all but a
+        // couple of hundred carry no finding at any point; sending them is a megabyte of rows
+        // reading 0 -> 0, and a table nobody can scan is the same as no table.
+        List<Map.Entry<String, int[]>> pkgs = new ArrayList<>(byName.entrySet().stream()
+                .filter(e -> e.getValue()[0] > 0 || e.getValue()[1] > 0).toList());
+        // Best outcome first, exactly as the per-bump table orders: cleared, then what is left.
+        pkgs.sort((a, b) -> {
+            int ca = a.getValue()[0] - a.getValue()[1];
+            int cb = b.getValue()[0] - b.getValue()[1];
+            return cb - ca != 0 ? cb - ca
+                    : b.getValue()[1] - a.getValue()[1] != 0 ? b.getValue()[1] - a.getValue()[1]
+                            : a.getKey().compareTo(b.getKey());
+        });
+        List<Measured> bumps = new ArrayList<>(all);
+        bumps.sort((a, b) -> (b.before() - b.after()) - (a.before() - a.after()));
+        int removed = before - after;
+        return Json.object(
+                Json.field("before", String.valueOf(before)),
+                Json.field("after", String.valueOf(after)),
+                Json.field("removed", String.valueOf(removed)),
+                Json.field("measured", String.valueOf(all.size())),
+                // THE LIST PAGE'S NUMBERS, so the two can be reconciled rather than argued about.
+                // Its tallies are parsed out of each settlement's sentence, which records
+                // OCCURRENCES; everything else here is distinct. Same corpus, different unit, and
+                // a reader who saw 2,354 there and 1,366 here with no explanation would be right
+                // to distrust both.
+                Json.field("occurrencesBefore", String.valueOf(occBefore)),
+                Json.field("occurrencesAfter", String.valueOf(occAfter)),
+                Json.field("rate", before == 0 ? "null"
+                        : String.valueOf(Math.round((removed * 100.0f) / before))),
+                Json.field("byPackage", Json.array(pkgs, e -> Json.object(
+                        Json.field("name", Json.string(e.getKey())),
+                        Json.field("before", String.valueOf(e.getValue()[0])),
+                        Json.field("after", String.valueOf(e.getValue()[1])),
+                        Json.field("bumps",
+                                String.valueOf(bumpsPer.getOrDefault(e.getKey(), 0)))))),
+                Json.field("byBump", Json.array(bumps, m -> Json.object(
+                        Json.field("slug", Json.string(m.slug())),
+                        Json.field("repo", Json.string(m.repo())),
+                        Json.field("from", String.valueOf(m.from())),
+                        Json.field("to", String.valueOf(m.to())),
+                        Json.field("before", String.valueOf(m.before())),
+                        Json.field("after", String.valueOf(m.after()))))));
     }
 
     /** {@code module<TAB>name<TAB>version<TAB>cves} rows, as the scan stage records them. */

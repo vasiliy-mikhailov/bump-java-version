@@ -176,11 +176,16 @@ export default function Home() {
           label="after"
           tone={cve.after < cve.before ? 'good' : cve.after > cve.before ? 'alarm' : 'plain'}
         />
-        <Tally
-          value={cve.rate === null ? '—' : `${cve.rate}%`}
-          label={`removed, over ${cve.measured.toLocaleString()} measured`}
-          tone={cve.rate !== null && cve.rate > 0 ? 'good' : cve.rate !== null && cve.rate < 0 ? 'alarm' : 'plain'}
-        />
+        {/* THE RATE IS THE QUESTION, so it is the link. A percentage with nothing behind it
+            is a number to believe or not; the page it opens says which dependencies account
+            for it and which repositories did the work. */}
+        <a href={href('/security/')} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Tally
+            value={cve.rate === null ? '—' : `${cve.rate}%`}
+            label={`removed, over ${cve.measured.toLocaleString()} measured →`}
+            tone={cve.rate !== null && cve.rate > 0 ? 'good' : cve.rate !== null && cve.rate < 0 ? 'alarm' : 'plain'}
+          />
+        </a>
       </div>
       <div style={{ ...STRIP, paddingTop: 0 }}>
         {[...byVerdict.entries()]
