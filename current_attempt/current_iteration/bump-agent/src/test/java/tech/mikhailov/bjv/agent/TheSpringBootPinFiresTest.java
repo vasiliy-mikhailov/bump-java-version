@@ -29,6 +29,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class TheSpringBootPinFiresTest {
 
+
+    /** The version each Boot line pins, which is the token after the coordinates. */
+    private static List<String> pinned(int target) {
+        return bootLines(target).stream()
+                .map(l -> l.replaceFirst("^\\[after\\]\\s*", "").split("\\s+")[1])
+                .toList();
+    }
     /** The lines of one hop's floors that mention Spring Boot. */
     private static List<String> bootLines(int target) {
         return Floors.forTarget(target).lines()
@@ -108,10 +115,14 @@ class TheSpringBootPinFiresTest {
         assertTrue(bootLines(11).stream().allMatch(l -> l.contains("2.7.18")),
                 "11 cannot run Boot 3: " + bootLines(11));
         for (int target : new int[] {17, 21, 25}) {
-            assertFalse(bootLines(target).stream().anyMatch(l -> l.matches(".*\\s2\\.\\d.*")),
-                    target + " should not be held at the 2.x line: " + bootLines(target)
-                            + " — Spring 5.3's ASM cannot read class file 65, so Boot 2 cannot "
-                            + "component-scan on 21 at all");
+            // THE PINNED VERSION, NOT ANY 2.x IN THE SENTENCE. This read the whole line, and the
+            // line now carries the measurement that justifies it — "jackson-databind 2.19.2 to
+            // 2.21.4" — so a substring search called a Boot 3.5 floor a Boot 2 floor. Same shape
+            // as matching "ok" inside "lombok": check the field, not the prose around it.
+            assertFalse(pinned(target).stream().anyMatch(v -> v.startsWith("2.")),
+                    target + " should not be held at the 2.x line: " + pinned(target)
+                            + ", because Spring 5.3's ASM cannot read class file 65 and Boot 2 "
+                            + "cannot component-scan on 21 at all");
         }
     }
 
@@ -133,10 +144,16 @@ class TheSpringBootPinFiresTest {
             String after = Floors.after(target);
             assertTrue(after.contains("UpgradeSpringBoot_3_5"),
                     "the floor names the recipe that resolves the patch, at " + target);
-            assertTrue(after.contains("never by writing a version into the parent block"),
+            assertTrue(after.contains("never write a version into the parent block"),
                     "and rules out the literal that costs the patch releases, at " + target);
-            assertTrue(after.contains("NOT met"),
-                    "sitting on an older 3.5 patch is not compliance, at " + target);
+            // VERSION-INDEPENDENT, which the first attempt at this floor was not. Naming 3.5.4
+            // made 3.5.4 compliant; naming 3.5.16 would make 3.5.16 compliant a month from now,
+            // and the recipe would stop being applied to exactly the projects it helps most.
+            // Measured on one such project: 24 CRITICAL+HIGH to 1, Tomcat 10.1.43 to 10.1.55.
+            assertTrue(after.contains("ANY project on the Boot 3 line whatever patch it declares"),
+                    "the instruction cannot depend on the patch number, at " + target);
+            assertTrue(after.contains("NOT evidence of being current"),
+                    "sitting on 3.5 is not compliance, at " + target);
         }
     }
 
