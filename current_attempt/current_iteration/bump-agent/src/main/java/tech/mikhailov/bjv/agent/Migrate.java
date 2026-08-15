@@ -269,21 +269,6 @@ final class Migrate {
         return "com.bjv.Bump";
     }
 
-    /**
-     * The recipes the run could not find, named, or empty when every one resolved.
-     *
-     * <p>Read from the output rather than the exit code because the exit code does not carry it: the
-     * plugin prints {@code Recipe class ... cannot be found}, says it will continue regardless, and
-     * returns success.
-     */
-    private static String unknownRecipes(String output) {
-        java.util.LinkedHashSet<String> missing = new java.util.LinkedHashSet<>();
-        Matcher m = Pattern.compile("Recipe class ([\\w.$]+) cannot be found").matcher(output);
-        while (m.find()) {
-            missing.add(m.group(1));
-        }
-        return String.join(", ", missing);
-    }
 
     private String rewrite(String from) {
         String goal = "mvn -B -ntp -U -Denforcer.skip=true " + REWRITE_PLUGIN + ":run"
@@ -293,17 +278,6 @@ final class Migrate {
         try {
             Shell.Output out = Shell.run(ws, Runner.env(ws), Duration.ofSeconds(2700),
                     hoptools + "/jvm-run", from, "jvmjob", "run", goal);
-            String said = unknownRecipes(out.text());
-            if (!said.isEmpty()) {
-                // A RECIPE THAT DOES NOT EXIST IS NOT A SUCCESSFUL RUN, whatever the exit code says.
-                // OpenRewrite logs the validation error and continues on purpose -- "Execution will
-                // continue regardless" -- so the build goes green having done nothing. Reported as
-                // rc=0, an agent has no way to learn it guessed the name wrong, and this corpus has
-                // one bump where the same wrong name was tried four times against the same wall.
-                return "no recipe ran: " + said + "\n\nThe run exited 0 because OpenRewrite skips "
-                        + "a recipe it cannot find rather than failing. Nothing was changed. Check "
-                        + "the name against the ones in this tool's description.";
-            }
             return "recipe run rc=" + out.code() + "\n" + Runner.tail(out.text());
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();

@@ -261,7 +261,8 @@ final class Tools {
      * catalog -- and guessing wrong is silent. The recipes know, for both build systems, which is
      * also what lets one instruction cover a Maven project and a Gradle one.
      */
-    private static Map<ToolSpecification, ToolExecutor> recipe(Migrate migrate, String jdk) {
+    private static Map<ToolSpecification, ToolExecutor> recipe(Migrate migrate, Tree tree,
+                                                              String jdk) {
         ToolSpecification spec = ToolSpecification.builder()
                 .name("apply_recipe")
                 .description("Run an OpenRewrite recipe against this project. Give the whole "
@@ -343,7 +344,24 @@ final class Tools {
                         + "See the tool description for the shape and the recipes worth using.";
             }
             try {
-                return migrate.apply(yaml, jdk);
+                // WHAT IT DID, NOT WHAT IT SAID. OpenRewrite skips a recipe it cannot load,
+                // prints why, adds "Execution will continue regardless" and exits 0 -- and that is
+                // only one of its wordings. Measured across this corpus: 87 runs said "Recipe
+                // validation errors detected", 80 said a required argument was missing, 13 said the
+                // class could not be found, and every one of them came back as rc=0. Matching those
+                // strings was a losing game; there is always another.
+                //
+                // So the tool reports the EFFECT. Whether the working tree moved is one fact that
+                // covers every way a recipe can fail to do anything, including ways nobody has seen
+                // yet, and it is the same fact the verifier will check afterwards. The plan-do-
+                // verify loop is what turns "nothing changed" into another attempt; this only has
+                // to stop lying to it.
+                String before = tree == null ? "" : tree.diff();
+                String said = migrate.apply(yaml, jdk);
+                if (tree == null) {
+                    return said;
+                }
+                return reported(before, tree.diff(), said);
             } catch (IOException e) {
                 return "could not run the recipe: " + e.getMessage();
             }
@@ -475,6 +493,31 @@ final class Tools {
      * once and never re-checked after an edit. As a tool both it and its critic can call it after
      * each attempt, which is what turns one re-ask into a loop that ends on the files.
      */
+    /**
+     * WHAT THE RUN DID, PUT WHERE THE AGENT READS FIRST.
+     *
+     * <p>The exit code is not the answer. OpenRewrite skips a recipe it cannot load, prints why,
+     * adds "Execution will continue regardless" and exits 0. Measured across this corpus: 87 runs
+     * said "Recipe validation errors detected", 80 said a required argument was missing, 13 said
+     * the class could not be found, and every one came back rc=0. The harness used to recognise the
+     * third wording and reported the other two as success, which is the same bug with better
+     * manners.
+     *
+     * <p>So this reports the EFFECT instead. Whether the working tree moved covers every way a
+     * recipe can fail to do anything, including wordings nobody has met yet, and it needs no
+     * knowledge of the plugin's vocabulary. Turning "nothing changed" into another attempt is the
+     * plan-do-verify loop's job; this only has to stop telling it the opposite.
+     */
+    static String reported(String before, String after, String said) {
+        return (after.equals(before)
+                ? "NOTHING CHANGED IN THE WORKING TREE. The recipe ran and left every file as it "
+                        + "was, so whatever it was meant to do has not happened. The exit code says "
+                        + "nothing about this: OpenRewrite reports a recipe it could not load, or an "
+                        + "argument it needed, and continues anyway.\n\n"
+                : "the working tree changed.\n\n")
+                + said;
+    }
+
     private static Map<ToolSpecification, ToolExecutor> targets(Path root, String targetJdk) {
         ToolSpecification spec = ToolSpecification.builder()
                 .name("check_target")
@@ -509,7 +552,7 @@ final class Tools {
                 only(root, Set.of("list_dir", "read_file", "edit_file"));
         tools.putAll(build(root, runner, targetJdk));
         tools.putAll(targets(root, targetJdk));
-        tools.putAll(recipe(migrate, under));
+        tools.putAll(recipe(migrate, tree, under));
         tools.putAll(buildSystem(root));
         tools.putAll(history(tree, trace));
         return recorded(guarded(tools), trace, agent);
@@ -529,7 +572,7 @@ final class Tools {
                                                         String jdk,
                                                         Trace trace, String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
-        tools.putAll(recipe(migrate, jdk));
+        tools.putAll(recipe(migrate, tree, jdk));
         tools.putAll(buildSystem(root));
         tools.putAll(declaredVersions(root));
         tools.putAll(jar());
