@@ -106,4 +106,34 @@ class TheChainIsDeclaredOnceTest {
         assertTrue(titles.indexOf("modules") < titles.indexOf("gate"),
                 "the gate judges finished work");
     }
+
+    @Test
+    void howOftenAStageRunsIsDeclaredWhereItRuns() {
+        // NESTING SAYS WHERE, NOT HOW MANY TIMES, and a reader will answer the second question from
+        // the first unless told. Under modules only bumpPhase walks the module list (Bump.java:673);
+        // pinPhase runs once for the repository and hands the module list to its agents as text.
+        // Three peers inside a stage whose deterministic step is called "the three passes" read as
+        // three per-module passes, and two of them are not.
+        assertEquals("once per module", repeatsOf("bump"));
+        assertEquals("once for the repository", repeatsOf("before-pins"));
+        assertEquals("once for the repository", repeatsOf("after-pins"));
+
+        // And troubleshoot is not a stage that follows the module work. It is the repair arm of a
+        // turn loop with the gate: the gate builds and tests the whole repository, troubleshoot runs
+        // only when that comes back red, and the pair goes round up to TURNS times.
+        assertTrue(repeatsOf("troubleshoot").contains("gate is red"), repeatsOf("troubleshoot"));
+        assertTrue(repeatsOf("security-after").contains("green gate"), repeatsOf("security-after"));
+
+        // A stage that runs once and always says nothing, because a note on every row is a note
+        // nobody reads.
+        assertEquals("", repeatsOf("survey"));
+        assertEquals("", repeatsOf("verdict"));
+    }
+
+    private static String repeatsOf(String title) {
+        return Chain.stages().stream()
+                .filter(s -> s.title().equals(title))
+                .findFirst().orElseThrow()
+                .repeats();
+    }
 }

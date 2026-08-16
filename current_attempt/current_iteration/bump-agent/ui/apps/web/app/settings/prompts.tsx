@@ -55,13 +55,19 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
 
   // In the order the chain reaches them, which is the order the server sends them: grouping must
   // not reorder, or the page stops being a picture of the run.
-  const stages: { title: string; within: string; loop: string; agents: AgentPrompt[] }[] = []
+  const stages: {
+    title: string
+    within: string
+    loop: string
+    repeats: string
+    agents: AgentPrompt[]
+  }[] = []
   for (const p of prompts ?? []) {
     const last = stages[stages.length - 1]
     if (last !== undefined && last.title === p.stage) {
       last.agents.push(p)
     } else {
-      stages.push({ title: p.stage, within: p.within, loop: p.loop, agents: [p] })
+      stages.push({ title: p.stage, within: p.within, loop: p.loop, repeats: p.repeats, agents: [p] })
     }
   }
 
@@ -87,6 +93,8 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
     agents: AgentPrompt[]
     /** The deterministic step this block opens with, when its doing is a sub-chain. */
     opens: string
+    /** How often it runs, empty when once and unconditionally. */
+    repeats: string
   }
 
   const blocks: Block[] = []
@@ -102,7 +110,14 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
     }
 
     if (children.length === 0) {
-      blocks.push({ key: stage.title, title: stage.title, depth: 0, agents: stage.agents, opens: '' })
+      blocks.push({
+        key: stage.title,
+        title: stage.title,
+        depth: 0,
+        agents: stage.agents,
+        opens: '',
+        repeats: stage.repeats,
+      })
       continue
     }
 
@@ -115,9 +130,17 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
       depth: 0,
       agents: openers,
       opens: stage.loop,
+      repeats: stage.repeats,
     })
     for (const child of children) {
-      blocks.push({ key: child.title, title: child.title, depth: 1, agents: child.agents, opens: '' })
+      blocks.push({
+        key: child.title,
+        title: child.title,
+        depth: 1,
+        agents: child.agents,
+        opens: '',
+        repeats: child.repeats,
+      })
     }
     blocks.push({
       key: stage.title + ':close',
@@ -125,6 +148,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
       depth: 0,
       agents: closers,
       opens: '',
+      repeats: '',
     })
   }
 
@@ -184,6 +208,15 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
                 }}
               >
                 {block.title}
+                {/* HOW OFTEN, BESIDE WHERE. Nesting says a stage sits inside modules and says
+                    nothing about how many times it happens, and a reader will answer the second
+                    question from the first: three peers inside a loop read as three per-module
+                    passes, when only bump walks the module list. */}
+                {block.repeats === '' ? null : (
+                  <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>
+                    {block.repeats}
+                  </span>
+                )}
                 {block.opens === '' ? null : (
                   <span style={{ color: 'var(--accent-primary)', marginLeft: '8px' }}>
                     {'\u21bb '}

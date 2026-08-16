@@ -42,11 +42,33 @@ final class Chain {
      * <p>{@code within} names the stage this one is nested inside, so the page can show the module
      * passes under the module stage rather than as peers of it. Empty for a top-level stage.
      */
-    record Stage(String title, String within, List<Step> steps) {
+    record Stage(String title, String within, List<Step> steps, String repeats) {
+
+        Stage(String title, String within, List<Step> steps) {
+            this(title, within, steps, "");
+        }
 
         boolean nested() {
             return !within.isBlank();
         }
+    }
+
+    /**
+     * HOW OFTEN A STAGE RUNS, AND WHETHER IT RUNS AT ALL.
+     *
+     * <p>Nesting says where a stage sits and says nothing about how many times it happens, and the
+     * two are different questions that a reader will answer wrongly from the first. Under modules,
+     * only bump walks the module list; both pin phases run once for the repository and are handed
+     * the module list as text. Drawn as three peers inside a loop, they read as three per-module
+     * passes, which is what the stage's own deterministic step is called.
+     *
+     * <p>And troubleshoot is not a stage that follows the module work. It is the repair arm of a
+     * turn loop with the gate: the gate builds and tests the whole repository, and troubleshoot
+     * runs only when that comes back red, up to sixteen times. A page that lists it after modules
+     * with nothing said implies it always runs and runs once, and it does neither.
+     */
+    private static Stage repeating(Stage s, String repeats) {
+        return new Stage(s.title(), s.within(), s.steps(), repeats);
     }
 
     private Chain() {
@@ -96,14 +118,15 @@ final class Chain {
                 triplet("module-filter"),
                 // The doing of the module stage is the three ordered passes below it.
                 aroundDeterministic("modules", "", "the three passes"),
-                triplet("before-pins", "modules"),
-                triplet("bump", "modules"),
-                triplet("after-pins", "modules"),
+                repeating(triplet("before-pins", "modules"), "once for the repository"),
+                repeating(triplet("bump", "modules"), "once per module"),
+                repeating(triplet("after-pins", "modules"), "once for the repository"),
                 deterministic("gate"),
                 // The doing of the troubleshoot stage is a campaign of the steps below it.
-                aroundDeterministic("troubleshoot", "", "a campaign of steps"),
-                triplet("step", "troubleshoot"),
-                triplet("security-after"),
+                repeating(aroundDeterministic("troubleshoot", "", "a campaign of steps"),
+                        "only when the gate is red, up to 16 turns"),
+                repeating(triplet("step", "troubleshoot"), "once per ordered step"),
+                repeating(triplet("security-after"), "only after a green gate"),
                 triplet("verdict"),
                 triplet("estimator"));
     }

@@ -219,6 +219,14 @@ export type AgentPrompt = {
   within: string
   /** The deterministic step that IS this stage's loop, empty when its doing is an agent. */
   loop: string
+  /**
+   * How often this stage runs, and whether it runs at all. Empty means once, unconditionally.
+   *
+   * NESTING SAYS WHERE, NOT HOW MANY TIMES. Under modules only bump walks the module list; both pin
+   * phases run once for the repository with the module list handed to them as text. And troubleshoot
+   * is the repair arm of a turn loop with the gate rather than a stage that follows the module work.
+   */
+  repeats: string
   description: string
   /** What is in force: the edit if there is one, otherwise the code's own. */
   prompt: string

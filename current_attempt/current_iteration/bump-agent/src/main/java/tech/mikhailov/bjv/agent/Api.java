@@ -1315,11 +1315,14 @@ final class Api {
         // What the loop itself is, so the body can be shown between a header and a closer rather
         // than merely indented under a name.
         Map<String, String> loopOf = new LinkedHashMap<>();
+        // How often a stage runs, which nesting does not say and a reader will otherwise guess.
+        Map<String, String> repeatsOf = new LinkedHashMap<>();
         for (Chain.Stage s : Chain.stages()) {
             for (Chain.Step step : s.steps()) {
                 stageOf.put(step.name(), s.title());
                 roleOf.put(step.name(), step.role());
                 withinOf.put(step.name(), s.within());
+                repeatsOf.put(step.name(), s.repeats());
                 if (!step.agent()) {
                     loopOf.put(s.title(), step.name());
                 }
@@ -1351,6 +1354,7 @@ final class Api {
                     Json.field("stage", Json.string(stageOf.getOrDefault(d.name(), ""))),
                     // The stage this one runs inside, empty at the top level.
                     Json.field("within", Json.string(withinOf.getOrDefault(d.name(), ""))),
+                    Json.field("repeats", Json.string(repeatsOf.getOrDefault(d.name(), ""))),
                     // The deterministic step that IS the loop, on the stage that owns one.
                     Json.field("loop", Json.string(
                             loopOf.getOrDefault(stageOf.getOrDefault(d.name(), ""), ""))),
