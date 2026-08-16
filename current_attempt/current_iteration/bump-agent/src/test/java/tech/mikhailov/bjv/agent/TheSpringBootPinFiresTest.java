@@ -36,6 +36,54 @@ class TheSpringBootPinFiresTest {
                 .map(l -> l.replaceFirst("^\\[after\\]\\s*", "").split("\\s+")[1])
                 .toList();
     }
+
+    @Test
+    void theBootFloorNamesARecipeAtEveryTargetIncludingEleven() {
+        // MEASURED ON THE CORPUS. Across every 8-to-11 bump, after-pins reached only for
+        // version-writing recipes -- ChangePropertyValue six times, UpgradeDependencyVersion and
+        // UpgradeParentVersion once each -- and UpgradeSpringBoot_2_7 not once. The agents were
+        // doing exactly what this floor said: it named a number and nothing else, while the 17, 21
+        // and 25 floors named a recipe.
+        //
+        // The number is the part that cannot work on its own. Boot 2.1 to 2.7 is six minor
+        // releases of renamed properties and withdrawn APIs; UpgradeSpringBoot_2_7 chains 23
+        // recipes down through 2.0 and carries newVersion 2.7.x, so it resolves the head of the
+        // line and moves the maven plugin and the BOM with the parent. A version typed into the
+        // parent block crosses none of that and fails later, at the gate, as the project's fault.
+        assertTrue(Floors.after(11).contains("UpgradeSpringBoot_2_7"),
+                "target 11 names the recipe that does the 2.x migration: " + Floors.after(11));
+        assertTrue(Floors.after(11).contains("rather than writing a version"),
+                "and rules out the literal, as the 3.5 line does");
+        for (int target : new int[] {17, 21, 25}) {
+            assertTrue(Floors.after(target).contains("UpgradeSpringBoot_3_5"),
+                    "and the Boot 3 line still names its own, at " + target);
+        }
+    }
+
+    @Test
+    void theRecipeNamedAtElevenIsOneThatCanRunOnJavaEleven() {
+        // UpgradeSpringBoot_3_5 would take a Java 11 project to a Boot that needs 17, so naming
+        // the wrong recipe here is worse than naming none.
+        assertFalse(Floors.after(11).contains("UpgradeSpringBoot_3_5"),
+                "Boot 3 is unreachable at target 11: " + Floors.after(11));
+        assertFalse(Floors.after(11).contains("UpgradeSpringBoot_4"),
+                "and so is Boot 4");
+    }
+
+    @Test
+    void everyFloorLineSitsAtTheSameIndent() {
+        // A TEXT BLOCK STRIPS THE COMMON INDENT, so a line indented further than its neighbours
+        // carries the difference into the prompt. Four jaxb-api lines did, one per target, and an
+        // agent reads this list as prose where a misaligned row is noise it has to account for.
+        for (int target : new int[] {11, 17, 21, 25}) {
+            for (String line : Floors.forTarget(target).lines().filter(l -> !l.isBlank()).toList()) {
+                assertFalse(line.startsWith(" "),
+                        "a floor line is indented past the rest, at " + target + ": "
+                                + line.substring(0, Math.min(70, line.length())));
+            }
+        }
+    }
+
     /** The lines of one hop's floors that mention Spring Boot. */
     private static List<String> bootLines(int target) {
         return Floors.forTarget(target).lines()
