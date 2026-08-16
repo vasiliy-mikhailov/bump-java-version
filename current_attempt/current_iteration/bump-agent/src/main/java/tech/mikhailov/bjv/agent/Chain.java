@@ -123,35 +123,64 @@ final class Chain {
 
     /** A stage that is only a deterministic step: a fact, with nothing to plan or dispute. */
     private static Stage deterministic(String title) {
-        return new Stage(title, "", List.of(runs(title)));
+        return deterministic(title, "");
     }
 
-    /** Every stage, in the order the bump reaches them. */
+    private static Stage deterministic(String title, String within) {
+        return new Stage(title, within, List.of(runs(title)));
+    }
+
+    /**
+     * Every stage, in the order the bump reaches them.
+     *
+     * <p>REPAIR LIVES INSIDE THE MODULE WALK NOW. It used to sit after every module had been
+     * bumped, as the other half of a sixteen-turn loop with the repository gate, and that loop
+     * existed only because repair was repository-wide: the gate had to keep re-running to find out
+     * whether the last repair had worked. A break in the first module surfaced as a reactor error
+     * after the last one, with no obvious owner and two hundred lines of log.
+     *
+     * <p>So a module is now pinned, bumped, compiled and repaired before the walk moves on, and the
+     * repository gate becomes a single scoring step rather than the head of a loop. What it decides
+     * is what only it can: the passing set against the baseline, and the lowest bytecode level any
+     * module actually emits. Neither is knowable one module at a time.
+     *
+     * <p>WHAT THIS GIVES UP, deliberately and with the cost known: a module that compiles alone and
+     * breaks the reactor because a sibling moved under it now has no repair path. Every module gate
+     * is green, the repository gate is red, and nothing tries again. Some bumps that pass today will
+     * fail. The argument for taking that is that a cross-module break is usually a bad edit, and a
+     * bad edit is better failed loudly than papered over sixteen times.
+     */
     static List<Stage> stages() {
         return List.of(
                 triplet("survey"),
                 deterministic("baseline"),
                 triplet("security-before"),
                 triplet("module-filter"),
-                // The doing of the module stage is the three ordered passes below it.
-                aroundDeterministic("modules", "", "the three passes"),
-                reading(repeating(triplet("before-pins", "modules"), "once for the repository"),
-                        "enables"),
+                // The doing of the module stage is the walk below it.
+                repeating(aroundDeterministic("modules", "", "the module walk"), "per module"),
+                reading(triplet("before-pins", "modules"), "enables"),
                 // The JDK move itself, which reads no list: it is the thing the two lists are
                 // either side of.
-                repeating(triplet("bump", "modules"), "once per module"),
-                reading(repeating(triplet("after-pins", "modules"), "once for the repository"),
-                        "hardens"),
+                triplet("bump", "modules"),
+                // A gate one module wide. Compile only: test conservation is a whole-suite fact
+                // measured against the baseline, so a per-module run cannot decide it and the
+                // repository gate has to run the suite anyway.
+                // NO AGENTS. Compiling one module and reading the exit code needs no judgement,
+                // and a planner and a critic per module per turn is a lot of tokens spent agreeing
+                // with a compiler.
+                repeating(deterministic("module-gate", "modules"),
+                        "until green, or the turns run out"),
+                repeating(aroundDeterministic("module-repair", "modules", "a campaign of steps"),
+                        "only when the module-gate is red"),
+                repeating(triplet("module-repair-step", "module-repair"), "up to 6"),
+                // AFTER THE REPAIR, NOT BEFORE IT. Hardening polishes a module that already
+                // compiles; asking it of one that does not is asking the wrong question.
+                reading(triplet("after-pins", "modules"), "hardens"),
+                // THE SCORER, AND NO LONGER A LOOP. It compares the passing set to the baseline and
+                // reads the effective target, which is all it ever decided; the turns around it
+                // were repair's, and repair has moved.
                 deterministic("gate"),
-                // The doing of the troubleshoot stage is a campaign of the steps below it.
-                repeating(aroundDeterministic("troubleshoot", "", "a campaign of steps"),
-                        "only when the gate is red, up to 16 turns"),
-                repeating(triplet("step", "troubleshoot"), "once per ordered step"),
                 repeating(triplet("security-after"), "only after a green gate"),
-                // THE MIRROR OF security-after, and it was unlabelled. A green gate returns PASS
-                // from inside the turn loop and never reaches here, so the arguer only ever argues
-                // bumps that failed: it is the stage that says what went wrong, not the stage that
-                // says what happened.
                 repeating(triplet("verdict"), "only when the gate never went green"),
                 triplet("estimator"));
     }

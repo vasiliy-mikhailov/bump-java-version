@@ -167,13 +167,16 @@ class AnAgentIsBuiltForItsHopTest {
         assertEquals(chain.size(), factory.size(), "the same agents, either way round");
         assertTrue(factory.containsAll(chain), "and the same names");
 
-        int afterPins = factory.indexOf("after-pins-planner");
-        int step = factory.indexOf("step-planner");
-        assertTrue(afterPins > step,
-                "the factory really does interleave them; if this ever stops being true the "
-                        + "sort in Api.settings is still correct and this comment is the record "
-                        + "of why it exists");
-        assertTrue(chain.indexOf("after-pins-planner") < chain.indexOf("step-planner"),
-                "while the chain runs the third module pass before the troubleshoot campaign");
+        assertNotEquals(chain, factory,
+                "the two orders differ; if they ever stop differing the sort in Api.settings is "
+                        + "still correct and this test is the record of why it exists");
+
+        // AND THE CHAIN'S ORDER IS THE RUN'S. Repair happens inside the module walk now, so the
+        // hardening pins come after it: a module is pinned, bumped, compiled, repaired, and only
+        // then hardened, because hardening polishes a module that already compiles.
+        assertTrue(chain.indexOf("module-repair-step-planner") < chain.indexOf("after-pins-planner"),
+                "repair runs before the hardening pins, inside the module walk");
+        assertTrue(chain.indexOf("after-pins-verifier") < chain.indexOf("security-after-planner"),
+                "and the whole module walk finishes before the repository is scored");
     }
 }

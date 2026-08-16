@@ -53,23 +53,22 @@ import java.util.regex.Pattern;
  */
 public final class Bump {
 
-    /**
-     * Turns of the reflect loop.
-     *
-     * <p>Rung-1's recovered repos took four to nine iterations with a mean of six, so a cap of
-     * eight cut the tail off the very distribution it was drawn from. Walls are serial: each turn
-     * clears one and reveals the next, so the repos needing the most turns are the ones with the
-     * most walls, not the ones making the least progress. The loop already ends on its own when a
-     * turn changes nothing, when the troubleshooter declines, or when its critic calls an edit
-     * gaming; this number is only a backstop against a loop that never converges.
-     */
-    private static final int TURNS = Integer.parseInt(
-            System.getenv().getOrDefault("BJV_TURNS", "16"));
     /** One re-ask per objection, quoting whoever objected. Every pair shares it, stated once. */
     private static final int REASK = 1;
     /** Steps one campaign may order before the loop critic gets to read it. */
     private static final int STEPS = Integer.parseInt(
             System.getenv().getOrDefault("BJV_STEPS", "6"));
+
+    /**
+     * HOW MANY TIMES ONE MODULE MAY BE COMPILED AND REPAIRED.
+     *
+     * <p>Much smaller than the sixteen the repository loop used, and deliberately: that budget was
+     * spent on the whole tree once, and this one is spent per module. Sixteen here would be
+     * sixteen times the modules, and a twenty-module repository could order nineteen hundred
+     * repair steps before the gate had run once.
+     */
+    private static final int MODULE_TURNS = Integer.parseInt(
+            System.getenv().getOrDefault("BJV_MODULE_TURNS", "3"));
 
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
@@ -286,57 +285,65 @@ public final class Bump {
 
         modulesPhase();
 
-        // ---- TROUBLESHOOT: the bounded loop. Free things first, every turn.
-        String lastLog = "";
-        for (int turn = 1; turn <= TURNS; turn++) {
-            trace.progress(bump, "gate: turn " + turn + " of " + TURNS + " under JDK " + to);
-            // The gate measures bytecode, so it must compile bytecode rather than inherit the
-            // baseline's. Without this Maven finds the old classes newer than the sources and
-            // skips the compile, and the target is read off the level the project started at.
-            runner.clearClasses();
-            Runner.Result build = runner.build(to);
-            trace.built("gate-build-" + turn, build);
-            if (!build.infra()) {
-                runner.clearReports();
-                Runner.Result test = runner.test(to);
-                trace.built("gate-test-" + turn, test);
-                // THE SCORER DECIDES, NOT THE EXIT CODE. A green build with an unraised module or a
-                // quietly dropped test is exactly the false pass this measures.
-                Gate.Verdict v = Gate.decide(pre, Gate.passing(ws), !test.infra(),
-                        Gate.effectiveTarget(ws), Integer.parseInt(to));
-                trace.applied("gate", "turn " + turn + ": " + v.state() + " (pre=" + v.preTests()
-                        + " lost=" + v.lost() + " effective-target=" + v.effectiveTarget() + ")"
-                        + names(v.missing())
-                        + perModule(Integer.parseInt(to)));
-                if (v.pass()) {
-                    gateGreen = true;
-                    // THE ONLY PLACE THE AFTER SCAN MEANS ANYTHING. The workspace has just built
-                    // and tested green at the target, so the offline collect is complete. On any
-                    // other exit the collect copies whatever resolved before the build died, and
-                    // the count falls because modules are missing rather than because anything was
-                    // fixed: the corpus's largest apparent wins are dead builds.
-                    trace.progress(bump, "security: scanning after a green gate, under JDK " + to);
-                    after = security.scan(to, "after");
-                    delta = Security.compare(before, after);
-                    trace.applied("security-delta", delta.valid()
-                            ? delta.before() + " -> " + delta.after() + " CRITICAL+HIGH; cleared "
-                            + delta.cleared() + ", introduced " + delta.introduced()
-                            : "UNKNOWN: " + delta.why());
-                    securityAfterPhase();
-                    price();
-                    return "PASS\n" + v.preTests() + " tests conserved, effective target "
-                            + v.effectiveTarget() + "; CRITICAL+HIGH " + securitySummary()
-                            + "";
-                }
-                lastVerdict = v;
-                lastLog = failureFor(v, test);
-            } else {
-                lastVerdict = null;
-                lastLog = build.summary();
+        // ---- GATE: the scorer, and no longer a loop.
+        //
+        // It ran sixteen times, with repair between the turns, and those turns were repair's: the
+        // gate had to keep re-running to find out whether the last repair had worked. Repair lives
+        // inside the module walk now, so what is left here is the one thing only this can decide.
+        //
+        // WHAT ONLY THIS CAN DECIDE. The passing set against the baseline, which is a whole-suite
+        // fact: a per-module run cannot tell a test that was lost from one that moved. And the
+        // lowest bytecode level any module actually emits, which is a property of the tree.
+        //
+        // WHAT THIS GIVES UP, knowingly: a module that compiles alone and breaks the reactor
+        // because a sibling moved under it now has no repair path. Every module gate was green,
+        // this one is red, and nothing tries again. The argument for taking that is that a
+        // cross-module break is usually a bad edit, and a bad edit is better failed loudly than
+        // papered over sixteen times.
+        String lastLog;
+        trace.progress(bump, "gate: building and testing the whole repository under JDK " + to);
+        // The gate measures bytecode, so it must compile bytecode rather than inherit the
+        // baseline's. Without this Maven finds the old classes newer than the sources and skips
+        // the compile, and the target is read off the level the project started at.
+        runner.clearClasses();
+        Runner.Result build = runner.build(to);
+        trace.built("gate-build", build);
+        if (!build.infra()) {
+            runner.clearReports();
+            Runner.Result test = runner.test(to);
+            trace.built("gate-test", test);
+            // THE SCORER DECIDES, NOT THE EXIT CODE. A green build with an unraised module or a
+            // quietly dropped test is exactly the false pass this measures.
+            Gate.Verdict v = Gate.decide(pre, Gate.passing(ws), !test.infra(),
+                    Gate.effectiveTarget(ws), Integer.parseInt(to));
+            trace.applied("gate", v.state() + " (pre=" + v.preTests()
+                    + " lost=" + v.lost() + " effective-target=" + v.effectiveTarget() + ")"
+                    + names(v.missing())
+                    + perModule(Integer.parseInt(to)));
+            if (v.pass()) {
+                gateGreen = true;
+                // THE ONLY PLACE THE AFTER SCAN MEANS ANYTHING. The workspace has just built and
+                // tested green at the target, so the offline collect is complete. On any other
+                // exit the collect copies whatever resolved before the build died, and the count
+                // falls because modules are missing rather than because anything was fixed: the
+                // corpus's largest apparent wins are dead builds.
+                trace.progress(bump, "security: scanning after a green gate, under JDK " + to);
+                after = security.scan(to, "after");
+                delta = Security.compare(before, after);
+                trace.applied("security-delta", delta.valid()
+                        ? delta.before() + " -> " + delta.after() + " CRITICAL+HIGH; cleared "
+                        + delta.cleared() + ", introduced " + delta.introduced()
+                        : "UNKNOWN: " + delta.why());
+                securityAfterPhase();
+                price();
+                return "PASS\n" + v.preTests() + " tests conserved, effective target "
+                        + v.effectiveTarget() + "; CRITICAL+HIGH " + securitySummary();
             }
-            if (!troubleshoot(lastLog)) {
-                break;
-            }
+            lastVerdict = v;
+            lastLog = failureFor(v, test);
+        } else {
+            lastVerdict = null;
+            lastLog = build.summary();
         }
 
         // ---- CLOSERS: argue only the unsettled, price everything.
@@ -472,21 +479,37 @@ public final class Bump {
     private void modulesPhase() throws IOException {
         new Triad("modules", agents.modulesPlanner(),
                 (plan, feedback) -> {
-                    pinPhase("before-pins-doer", false);
-                    tree.land("before-pins-doer");
+                    // ONE MODULE AT A TIME, ALL THE WAY THROUGH. Pinned, bumped, compiled,
+                    // repaired and hardened before the walk moves on.
+                    //
+                    // It used to be three passes over the whole repository with repair sixteen
+                    // turns later, which meant a break in the first module surfaced as a reactor
+                    // error after the last one, with no obvious owner and two hundred lines of
+                    // log. The context a repair needs is the diff that caused it, and that diff
+                    // exists for about one module's worth of time.
+                    int repaired = 0;
+                    for (Modules.Module m : modules) {
+                        String where = label(m);
+                        trace.progress(bump, "module " + where + ": pinning what the hop needs");
+                        pinPhase("before-pins-doer", false, m);
 
-                    // The step that moves the JDK.
-                    bumpPhase();
-                    tree.land("bump");
+                        trace.progress(bump, "module " + where + ": moving the JDK");
+                        bumpModule(m);
 
-                    // The JDK has moved NOW, so the versions that require it are finally
-                    // applicable. This ran BEFORE the bump until the deterministic migrate pass was
-                    // removed from between them, which left the phase whose whole premise is a
-                    // raised JDK running against an unraised one.
-                    pinPhase("after-pins-doer", true);
-                    tree.land("after-pins-doer");
-                    return "The three passes ran over " + modules.size()
-                            + (modules.size() == 1 ? " module." : " modules.");
+                        // COMPILE IT NOW, while its diff is the only thing that changed.
+                        if (moduleGate(m)) {
+                            repaired++;
+                        }
+
+                        // AFTER THE REPAIR, NOT BEFORE IT. Hardening polishes a module that
+                        // already compiles; asking it of one that does not is the wrong question.
+                        trace.progress(bump, "module " + where + ": hardening what the bump left");
+                        pinPhase("after-pins-doer", true, m);
+                    }
+                    return "The walk covered " + modules.size()
+                            + (modules.size() == 1 ? " module" : " modules")
+                            + (repaired == 0 ? ", none needing repair."
+                                    : ", " + repaired + " needing repair.");
                 },
                 agents.modulesVerifier(),
                 // The same facts the planners read: what every module declares, and the target
@@ -518,13 +541,18 @@ public final class Bump {
      * <p>The verifier reads the same tool and holds the loop. Nothing between the floors and the
      * agents parses anything.
      */
-    private void pinPhase(String stage, boolean after) throws IOException {
+    private void pinPhase(String stage, boolean after, Modules.Module only) throws IOException {
         Agents.Agent planner = after ? agents.afterPinsPlanner() : agents.beforePinsPlanner();
         Agents.Agent doer = after ? agents.afterPinsDoer() : agents.beforePinsDoer();
         Agents.Agent verifier = after ? agents.afterPinsVerifier() : agents.beforePinsVerifier();
 
+        // SCOPED TO ONE MODULE, and said in the first line so it cannot be skimmed past. An
+        // agent handed the whole module list and asked about one of them will drift into the
+        // others, and the diff it leaves is then somebody else's turn's problem.
         String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")\n\n"
-                + "The modules of this project:\n" + moduleList()
+                + "YOU ARE WORKING ON ONE MODULE: " + label(only)
+                + "\nEvery other module in this repository is somebody else's turn. Do not edit "
+                + "them.\n\nThe modules of this project, for context only:\n" + moduleList()
                 + "\n\nThe JDK has " + (after ? "already been raised to " + to
                         + ", so versions that require it can now be resolved."
                         : "NOT been raised yet; it is still " + from + ".");
@@ -539,9 +567,9 @@ public final class Bump {
                     trace.applied(stage, said + "\n" + tree.diff());
                     return said;
                 },
-                verifier, () -> Declared.report(ws, modules), trace, bump, REASK + 1)
+                verifier, () -> Declared.report(ws, List.of(only)), trace, bump, REASK + 1)
                 .run(brief);
-        tree.land(stage);
+        tree.land(stage + " " + label(only));
     }
 
     /** The modules, as a list the planner can name back. */
@@ -667,44 +695,67 @@ public final class Bump {
      * <p>It is the pin the GATE measures, so a bumper that stops early does not fail here, it fails
      * four stages later as FAIL_target_not_bumped with nothing left to try.
      */
-    private void bumpPhase() throws IOException {
+    private void bumpModule(Modules.Module m) throws IOException {
         int target = Integer.parseInt(to);
-        int worked = 0;
-        for (Modules.Module m : modules) {
-            // A module that declares no target of its own inherits the parent's, and inventing one
-            // here is the most expensive edit available: a module-local property shadows a correctly
-            // raised parent, and the gate reads the old target off the module that shadowed it.
-            //
-            // THE GUARD IS "DECLARES NOTHING", NOT "NOTHING IS BELOW". Those differ exactly where a
-            // module spells its level in a dialect the pattern does not parse, and skipping THAT is
-            // a module silently left behind for the gate to find as the repository minimum.
-            if (Pins.belowTarget(ws, m, allModules, target).isEmpty()
-                    && !Pins.mentionsTarget(ws, m, allModules)) {
-                continue;
+        // A module that declares no target of its own inherits the parent's, and inventing one
+        // here is the most expensive edit available: a module-local property shadows a correctly
+        // raised parent, and the gate reads the old target off the module that shadowed it.
+        //
+        // THE GUARD IS "DECLARES NOTHING", NOT "NOTHING IS BELOW". Those differ exactly where a
+        // module spells its level in a dialect the pattern does not parse, and skipping THAT is a
+        // module silently left behind for the gate to find as the repository minimum.
+        if (Pins.belowTarget(ws, m, allModules, target).isEmpty()
+                && !Pins.mentionsTarget(ws, m, allModules)) {
+            trace.progress(bump, "module " + label(m) + ": declares no target of its own; it "
+                    + "inherits, and inventing one here is how a module shadows a raised parent");
+            return;
+        }
+        new Triad("bump:" + label(m), agents.bumpPlanner(),
+                (plan, feedback) -> {
+                    String said = agents.bumpDoer().run(moduleBrief(m)
+                            + "\n\nThe plan you are carrying out:\n" + plan + feedback);
+                    trace.applied("bump", label(m) + "\n" + said + "\n" + tree.diff());
+                    return said;
+                },
+                agents.bumpVerifier(), () -> bumpFacts(m, target), trace, bump, REASK + 1)
+                .run(moduleBrief(m));
+        tree.land("bump " + label(m));
+    }
+
+    /**
+     * COMPILE ONE MODULE, AND REPAIR IT UNTIL IT COMPILES OR THE TURNS RUN OUT.
+     *
+     * <p>The same shape the repository gate used to have, one module wide, and the reason the
+     * repository no longer needs it: the turns were repair's, and repair has moved here. A failure
+     * found now is a failure with that module's diff in front of it, rather than a reactor error
+     * after every module has moved.
+     *
+     * <p>Compile only. Test conservation is a whole-suite fact measured against the baseline, so a
+     * per-module test run cannot decide it, and the repository gate has to run the suite anyway.
+     *
+     * @return whether this module needed repairing at all
+     */
+    private boolean moduleGate(Modules.Module m) throws IOException {
+        boolean everRed = false;
+        for (int turn = 1; turn <= MODULE_TURNS; turn++) {
+            Runner.Result compiled = runner.buildModule(to, m.isRoot() ? "" : m.path());
+            trace.built("module-gate-" + label(m) + "-" + turn, compiled);
+            if (!compiled.infra()) {
+                if (turn > 1) {
+                    trace.progress(bump, "module " + label(m) + ": compiles after repair");
+                }
+                return everRed;
             }
-            worked++;
-            new Triad("bump:" + label(m), agents.bumpPlanner(),
-                    (plan, feedback) -> {
-                        String said = agents.bumpDoer().run(moduleBrief(m)
-                                + "\n\nThe plan you are carrying out:\n" + plan + feedback);
-                        trace.applied("bump", label(m) + "\n" + said + "\n" + tree.diff());
-                        return said;
-                    },
-                    agents.bumpVerifier(), () -> bumpFacts(m, target), trace, bump, REASK + 1)
-                    .run(moduleBrief(m));
+            everRed = true;
+            trace.progress(bump, "module " + label(m) + ": will not compile under JDK " + to
+                    + " (turn " + turn + " of " + MODULE_TURNS + ")");
+            if (!moduleRepair(m, compiled.summary())) {
+                // Nothing landed, so going round again would ask the same question of the same
+                // tree. The repository gate is the arbiter either way.
+                break;
+            }
         }
-        List<String> left = Pins.belowTarget(ws, target);
-        trace.progress(bump, "bump: " + worked + " of " + modules.size()
-                + " modules declared a target of their own; "
-                + (left.isEmpty() ? "nothing is below " + to + " any more"
-                : left.size() + " declaration(s) still below " + to));
-        if (worked == 0 && left.isEmpty()) {
-            // Every module inherits, and nothing in the tree declares a target below the one asked
-            // for. That is a real state and not an error, but it is also how a soft-pinned project
-            // reaches the gate with no edit at all, so it is worth saying out loud.
-            trace.progress(bump, "bump: no module declares a target below " + to
-                    + "; nothing here needed raising");
-        }
+        return everRed;
     }
 
     /**
@@ -759,14 +810,23 @@ public final class Bump {
      *
      * @return true when a step landed and the gate should be re-run, false when the campaign is over
      */
-    private boolean troubleshoot(String log) throws IOException {
+    private boolean moduleRepair(Modules.Module m, String log) throws IOException {
+        // SCOPED, AND SAID FIRST. An agent handed a reactor log and asked about one module drifts
+        // into the others, and the diff it leaves is then the next module's turn's problem.
+        String scoped = "YOU ARE REPAIRING ONE MODULE: " + label(m)
+                + "\nIt does not compile under JDK " + to + ". Every other module in this "
+                + "repository is somebody else's turn; do not edit them.\n\n" + log;
+        return repairCampaign(scoped);
+    }
+
+    private boolean repairCampaign(String log) throws IOException {
         String floor = tree.head();
         String feedback = "";
         // WHAT THE CAMPAIGN IS FOR, decided before anyone edits. A campaign with no stated end runs
         // until its budget is spent, and this planner is also the one place a failure that is not
         // this bump's doing can be named as such: a test red before anything moved is not a wall,
         // and treating it as one has cost this corpus whole runs.
-        String aim = agents.troubleshootPlanner().run(brief(log)
+        String aim = agents.moduleRepairPlanner().run(brief(log)
                 + "\n\nWhat has landed so far:\n" + tree.history(floor));
         if (aim.stripLeading().startsWith("NOT-OURS")) {
             trace.progress(bump, "troubleshoot: " + aim.lines().findFirst().orElse(""));
@@ -775,7 +835,7 @@ public final class Bump {
         for (int campaign = 0; campaign <= REASK; campaign++) {
             boolean landed = campaignOfSteps(log, floor,
                     "\n\nWhat this campaign is for:\n" + aim + feedback);
-            String judgement = agents.troubleshootVerifier(floor)
+            String judgement = agents.moduleRepairVerifier(floor)
                     .run("The failing build:\n" + log
                             + "\n\nThe whole campaign, since it began:\n" + tree.diffSince(floor)
                             + "\n\nThe steps that landed:\n" + tree.history(floor));
@@ -795,7 +855,7 @@ public final class Bump {
     private boolean campaignOfSteps(String log, String floor, String feedback) throws IOException {
         boolean landed = false;
         for (int step = 0; step < STEPS; step++) {
-            String order = agents.stepPlanner(floor)
+            String order = agents.moduleRepairStepPlanner(floor)
                     .run(brief(log) + feedback
                             + "\n\nSteps landed so far in this campaign:\n" + tree.history(floor)
                             + "\n\nWhat the campaign has changed:\n" + tree.diffSince(floor));
@@ -827,7 +887,7 @@ public final class Bump {
      */
     private boolean step(String log, String order) throws IOException {
         String brief = brief(log) + "\n\nThe step you have been asked to make:\n" + order;
-        String reply = agents.stepDoer().run(brief);
+        String reply = agents.moduleRepairStepDoer().run(brief);
         List<String> rejected = new ArrayList<>();
         for (int attempt = 0; attempt <= REASK; attempt++) {
             if (reply.stripLeading().startsWith("BLOCKED:")) {
@@ -840,7 +900,7 @@ public final class Bump {
                 return false;
             }
             trace.applied("step-doer", now);
-            String judgement = agents.stepVerifier().run("The failing build said:\n" + log
+            String judgement = agents.moduleRepairStepVerifier().run("The failing build said:\n" + log
                     + "\n\nThe edits now in the workspace:\n" + now + "\n\nWhat they said:\n" + reply);
             if ("sound".equals(word(judgement, "sound", "gaming", "off-target"))) {
                 return true;
@@ -851,7 +911,7 @@ public final class Bump {
                 trace.progress(bump, "step rejected twice; handing back to the loop");
                 return false;
             }
-            reply = agents.stepDoer().run(brief
+            reply = agents.moduleRepairStepDoer().run(brief
                     + "\n\nYour earlier attempts at this step, and why they were rejected:\n"
                     + String.join("\n\n", rejected)
                     + "\nEach was reverted. Do not repeat one.");

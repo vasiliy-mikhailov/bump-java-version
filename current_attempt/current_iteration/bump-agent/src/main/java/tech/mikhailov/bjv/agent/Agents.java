@@ -798,8 +798,8 @@ final class Agents {
      * to a loop counter, and it is why this one can see the landed steps and rewind past a line that
      * led nowhere.
      */
-    Agent stepPlanner(String floor) {
-        return runtime("step-planner", steer("step-planner", floor),
+    Agent moduleRepairStepPlanner(String floor) {
+        return runtime("module-repair-step-planner", steer("module-repair-step-planner", floor),
                 P_TROUBLESHOOT_LOOP);
     }
 
@@ -810,18 +810,18 @@ final class Agents {
      * steps adding up to nothing, or a declaration of defeat that had a route left. This one reads
      * the whole thing and is the only agent that may send the loop back to where it started.
      */
-    Agent troubleshootVerifier(String floor) {
-        return runtime("troubleshoot-verifier", steer("troubleshoot-verifier", floor),
+    Agent moduleRepairVerifier(String floor) {
+        return runtime("module-repair-verifier", steer("module-repair-verifier", floor),
                 P_TROUBLESHOOT_LOOP_CRITIC);
     }
 
-    Agent stepDoer() {
-        return agent("step-doer");
+    Agent moduleRepairStepDoer() {
+        return agent("module-repair-step-doer");
     }
 
     /** Judges the troubleshooting edit: migration fix, or gaming the gate? */
-    Agent stepVerifier() {
-        return agent("step-verifier");
+    Agent moduleRepairStepVerifier() {
+        return agent("module-repair-step-verifier");
     }
 
     // ---- pair 6: what the bump actually did to the vulnerabilities ----
@@ -1050,8 +1050,8 @@ final class Agents {
                 floors(P_MODULE_FILTER_PLANNER));
     }
 
-    Agent troubleshootPlanner() {
-        return runtime("troubleshoot-planner", steer("troubleshoot-planner", ""),
+    Agent moduleRepairPlanner() {
+        return runtime("module-repair-planner", steer("module-repair-planner", ""),
                 floors(P_TROUBLESHOOT_PLANNER));
     }
 
@@ -1110,16 +1110,16 @@ final class Agents {
                         Tools.raising(ws, runner, recipes(), tree, targetJdk, String.valueOf(hop.to()), trace, "bump-doer")),
                 define("bump-verifier", "checks every module reached the target", P_BUMP_CRITIC,
                         Tools.checking(ws, tree, targetJdk, trace, "bump-verifier")),
-                define("troubleshoot-planner", "says what the campaign is for, and when it is over",
-                        floors(P_TROUBLESHOOT_PLANNER), steer("troubleshoot-planner", "")),
-                define("troubleshoot-verifier", "judges the campaign, not the step",
-                        P_TROUBLESHOOT_LOOP_CRITIC, steer("troubleshoot-verifier", "")),
-                define("step-planner", "decides the next step, and when to stop",
-                        P_TROUBLESHOOT_LOOP, steer("step-planner", "")),
-                define("step-doer", "clears one wall the deterministic table did not know",
-                        P_TROUBLESHOOTER, patch("step-doer")),
-                define("step-verifier", "migration fix, or gaming the gate", P_TROUBLE_CRITIC,
-                        read("step-verifier")),
+                define("module-repair-planner", "says what the campaign is for, and when it is over",
+                        floors(P_TROUBLESHOOT_PLANNER), steer("module-repair-planner", "")),
+                define("module-repair-verifier", "judges the campaign, not the step",
+                        P_TROUBLESHOOT_LOOP_CRITIC, steer("module-repair-verifier", "")),
+                define("module-repair-step-planner", "decides the next step, and when to stop",
+                        P_TROUBLESHOOT_LOOP, steer("module-repair-step-planner", "")),
+                define("module-repair-step-doer", "clears one wall the deterministic table did not know",
+                        P_TROUBLESHOOTER, patch("module-repair-step-doer")),
+                define("module-repair-step-verifier", "migration fix, or gaming the gate", P_TROUBLE_CRITIC,
+                        read("module-repair-step-verifier")),
                 define("after-pins-planner", "decides which post-JDK pins to raise, in which module",
                         pinPrompt(P_PINS_PLANNER, true), read("after-pins-planner")),
                 define("after-pins-doer", "raises the versions that only run on the new JDK",

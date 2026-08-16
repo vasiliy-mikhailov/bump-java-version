@@ -39,6 +39,32 @@ mvncmd() { if [ -x ./mvnw ] && { [ -f .mvn/wrapper/maven-wrapper.properties ] ||
 # is picked up automatically once the task runs. Plain-Java Gradle projects are untouched (is_kmp false).
 is_kmp() { grep -rhsE 'kotlin\("multiplatform"\)|kotlin-multiplatform|org\.jetbrains\.kotlin\.multiplatform|plugins\.kotlin\.?[mM]ultiplatform' --include='*.gradle' --include='*.gradle.kts' . 2>/dev/null | grep -vqE '^[[:space:]]*(//|#|\*)|apply[[:space:]]+false'; }
 case "${1:-}" in
+  # ONE MODULE, COMPILED ON ITS OWN. The repair loop moved inside the module walk, so it needs a
+  # check it can run after bumping one module rather than after bumping all of them: a failure found
+  # with that module's diff in front of it is a different proposition from the same failure surfacing
+  # four modules later as a reactor error.
+  #
+  # Maven needs -am, because a module cannot compile without the modules it depends on, and those may
+  # themselves be mid-bump. Gradle takes the project path with colons. An empty path is the root and
+  # means the whole build, which is what a single-module repository wants anyway.
+  build-module)
+         m="${2:-}"
+         case "$(tool)" in
+           mvn)     if [ -z "$m" ] || [ "$m" = "." ]; then
+                      exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp -DskipTests test-compile
+                    fi
+                    exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp -DskipTests \
+                         -pl "$m" -am -Dsurefire.failIfNoSpecifiedTests=false test-compile;;
+           gradlew) if [ -z "$m" ] || [ "$m" = "." ]; then
+                      exec timeout -k 15 "${BJV_INNER:-5100}" bash ./gradlew --no-daemon $BJVINIT --rerun-tasks testClasses
+                    fi
+                    exec timeout -k 15 "${BJV_INNER:-5100}" bash ./gradlew --no-daemon $BJVINIT \
+                         --rerun-tasks ":$(printf '%s' "$m" | tr '/' ':'):testClasses";;
+           gradle)  if [ -z "$m" ] || [ "$m" = "." ]; then
+                      exec timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon $BJVINIT --rerun-tasks testClasses
+                    fi
+                    exec timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon $BJVINIT \
+                         --rerun-tasks ":$(printf '%s' "$m" | tr '/' ':'):testClasses";; esac;;
   build) case "$(tool)" in
            mvn)     exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp -DskipTests test-compile;;
            gradlew) exec timeout -k 15 "${BJV_INNER:-5100}" bash ./gradlew --no-daemon $BJVINIT --rerun-tasks testClasses;;

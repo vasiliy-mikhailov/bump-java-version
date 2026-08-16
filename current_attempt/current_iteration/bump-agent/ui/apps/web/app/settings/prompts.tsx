@@ -107,63 +107,61 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
     reads: string
   }
 
+  // ANY DEPTH, NOT ONE LEVEL. The first version collected children only where within matched the
+  // stage directly above, so the moment a stage nested two deep -- module-repair-step inside
+  // module-repair inside modules -- the collector stopped at it and silently dropped everything
+  // after, after-pins included. A page missing a stage is the failure this whole area is about.
+  const byParent = new Map<string, typeof stages>()
+  for (const s of stages) {
+    const kids = byParent.get(s.within) ?? []
+    kids.push(s)
+    byParent.set(s.within, kids)
+  }
+
   const blocks: Block[] = []
-  for (let i = 0; i < stages.length; i += 1) {
-    const stage = stages[i]
-    if (stage === undefined || stage.within !== '') continue
-
-    const children: typeof stages = []
-    for (let j = i + 1; j < stages.length; j += 1) {
-      const child = stages[j]
-      if (child === undefined || child.within !== stage.title) break
-      children.push(child)
-    }
-
+  const emit = (stage: (typeof stages)[number], depth: number) => {
+    const children = byParent.get(stage.title) ?? []
     if (children.length === 0) {
       blocks.push({
         key: stage.title,
         title: stage.title,
-        depth: 0,
+        depth,
         agents: stage.agents,
         opens: '',
         repeats: stage.repeats,
         reads: stage.reads,
       })
-      continue
+      return
     }
-
-    // Open with everything that is not the verdict on the block: in practice the planner.
-    const closers = stage.agents.filter((a) => a.role === 'verifier')
-    const openers = stage.agents.filter((a) => a.role !== 'verifier')
+    // A block opens with everything that is not the verdict on it, in practice the planner, and
+    // closes with the verifier, so the body sits between the two the way it runs.
     blocks.push({
       key: stage.title + ':open',
       title: stage.title,
-      depth: 0,
-      agents: openers,
+      depth,
+      agents: stage.agents.filter((a) => a.role !== 'verifier'),
       opens: stage.loop,
       repeats: stage.repeats,
       reads: stage.reads,
     })
     for (const child of children) {
+      emit(child, depth + 1)
+    }
+    const closers = stage.agents.filter((a) => a.role === 'verifier')
+    if (closers.length > 0) {
       blocks.push({
-        key: child.title,
-        title: child.title,
-        depth: 1,
-        agents: child.agents,
+        key: stage.title + ':close',
+        title: stage.title,
+        depth,
+        agents: closers,
         opens: '',
-        repeats: child.repeats,
-        reads: child.reads,
+        repeats: '',
+        reads: '',
       })
     }
-    blocks.push({
-      key: stage.title + ':close',
-      title: stage.title,
-      depth: 0,
-      agents: closers,
-      opens: '',
-      repeats: '',
-      reads: '',
-    })
+  }
+  for (const top of byParent.get('') ?? []) {
+    emit(top, 0)
   }
 
   return (
@@ -206,8 +204,11 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
                 margin: '0 0 22px',
                 // INDENTED WITH A RULE DOWN THE LEFT, because a block that is only shifted right
                 // has no visible end, and the end is half of what a block tells a reader.
+                // PROPORTIONAL TO DEPTH, not a boolean. It was `depth === 0 ? 0 : 22px`, which
+                // drew a stage nested two deep at the same indent as its own parent, so
+                // module-repair-step read as a sibling of module-repair rather than its body.
                 marginLeft: block.depth === 0 ? 0 : '22px',
-                paddingLeft: block.depth === 0 ? 0 : '16px',
+                paddingLeft: block.depth === 0 ? 0 : `${block.depth * 16}px`,
                 borderLeft: block.depth === 0 ? undefined : '2px solid var(--border-strong)',
               }}
             >

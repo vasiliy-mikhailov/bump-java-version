@@ -114,14 +114,21 @@ class TheChainIsDeclaredOnceTest {
         // pinPhase runs once for the repository and hands the module list to its agents as text.
         // Three peers inside a stage whose deterministic step is called "the three passes" read as
         // three per-module passes, and two of them are not.
-        assertEquals("once per module", repeatsOf("bump"));
-        assertEquals("once for the repository", repeatsOf("before-pins"));
-        assertEquals("once for the repository", repeatsOf("after-pins"));
+        // THE COUNT IS ON THE BLOCK, NOT REPEATED ON EVERY LINE IN IT. modules says "per module"
+        // and everything nested under it inherits that; saying it again on each of before-pins,
+        // bump and after-pins is three chances to disagree with the one place it is decided.
+        assertEquals("per module", repeatsOf("modules"));
+        assertEquals("", repeatsOf("bump"));
+        assertEquals("", repeatsOf("before-pins"));
+        assertEquals("", repeatsOf("after-pins"));
 
-        // And troubleshoot is not a stage that follows the module work. It is the repair arm of a
-        // turn loop with the gate: the gate builds and tests the whole repository, troubleshoot runs
-        // only when that comes back red, and the pair goes round up to TURNS times.
-        assertTrue(repeatsOf("troubleshoot").contains("gate is red"), repeatsOf("troubleshoot"));
+        // Repair lives inside the module walk. The module-gate compiles one module and the repair
+        // runs only when that is red, which is the same shape the repository gate used to have and
+        // the reason it no longer needs one: the turns were repair's, and repair has moved.
+        assertTrue(repeatsOf("module-gate").contains("until green"), repeatsOf("module-gate"));
+        assertTrue(repeatsOf("module-repair").contains("module-gate is red"),
+                repeatsOf("module-repair"));
+        assertEquals("up to 6", repeatsOf("module-repair-step"));
         assertTrue(repeatsOf("security-after").contains("green gate"), repeatsOf("security-after"));
 
         // THE MIRROR OF security-after. A green gate returns PASS from inside the turn loop and

@@ -169,13 +169,36 @@ final class Runner {
         return run(jdk, "build");
     }
 
+    /**
+     * COMPILE ONE MODULE, so a repair can happen where the diff still is.
+     *
+     * <p>The repair loop used to sit after every module had been bumped, which meant a break in the
+     * first module surfaced as a reactor error after the last one, with no obvious owner and two
+     * hundred lines of log. This is the check that lets it be found immediately.
+     *
+     * <p>Compile only, deliberately. Test conservation is a whole-suite fact measured against the
+     * baseline, so a per-module test run cannot decide it and the repository gate has to run the
+     * suite anyway; running it here as well would pay for that module's tests twice.
+     *
+     * @param module the module's path relative to the workspace, empty or {@code .} for the root
+     */
+    Result buildModule(String jdk, String module) {
+        return run(jdk, "build-module", module);
+    }
+
     Result test(String jdk) {
         return run(jdk, "test");
     }
 
-    private Result run(String jdk, String goal) {
+    private Result run(String jdk, String goal, String... more) {
         try {
-            Shell.Output out = Shell.run(ws, env, PATIENCE, jvmRun, jdk, "jvmjob", goal);
+            String[] cmd = new String[4 + more.length];
+            cmd[0] = jvmRun;
+            cmd[1] = jdk;
+            cmd[2] = "jvmjob";
+            cmd[3] = goal;
+            System.arraycopy(more, 0, cmd, 4, more.length);
+            Shell.Output out = Shell.run(ws, env, PATIENCE, cmd);
             String text = out.text();
             boolean ranTests = TESTS.matcher(text).find();
             if (!out.ok() && !ranTests) {
