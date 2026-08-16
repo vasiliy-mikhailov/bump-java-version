@@ -53,6 +53,7 @@ final class Api {
             case "/api/settings/registry" -> registry(x);
             case "/api/settings/supervisor" -> Zone.json(x, supervisor());
             case "/api/settings/bom" -> Zone.json(x, boms());
+            case "/api/settings/bom/file" -> bomFile(x);
             default -> {
                 return false;
             }
@@ -338,9 +339,11 @@ final class Api {
      * is still right needs the argument that put it there more than the number.
      */
     private String boms() {
-        return Json.array(List.of(11, 17, 21, 25), target -> Json.object(
-                Json.field("target", String.valueOf(target)),
-                Json.field("floors", Json.array(Bom.of(target), floor -> Json.object(
+        return Json.array(List.of(new Hop(8, 11), new Hop(11, 17), new Hop(17, 21),
+                new Hop(21, 25)), hop -> Json.object(
+                Json.field("hop", Json.string(hop.from() + " \u2192 " + hop.to())),
+                Json.field("name", Json.string(hop.from() + "-" + hop.to())),
+                Json.field("floors", Json.array(Bom.of(hop), floor -> Json.object(
                         Json.field("coordinates", Json.string(floor.coordinates())),
                         Json.field("artifact", Json.string(floor.artifact())),
                         Json.field("version", Json.string(floor.version())),
@@ -351,7 +354,53 @@ final class Api {
                                         .filter(s -> !s.equals(floor.coordinates()))
                                         .sorted().toList(),
                                 Json::string)),
-                        Json.field("why", Json.string(reasonFor(target, floor.coordinates()))))))));
+                        Json.field("why",
+                                Json.string(reasonFor(hop.to(), floor.coordinates()))))))));
+    }
+
+    /**
+     * READ AND WRITE ONE HOP'S LIST AS A FILE, which is what it is.
+     *
+     * <p>The rows go out parsed for the table; this goes out raw, because the thing being edited is
+     * a file whose comments are half of what it says, and a round trip through records and back
+     * would quietly drop them.
+     *
+     * <p>A save that cannot be parsed is refused here rather than accepted and thrown at the next
+     * bump to discover. Loading throws on a malformed row on purpose, and that throw would land
+     * inside a lane rather than on the page of whoever typed it.
+     */
+    private void bomFile(HttpExchange x) throws IOException {
+        String hop = Zone.param(x, "hop");
+        if (!hop.matches("\\d+-\\d+")) {
+            Zone.json(x, Json.object(Json.field("saved", "false"),
+                    Json.field("why", Json.string("that is not a hop"))));
+            return;
+        }
+        if (x.getRequestMethod().equalsIgnoreCase("GET")) {
+            Bom.Source source = Bom.textFor(hop);
+            Zone.json(x, Json.object(
+                    Json.field("hop", Json.string(hop)),
+                    Json.field("text", Json.string(source.text())),
+                    Json.field("edited", String.valueOf(source.edited()))));
+            return;
+        }
+        String body = new String(x.getRequestBody().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        try {
+            if (body.isBlank()) {
+                // AN EMPTY SAVE IS A REVERT, said once rather than needing its own button: the
+                // built-in was never gone, so throwing the edit away restores it.
+                Bom.revert(hop);
+            } else {
+                Bom.save(hop, body);
+            }
+            Bom.Source now = Bom.textFor(hop);
+            Zone.json(x, Json.object(Json.field("saved", "true"),
+                    Json.field("edited", String.valueOf(now.edited())),
+                    Json.field("rows", String.valueOf(Bom.of(hopOf(hop)).size()))));
+        } catch (IOException | RuntimeException refused) {
+            Zone.json(x, Json.object(Json.field("saved", "false"),
+                    Json.field("why", Json.string(String.valueOf(refused.getMessage())))));
+        }
     }
 
     /**

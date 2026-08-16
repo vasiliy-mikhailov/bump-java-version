@@ -50,17 +50,17 @@ final class Backfill {
                     continue;
                 }
                 String bump = row[0] + "|" + row[1] + "|" + row[2] + "|" + row[3];
-                int target;
+                Hop hop;
                 try {
-                    target = Integer.parseInt(row[3]);
+                    hop = new Hop(Integer.parseInt(row[2]), Integer.parseInt(row[3]));
                 } catch (NumberFormatException notAHop) {
                     skipped++;
                     continue;
                 }
                 Path trace = results.resolve(bump.replaceAll("[^A-Za-z0-9]+", "_"))
                         .resolve("trace.jsonl");
-                Bom.Compliance c = Bom.measure(ws, trace, target);
-                Bom.Compliance was = Bom.measureBefore(ws, trace, row[1], target);
+                Bom.Compliance c = Bom.measure(ws, trace, hop);
+                Bom.Compliance was = Bom.measureBefore(ws, trace, row[1], hop);
                 Bom.record(results, bump, c, was);
                 Bom.Movement moved = Bom.between(was, c);
                 System.out.printf("  %-46s now %2d/%-2d %-4s   comparable %2d: %d issues -> %d%n",

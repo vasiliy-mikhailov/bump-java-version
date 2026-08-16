@@ -1,6 +1,7 @@
 package tech.mikhailov.bjv.agent;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -130,8 +131,104 @@ final class Bom {
         return new Movement(applied, before, after);
     }
 
-    /** Parsed once per rung. The files do not change under a running sweep. */
-    private static final Map<Integer, List<Floor>> LOADED = new LinkedHashMap<>();
+    /**
+     * AN EDITED LIST REPLACES THE BUILT-IN ENTIRELY, on the same terms as an edited prompt.
+     *
+     * <p>No merge. A list half from the code and half from a box is a list nobody can read in one
+     * place, and reading it in one place is the only way anyone works out why a version was asked
+     * for. The store sits beside the results rather than inside them, because results are a record
+     * of what happened and this is an instruction about what should.
+     */
+    private static volatile Path store = null;
+
+    /** Point the store at a run root, before anything reads a list. */
+    static void beside(Path results) {
+        Path root = results.getParent() == null ? results : results.getParent();
+        store = root.resolve("bom");
+    }
+
+    static Path store() {
+        return store;
+    }
+
+    /** Where one hop's edit lives, or null when there is nowhere to put it. */
+    static Path fileFor(Path root, String hop) {
+        if (root == null || !hop.matches("\\d+-\\d+")) {
+            return null;
+        }
+        return root.resolve(hop + ".tsv");
+    }
+
+    /**
+     * The text a hop's list is read from, and where it came from.
+     *
+     * <p>Serving the raw file rather than the parsed rows is deliberate: the thing being edited is
+     * a file, the comments in it are half of what it says, and a round trip through records and
+     * back would quietly drop them.
+     */
+    record Source(String text, boolean edited) {
+    }
+
+    static Source textFor(String hop) {
+        Path file = fileFor(store, hop);
+        if (file != null && Files.isRegularFile(file)) {
+            try {
+                String text = Files.readString(file, java.nio.charset.StandardCharsets.UTF_8);
+                // AN EMPTY FILE IS NOT AN EMPTY LIST. It is a save that went wrong, and a bump
+                // measured against nothing reads as perfectly compliant.
+                if (!text.isBlank()) {
+                    return new Source(text, true);
+                }
+            } catch (IOException unreadable) {
+                // Fall through to the built-in, which is always there.
+            }
+        }
+        return new Source(builtIn(hop), false);
+    }
+
+    private static String builtIn(String hop) {
+        try (var in = Bom.class.getResourceAsStream("/bom/" + hop + ".tsv")) {
+            return in == null ? ""
+                    : new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (IOException unreadable) {
+            return "";
+        }
+    }
+
+    /** Save an edit, staged and renamed over so no reader sees half of each. */
+    static void save(String hop, String text) throws IOException {
+        Path file = fileFor(store, hop);
+        if (file == null) {
+            throw new IOException("no bill-of-materials store configured");
+        }
+        if (text.isBlank()) {
+            throw new IOException("an empty list would read as a project meeting everything");
+        }
+        // PARSED BEFORE IT IS KEPT. A file that cannot be read throws at load, and load happens
+        // inside a bump; refusing here turns a sweep-wide failure into a message on a page.
+        parse(hop, text);
+        Files.createDirectories(file.getParent());
+        Path staged = file.resolveSibling(file.getFileName() + ".staged");
+        Files.writeString(staged, text, java.nio.charset.StandardCharsets.UTF_8);
+        Files.move(staged, file, java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+    }
+
+    /** Throw the edit away. The built-in is not restored; it was never gone. */
+    static void revert(String hop) throws IOException {
+        Path file = fileFor(store, hop);
+        if (file != null) {
+            Files.deleteIfExists(file);
+        }
+    }
+
+    /**
+     * Parsed per read, not once.
+     *
+     * <p>The cache this replaces held a list for the life of the process, which is right for a file
+     * baked into a jar and wrong the moment one can be edited from a page: the dashboard would have
+     * gone on measuring against the version it started with and shown the new one.
+     */
 
     private Bom() {
     }
@@ -143,13 +240,25 @@ final class Bom {
      *                               floor that silently vanishes from this list is the exact
      *                               failure the class doc describes
      */
-    static synchronized List<Floor> of(int target) {
-        return LOADED.computeIfAbsent(rung(target), Bom::load);
+    static List<Floor> of(Hop hop) {
+        return load(name(hop));
     }
 
-    /** Which list a target reads, on the same ladder {@link Floors#forTarget} walks. */
-    static int rung(int target) {
-        return target >= 25 ? 25 : target >= 21 ? 21 : target >= 17 ? 17 : 11;
+    /**
+     * WHICH FILE A HOP READS, and there is one per hop rather than one per target.
+     *
+     * <p>The phase column says "before the JDK" and "after the JDK", and neither means anything
+     * without both ends of the move: what a project may raise before the JDK changes depends on the
+     * JDK it is leaving as much as the one it is going to.
+     *
+     * <p>A hop that is not one of the four the corpus runs is answered by the nearest one at or
+     * below its target, because a 17 to 19 move crosses the same walls a 17 to 21 move does.
+     */
+    static String name(Hop hop) {
+        int to = hop.to();
+        String rung = to >= 25 ? "21-25" : to >= 21 ? "17-21" : to >= 17 ? "11-17" : "8-11";
+        String exact = hop.from() + "-" + hop.to();
+        return Bom.class.getResource("/bom/" + exact + ".tsv") != null ? exact : rung;
     }
 
     /**
@@ -172,17 +281,15 @@ final class Bom {
      * it; the same for the wrapper on a Maven project. Counting an impossible row as a miss is how a
      * percentage becomes an accusation.
      */
-    private static List<Floor> load(int rung) {
-        String text;
-        try (var in = Bom.class.getResourceAsStream("/bom/" + rung + ".tsv")) {
-            if (in == null) {
-                throw new IllegalStateException("no bill of materials for target " + rung);
-            }
-            text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
-        } catch (IOException unreadable) {
-            throw new IllegalStateException("could not read the bill of materials for " + rung,
-                    unreadable);
+    private static List<Floor> load(String hop) {
+        String text = textFor(hop).text();
+        if (text.isEmpty()) {
+            throw new IllegalStateException("no bill of materials for the " + hop + " hop");
         }
+        return parse(hop, text);
+    }
+
+    private static List<Floor> parse(String hop, String text) {
         List<Floor> floors = new ArrayList<>();
         for (String raw : text.lines().toList()) {
             String line = raw.strip();
@@ -198,7 +305,7 @@ final class Bom {
                     || !Set.of("before", "after").contains(cell[2])
                     || !Set.of("any", "maven", "gradle").contains(cell[3])) {
                 throw new IllegalStateException(
-                        "target " + rung + " has a row this cannot read: " + raw);
+                        "the " + hop + " hop has a row this cannot read: " + raw);
             }
             Set<String> spellings = new java.util.LinkedHashSet<>();
             spellings.add(cell[0]);
@@ -212,7 +319,7 @@ final class Bom {
             floors.add(new Floor(cell[0], cell[1], cell[2], spellings, cell[3]));
         }
         if (floors.isEmpty()) {
-            throw new IllegalStateException("the bill of materials for " + rung + " is empty");
+            throw new IllegalStateException("the bill of materials for " + hop + " is empty");
         }
         return List.copyOf(floors);
     }
@@ -223,12 +330,12 @@ final class Bom {
      * @param declared what each artifact is declared at, keyed by coordinate, lowest already chosen
      * @param build    {@code maven}, {@code gradle} or {@code both}, from {@link Migrate#actuatorFor}
      */
-    static Compliance against(int target, Map<String, String> resolved,
+    static Compliance against(Hop hop, Map<String, String> resolved,
                               Map<String, String> declared, String build) {
         List<Verdict> verdicts = new ArrayList<>();
         int met = 0;
         int missed = 0;
-        for (Floor floor : of(target)) {
+        for (Floor floor : of(hop)) {
             if (!speaks(build, floor.dialect())) {
                 verdicts.add(new Verdict(floor, "", false, false));
                 continue;
@@ -248,6 +355,16 @@ final class Bom {
                 // NOT DECLARED IS NOT A MISS. A project that uses no archunit has not failed the
                 // archunit floor, and counting it would make the denominator a measure of how long
                 // the list is rather than of the project.
+                verdicts.add(new Verdict(floor, "", false, false));
+                continue;
+            }
+            // A ROW IS THE HEAD OF A LINE, AND ONLY ITS OWN LINE ANSWERS TO IT. Same major, same
+            // minor, and this is a patch away; anything else is a different line and a different
+            // move. tomcat-embed-core sits at 9.0.105 and at 10.1.55 in the same file for exactly
+            // this reason, and a project on 9.0.65 must not read as failing the 10.1 row: crossing
+            // from Tomcat 9 to Tomcat 10 is the jakarta rename, which is not something a patch does
+            // and not something this should ever ask for by implication.
+            if (!line(lowest).equals(line(floor.version()))) {
                 verdicts.add(new Verdict(floor, "", false, false));
                 continue;
             }
@@ -346,6 +463,12 @@ final class Bom {
         return lowest;
     }
 
+    /** The line a version sits on: major.minor, or the whole string when it has neither. */
+    private static String line(String version) {
+        String[] part = version.split("[.-]");
+        return part.length >= 2 ? part[0] + "." + part[1] : version;
+    }
+
     private static boolean speaks(String build, String dialect) {
         return dialect.equals("any") || build.equals("both") || build.equals(dialect);
     }
@@ -414,9 +537,9 @@ final class Bom {
     }
 
     /** The whole measurement for one finished bump, or an empty compliance when unreadable. */
-    static Compliance measure(Path ws, Path trace, int target) {
+    static Compliance measure(Path ws, Path trace, Hop hop) {
         try {
-            return against(target, resolvedIn(trace), declaredIn(ws), Migrate.actuatorFor(ws));
+            return against(hop, resolvedIn(trace), declaredIn(ws), Migrate.actuatorFor(ws));
         } catch (IOException | RuntimeException unreadable) {
             return new Compliance(List.of(), 0, 0);
         }
@@ -440,9 +563,9 @@ final class Bom {
      * this read the new shape against old contents, which is wrong at the edges and much less wrong
      * than not reading the declarations at all.
      */
-    static Compliance measureBefore(Path ws, Path trace, String sha, int target) {
+    static Compliance measureBefore(Path ws, Path trace, String sha, Hop hop) {
         try {
-            return against(target, resolvedIn(trace, "packages-before"), declaredAt(ws, sha),
+            return against(hop, resolvedIn(trace, "packages-before"), declaredAt(ws, sha),
                     Migrate.actuatorFor(ws));
         } catch (IOException | RuntimeException unreadable) {
             return new Compliance(List.of(), 0, 0);

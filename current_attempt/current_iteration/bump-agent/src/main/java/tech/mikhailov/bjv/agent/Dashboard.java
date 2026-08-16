@@ -297,6 +297,7 @@ public final class Dashboard {
             return t;
         }));
         Prompts.beside(results);
+        Bom.beside(results);
         Dashboard d = new Dashboard(results, System.getenv("BJV_DASH_TOKEN"));
         Api api = new Api(results);
 

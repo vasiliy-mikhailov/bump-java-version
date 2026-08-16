@@ -81,6 +81,9 @@ public final class Bump {
         Path results = Path.of(args.length > 2 ? args[2] : "results");
         // Where an edited prompt would be, if anybody made one. Set before any agent is built.
         Prompts.beside(results);
+        // The same store, for the same reason: an edited list replaces the built-in entirely, and
+        // a bump reads whichever was on disk when it started.
+        Bom.beside(results);
 
         String slug = bump.replaceAll("[^A-Za-z0-9]+", "_");
         JsonlTrace trace = new JsonlTrace(results.resolve(slug).resolve("trace.jsonl"),
@@ -98,9 +101,9 @@ public final class Bump {
             if (part.length >= 4) {
                 try {
                     Path written = results.resolve(slug).resolve("trace.jsonl");
-                    int target = Integer.parseInt(part[3]);
-                    Bom.record(results, bump, Bom.measure(checkout, written, target),
-                            Bom.measureBefore(checkout, written, part[1], target));
+                    Hop measured = new Hop(Integer.parseInt(part[2]), Integer.parseInt(part[3]));
+                    Bom.record(results, bump, Bom.measure(checkout, written, measured),
+                            Bom.measureBefore(checkout, written, part[1], measured));
                 } catch (NumberFormatException notAHop) {
                     // A manifest row with no target has nothing to be compliant with.
                 }
