@@ -147,4 +147,33 @@ class AnAgentIsBuiltForItsHopTest {
         return defs.stream().filter(d -> d.name().equals(name)).findFirst().orElseThrow()
                 .systemPrompt();
     }
+
+    @Test
+    void theFactoryOrderIsNotTheChainOrderAndNothingMayDependOnIt() {
+        // MEASURED ON THE LIVE PAGE, not imagined. forHop hands agents back in the order its
+        // methods happen to be listed, and that order interleaves: after-pins arrived after
+        // troubleshoot and step, with modules-verifier after that. The settings page drew the
+        // module block missing its third pass and closed the loop in the wrong place, while its
+        // own comment claimed the order was the chain's.
+        //
+        // This test does not require the factory to be sorted. It requires the two orders to be
+        // KNOWN to differ, so that anything showing the chain sorts by Chain and no future reader
+        // assumes the factory's order means something.
+        List<String> factory = Agents.forHop(new Hop(17, 21), Path.of("/tmp")).stream()
+                .map(SubAgentDefinition::name)
+                .toList();
+        List<String> chain = Chain.agentNames();
+
+        assertEquals(chain.size(), factory.size(), "the same agents, either way round");
+        assertTrue(factory.containsAll(chain), "and the same names");
+
+        int afterPins = factory.indexOf("after-pins-planner");
+        int step = factory.indexOf("step-planner");
+        assertTrue(afterPins > step,
+                "the factory really does interleave them; if this ever stops being true the "
+                        + "sort in Api.settings is still correct and this comment is the record "
+                        + "of why it exists");
+        assertTrue(chain.indexOf("after-pins-planner") < chain.indexOf("step-planner"),
+                "while the chain runs the third module pass before the troubleshoot campaign");
+    }
 }

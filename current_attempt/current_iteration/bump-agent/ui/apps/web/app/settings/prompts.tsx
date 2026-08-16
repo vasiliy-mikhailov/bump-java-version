@@ -55,14 +55,77 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
 
   // In the order the chain reaches them, which is the order the server sends them: grouping must
   // not reorder, or the page stops being a picture of the run.
-  const stages: { title: string; agents: AgentPrompt[] }[] = []
+  const stages: { title: string; within: string; loop: string; agents: AgentPrompt[] }[] = []
   for (const p of prompts ?? []) {
     const last = stages[stages.length - 1]
     if (last !== undefined && last.title === p.stage) {
       last.agents.push(p)
     } else {
-      stages.push({ title: p.stage, agents: [p] })
+      stages.push({ title: p.stage, within: p.within, loop: p.loop, agents: [p] })
     }
+  }
+
+  /**
+   * THE CHAIN IS A PROGRAM AND IT HAS BLOCKS, so it is drawn as one.
+   *
+   * modules and troubleshoot each run a sub-chain between their planner and their verifier. Drawn
+   * flat, that reads as fourteen stages in a row and hides the two facts that matter most about the
+   * shape: the module passes run once per module, and the troubleshoot steps run until the campaign
+   * ends or its critic stops it. A reader who does not know that reads a loop body as a straight
+   * line and cannot work out why one agent ran eleven times.
+   *
+   * SO THE ORDER SHOWN IS THE RUN'S, NOT THE DECLARATION'S. Chain lists a stage's own steps
+   * together and its children after, because that is how a stage is written; at run time the
+   * planner goes first, the body runs between, and the verifier judges what came out of it. A page
+   * showing modules-verifier above the passes it is verifying would be a picture of the file rather
+   * than of the run, and this page exists to be the second.
+   */
+  type Block = {
+    key: string
+    title: string
+    depth: number
+    agents: AgentPrompt[]
+    /** The deterministic step this block opens with, when its doing is a sub-chain. */
+    opens: string
+  }
+
+  const blocks: Block[] = []
+  for (let i = 0; i < stages.length; i += 1) {
+    const stage = stages[i]
+    if (stage === undefined || stage.within !== '') continue
+
+    const children: typeof stages = []
+    for (let j = i + 1; j < stages.length; j += 1) {
+      const child = stages[j]
+      if (child === undefined || child.within !== stage.title) break
+      children.push(child)
+    }
+
+    if (children.length === 0) {
+      blocks.push({ key: stage.title, title: stage.title, depth: 0, agents: stage.agents, opens: '' })
+      continue
+    }
+
+    // Open with everything that is not the verdict on the block: in practice the planner.
+    const closers = stage.agents.filter((a) => a.role === 'verifier')
+    const openers = stage.agents.filter((a) => a.role !== 'verifier')
+    blocks.push({
+      key: stage.title + ':open',
+      title: stage.title,
+      depth: 0,
+      agents: openers,
+      opens: stage.loop,
+    })
+    for (const child of children) {
+      blocks.push({ key: child.title, title: child.title, depth: 1, agents: child.agents, opens: '' })
+    }
+    blocks.push({
+      key: stage.title + ':close',
+      title: stage.title,
+      depth: 0,
+      agents: closers,
+      opens: '',
+    })
   }
 
   return (
@@ -98,8 +161,18 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
         ) : prompts === null ? (
           <EmptyNote>Reading the prompts…</EmptyNote>
         ) : (
-          stages.map((stage) => (
-            <section key={stage.title} style={{ margin: '0 0 22px' }}>
+          blocks.map((block) => (
+            <section
+              key={block.key}
+              style={{
+                margin: '0 0 22px',
+                // INDENTED WITH A RULE DOWN THE LEFT, because a block that is only shifted right
+                // has no visible end, and the end is half of what a block tells a reader.
+                marginLeft: block.depth === 0 ? 0 : '22px',
+                paddingLeft: block.depth === 0 ? 0 : '16px',
+                borderLeft: block.depth === 0 ? undefined : '2px solid var(--border-strong)',
+              }}
+            >
               <h2
                 style={{
                   fontSize: '11px',
@@ -110,10 +183,17 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
                   margin: '0 0 10px',
                 }}
               >
-                {stage.title}
+                {block.title}
+                {block.opens === '' ? null : (
+                  <span style={{ color: 'var(--accent-primary)', marginLeft: '8px' }}>
+                    {'\u21bb '}
+                    {block.opens}
+                    {' \u2014 everything below runs inside this'}
+                  </span>
+                )}
               </h2>
               <div style={CARDS}>
-                {stage.agents.map((p) => (
+                {block.agents.map((p) => (
                   <PromptCard
                     key={p.name}
                     prompt={p}

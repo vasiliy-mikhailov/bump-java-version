@@ -3,6 +3,8 @@ package tech.mikhailov.bjv.agent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import com.deepagents.langchain4j.subagents.SubAgentDefinition;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -1305,15 +1307,41 @@ final class Api {
         Hop h = new Hop(Integer.parseInt(pair[0]), Integer.parseInt(pair.length > 1 ? pair[1] : pair[0]));
         Map<String, String> stageOf = new LinkedHashMap<>();
         Map<String, String> roleOf = new LinkedHashMap<>();
+        // THE CHAIN IS A PROGRAM AND IT HAS BLOCKS. modules and troubleshoot each run a sub-chain
+        // between their planner and their verifier, and a flat list of agents says nothing about
+        // that: it reads as fourteen stages in a row rather than two loops with bodies. The nesting
+        // has always been declared in Chain; it simply never left the server.
+        Map<String, String> withinOf = new LinkedHashMap<>();
+        // What the loop itself is, so the body can be shown between a header and a closer rather
+        // than merely indented under a name.
+        Map<String, String> loopOf = new LinkedHashMap<>();
         for (Chain.Stage s : Chain.stages()) {
             for (Chain.Step step : s.steps()) {
                 stageOf.put(step.name(), s.title());
                 roleOf.put(step.name(), step.role());
+                withinOf.put(step.name(), s.within());
+                if (!step.agent()) {
+                    loopOf.put(s.title(), step.name());
+                }
             }
         }
         Path root = (results.getParent() == null ? results : results.getParent())
                 .resolve("prompts");
-        return Json.array(Agents.forHop(h, results), d -> {
+        // IN THE CHAIN'S ORDER, WHICH IS NOT THE ORDER THE FACTORY HANDS THEM BACK. Measured on
+        // the live page: after-pins arrived after troubleshoot and step, and modules-verifier after
+        // that, so the settings page drew the module block missing its third pass and the loop
+        // closing in the wrong place. Chain declares the order once and a test binds the two; the
+        // factory's order is an accident of how the methods happen to be listed, and nothing should
+        // depend on it.
+        List<String> order = Chain.agentNames();
+        List<SubAgentDefinition> defined = new ArrayList<>(Agents.forHop(h, results));
+        defined.sort(java.util.Comparator.comparingInt(d -> {
+            int at = order.indexOf(d.name());
+            // An agent the chain does not name goes last rather than first, so a new one shows up
+            // as obviously unplaced instead of quietly heading the list.
+            return at < 0 ? order.size() : at;
+        }));
+        return Json.array(defined, d -> {
             // BOTH TEXTS TRAVEL. The page cannot offer a revert without something to revert TO, and
             // a reader comparing an edit to the built-in should not have to redeploy to see it.
             boolean edited = Prompts.edited(root, d.name(), h);
@@ -1321,6 +1349,11 @@ final class Api {
                     Json.field("name", Json.string(d.name())),
                     Json.field("role", Json.string(roleOf.getOrDefault(d.name(), "doer"))),
                     Json.field("stage", Json.string(stageOf.getOrDefault(d.name(), ""))),
+                    // The stage this one runs inside, empty at the top level.
+                    Json.field("within", Json.string(withinOf.getOrDefault(d.name(), ""))),
+                    // The deterministic step that IS the loop, on the stage that owns one.
+                    Json.field("loop", Json.string(
+                            loopOf.getOrDefault(stageOf.getOrDefault(d.name(), ""), ""))),
                     Json.field("description", Json.string(d.description())),
                     Json.field("builtIn", Json.string(d.systemPrompt())),
                     Json.field("edited", String.valueOf(edited)),

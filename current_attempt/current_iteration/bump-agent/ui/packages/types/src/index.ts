@@ -209,6 +209,16 @@ export type AgentPrompt = {
   name: string
   role: StepRole
   stage: string
+  /**
+   * The stage this one runs inside, empty at the top level.
+   *
+   * THE CHAIN IS A PROGRAM WITH BLOCKS. modules and troubleshoot each run a sub-chain between their
+   * planner and their verifier, and a flat list reads as fourteen stages in a row rather than two
+   * loops with bodies.
+   */
+  within: string
+  /** The deterministic step that IS this stage's loop, empty when its doing is an agent. */
+  loop: string
   description: string
   /** What is in force: the edit if there is one, otherwise the code's own. */
   prompt: string
