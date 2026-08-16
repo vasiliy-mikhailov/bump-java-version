@@ -24,6 +24,7 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
             <th style={th}>verdict</th>
             <th style={{ ...th, textAlign: 'right' }}>tests</th>
             <th style={{ ...th, textAlign: 'right' }}>CVEs</th>
+            <th style={{ ...th, textAlign: 'right' }}>at the floor</th>
             <th style={{ ...th, textAlign: 'right' }}>took</th>
             <th style={{ ...th, textAlign: 'right' }}>a person would have</th>
             <th style={{ ...th, textAlign: 'right' }}>last event</th>
@@ -90,6 +91,45 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                       </>
                     )}
                   </a>
+                )}
+              </td>
+              <td style={{ ...td, textAlign: 'right' }}>
+                {/* A GREEN GATE AND A COMPLIANT PROJECT ARE DIFFERENT CLAIMS. The verdict says the
+                    project builds under the target and kept every test it had. This says how many
+                    of the floors that target actually needs it reached, measured against the
+                    dependency tree the build resolved rather than against what a build file asked
+                    for, because a managed project declares almost none of them.
+
+                    A DASH, NOT NOUGHT PER CENT. A bump that settled before anything was measured
+                    and a project that declares none of these floors have both failed nothing, and
+                    rendering either as 0% ranks them below a project that met half. */}
+                {b.bomMet == null || b.bomMet + (b.bomMissed ?? 0) === 0 ? (
+                  <span style={{ color: 'var(--text-tertiary)' }} title="nothing measured here">
+                    —
+                  </span>
+                ) : (
+                  <span title={b.bomOutstanding ?? 'every floor this project declares is met'}>
+                    <span
+                      style={{
+                        color:
+                          (b.bomMissed ?? 0) === 0
+                            ? 'var(--cve-cleared)'
+                            : b.bomMet === 0
+                              ? 'var(--cve-introduced)'
+                              : 'var(--cve-remaining)',
+                      }}
+                    >
+                      {b.bomMet}
+                    </span>
+                    <span style={{ color: 'var(--text-tertiary)' }}>
+                      {' / '}
+                      {b.bomMet + (b.bomMissed ?? 0)}
+                    </span>
+                    <span style={{ color: 'var(--text-tertiary)', fontSize: '11px' }}>
+                      {'  '}
+                      {Math.round((b.bomMet * 100) / (b.bomMet + (b.bomMissed ?? 0)))}%
+                    </span>
+                  </span>
                 )}
               </td>
               <td style={{ ...td, textAlign: 'right' }}>

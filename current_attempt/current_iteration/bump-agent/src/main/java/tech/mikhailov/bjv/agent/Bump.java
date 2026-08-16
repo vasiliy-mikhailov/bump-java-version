@@ -90,6 +90,20 @@ public final class Bump {
             String account = b.run();
             String state = account.split("\n", 2)[0];
             trace.settled(bump, state, account, b.baselineGreen, b.gateGreen);
+            // A GREEN GATE IS NOT COMPLIANCE. The verdict says the project builds under the target
+            // and lost no test; it says nothing about whether the versions the target needs were
+            // reached. Measured here because this is the last moment the working tree exists and
+            // the hop is known, and filed beside the settlement rather than inside it.
+            String[] part = bump.split("\\|");
+            if (part.length >= 4) {
+                try {
+                    Bom.record(results, bump, Bom.measure(checkout,
+                            results.resolve(slug).resolve("trace.jsonl"),
+                            Integer.parseInt(part[3])));
+                } catch (NumberFormatException notAHop) {
+                    // A manifest row with no target has nothing to be compliant with.
+                }
+            }
         } catch (Exception e) {
             // EVERY failure leaves a row, not only the unchecked ones. A checked IOException
             // escaping main killed the process with the last settlement still reading "bumping",

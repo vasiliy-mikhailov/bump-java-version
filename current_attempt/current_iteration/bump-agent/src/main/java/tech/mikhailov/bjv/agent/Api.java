@@ -260,6 +260,71 @@ final class Api {
      * bump that has been priced is a bump that has finished. Only settled bumps are looked up at
      * all, so a sweep of 1439 mostly-queued rows costs nothing here.
      */
+    /**
+     * THE COMPLIANCE FILE, READ ONCE AND JOINED BY BUMP.
+     *
+     * <p>It sits beside settlements.jsonl rather than inside it, because a live sweep appends to
+     * that file and two readers take the last line per bump to decide what state it is in. A
+     * measurement does not belong in the path of a verdict.
+     *
+     * <p>Last line wins, so a bump measured again against a changed bill of materials shows the
+     * newer number while the older one stays on the record.
+     */
+    private Map<String, Map<String, String>> compliance() {
+        Map<String, Map<String, String>> byBump = new LinkedHashMap<>();
+        Path file = results.resolve("bom.jsonl");
+        if (!Files.isRegularFile(file)) {
+            return byBump;
+        }
+        try {
+            for (String line : Files.readAllLines(file, java.nio.charset.StandardCharsets.UTF_8)) {
+                Map<String, String> row = Dashboard.row(line);
+                String bump = row.get("bump");
+                if (bump != null && !bump.isBlank()) {
+                    byBump.put(bump.replaceAll("[^A-Za-z0-9]+", "_"), row);
+                }
+            }
+        } catch (IOException unreadable) {
+            return byBump;
+        }
+        return byBump;
+    }
+
+    private Map<String, Map<String, String>> held;
+    private long heldAt = -1;
+
+    /**
+     * One field of one bump's compliance, or null when it was never measured.
+     *
+     * <p>Cached, because forty-five bumps times three fields is a hundred and thirty-five reads of
+     * one file to render one table. KEYED ON THE FILE'S OWN CLOCK, because this object outlives a
+     * request: a cache that never expires would hold the numbers as they were when the dashboard
+     * started and go on showing them while a sweep wrote new ones, which is worse than showing
+     * none. The file only grows, so its timestamp is a complete description of its contents.
+     */
+    private synchronized String bom(String slug, String field) {
+        long stamp = 0;
+        try {
+            Path file = results.resolve("bom.jsonl");
+            stamp = Files.isRegularFile(file) ? Files.getLastModifiedTime(file).toMillis() : 0;
+        } catch (IOException unreadable) {
+            stamp = 0;
+        }
+        if (held == null || stamp != heldAt) {
+            held = compliance();
+            heldAt = stamp;
+        }
+        Map<String, String> row = held.get(slug);
+        if (row == null) {
+            return null;
+        }
+        String value = row.get(field);
+        if (value == null || value.isBlank()) {
+            return field.equals("outstanding") ? null : null;
+        }
+        return field.equals("outstanding") ? Json.string(value) : value;
+    }
+
     private String humanMinutes(String slug) {
         String known = priced.get(slug);
         if (known != null) {
@@ -602,7 +667,13 @@ final class Api {
                 Json.field("startedAt", String.valueOf(startedAt(slug))),
                 Json.field("at", String.valueOf(shownAt(r))),
                 Json.field("events", String.valueOf(events(slug))),
-                Json.field("humanMinutes", humanMinutes(slug)));
+                Json.field("humanMinutes", humanMinutes(slug)),
+                // A GREEN GATE IS NOT COMPLIANCE. The verdict says the project builds under the
+                // target and kept its tests; this says how much of what the target actually needs
+                // it reached. Null where nothing was measured, which is not nought per cent.
+                Json.field("bomMet", bom(slug, "met")),
+                Json.field("bomMissed", bom(slug, "missed")),
+                Json.field("bomOutstanding", Json.optional(bom(slug, "outstanding"))));
     }
 
     /**

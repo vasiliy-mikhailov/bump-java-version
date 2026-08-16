@@ -80,6 +80,16 @@ export type BumpSummary = {
    * it must never be added to a measured number.
    */
   humanMinutes: number | null
+  /**
+   * HOW MUCH OF WHAT THE TARGET NEEDS THIS PROJECT REACHED, which the verdict does not say.
+   *
+   * Null means nothing was measured, and that is not nought: a bump settled before anyone was
+   * measuring, and a project declaring none of these floors, are both absent rather than failing.
+   */
+  bomMet: number | null
+  bomMissed: number | null
+  /** The floors it still sits below, named, so the number can be argued with. */
+  bomOutstanding: string | null
 }
 
 /**
