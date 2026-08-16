@@ -31,7 +31,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>The delta filter had the same fault for the same reason. A caller's mark comes from the row it
  * was given, so comparing it against a field that row never carried drops rows that have in fact
- * moved.
+ * moved. That half is unchanged and is most of this file.
+ *
+ * <p>THE ORDER ITSELF IS NO LONGER A TIMESTAMP. Sorting by whatever moved most recently floated the
+ * running bumps to the top and rearranged the table as the sweep worked: a repository somebody was
+ * reading moved because a different one finished. It is run.sh's own comparator now, so the page and
+ * the queue agree, and the two assertions that pinned the descending order are rewritten rather than
+ * deleted, because what they were really guarding is that the order is deliberate and not whatever
+ * the map happened to yield.
  */
 class TheListIsSortedByWhatItShowsTest {
 
@@ -63,6 +70,15 @@ class TheListIsSortedByWhatItShowsTest {
         Files.setLastModifiedTime(trace, FileTime.fromMillis(lastEvent));
     }
 
+    private static List<String> reposInOrder(String json) {
+        List<String> out = new ArrayList<>();
+        Matcher m = Pattern.compile("\"repo\":\"([^\"]*)\"").matcher(json);
+        while (m.find()) {
+            out.add(m.group(1));
+        }
+        return out;
+    }
+
     private static List<Long> atsInOrder(String json) {
         List<Long> out = new ArrayList<>();
         Matcher m = Pattern.compile("\"at\":(\\d+)").matcher(json);
@@ -73,34 +89,36 @@ class TheListIsSortedByWhatItShowsTest {
     }
 
     @Test
-    void theRowsComeBackInTheOrderOfTheirOwnTimestamps(@TempDir Path results) throws Exception {
-        // Settlement order is deliberately the REVERSE of trace order here. Sorting on the wrong
-        // one is then not a subtle difference, it is exactly backwards.
-        bump(results, "a/oldest-trace", 9_000, 1_000);
-        bump(results, "b/newest-trace", 1_000, 9_000);
-        bump(results, "c/middle", 5_000, 5_000);
+    void noTimestampDecidesWhereARowGoes(@TempDir Path results) throws Exception {
+        // The timestamps here are deliberately the reverse of the alphabet, so a sort that still
+        // touched one would produce exactly the wrong list rather than an accidentally right one.
+        bump(results, "a/first", 9_000, 9_000);
+        bump(results, "b/second", 5_000, 5_000);
+        bump(results, "c/third", 1_000, 1_000);
 
-        List<Long> ats = atsInOrder(bumps(results, 0));
-
-        assertEquals(List.of(9_000L, 5_000L, 1_000L), ats,
-                "newest last-event first, which is the column the page draws");
+        assertEquals(List.of("a/first", "b/second", "c/third"), reposInOrder(bumps(results, 0)),
+                "alphabetical, and the busiest row does not lead");
     }
 
     @Test
-    void everyRowIsInDescendingOrderAndNotJustTheFirst(@TempDir Path results) throws Exception {
-        for (int i = 0; i < 12; i += 1) {
-            // Settlement times ascending, trace times descending: any sort touching the wrong field
-            // produces a visibly wrong list rather than an accidentally right one.
-            bump(results, "r/" + i, 1_000 + i, 20_000 - i);
-        }
+    void itIsTheComparatorTheSweepQueuesBy(@TempDir Path results) throws Exception {
+        // run.sh:233 is `sort -k2,2f -k2,2 -k4,4n`: repository case-folded, then case-sensitive to
+        // break the ties the fold creates, then the source JDK. Case-folded because that is what
+        // alphabetical means to a reader; a plain byte sort puts every capital-initial repository
+        // before every lowercase one, which is how aartiPl/tablevis sat at row 524 of the queue
+        // while the page showed it fourteenth. Same corpus, two orders, and the sweep read as
+        // skipping rows it had simply not reached.
+        // THE TIE-BREAK ONLY FIRES ON A REAL TIE, which is two names differing in nothing but
+        // case. A first attempt at this used Alpha/upper and alpha/lower, which are not tied at
+        // all once the fold reaches the seventh character, and it tested the fold twice.
+        bump(results, "zeta/last", 1_000, 1_000);
+        bump(results, "alpha/same", 2_000, 2_000);
+        bump(results, "Alpha/same", 3_000, 3_000);
+        bump(results, "aardvark/first", 4_000, 4_000);
 
-        List<Long> ats = atsInOrder(bumps(results, 0));
-
-        assertEquals(12, ats.size());
-        for (int i = 1; i < ats.size(); i += 1) {
-            assertTrue(ats.get(i - 1) >= ats.get(i),
-                    "row " + i + " is out of order: " + ats);
-        }
+        assertEquals(List.of("aardvark/first", "Alpha/same", "alpha/same", "zeta/last"),
+                reposInOrder(bumps(results, 0)),
+                "case-folded first; the byte order decides only where the fold ties");
     }
 
     @Test

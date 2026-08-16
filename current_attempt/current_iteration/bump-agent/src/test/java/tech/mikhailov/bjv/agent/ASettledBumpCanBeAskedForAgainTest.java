@@ -147,4 +147,39 @@ class ASettledBumpCanBeAskedForAgainTest {
         assertTrue(said.contains("already waiting"), said);
         assertFalse(Files.exists(results.resolve("rerun.tsv")), "nothing was queued a second time");
     }
+
+    @Test
+    void theTableIsInTheOrderTheSweepTakesThem(@TempDir Path results) throws Exception {
+        // IT SORTED BY WHATEVER MOVED LAST, so the running bumps floated to the top and the table
+        // rearranged itself as the sweep worked: a repository you were reading moved because a
+        // different one finished. It is run.sh's own comparator now (run.sh:233), repository
+        // case-folded, then case-sensitive to break the ties the fold creates, then the source JDK.
+        //
+        // CASE-FOLDED BECAUSE THAT IS WHAT ALPHABETICAL MEANS. A plain byte sort puts every
+        // capital-initial repository before every lowercase one, which is how aartiPl/tablevis sat
+        // at row 524 of the queue while the page showed it fourteenth: same corpus, two orders,
+        // and the sweep read as skipping rows it had simply not reached.
+        settle(results, "zeta/last", "PASS");
+        settle(results, "aartiPl/tablevis", "bumping");
+        settle(results, "Alpha/first", "PASS");
+        settle(results, "alpha/first", "PASS");
+
+        java.lang.reflect.Method m = Api.class.getDeclaredMethod("bumps", String.class);
+        m.setAccessible(true);
+        List<String> shown = reposIn((String) m.invoke(new Api(results), ""));
+
+        assertEquals(List.of("aartiPl/tablevis", "Alpha/first", "alpha/first", "zeta/last"), shown,
+                "case-folded first, and a bumping row does not jump the queue");
+    }
+
+    /** The repository of every row, in the order the endpoint returned them. */
+    private static List<String> reposIn(String json) {
+        List<String> out = new java.util.ArrayList<>();
+        java.util.regex.Matcher m =
+                java.util.regex.Pattern.compile("\"repo\":\"([^\"]*)\"").matcher(json);
+        while (m.find()) {
+            out.add(m.group(1));
+        }
+        return out;
+    }
 }

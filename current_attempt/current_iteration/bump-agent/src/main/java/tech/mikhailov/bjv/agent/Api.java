@@ -745,20 +745,46 @@ final class Api {
             rows.removeIf(r -> shownAt(r) <= mark
                     && !"bumping".equals(r.getOrDefault("state", "")));
         }
-        // Anything that has moved first, newest first, then the queue in the order it will run.
+        // THE ORDER THE SWEEP TAKES THEM IN, which is the one order a reader can hold in their
+        // head. It sorted by whatever had moved most recently, so the running bumps floated to the
+        // top and the table rearranged itself as the sweep worked: a repository you were looking
+        // at moved because a different one finished.
         //
-        // SORTED ON THE VALUE THE ROW ACTUALLY CARRIES. This sorted on the settlement's own `at`
-        // and then emitted lastEventAt instead, so the two were different facts: a settlement is
-        // written when a bump starts and when it ends, while the row shows the trace's last write.
-        // The list therefore arrived in an order matching nothing on screen, and looked stable only
-        // because the page merges deltas in place -- until a refresh, which fetched it afresh and
-        // shuffled every running row.
+        // This is run.sh's comparator, character for character (run.sh:233):
+        //     LC_ALL=C sort -t TAB -k2,2f -k2,2 -k4,4n
+        // repository case-folded, then case-sensitive to break the ties the fold creates, then the
+        // source JDK numerically. Case-folded because that is what alphabetical means to a reader:
+        // a plain byte sort puts every capital-initial repository before every lowercase one, and
+        // aartiPl/tablevis sat at row 524 in the queue while the page showed it fourteenth. Same
+        // corpus, two orders, and the sweep looked like it was skipping rows it had not reached.
         //
-        // The delta filter above has the same fix for the same reason: comparing a caller's mark,
-        // which came from the row it was given, against a field that row never carried would drop
-        // rows that had in fact moved.
-        rows.sort((a, b) -> Long.compare(shownAt(b), shownAt(a)));
+        // The delta filter above is untouched. It decides which rows moved, not where they go, and
+        // the page replaces them in place precisely so that the server's order survives a refresh.
+        rows.sort((a, b) -> {
+            String[] x = a.getOrDefault("bump", "").split("\\|");
+            String[] y = b.getOrDefault("bump", "").split("\\|");
+            String rx = x.length > 0 ? x[0] : "";
+            String ry = y.length > 0 ? y[0] : "";
+            int byName = rx.compareToIgnoreCase(ry);
+            if (byName != 0) {
+                return byName;
+            }
+            int exact = rx.compareTo(ry);
+            if (exact != 0) {
+                return exact;
+            }
+            return Integer.compare(hopFrom(x), hopFrom(y));
+        });
         return Json.array(rows, this::summary);
+    }
+
+    /** The source JDK of a split bump key, or zero when it has none to compare on. */
+    private static int hopFrom(String[] parts) {
+        try {
+            return parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+        } catch (NumberFormatException notANumber) {
+            return 0;
+        }
     }
 
     /** One row of the corpus. `repo|sha|from|to` is the bump key the whole harness is keyed by. */
