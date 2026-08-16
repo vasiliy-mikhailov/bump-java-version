@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import type { BumpSummary, Summary } from '@bjv/types'
 import {
   BumpTable,
+  bomTotals,
   cveTotals,
   duration,
   EmptyNote,
@@ -141,6 +142,7 @@ export default function Home() {
   // its before alone would credit the run with clearing a project it never finished. The
   // denominator travels with the totals for the same reason.
   const cve = cveTotals(bumps)
+  const bom = bomTotals(bumps)
 
   // TWO ADJACENT STRIPS, as the sibling has: the first counts the RUN, the second counts the
   // verdicts. Merging them would put "elapsed" next to "blocked-dependency".
@@ -191,6 +193,48 @@ export default function Home() {
             value={cve.rate === null ? '—' : `${cve.rate}%`}
             label={`removed, over ${cve.measured.toLocaleString()} measured →`}
             tone={cve.rate !== null && cve.rate > 0 ? 'good' : cve.rate !== null && cve.rate < 0 ? 'alarm' : 'plain'}
+          />
+        </a>
+      </div>
+      {/* THE SAME SHAPE, ASKING THE OTHER QUESTION. The row above is what the bumps did to the
+          vulnerabilities; this is what they did to the versions the target actually needs, which
+          the verdict does not say and which a green gate can be entirely silent about.
+
+          Both rows count only bumps measured on BOTH sides. A before with no after would read as
+          work done and an after with no before as work lost, and neither is true. */}
+      <div style={{ ...STRIP, paddingTop: 0 }}>
+        <Tally value={bom.before.toLocaleString()} label="BOM issues before" />
+        <Tally
+          value={bom.after.toLocaleString()}
+          label="after"
+          tone={bom.after < bom.before ? 'good' : bom.after > bom.before ? 'alarm' : 'plain'}
+        />
+        <Tally
+          value={bom.removed === null ? '—' : `${bom.removed}%`}
+          label={`removed, over ${bom.measured.toLocaleString()} measured`}
+          tone={
+            bom.removed !== null && bom.removed > 0
+              ? 'good'
+              : bom.removed !== null && bom.removed < 0
+                ? 'alarm'
+                : 'plain'
+          }
+        />
+        {/* The rate is over floors that APPLIED, so a repository declaring none of them neither
+            helps nor hurts it. The definition lives one click away rather than in a tooltip. */}
+        <a href={href('/settings/?a=bom')} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Tally
+            value={bom.compliance === null ? '—' : `${bom.compliance}%`}
+            label="BOM compliance →"
+            tone={
+              bom.compliance === null
+                ? 'plain'
+                : bom.compliance >= 90
+                  ? 'good'
+                  : bom.compliance < 50
+                    ? 'alarm'
+                    : 'plain'
+            }
           />
         </a>
       </div>

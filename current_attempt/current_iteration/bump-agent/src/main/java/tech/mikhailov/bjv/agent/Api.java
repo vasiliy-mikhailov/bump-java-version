@@ -762,6 +762,16 @@ final class Api {
                 // it reached. Null where nothing was measured, which is not nought per cent.
                 Json.field("bomMet", bom(slug, "met")),
                 Json.field("bomMissed", bom(slug, "missed")),
+                // WHERE IT STOOD BEFORE, so a reader can tell a repository this harness raised
+                // from one that arrived at the floor already owing it nothing.
+                Json.field("bomMetBefore", bom(slug, "metBefore")),
+                Json.field("bomMissedBefore", bom(slug, "missedBefore")),
+                // ONLY THE FLOORS JUDGEABLE ON BOTH SIDES. The after-scan runs on a green gate and
+                // the before-scan does not, so the raw totals are not comparable and subtracting
+                // them reports a missing measurement as work done.
+                Json.field("bomPairApplied", bom(slug, "pairApplied")),
+                Json.field("bomPairMissedBefore", bom(slug, "pairMissedBefore")),
+                Json.field("bomPairMissedAfter", bom(slug, "pairMissedAfter")),
                 Json.field("bomOutstanding", Json.optional(bom(slug, "outstanding"))));
     }
 

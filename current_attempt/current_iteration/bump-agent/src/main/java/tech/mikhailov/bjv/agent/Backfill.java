@@ -57,13 +57,16 @@ final class Backfill {
                     skipped++;
                     continue;
                 }
-                Bom.Compliance c = Bom.measure(ws,
-                        results.resolve(bump.replaceAll("[^A-Za-z0-9]+", "_"))
-                                .resolve("trace.jsonl"),
-                        target);
-                Bom.record(results, bump, c);
-                System.out.printf("  %-52s %2d met  %2d missed  %s%n", slug, c.met(), c.missed(),
-                        c.percent() < 0 ? "no floors declared" : c.percent() + "%");
+                Path trace = results.resolve(bump.replaceAll("[^A-Za-z0-9]+", "_"))
+                        .resolve("trace.jsonl");
+                Bom.Compliance c = Bom.measure(ws, trace, target);
+                Bom.Compliance was = Bom.measureBefore(ws, trace, row[1], target);
+                Bom.record(results, bump, c, was);
+                Bom.Movement moved = Bom.between(was, c);
+                System.out.printf("  %-46s now %2d/%-2d %-4s   comparable %2d: %d issues -> %d%n",
+                        slug, c.met(), c.applicable(),
+                        c.percent() < 0 ? "  -" : c.percent() + "%",
+                        moved.applied(), moved.missedBefore(), moved.missedAfter());
                 measured++;
             }
         }

@@ -7,6 +7,7 @@
  */
 
 export { BumpTable, type BumpTableProps } from './BumpTable'
+export { bomTotals, type BomTotals } from './boms'
 export { cveTotals, type CveTotals } from './cves'
 export { ChainStrip, type ChainStripProps } from './ChainStrip'
 export { EventFeed, type EventFeedProps } from './EventFeed'

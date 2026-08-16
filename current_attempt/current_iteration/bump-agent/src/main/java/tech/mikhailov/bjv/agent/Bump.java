@@ -97,9 +97,10 @@ public final class Bump {
             String[] part = bump.split("\\|");
             if (part.length >= 4) {
                 try {
-                    Bom.record(results, bump, Bom.measure(checkout,
-                            results.resolve(slug).resolve("trace.jsonl"),
-                            Integer.parseInt(part[3])));
+                    Path written = results.resolve(slug).resolve("trace.jsonl");
+                    int target = Integer.parseInt(part[3]);
+                    Bom.record(results, bump, Bom.measure(checkout, written, target),
+                            Bom.measureBefore(checkout, written, part[1], target));
                 } catch (NumberFormatException notAHop) {
                     // A manifest row with no target has nothing to be compliant with.
                 }

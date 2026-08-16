@@ -87,6 +87,49 @@ final class Bom {
         }
     }
 
+    /**
+     * WHAT MOVED, OVER THE FLOORS THAT WERE JUDGEABLE ON BOTH SIDES.
+     *
+     * <p>The two compliances are not comparable as totals and it is not close. The after-scan only
+     * runs on a green gate, so a bump that never reached one has a resolved tree before and none
+     * after, and its "after" is smaller because less was measured rather than because anything was
+     * fixed. Measured on this corpus: packages-before exists on 69 traces and packages-after on 39,
+     * and repositories came out reading "was 3 of 11, now 0 of 4".
+     *
+     * <p>Subtracting those would report the missing measurement as work done, which is the most
+     * expensive recurring mistake in this project wearing a rate. So a floor counts here only if it
+     * applied on BOTH sides, and everything else is left out of the arithmetic entirely.
+     */
+    record Movement(int applied, int missedBefore, int missedAfter) {
+    }
+
+    /** The comparable half of two measurements of one repository. */
+    static Movement between(Compliance was, Compliance now) {
+        Map<String, Verdict> then = new LinkedHashMap<>();
+        for (Verdict v : was.verdicts()) {
+            if (v.applicable()) {
+                then.put(v.floor().coordinates(), v);
+            }
+        }
+        int applied = 0;
+        int before = 0;
+        int after = 0;
+        for (Verdict v : now.verdicts()) {
+            Verdict earlier = v.applicable() ? then.get(v.floor().coordinates()) : null;
+            if (earlier == null) {
+                continue;
+            }
+            applied++;
+            if (!earlier.met()) {
+                before++;
+            }
+            if (!v.met()) {
+                after++;
+            }
+        }
+        return new Movement(applied, before, after);
+    }
+
     /** Parsed once per rung. The files do not change under a running sweep. */
     private static final Map<Integer, List<Floor>> LOADED = new LinkedHashMap<>();
 
@@ -266,6 +309,11 @@ final class Bom {
      * dependencies and must not be read as one.
      */
     static Map<String, String> resolvedIn(Path trace) {
+        return resolvedIn(trace, "packages-after");
+    }
+
+    /** The same, for whichever scan is wanted: the tree before the bump, or the tree after it. */
+    static Map<String, String> resolvedIn(Path trace, String stage) {
         Map<String, String> lowest = new LinkedHashMap<>();
         if (!java.nio.file.Files.isRegularFile(trace)) {
             return lowest;
@@ -274,7 +322,7 @@ final class Bom {
         try {
             for (String line : java.nio.file.Files.readAllLines(trace,
                     java.nio.charset.StandardCharsets.UTF_8)) {
-                if (line.contains("\"stage\":\"packages-after\"")) {
+                if (line.contains("\"stage\":\"" + stage + "\"")) {
                     latest = line;
                 }
             }
@@ -341,12 +389,18 @@ final class Bom {
      * against a changed harness should leave both numbers on the record, and the reader takes the
      * last.
      */
-    static void record(Path results, String bump, Compliance c) {
+    static void record(Path results, String bump, Compliance c, Compliance was) {
+        Movement moved = between(was, c);
         String outstanding = c.outstanding().stream()
                 .map(v -> v.floor().artifact() + " " + v.declared() + " below " + v.floor().version())
                 .reduce((a, b) -> a + "; " + b).orElse("");
         String line = "{\"bump\":\"" + Settlement.escape(bump) + "\",\"met\":" + c.met()
                 + ",\"missed\":" + c.missed() + ",\"percent\":" + c.percent()
+                + ",\"metBefore\":" + was.met() + ",\"missedBefore\":" + was.missed()
+                // The comparable half, which is what a before-and-after rate may be built from.
+                + ",\"pairApplied\":" + moved.applied()
+                + ",\"pairMissedBefore\":" + moved.missedBefore()
+                + ",\"pairMissedAfter\":" + moved.missedAfter()
                 + ",\"outstanding\":\"" + Settlement.escape(outstanding) + "\"}\n";
         try {
             java.nio.file.Files.createDirectories(results);
@@ -365,6 +419,76 @@ final class Bom {
             return against(target, resolvedIn(trace), declaredIn(ws), Migrate.actuatorFor(ws));
         } catch (IOException | RuntimeException unreadable) {
             return new Compliance(List.of(), 0, 0);
+        }
+    }
+
+    /**
+     * WHERE THE PROJECT STOOD BEFORE ANY OF THIS TOUCHED IT.
+     *
+     * <p>Without it there is a compliance number and nothing to compare it against, and the
+     * question everyone actually asks is not how compliant a repository is but how much of the
+     * distance this harness closed. A project that arrived at the floor owes the bump nothing.
+     *
+     * <p>ON THE SAME BASIS AS THE AFTER, which is the whole point and the only difficult part. The
+     * resolved half comes from the scan that ran before the bump; the declared half is read out of
+     * git at the sha the corpus pinned, because rows that are never a dependency -- a wrapper, a
+     * maven plugin, a parent pom -- exist only in build files. Measuring the before from resolved
+     * packages alone and the after from both would report every one of those rows as an issue this
+     * harness introduced.
+     *
+     * <p>The module list is the one on disk now. A bump that adds or removes a module would have
+     * this read the new shape against old contents, which is wrong at the edges and much less wrong
+     * than not reading the declarations at all.
+     */
+    static Compliance measureBefore(Path ws, Path trace, String sha, int target) {
+        try {
+            return against(target, resolvedIn(trace, "packages-before"), declaredAt(ws, sha),
+                    Migrate.actuatorFor(ws));
+        } catch (IOException | RuntimeException unreadable) {
+            return new Compliance(List.of(), 0, 0);
+        }
+    }
+
+    /** What the build files said at one commit, which is not what they say now. */
+    static Map<String, String> declaredAt(Path ws, String sha) throws IOException {
+        Map<String, String> lowest = new LinkedHashMap<>();
+        if (sha == null || sha.isBlank()) {
+            return lowest;
+        }
+        List<Modules.Module> modules = Modules.of(ws);
+        for (Modules.Module m : modules) {
+            for (Path f : Modules.buildFilesOf(ws, m, modules)) {
+                String relative = ws.relativize(f).toString().replace('\\', '/');
+                String text = show(ws, sha, relative);
+                if (text.isEmpty()) {
+                    continue;
+                }
+                for (Declared.Version v : Declared.in(text, relative)) {
+                    if (v.value().matches("\\d.*")) {
+                        String key = v.coordinates().toLowerCase(Locale.ROOT);
+                        lowest.put(key, lower(lowest.getOrDefault(key, ""), v.value()));
+                    }
+                }
+            }
+        }
+        lowest.values().removeIf(String::isEmpty);
+        return lowest;
+    }
+
+    /**
+     * One file as of one commit, or empty when it did not exist then.
+     *
+     * <p>Empty is a real answer and not an error: a build file this harness ADDED has no earlier
+     * version, and treating that as a failure would lose every other file in the module.
+     */
+    private static String show(Path ws, String sha, String relative) {
+        try {
+            Shell.Output out = Shell.run(ws, Map.of(), java.time.Duration.ofSeconds(30),
+                    "git", "-c", "safe.directory=" + ws, "show", sha + ":" + relative);
+            return out.code() == 0 ? out.text() : "";
+        } catch (IOException | InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            return "";
         }
     }
 }

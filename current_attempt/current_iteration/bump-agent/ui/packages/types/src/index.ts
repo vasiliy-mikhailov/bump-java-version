@@ -88,6 +88,19 @@ export type BumpSummary = {
    */
   bomMet: number | null
   bomMissed: number | null
+  /** The same two, measured against the tree as it stood before the bump touched it. */
+  bomMetBefore: number | null
+  bomMissedBefore: number | null
+  /**
+   * THE COMPARABLE HALF, and the only honest basis for a before-and-after rate.
+   *
+   * The after-scan only runs on a green gate, so a bump that never reached one is measured against
+   * a resolved tree before and none after: its "after" is smaller because less was measured, not
+   * because anything was fixed. These count only floors that applied on both sides.
+   */
+  bomPairApplied: number | null
+  bomPairMissedBefore: number | null
+  bomPairMissedAfter: number | null
   /** The floors it still sits below, named, so the number can be argued with. */
   bomOutstanding: string | null
 }
