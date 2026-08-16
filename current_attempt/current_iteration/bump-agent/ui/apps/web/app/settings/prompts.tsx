@@ -61,6 +61,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
     loop: string
     repeats: string
     reads: string
+    pins: number
     agents: AgentPrompt[]
   }[] = []
   for (const p of prompts ?? []) {
@@ -74,6 +75,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
         loop: p.loop,
         repeats: p.repeats,
         reads: p.reads,
+        pins: p.pins,
         agents: [p],
       })
     }
@@ -105,6 +107,8 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
     repeats: string
     /** Which bill of materials it works from, empty when none. */
     reads: string
+    /** How many rows that list has for this hop. */
+    pins: number
   }
 
   // ANY DEPTH, NOT ONE LEVEL. The first version collected children only where within matched the
@@ -130,6 +134,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
         opens: '',
         repeats: stage.repeats,
         reads: stage.reads,
+        pins: stage.pins,
       })
       return
     }
@@ -143,6 +148,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
       opens: stage.loop,
       repeats: stage.repeats,
       reads: stage.reads,
+      pins: stage.pins,
     })
     for (const child of children) {
       emit(child, depth + 1)
@@ -157,6 +163,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
         opens: '',
         repeats: '',
         reads: '',
+        pins: 0,
       })
     }
   }
@@ -170,7 +177,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
         label="Hop"
         tabs={HOPS.map((h) => ({
           label: h.replace('-', ' → '),
-          href: href(`/settings/?a=prompts&hop=${h}`),
+          href: href(`/settings/?a=shape&hop=${h}`),
           current: h === hop,
         }))}
       />
@@ -237,6 +244,10 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
                     style={{ color: 'var(--accent-primary)', marginLeft: '8px' }}
                   >
                     {block.reads === 'hardens' ? 'hardens the result' : 'enables the bump'}
+                    {/* COUNTED FROM THE FILE, not written down beside it. A number typed onto a
+                        page goes stale the first time somebody edits the list it describes, and
+                        this one is editable from the next tab along. */}
+                    {block.pins === 0 ? null : `  ${block.pins} pins`}
                     {' \u2192'}
                   </a>
                 )}

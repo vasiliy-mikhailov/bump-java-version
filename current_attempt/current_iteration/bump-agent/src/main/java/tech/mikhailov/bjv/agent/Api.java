@@ -1365,6 +1365,12 @@ final class Api {
                     Json.field("within", Json.string(withinOf.getOrDefault(d.name(), ""))),
                     Json.field("repeats", Json.string(repeatsOf.getOrDefault(d.name(), ""))),
                     Json.field("reads", Json.string(readsOf.getOrDefault(d.name(), ""))),
+                    // HOW MANY ROWS THAT LIST ACTUALLY HAS, counted from the file rather than
+                    // written down beside it. A number typed into a page is a number that goes
+                    // stale the first time somebody edits the list it describes.
+                    Json.field("pins", String.valueOf(
+                            readsOf.getOrDefault(d.name(), "").isEmpty() ? 0
+                                    : Bom.of(h, readsOf.get(d.name())).size())),
                     // The deterministic step that IS the loop, on the stage that owns one.
                     Json.field("loop", Json.string(
                             loopOf.getOrDefault(stageOf.getOrDefault(d.name(), ""), ""))),

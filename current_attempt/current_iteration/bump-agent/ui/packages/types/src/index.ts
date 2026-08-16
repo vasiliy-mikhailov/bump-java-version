@@ -235,6 +235,8 @@ export type AgentPrompt = {
    * the result is polish on a project that already builds and tests green.
    */
   reads: string
+  /** How many rows that list has for this hop, counted from the file. Zero when it reads none. */
+  pins: number
   description: string
   /** What is in force: the edit if there is one, otherwise the code's own. */
   prompt: string
