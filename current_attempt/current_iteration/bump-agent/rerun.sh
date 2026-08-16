@@ -20,6 +20,23 @@ set -uo pipefail
 cd "$(dirname "$0")"
 R=${BJV_RUNROOT:-$(cd .. && pwd)/runs_agent}
 n=0
+
+# ADOPT WHAT A PREVIOUS DRAINER LEFT BEHIND.
+#
+# A batch is MOVED out of rerun.tsv before it runs, so a drainer that is restarted while one is in
+# flight strands it: the file is no longer in the queue and the new drainer only watches the queue.
+# Measured the first time this was restarted, with somebody waiting on the page for the bump inside.
+#
+# Re-queueing is safe rather than clever. run.sh skips a bump that has settled and skips one whose
+# claim is live, so a row that did finish costs one line of output and a row still running is left
+# alone; the only case that changes is the one this is for.
+for old in "$R"/rerun-batch-*.tsv; do
+  [ -e "$old" ] || continue
+  echo "[$(date -Is)] adopting $(basename "$old"): $(grep -c . "$old") row(s) a previous drainer left"
+  cat "$old" >> "$R/results/rerun.tsv"
+  rm -f "$old"
+done
+
 while true; do
   if [ -s "$R/results/rerun.tsv" ]; then
     n=$((n+1))
@@ -28,7 +45,10 @@ while true; do
     # being run twice or dropped.
     mv "$R/results/rerun.tsv" "$BATCH"
     echo "[$(date -Is)] draining batch $n: $(grep -c . "$BATCH") requeued bump(s)"
-    bash ./run.sh "$BATCH" &
+    # PRIORITY, WHICH MEANS A SWEEP HOLDS A SLOT BACK RATHER THAN THIS ONE TAKING AN EXTRA. A
+    # rerun is a person who clicked, and it was losing a three-way race for every freed lane to two
+    # sweeps of 1439 rows each. The total allowance is unchanged.
+    BJV_PRIORITY=1 bash ./run.sh "$BATCH" &
   fi
   sleep 15
 done

@@ -270,10 +270,69 @@ lanes() { local n; n=$(cat "$LANEFILE" 2>/dev/null); case "$n" in ''|*[!0-9]*) e
 # claims directory is the count that was wanted all along. Own jobs are the floor, because a
 # claim write is allowed to fail and a lane that could not claim still occupies a lane.
 running() {
-  local claimed own
-  claimed=$(ls "$RESULTS/claims" 2>/dev/null | wc -l)
+  local n=0 own c name
+  for c in "$RESULTS"/claims/*; do
+    [ -e "$c" ] || continue
+    name=$(cat "$c" 2>/dev/null)
+    if [ -n "$name" ] && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "$name"; then
+      n=$((n+1)); continue
+    fi
+    # A CLAIM WITH NO CONTAINER, AND NOTHING ELSE WAS GOING TO NOTICE. inflight() reaps one, but
+    # only for a bump the pass actually considers, and a pass skips a SETTLED bump before it gets
+    # there. So a lane that ended left its claim behind for good: measured, one dead ForgeHaxEx
+    # claim held a slot for nine hours and a cap of eight was really a cap of seven.
+    #
+    # NOT REAPED ON SIGHT, THOUGH. A lane writes its claim before it starts its container, so a
+    # claim with no container is either dead or three seconds old. The watchdog touches a live one
+    # every thirty seconds, so an untouched-for-minutes claim is the only one that is certainly
+    # dead; reaping the other kind would launch the same bump twice.
+    if [ -n "$(find "$c" -mmin +3 2>/dev/null)" ]; then
+      echo "[lanes] reaping a claim whose container is gone: $(basename "$c")"
+      rm -f "$c" 2>/dev/null
+    else
+      n=$((n+1))
+    fi
+  done
   own=$(jobs -rp | wc -l)
-  [ "$claimed" -gt "$own" ] && echo "$claimed" || echo "$own"
+  [ "$n" -gt "$own" ] && echo "$n" || echo "$own"
+}
+
+# WHETHER SOMEBODY IS WAITING ON A PAGE FOR A LANE.
+#
+# A rerun is a person who clicked, and it was losing a three-way race for every freed slot against
+# two sweeps of 1439 rows each. Measured twice: a requeued bump sat unclaimed while the sweeps took
+# every slot that came up.
+#
+# So a sweep holds one slot back while anything is queued for rerun, and the drainer takes it. The
+# total is unchanged, which is the point: raising the cap for reruns would quietly spend GPU that
+# was deliberately budgeted.
+rerunWaiting() {
+  [ -s "$RESULTS/rerun.tsv" ] && return 0
+  ls "$ROOT"/rerun-batch-*.tsv >/dev/null 2>&1 && return 0
+  return 1
+}
+
+# The ceiling this runner may fill, which is not always the whole allowance.
+#
+# IT HAS TO WORK WITHOUT EVERY RUNNER AGREEING, which is the part the first attempt got wrong. A
+# reservation where sweeps hold a slot back is the tidy design and it was inert on arrival: bash
+# reads a script by byte offset, the two long-lived sweeps were already inside their loops, and
+# they will not see a new function until they are restarted, which means killing live lanes.
+#
+# So priority takes rather than waits. The drainer may fill one slot above the allowance, which
+# needs nobody's cooperation and works the moment it is deployed. A sweep that IS new holds one
+# back while a rerun is queued, so once the sweeps do restart the total returns to the allowance
+# exactly. Both halves are correct on their own and together; the cost, said plainly, is one lane
+# over the budget for as long as a person is waiting on a page and an old sweep is still running.
+mine() {
+  local cap; cap=$(lanes)
+  if [ -n "${BJV_PRIORITY:-}" ]; then
+    echo $((cap + 1))
+  elif [ "$cap" -gt 1 ] && rerunWaiting; then
+    echo $((cap - 1))
+  else
+    echo "$cap"
+  fi
 }
 
 echo "manifest $MAN ($(grep -c . "$MAN") rows), $(lanes) lanes (live: $LANEFILE), results -> $RESULTS"
@@ -292,7 +351,7 @@ while read -r slug repo sha from to; do
   # value could not matter. Raising the limit from the dashboard then did nothing until something
   # finished: saved as 6, still running 4, with no way to tell the difference from a broken write.
   # Two seconds of latency reusing a freed slot is nothing against a bump that runs for an hour.
-  while [ "$(running)" -ge "$(lanes)" ]; do sleep 2; done
+  while [ "$(running)" -ge "$(mine)" ]; do sleep 2; done
   one "$slug" "$repo" "$sha" "$from" "$to" &
   done_n=$((done_n+1))
 done < "$MAN"
