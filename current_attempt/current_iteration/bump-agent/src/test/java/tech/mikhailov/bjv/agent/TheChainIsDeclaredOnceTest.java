@@ -187,4 +187,31 @@ class TheChainIsDeclaredOnceTest {
                 .findFirst().orElseThrow()
                 .reads();
     }
+
+    @Test
+    void theCatalogueAndTheFactoryCannotDisagreeAboutTools() {
+        // THEY DID, ON SIX AGENTS, AND THE PAGE WAS THE ONE THAT WAS WRONG. definitions() gave
+        // before-pins-planner, before-pins-verifier, after-pins-planner, after-pins-verifier,
+        // modules-planner and modules-verifier the reading tool set, while the factory that
+        // actually runs them handed out Tools.judging. The settings page reads the catalogue, so
+        // it described a tool surface those agents did not have, and their own prompt tells them
+        // to call declared_versions and build_system, which only judging carries.
+        //
+        // The factories derive from the catalogue now. This is the thing that stops it happening
+        // again: every agent the chain names must resolve through the same lookup, and a factory
+        // that restates a tool set instead of asking for one will show up as a name the catalogue
+        // does not carry.
+        List<String> catalogued = Agents.forHop(new Hop(17, 21), Path.of("/tmp")).stream()
+                .map(SubAgentDefinition::name)
+                .toList();
+
+        for (String name : Chain.agentNames()) {
+            assertTrue(catalogued.contains(name),
+                    name + " runs but is not in the catalogue, so nothing can describe it");
+        }
+        for (String name : catalogued) {
+            assertTrue(Chain.agentNames().contains(name),
+                    name + " is catalogued but the chain never reaches it");
+        }
+    }
 }

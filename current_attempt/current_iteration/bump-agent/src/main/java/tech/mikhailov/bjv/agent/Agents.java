@@ -408,9 +408,7 @@ final class Agents {
     }
 
     Agent beforePinsVerifier() {
-        return runtime("before-pins-verifier",
-                Tools.judging(ws, tree, trace, "before-pins-verifier"),
-                pinPrompt(P_PINS_CRITIC, false));
+        return agent("before-pins-verifier");
     }
 
     Agent afterPinsDoer() {
@@ -418,9 +416,7 @@ final class Agents {
     }
 
     Agent afterPinsVerifier() {
-        return runtime("after-pins-verifier",
-                Tools.judging(ws, tree, trace, "after-pins-verifier"),
-                pinPrompt(P_PINS_CRITIC, true));
+        return agent("after-pins-verifier");
     }
 
     /**
@@ -432,15 +428,11 @@ final class Agents {
      * at the same plan until the budget ran out.
      */
     Agent beforePinsPlanner() {
-        return runtime("before-pins-planner",
-                Tools.judging(ws, tree, trace, "before-pins-planner"),
-                pinPrompt(P_PINS_PLANNER, false));
+        return agent("before-pins-planner");
     }
 
     Agent afterPinsPlanner() {
-        return runtime("after-pins-planner",
-                Tools.judging(ws, tree, trace, "after-pins-planner"),
-                pinPrompt(P_PINS_PLANNER, true));
+        return agent("after-pins-planner");
     }
 
     Agent bumpPlanner() {
@@ -461,15 +453,11 @@ final class Agents {
 
     /** One module's own plan, and the verifier that closes it. Both read per module. */
     Agent modulesPlanner() {
-        return runtime("modules-planner",
-                Tools.judging(ws, tree, trace, "modules-planner"),
-                floors(P_MODULE_PLANNER));
+        return agent("modules-planner");
     }
 
     Agent modulesVerifier() {
-        return runtime("modules-verifier",
-                Tools.judging(ws, tree, trace, "modules-verifier"),
-                floors(P_MODULE_VERIFIER));
+        return agent("modules-verifier");
     }
 
     /** The planners of the stages that used to be pairs. None of them holds a tool that writes. */
@@ -536,14 +524,14 @@ final class Agents {
                 define("module-filter-verifier", "checks every skip is evidenced",
                         floors(P_MODULE_FILTER_CRITIC), read("module-filter-verifier")),
                 define("modules-planner", "says what one module needs, and nothing about its siblings",
-                        floors(P_MODULE_PLANNER), read("modules-planner")),
+                        floors(P_MODULE_PLANNER), Tools.judging(ws, tree, trace, "modules-planner")),
                 define("before-pins-planner", "decides which pins to raise, in which module",
-                        pinPrompt(P_PINS_PLANNER, false), read("before-pins-planner")),
+                        pinPrompt(P_PINS_PLANNER, false), Tools.judging(ws, tree, trace, "before-pins-planner")),
                 define("before-pins-doer", "raises the versions the new JDK needs, before it moves",
                         pinPrompt(P_PINS, false),
                         Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()), trace, "before-pins-doer")),
                 define("before-pins-verifier", "checks every pre-JDK pin landed, module by module",
-                        pinPrompt(P_PINS_CRITIC, false), read("before-pins-verifier")),
+                        pinPrompt(P_PINS_CRITIC, false), Tools.judging(ws, tree, trace, "before-pins-verifier")),
 
                 define("bump-planner", "groups the remaining target declarations by module",
                         floors(P_BUMP_PLANNER),
@@ -563,14 +551,14 @@ final class Agents {
                 define("module-repair-step-verifier", "migration fix, or gaming the gate", P_TROUBLE_CRITIC,
                         read("module-repair-step-verifier")),
                 define("after-pins-planner", "decides which post-JDK pins to raise, in which module",
-                        pinPrompt(P_PINS_PLANNER, true), read("after-pins-planner")),
+                        pinPrompt(P_PINS_PLANNER, true), Tools.judging(ws, tree, trace, "after-pins-planner")),
                 define("after-pins-doer", "raises the versions that only run on the new JDK",
                         pinPrompt(P_PINS, true),
                         Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()), trace, "after-pins-doer")),
                 define("after-pins-verifier", "checks every post-JDK pin landed, module by module",
-                        pinPrompt(P_PINS_CRITIC, true), read("after-pins-verifier")),
+                        pinPrompt(P_PINS_CRITIC, true), Tools.judging(ws, tree, trace, "after-pins-verifier")),
                 define("modules-verifier", "closes one module, or sends it back",
-                        floors(P_MODULE_VERIFIER), read("modules-verifier")),
+                        floors(P_MODULE_VERIFIER), Tools.judging(ws, tree, trace, "modules-verifier")),
                 define("security-after-planner", "says which findings the bump could have moved",
                         floors(P_SECURITY_PLANNER), read("security-after-planner")),
                 define("security-after-doer", "reads what the bump did to the vulnerability count",
