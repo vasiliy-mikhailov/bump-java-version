@@ -1039,7 +1039,10 @@ public final class Bump {
         };
     }
 
-    private void price() {
+    // THROWS NOW, because an Agent may be plain code and plain code touches the workspace. Every
+    // caller of price() already runs inside a throwing method; the signature was the only thing
+    // pretending otherwise.
+    private void price() throws IOException {
         String context = "The bump " + bump + " (JDK " + from + " -> " + to
                 + ")"
                 + ". What the workspace became:\n" + tree.diff();

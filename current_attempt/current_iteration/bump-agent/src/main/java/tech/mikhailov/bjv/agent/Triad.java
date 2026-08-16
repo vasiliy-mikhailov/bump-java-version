@@ -36,7 +36,7 @@ import java.io.IOException;
  * verifier. The inner one closes first, so an outer verifier judges a finished piece of work rather
  * than a half-run loop.
  */
-final class Triad {
+final class Triad implements Agents.Agent {
 
     /** One execution of one plan. Not necessarily an agent: the enumerator's doer is Maven. */
     @FunctionalInterface
@@ -81,8 +81,31 @@ final class Triad {
         this.rounds = Math.max(1, rounds);
     }
 
+    /**
+     * The stage's name, which is the node's name: a triad is an agent like any other and a picture
+     * walked off the program needs to be able to say which one this is.
+     */
+    @Override
+    public String name() {
+        return stage;
+    }
+
+    /**
+     * WHAT IT CONTAINS, so a triad can be drawn without anyone writing the drawing down twice.
+     *
+     * <p>The planner and the verifier are leaves here rather than named children: naming them would
+     * put three lines on a picture where the interesting fact is one, that this stage plans, does
+     * and verifies like every other. What is worth showing is what the DOER contains, which is
+     * where a sub-chain lives.
+     */
+    @Override
+    public java.util.List<Agents.Agent> inside() {
+        return doer instanceof Agents.Agent nested ? java.util.List.of(nested) : java.util.List.of();
+    }
+
     /** What the stage ended up having done, which is the doer's last word. */
-    String run(String brief) throws IOException {
+    @Override
+    public String run(String brief) throws IOException {
         String plan = planner.run(brief);
         String feedback = "";
         String did = "";
