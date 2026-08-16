@@ -59,9 +59,6 @@ final class Migrate {
     private static final String RECIPE_JARS = "org.openrewrite.recipe:rewrite-migrate-java:3.36.0,"
             + "org.openrewrite.recipe:rewrite-spring:6.31.0";
 
-    /** The LTS ladder, so a hop can be asked which rungs it crosses. */
-    private static final int[] LTS = {8, 11, 17, 21, 25};
-
     private final Path ws;
     private final String hoptools;
     private final Trace trace;
@@ -70,95 +67,6 @@ final class Migrate {
         this.ws = ws;
         this.hoptools = hoptools;
         this.trace = trace;
-    }
-
-    /**
-     * The Tomcat floor for the 17->21 hop.
-     *
-     * <p>Measured, not chosen: this corpus scores tomcat-embed-core 9.0.65 at 22 CRITICAL+HIGH,
-     * 9.0.83 at 19 and 9.0.105 at 14. Nothing in a Java bump ever looked at that. Tomcat moved
-     * because SPRING moved -- Boot 2.7.18 pins tomcat.version 9.0.83 -- so the project inherited
-     * whichever Tomcat its framework happened to carry, and 9.0.83 is the last patch of Boot 2.7's
-     * line rather than of Tomcat's.
-     */
-    private static final String TOMCAT_9 = "9.0.105";
-
-    /**
-     * The Boot line a target JDK can actually run, and the version to land on.
-     *
-     * <p>SPRING BOOT 2.7 DOES NOT SUPPORT JAVA 21. It was the last 2.x line, it went end-of-life in
-     * 2023, and a 17->21 hop that lifts a Boot 2.7.3 project to 2.7.18 has moved it to the newest
-     * patch of a line that cannot run the target. The measurement agrees: this corpus scores Boot
-     * 3.5.x at 1 CRITICAL+HIGH against 2.7.18's tens, and 3.5.16 pins tomcat 10.1.55 -- the exact
-     * version trivy names as the fix for what the newest Tomcat 9 still carries.
-     *
-     * <p>The cost is honest and large: 2 to 3 is the jakarta rename, the highest-variance migration
-     * in this system, and the one measured losing 1916 of 2409 tests on a repo that took the jump
-     * unprepared. It is attempted anyway because the gate is the arbiter -- a migration that loses a
-     * test fails and says so -- and because leaving a project on an EOL line that cannot run its own
-     * target is not a smaller risk, only a quieter one.
-     */
-
-    /** The family moves in lockstep or the build breaks: they share a version by contract. */
-    private static final List<String> TOMCAT_EMBED = List.of(
-            "tomcat-embed-core", "tomcat-embed-el", "tomcat-embed-websocket");
-
-    /**
-     * Which Spring Boot LINE this project is on: 2, 3, or 0 for no Spring.
-     *
-     * <p>Structural, from the parent declaration or an imported BOM. A version scraped from anywhere
-     * near the word "spring" reads a {@code maven-compiler-plugin 3.8.0} as Boot 3.x, which is how
-     * the first detector silently routed projects into the wrong migration.
-     */
-    int bootLine() throws IOException {
-        String v = bootVersion();
-        return v.isEmpty() ? 0 : Integer.parseInt(v.substring(0, v.indexOf('.')));
-    }
-
-    /**
-     * The declared Spring Boot version as {@code major.minor}, or empty for no Spring.
-     *
-     * <p>The minor is kept because the distance being travelled is the interesting number. Boot 2.7
-     * to 3.5 is one minor plus the jakarta rename; Boot 2.0 to 3.5 is seven, and 2.0 is the profile
-     * of the run that lost 1916 of 2409 tests. Reporting only the major made those two the same
-     * fact, so the corpus could not tell them apart afterwards.
-     *
-     * <p>THE SPELLINGS ARE MEASURED, NOT IMAGINED. The property arm used to enumerate three exact
-     * tag names and matched none of the seventeen property declarations in this corpus: real poms
-     * write spring.boot.version and spring-boot-dependencies.version, and the Gradle arm could not
-     * see a buildscript classpath coordinate at all. Six Boot projects read as having no Spring.
-     */
-    String bootVersion() throws IOException {
-        Pattern parent = Pattern.compile(
-                "<artifactId>\\s*spring-boot-(?:starter-parent|dependencies)\\s*</artifactId>\\s*"
-                        + "<version>\\s*\\$?\\{?[^<}]*?(\\d+)\\.(\\d+)", Pattern.DOTALL);
-        // spring-boot.version, spring.boot.version, spring-boot-version,
-        // spring-boot-dependencies.version, spring.boot.dependencies.version, and so on.
-        Pattern property = Pattern.compile(
-                "<spring[.-]boot[.-]?(?:dependencies[.-])?version>\\s*(\\d+)\\.(\\d+)");
-        // classpath("org.springframework.boot:spring-boot-gradle-plugin:2.7.17")
-        Pattern gradleClasspath = Pattern.compile(
-                "org\\.springframework\\.boot:spring-boot-gradle-plugin:(\\d+)\\.(\\d+)");
-        // id("org.springframework.boot") version "3.1.0"
-        Pattern gradlePlugin = Pattern.compile(
-                "org\\.springframework\\.boot[\"']?\\s*\\)?\\s*(?:version)?\\s*[\"']?(\\d+)\\.(\\d+)");
-        List<Path> files = new ArrayList<>(Walls.poms(ws));
-        for (String g : List.of("build.gradle", "build.gradle.kts")) {
-            Path f = ws.resolve(g);
-            if (Files.isRegularFile(f)) {
-                files.add(f);
-            }
-        }
-        for (Path f : files) {
-            String text = Files.readString(f).replaceAll("<!--.*?-->", "");
-            for (Pattern p : List.of(parent, property, gradleClasspath, gradlePlugin)) {
-                Matcher m = p.matcher(text);
-                if (m.find()) {
-                    return m.group(1) + "." + m.group(2);
-                }
-            }
-        }
-        return "";
     }
 
     /** Dotted version order, so 9.0.105 is newer than 9.0.83 rather than alphabetically older. */
@@ -173,23 +81,6 @@ final class Migrate {
             }
         }
         return 0;
-    }
-
-    private String readAllBuildFiles() throws IOException {
-        StringBuilder all = new StringBuilder();
-        for (Path p : Walls.poms(ws)) {
-            all.append(Files.readString(p));
-        }
-        try (var s = Files.walk(ws)) {
-            for (Path f : s.filter(Files::isRegularFile).toList()) {
-                String n = f.toString();
-                if ((n.endsWith(".gradle") || n.endsWith(".gradle.kts") || n.endsWith(".toml"))
-                        && !n.contains("/node_modules/")) {
-                    all.append(Files.readString(f));
-                }
-            }
-        }
-        return all.toString().toLowerCase();
     }
 
     /** The recipe run itself, in the sealed container, under the SOURCE JDK the project still is. */

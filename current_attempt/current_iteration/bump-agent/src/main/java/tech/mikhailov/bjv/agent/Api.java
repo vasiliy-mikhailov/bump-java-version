@@ -403,26 +403,6 @@ final class Api {
         }
     }
 
-    /**
-     * The sentence Floors gives this pin, which is the half a table cannot carry.
-     *
-     * <p>Looked up rather than duplicated. Empty when the prose says nothing, which the agreement
-     * test makes impossible today and which this must survive anyway.
-     */
-    private String reasonFor(int target, String coordinates) {
-        for (String raw : Floors.forTarget(target).lines().toList()) {
-            String line = raw.strip();
-            if (line.startsWith("[after]")) {
-                line = line.substring("[after]".length()).strip();
-            }
-            if (line.startsWith(coordinates + " ")) {
-                int dash = line.indexOf(" \u2014 ");
-                return dash < 0 ? "" : line.substring(dash + 3).strip();
-            }
-        }
-        return "";
-    }
-
     private String humanMinutes(String slug) {
         String known = priced.get(slug);
         if (known != null) {

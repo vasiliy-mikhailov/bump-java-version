@@ -147,10 +147,6 @@ final class Bom {
         store = root.resolve("bom");
     }
 
-    static Path store() {
-        return store;
-    }
-
     /** Where one hop's edit lives, or null when there is nowhere to put it. */
     static Path fileFor(Path root, String key) {
         if (root == null || !key.matches("\\d+-\\d+-(enables|hardens)")) {

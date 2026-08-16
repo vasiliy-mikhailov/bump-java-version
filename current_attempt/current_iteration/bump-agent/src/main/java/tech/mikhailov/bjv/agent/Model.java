@@ -96,11 +96,6 @@ final class Model {
         return build(trace, false);
     }
 
-    /** For a caller with no trace to write to; the reasoning is then simply not recorded. */
-    static ChatModel fromEnv() {
-        return build(null, true);
-    }
-
     private static ChatModel build(Trace trace, boolean thinking) {
         String base = Env.get("OC_BASE");
         if (base == null) {

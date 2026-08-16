@@ -48,10 +48,6 @@ final class Prompts {
         store = root.resolve("prompts");
     }
 
-    static Path store() {
-        return store;
-    }
-
     /** The edited text for one agent on one hop, or empty when the code's own still stands. */
     static String override(String agent, Hop hop) {
         return override(store, agent, hop);

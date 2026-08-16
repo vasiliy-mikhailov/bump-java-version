@@ -65,10 +65,6 @@ final class Registry {
             return slug + "\t" + repo + "\t" + (pinned() ? sha : "-") + "\t" + from + "\t" + to;
         }
 
-        String origin() {
-            return repo + "\t" + url;
-        }
-
         /** Dedup is by repository and starting level, as the sweep and the queue both do it. */
         String identity() {
             return repo + "\t" + from;

@@ -47,11 +47,6 @@ final class Security {
         static Scan notMeasured(String why) {
             return new Scan(false, why, -1, -1, -1, Map.of(), List.of(), -1, Set.of(), List.of());
         }
-
-        /** The corpus's reward shape for security: 0.99 per outstanding CRITICAL or HIGH. */
-        double multiplier() {
-            return measured ? Math.pow(0.99, total) : Double.NaN;
-        }
     }
 
     /**

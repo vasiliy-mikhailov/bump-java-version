@@ -37,43 +37,6 @@ final class Pins {
     private Pins() {
     }
 
-    private static void collect(List<String> out, Pattern p, String text) {
-        Matcher m = p.matcher(text);
-        while (m.find()) {
-            String v = m.group(1).strip();
-            // AN UNRESOLVED PLACEHOLDER IS NOT A VERSION. `${lombok.version}` sorts below every
-            // real number, and lowest-wins would make it the module's answer, so a project that
-            // routes its versions through properties would read as permanently below every floor
-            // and be sent round the loop until the budget ran out.
-            if (!v.isBlank() && !v.contains("${") && !v.startsWith("$")) {
-                out.add(v);
-            }
-        }
-    }
-
-    /**
-     * The same text with comments removed.
-     *
-     * <p>A commented-out property read as a declaration, and a comment sitting between an
-     * artifactId and its version let the Maven pattern skip across into a neighbouring dependency's
-     * version. Both are ordinary in real poms, where the previous value is usually left in place
-     * above the new one.
-     */
-    private static String uncommented(String text) {
-        return text.replaceAll("(?s)<!--.*?-->", " ");
-    }
-
-    /**
-     * The declared source/target pins in one module that are still BELOW the target JDK.
-     *
-     * <p>The other half of "did it land": a version floor asks whether a dependency is high enough,
-     * and this asks whether the module has actually been told to compile for the new JDK. Both are
-     * read from the files rather than from a diff, because a diff shows what someone changed and not
-     * what remains.
-     *
-     * <p>Every dialect it can be written in: Maven properties and plugin configuration, Gradle's
-     * sourceCompatibility and jvmTarget, and the toolchain's JavaLanguageVersion.of.
-     */
     /**
      * Every dialect a Java level can be declared in.
      *

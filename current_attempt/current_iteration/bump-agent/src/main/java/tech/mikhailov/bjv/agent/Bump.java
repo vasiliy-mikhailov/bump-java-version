@@ -995,12 +995,6 @@ public final class Bump {
     }
 
 
-    private Shell.Output git(String... args) throws IOException, InterruptedException {
-        List<String> cmd = new ArrayList<>(List.of("git", "-c", "safe.directory=" + ws));
-        cmd.addAll(List.of(args));
-        return Shell.run(ws, Map.of(), Duration.ofMinutes(3), cmd.toArray(new String[0]));
-    }
-
 
     /**
      * What to put in front of the next agent: the scorer's finding, in the terms it can act on.

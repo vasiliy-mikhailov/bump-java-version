@@ -4,5 +4,24 @@
 # minor, lower patch. One artifact may hold several rows, one per line.
 #
 # group:artifact <tab> version <tab> any|maven|gradle <tab> other spellings, comma separated
+#
+# WHY THESE TOMCAT VERSIONS. Measured on this corpus, not read off a compatibility table:
+# tomcat-embed-core 9.0.65 scores 22 CRITICAL+HIGH, 9.0.83 scores 19, 9.0.105 scores 14. Nothing in
+# a Java bump ever looked at that. Tomcat moved because SPRING moved -- Boot 2.7.18 pins
+# tomcat.version 9.0.83 -- so a project inherited whichever Tomcat its framework happened to carry,
+# and 9.0.83 is the last patch of Boot 2.7's line rather than of Tomcat's. 10.1.55 is what Boot
+# 3.5.16 pins, and the exact version trivy names as the fix for what the newest Tomcat 9 carries.
+# The family moves in lockstep or the build breaks: tomcat-embed-core, -el and -websocket share a
+# version by contract.
+#
+# WHY 3.5 AND NOT 2.7 ABOVE JDK 17. Spring Boot 2.7 does not support Java 21. It was the last 2.x
+# line and went end of life in 2023, so a 17 to 21 hop that lifts a Boot 2.7.3 project to 2.7.18 has
+# moved it to the newest patch of a line that cannot run the target. The measurement agrees: this
+# corpus scores Boot 3.5.x at 1 CRITICAL+HIGH against 2.7.18's tens.
+#
+# The cost is honest and large. 2 to 3 is the jakarta rename, the highest-variance migration in this
+# system, and the one measured losing 1916 of 2409 tests on a repository that took the jump
+# unprepared. It is attempted anyway because the gate is the arbiter, and because leaving a project
+# on an end-of-life line that cannot run its own target is not a smaller risk, only a quieter one.
 org.apache.tomcat.embed:tomcat-embed-core	10.1.55	any	
 org.springframework.boot:spring-boot-starter-parent	3.5.16	any	org.springframework.boot:spring-boot-dependencies,org.springframework.boot:spring-boot-gradle-plugin,org.springframework.boot,org.springframework.boot:*
