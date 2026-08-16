@@ -148,7 +148,11 @@ final class Chain {
                         "only when the gate is red, up to 16 turns"),
                 repeating(triplet("step", "troubleshoot"), "once per ordered step"),
                 repeating(triplet("security-after"), "only after a green gate"),
-                triplet("verdict"),
+                // THE MIRROR OF security-after, and it was unlabelled. A green gate returns PASS
+                // from inside the turn loop and never reaches here, so the arguer only ever argues
+                // bumps that failed: it is the stage that says what went wrong, not the stage that
+                // says what happened.
+                repeating(triplet("verdict"), "only when the gate never went green"),
                 triplet("estimator"));
     }
 
