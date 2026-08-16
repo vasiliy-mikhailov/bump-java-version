@@ -52,6 +52,7 @@ final class Api {
             case "/api/settings/subject" -> Zone.json(x, subject());
             case "/api/settings/registry" -> registry(x);
             case "/api/settings/supervisor" -> Zone.json(x, supervisor());
+            case "/api/settings/bom" -> Zone.json(x, boms());
             default -> {
                 return false;
             }
@@ -323,6 +324,54 @@ final class Api {
             return field.equals("outstanding") ? null : null;
         }
         return field.equals("outstanding") ? Json.string(value) : value;
+    }
+
+    /**
+     * THE BILLS OF MATERIALS, AS THE HARNESS HOLDS THEM.
+     *
+     * <p>Read from the same files the measurement reads, not restated: a settings page that
+     * describes a list from memory is a third copy of it, and this whole area exists because two
+     * copies of one fact once disagreed in silence.
+     *
+     * <p>The prose is shipped alongside each row. A version with no reason behind it is
+     * indistinguishable from a superstition, and these accumulate; a reader deciding whether a floor
+     * is still right needs the argument that put it there more than the number.
+     */
+    private String boms() {
+        return Json.array(List.of(11, 17, 21, 25), target -> Json.object(
+                Json.field("target", String.valueOf(target)),
+                Json.field("floors", Json.array(Bom.of(target), floor -> Json.object(
+                        Json.field("coordinates", Json.string(floor.coordinates())),
+                        Json.field("artifact", Json.string(floor.artifact())),
+                        Json.field("version", Json.string(floor.version())),
+                        Json.field("phase", Json.string(floor.phase())),
+                        Json.field("dialect", Json.string(floor.dialect())),
+                        Json.field("spellings", Json.array(
+                                floor.spellings().stream()
+                                        .filter(s -> !s.equals(floor.coordinates()))
+                                        .sorted().toList(),
+                                Json::string)),
+                        Json.field("why", Json.string(reasonFor(target, floor.coordinates()))))))));
+    }
+
+    /**
+     * The sentence Floors gives this pin, which is the half a table cannot carry.
+     *
+     * <p>Looked up rather than duplicated. Empty when the prose says nothing, which the agreement
+     * test makes impossible today and which this must survive anyway.
+     */
+    private String reasonFor(int target, String coordinates) {
+        for (String raw : Floors.forTarget(target).lines().toList()) {
+            String line = raw.strip();
+            if (line.startsWith("[after]")) {
+                line = line.substring("[after]".length()).strip();
+            }
+            if (line.startsWith(coordinates + " ")) {
+                int dash = line.indexOf(" \u2014 ");
+                return dash < 0 ? "" : line.substring(dash + 3).strip();
+            }
+        }
+        return "";
     }
 
     private String humanMinutes(String slug) {

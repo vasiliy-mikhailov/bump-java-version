@@ -3,11 +3,12 @@
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { EmptyNote, PageHeader } from '@bjv/ui'
 import { href } from '@/lib/api'
+import { BomSection } from './bom'
 import { PromptsSection } from './prompts'
 import { ModelSection, RunSection, SubjectPanel, SupervisorSection } from './sections'
 import { ABOUT, Panel, SettingsTabs, type TabName } from './tabs'
 
-const NAMES: TabName[] = ['prompts', 'run', 'model', 'subject', 'supervisor']
+const NAMES: TabName[] = ['prompts', 'bom', 'run', 'model', 'subject', 'supervisor']
 
 /**
  * SETTINGS, IN THE SECTIONS THE SIBLING TOOL DIVIDES THEM INTO.
@@ -46,6 +47,7 @@ function Settings() {
       <SettingsTabs current={tab} />
       <Panel>
         {tab === 'prompts' ? <PromptsSection onCount={onCount} /> : null}
+        {tab === 'bom' ? <BomSection /> : null}
         {tab === 'run' ? <RunSection /> : null}
         {tab === 'model' ? <ModelSection /> : null}
         {tab === 'subject' ? <SubjectPanel /> : null}

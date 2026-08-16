@@ -17,6 +17,9 @@ import { href } from '@/lib/api'
  */
 export const TABS = [
   { a: 'prompts', label: 'prompts' },
+  // NOT A SETTING EITHER, and it sits here for the same reason the prompts do: it is what the
+  // agents are working to, and a standard nobody can read is a standard nobody can argue with.
+  { a: 'bom', label: 'the floors' },
   { a: 'run', label: 'the run' },
   { a: 'model', label: 'the model' },
   { a: 'subject', label: 'the subject' },
@@ -27,6 +30,7 @@ export type TabName = (typeof TABS)[number]['a'] | 'supervisor'
 /** What each section is, in the header, so the page says what it is for before it lists values. */
 export const ABOUT: Record<TabName, { title: string; subtitle: string }> = {
   prompts: { title: 'prompts', subtitle: 'what each agent is told, for the hop it is built for' },
+  bom: { title: 'the floors', subtitle: 'the versions a target needs, and the argument for each' },
   run: { title: 'the run', subtitle: 'how many repositories are bumped at once' },
   model: { title: 'the model', subtitle: "every value is the environment's or the code's" },
   subject: { title: 'the subject', subtitle: 'the queue this sweep is working through' },
