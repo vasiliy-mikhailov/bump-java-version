@@ -172,12 +172,19 @@ function BumpPage() {
 
                 Three renderings, not two. The word comes back at the one moment it says something
                 the pill does not yet: that this click landed. It is also what the focus lands on,
-                which is why it is an element and not a pill variant. */}
+                which is why it is an element and not a pill variant.
+
+                WITHHELD ONLY WHILE A LANE HOLDS IT. A queued bump keeps its button: it can sit a
+                long time, because the drainer waits for a free lane and a lane runs for hours, and
+                a reader with no way to ask has no way to tell waiting from lost. Two repositories
+                sat requeued and unclaimed for ninety minutes with nothing on the page to say so.
+                Asking again is answered rather than duplicated: the server sees the row already
+                pending and says so instead of adding a second. */}
             {again.queued ? (
               <span ref={said} tabIndex={-1} role="status" style={SAID}>
                 queued
               </span>
-            ) : summary.verdict === 'bumping' || summary.verdict === 'queued' ? null : (
+            ) : summary.verdict === 'bumping' ? null : (
               <button
                 type="button"
                 aria-label={

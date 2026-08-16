@@ -106,4 +106,45 @@ class ASettledBumpCanBeAskedForAgainTest {
             assertTrue(rerun(results, slug).contains("\"queued\":false"), String.valueOf(slug));
         }
     }
+
+    @Test
+    void askingTwiceQueuesOnceAndSaysSo(@TempDir Path runRoot) throws Exception {
+        Path results = Files.createDirectories(runRoot.resolve("results"));
+        // A REQUEUED BUMP WAITS, AND THE WAIT CAN BE LONG. The drainer wants a free lane and a lane
+        // runs for hours; two repositories sat requeued and unclaimed for ninety minutes because
+        // one batch was still going. Asking again is a fair thing to do in that state, so the page
+        // keeps offering it, and the honest answer is that it is already queued rather than a
+        // second row for the same work.
+        String slug = settle(results, "agwlvssainokuni/springapp3", "PASS");
+
+        String first = rerun(results, slug);
+        String second = rerun(results, slug);
+
+        assertTrue(first.contains("\"queued\":true"), first);
+        assertTrue(second.contains("\"queued\":true"), "it is queued, which is not a refusal");
+        assertTrue(second.contains("already waiting"), second);
+        assertEquals(1, Files.readAllLines(results.resolve("rerun.tsv")).size(),
+                "and the manifest gained one row, not two");
+    }
+
+    @Test
+    void aRowADrainerHasAlreadyTakenStillCounts(@TempDir Path runRoot) throws Exception {
+        // The drainer MOVES rerun.tsv aside before running it, so a bump in flight sits in a batch
+        // file and in no queue a naive check would see. Missing that is a duplicate row every time
+        // somebody clicks while their own bump is being picked up.
+        //
+        // A RUN ROOT OF ITS OWN, because the check reads the directory ABOVE results and the batch
+        // files live there. Writing one into a shared parent made a sibling test see a bump queued
+        // that it had never queued, which is the same way this would misfire in production if
+        // anything unrelated ever left a rerun-batch file beside the run root.
+        Path results = Files.createDirectories(runRoot.resolve("results"));
+        String slug = settle(results, "aartiPl/tablevis", "PASS");
+        Files.writeString(runRoot.resolve("rerun-batch-1.tsv"),
+                slug + "\taartiPl/tablevis\tabc123\t8\t11\n");
+
+        String said = rerun(results, slug);
+
+        assertTrue(said.contains("already waiting"), said);
+        assertFalse(Files.exists(results.resolve("rerun.tsv")), "nothing was queued a second time");
+    }
 }

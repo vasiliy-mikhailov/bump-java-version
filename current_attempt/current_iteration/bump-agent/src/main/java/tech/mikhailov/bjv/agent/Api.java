@@ -529,6 +529,38 @@ final class Api {
      * corpus has spent the day removing numbers that were true only by accident. The page reads it
      * as queued, which is what it is.
      */
+    /**
+     * Is this bump already waiting in the drainer's queue?
+     *
+     * <p>ASKING TWICE IS A FAIR THING TO DO. A requeued bump waits for a free lane and a lane runs
+     * for hours, so the honest answer to a second click is "it is already queued", not a second row
+     * in the manifest for the same work. The queue is two files: what has not been picked up yet,
+     * and the batch a drainer has taken but not finished.
+     */
+    private boolean alreadyQueued(String slug) {
+        Path root = results.getParent() == null ? results : results.getParent();
+        List<Path> queues = new ArrayList<>();
+        queues.add(results.resolve("rerun.tsv"));
+        try (var batches = Files.list(root)) {
+            batches.filter(p -> p.getFileName().toString().startsWith("rerun-batch"))
+                    .forEach(queues::add);
+        } catch (IOException unreadable) {
+            // A queue that cannot be read is not evidence of an empty one, but refusing every
+            // rerun on that basis would be worse than the duplicate row it prevents.
+        }
+        for (Path queue : queues) {
+            try {
+                if (Files.isRegularFile(queue) && Files.readAllLines(queue).stream()
+                        .anyMatch(l -> l.startsWith(slug + "\t"))) {
+                    return true;
+                }
+            } catch (IOException unreadable) {
+                continue;
+            }
+        }
+        return false;
+    }
+
     private String rerun(String slug) {
         if (slug == null || slug.isBlank()) {
             return Json.object(Json.field("queued", "false"),
@@ -544,6 +576,14 @@ final class Api {
         if (parts.length < 4) {
             return Json.object(Json.field("queued", "false"),
                     Json.field("why", Json.string("that settlement names no hop")));
+        }
+        if (alreadyQueued(slug)) {
+            // TRUE, AND NOT A REFUSAL. The work is going to happen; a second row for it would only
+            // make a lane discover it was already in flight and skip it.
+            return Json.object(Json.field("queued", "true"),
+                    Json.field("repo", Json.string(parts[0])),
+                    Json.field("hop", Json.string(parts[2] + " -> " + parts[3])),
+                    Json.field("was", Json.string("already waiting for a lane")));
         }
         try {
             Files.writeString(results.resolve("rerun.tsv"),
