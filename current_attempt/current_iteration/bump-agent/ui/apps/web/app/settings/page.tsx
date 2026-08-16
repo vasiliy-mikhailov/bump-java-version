@@ -3,12 +3,11 @@
 import { Suspense, useCallback, useEffect, useState } from 'react'
 import { EmptyNote, PageHeader } from '@bjv/ui'
 import { href } from '@/lib/api'
-import { BomSection } from './bom'
 import { PromptsSection } from './prompts'
 import { ModelSection, RunSection, SubjectPanel, SupervisorSection } from './sections'
 import { ABOUT, Panel, SettingsTabs, type TabName } from './tabs'
 
-const NAMES: TabName[] = ['shape', 'bom', 'run', 'model', 'subject', 'supervisor']
+const NAMES: TabName[] = ['shape', 'run', 'model', 'subject', 'supervisor']
 
 /**
  * SETTINGS, IN THE SECTIONS THE SIBLING TOOL DIVIDES THEM INTO.
@@ -29,7 +28,8 @@ function Settings() {
     // people's history and in this repository's own commit messages; renaming a tab is not a
     // reason to break them.
     const asked = new URLSearchParams(window.location.search).get('a') ?? 'shape'
-    const a = asked === 'prompts' ? 'shape' : asked
+    // ?a=bom lands here too: the floors are on this page now, under the phases that read them.
+    const a = asked === 'prompts' || asked === 'bom' ? 'shape' : asked
     setTab((NAMES as string[]).includes(a) ? (a as TabName) : 'shape')
   }, [])
 
@@ -51,7 +51,6 @@ function Settings() {
       <SettingsTabs current={tab} />
       <Panel>
         {tab === 'shape' ? <PromptsSection onCount={onCount} /> : null}
-        {tab === 'bom' ? <BomSection /> : null}
         {tab === 'run' ? <RunSection /> : null}
         {tab === 'model' ? <ModelSection /> : null}
         {tab === 'subject' ? <SubjectPanel /> : null}

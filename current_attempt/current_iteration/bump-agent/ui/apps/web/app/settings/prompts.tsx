@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import type { AgentPrompt } from '@bjv/types'
 import { CARDS, EmptyNote, PromptCard, TabRow } from '@bjv/ui'
 import { href, read } from '@/lib/api'
+import { BomFile, type Bom } from './bom'
 
 const HOPS = ['8-11', '11-17', '17-21', '21-25'] as const
 
@@ -23,6 +24,13 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
   const [hop, setHop] = useState('17-21')
   const [prompts, setPrompts] = useState<AgentPrompt[] | null>(null)
   const [failed, setFailed] = useState<string | null>(null)
+  // THE LISTS THE PIN PHASES WORK TO, on this page rather than a tab away. A reader looking at
+  // before-pins had to remember which half it read, go elsewhere and come back; the stage names
+  // the list, so the list belongs under the stage.
+  const [bom, setBom] = useState<Bom | null>(null)
+  const [typed, setTyped] = useState<Record<string, string>>({})
+  const [busy, setBusy] = useState<string | null>(null)
+  const [said, setSaid] = useState<Record<string, string>>({})
 
   useEffect(() => {
     const wanted = new URLSearchParams(window.location.search).get('hop') ?? '17-21'
@@ -31,7 +39,45 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
     read<AgentPrompt[]>(`/api/settings?hop=${valid}`)
       .then(setPrompts)
       .catch((e: Error) => setFailed(e.message))
+    read<Bom>(`/api/settings/bom?hop=${valid}`)
+      .then(setBom)
+      .catch(() => undefined)
   }, [])
+
+  const saveBom = (part: string, text: string) => {
+    setBusy(part)
+    setSaid((s) => ({ ...s, [part]: '' }))
+    fetch(href(`/api/settings/bom?hop=${hop}&part=${part}`), { method: 'POST', body: text })
+      .then((r) => r.json())
+      .then((r: { saved: boolean; why?: string; rows?: number; edited?: boolean }) => {
+        setBusy(null)
+        if (!r.saved) {
+          // REFUSED HERE RATHER THAN AT THE NEXT BUMP. A row that cannot be read throws at load,
+          // and load happens inside a lane, where nobody who typed it would ever see the message.
+          setSaid((s) => ({ ...s, [part]: `not saved: ${r.why ?? 'unknown'}` }))
+          return
+        }
+        setSaid((s) => ({
+          ...s,
+          [part]: r.edited
+            ? `saved, ${r.rows} row(s); this replaces the built-in`
+            : `reverted, ${r.rows} row(s) from the code`,
+        }))
+        setTyped((s) => {
+          const next = { ...s }
+          delete next[part]
+          return next
+        })
+        read<Bom>(`/api/settings/bom?hop=${hop}`).then(setBom).catch(() => undefined)
+        // The pin count in the heading is served with the prompts, so it has to be re-read or the
+        // number above the box disagrees with the rows inside it.
+        read<AgentPrompt[]>(`/api/settings?hop=${hop}`).then(setPrompts).catch(() => undefined)
+      })
+      .catch((e: Error) => {
+        setBusy(null)
+        setSaid((s) => ({ ...s, [part]: `not saved: ${e.message}` }))
+      })
+  }
 
   // REFETCH AFTER A WRITE rather than patching the row in place. The server decides what is in
   // force — it can refuse a save, and an empty one it does — so the page asks rather than assumes.
@@ -264,6 +310,24 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
                   </span>
                 )}
               </h2>
+              {/* THE LIST THIS STAGE WORKS TO, between its name and the agents that read it,
+                  which is the order a reader meets them in. */}
+              {block.reads === '' || bom === null
+                ? null
+                : bom.files
+                    .filter((f) => f.part === block.reads)
+                    .map((f) => (
+                      <BomFile
+                        key={f.part}
+                        file={f}
+                        typed={typed[f.part]}
+                        busy={busy === f.part}
+                        said={said[f.part]}
+                        onType={(text) => setTyped((s) => ({ ...s, [f.part]: text }))}
+                        onSave={(text) => saveBom(f.part, text)}
+                      />
+                    ))}
+
               <div style={CARDS}>
                 {block.agents.map((p) => (
                   <PromptCard
