@@ -1401,7 +1401,7 @@ final class Api {
                 Json.field("lanes", now.matches("\\d+") ? now : "null"),
                 Json.field("min", "1"),
                 Json.field("max", "16"),
-                Json.field("turns", Json.string(envOr("BJV_TURNS", "16"))),
+                Json.field("turns", Json.string(envOr("BJV_MODULE_TURNS", "3"))),
                 Json.field("steps", Json.string(envOr("BJV_STEPS", "6"))),
                 Json.field("hangGuardMinutes", Json.string(envOr("BJV_HANG_GUARD", ""))),
                 // WHERE DEPENDENCIES COME FROM, ON A PAGE, because until now it was knowable only

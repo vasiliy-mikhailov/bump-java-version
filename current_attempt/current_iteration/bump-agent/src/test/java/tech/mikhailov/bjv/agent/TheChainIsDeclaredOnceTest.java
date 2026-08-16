@@ -128,7 +128,13 @@ class TheChainIsDeclaredOnceTest {
         assertTrue(repeatsOf("module-gate").contains("until green"), repeatsOf("module-gate"));
         assertTrue(repeatsOf("module-repair").contains("module-gate is red"),
                 repeatsOf("module-repair"));
-        assertEquals("up to 6", repeatsOf("module-repair-step"));
+        // SIX PER CAMPAIGN AND TWO CAMPAIGNS, so twelve, and the bump's own allowance caps the
+        // lot. The label read "up to 6" and meant half of one module's worst case, which is the
+        // kind of number a reader multiplies by the module count and gets a quarter of the answer.
+        assertTrue(repeatsOf("module-repair-step").contains("12 per module"),
+                repeatsOf("module-repair-step"));
+        assertTrue(repeatsOf("module-repair-step").contains("192 per bump"),
+                "and the ceiling that actually binds is the bump's, not the module's");
         assertTrue(repeatsOf("security-after").contains("green gate"), repeatsOf("security-after"));
 
         // THE MIRROR OF security-after. A green gate returns PASS from inside the turn loop and

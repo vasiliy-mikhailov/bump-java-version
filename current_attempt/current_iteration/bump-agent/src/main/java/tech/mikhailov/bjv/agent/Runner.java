@@ -105,6 +105,26 @@ final class Runner {
     private static final Set<String> GENERATED = Set.of("generated", "generated-sources",
             "generated-src", "generated-java", "generated-test-sources");
 
+    /**
+     * THE SAME WIPE, UNDER ONE MODULE.
+     *
+     * <p>The module gate was answering the wrong question entirely. A bump is a pom-only edit, so
+     * no source is newer than its class, and maven-compiler-plugin 3.8.1 and 3.13.0 both answer
+     * "Nothing to compile - all classes are up to date". Measured in vivo on the first three Maven
+     * bumps to run the new walk: every module gate compiled 0 files, and the repository gate
+     * seconds later compiled 5, 7 and 5. On one repository seven module gates flip from all-red to
+     * all-green purely because the baseline build ran first.
+     *
+     * <p>Repository-wide would be correct and would also re-pay the whole reactor's compile once
+     * per module per turn, which is the cost the walk exists to avoid.
+     */
+    void clearClasses(String module) {
+        Path under = module == null || module.isBlank() || module.equals(".")
+                ? ws : ws.resolve(module);
+        wipe(under, name -> name.equals("classes") || name.equals("test-classes")
+                || GENERATED.contains(name));
+    }
+
     void clearClasses() {
         // Compiled output AND anything a generator wrote. Deleting the classes alone leaves the
         // sources that produced them, which is the half of the state that collides.
@@ -138,7 +158,14 @@ final class Runner {
      * different and much worse bug than the one it fixes.
      */
     private void wipe(java.util.function.Predicate<String> named) {
-        try (var s = java.nio.file.Files.walk(ws)) {
+        wipe(ws, named);
+    }
+
+    private void wipe(Path under, java.util.function.Predicate<String> named) {
+        if (!java.nio.file.Files.isDirectory(under)) {
+            return;
+        }
+        try (var s = java.nio.file.Files.walk(under)) {
             List<Path> doomed = s.filter(java.nio.file.Files::isDirectory)
                     .filter(d -> {
                         Path parent = d.getParent();

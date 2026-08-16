@@ -70,6 +70,24 @@ public final class Bump {
     private static final int MODULE_TURNS = Integer.parseInt(
             System.getenv().getOrDefault("BJV_MODULE_TURNS", "3"));
 
+    /**
+     * ORDERED REPAIR STEPS FOR THE WHOLE BUMP, not for each module.
+     *
+     * <p>The old ceiling was sixteen turns times two campaigns times six steps: 192, spent on the
+     * repository once. Per module the same arithmetic is 36 per module, which is 216 at the corpus
+     * median of six modules and 720 at twenty, so the change that was supposed to bound repair
+     * quadrupled it. The commit that made it compared 16N against 3N and never against 16.
+     *
+     * <p>So the budget stays where it was, per bump, and the walk draws down a shared allowance. A
+     * module that needs thirty steps is welcome to them; what it may not do is leave nothing for
+     * the nineteen modules behind it.
+     */
+    private static final int REPAIR_BUDGET = Integer.parseInt(
+            System.getenv().getOrDefault("BJV_REPAIR_BUDGET", "192"));
+
+    /** What is left of it. Read and decremented by the step loop, never reset mid-bump. */
+    private int repairLeft = REPAIR_BUDGET;
+
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
             System.err.println("usage: Bump <checkout> <repo|sha[|from|to]> [results-dir]");
@@ -737,8 +755,27 @@ public final class Bump {
      */
     private boolean moduleGate(Modules.Module m) throws IOException {
         boolean everRed = false;
+        // ROOT IS THE WHOLE REACTOR, NOT A MODULE. jvmjob turns an empty path into the
+        // unscoped build, so gating root on a multi-module repository compiles everything and then
+        // hands a full reactor log to an agent told it is repairing one module named "root". That
+        // is the failure this walk was built to remove, moved from the last module to the first.
+        // The repository gate compiles everything already; this one has nothing to add.
+        if (m.isRoot() && modules.size() > 1) {
+            trace.progress(bump, "module root: skipping its gate, because compiling root is "
+                    + "compiling the whole reactor and the repository gate does that already");
+            return false;
+        }
+        String path = m.isRoot() ? "" : m.path();
         for (int turn = 1; turn <= MODULE_TURNS; turn++) {
-            Runner.Result compiled = runner.buildModule(to, m.isRoot() ? "" : m.path());
+            // THE GATE MEASURES BYTECODE, SO IT HAS TO COMPILE BYTECODE. A bump is a pom-only
+            // edit, so nothing is newer than its class and Maven answers "Nothing to compile".
+            // Measured on the first three Maven bumps to run this walk: every module gate compiled
+            // zero files while the repository gate seconds later compiled five, seven and five.
+            // The gate was reading whether the baseline's classes were stale, not whether the
+            // module compiles under the target, and the repository repair loop that used to
+            // absorb the consequence was deleted in the same commit that added this.
+            runner.clearClasses(path);
+            Runner.Result compiled = runner.buildModule(to, path);
             trace.built("module-gate-" + label(m) + "-" + turn, compiled);
             if (!compiled.infra()) {
                 if (turn > 1) {
@@ -855,6 +892,14 @@ public final class Bump {
     private boolean campaignOfSteps(String log, String floor, String feedback) throws IOException {
         boolean landed = false;
         for (int step = 0; step < STEPS; step++) {
+            // THE ALLOWANCE IS THE BUMP'S, NOT THIS MODULE'S. A module that needs thirty steps may
+            // have them; what it may not do is leave nothing for the modules behind it.
+            if (repairLeft <= 0) {
+                trace.progress(bump, "repair: the bump's step budget of " + REPAIR_BUDGET
+                        + " is spent; nothing further is ordered for any module");
+                return landed;
+            }
+            repairLeft--;
             String order = agents.moduleRepairStepPlanner(floor)
                     .run(brief(log) + feedback
                             + "\n\nSteps landed so far in this campaign:\n" + tree.history(floor)

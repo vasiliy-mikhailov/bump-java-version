@@ -172,7 +172,10 @@ final class Chain {
                         "until green, or the turns run out"),
                 repeating(aroundDeterministic("module-repair", "modules", "a campaign of steps"),
                         "only when the module-gate is red"),
-                repeating(triplet("module-repair-step", "module-repair"), "up to 6"),
+                // 6 PER CAMPAIGN AND TWO CAMPAIGNS, so twelve, and the bump's own allowance
+                // caps the lot: the label said six and meant half of one module's worst case.
+                repeating(triplet("module-repair-step", "module-repair"),
+                        "up to 12 per module, 192 per bump"),
                 // AFTER THE REPAIR, NOT BEFORE IT. Hardening polishes a module that already
                 // compiles; asking it of one that does not is asking the wrong question.
                 reading(triplet("after-pins", "modules"), "hardens"),
