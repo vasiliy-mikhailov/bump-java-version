@@ -1,9 +1,10 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import type { BumpDetail } from '@bjv/types'
 import {
   Card,
+  CORNER,
   ChainStrip,
   EmptyNote,
   EventFeed,
@@ -37,7 +38,8 @@ function BumpPage() {
   const [slug, setSlug] = useState('')
   const [only, setOnly] = useState<string | undefined>(undefined)
   const [tab, setTab] = useState<Tab>('summary')
-  const [rerun, setRerun] = useState<string | null>(null)
+  const [again, setAgain] = useState<Rerun>({ turns: 0, busy: false, queued: false, why: '' })
+  const said = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search)
@@ -74,6 +76,44 @@ function BumpPage() {
     // resubscribing on each one would reopen the stream forever.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, detail !== null])
+
+  // THE CONTROL UNMOUNTS ON SUCCESS, so something has to catch the focus it was holding. Without
+  // this a keyboard user is returned to the document body by their own click, which is the one
+  // interaction a mouse never notices going wrong.
+  useEffect(() => {
+    if (again.queued) {
+      said.current?.focus()
+    }
+  }, [again.queued])
+
+  /**
+   * Ask for this bump again.
+   *
+   * A REFUSAL IS A 200. The server answers {queued:false,why} when there is nothing settled under
+   * the slug, so the catch here is for the network and for the page being served without its api,
+   * and the two have to read differently or a wrong slug looks like an outage.
+   */
+  const askAgain = () => {
+    setAgain((a) => ({ turns: a.turns + 1, busy: true, queued: false, why: '' }))
+    post<{ queued: boolean; why?: string }>(`/api/rerun?slug=${encodeURIComponent(slug)}`)
+      .then((r) => {
+        setAgain((a) => ({
+          ...a,
+          busy: false,
+          queued: r.queued,
+          why: r.queued ? '' : (r.why ?? 'the server declined without saying why'),
+        }))
+        // The bump IS queued now, so the pill says so rather than going on showing a verdict that
+        // is about to be replaced. Which also takes the control away, and should: a second ask
+        // would be a second row in the manifest for a bump already waiting for a lane.
+        if (r.queued) {
+          setDetail((d) => (d === null ? d : { ...d, summary: { ...d.summary, verdict: 'queued' } }))
+        }
+      })
+      .catch((e: Error) =>
+        setAgain((a) => ({ ...a, busy: false, why: `the request itself failed: ${e.message}` })),
+      )
+  }
 
   if (failed !== null) {
     return (
@@ -112,6 +152,15 @@ function BumpPage() {
           <>
             JDK {summary.from} → {summary.to} · {summary.sha.slice(0, 12)} ·{' '}
             <VerdictPill verdict={summary.verdict} />
+            {/* A REASON IS A SENTENCE, and a sentence does not belong in a right-aligned row of
+                corner controls, where it either truncates to nothing or deforms the header. It
+                also must not be carried by colour alone, so the red is on one bolded word and
+                the rest is prose. */}
+            {again.why === '' ? null : (
+              <div role="alert" style={REFUSED_NOTE}>
+                <b style={{ color: 'var(--danger)' }}>Not queued.</b> {again.why}
+              </div>
+            )}
           </>
         }
         back={{ label: 'bumps', href: href('/') }}
@@ -119,34 +168,64 @@ function BumpPage() {
           <>
             {/* A SETTLED VERDICT IS ONLY TRUE OF THE HARNESS THAT REACHED IT. The floors, the
                 prompts and the tools all moved today, so a verdict from this morning was decided
-                by an agent that no longer exists. Offered only on a settled bump: asking for a
-                rerun of something already running is a click that means nothing. */}
-            {summary.verdict === 'bumping' || summary.verdict === 'queued' ? null : (
+                by an agent that no longer exists.
+
+                Three renderings, not two. The word comes back at the one moment it says something
+                the pill does not yet: that this click landed. It is also what the focus lands on,
+                which is why it is an element and not a pill variant. */}
+            {again.queued ? (
+              <span ref={said} tabIndex={-1} role="status" style={SAID}>
+                queued
+              </span>
+            ) : summary.verdict === 'bumping' || summary.verdict === 'queued' ? null : (
               <button
                 type="button"
-                style={RERUN}
+                aria-label={
+                  again.why === ''
+                    ? 'Run this bump again'
+                    : 'Run this bump again. The last ask was refused'
+                }
+                title="Run this bump again"
+                aria-busy={again.busy || undefined}
+                // aria-disabled rather than the real attribute, which would drop the control out
+                // of the tab order mid-action and strand a keyboard user on the body.
+                aria-disabled={again.busy || undefined}
                 onClick={() => {
-                  setRerun('asking…')
-                  post<{ queued: boolean; why?: string; was?: string }>(
-                    `/api/rerun?slug=${encodeURIComponent(slug)}`,
-                  )
-                    .then((r) =>
-                      setRerun(
-                        r.queued
-                          ? `queued again, was ${r.was ?? 'settled'}`
-                          : `not queued: ${r.why ?? 'unknown'}`,
-                      ),
-                    )
-                    .catch((e: Error) => setRerun(`not queued: ${e.message}`))
+                  if (!again.busy) {
+                    askAgain()
+                  }
+                }}
+                style={{
+                  ...CORNER_BUTTON,
+                  ...(again.why === '' ? null : REFUSED),
+                  ...(again.busy ? BUSY : null),
                 }}
               >
-                rerun
+                {/* DRAWN, NOT TYPED. Every unicode repeat mark is at the mercy of whichever face
+                    the reader's machine falls back to, and U+21BB lands hairline beside the dense
+                    U+2699 gear it has to sit next to; a path takes currentColor for both themes
+                    and a stroke width that can be matched to the gear by eye.
+
+                    r=5 about (8,8). large-arc=1 with sweep=1 picks the 300° clockwise sweep, so
+                    the tangent at the terminus is exactly (1,0) and the head is axis-aligned; a
+                    3.2 base against a 1.5 stroke still reads as an arrow at 16px, where a
+                    narrower one becomes a blob. */}
+                <svg
+                  viewBox="0 0 16 16"
+                  aria-hidden="true"
+                  focusable="false"
+                  style={{ ...TURN, transform: `rotate(${again.turns * 360}deg)` }}
+                >
+                  <path
+                    d="M12.33 5.5A5 5 0 1 1 8 3"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                  />
+                  <path d="M11.2 3L8 1.4L8 4.6Z" fill="currentColor" />
+                </svg>
               </button>
-            )}
-            {rerun === null ? null : (
-              <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginRight: '8px' }}>
-                {rerun}
-              </span>
             )}
             <Nav current="bumps" />
           </>
@@ -231,17 +310,64 @@ function BumpPage() {
   )
 }
 
-const RERUN = {
-  font: 'inherit',
-  fontSize: '12px',
-  color: 'var(--text-secondary)',
-  background: 'var(--bg-subtle)',
-  border: '1px solid var(--border-soft)',
-  borderRadius: '5px',
-  padding: '3px 10px',
+/** What asking for a rerun has done so far. One record because the four move together. */
+type Rerun = { turns: number; busy: boolean; queued: boolean; why: string }
+
+/**
+ * THE BUTTON TWIN OF THE CORNER GEAR.
+ *
+ * It spreads CORNER rather than restating its numbers, so the two corner controls share one box by
+ * construction and cannot drift apart the next time either is adjusted. A button does not inherit
+ * fontFamily, and the `font` shorthand would take CORNER's fontSize down with it, so the family is
+ * named on a line of its own.
+ *
+ * The border is reserved transparent and paid for out of the padding: a refusal can turn it red
+ * without moving the gear beside it by a pixel. No hover, because the gear has none and matching
+ * that corner is the whole argument for this shape.
+ */
+const CORNER_BUTTON = {
+  ...CORNER,
+  display: 'inline-flex',
+  alignItems: 'center',
+  appearance: 'none',
+  background: 'none',
+  border: '1px solid transparent',
+  padding: '0 calc(0.35rem - 1px)',
+  margin: 0,
+  fontFamily: 'inherit',
   cursor: 'pointer',
-  marginRight: '8px',
+  transition: 'color 120ms ease, border-color 120ms ease',
 } as const
+
+/**
+ * 1.25em, MEASURED OFF THE RENDERED PAGE RATHER THAN REASONED ABOUT.
+ *
+ * The gear beside it is emoji-presented: U+2699 with no variation selector falls through to the
+ * colour emoji face, which is why it is blue in a monochrome header, and an emoji glyph overshoots
+ * its em. Measured on the real page at 1.25rem, the gear's ink is 22.2px square while a 1em drawing
+ * came out at 12. Guessing from a text face said the opposite, which is why this number is taken
+ * from a screenshot of the thing itself.
+ *
+ * 1.25em puts the arrow at about 85 per cent of the gear's diameter, where a stroked mark reads as
+ * the same weight as a filled one rather than as a larger, thinner ring. If the gear ever loses its
+ * emoji presentation this drops back to roughly 0.8em, so re-measure rather than trusting the
+ * number. Vertical padding is nil because the drawing is already taller than the glyph's line box.
+ *
+ * ONE TURN PER ASK, FROM A COUNTER THAT ONLY GOES UP, so it never rewinds when an ask is refused.
+ * A transition rather than a keyframe: tokens.css is the portal's file, taken verbatim and read by
+ * two tools, and its reduced-motion block already clamps transitions for nothing.
+ */
+const TURN = {
+  width: '1.25em',
+  height: '1.25em',
+  display: 'block',
+  transition: 'transform 600ms cubic-bezier(.4,0,.2,1)',
+} as const
+
+const BUSY = { opacity: 0.55, cursor: 'progress' } as const
+const REFUSED = { color: 'var(--danger)', borderColor: 'var(--danger)' } as const
+const SAID = { fontSize: '12px', color: 'var(--text-tertiary)', padding: '0.2rem 0.35rem' } as const
+const REFUSED_NOTE = { marginTop: '4px', maxWidth: '60ch', color: 'var(--text-secondary)' } as const
 
 const LABEL = {
   fontSize: '11px',
