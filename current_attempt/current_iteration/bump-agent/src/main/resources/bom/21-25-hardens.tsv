@@ -1,0 +1,8 @@
+# WHAT HARDENS THE JDK 21 TO 25 RESULT. Polish, once the bump already builds and tests green.
+#
+# Every row is the head of a line and answers only for projects already on it: same major, same
+# minor, lower patch. One artifact may hold several rows, one per line.
+#
+# group:artifact <tab> version <tab> any|maven|gradle <tab> other spellings, comma separated
+org.apache.tomcat.embed:tomcat-embed-core	10.1.55	any	
+org.springframework.boot:spring-boot-starter-parent	3.5.16	any	org.springframework.boot:spring-boot-dependencies,org.springframework.boot:spring-boot-gradle-plugin,org.springframework.boot,org.springframework.boot:*

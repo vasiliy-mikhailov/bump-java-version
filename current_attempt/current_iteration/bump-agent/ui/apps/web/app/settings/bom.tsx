@@ -4,248 +4,180 @@ import { useEffect, useState } from 'react'
 import { Card, EmptyNote, SaveRow, type Style } from '@bjv/ui'
 import { href, read } from '@/lib/api'
 
-type Floor = {
-  coordinates: string
-  artifact: string
-  version: string
-  phase: 'before' | 'after'
-  dialect: 'any' | 'maven' | 'gradle'
-  spellings: string[]
-  why: string
+type File = {
+  part: 'enables' | 'hardens'
+  title: string
+  about: string
+  rows: number
+  text: string
+  edited: boolean
 }
 
-type Bom = { hop: string; name: string; floors: Floor[] }
+type Bom = { hop: string; name: string; files: File[] }
+
+const HOPS = ['8-11', '11-17', '17-21', '21-25']
 
 /**
- * WHAT EACH TARGET NEEDS, AND WHY, AS THE HARNESS HOLDS IT.
+ * THE TWO LISTS A HOP WORKS TO, AS THE TWO FILES THEY ARE.
  *
- * The other settings sections show a value somebody can change. This one shows a list nothing on
- * this page can change, and it earns its place anyway: it is the standard every passing repository
- * is scored against, and until now the only way to read it was to open a Java file. A number in a
- * table column that nobody can see the definition of is a number nobody can argue with.
+ * There was a rendered table here and it is gone. It was a second shape of the same fact, kept in
+ * step by hand, and it got the fact wrong the first time one artifact needed two rows: the row key
+ * was the coordinate, tomcat-embed-core has a 9.0 head and a 10.1 head, and React drew one of them
+ * four times. The file is the thing; a picture of the file is a thing to keep true.
  *
- * THE REASON TRAVELS WITH THE VERSION. A floor without one is indistinguishable from a
- * superstition, and these accumulate. Every version here was measured on this corpus rather than
- * read off a compatibility table, and the sentence is where that shows.
+ * TWO FILES, NOT A COLUMN, because these are two kinds of claim and not two timings of one. What
+ * ENABLES the bump is a precondition: below it the bump does not happen. What HARDENS the result is
+ * polish on a project that already builds and tests green. A phase column inside one file made them
+ * look like the same measurement taken twice, and invited a reader to weigh them the same.
+ *
+ * AN EDIT REPLACES THE BUILT-IN ENTIRELY, on the same terms as an edited prompt. No merge: a list
+ * half from the code and half from a box is a list nobody can read in one place, and reading it in
+ * one place is the only way anyone works out why a version was asked for. Saving an empty box
+ * throws the edit away, because the built-in was never gone.
  */
 export function BomSection() {
-  const [boms, setBoms] = useState<Bom[] | null>(null)
-  const [failed, setFailed] = useState<string | null>(null)
   const [name, setName] = useState('17-21')
-  // THE FILE, NOT THE ROWS. Its comments are half of what it says, and a round trip through
-  // records and back would drop them; the same reason the endpoint serves it raw.
-  const [file, setFile] = useState<{ text: string; edited: boolean } | null>(null)
-  const [typed, setTyped] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
-  const [said, setSaid] = useState<string | null>(null)
+  const [bom, setBom] = useState<Bom | null>(null)
+  const [failed, setFailed] = useState<string | null>(null)
+  const [typed, setTyped] = useState<Record<string, string>>({})
+  const [busy, setBusy] = useState<string | null>(null)
+  const [said, setSaid] = useState<Record<string, string>>({})
+
+  const load = (hop: string) =>
+    read<Bom>(`/api/settings/bom?hop=${hop}`)
+      .then(setBom)
+      .catch((e: Error) => setFailed(e.message))
 
   useEffect(() => {
-    setFile(null)
-    setTyped(null)
-    setSaid(null)
-    read<{ text: string; edited: boolean }>(`/api/settings/bom/file?hop=${name}`)
-      .then(setFile)
-      .catch(() => setFile(null))
+    setBom(null)
+    setFailed(null)
+    setTyped({})
+    setSaid({})
+    void load(name)
   }, [name])
 
-  const save = (text: string) => {
-    setBusy(true)
-    setSaid(null)
-    fetch(href(`/api/settings/bom/file?hop=${name}`), { method: 'POST', body: text })
+  const save = (part: string, text: string) => {
+    setBusy(part)
+    setSaid((s) => ({ ...s, [part]: '' }))
+    fetch(href(`/api/settings/bom?hop=${name}&part=${part}`), { method: 'POST', body: text })
       .then((r) => r.json())
       .then((r: { saved: boolean; why?: string; rows?: number; edited?: boolean }) => {
-        setBusy(false)
+        setBusy(null)
         if (!r.saved) {
           // REFUSED HERE RATHER THAN AT THE NEXT BUMP. A row that cannot be read throws at load,
           // and load happens inside a lane, where nobody who typed it would ever see the message.
-          setSaid(`not saved: ${r.why ?? 'unknown'}`)
+          setSaid((s) => ({ ...s, [part]: `not saved: ${r.why ?? 'unknown'}` }))
           return
         }
-        setSaid(r.edited ? `saved, ${r.rows} row(s)` : `reverted to the built-in, ${r.rows} row(s)`)
-        setTyped(null)
-        read<{ text: string; edited: boolean }>(`/api/settings/bom/file?hop=${name}`)
-          .then(setFile)
-          .catch(() => undefined)
-        // The table above is parsed from the same file, so it has to be re-read too or the page
-        // shows an old list beside the new text.
-        read<Bom[]>('/api/settings/bom').then(setBoms).catch(() => undefined)
+        setSaid((s) => ({
+          ...s,
+          [part]: r.edited
+            ? `saved, ${r.rows} row(s); this replaces the built-in`
+            : `reverted, ${r.rows} row(s) from the code`,
+        }))
+        setTyped((s) => {
+          const next = { ...s }
+          delete next[part]
+          return next
+        })
+        void load(name)
       })
       .catch((e: Error) => {
-        setBusy(false)
-        setSaid(`not saved: ${e.message}`)
+        setBusy(null)
+        setSaid((s) => ({ ...s, [part]: `not saved: ${e.message}` }))
       })
   }
-
-  useEffect(() => {
-    read<Bom[]>('/api/settings/bom')
-      .then(setBoms)
-      .catch((e: Error) => setFailed(e.message))
-  }, [])
 
   if (failed !== null) {
     return <EmptyNote>The bills of materials could not be read: {failed}</EmptyNote>
   }
-  if (boms === null) {
-    return <EmptyNote>Reading the bills of materials…</EmptyNote>
-  }
-
-  const shown = boms.find((b) => b.name === name) ?? boms[0]
-  if (shown === undefined) {
-    return <EmptyNote>There are no bills of materials.</EmptyNote>
-  }
 
   return (
     <>
-      {/* ONE RUNG AT A TIME. Lombok appears in all four lists at two different versions, and four
-          tables side by side invite a reader to compare rows that are answers to different
-          questions. The hop picker is the same shape the prompts section uses. */}
+      {/* ONE HOP AT A TIME. Lombok is in all four lists at two different versions, and four pairs
+          of files side by side invite a reader to compare rows that answer different questions. */}
       <nav style={RUNGS} aria-label="Which hop">
-        {boms.map((b) => (
+        {HOPS.map((h) => (
           <button
-            key={b.name}
+            key={h}
             type="button"
-            onClick={() => setName(b.name)}
-            style={rungStyle(b.name === shown.name)}
-            aria-current={b.name === shown.name ? 'true' : undefined}
+            onClick={() => setName(h)}
+            style={rungStyle(h === name)}
+            aria-current={h === name ? 'true' : undefined}
           >
             {'JDK '}
-            {b.hop}
-            <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
-              {'  '}
-              {b.floors.length}
-            </span>
+            {h.replace('-', ' → ')}
           </button>
         ))}
       </nav>
 
-      <Card>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
-          <thead>
-            <tr>
-              <th style={TH}>artifact</th>
-              <th style={{ ...TH, textAlign: 'right', whiteSpace: 'nowrap' }}>at least</th>
-              <th style={TH}>what it is for</th>
-              <th style={TH}>why it is here</th>
-            </tr>
-          </thead>
-          <tbody>
-            {shown.floors.map((f) => (
-              <tr key={f.coordinates}>
-                <td style={TD}>
-                  <div style={{ fontFamily: 'ui-monospace, monospace' }}>{f.artifact}</div>
-                  <div style={{ color: 'var(--text-tertiary)', fontSize: '11px' }}>
-                    {f.coordinates.slice(0, f.coordinates.lastIndexOf(':'))}
-                    {/* A row one build system cannot express does not count against it, and a
-                        reader looking at a repository scored 3 of 4 needs to know which rows were
-                        never in play. */}
-                    {f.dialect === 'any' ? null : (
-                      <span style={ONLY}>{f.dialect} only</span>
-                    )}
-                  </div>
-                  {/* The names the same artifact goes by elsewhere. Without these the measurement
-                      is a lie on half the corpus: Gradle cannot write spring-boot-starter-parent. */}
-                  {f.spellings.length === 0 ? null : (
-                    <div style={{ color: 'var(--text-tertiary)', fontSize: '11px', marginTop: '2px' }}>
-                      {'also '}
-                      {f.spellings.join(', ')}
-                    </div>
-                  )}
-                </td>
-                <td
-                  style={{
-                    ...TD,
-                    textAlign: 'right',
-                    fontFamily: 'ui-monospace, monospace',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {f.version}
-                </td>
-                <td style={{ ...TD, whiteSpace: 'nowrap' }}>
-                  {/* THE TWO GROUPS ARE DIFFERENT KINDS OF ROW, not two timings. A before row is
-                      what makes the bump possible at all: an unmet one means no bump. An after row
-                      is polish on what the bump produced, and it is where the CVE fixes are. A
-                      column that said only "before the JDK" invited a reader to weigh them the
-                      same. */}
-                  <span
-                    style={f.phase === 'after' ? AFTER : BEFORE}
-                    title={
-                      f.phase === 'after'
-                        ? 'polish, once the bump has already built and tested green'
-                        : 'a precondition: below this the bump cannot happen at all'
-                    }
-                  >
-                    {f.phase === 'after' ? 'hardens the result' : 'enables the bump'}
-                  </span>
-                </td>
-                <td style={{ ...TD, color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                  {f.why === '' ? (
-                    <span style={{ color: 'var(--text-tertiary)' }}>
-                      no reason is recorded, which makes this indistinguishable from a superstition
-                    </span>
-                  ) : (
-                    f.why
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
-
-      {file === null ? null : (
-        <section style={{ marginTop: '18px' }}>
-          <h2 style={LABEL}>
-            {'the file'}
-            {file.edited ? (
-              <span style={EDITED}>edited; the built-in is replaced entirely</span>
-            ) : (
+      {bom === null ? (
+        <EmptyNote>Reading the bills of materials…</EmptyNote>
+      ) : (
+        bom.files.map((f) => (
+          <section key={f.part} style={{ marginBottom: '22px' }}>
+            <h2 style={LABEL}>
+              {f.title}
               <span style={{ color: 'var(--text-tertiary)', fontWeight: 400 }}>
-                {"  the code's own"}
+                {'  '}
+                {f.rows}
+                {' row(s)'}
               </span>
-            )}
-          </h2>
-          <Card>
-            {/* AN EDIT REPLACES THE BUILT-IN ENTIRELY, on the same terms as an edited prompt.
-                There is no merge: a list half from the code and half from a box is a list nobody
-                can read in one place, and reading it in one place is the only way anyone works out
-                why a version was asked for. Saving an empty box throws the edit away. */}
-            <textarea
-              value={typed ?? file.text}
-              onChange={(e) => setTyped(e.target.value)}
-              spellCheck={false}
-              rows={18}
-              style={EDITOR}
-              aria-label={`The bill of materials for the ${name} hop`}
-            />
-            <SaveRow
-              onSave={() => save(typed ?? file.text)}
-              busy={busy}
-              said={
-                said ?? (typed === null ? undefined : 'unsaved; a bump reads what is on disk')
-              }
-            />
-          </Card>
-        </section>
+              {f.edited ? <span style={EDITED}>edited</span> : null}
+            </h2>
+            <p style={ABOUT}>{f.about}</p>
+            <Card>
+              <textarea
+                value={typed[f.part] ?? f.text}
+                onChange={(e) => setTyped((s) => ({ ...s, [f.part]: e.target.value }))}
+                spellCheck={false}
+                rows={20}
+                style={EDITOR}
+                aria-label={`${f.title}, JDK ${bom.hop}`}
+              />
+              <SaveRow
+                onSave={() => save(f.part, typed[f.part] ?? f.text)}
+                busy={busy === f.part}
+                said={
+                  said[f.part] !== undefined && said[f.part] !== ''
+                    ? said[f.part]
+                    : typed[f.part] === undefined
+                      ? undefined
+                      : 'unsaved; a bump reads what is on disk when it starts'
+                }
+              />
+            </Card>
+          </section>
+        ))
       )}
 
       <p style={NOTE}>
-        {/* Said here because a reader is entitled to know how much this page can be trusted, and
-            because the answer is about to change: the deterministic pinning step will apply these
-            rather than measure against them. */}
-        Every row is the head of a line, and it answers only for projects already on that line:
-        same major, same minor, lower patch. That is why{' '}
-        <code>tomcat-embed-core</code> can appear twice, once for 9.0 and once for 10.1, without the
-        two competing. A project on neither is asked for nothing, because crossing from Tomcat 9 to
-        Tomcat 10 is the jakarta rename and not a patch. These are hand maintained, in{' '}
-        <code>src/main/resources/bom/</code>, and stated a second time as prose in{' '}
-        <code>Floors.java</code>, which is what the planners read; a test binds the two.
+        Every row is the head of a line and answers only for projects already on it: same major,
+        same minor, lower patch. That is why <code>tomcat-embed-core</code> can hold a 9.0 head and a
+        10.1 head at once without the two competing, and why a project on neither is asked for
+        nothing — Tomcat 9 to Tomcat 10 is the jakarta rename, not a patch. Saving an empty box
+        reverts to the file in <code>src/main/resources/bom/</code>. An edit takes effect on the next
+        bump that starts, never on one already running.
       </p>
     </>
   )
 }
 
-const RUNGS: Style = { display: 'flex', gap: '6px', marginBottom: '14px' }
+const RUNGS: Style = { display: 'flex', gap: '6px', marginBottom: '18px' }
+
+function rungStyle(current: boolean): Style {
+  return {
+    font: 'inherit',
+    fontSize: '12.5px',
+    fontWeight: current ? 600 : 400,
+    padding: '5px 11px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    border: '1px solid var(--border-soft)',
+    color: current ? 'var(--text-primary)' : 'var(--text-tertiary)',
+    background: current ? 'var(--state-selected-bg)' : 'transparent',
+  }
+}
 
 const LABEL: Style = {
   fontSize: '11px',
@@ -253,7 +185,15 @@ const LABEL: Style = {
   letterSpacing: '.06em',
   color: 'var(--text-tertiary)',
   fontWeight: 500,
+  margin: '0 0 6px',
+}
+
+const ABOUT: Style = {
   margin: '0 0 10px',
+  fontSize: '12.5px',
+  color: 'var(--text-secondary)',
+  maxWidth: '90ch',
+  lineHeight: 1.5,
 }
 
 const EDITED: Style = { marginLeft: '8px', color: 'var(--accent-primary)', fontWeight: 600 }
@@ -274,52 +214,10 @@ const EDITOR: Style = {
   marginBottom: '12px',
 }
 
-function rungStyle(current: boolean): Style {
-  return {
-    font: 'inherit',
-    fontSize: '12.5px',
-    fontWeight: current ? 600 : 400,
-    padding: '5px 11px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    border: '1px solid var(--border-soft)',
-    color: current ? 'var(--text-primary)' : 'var(--text-tertiary)',
-    background: current ? 'var(--state-selected-bg)' : 'transparent',
-  }
-}
-
-const TH: Style = {
-  textAlign: 'left',
-  fontSize: '11px',
-  textTransform: 'uppercase',
-  letterSpacing: '.06em',
-  color: 'var(--text-tertiary)',
-  fontWeight: 500,
-  padding: '0 12px 8px 0',
-  borderBottom: '1px solid var(--border-soft)',
-}
-
-const TD: Style = {
-  padding: '9px 12px 9px 0',
-  borderBottom: '1px solid var(--border-soft)',
-  verticalAlign: 'top',
-}
-
-const ONLY: Style = {
-  marginLeft: '6px',
-  padding: '0 5px',
-  borderRadius: '4px',
-  background: 'var(--bg-subtle)',
-  color: 'var(--text-tertiary)',
-}
-
-const BEFORE: Style = { color: 'var(--text-tertiary)' }
-const AFTER: Style = { color: 'var(--accent-primary)' }
-
 const NOTE: Style = {
-  margin: '14px 0 0',
+  margin: '4px 0 0',
   fontSize: '12px',
   color: 'var(--text-tertiary)',
-  maxWidth: '80ch',
+  maxWidth: '90ch',
   lineHeight: 1.5,
 }

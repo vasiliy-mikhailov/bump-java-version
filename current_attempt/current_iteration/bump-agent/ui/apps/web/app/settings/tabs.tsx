@@ -30,7 +30,7 @@ export type TabName = (typeof TABS)[number]['a'] | 'supervisor'
 /** What each section is, in the header, so the page says what it is for before it lists values. */
 export const ABOUT: Record<TabName, { title: string; subtitle: string }> = {
   prompts: { title: 'prompts', subtitle: 'what each agent is told, for the hop it is built for' },
-  bom: { title: 'the floors', subtitle: 'the versions a target needs, and the argument for each' },
+  bom: { title: 'the floors', subtitle: 'what each hop needs to happen, and what it needs to be safe' },
   run: { title: 'the run', subtitle: 'how many repositories are bumped at once' },
   model: { title: 'the model', subtitle: "every value is the environment's or the code's" },
   subject: { title: 'the subject', subtitle: 'the queue this sweep is working through' },

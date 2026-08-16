@@ -1,0 +1,22 @@
+# WHAT ENABLES THE JDK 21 TO 25 BUMP. Below one of these the bump does not happen.
+#
+# Every row is the head of a line and answers only for projects already on it: same major, same
+# minor, lower patch. One artifact may hold several rows, one per line.
+#
+# group:artifact <tab> version <tab> any|maven|gradle <tab> other spellings, comma separated
+org.projectlombok:lombok	1.18.46	any	
+net.bytebuddy:byte-buddy	1.17.6	any	
+net.bytebuddy:byte-buddy-agent	1.17.6	any	
+org.mockito:mockito-core	5.18.0	any	
+org.jetbrains.kotlin:kotlin	2.3.20	any	org.jetbrains.kotlin:kotlin-stdlib,org.jetbrains.kotlin:kotlin-gradle-plugin,org.jetbrains.kotlin:kotlin-maven-plugin,org.jetbrains.kotlin.jvm,org.jetbrains.kotlin:*
+org.gradle:gradle-wrapper	9.1.0	gradle	
+org.apache.tomcat.embed:tomcat-embed-core	9.0.105	any	
+com.tngtech.archunit:archunit	1.4.1	any	com.tngtech.archunit:*
+com.tngtech.archunit:archunit-junit5	1.4.1	any	
+org.jacoco:jacoco-maven-plugin	0.8.15	any	org.jacoco:org.jacoco.core,org.jacoco:jacoco,org.jacoco:*
+javax.xml.bind:jaxb-api	2.3.1	any	
+org.glassfish.jaxb:jaxb-runtime	2.3.1	any	
+javax.annotation:javax.annotation-api	1.3.2	any	
+org.hamcrest:hamcrest	2.2	any	
+org.junit.platform:junit-platform-launcher	1.10.2	any	
+org.apache.maven.plugins:maven-compiler-plugin	3.13.0	maven	

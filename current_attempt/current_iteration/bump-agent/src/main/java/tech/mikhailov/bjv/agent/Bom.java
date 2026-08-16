@@ -152,11 +152,11 @@ final class Bom {
     }
 
     /** Where one hop's edit lives, or null when there is nowhere to put it. */
-    static Path fileFor(Path root, String hop) {
-        if (root == null || !hop.matches("\\d+-\\d+")) {
+    static Path fileFor(Path root, String key) {
+        if (root == null || !key.matches("\\d+-\\d+-(enables|hardens)")) {
             return null;
         }
-        return root.resolve(hop + ".tsv");
+        return root.resolve(key + ".tsv");
     }
 
     /**
@@ -169,8 +169,12 @@ final class Bom {
     record Source(String text, boolean edited) {
     }
 
-    static Source textFor(String hop) {
-        Path file = fileFor(store, hop);
+    static Source textFor(Hop hop, String part) {
+        return textFor(key(hop, part));
+    }
+
+    static Source textFor(String key) {
+        Path file = fileFor(store, key);
         if (file != null && Files.isRegularFile(file)) {
             try {
                 String text = Files.readString(file, java.nio.charset.StandardCharsets.UTF_8);
@@ -183,11 +187,11 @@ final class Bom {
                 // Fall through to the built-in, which is always there.
             }
         }
-        return new Source(builtIn(hop), false);
+        return new Source(builtIn(key), false);
     }
 
-    private static String builtIn(String hop) {
-        try (var in = Bom.class.getResourceAsStream("/bom/" + hop + ".tsv")) {
+    private static String builtIn(String key) {
+        try (var in = Bom.class.getResourceAsStream("/bom/" + key + ".tsv")) {
             return in == null ? ""
                     : new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         } catch (IOException unreadable) {
@@ -196,8 +200,8 @@ final class Bom {
     }
 
     /** Save an edit, staged and renamed over so no reader sees half of each. */
-    static void save(String hop, String text) throws IOException {
-        Path file = fileFor(store, hop);
+    static void save(String key, String text) throws IOException {
+        Path file = fileFor(store, key);
         if (file == null) {
             throw new IOException("no bill-of-materials store configured");
         }
@@ -206,7 +210,7 @@ final class Bom {
         }
         // PARSED BEFORE IT IS KEPT. A file that cannot be read throws at load, and load happens
         // inside a bump; refusing here turns a sweep-wide failure into a message on a page.
-        parse(hop, text);
+        parse(key, text, key.endsWith("hardens") ? "hardens" : "enables");
         Files.createDirectories(file.getParent());
         Path staged = file.resolveSibling(file.getFileName() + ".staged");
         Files.writeString(staged, text, java.nio.charset.StandardCharsets.UTF_8);
@@ -215,8 +219,8 @@ final class Bom {
     }
 
     /** Throw the edit away. The built-in is not restored; it was never gone. */
-    static void revert(String hop) throws IOException {
-        Path file = fileFor(store, hop);
+    static void revert(String key) throws IOException {
+        Path file = fileFor(store, key);
         if (file != null) {
             Files.deleteIfExists(file);
         }
@@ -240,8 +244,33 @@ final class Bom {
      *                               floor that silently vanishes from this list is the exact
      *                               failure the class doc describes
      */
+    /** Both halves, in the order a bump reaches them. */
     static List<Floor> of(Hop hop) {
-        return load(name(hop));
+        List<Floor> both = new ArrayList<>(of(hop, "enables"));
+        both.addAll(of(hop, "hardens"));
+        return both;
+    }
+
+    /**
+     * ONE HALF OF ONE HOP'S LIST.
+     *
+     * <p>Two files rather than a column, because these are two kinds of claim and not two timings
+     * of one. {@code enables} is what makes the bump possible at all and is unmet only on a bump
+     * that did not happen; {@code hardens} is polish on a project that already builds and tests
+     * green. A phase column inside one file made them look like the same thing measured twice.
+     */
+    static List<Floor> of(Hop hop, String part) {
+        return parse(key(hop, part), textFor(hop, part).text(), part);
+    }
+
+    /** Which two files a hop reads. */
+    static String key(Hop hop, String part) {
+        return name(hop) + "-" + part;
+    }
+
+    /** The two halves, named once so nothing has to remember the spelling. */
+    static List<String> parts() {
+        return List.of("enables", "hardens");
     }
 
     /**
@@ -258,7 +287,7 @@ final class Bom {
         int to = hop.to();
         String rung = to >= 25 ? "21-25" : to >= 21 ? "17-21" : to >= 17 ? "11-17" : "8-11";
         String exact = hop.from() + "-" + hop.to();
-        return Bom.class.getResource("/bom/" + exact + ".tsv") != null ? exact : rung;
+        return Bom.class.getResource("/bom/" + exact + "-enables.tsv") != null ? exact : rung;
     }
 
     /**
@@ -281,15 +310,16 @@ final class Bom {
      * it; the same for the wrapper on a Maven project. Counting an impossible row as a miss is how a
      * percentage becomes an accusation.
      */
-    private static List<Floor> load(String hop) {
-        String text = textFor(hop).text();
+    /**
+     * The rows of one file.
+     *
+     * <p>The phase is not a column any more; it is which file this is. A row that had to say so
+     * twice could disagree with itself, and one of the two would have been the quiet one.
+     */
+    private static List<Floor> parse(String key, String text, String phase) {
         if (text.isEmpty()) {
-            throw new IllegalStateException("no bill of materials for the " + hop + " hop");
+            throw new IllegalStateException("no bill of materials at " + key);
         }
-        return parse(hop, text);
-    }
-
-    private static List<Floor> parse(String hop, String text) {
         List<Floor> floors = new ArrayList<>();
         for (String raw : text.lines().toList()) {
             String line = raw.strip();
@@ -300,26 +330,24 @@ final class Bom {
             // a shorter list is a healthier looking percentage, which is the same failure the
             // class doc describes wearing different clothes.
             String[] cell = line.split("\\t", -1);
-            if (cell.length < 4 || !cell[0].contains(":")
+            if (cell.length < 3 || !cell[0].contains(":")
                     || !cell[1].matches("\\d[\\w.\\-]*")
-                    || !Set.of("before", "after").contains(cell[2])
-                    || !Set.of("any", "maven", "gradle").contains(cell[3])) {
-                throw new IllegalStateException(
-                        "the " + hop + " hop has a row this cannot read: " + raw);
+                    || !Set.of("any", "maven", "gradle").contains(cell[2])) {
+                throw new IllegalStateException(key + " has a row this cannot read: " + raw);
             }
             Set<String> spellings = new java.util.LinkedHashSet<>();
             spellings.add(cell[0]);
-            if (cell.length > 4) {
-                for (String also : cell[4].split(",")) {
+            if (cell.length > 3) {
+                for (String also : cell[3].split(",")) {
                     if (!also.isBlank()) {
                         spellings.add(also.strip());
                     }
                 }
             }
-            floors.add(new Floor(cell[0], cell[1], cell[2], spellings, cell[3]));
+            floors.add(new Floor(cell[0], cell[1], phase, spellings, cell[2]));
         }
         if (floors.isEmpty()) {
-            throw new IllegalStateException("the bill of materials for " + hop + " is empty");
+            throw new IllegalStateException(key + " is empty");
         }
         return List.copyOf(floors);
     }

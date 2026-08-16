@@ -52,8 +52,7 @@ final class Api {
             case "/api/settings/subject" -> Zone.json(x, subject());
             case "/api/settings/registry" -> registry(x);
             case "/api/settings/supervisor" -> Zone.json(x, supervisor());
-            case "/api/settings/bom" -> Zone.json(x, boms());
-            case "/api/settings/bom/file" -> bomFile(x);
+            case "/api/settings/bom" -> bomFile(x);
             default -> {
                 return false;
             }
@@ -328,37 +327,6 @@ final class Api {
     }
 
     /**
-     * THE BILLS OF MATERIALS, AS THE HARNESS HOLDS THEM.
-     *
-     * <p>Read from the same files the measurement reads, not restated: a settings page that
-     * describes a list from memory is a third copy of it, and this whole area exists because two
-     * copies of one fact once disagreed in silence.
-     *
-     * <p>The prose is shipped alongside each row. A version with no reason behind it is
-     * indistinguishable from a superstition, and these accumulate; a reader deciding whether a floor
-     * is still right needs the argument that put it there more than the number.
-     */
-    private String boms() {
-        return Json.array(List.of(new Hop(8, 11), new Hop(11, 17), new Hop(17, 21),
-                new Hop(21, 25)), hop -> Json.object(
-                Json.field("hop", Json.string(hop.from() + " \u2192 " + hop.to())),
-                Json.field("name", Json.string(hop.from() + "-" + hop.to())),
-                Json.field("floors", Json.array(Bom.of(hop), floor -> Json.object(
-                        Json.field("coordinates", Json.string(floor.coordinates())),
-                        Json.field("artifact", Json.string(floor.artifact())),
-                        Json.field("version", Json.string(floor.version())),
-                        Json.field("phase", Json.string(floor.phase())),
-                        Json.field("dialect", Json.string(floor.dialect())),
-                        Json.field("spellings", Json.array(
-                                floor.spellings().stream()
-                                        .filter(s -> !s.equals(floor.coordinates()))
-                                        .sorted().toList(),
-                                Json::string)),
-                        Json.field("why",
-                                Json.string(reasonFor(hop.to(), floor.coordinates()))))))));
-    }
-
-    /**
      * READ AND WRITE ONE HOP'S LIST AS A FILE, which is what it is.
      *
      * <p>The rows go out parsed for the table; this goes out raw, because the thing being edited is
@@ -371,32 +339,62 @@ final class Api {
      */
     private void bomFile(HttpExchange x) throws IOException {
         String hop = Zone.param(x, "hop");
+        String part = Zone.param(x, "part");
         if (!hop.matches("\\d+-\\d+")) {
             Zone.json(x, Json.object(Json.field("saved", "false"),
                     Json.field("why", Json.string("that is not a hop"))));
             return;
         }
         if (x.getRequestMethod().equalsIgnoreCase("GET")) {
-            Bom.Source source = Bom.textFor(hop);
+            // BOTH HALVES IN ONE ANSWER. They are read together and edited together, and a page
+            // that had to ask twice would show one of them stale for a moment.
+            Hop asked = hopOf(hop);
             Zone.json(x, Json.object(
-                    Json.field("hop", Json.string(hop)),
-                    Json.field("text", Json.string(source.text())),
-                    Json.field("edited", String.valueOf(source.edited()))));
+                        Json.field("hop", Json.string(asked.from() + " \u2192 " + asked.to())),
+                        Json.field("name", Json.string(hop)),
+                        Json.field("files", Json.array(Bom.parts(), name -> {
+                            Bom.Source source = Bom.textFor(asked, name);
+                            return Json.object(
+                                    Json.field("part", Json.string(name)),
+                                    Json.field("title", Json.string(name.equals("hardens")
+                                            ? "what hardens the result"
+                                            : "what enables the bump")),
+                                    Json.field("about", Json.string(name.equals("hardens")
+                                            ? "Polish on a project that already builds and tests "
+                                            + "green at the target, where the patch releases carry "
+                                            + "the CVE fixes. None of it can be raised until the "
+                                            + "JDK has moved, and none of it is load-bearing for "
+                                            + "the move."
+                                            : "What makes the bump possible at all. A Lombok that "
+                                            + "cannot read the new class file kills javac before "
+                                            + "anything else runs. Below one of these the bump "
+                                            + "does not happen, so they move before the JDK does.")),
+                                    Json.field("rows",
+                                            String.valueOf(Bom.of(asked, name).size())),
+                                    Json.field("text", Json.string(source.text())),
+                                    Json.field("edited", String.valueOf(source.edited())));
+                    }))));
+            return;
+        }
+        if (!Bom.parts().contains(part)) {
+            Zone.json(x, Json.object(Json.field("saved", "false"),
+                    Json.field("why", Json.string("a save names which half it is"))));
             return;
         }
         String body = new String(x.getRequestBody().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        String key = Bom.key(hopOf(hop), part);
         try {
             if (body.isBlank()) {
                 // AN EMPTY SAVE IS A REVERT, said once rather than needing its own button: the
                 // built-in was never gone, so throwing the edit away restores it.
-                Bom.revert(hop);
+                Bom.revert(key);
             } else {
-                Bom.save(hop, body);
+                Bom.save(key, body);
             }
-            Bom.Source now = Bom.textFor(hop);
+            Bom.Source now = Bom.textFor(key);
             Zone.json(x, Json.object(Json.field("saved", "true"),
                     Json.field("edited", String.valueOf(now.edited())),
-                    Json.field("rows", String.valueOf(Bom.of(hopOf(hop)).size()))));
+                    Json.field("rows", String.valueOf(Bom.of(hopOf(hop), part).size()))));
         } catch (IOException | RuntimeException refused) {
             Zone.json(x, Json.object(Json.field("saved", "false"),
                     Json.field("why", Json.string(String.valueOf(refused.getMessage())))));
