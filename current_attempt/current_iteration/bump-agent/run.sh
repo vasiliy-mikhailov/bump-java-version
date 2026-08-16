@@ -262,6 +262,20 @@ LANEFILE=$ROOT/max_lanes
 [ -f "$LANEFILE" ] || echo "$LANES" > "$LANEFILE"
 lanes() { local n; n=$(cat "$LANEFILE" 2>/dev/null); case "$n" in ''|*[!0-9]*) echo "$LANES";; *) echo "$n";; esac; }
 
+# HOW MANY LANES ARE RUNNING ANYWHERE, not how many this shell started. `jobs -rp` counts one
+# runner's own children, so a second sweep and the rerun drainer each helped themselves to the
+# whole allowance: max_lanes 4 across three runners is twelve containers on one GPU, and the
+# number on the settings page meant a third of what it said. A claim file exists for the life of
+# a lane whoever launched it, and inflight() clears the ones whose container is gone, so the
+# claims directory is the count that was wanted all along. Own jobs are the floor, because a
+# claim write is allowed to fail and a lane that could not claim still occupies a lane.
+running() {
+  local claimed own
+  claimed=$(ls "$RESULTS/claims" 2>/dev/null | wc -l)
+  own=$(jobs -rp | wc -l)
+  [ "$claimed" -gt "$own" ] && echo "$claimed" || echo "$own"
+}
+
 echo "manifest $MAN ($(grep -c . "$MAN") rows), $(lanes) lanes (live: $LANEFILE), results -> $RESULTS"
 rounds=0
 while :; do
@@ -278,7 +292,7 @@ while read -r slug repo sha from to; do
   # value could not matter. Raising the limit from the dashboard then did nothing until something
   # finished: saved as 6, still running 4, with no way to tell the difference from a broken write.
   # Two seconds of latency reusing a freed slot is nothing against a bump that runs for an hour.
-  while [ "$(jobs -rp | wc -l)" -ge "$(lanes)" ]; do sleep 2; done
+  while [ "$(running)" -ge "$(lanes)" ]; do sleep 2; done
   one "$slug" "$repo" "$sha" "$from" "$to" &
   done_n=$((done_n+1))
 done < "$MAN"
