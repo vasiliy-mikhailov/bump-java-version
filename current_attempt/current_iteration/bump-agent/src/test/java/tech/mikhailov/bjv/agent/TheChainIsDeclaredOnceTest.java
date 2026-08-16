@@ -124,10 +124,16 @@ class TheChainIsDeclaredOnceTest {
         assertTrue(repeatsOf("troubleshoot").contains("gate is red"), repeatsOf("troubleshoot"));
         assertTrue(repeatsOf("security-after").contains("green gate"), repeatsOf("security-after"));
 
+        // THE MIRROR OF security-after. A green gate returns PASS from inside the turn loop and
+        // never reaches the closers, so the arguer only ever argues bumps that failed: it is the
+        // stage that says what went wrong, not the stage that says what happened.
+        assertTrue(repeatsOf("verdict").contains("never went green"), repeatsOf("verdict"));
+
         // A stage that runs once and always says nothing, because a note on every row is a note
         // nobody reads.
         assertEquals("", repeatsOf("survey"));
-        assertEquals("", repeatsOf("verdict"));
+        assertEquals("", repeatsOf("estimator"),
+                "the estimator prices every bump, green or not");
     }
 
     private static String repeatsOf(String title) {
