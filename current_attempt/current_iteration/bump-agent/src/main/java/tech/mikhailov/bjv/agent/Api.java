@@ -1382,6 +1382,10 @@ final class Api {
                 Json.field("min", "1"),
                 Json.field("max", "16"),
                 Json.field("turns", Json.string(envOr("BJV_MODULE_TURNS", "3"))),
+                // THE CEILING THAT ACTUALLY BINDS, and it was served nowhere. Turns and steps are
+                // per module; this is the whole bump's allowance, and it is what stops a
+                // twenty-module repository ordering seven hundred repair steps.
+                Json.field("repairBudget", Json.string(envOr("BJV_REPAIR_BUDGET", "192"))),
                 Json.field("steps", Json.string(envOr("BJV_STEPS", "6"))),
                 Json.field("hangGuardMinutes", Json.string(envOr("BJV_HANG_GUARD", ""))),
                 // WHERE DEPENDENCIES COME FROM, ON A PAGE, because until now it was knowable only

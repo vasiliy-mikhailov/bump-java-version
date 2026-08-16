@@ -19,6 +19,7 @@ type Run = {
   min: number
   max: number
   turns: string
+  repairBudget: string
   steps: string
   hangGuardMinutes: string
   /** Where dependencies resolve from, and the caches the sandbox mounts to reach them. */
@@ -108,24 +109,37 @@ export function RunSection() {
       <div style={{ height: '18px' }} />
 
       <SettingCard
-        title="the loops"
+        title="the repair budget"
         provenance="the environment's"
         footnote={
           <>
-            Set on the container and read at launch, so changing one means a redeploy. They are shown
-            because a reader looking at a bump that spent sixteen turns should be able to see that
-            sixteen was the budget.
+            Set on the container and read at launch, so changing one means a redeploy. Repair happens
+            inside the module walk: a module is compiled on its own and repaired until it compiles or
+            its turns run out. The repository gate runs once after the walk and does not retry, so
+            there is no gate-turn budget any more.
           </>
         }
       >
         <LabeledField
-          label="gate turns"
-          hint="How many times the gate may build, judge and hand back to the troubleshooter."
+          label="module-gate turns"
+          hint="How many times one module may be compiled and repaired before the walk moves on."
         >
           <input style={READONLY} value={run.turns} readOnly />
         </LabeledField>
-        <LabeledField label="steps per campaign" hint="Steps one troubleshoot campaign may order.">
+        <LabeledField
+          label="steps per campaign"
+          hint="Steps one repair campaign may order, and a campaign may run twice."
+        >
           <input style={READONLY} value={run.steps} readOnly />
+        </LabeledField>
+        {/* THE ONE THAT ACTUALLY BINDS. Turns times steps times campaigns is per module, so on a
+            twenty-module repository the per-module numbers alone would allow seven hundred steps.
+            This is the whole bump's allowance and the walk draws it down across every module. */}
+        <LabeledField
+          label="repair steps per bump"
+          hint="The whole bump's allowance, shared by every module. This is the ceiling that binds."
+        >
+          <input style={READONLY} value={run.repairBudget} readOnly />
         </LabeledField>
       </SettingCard>
 
