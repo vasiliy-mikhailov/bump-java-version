@@ -79,7 +79,7 @@ settled() { # a slug is done when the settlements file holds a terminal state fo
   [ -f "$RESULTS/settlements.jsonl" ] || return 1
   grep -q "\"bump\":\"$1|" "$RESULTS/settlements.jsonl" 2>/dev/null &&
     grep "\"bump\":\"$1|" "$RESULTS/settlements.jsonl" | tail -1 |
-    grep -qvE '"state":"bumping"'
+    grep -qvE '"state":"(bumping|requeued)"'
 }
 
 # A BUMP STILL IN FLIGHT IS NOT AN UNSETTLED BUMP. Its last settlement row reads "bumping", which

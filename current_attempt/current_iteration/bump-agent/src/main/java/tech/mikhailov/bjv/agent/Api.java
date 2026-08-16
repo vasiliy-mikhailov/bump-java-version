@@ -42,6 +42,7 @@ final class Api {
             case "/api/bumps" -> Zone.json(x, bumps(Zone.param(x, "since")));
             case "/api/summary" -> Zone.json(x, summary());
             case "/api/live" -> live(x, Zone.param(x, "slug"), Zone.param(x, "have"));
+            case "/api/rerun" -> Zone.json(x, rerun(Zone.param(x, "slug")));
             case "/api/security" -> Zone.json(x, security());
             case "/api/bump" -> Zone.json(x, bump(Zone.param(x, "slug")));
             case "/api/settings" -> Zone.json(x, settings(Zone.param(x, "hop")));
@@ -445,6 +446,62 @@ final class Api {
         out.flush();
     }
 
+    /**
+     * ASK FOR A BUMP TO BE RUN AGAIN.
+     *
+     * <p>A settled bump is skipped forever, which is right while the harness is unchanged and wrong
+     * the moment it is not. The floors, the prompts and the tools all moved today, so a verdict
+     * from this morning was reached by an agent that no longer exists. Until now the only way to
+     * revisit one was to hand-edit settlements.jsonl on the host.
+     *
+     * <p>AN APPEND, NOT A REWRITE. Both readers of that file already take the LAST line for a bump
+     * and ignore what came before, so requeueing is one line added rather than a file rewritten
+     * underneath a sweep that is appending to it. A rewrite would race, and the window is precisely
+     * the moment a lane settles.
+     *
+     * <p>"requeued" rather than "bumping", which would also have worked because it is the one state
+     * run.sh treats as unfinished. A bump waiting for a lane is not a bump in flight, and this
+     * corpus has spent the day removing numbers that were true only by accident. The page reads it
+     * as queued, which is what it is.
+     */
+    private String rerun(String slug) {
+        if (slug == null || slug.isBlank()) {
+            return Json.object(Json.field("queued", "false"),
+                    Json.field("why", Json.string("no slug given")));
+        }
+        Map<String, String> settled = settlements().get(slug);
+        if (settled == null) {
+            return Json.object(Json.field("queued", "false"),
+                    Json.field("why", Json.string("nothing settled under that slug")));
+        }
+        String bump = settled.getOrDefault("bump", "");
+        String[] parts = bump.split("\\|");
+        if (parts.length < 4) {
+            return Json.object(Json.field("queued", "false"),
+                    Json.field("why", Json.string("that settlement names no hop")));
+        }
+        try {
+            Files.writeString(results.resolve("rerun.tsv"),
+                    slug + "\t" + parts[0] + "\t" + parts[1] + "\t" + parts[2] + "\t" + parts[3]
+                            + "\n",
+                    java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.APPEND);
+            Files.writeString(results.resolve("settlements.jsonl"),
+                    "{\"at\":\"" + System.currentTimeMillis() + "\",\"bump\":\"" + bump
+                            + "\",\"kind\":\"settled\",\"state\":\"requeued\"}\n",
+                    java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.APPEND);
+        } catch (IOException couldNotWrite) {
+            return Json.object(Json.field("queued", "false"),
+                    Json.field("why", Json.string(String.valueOf(couldNotWrite.getMessage()))));
+        }
+        return Json.object(
+                Json.field("queued", "true"),
+                Json.field("repo", Json.string(parts[0])),
+                Json.field("hop", Json.string(parts[2] + " -> " + parts[3])),
+                Json.field("was", Json.string(settled.getOrDefault("state", ""))));
+    }
+
     /** The corpus: everything queued, plus anything settled that the queue no longer lists. */
     private int bumpCount() {
         Set<String> all = new LinkedHashSet<>(settlements().keySet());
@@ -532,7 +589,10 @@ final class Api {
                 Json.field("sha", Json.string(parts.length > 1 ? parts[1] : "")),
                 Json.field("from", parts.length > 2 ? parts[2] : "0"),
                 Json.field("to", parts.length > 3 ? parts[3] : "0"),
-                Json.field("verdict", Json.string(r.getOrDefault("state", "bumping"))),
+                // REQUEUED READS AS QUEUED. The state exists so the runner knows the old
+                // verdict no longer counts; a reader already has a word for waiting.
+                Json.field("verdict", Json.string("requeued".equals(r.get("state"))
+                        ? "queued" : r.getOrDefault("state", "bumping"))),
                 Json.field("because", Json.optional(because)),
                 Json.field("baselineGreen", String.valueOf("true".equals(r.get("baseline")))),
                 Json.field("gateGreen", String.valueOf("true".equals(r.get("gate")))),

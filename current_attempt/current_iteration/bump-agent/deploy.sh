@@ -66,7 +66,7 @@ fi
 # edited one is silently the old one -- the same shape as this script not shipping itself, which
 # also had to be found the hard way.
 if [ -z "$LOCAL" ]; then
-  rsync -a Dockerfile run.sh deploy.sh "$H:$R/"
+  rsync -a Dockerfile run.sh rerun.sh deploy.sh "$H:$R/"
 fi
 # ONE IMAGE. The agent, the dashboard and the supervisor are the same jar with different main
 # classes; three Dockerfiles copying the same artifact meant three builds and three chances for one

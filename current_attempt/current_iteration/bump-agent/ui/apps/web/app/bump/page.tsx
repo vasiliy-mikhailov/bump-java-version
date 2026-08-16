@@ -14,7 +14,7 @@ import {
   VerdictPill,
 } from '@bjv/ui'
 import type { TraceEvent } from '@bjv/types'
-import { href, live, read } from '@/lib/api'
+import { href, live, post, read } from '@/lib/api'
 import { Nav } from '../nav'
 
 /** Which half of the page is showing. The record is everything that happened, in order. */
@@ -37,6 +37,7 @@ function BumpPage() {
   const [slug, setSlug] = useState('')
   const [only, setOnly] = useState<string | undefined>(undefined)
   const [tab, setTab] = useState<Tab>('summary')
+  const [rerun, setRerun] = useState<string | null>(null)
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search)
@@ -114,7 +115,42 @@ function BumpPage() {
           </>
         }
         back={{ label: 'bumps', href: href('/') }}
-        actions={<Nav current="bumps" />}
+        actions={
+          <>
+            {/* A SETTLED VERDICT IS ONLY TRUE OF THE HARNESS THAT REACHED IT. The floors, the
+                prompts and the tools all moved today, so a verdict from this morning was decided
+                by an agent that no longer exists. Offered only on a settled bump: asking for a
+                rerun of something already running is a click that means nothing. */}
+            {summary.verdict === 'bumping' || summary.verdict === 'queued' ? null : (
+              <button
+                type="button"
+                style={RERUN}
+                onClick={() => {
+                  setRerun('asking…')
+                  post<{ queued: boolean; why?: string; was?: string }>(
+                    `/api/rerun?slug=${encodeURIComponent(slug)}`,
+                  )
+                    .then((r) =>
+                      setRerun(
+                        r.queued
+                          ? `queued again, was ${r.was ?? 'settled'}`
+                          : `not queued: ${r.why ?? 'unknown'}`,
+                      ),
+                    )
+                    .catch((e: Error) => setRerun(`not queued: ${e.message}`))
+                }}
+              >
+                rerun
+              </button>
+            )}
+            {rerun === null ? null : (
+              <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginRight: '8px' }}>
+                {rerun}
+              </span>
+            )}
+            <Nav current="bumps" />
+          </>
+        }
       />
 
       <div style={{ padding: '14px 24px 0' }}>
@@ -194,6 +230,18 @@ function BumpPage() {
     </>
   )
 }
+
+const RERUN = {
+  font: 'inherit',
+  fontSize: '12px',
+  color: 'var(--text-secondary)',
+  background: 'var(--bg-subtle)',
+  border: '1px solid var(--border-soft)',
+  borderRadius: '5px',
+  padding: '3px 10px',
+  cursor: 'pointer',
+  marginRight: '8px',
+} as const
 
 const LABEL = {
   fontSize: '11px',

@@ -46,6 +46,15 @@ export function href(path: string): string {
  *
  * Returns its own teardown, so an effect can hand it straight back to React.
  */
+/** Ask the server to run a settled bump again. Returns what it decided. */
+export async function post<T>(path: string): Promise<T> {
+  const response = await fetch(href(path), { method: 'POST' })
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}`)
+  }
+  return (await response.json()) as T
+}
+
 export function live(
   path: string,
   handlers: Record<string, (data: unknown) => void>,
