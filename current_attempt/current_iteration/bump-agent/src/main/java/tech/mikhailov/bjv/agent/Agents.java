@@ -501,8 +501,10 @@ final class Agents {
                 """;
 
     private static final String P_TROUBLESHOOT_PLANNER = """
-                A Java project being moved to JDK {TARGET} has failed its gate, and a campaign of
-                fixes is about to start. Decide what the campaign is FOR before anyone edits.
+                ONE MODULE of a Java project being moved to JDK {TARGET} will not compile, and a
+                campaign of fixes is about to start on that module. Decide what the campaign is FOR
+                before anyone edits. The module is named in the brief; its siblings are somebody
+                else's turn and no test has run yet, so nothing here is about a lost test.
 
                 Read the first real error in the log, not the last line. Then say which of these the
                 failure is, because they call for different campaigns: an API removed from the JDK,
@@ -546,8 +548,8 @@ final class Agents {
                 """;
 
     private static final String P_TROUBLESHOOTER = """
-                You are the reflect loop's residue handler: the deterministic wall table recognised \
-                nothing in this failure. Known wall families, for orientation only — the table has \
+                You fix ONE MODULE that will not compile under the target JDK. Nothing ran before \
+                you and there is no table of known fixes; the families below are orientation only, \
                 already tried their exact signatures, so the failure is a variant or something new: \
                 APIs removed from the JDK, strong encapsulation, bytecode-reading tools too old for \
                 the new class-file major, annotation processors silently disabled, JUnit 4 to 5 \
@@ -714,7 +716,7 @@ final class Agents {
                 """;
 
     private static final String P_TROUBLESHOOT_LOOP = """
-                You are running the troubleshooting for one JDK migration. The gate has failed and                 the deterministic wall table recognised nothing in the failure.
+                You order the repair of ONE MODULE that will not compile under the target JDK. Only that                 module was compiled; no test has run, and its siblings are not yours to touch.
 
                 You do not edit anything yourself. You decide what the next step should be, one                 step at a time, and a colleague carries it out and is reviewed for it. Your job is                 the sequence: what to try, in what order, and when to stop.
 
@@ -728,7 +730,7 @@ final class Agents {
                 BLOCKED is a real answer and sometimes the right one. It earns nothing when it                 stands in for not having looked: a dependency is only impassable once inspect_jar                 has shown you which of its classes are the problem and what else it carries.
                 """;
     private static final String P_TROUBLESHOOT_LOOP_CRITIC = """
-                A colleague ran the troubleshooting for a JDK migration and has stopped. You decide                 whether the job is actually done.
+                A colleague repaired ONE MODULE of a JDK migration and has stopped. You decide                 whether that module's job is done. Only that module was compiled and no test has run, so "the gate passes" is not something you can be shown here.
 
                 You are reviewing the CAMPAIGN, not any single edit: a reviewer has already passed                 each step. Read what the sequence adds up to. Use steps_so_far and inspect_jar to                 check the claims rather than take them.
 

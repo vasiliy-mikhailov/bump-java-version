@@ -67,7 +67,12 @@ final class Tools {
                         + "and every tool result so far, one line each, oldest first. Git shows what "
                         + "LANDED; this shows what was TRIED, including the attempts that were "
                         + "rejected and why. Read it before repeating something. Narrow it with "
-                        + "`stage` (survey, baseline, migrate, prepare, bump, gate, troubleshooter) "
+                        // FOUR OF THE SEVEN NAMED HERE DID NOT EXIST. migrate, prepare and
+                        // troubleshooter were deleted stages, survey never writes an `applied`
+                        // row, and happened() returns nothing for a stage it does not match, so
+                        // every agent was offered a filter vocabulary that silently found nothing.
+                        + "`stage` (baseline, before-pins-doer, bump, after-pins-doer, modules, "
+                        + "gate, module-repair-step-doer, security-before, security-after) "
                         + "or `agent` when the whole log is too much.")
                 .parameters(JsonObjectSchema.builder()
                         .addStringProperty("stage", "optional stage to filter to")

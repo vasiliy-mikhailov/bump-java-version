@@ -571,9 +571,16 @@ public final class Bump {
                 + "YOU ARE WORKING ON ONE MODULE: " + label(only)
                 + "\nEvery other module in this repository is somebody else's turn. Do not edit "
                 + "them.\n\nThe modules of this project, for context only:\n" + moduleList()
-                + "\n\nThe JDK has " + (after ? "already been raised to " + to
-                        + ", so versions that require it can now be resolved."
-                        : "NOT been raised yet; it is still " + from + ".");
+                // TRUE OF THIS MODULE, NOT OF THE REPOSITORY. The walk is module-major, so by
+                // the time module two is pinned, module one has already been raised; saying "the
+                // JDK has NOT been raised yet" is then a false statement of fact to a producing
+                // agent, once per module rather than once per bump.
+                + "\n\nTHIS MODULE has " + (after ? "already been raised to " + to
+                        + ", so versions that require it can now be resolved. Earlier modules in "
+                        + "the walk have been raised too; later ones have not yet."
+                        : "NOT been raised yet; it is still " + from + ". Modules earlier in the "
+                        + "walk may already have been raised, which is expected and is not your "
+                        + "business.");
 
         new Triad(stage, planner,
                 (plan, feedback) -> {
@@ -866,7 +873,7 @@ public final class Bump {
         String aim = agents.moduleRepairPlanner().run(brief(log)
                 + "\n\nWhat has landed so far:\n" + tree.history(floor));
         if (aim.stripLeading().startsWith("NOT-OURS")) {
-            trace.progress(bump, "troubleshoot: " + aim.lines().findFirst().orElse(""));
+            trace.progress(bump, "module-repair: " + aim.lines().findFirst().orElse(""));
             return false;
         }
         for (int campaign = 0; campaign <= REASK; campaign++) {
@@ -879,7 +886,7 @@ public final class Bump {
             if (word(judgement, "done", "again").equals("done") || campaign == REASK) {
                 return landed;
             }
-            trace.progress(bump, "troubleshoot-loop-critic sent the campaign back: "
+            trace.progress(bump, "module-repair-verifier sent the campaign back: "
                     + judgement.lines().findFirst().orElse(""));
             // The critic may already have rewound; if it did not, its objection stands on top of
             // whatever is there, which is its choice to make and not this loop's.
@@ -906,7 +913,7 @@ public final class Bump {
                             + "\n\nWhat the campaign has changed:\n" + tree.diffSince(floor));
             String head = order.stripLeading();
             if (head.startsWith("DONE:") || head.startsWith("BLOCKED:")) {
-                trace.progress(bump, "troubleshoot-loop: " + head.lines().findFirst().orElse(""));
+                trace.progress(bump, "module-repair-step: " + head.lines().findFirst().orElse(""));
                 return landed;
             }
             if (step(log, order)) {
@@ -915,10 +922,10 @@ public final class Bump {
             } else {
                 // A step nobody could land is a signal about the order, not about the workspace,
                 // and the proposer sees it next time round in the history that did not grow.
-                trace.progress(bump, "troubleshoot-loop: the ordered step did not land");
+                trace.progress(bump, "module-repair-step: the ordered step did not land");
             }
         }
-        trace.progress(bump, "troubleshoot-loop: step budget spent");
+        trace.progress(bump, "module-repair-step: step budget spent");
         return landed;
     }
 
