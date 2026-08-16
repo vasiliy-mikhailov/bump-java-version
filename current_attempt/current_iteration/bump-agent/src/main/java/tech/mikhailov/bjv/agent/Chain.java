@@ -42,10 +42,10 @@ final class Chain {
      * <p>{@code within} names the stage this one is nested inside, so the page can show the module
      * passes under the module stage rather than as peers of it. Empty for a top-level stage.
      */
-    record Stage(String title, String within, List<Step> steps, String repeats) {
+    record Stage(String title, String within, List<Step> steps, String repeats, String reads) {
 
         Stage(String title, String within, List<Step> steps) {
-            this(title, within, steps, "");
+            this(title, within, steps, "", "");
         }
 
         boolean nested() {
@@ -68,7 +68,24 @@ final class Chain {
      * with nothing said implies it always runs and runs once, and it does neither.
      */
     private static Stage repeating(Stage s, String repeats) {
-        return new Stage(s.title(), s.within(), s.steps(), repeats);
+        return new Stage(s.title(), s.within(), s.steps(), repeats, s.reads());
+    }
+
+    /**
+     * WHICH BILL OF MATERIALS A STAGE WORKS FROM, which is the same split the lists are kept in.
+     *
+     * <p>The two halves are different kinds of claim rather than two timings of one. What ENABLES
+     * the bump is a precondition: a Lombok that cannot read the new class file kills javac before
+     * anything else runs, and below one of those the bump does not happen at all. What HARDENS the
+     * result is polish on a project that already builds and tests green, where the patch releases
+     * carry the CVE fixes and nothing is load-bearing for the move itself.
+     *
+     * <p>Naming it here is what connects the two pages. A reader looking at before-pins can see
+     * which list it is working to without knowing that the phase happens to run before the JDK
+     * moves, and a reader editing a list can see which agent will act on what they typed.
+     */
+    private static Stage reading(Stage s, String reads) {
+        return new Stage(s.title(), s.within(), s.steps(), s.repeats(), reads);
     }
 
     private Chain() {
@@ -118,9 +135,13 @@ final class Chain {
                 triplet("module-filter"),
                 // The doing of the module stage is the three ordered passes below it.
                 aroundDeterministic("modules", "", "the three passes"),
-                repeating(triplet("before-pins", "modules"), "once for the repository"),
+                reading(repeating(triplet("before-pins", "modules"), "once for the repository"),
+                        "enables"),
+                // The JDK move itself, which reads no list: it is the thing the two lists are
+                // either side of.
                 repeating(triplet("bump", "modules"), "once per module"),
-                repeating(triplet("after-pins", "modules"), "once for the repository"),
+                reading(repeating(triplet("after-pins", "modules"), "once for the repository"),
+                        "hardens"),
                 deterministic("gate"),
                 // The doing of the troubleshoot stage is a campaign of the steps below it.
                 repeating(aroundDeterministic("troubleshoot", "", "a campaign of steps"),

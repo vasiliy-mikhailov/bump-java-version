@@ -60,6 +60,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
     within: string
     loop: string
     repeats: string
+    reads: string
     agents: AgentPrompt[]
   }[] = []
   for (const p of prompts ?? []) {
@@ -67,7 +68,14 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
     if (last !== undefined && last.title === p.stage) {
       last.agents.push(p)
     } else {
-      stages.push({ title: p.stage, within: p.within, loop: p.loop, repeats: p.repeats, agents: [p] })
+      stages.push({
+        title: p.stage,
+        within: p.within,
+        loop: p.loop,
+        repeats: p.repeats,
+        reads: p.reads,
+        agents: [p],
+      })
     }
   }
 
@@ -95,6 +103,8 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
     opens: string
     /** How often it runs, empty when once and unconditionally. */
     repeats: string
+    /** Which bill of materials it works from, empty when none. */
+    reads: string
   }
 
   const blocks: Block[] = []
@@ -117,6 +127,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
         agents: stage.agents,
         opens: '',
         repeats: stage.repeats,
+        reads: stage.reads,
       })
       continue
     }
@@ -131,6 +142,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
       agents: openers,
       opens: stage.loop,
       repeats: stage.repeats,
+      reads: stage.reads,
     })
     for (const child of children) {
       blocks.push({
@@ -140,6 +152,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
         agents: child.agents,
         opens: '',
         repeats: child.repeats,
+        reads: child.reads,
       })
     }
     blocks.push({
@@ -149,6 +162,7 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
       agents: closers,
       opens: '',
       repeats: '',
+      reads: '',
     })
   }
 
@@ -212,6 +226,19 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
                     nothing about how many times it happens, and a reader will answer the second
                     question from the first: three peers inside a loop read as three per-module
                     passes, when only bump walks the module list. */}
+                {/* WHICH LIST IT WORKS TO, linked. A reader looking at before-pins should not
+                    have to know that the phase runs before the JDK moves in order to work out
+                    which half of the bill of materials it is acting on, and a reader editing a
+                    list should be able to see which agent will act on what they typed. */}
+                {block.reads === '' ? null : (
+                  <a
+                    href={href('/settings/?a=bom')}
+                    style={{ color: 'var(--accent-primary)', marginLeft: '8px' }}
+                  >
+                    {block.reads === 'hardens' ? 'hardens the result' : 'enables the bump'}
+                    {' \u2192'}
+                  </a>
+                )}
                 {block.repeats === '' ? null : (
                   <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>
                     {block.repeats}

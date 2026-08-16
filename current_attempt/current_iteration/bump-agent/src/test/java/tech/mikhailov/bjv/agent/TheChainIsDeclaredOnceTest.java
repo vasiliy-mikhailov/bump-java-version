@@ -136,4 +136,36 @@ class TheChainIsDeclaredOnceTest {
                 .findFirst().orElseThrow()
                 .repeats();
     }
+
+    @Test
+    void eachPinPhaseNamesTheHalfOfTheListItWorksTo() {
+        // THE SAME SPLIT THE LISTS ARE KEPT IN, said in the chain as well. What enables the bump is
+        // a precondition and below one of those the bump does not happen; what hardens the result
+        // is polish on a project that already builds and tests green. Naming it here is what
+        // connects the two pages: a reader looking at before-pins should not have to know that the
+        // phase runs before the JDK moves in order to work out which list it is acting on.
+        assertEquals("enables", readsOf("before-pins"));
+        assertEquals("hardens", readsOf("after-pins"));
+
+        // The JDK move itself reads no list. It is the thing the two lists are either side of, and
+        // giving it one would make the split about timing again.
+        assertEquals("", readsOf("bump"));
+
+        // AND THE NAMES ARE THE FILES'. A chain saying "hardens" while the resource is called
+        // something else is the two-readers-of-one-string failure this codebase keeps paying for.
+        for (String part : Bom.parts()) {
+            assertFalse(Bom.of(new Hop(17, 21), part).isEmpty(), part + " names a real list");
+        }
+        for (Chain.Stage s : Chain.stages()) {
+            assertTrue(s.reads().isEmpty() || Bom.parts().contains(s.reads()),
+                    s.title() + " reads a list that does not exist: " + s.reads());
+        }
+    }
+
+    private static String readsOf(String title) {
+        return Chain.stages().stream()
+                .filter(s -> s.title().equals(title))
+                .findFirst().orElseThrow()
+                .reads();
+    }
 }

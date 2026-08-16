@@ -227,6 +227,14 @@ export type AgentPrompt = {
    * is the repair arm of a turn loop with the gate rather than a stage that follows the module work.
    */
   repeats: string
+  /**
+   * Which bill of materials this stage works from: `enables`, `hardens`, or empty.
+   *
+   * The two halves are different kinds of claim rather than two timings of one. What enables the
+   * bump is a precondition, and below one of those the bump does not happen at all. What hardens
+   * the result is polish on a project that already builds and tests green.
+   */
+  reads: string
   description: string
   /** What is in force: the edit if there is one, otherwise the code's own. */
   prompt: string
