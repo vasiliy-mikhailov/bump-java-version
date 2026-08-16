@@ -141,6 +141,35 @@ final class Declared {
     }
 
     /**
+     * Every version any build file states for one artifact, in reading order.
+     *
+     * <p>For a tool that has to know how far it is being asked to travel before it travels. A
+     * coordinate can be declared in several modules at different versions and deciding which one is
+     * real is a judgement, so this returns all of them and lets the caller answer for itself.
+     *
+     * <p>Several spellings are accepted because one artifact has several: a Maven project writes
+     * {@code org.springframework.boot:spring-boot-starter-parent}, a Gradle buildscript writes
+     * {@code org.springframework.boot:spring-boot-gradle-plugin}, and the plugins block writes the
+     * plugin id alone.
+     */
+    static List<String> valuesFor(Path ws, String... coordinates) throws IOException {
+        List<Modules.Module> modules = Modules.of(ws);
+        List<String> out = new ArrayList<>();
+        for (Modules.Module m : modules) {
+            for (Path f : Modules.buildFilesOf(ws, m, modules)) {
+                for (Version v : in(Files.readString(f), ws.relativize(f).toString())) {
+                    for (String want : coordinates) {
+                        if (v.coordinates().equalsIgnoreCase(want) && !out.contains(v.value())) {
+                            out.add(v.value());
+                        }
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
+    /**
      * First declaration wins within a file.
      *
      * <p>Not lowest: this reports what the file SAYS, and picking a winner would be a judgement.

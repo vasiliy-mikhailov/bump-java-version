@@ -36,6 +36,26 @@ final class Migrate {
 
     /** The recipe versions the corpus measured against; pinned so a run is reproducible. */
     private static final String REWRITE_PLUGIN = "org.openrewrite.maven:rewrite-maven-plugin:6.40.0";
+
+    /**
+     * THE GRADLE ACTUATOR'S PLUGIN, PAIRED BY ENGINE RATHER THAN BY DATE.
+     *
+     * <p>7.33.0 is not the newest published; it is the one whose rewrite-bom is 8.83.0, which is
+     * exactly what rewrite-maven-plugin 6.40.0 pins. So both actuators run one recipe engine and a
+     * verdict from a Gradle repository is comparable with one from a Maven repository rather than
+     * being a measurement of two different programs. 7.39.0 would be 8.89.0.
+     */
+    private static final String REWRITE_GRADLE_PLUGIN = "org.openrewrite:plugin:7.33.0";
+
+    /**
+     * The init script, written beside the recipe rather than into the Gradle home.
+     *
+     * <p>jvm-run will mount a file at /root/.gradle/init.gradle, and anything there applies to
+     * EVERY Gradle invocation in the container, which includes the baseline build and test the
+     * conservation gate compares against. A script passed with --init-script applies to the one
+     * invocation that asked for it.
+     */
+    static final String INIT = "bjv-rewrite.init.gradle";
     private static final String RECIPE_JARS = "org.openrewrite.recipe:rewrite-migrate-java:3.36.0,"
             + "org.openrewrite.recipe:rewrite-spring:6.31.0";
 
@@ -179,10 +199,126 @@ final class Migrate {
      * <p>The one way a pin reaches a project. An agent that edits a pom by hand is guessing at
      * placement -- dependencyManagement, a property, a BOM import, a Gradle string -- and the
      * recipes know which is right for the project in front of them, on either build system.
+     *
+     * <p>ON EITHER BUILD SYSTEM WAS AN ASPIRATION FOR FOUR HUNDRED BUMPS. The recipes always knew;
+     * the runner was one maven goal, so on a Gradle project the sentence above was simply false and
+     * the phase that owed the pin had nothing else to reach for. Which actuator runs is decided
+     * here, from what is at the root, and is no longer something an agent has to know.
      */
     String apply(String yaml, String jdk) throws IOException {
         Files.writeString(ws.resolve("rewrite.yml"), normalised(yaml));
-        return rewrite(jdk);
+        switch (actuatorFor(ws)) {
+            case "maven":
+                return rewrite(jdk);
+            case "gradle":
+                return rewriteGradle(jdk);
+            // A repository carrying both at the root is still one bump, so both run and whichever
+            // build system is not really in charge finds nothing to do.
+            case "both":
+                return rewrite(jdk) + "\n\n" + rewriteGradle(jdk);
+            default:
+                return "there is no pom.xml and no gradle build file at the root of this "
+                        + "workspace, so there is nothing here for a recipe to run against";
+        }
+    }
+
+    /**
+     * WHICH ACTUATOR THIS WORKSPACE NEEDS: maven, gradle, both, or neither.
+     *
+     * <p>Read from the root, because a recipe run is per repository and not per module. One Gradle
+     * invocation at the root reaches every subproject, measured on a multi-project build where the
+     * root held no sources at all and the edit landed in lib/build.gradle.
+     */
+    static String actuatorFor(Path ws) {
+        boolean maven = Files.isRegularFile(ws.resolve("pom.xml"));
+        boolean gradle = Files.isRegularFile(ws.resolve("build.gradle"))
+                || Files.isRegularFile(ws.resolve("build.gradle.kts"))
+                || Files.isRegularFile(ws.resolve("settings.gradle"))
+                || Files.isRegularFile(ws.resolve("settings.gradle.kts"));
+        return maven && gradle ? "both" : maven ? "maven" : gradle ? "gradle" : "";
+    }
+
+    /**
+     * THE SAME RECIPE DOCUMENT, RUN BY GRADLE.
+     *
+     * <p>For four hundred bumps this half did not exist. apply_recipe was one command,
+     * {@code mvn rewrite-maven-plugin:run}, and half this corpus by repository is Gradle-only, so
+     * on those it reported "Goal requires a project to execute but there is no POM" and nothing
+     * else, 622 times, without a single success. The pin phases hold no editor, so the phase could
+     * read that a floor was violated and had no way at all to act; 453 of those calls were made
+     * after the answer was already known, one bump spending 132 of them before passing at 225 CVEs
+     * to 225.
+     *
+     * <p>Nothing about the recipe changes. A document carrying both the maven and the gradle arm
+     * runs here with the maven arms as silent no-ops, which is what the apply_recipe description
+     * has been telling agents to write all along.
+     */
+    private String rewriteGradle(String from) {
+        try {
+            Files.writeString(ws.resolve(INIT), initScript());
+            // The wrapper when the project has one, because its version is what the project builds
+            // under and the distributions are staged by version; the image's own gradle otherwise,
+            // which is the fallback jvmjob already makes.
+            String gradle = Files.isRegularFile(ws.resolve("gradlew")) ? "./gradlew" : "gradle";
+            String goal = gradle + " --no-daemon --init-script " + INIT + " rewriteRun";
+            Shell.Output out = Shell.run(ws, Runner.env(ws), Duration.ofSeconds(2700),
+                    hoptools + "/jvm-run", from, "jvmjob", "run", goal);
+            return "recipe run (gradle) rc=" + out.code() + "\n" + Runner.tail(out.text());
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "recipe run (gradle) failed: " + e.getMessage();
+        }
+    }
+
+    /**
+     * What tells Gradle to apply a plugin the project has never heard of.
+     *
+     * <p>Every line here was earned by a run that failed without it, on Gradle 5.6.4 through 9.6.1,
+     * Groovy and Kotlin, single project and multi, with every upstream host blackholed so the local
+     * mirror was the only reachable source.
+     */
+    String initScript() {
+        StringBuilder jars = new StringBuilder();
+        for (String coordinate : RECIPE_JARS.split(",")) {
+            jars.append("        rewrite \"").append(coordinate.strip()).append("\"\n");
+        }
+        return """
+                // Written by the harness for one invocation. Not the project's file.
+                def repoUrl = System.getenv("BJV_REPO_URL") ?: "http://nexus:8081/repository/maven-public/"
+                def mirror = { r -> r.url = repoUrl; try { r.allowInsecureProtocol = true } catch (Throwable ignored) { } }
+
+                initscript {
+                    // THE ONE SCOPE THE HOST'S OWN MIRROR SCRIPT DOES NOT REACH. nexus-mirror.init.gradle
+                    // prepends the mirror to pluginManagement, to buildscript and to project repositories.
+                    // An init script's own classpath is resolved before any of those exist, so without
+                    // this the plugin is fetched from the open internet or not at all.
+                    repositories {
+                        maven { r -> r.url = System.getenv("BJV_REPO_URL") ?: "http://nexus:8081/repository/maven-public/"
+                                     // Gradle 6+ refuses a plaintext repository without the opt-in and the
+                                     // mirror is http. On 5.x the property does not exist and http is fine.
+                                     try { r.allowInsecureProtocol = true } catch (Throwable ignored) { } }
+                    }
+                    dependencies { classpath "%s" }
+                }
+
+                rootProject { p ->
+                    p.apply plugin: org.openrewrite.gradle.RewritePlugin
+                    try { p.repositories.maven(mirror) } catch (Throwable refused) {
+                        // FAIL_ON_PROJECT_REPOS rejects the injection. Measured: the run still works
+                        // off the settings-level repositories, so this cannot be fatal.
+                        p.logger.lifecycle("bjv: project repositories refused (" + refused.message + ")")
+                    }
+                    p.dependencies {
+                %s    }
+                    p.rewrite {
+                        setConfigFile(p.file("rewrite.yml"))
+                        activeRecipe("%s")
+                        // Strictly better than the maven side, which reports a name it could not
+                        // resolve as a successful run that changed nothing.
+                        setFailOnInvalidActiveRecipes(true)
+                    }
+                }
+                """.formatted(REWRITE_GRADLE_PLUGIN, jars, activeRecipe());
     }
 
     /** The one literal OpenRewrite accepts as a recipe document's type. Anything else is not a recipe. */

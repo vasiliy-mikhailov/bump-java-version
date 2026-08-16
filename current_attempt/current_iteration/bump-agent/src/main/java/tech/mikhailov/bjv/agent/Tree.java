@@ -186,7 +186,8 @@ final class Tree {
             Path exclude = ws.resolve(".git/info/exclude");
             if (Files.isDirectory(exclude.getParent())) {
                 Files.writeString(exclude, String.join("\n",
-                        "target/", "build/", ".gradle/", "rewrite.yml", "*.class", ""),
+                        "target/", "build/", ".gradle/", "rewrite.yml", Migrate.INIT,
+                        "*.class", ""),
                         StandardOpenOption.CREATE,
                         StandardOpenOption.APPEND);
             }

@@ -15,14 +15,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * WHICH BUILD SYSTEM, ASKED RATHER THAN INFERRED FROM A FAILURE.
  *
- * <p>apply_recipe runs the OpenRewrite MAVEN plugin. On a module with no pom it answers "no POM in
- * this directory" and no recipe can run. Before this tool the only route to that knowledge was to
- * call the tool, read the error and infer the project type from it, and in the corpus that usually
- * ended in calling it again: 24 of 75 bumps, and the ten of those scanned on both sides held 143
- * CVEs that never moved.
+ * <p>This tool was added when apply_recipe ran only the OpenRewrite MAVEN plugin, so that an
+ * agent could learn its module had no pom by asking rather than by reading an error: in the corpus
+ * the usual route to that knowledge was to call the tool, misread the failure and call it again.
  *
- * <p>The fix is not cleverer prompting. It is a tool that answers the question, so the prompt can
- * say "ask" instead of teaching an agent to recognise an error string.
+ * <p>THE ANSWER IT GIVES HAS CHANGED, BECAUSE THE THING IT DESCRIBES HAS. There is a Gradle
+ * actuator now, so "every module here is Gradle" no longer means a recipe cannot run; it means the
+ * run goes through the Gradle plugin from the root and reaches every module at once. A test that
+ * still asserted the old sentence would be pinning a statement to the agent that is no longer
+ * true, which is exactly the failure this whole area is about: 622 calls made on the strength of a
+ * description that did not match the runner behind it.
+ *
+ * <p>What the tool is FOR has changed with it. It is no longer how you find out whether you can
+ * act. It is how a reader, and a verifier, tells a pin that was never attempted from one that was
+ * attempted and did not land.
  */
 class TheAgentCanAskWhichBuildSystemTest {
 
@@ -57,24 +63,38 @@ class TheAgentCanAskWhichBuildSystemTest {
     }
 
     @Test
-    void aMavenProjectSaysRecipesCanRun(@TempDir Path ws) throws IOException {
+    void aMavenProjectSaysSo(@TempDir Path ws) throws IOException {
         module(ws, "", "pom.xml");
 
         String said = ask(ws);
 
-        assertTrue(said.contains("apply_recipe can run"), said);
+        assertTrue(said.contains("Every module here is Maven"), said);
         assertTrue(said.contains("maven"), said);
     }
 
     @Test
-    void aGradleProjectSaysTheyCannot(@TempDir Path ws) throws IOException {
+    void aGradleProjectIsNotToldItCannotAct(@TempDir Path ws) throws IOException {
         module(ws, "", "build.gradle");
 
         String said = ask(ws);
 
-        // The sentence has to be unambiguous: this is the one an agent acts on.
-        assertTrue(said.contains("cannot execute a recipe"), said);
+        assertTrue(said.contains("Every module here is Gradle"), said);
         assertTrue(said.contains("gradle"), said);
+        // The sentence an agent acts on. It used to read "apply_recipe runs the OpenRewrite MAVEN
+        // plugin and cannot execute a recipe on any of them", and for four hundred bumps it was
+        // true. Leaving it in place after building the actuator would cost every Gradle pin twice
+        // over: once to the runner, once to a description telling agents not to try.
+        assertFalse(said.contains("cannot"), said);
+    }
+
+    @Test
+    void andIsToldWhereTheRunStartsInstead(@TempDir Path ws) throws IOException {
+        module(ws, "", "build.gradle");
+
+        // A recipe run is per repository on Gradle, not per module: one invocation at the root
+        // reaches every subproject, measured on a multi-project build whose root held no sources.
+        // An agent that does not know that walks the modules calling it once each.
+        assertTrue(ask(ws).contains("from the root"), ask(ws));
     }
 
     @Test
@@ -95,7 +115,9 @@ class TheAgentCanAskWhichBuildSystemTest {
         String said = ask(ws);
 
         assertTrue(said.startsWith("Mixed."), said);
-        assertTrue(said.contains("on none of the Gradle ones"), said);
+        // Both actuators run in turn on a repository that is both, and the arms of the document
+        // that do not match the build system in front of them are no-ops rather than errors.
+        assertTrue(said.contains("reaches both"), said);
     }
 
     @Test

@@ -411,11 +411,12 @@ final class Tools {
     private static Map<ToolSpecification, ToolExecutor> buildSystem(Path root) {
         ToolSpecification spec = ToolSpecification.builder()
                 .name("build_system")
-                .description("Report, PER MODULE, whether it is built by Maven, by Gradle, or by "
-                        + "both. Call this before apply_recipe: that tool runs the OpenRewrite "
-                        + "Maven plugin, so on a module with no pom.xml it cannot execute any "
-                        + "recipe at all, and no retry changes that. A repository can be mixed, so "
-                        + "the answer is per module rather than one word for the project.")
+                .description("Report, PER MODULE, whether it is built by Maven, by Gradle, or "
+                        + "by both. Useful for reading a project, not for choosing a tool: "
+                        + "bump_patch, bump_line and apply_recipe all pick their own actuator from "
+                        + "what is at the root, so a recipe runs on a Gradle project as it does on "
+                        + "a Maven one. A repository can be mixed, so the answer is per module "
+                        + "rather than one word for the whole project.")
                 .parameters(JsonObjectSchema.builder().build())
                 .build();
         ToolExecutor exec = (request, memoryId) -> {
@@ -445,12 +446,12 @@ final class Tools {
                 if (modules.isEmpty()) {
                     return "no modules were found under this workspace";
                 }
-                String head = gradle == 0 ? "Every module here is Maven; apply_recipe can run."
+                String head = gradle == 0 ? "Every module here is Maven."
                         : maven == 0
-                                ? "Every module here is Gradle. apply_recipe runs the OpenRewrite "
-                                        + "MAVEN plugin and cannot execute a recipe on any of them."
-                                : "Mixed. apply_recipe can run on the Maven modules and on none of "
-                                        + "the Gradle ones.";
+                                ? "Every module here is Gradle. Recipes run through the Gradle "
+                                        + "plugin, from the root, reaching every module at once."
+                                : "Mixed. A recipe run reaches both, by running each actuator in "
+                                        + "turn; the arms that do not match are no-ops.";
                 return head + "\n" + out;
             } catch (IOException e) {
                 return "could not read the build files: " + e.getMessage();
@@ -552,6 +553,8 @@ final class Tools {
                 only(root, Set.of("list_dir", "read_file", "edit_file"));
         tools.putAll(build(root, runner, targetJdk));
         tools.putAll(targets(root, targetJdk));
+        tools.putAll(patchBump(root, migrate, tree, under));
+        tools.putAll(lineBump(migrate, tree, under));
         tools.putAll(recipe(migrate, tree, under));
         tools.putAll(buildSystem(root));
         tools.putAll(history(tree, trace));
@@ -567,11 +570,238 @@ final class Tools {
         return recorded(tools, trace, agent);
     }
 
+    /** Run a document the harness wrote itself, reporting what it did rather than what it said. */
+    private static String ran(Migrate migrate, Tree tree, String jdk, String yaml) {
+        try {
+            String before = tree == null ? "" : tree.diff();
+            String said = migrate.apply(yaml, jdk);
+            return tree == null ? said : reported(before, tree.diff(), said);
+        } catch (IOException e) {
+            return "could not run the recipe: " + e.getMessage();
+        }
+    }
+
+    /** The line a version sits on: major.minor, or the whole string when it has neither. */
+    private static String line(String version) {
+        String[] part = version.split("[.-]");
+        return part.length >= 2 ? part[0] + "." + part[1] : version;
+    }
+
+    /**
+     * The document the harness writes so that nobody has to write it.
+     *
+     * <p>Four arms, because one artifact has four places it can be written and the project decides
+     * which: a Maven dependency or a managed one, a Maven parent, a Gradle dependency or buildscript
+     * classpath, and a Gradle plugins block. Whichever does not apply is a silent no-op, measured on
+     * a real project rather than assumed, so one document is correct on either build system.
+     *
+     * <p>Every name here was checked against the jars the actuators load, because a name that does
+     * not resolve is a run the Maven plugin reports as a success that changed nothing.
+     */
+    static String bumpYaml(String group, String artifact, String version) {
+        return """
+                type: specs.openrewrite.org/v1beta/recipe
+                name: com.bjv.Bump
+                displayName: %s to %s
+                recipeList:
+                  - org.openrewrite.maven.UpgradeDependencyVersion:
+                      groupId: %s
+                      artifactId: %s
+                      newVersion: %s
+                      overrideManagedVersion: true
+                  - org.openrewrite.maven.UpgradeParentVersion:
+                      groupId: %s
+                      artifactId: %s
+                      newVersion: %s
+                  - org.openrewrite.gradle.UpgradeDependencyVersion:
+                      groupId: %s
+                      artifactId: %s
+                      newVersion: %s
+                  - org.openrewrite.gradle.plugins.UpgradePluginVersion:
+                      pluginIdPattern: %s
+                      newVersion: %s
+                """.formatted(artifact, version,
+                        group, artifact, version,
+                        group, artifact, version,
+                        group, artifact, version,
+                        group, version);
+    }
+
+    /**
+     * A NEWER PATCH OF THE LINE THE PROJECT IS ALREADY ON, on either build system.
+     *
+     * <p>Nearly every floor in this harness is the newest patch of a line the target JDK can run,
+     * and that is not an accident of how they were written: a patch release carries the CVE fixes
+     * and changes no API, so it is the move that needs no migration and loses no test. Lombok
+     * 1.18.30, Tomcat 9.0.105, Boot 2.7.18, Boot 3.5.16 are all that shape.
+     *
+     * <p>The agent names an artifact and a version. It does not name a recipe, so it cannot invent
+     * one; it does not write yaml, so the header cannot be wrong; and it is not asked which build
+     * system it is on, because that is the harness's question to answer and answering it wrongly is
+     * what cost this corpus 622 calls and every Gradle pin it ever owed.
+     */
+    private static Map<ToolSpecification, ToolExecutor> patchBump(Path root, Migrate migrate,
+                                                                   Tree tree, String jdk) {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("bump_patch")
+                .description("Move one artifact to a newer patch of the line it is already on: "
+                        + "42.7.1 to 42.7.2, Spring Boot 2.7.3 to 2.7.18, lombok 1.18.20 to "
+                        + "1.18.30. Give the coordinates and the version you want; the harness "
+                        + "writes the recipe and picks the actuator, so this does the same thing on "
+                        + "a Maven project and on a Gradle one and you do not have to know which "
+                        + "you are on. Patch releases are where the CVE fixes are and they change "
+                        + "no API, which is why almost every floor in your brief is one. Crossing a "
+                        + "minor or a major is a different move and bump_line is what does it.")
+                .parameters(JsonObjectSchema.builder()
+                        .addStringProperty("groupId", "org.projectlombok")
+                        .addStringProperty("artifactId", "lombok")
+                        .addStringProperty("newVersion",
+                                "The patch to land on. Same major.minor as what is declared now.")
+                        .required("groupId", "artifactId", "newVersion")
+                        .build())
+                .build();
+        ToolExecutor exec = (request, memoryId) -> {
+            String group = Reasoning.field(request.arguments(), "groupId").strip();
+            String artifact = Reasoning.field(request.arguments(), "artifactId").strip();
+            String version = Reasoning.field(request.arguments(), "newVersion").strip();
+            if (group.isEmpty() || artifact.isEmpty() || version.isEmpty()) {
+                return "bump_patch needs groupId, artifactId and newVersion, all three of them";
+            }
+            if (!version.matches("\\d[0-9A-Za-z.\\-_]*")) {
+                return "\"" + version + "\" does not look like a version";
+            }
+            List<String> crossing;
+            try {
+                // The plugin id alone as well as the coordinate, because a Gradle plugins block
+                // writes `id "org.springframework.boot" version "2.7.3"` and no artifactId at all.
+                crossing = Declared.valuesFor(root, group + ":" + artifact, group).stream()
+                        .filter(v -> v.matches("\\d.*"))
+                        .filter(v -> !line(v).equals(line(version)))
+                        .distinct()
+                        .toList();
+            } catch (IOException e) {
+                return "could not read the build files to check the distance: " + e.getMessage();
+            }
+            if (!crossing.isEmpty()) {
+                return "that is not a patch move, so this is the wrong tool for it. " + artifact
+                        + " is declared at " + String.join(", ", crossing) + " and you asked for "
+                        + version + ", which is a different line. bump_line runs the migration for "
+                        + "the line rather than writing the number, which is the difference between "
+                        + "a project that starts and one that compiles and then fails on a property "
+                        + "renamed three minors ago.";
+            }
+            return ran(migrate, tree, jdk, bumpYaml(group, artifact, version));
+        };
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, exec);
+        return one;
+    }
+
+    /**
+     * CROSSING A LINE, which is a migration and not a number.
+     *
+     * <p>Six minor releases of renamed properties and withdrawn APIs sit between a Boot 2.1 project
+     * and 2.7, and a version typed into the parent block crosses none of them. Two doers in one
+     * sweep read a floor naming 3.5.4 and wrote exactly 3.5.4; the build was green, nothing
+     * complained, and the project kept Tomcat 10.1.43 with eleven CRITICAL+HIGH. The repository
+     * whose doer ran the recipe instead landed on 3.5.16 and went 63 findings to 2.
+     *
+     * <p>So this takes the same two coordinates and a target, and derives the recipe. Deriving beats
+     * remembering: an agent asked to name one invented AddDependencyManagementDependency, which does
+     * not exist, and the Maven plugin reported that as a success.
+     */
+    private static Map<ToolSpecification, ToolExecutor> lineBump(Migrate migrate, Tree tree,
+                                                                  String jdk) {
+        ToolSpecification spec = ToolSpecification.builder()
+                .name("bump_line")
+                .description("Move one artifact to a different major or minor line: Spring Boot "
+                        + "2.7 to 3.5, or 2.0 to 2.7. This runs the migration for that line rather "
+                        + "than writing a version, because the renamed properties and withdrawn "
+                        + "APIs between two lines are the whole cost of the move and a number "
+                        + "crosses none of them. The harness picks the recipe from what you name "
+                        + "and picks the actuator from the build system, so it works the same on "
+                        + "Maven and on Gradle. If nothing here covers the artifact you name it "
+                        + "says so rather than doing something else, and apply_recipe is then the "
+                        + "way through.")
+                .parameters(JsonObjectSchema.builder()
+                        .addStringProperty("groupId", "org.springframework.boot")
+                        .addStringProperty("artifactId", "spring-boot-starter-parent")
+                        .addStringProperty("newVersion",
+                                "The line to land on. The patch is resolved by the recipe, so 3.5 "
+                                        + "and 3.5.16 mean the same thing here.")
+                        .required("groupId", "artifactId", "newVersion")
+                        .build())
+                .build();
+        ToolExecutor exec = (request, memoryId) -> {
+            String group = Reasoning.field(request.arguments(), "groupId").strip();
+            String artifact = Reasoning.field(request.arguments(), "artifactId").strip();
+            String version = Reasoning.field(request.arguments(), "newVersion").strip();
+            if (group.isEmpty() || artifact.isEmpty() || version.isEmpty()) {
+                return "bump_line needs groupId, artifactId and newVersion, all three of them";
+            }
+            String recipe = migrationFor(group, version);
+            if (recipe.isEmpty()) {
+                return "nothing here migrates " + group + ":" + artifact + " to " + version
+                        + ". The lines this can cross on its own are Spring Boot's, 2.0 through "
+                        + "2.7, 3.0 through 3.5, and 4.0. For anything else apply_recipe takes a "
+                        + "recipe you name, and declared_versions will show you where the version "
+                        + "currently lives so you can pick the right one.";
+            }
+            return ran(migrate, tree, jdk, """
+                    type: specs.openrewrite.org/v1beta/recipe
+                    name: com.bjv.Bump
+                    displayName: %s to the %s line
+                    recipeList:
+                      - %s
+                    """.formatted(artifact, line(version), recipe));
+        };
+        Map<ToolSpecification, ToolExecutor> one = new LinkedHashMap<>();
+        one.put(spec, exec);
+        return one;
+    }
+
+    /**
+     * The migration that crosses one line, derived rather than remembered.
+     *
+     * <p>The bounds are read off rewrite-spring 6.31.0 rather than assumed: boot2 carries 2_0
+     * through 2_7, boot3 carries 3_0 through 3_5, boot4 carries 4_0. A name outside those is a
+     * recipe that does not exist, which the Gradle actuator fails loudly on and the Maven one
+     * reports as a run that succeeded and changed nothing.
+     */
+    static String migrationFor(String group, String version) {
+        if (!group.startsWith("org.springframework.boot")) {
+            return "";
+        }
+        String[] part = version.split("[.-]");
+        if (part.length < 2) {
+            return "";
+        }
+        int major;
+        int minor;
+        try {
+            major = Integer.parseInt(part[0]);
+            minor = Integer.parseInt(part[1]);
+        } catch (NumberFormatException notAVersion) {
+            return "";
+        }
+        boolean published = (major == 2 && minor <= 7)
+                || (major == 3 && minor <= 5)
+                || (major == 4 && minor == 0);
+        return published
+                ? "org.openrewrite.java.spring.boot" + major + ".UpgradeSpringBoot_" + major + "_"
+                        + minor
+                : "";
+    }
+
     /** A pin-phase producer: it may run recipes and check what landed, and edit nothing by hand. */
     static Map<ToolSpecification, ToolExecutor> pinning(Path root, Migrate migrate, Tree tree,
                                                         String jdk,
                                                         Trace trace, String agent) {
         Map<ToolSpecification, ToolExecutor> tools = only(root, Set.of("list_dir", "read_file"));
+        // THE NAMED MOVE FIRST, the raw document last. A phase that owes a floor is nearly always
+        // making one of two moves, and both of them are now something it can ask for by name.
+        tools.putAll(patchBump(root, migrate, tree, jdk));
+        tools.putAll(lineBump(migrate, tree, jdk));
         tools.putAll(recipe(migrate, tree, jdk));
         tools.putAll(buildSystem(root));
         tools.putAll(declaredVersions(root));
@@ -593,6 +823,10 @@ final class Tools {
         // apply_recipe runs the Maven plugin, and the verifier, seeing only that the version
         // was below the floor, answered `again` twice to a colleague with no tool to try
         // anything with. Same reason inspect_jar is given to judges.
+        //
+        // The premise is gone now -- there is a Gradle actuator -- but the tool stays. A verifier
+        // that can see which build system a module is on can tell a pin that was not attempted
+        // from one that was attempted and did not land, and those want different answers.
         tools.putAll(buildSystem(root));
         tools.putAll(history(tree, trace));
         return recorded(tools, trace, agent);
