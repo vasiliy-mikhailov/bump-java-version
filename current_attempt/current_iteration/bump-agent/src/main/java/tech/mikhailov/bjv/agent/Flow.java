@@ -10,11 +10,12 @@ import java.util.function.Supplier;
 /**
  * THE SHAPE IS THE PROGRAM, RATHER THAN A DESCRIPTION OF IT.
  *
- * <p>{@link Chain} exists because the structure of a bump lives in two places: declared there, and
- * carried out in {@link Bump}. Two copies of one fact drift, and this pair has: a page drew a loop
- * between two stages that had never joined, a label said a phase ran once for the repository days
- * after it became per module, and four prompts opened by telling agents a gate had failed that no
- * longer ran before them. Every one of those was found by reading, not by anything failing.
+ * <p>A file called {@code Chain} existed because the structure of a bump lived in two places:
+ * declared there, and carried out in {@link Bump}. Two copies of one fact drift, and that pair did:
+ * a page drew a loop between two stages that had never joined, a label said a phase ran once for
+ * the repository days after it became per module, and four prompts opened by telling agents a gate
+ * had failed that no longer ran before them. Every one of those was found by reading, not by
+ * anything failing. It is gone; {@link Shape} walks this tree for everything the pages read off it.
  *
  * <p>The fix is not another test binding the two. It is to stop having two. An agent is
  * {@code String run(String)}; a triad is three of those with a loop; a sequence is several of them
@@ -43,11 +44,58 @@ final class Flow {
     }
 
     /**
+     * THE RUN IS OVER BEFORE THE SEQUENCE IS, and saying so is a jump.
+     *
+     * <p>It is named and it lives here, next to the paragraph about having replaced the jump,
+     * rather than hidden in the caller. Three things end a bump before anything can be gated: the
+     * sealed tooling is not staged, the project does not build under its own JDK, no test passed
+     * that a bump could conserve. None of them is a stage deciding something, so none of them is
+     * selection: guarding every later stage with "and we are still going" would put error handling
+     * into the picture and stop it being the shape of the program. Nobody chose to skip the gate.
+     * The run stopped.
+     *
+     * <p>It carries the settlement account, whose first line is the state the sweep files. The
+     * safety of that is a property of what sits between a throw and its catch, so it is worth
+     * saying what does: today the only throwers are plain-code nodes at the top of the bump, and
+     * neither {@link #code} nor {@link #seq} catches anything on the way out. Two broad catches do
+     * exist in {@link Agents}, around the model call inside an agent, and no settlement passes
+     * through them. One added on this path would swallow the account, and the sweep would then
+     * read a settled bump as a crash.
+     */
+    static final class Settled extends RuntimeException {
+
+        private final String account;
+
+        Settled(String account) {
+            super(account);
+            this.account = account;
+        }
+
+        /** The settlement, in the form the caller returns it: state on the first line, then why. */
+        String account() {
+            return account;
+        }
+    }
+
+    /**
      * A NAMED NODE. Everything here is one, because a node without a name cannot be traced, cannot
      * be drawn, and cannot be pointed at in a bug report.
+     *
+     * <p>IT ALSO CARRIES THE THREE THINGS A WALK CANNOT DERIVE. Who speaks inside a node, how often
+     * the node runs, and which half of the bill of materials it works to: the agents are called
+     * from inside a body, and a condition is a {@link BooleanSupplier} with no English in it. They
+     * were declared in a file of their own beside the program, and all three drifted. Here they sit
+     * on the node, one line above the body that makes them true, and they die with it.
+     *
+     * <p>The vocabulary is the one that file used, because the facts are the same facts: a stage is
+     * a {@link #triplet}, or a plan and a verdict {@link #around} a step no model makes, or
+     * {@link #deterministic}, which is a fact with nothing to plan and nothing to dispute.
      */
-    private abstract static class Node implements Agents.Agent {
+    abstract static class Node implements Agents.Agent {
         private final String label;
+        private List<Shape.Step> steps = List.of();
+        private String repeats = "";
+        private String reads = "";
 
         Node(String label) {
             this.label = label;
@@ -57,14 +105,87 @@ final class Flow {
         public String name() {
             return label;
         }
+
+        /** Who speaks inside this node, and which of them is a step no model makes. */
+        List<Shape.Step> steps() {
+            return steps;
+        }
+
+        /** How often it runs, which nesting cannot say and a reader will otherwise guess wrongly. */
+        String repeats() {
+            return repeats;
+        }
+
+        /** Which half of the bill of materials it works to, empty for a node that reads neither. */
+        String reads() {
+            return reads;
+        }
+
+        /** Plans, does and verifies: the three agents named after this node. */
+        Node triplet() {
+            steps = List.of(Shape.agent(label, "planner"), Shape.agent(label, "doer"),
+                    Shape.agent(label, "verifier"));
+            return this;
+        }
+
+        /** A plan and a verdict around a step no model makes: a sub-chain, a build, a read. */
+        Node around(String step) {
+            steps = List.of(Shape.agent(label, "planner"), Shape.step(step),
+                    Shape.agent(label, "verifier"));
+            return this;
+        }
+
+        /** Only the step: a fact, with nothing to plan and nothing to dispute. */
+        Node deterministic() {
+            steps = List.of(Shape.step(label));
+            return this;
+        }
+
+        Node repeats(String often) {
+            repeats = often;
+            return this;
+        }
+
+        Node reads(String part) {
+            reads = part;
+            return this;
+        }
     }
 
     /** Plain code as an agent. The gate, a build, a scan: things with no model in them. */
-    static Agents.Agent code(String name, Step body) {
+    static Node code(String name, Step body) {
         return new Node(name) {
             @Override
             public String run(String task) throws IOException {
                 return body.run(task);
+            }
+        };
+    }
+
+    /**
+     * PLAIN CODE WITH A NODE INSIDE IT, which its own body reaches when and as often as it decides.
+     *
+     * <p>The three combinators cover the shapes a caller can hand over: in order, once per item,
+     * until a condition clears. A campaign is none of those from the outside. Its steps are a loop
+     * inside a loop, with a planner above them and a critic between the rounds, and rewriting that
+     * as nested {@code loop}s to make it drawable would rewrite live repair to suit a picture.
+     *
+     * <p>So the node is real and the body runs it. The picture shows the stage under its parent
+     * because the parent holds it, and every step the bump orders goes through it because the code
+     * has no other way to reach the campaign. What this does NOT claim is a count: how many times
+     * the body runs the node inside it is the body's business, which is what {@link #repeats} is
+     * for.
+     */
+    static Node code(String name, Agents.Agent inner, Step body) {
+        return new Node(name) {
+            @Override
+            public String run(String task) throws IOException {
+                return body.run(task);
+            }
+
+            @Override
+            public List<Agents.Agent> inside() {
+                return List.of(inner);
             }
         };
     }
@@ -76,7 +197,7 @@ final class Flow {
      * sequence that concatenated every step's answer would hand the next reader a transcript rather
      * than a result, and every caller would then have to decide which part of it mattered.
      */
-    static Agents.Agent seq(String name, Agents.Agent... steps) {
+    static Node seq(String name, Agents.Agent... steps) {
         List<Agents.Agent> all = List.of(steps);
         return new Node(name) {
             @Override
@@ -105,8 +226,8 @@ final class Flow {
      * anything has run. That is a real limitation and an honest one: a shape is what the program can
      * do, not what one execution did.
      */
-    static <T> Agents.Agent each(String name, Supplier<List<T>> items,
-                                 Function<T, String> label, Function<T, Agents.Agent> body) {
+    static <T> Node each(String name, Supplier<List<T>> items,
+                         Function<T, String> label, Function<T, Agents.Agent> body) {
         return new Node(name) {
             @Override
             public String run(String task) throws IOException {
@@ -130,28 +251,37 @@ final class Flow {
      * <p>The condition is asked BEFORE each turn and again after the body, so a block whose work is
      * already unnecessary costs nothing. A loop that always ran once before checking is how a
      * repository that needed no repair still paid for a repair planner.
+     *
+     * <p>A TURN IS ITS STEPS, IN ORDER, rather than a single step. The module gate is a build and
+     * then, only when that build came back red, a repair. Writing the pair as a nameless sequence
+     * inside the loop would put a node in the picture that nobody could point at, in order to say
+     * something the loop already says.
      */
-    static Agents.Agent loop(String name, int turns, BooleanSupplier again, Agents.Agent body) {
+    static Node loop(String name, int turns, BooleanSupplier again, Agents.Agent... turn) {
         int bound = Math.max(1, turns);
+        List<Agents.Agent> steps = List.of(turn);
         return new Node(name) {
             @Override
             public String run(String task) throws IOException {
                 String last = "";
-                for (int turn = 1; turn <= bound && again.getAsBoolean(); turn++) {
-                    last = body.run(task + "\n\nTurn " + turn + " of at most " + bound + ".");
+                for (int round = 1; round <= bound && again.getAsBoolean(); round++) {
+                    String brief = task + "\n\nTurn " + round + " of at most " + bound + ".";
+                    for (Agents.Agent step : steps) {
+                        last = step.run(brief);
+                    }
                 }
                 return last;
             }
 
             @Override
             public List<Agents.Agent> inside() {
-                return List.of(body);
+                return steps;
             }
         };
     }
 
     /** Only when the condition holds. Selection, and the reason a stage can say "only after a green gate". */
-    static Agents.Agent when(String name, BooleanSupplier cond, Agents.Agent body) {
+    static Node when(String name, BooleanSupplier cond, Agents.Agent body) {
         return new Node(name) {
             @Override
             public String run(String task) throws IOException {
@@ -163,6 +293,39 @@ final class Flow {
                 return List.of(body);
             }
         };
+    }
+
+    /**
+     * A BLOCK OF THE TREE, STANDING AS A TRIAD'S DOER.
+     *
+     * <p>{@link Triad#inside()} reports its doer when the doer is an agent, and that is the hook
+     * that lets a stage's picture show what happens underneath it. A doer written as a lambda is
+     * not an agent, so a stage whose work is a whole walk drew as a leaf: the stage was in the
+     * picture and everything it did was not.
+     *
+     * <p>It is abstract on purpose. The two things a doer is handed, the plan and the verifier's
+     * objection, are the block's to place, because only the block knows which of its stages can act
+     * on them. A default that spliced them into the task would put the walk's transcript in front
+     * of an agent that was asked about one module.
+     */
+    abstract static class Block implements Triad.Doer, Agents.Agent {
+
+        /** The nested tree: what this doer runs, and what the picture shows under its stage. */
+        final Agents.Agent body;
+
+        Block(Agents.Agent body) {
+            this.body = body;
+        }
+
+        @Override
+        public String run(String task) throws IOException {
+            return body.run(task);
+        }
+
+        @Override
+        public List<Agents.Agent> inside() {
+            return List.of(body);
+        }
     }
 
     /**

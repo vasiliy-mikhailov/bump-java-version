@@ -12,35 +12,25 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * THE ORDER, run in a sequence nothing can rewrite, with the gate between every phase that changes
- * the workspace.
+ * THE ORDER, AS ONE TREE THAT RUNS, and no second copy of it anywhere to keep in step.
  *
- * <pre>
- * surveyor ──→ survey-critic          which hop is this, actually   (wrong-hop → adopt correction)
- *    ↓
- * baseline @ from-JDK                 a FACT; no baseline, no bump; captured per module
- *    ↓
- * security-before                     the last moment this is still the project's own state
- *    ↓
- * module-filter ──→ its critic        which modules this bump leaves alone (a skip is dangerous)
- *    ↓
- * modules triad: planner → [ three passes ] → verifier
- *   before-pins   per module          what the new JDK needs, before it moves
- *   bump          per module          the step that moves the JDK
- *   after-pins    per module          what only resolves once it has moved
- *    ↓
- * reflect loop, bounded:
- *   gate @ to-JDK                     green → settled by the build, no model involved
- *   troubleshooter ──→ trouble-critic the residue                    (gaming → revert and stop)
- *    ↓
- * verdict                             argues ONLY what execution could not settle
- * estimator                           prices the attempt from the record
- * </pre>
+ * <p>{@link #everything} is that sequence, and {@code Flow.shape} prints it, so the picture is
+ * walked off the thing that executes. What stood here instead was a picture drawn beside the
+ * program: it drew a bounded reflect loop around the gate with a troubleshooter beside it, long
+ * after repair had moved inside the module walk and that loop had been deleted. Nothing failed and
+ * no test went red. Every reader was simply told something untrue.
+ *
+ * <p>The shape is asserted in {@code TheShapeIsTheProgramTest}, against the tree itself: survey,
+ * baseline, security-before, module-filter; the module walk; then the gate and the three stages
+ * that close on it. Two of those three are selection on the gate's own word, so a reader can see
+ * from the shape alone that the scan follows a green gate and the arguer follows a red one.
  *
  * <p>EVERY STAGE IS PLANNER, DOER, VERIFIER, and the verifier holds the loop. See {@link Triad}.
- * The three passes are ordered globally rather than per module because one reactor compiles the
- * whole project with one javac: Lombok has to be in place everywhere before the JDK moves anywhere,
- * and Spring Boot cannot resolve until after it has.
+ * The three passes are ordered inside a module rather than across the repository: one module is
+ * pinned, bumped, compiled, repaired and hardened before the walk moves on, because the context a
+ * repair needs is the diff that caused it and that diff exists for about one module's worth of
+ * time. Their order within the module is what the two pin phases are for: Lombok has to be in place
+ * before the JDK moves, and Spring Boot cannot resolve until after it has.
  *
  * <p>THE GATE IS NOT A TOOL. Producers can try their own build, and what they learn from it is
  * feedback; the build that DECIDES runs here, between the stages, because whether the gate ran after
@@ -143,16 +133,67 @@ public final class Bump {
     private String to;
     private Agents agents;
     private Runner runner;
+    /** Where jvm-run is invoked from. The survey reads it; the recipes the filter installs need it. */
+    private String hoptools;
     // What the builds actually did, carried to the settlement. An implication is not a record.
     private boolean baselineGreen;
     private boolean gateGreen;
     private Set<String> pre = Set.of();
+    /** What the scorer last said, which is what the arguer is answering. Null until the gate runs. */
     private Gate.Verdict lastVerdict;
+    /** What went wrong, in the terms the arguer can act on: written by the gate when it is red. */
+    private String lastLog = "";
+
+    /**
+     * WHAT THE BUMP SETTLED ON, WRITTEN BY THE STAGE THAT SETTLED IT.
+     *
+     * <p>A sequence answers with its last word, and the last word of this one belongs to a stage
+     * that only runs when the gate went red. So the answer cannot be the tree's: on the run that
+     * passed, the stage that would have supplied it is the one that was skipped. It is a field, and
+     * the two stages that can end a bump write it, the after-scan on a green gate and the arguer on
+     * a red one. The third way a bump ends is {@link Flow.Settled}, which carries its own.
+     *
+     * <p>WHY THE AFTER-SCAN AND NOT THE GATE, which is the stage that actually decided. The account
+     * of a passing bump quotes the CRITICAL+HIGH line, and that number does not exist until the
+     * scan has run, so the gate cannot yet say the sentence. What the gate settles is
+     * {@link #gateGreen}, and that is what both closers select on.
+     */
+    private String account = "";
 
     /** Every module the build files declare, which is what scopes a per-module read. */
     private List<Modules.Module> allModules = List.of();
     /** The ones this bump works on: everything above, minus what the filter pair set aside. */
     private List<Modules.Module> modules = List.of();
+
+    /**
+     * WHAT AN OUTER OBJECTION MEANS TO A NESTED BLOCK.
+     *
+     * <p>The modules verifier judges the repository: it reads what every module declares and says
+     * whether the walk is done. When it says again, the doer it is sending back is the whole walk,
+     * and a walk that re-runs having been told nothing asks every one of its agents the question it
+     * asked five minutes ago and gets the answer it got then. That is what this did: the doer took
+     * {@code (plan, feedback)} and read neither, so a second pass over twenty modules was forty
+     * stages spent to differ from the first only by sampling.
+     *
+     * <p>So the objection travels DOWN, into the brief of every module-scoped stage that shapes a
+     * declaration: before-pins, bump, after-pins. It is carried in a field rather than through the
+     * task because those stages build their own briefs and read no task, which is deliberate: what
+     * a module agent needs first is its module, not the walk's transcript.
+     *
+     * <p>WHAT IT MAY NOT DO IS PICK WHICH MODULES RUN AGAIN. The objection names modules in prose,
+     * and parsing agent prose for module paths is how the filter once dropped an aggregator whose
+     * path was a prefix of the module it had been told to skip. Every module is visited again; what
+     * changed is that each is told why.
+     *
+     * <p>It does not reach module-repair, which is answering a compiler. A reviewer of declarations
+     * has no opinion about a javac error, and pasting one in front of a repair step is how a
+     * campaign starts working on somebody else's problem.
+     */
+    private String walkObjection = "";
+
+    /** How many modules of the current walk needed repairing at all. Reset when the walk starts. */
+    private int modulesRepaired;
+
     /** Each module's own passing set before anything moved, so a loss is attributed where it happened. */
     private Map<String, Set<String>> baselineByModule = Map.of();
     private Security security;
@@ -173,12 +214,362 @@ public final class Bump {
         this.to = parts[3];
         this.trace = trace;
         this.tree = new Tree(ws, note -> trace.progress(bump, note));
+        // THE MODULES STAGE, ASSEMBLED HERE AND NOT AS A FIELD INITIALISER: a triad keeps the trace
+        // and the bump it is running, and field initialisers run before the constructor body has
+        // set either of them, so one built up there would hold a null trace for the whole run.
+        //
+        // Its planner and verifier are looked up when they are called rather than now, because the
+        // survey is what builds Agents and the survey has not run yet.
+        //
+        // THE STAGE BUILDS ITS OWN BRIEF, which is why the two agent roles splice it in rather than
+        // read it off the task. A sequence hands every step the same task, and this brief names the
+        // modules the bump works on: those are chosen by a stage four nodes earlier, so a task
+        // fixed before the run cannot carry them. The concatenation is exactly what Triad does with
+        // a brief handed in, in the same order, so the prompts are the ones these agents have
+        // always been given.
+        this.modulesStage = new Triad("modules",
+                brief -> agents.modulesPlanner().run(modulesBrief() + brief),
+                walkDoer,
+                brief -> agents.modulesVerifier().run(modulesBrief() + brief),
+                // The same facts the planners read: what every module declares, and the target
+                // levels still below the hop. Nothing here judges either.
+                () -> Declared.report(ws, modules)
+                        + "\nDeclarations still below JDK " + to + ":\n"
+                        + String.join("\n", Pins.belowTarget(ws, Integer.parseInt(to))),
+                trace, bump, REASK + 1)
+                // THE DOING IS THE WALK, AND THE WALK IS PER MODULE. Both are said here because
+                // neither can be walked off the shape: the walk is a nameless each() below, and no
+                // picture can count what a supplier is going to hand it. The count belongs on the
+                // block rather than on every line inside it, or it is three chances to disagree
+                // with the one place it is decided.
+                .around("the module walk")
+                .repeats("per module");
+        // THE ORDER, AND THE ONLY PLACE IT EXISTS. Here rather than in a field initialiser for the
+        // same reason as the stage above: it holds that stage, and that stage does not exist until
+        // the line before this one.
+        this.everything = Flow.seq("", survey, baseline, securityBefore, moduleFilter,
+                modulesStage, gate, securityAfter, estimator, verdict);
     }
 
-    /** The whole bump. Read it top to bottom; that is the order, and nothing can reorder it. */
+    /**
+     * EVERY STAGE IS A NODE, WHICH IS WHAT MAKES THE ORDER SAYABLE IN ONE PLACE.
+     *
+     * <p>Each is the body it always was with a name on it. The order is not here: it is the
+     * sequence assembled in the constructor, and that is now the only place it exists. The pages
+     * read it too: {@link Shape} walks this tree for the stage list that the settings page and the
+     * bump strip used to take from a declaration of their own, which drifted from it twice.
+     *
+     * <p>WHAT A WALK CANNOT DERIVE IS DECLARED ON THE NODE. Who speaks inside a stage, how often it
+     * runs, and which half of the bill of materials it works to: an agent is called from inside a
+     * body, and a condition is a {@code BooleanSupplier} with no English in it. Each is written on
+     * the node it is true of, one line above the body that makes it true.
+     *
+     * <p>They are built on the fields because every stage reads and writes those fields and the
+     * bodies close over {@code this}, exactly as the lambdas inside them already do. Nothing is
+     * constructed early by building them here: a node holds a body and runs it later, and
+     * {@code agents} does not exist until the survey has made it.
+     */
+    private final Agents.Agent survey = Flow.code("survey", this::surveyPhase).triplet();
+    private final Agents.Agent baseline =
+            Flow.code("baseline", this::baselinePhase).deterministic();
+    private final Agents.Agent securityBefore =
+            Flow.code("security-before", this::securityBeforePhase).triplet();
+    private final Agents.Agent moduleFilter =
+            Flow.code("module-filter", this::moduleFilterPhase).triplet();
+    private final Agents.Agent gate = Flow.code("gate", this::gatePhase).deterministic();
+
+    /**
+     * THE CLOSERS, WHICH ARE SELECTION ON THE GATE RATHER THAN A JUMP OUT OF THE RUN.
+     *
+     * <p>A green gate used to return PASS from the middle of the bump and reach none of these, so
+     * whether a stage ran was a property of a {@code return} four stages above it. That is how the
+     * estimator came to be described everywhere as pricing every bump while the code ran it on one
+     * path of two. Written as selection, the picture says what happens: the scan only after a green
+     * gate, the arguer only when the gate never went green, the estimator always, because a bump
+     * that reached the gate is work whether it landed or not.
+     *
+     * <p>PRICED BEFORE THE ARGUMENT, WHICH IS A CHANGE ON THE RED PATH. It used to run after the
+     * arguer had finished. The estimator prices the work that LANDED, and an argument lands
+     * nothing, so the order now says that: what it reads is the workspace, which the arguer cannot
+     * touch because every tool it holds only reads. The one visible difference is that the priced
+     * row reaches the trace before the verdict's own rows.
+     *
+     * <p>The bodies carry no name of their own. The selection IS the stage; printing the word twice
+     * would say there are two.
+     */
+    private final Agents.Agent securityAfter = Flow.when("security-after", () -> gateGreen,
+            Flow.code("", this::securityAfterPhase))
+            .triplet().repeats("only after a green gate");
+    private final Agents.Agent estimator = Flow.code("estimator", this::price).triplet();
+    private final Agents.Agent verdict = Flow.when("verdict", () -> !gateGreen,
+            Flow.code("", this::verdictPhase))
+            .triplet().repeats("only when the gate never went green");
+
+    /**
+     * THE STAGES OF A BUMP, FOR A READER RATHER THAN FOR A RUN.
+     *
+     * <p>A bump built for its shape alone: no workspace, no agents and no trace, because every node
+     * holds a body it has not run. This is what the settings page and the bump strip read, and it
+     * is the same object a live bump executes, so no stage can go on being advertised after it is
+     * deleted. That happened for hours, twice, with a declaration in the middle.
+     *
+     * <p>THE HOP IN THE ROW IS NOMINAL and nothing walked here reads it. The titles, the nesting and
+     * the agents' names are the same on every hop; what differs by hop is the prompts, and
+     * {@link Agents#forHop} is what answers for those.
+     */
+    static List<Shape.Stage> stages() {
+        return Shape.of(new Bump(Path.of("."), "shape|shape|17|21", null).everything);
+    }
+
+    /**
+     * THE WHOLE BUMP, AS ONE TREE. This is the thing the rest of it was for.
+     *
+     * <p>It carries no name of its own because it IS the bump, and the class is called that;
+     * printing a root line would put a stage above the survey where there is none. Assembled in the
+     * constructor, because it holds the modules stage and a triad cannot be built until the trace
+     * and the bump id have been set.
+     */
+    private final Agents.Agent everything;
+
+    /**
+     * THE STEP CAMPAIGN, WHICH IS A STAGE AND WAS NOT A NODE.
+     *
+     * <p>Three of the thirty-four agents spend the whole repair budget here, and for as long as the
+     * campaign was ordinary code inside {@code module-repair} the picture drew that stage as a leaf
+     * and said nothing about them. The one written record of what bounds them lived in a
+     * declaration beside the program, and it was wrong: it said twelve per module, which is what
+     * one campaign may order, and a module reaches the campaign once per gate turn.
+     *
+     * <p>So the campaign is a node and {@link #repairCampaign} reaches it through this field rather
+     * than past it. What it may not claim is a count, which is why the ceiling is computed from the
+     * three constants that bound it instead of typed.
+     *
+     * <p>The brief is carried in fields because a node runs on a task string and this one needs
+     * three: what failed, where the campaign began, and what the campaign is for. One campaign runs
+     * at a time, in one thread, so they are set by the caller on the line before it hands over.
+     */
+    private String campaignLog = "";
+    private String campaignFloor = "";
+    private String campaignAim = "";
+    private boolean campaignLanded;
+
+    private final Agents.Agent stepCampaign = Flow.code("module-repair-step", task -> {
+        campaignLanded = campaignOfSteps(campaignLog, campaignFloor, campaignAim);
+        return campaignLanded ? "a step landed" : "nothing landed";
+    }).triplet().repeats("up to " + MODULE_TURNS * (REASK + 1) * STEPS + " per module, "
+            + REPAIR_BUDGET + " per bump");
+
+    /**
+     * THE MODULE WALK: ONE MODULE AT A TIME, ALL THE WAY THROUGH.
+     *
+     * <p>Pinned, bumped, compiled, repaired and hardened before the walk moves on. It used to be
+     * three passes over the whole repository with repair sixteen turns later, which meant a break
+     * in the first module surfaced as a reactor error after the last one, with no obvious owner and
+     * two hundred lines of log. The context a repair needs is the diff that caused it, and that
+     * diff exists for about one module's worth of time.
+     *
+     * <p>THE WALK CARRIES NO NAME OF ITS OWN, because it IS the modules stage and the triad above
+     * it is already called that; printing the word twice would say there are two stages where there
+     * is one. The same rule covers the two bodies inside it that have no name: the build IS the
+     * module gate, and the campaign IS module-repair.
+     */
+    private final Agents.Agent walk = Flow.each("", () -> modules, Bump::label, this::moduleWalk);
+
+    /**
+     * ONE MODULE'S TURN, WHICH IS WHAT THE WALK REPEATS.
+     *
+     * <p>A method rather than a lambda in the field above, and not for taste: a field initialiser
+     * may not read a blank final, and every stage in here reads the trace and the bump it is
+     * running. The tree is the same either way.
+     *
+     * <p>THE TURN STATE IS PER MODULE BECAUSE THE TURNS ARE. It is allocated here, and this runs
+     * once per module, so no module can read the state of the one before it. The one thing
+     * deliberately NOT per module is the repair budget: that one is the bump's, it is a field, and
+     * the walk draws it down across the modules it visits.
+     *
+     * <p>Called once with a null module to draw the picture, so nothing may read the module until
+     * the nodes run. A shape is what the program can do, not what one repository made it do.
+     */
+    private Agents.Agent moduleWalk(Modules.Module m) {
+        boolean[] red = {false};      // this module's last build came back red
+        boolean[] open = {true};      // there is still a turn worth taking
+        boolean[] counted = {false};  // it is already counted as having needed repair
+        int[] turn = {0};
+        String[] log = {""};
+        return Flow.seq("module",
+                Flow.code("before-pins", task -> {
+                    trace.progress(bump, "module " + label(m) + ": pinning what the hop needs");
+                    pinPhase("before-pins-doer", false, m);
+                    return label(m) + ": pinned";
+                }).triplet().reads("enables"),
+                Flow.code("bump", task -> {
+                    trace.progress(bump, "module " + label(m) + ": moving the JDK");
+                    bumpModule(m);
+                    return label(m) + ": bumped";
+                }).triplet(),
+                // COMPILE IT NOW, while its diff is the only thing that changed. This is the shape
+                // the repository gate used to have, one module wide, and the reason the repository
+                // no longer needs one: the turns were repair's, and repair has moved here.
+                //
+                // COMPILE ONLY. Test conservation is a whole-suite fact measured against the
+                // baseline, so a per-module test run cannot decide it, and the repository gate has
+                // to run the suite anyway.
+                Flow.loop("module-gate", MODULE_TURNS, () -> open[0],
+                        Flow.code("", task -> {
+                            // ROOT IS THE WHOLE REACTOR, NOT A MODULE. jvmjob turns an empty path
+                            // into the unscoped build, so gating root on a multi-module repository
+                            // compiles everything and then hands a full reactor log to an agent
+                            // told it is repairing one module named "root". That is the failure
+                            // this walk was built to remove, moved from the last module to the
+                            // first. The repository gate compiles everything already; this one has
+                            // nothing to add.
+                            //
+                            // It is a turn that declines rather than a guard in front of the loop,
+                            // so the one thing that answers for the module gate is the module gate.
+                            if (m.isRoot() && modules.size() > 1) {
+                                trace.progress(bump, "module root: skipping its gate, because "
+                                        + "compiling root is compiling the whole reactor and the "
+                                        + "repository gate does that already");
+                                open[0] = false;
+                                return "root: no gate of its own";
+                            }
+                            String path = m.isRoot() ? "" : m.path();
+                            turn[0]++;
+                            // THE GATE MEASURES BYTECODE, SO IT HAS TO COMPILE BYTECODE. A bump is
+                            // a pom-only edit, so nothing is newer than its class and Maven answers
+                            // "Nothing to compile". Measured on the first three Maven bumps to run
+                            // this walk: every module gate compiled zero files while the repository
+                            // gate seconds later compiled five, seven and five. The gate was
+                            // reading whether the baseline's classes were stale, not whether the
+                            // module compiles under the target, and the repository repair loop that
+                            // used to absorb the consequence was deleted in the same commit that
+                            // added this.
+                            runner.clearClasses(path);
+                            Runner.Result compiled = runner.buildModule(to, path);
+                            trace.built("module-gate-" + label(m) + "-" + turn[0], compiled);
+                            red[0] = compiled.infra();
+                            if (!red[0]) {
+                                open[0] = false;
+                                if (turn[0] > 1) {
+                                    trace.progress(bump, "module " + label(m)
+                                            + ": compiles after repair");
+                                }
+                                return label(m) + ": compiles under JDK " + to;
+                            }
+                            if (!counted[0]) {
+                                counted[0] = true;
+                                modulesRepaired++;
+                            }
+                            log[0] = compiled.summary();
+                            trace.progress(bump, "module " + label(m) + ": will not compile under "
+                                    + "JDK " + to + " (turn " + turn[0] + " of " + MODULE_TURNS
+                                    + ")");
+                            return label(m) + ": will not compile";
+                        }),
+                        // ONLY WHEN THE BUILD CAME BACK RED, which is the whole reason the build is
+                        // the first step of the turn: a module that compiles never pays for a
+                        // repair planner.
+                        Flow.when("module-repair", () -> red[0],
+                                Flow.code("", stepCampaign, task -> {
+                                    // NOTHING LANDED CLOSES THE GATE. Going round again would ask
+                                    // the same question of the same tree, and the repository gate
+                                    // is the arbiter either way.
+                                    open[0] = moduleRepair(m, log[0]);
+                                    return open[0] ? label(m) + ": a repair landed"
+                                            : label(m) + ": nothing landed";
+                                }))
+                                .around("a campaign of steps")
+                                .repeats("only when the module-gate is red"))
+                        .deterministic()
+                        .repeats("until green, or the turns run out"),
+                // AFTER THE REPAIR, NOT BEFORE IT. Hardening polishes a module that already
+                // compiles; asking it of one that does not is the wrong question.
+                Flow.code("after-pins", task -> {
+                    trace.progress(bump, "module " + label(m) + ": hardening what the bump left");
+                    pinPhase("after-pins-doer", true, m);
+                    return label(m) + ": hardened";
+                }).triplet().reads("hardens"));
+    }
+
+    /**
+     * THE WALK, STANDING AS THE MODULES STAGE'S DOER.
+     *
+     * <p>A block rather than a lambda because {@link Triad#inside()} can only show a doer that is
+     * an agent, and a stage whose work is a whole walk drew as a leaf: the stage was in the picture
+     * and everything it did was not.
+     *
+     * <p>THE OBJECTION IS PLACED HERE, which is the only place that knows what it means. See
+     * {@link #walkObjection}: it goes into the brief of every module-scoped stage that shapes a
+     * declaration, because a declaration is what the verifier read to form it.
+     *
+     * <p>THE PLAN IS STILL NOT ROUTED, and that is unchanged rather than decided. No module stage
+     * has ever been handed the modules planner's plan, and handing it one now would rewrite every
+     * brief in the walk on the pass that works. The objection is the half that was costing a whole
+     * second walk to say nothing at all.
+     */
+    private final Triad.Doer walkDoer = new Flow.Block(walk) {
+        @Override
+        public String run(String plan, String feedback) throws IOException {
+            walkObjection = objection(feedback);
+            modulesRepaired = 0;
+            // THE TASK IS EMPTY BECAUSE NO LEAF READS ONE, exactly as at the top of the bump: every
+            // module stage builds its own brief, and that brief names its module far more plainly
+            // than a line spliced onto a task could.
+            body.run("");
+            // THE WALK'S OWN WORD, not the last module's. What the stage did is what it covered.
+            return "The walk covered " + modules.size()
+                    + (modules.size() == 1 ? " module" : " modules")
+                    + (modulesRepaired == 0 ? ", none needing repair."
+                            : ", " + modulesRepaired + " needing repair.");
+        }
+    };
+
+    /** The modules stage: the walk above, with a planner and the verifier that holds its loop. */
+    private final Agents.Agent modulesStage;
+
+    /** An objection to the walk, framed for an agent that is working on one module of it. */
+    private static String objection(String feedback) {
+        if (feedback == null || feedback.isBlank()) {
+            return "";
+        }
+        return "\n\nThis is a second pass over the modules. A reviewer read the whole walk and sent"
+                + " it back, and this is what it said. The objection is about the repository, so"
+                + " most of it will be about modules that are not yours: answer the part that names"
+                + " this one, and change nothing it does not name.\n" + feedback.strip();
+    }
+
+    /**
+     * THE TREE, RUN, AND THE ACCOUNT IT SETTLED ON.
+     *
+     * <p>The order used to be written out here as statements. It is {@link #everything} now, which
+     * is a sequence of nodes and the only statement of the order there is. What is left in this
+     * method is the two ways a bump ends: a settlement thrown from inside a stage, which is the
+     * jump {@link Flow.Settled} exists to name, and the ordinary one, where the tree runs to the
+     * end and whichever stage settled the bump has written {@link #account}.
+     *
+     * <p>THE TASK IS EMPTY BECAUSE NO STAGE READS ONE. Every stage builds its own brief from the
+     * hop and from the module it is working on, and a repository-wide brief invented here would be
+     * a second source for something each of them already decides.
+     */
     private String run() throws IOException {
-        // ---- SURVEY: does the project agree it is where the manifest says?
-        //
+        try {
+            everything.run("");
+        } catch (Flow.Settled settled) {
+            // NO TOOLING, NO BUILD, NOTHING TO CONSERVE. Every stage after the one that threw is
+            // skipped, the estimator included: an attempt that never reached the gate has no work
+            // to price. That is what the returns this replaces did, from inside those same places.
+            return settled.account();
+        }
+        return account;
+    }
+
+    /**
+     * SURVEY: does the project agree it is where the manifest says?
+     *
+     * <p>It is also where the tools the rest of the bump runs on are built, because they have to
+     * target the hop, and the hop is what this stage has just finished asking about.
+     */
+    private String surveyPhase(String task) throws IOException {
         // THE HOP IS PRESCRIBED, NOT DISCOVERED. It arrives in the manifest row and nothing here
         // may change it: the target is the experiment's independent variable, and an agent that
         // picks it makes every run a different experiment. It also went wrong in exactly the way
@@ -209,7 +600,7 @@ public final class Bump {
                     + " while the manifest prescribes " + from + "->" + to
                     + "; proceeding with the prescribed hop");
         }
-        String hoptools = Env.get("BJV_HOPTOOLS");
+        hoptools = Env.get("BJV_HOPTOOLS");
         if (hoptools == null) {
             throw new IllegalStateException(
                     "BJV_HOPTOOLS must be the host path of hoptools/ (jvm-run is invoked from it)");
@@ -218,9 +609,11 @@ public final class Bump {
         security = new Security(ws, hoptools, trace);
         // The producers' try_build must target the hop the survey settled, so they are built now.
         agents = new Agents(Model.forProducer(trace), ws, runner, tree, Hop.of(from, to), trace);
+        return claim;
+    }
 
-        // ---- BASELINE: a fact. No baseline, no bump.
-        //
+    /** BASELINE: a fact, and the one everything later is measured against. No baseline, no bump. */
+    private String baselinePhase(String task) throws IOException {
         // FIRST, THOUGH: IS THE TOOLING EVEN THERE. Builds here are sealed, so a Gradle wrapper
         // resolves its distribution out of a staged cache and cannot download. Staging can stop
         // half way and leaves a directory that looks exactly like a distribution; Gradle finds it,
@@ -230,14 +623,14 @@ public final class Bump {
         String tooling = Staged.problem(ws, Env.get("BJV_GRADLE_DISTS"));
         if (!tooling.isEmpty()) {
             trace.progress(bump, "infra: " + tooling);
-            return "infra\n" + tooling;
+            throw new Flow.Settled("infra\n" + tooling);
         }
         trace.progress(bump, "baseline: building and testing under JDK " + from);
         Runner.Result preBuild = runner.build(from);
         trace.built("baseline-build", preBuild);
         if (preBuild.infra()) {
-            return "no-baseline\nthe project does not build under its own JDK " + from + ":\n"
-                    + preBuild.summary();
+            throw new Flow.Settled("no-baseline\nthe project does not build under its own JDK "
+                    + from + ":\n" + preBuild.summary());
         }
         runner.clearReports();
         Runner.Result preTest = runner.test(from);
@@ -269,26 +662,41 @@ public final class Bump {
         baselineByModule = Gate.baselinePerModule(ws);
         baselineGreen = preTest.passed();
         if (pre.isEmpty()) {
-            return "no-baseline\n" + (preTest.infra()
+            throw new Flow.Settled("no-baseline\n" + (preTest.infra()
                     ? "the tests could not be RUN under the project's own JDK " + from
                     + ", so there is nothing to conserve:\n" + preTest.summary()
                     : "no test passed under the project's own JDK " + from + ", so there is nothing"
-                    + " to conserve and a bump here would be unverifiable:\n" + preTest.summary());
+                    + " to conserve and a bump here would be unverifiable:\n" + preTest.summary()));
         }
-        trace.applied("baseline", "tests passing under JDK " + from + ": " + pre.size()
+        String counted = "tests passing under JDK " + from + ": " + pre.size()
                 + (baselineGreen ? "" : " (the suite is not all green; the red ones were red before"
-                + " this bump and are not in the set)"));
+                + " this bump and are not in the set)");
+        trace.applied("baseline", counted);
+        return counted;
+    }
 
-        // ---- SECURITY BEFORE: the project's own state, and the last moment it still is.
+    /** SECURITY BEFORE: the project's own state, and the last moment it still is. */
+    private String securityBeforePhase(String task) throws IOException {
         // Migrate applies recipes, floors and a target sweep next, every one of which moves a
         // resolved version, so a scan taken after it is not this project's prior state. It also
         // has to follow a build, because the collect is offline and copies only what the build
         // already pulled down.
         trace.progress(bump, "security: scanning before any migration, under JDK " + from);
         before = security.scan(from, "before");
-        securityBeforePhase();
+        securityBeforeAdvisory();
+        return before.measured()
+                ? "CRITICAL+HIGH before any migration: " + before.total()
+                : "nothing to read (" + before.why() + ")";
+    }
 
-        // ---- PREPARE: deterministic pre-pass first, then the proactive steps, judged.
+    /**
+     * MODULE FILTER: what this repository is made of, minus what this bump should leave alone.
+     *
+     * <p>It installs the deterministic pre-pass as well, and that is why it sits behind the scan
+     * rather than in front of it: the recipes move resolved versions, and a scan taken after they
+     * have run is not this project's prior state.
+     */
+    private String moduleFilterPhase(String task) throws IOException {
         // The before-scan travels into the migration: the Tomcat floor has to know which line the
         // project actually resolved, and no build file says that.
         tree.excludeBuildOutput();
@@ -298,101 +706,9 @@ public final class Bump {
         // still on 11. Both used to happen in one pass with nothing sequencing them.
         agents.withRecipes(new Migrate(ws, hoptools, trace));
 
-        // ---- MODULES: what this repository is actually made of, before anything is asked of it.
-        modules = moduleFilterPhase();
-
-        modulesPhase();
-
-        // ---- GATE: the scorer, and no longer a loop.
-        //
-        // It ran sixteen times, with repair between the turns, and those turns were repair's: the
-        // gate had to keep re-running to find out whether the last repair had worked. Repair lives
-        // inside the module walk now, so what is left here is the one thing only this can decide.
-        //
-        // WHAT ONLY THIS CAN DECIDE. The passing set against the baseline, which is a whole-suite
-        // fact: a per-module run cannot tell a test that was lost from one that moved. And the
-        // lowest bytecode level any module actually emits, which is a property of the tree.
-        //
-        // WHAT THIS GIVES UP, knowingly: a module that compiles alone and breaks the reactor
-        // because a sibling moved under it now has no repair path. Every module gate was green,
-        // this one is red, and nothing tries again. The argument for taking that is that a
-        // cross-module break is usually a bad edit, and a bad edit is better failed loudly than
-        // papered over sixteen times.
-        String lastLog;
-        trace.progress(bump, "gate: building and testing the whole repository under JDK " + to);
-        // The gate measures bytecode, so it must compile bytecode rather than inherit the
-        // baseline's. Without this Maven finds the old classes newer than the sources and skips
-        // the compile, and the target is read off the level the project started at.
-        runner.clearClasses();
-        Runner.Result build = runner.build(to);
-        trace.built("gate-build", build);
-        if (!build.infra()) {
-            runner.clearReports();
-            Runner.Result test = runner.test(to);
-            trace.built("gate-test", test);
-            // THE SCORER DECIDES, NOT THE EXIT CODE. A green build with an unraised module or a
-            // quietly dropped test is exactly the false pass this measures.
-            Gate.Verdict v = Gate.decide(pre, Gate.passing(ws), !test.infra(),
-                    Gate.effectiveTarget(ws), Integer.parseInt(to));
-            trace.applied("gate", v.state() + " (pre=" + v.preTests()
-                    + " lost=" + v.lost() + " effective-target=" + v.effectiveTarget() + ")"
-                    + names(v.missing())
-                    + perModule(Integer.parseInt(to)));
-            if (v.pass()) {
-                gateGreen = true;
-                // THE ONLY PLACE THE AFTER SCAN MEANS ANYTHING. The workspace has just built and
-                // tested green at the target, so the offline collect is complete. On any other
-                // exit the collect copies whatever resolved before the build died, and the count
-                // falls because modules are missing rather than because anything was fixed: the
-                // corpus's largest apparent wins are dead builds.
-                trace.progress(bump, "security: scanning after a green gate, under JDK " + to);
-                after = security.scan(to, "after");
-                delta = Security.compare(before, after);
-                trace.applied("security-delta", delta.valid()
-                        ? delta.before() + " -> " + delta.after() + " CRITICAL+HIGH; cleared "
-                        + delta.cleared() + ", introduced " + delta.introduced()
-                        : "UNKNOWN: " + delta.why());
-                securityAfterPhase();
-                price();
-                return "PASS\n" + v.preTests() + " tests conserved, effective target "
-                        + v.effectiveTarget() + "; CRITICAL+HIGH " + securitySummary();
-            }
-            lastVerdict = v;
-            lastLog = failureFor(v, test);
-        } else {
-            lastVerdict = null;
-            lastLog = build.summary();
-        }
-
-        // ---- CLOSERS: argue only the unsettled, price everything.
-        String context = brief(lastLog)
-                + (lastVerdict == null ? "" : "\nThe scorer's last verdict: " + lastVerdict.state())
-                + "\nThe reflect loop ended without a green gate.";
-        // The planner names the ONE question execution could not settle. Without it the arguer was
-        // choosing the question and answering it, and a verdict in this corpus once called a
-        // dependency incompatible with JDK 21 on the strength of a compile error the troubleshooter
-        // had caused itself.
-        String question = agents.verdictPlanner().run(context);
-        context = context + "\n\nWhat is actually unsettled here:\n" + question;
-        String argued = agents.verdictDoer().run(context);
-
-        // THE WORD IS WHAT THE CORPUS RECORDS, and nothing after this re-reads the log to check it.
-        // One verdict here called a dependency incompatible with JDK 21 on the strength of a
-        // compile error the troubleshooter had caused itself, and it stood because no one asked.
-        for (int again = 0; again < REASK; again++) {
-            String judgement = agents.verdictVerifier().run(context
-                    + "\n\nYour colleague argues:\n" + argued);
-            if (word(judgement, "sound", "wrong").equals("sound")) {
-                break;
-            }
-            trace.progress(bump, "verdict-critic: " + judgement.lines().findFirst().orElse(""));
-            argued = agents.verdictDoer().run(context
-                    + "\n\nYou argued:\n" + argued
-                    + "\n\nA reviewer checked it against the record and disagrees:\n" + judgement
-                    + "\nArgue it again, or keep your word and answer the objection.");
-        }
-        price();
-        return word(argued, "blocked-dependency", "behavior-change", "infra") + "\n" + argued;
+        modules = filteredModules();
+        return "this bump works on " + modules.size()
+                + (modules.size() == 1 ? " module." : " modules.");
     }
 
     /**
@@ -403,7 +719,7 @@ public final class Bump {
      * produces is a record: which findings this hop could plausibly reach, for whoever decides how
      * a CVE count and a PASS trade against each other.
      */
-    private void securityBeforePhase() {
+    private void securityBeforeAdvisory() {
         if (!before.measured()) {
             trace.progress(bump, "security-before: nothing to read (" + before.why() + ")");
             return;
@@ -442,7 +758,7 @@ public final class Bump {
     }
 
     /** The accounting is computed; this judges whether it describes a real change. */
-    private void securityAfterPhase() {
+    private void securityAfterAdvisory() {
         if (!after.measured()) {
             trace.progress(bump, "security-after: not measured (" + after.why() + ")");
             return;
@@ -471,75 +787,24 @@ public final class Bump {
         return before.total() + " -> " + after.total();
     }
 
-    /** The preparer and its critic: the proactive steps, executed and then audited. */
     /**
-     * One pin phase: raise, check, and go again while anything is outstanding.
+     * THE MODULE WORK, AS ONE TRIAD OVER THE WALK BELOW IT.
      *
-     * <p>The loop terminates on the build files rather than on anyone's account of them. A producer
-     * that says it raised Lombok and a critic that agrees are two opinions; check_pins reads the
-     * project, and both agents hold it, so the disagreement that ends the loop is with the pom.
+     * <p>The doer is the walk; the verifier reads every module and decides whether the repository
+     * is actually done. That verifier is the piece the repo-level gate cannot supply in time: the
+     * gate runs four stages later and reports a single minimum across the tree, so a module left
+     * behind arrives as an unraised repository pointing nowhere.
+     *
+     * <p>The stage is assembled in the constructor, so the tree exists before anything runs and the
+     * picture can be walked off it. What is left here is the brief, which is made of fields that
+     * have no value until the filter has chosen the modules, and so cannot be handed down by a
+     * sequence that was built before either of them existed.
      */
-    /**
-     * THE MODULE WORK, AS ONE TRIAD OVER THREE ORDERED PASSES.
-     *
-     * <p>The doer is the three phases; the verifier reads every module and decides whether the
-     * repository is actually done. That verifier is the piece the repo-level gate cannot supply in
-     * time: the gate runs four stages later and reports a single minimum across the tree, so a
-     * module left behind arrives as an unraised repository pointing nowhere.
-     *
-     * <p>THREE PASSES OVER THE MODULES, NOT ONE PASS PER MODULE. The phases are globally ordered and
-     * the modules inside them are not. Lombok has to be in place everywhere before the JDK moves
-     * anywhere, because one reactor compiles the whole project with one javac; Spring Boot has to
-     * wait until after, because Boot 4.1 declares java.version 17 and cannot resolve against a
-     * project still below it. Walking module-major would put module two's "the JDK has not moved
-     * yet" phase after module one had already moved it, and the phase prompts state that as fact.
-     */
-    private void modulesPhase() throws IOException {
-        new Triad("modules", agents.modulesPlanner(),
-                (plan, feedback) -> {
-                    // ONE MODULE AT A TIME, ALL THE WAY THROUGH. Pinned, bumped, compiled,
-                    // repaired and hardened before the walk moves on.
-                    //
-                    // It used to be three passes over the whole repository with repair sixteen
-                    // turns later, which meant a break in the first module surfaced as a reactor
-                    // error after the last one, with no obvious owner and two hundred lines of
-                    // log. The context a repair needs is the diff that caused it, and that diff
-                    // exists for about one module's worth of time.
-                    int repaired = 0;
-                    for (Modules.Module m : modules) {
-                        String where = label(m);
-                        trace.progress(bump, "module " + where + ": pinning what the hop needs");
-                        pinPhase("before-pins-doer", false, m);
-
-                        trace.progress(bump, "module " + where + ": moving the JDK");
-                        bumpModule(m);
-
-                        // COMPILE IT NOW, while its diff is the only thing that changed.
-                        if (moduleGate(m)) {
-                            repaired++;
-                        }
-
-                        // AFTER THE REPAIR, NOT BEFORE IT. Hardening polishes a module that
-                        // already compiles; asking it of one that does not is the wrong question.
-                        trace.progress(bump, "module " + where + ": hardening what the bump left");
-                        pinPhase("after-pins-doer", true, m);
-                    }
-                    return "The walk covered " + modules.size()
-                            + (modules.size() == 1 ? " module" : " modules")
-                            + (repaired == 0 ? ", none needing repair."
-                                    : ", " + repaired + " needing repair.");
-                },
-                agents.modulesVerifier(),
-                // The same facts the planners read: what every module declares, and the target
-                // levels still below the hop. Nothing here judges either.
-                () -> Declared.report(ws, modules)
-                        + "\nDeclarations still below JDK " + to + ":\n"
-                        + String.join("\n", Pins.belowTarget(ws, Integer.parseInt(to))),
-                trace, bump, REASK + 1)
-                .run("Migration: JDK " + from + " -> " + to + " (" + bump + ")"
-                        + "\n\nThe modules this bump works on:\n"
-                        + modules.stream().map(m -> "  " + label(m))
-                                .collect(java.util.stream.Collectors.joining("\n")));
+    private String modulesBrief() {
+        return "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
+                + "\n\nThe modules this bump works on:\n"
+                + modules.stream().map(m -> "  " + label(m))
+                        .collect(java.util.stream.Collectors.joining("\n"));
     }
 
     /**
@@ -580,7 +845,10 @@ public final class Bump {
                         + "the walk have been raised too; later ones have not yet."
                         : "NOT been raised yet; it is still " + from + ". Modules earlier in the "
                         + "walk may already have been raised, which is expected and is not your "
-                        + "business.");
+                        + "business.")
+                // WHY THIS PASS IS HAPPENING, when it is not the first one. Empty on every first
+                // walk, which is every walk that is not answering a reviewer.
+                + walkObjection;
 
         new Triad(stage, planner,
                 (plan, feedback) -> {
@@ -611,7 +879,8 @@ public final class Bump {
         return "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
                 + "\n\nYou are working on ONE module of this project: " + label(m)
                 + "\nThe project has " + allModules.size()
-                + (allModules.size() == 1 ? " module." : " modules; the others are not yours.");
+                + (allModules.size() == 1 ? " module." : " modules; the others are not yours.")
+                + walkObjection;
     }
 
     private static String label(Modules.Module m) {
@@ -631,7 +900,7 @@ public final class Bump {
      * been skipped wastes a diff; skipping one that should have been kept leaves it below the target
      * and the gate takes the lowest module, which fails the entire bump.
      */
-    private List<Modules.Module> moduleFilterPhase() throws IOException {
+    private List<Modules.Module> filteredModules() throws IOException {
         allModules = Modules.of(ws);
         if (allModules.size() == 1) {
             trace.applied("modules", "one module; no filtering to do");
@@ -748,61 +1017,6 @@ public final class Bump {
     }
 
     /**
-     * COMPILE ONE MODULE, AND REPAIR IT UNTIL IT COMPILES OR THE TURNS RUN OUT.
-     *
-     * <p>The same shape the repository gate used to have, one module wide, and the reason the
-     * repository no longer needs it: the turns were repair's, and repair has moved here. A failure
-     * found now is a failure with that module's diff in front of it, rather than a reactor error
-     * after every module has moved.
-     *
-     * <p>Compile only. Test conservation is a whole-suite fact measured against the baseline, so a
-     * per-module test run cannot decide it, and the repository gate has to run the suite anyway.
-     *
-     * @return whether this module needed repairing at all
-     */
-    private boolean moduleGate(Modules.Module m) throws IOException {
-        boolean everRed = false;
-        // ROOT IS THE WHOLE REACTOR, NOT A MODULE. jvmjob turns an empty path into the
-        // unscoped build, so gating root on a multi-module repository compiles everything and then
-        // hands a full reactor log to an agent told it is repairing one module named "root". That
-        // is the failure this walk was built to remove, moved from the last module to the first.
-        // The repository gate compiles everything already; this one has nothing to add.
-        if (m.isRoot() && modules.size() > 1) {
-            trace.progress(bump, "module root: skipping its gate, because compiling root is "
-                    + "compiling the whole reactor and the repository gate does that already");
-            return false;
-        }
-        String path = m.isRoot() ? "" : m.path();
-        for (int turn = 1; turn <= MODULE_TURNS; turn++) {
-            // THE GATE MEASURES BYTECODE, SO IT HAS TO COMPILE BYTECODE. A bump is a pom-only
-            // edit, so nothing is newer than its class and Maven answers "Nothing to compile".
-            // Measured on the first three Maven bumps to run this walk: every module gate compiled
-            // zero files while the repository gate seconds later compiled five, seven and five.
-            // The gate was reading whether the baseline's classes were stale, not whether the
-            // module compiles under the target, and the repository repair loop that used to
-            // absorb the consequence was deleted in the same commit that added this.
-            runner.clearClasses(path);
-            Runner.Result compiled = runner.buildModule(to, path);
-            trace.built("module-gate-" + label(m) + "-" + turn, compiled);
-            if (!compiled.infra()) {
-                if (turn > 1) {
-                    trace.progress(bump, "module " + label(m) + ": compiles after repair");
-                }
-                return everRed;
-            }
-            everRed = true;
-            trace.progress(bump, "module " + label(m) + ": will not compile under JDK " + to
-                    + " (turn " + turn + " of " + MODULE_TURNS + ")");
-            if (!moduleRepair(m, compiled.summary())) {
-                // Nothing landed, so going round again would ask the same question of the same
-                // tree. The repository gate is the arbiter either way.
-                break;
-            }
-        }
-        return everRed;
-    }
-
-    /**
      * WHICH MODULE IS BEHIND, appended to the gate's own line.
      *
      * <p>The verdict itself stays a repository verdict and stays all-or-nothing: the gate takes the
@@ -877,8 +1091,15 @@ public final class Bump {
             return false;
         }
         for (int campaign = 0; campaign <= REASK; campaign++) {
-            boolean landed = campaignOfSteps(log, floor,
-                    "\n\nWhat this campaign is for:\n" + aim + feedback);
+            // THROUGH THE NODE RATHER THAN PAST IT. The steps are a stage with three agents of
+            // their own and the whole repair budget to spend, and while the campaign was reached
+            // by an ordinary call the picture could not see any of that. What runs is this
+            // method's own campaign either way; the difference is that the page can now name it.
+            campaignLog = log;
+            campaignFloor = floor;
+            campaignAim = "\n\nWhat this campaign is for:\n" + aim + feedback;
+            stepCampaign.run("");
+            boolean landed = campaignLanded;
             String judgement = agents.moduleRepairVerifier(floor)
                     .run("The failing build:\n" + log
                             + "\n\nThe whole campaign, since it began:\n" + tree.diffSince(floor)
@@ -1039,10 +1260,149 @@ public final class Bump {
         };
     }
 
-    // THROWS NOW, because an Agent may be plain code and plain code touches the workspace. Every
-    // caller of price() already runs inside a throwing method; the signature was the only thing
-    // pretending otherwise.
-    private void price() throws IOException {
+    /**
+     * THE GATE: THE SCORER, AND NO LONGER A LOOP.
+     *
+     * <p>It ran sixteen times, with repair between the turns, and those turns were repair's: the
+     * gate had to keep re-running to find out whether the last repair had worked. Repair lives
+     * inside the module walk now, so what is left here is the one thing only this can decide.
+     *
+     * <p>WHAT ONLY THIS CAN DECIDE. The passing set against the baseline, which is a whole-suite
+     * fact: a per-module run cannot tell a test that was lost from one that moved. And the lowest
+     * bytecode level any module actually emits, which is a property of the tree.
+     *
+     * <p>WHAT THIS GIVES UP, knowingly: a module that compiles alone and breaks the reactor because
+     * a sibling moved under it now has no repair path. Every module gate was green, this one is
+     * red, and nothing tries again. The argument for taking that is that a cross-module break is
+     * usually a bad edit, and a bad edit is better failed loudly than papered over sixteen times.
+     *
+     * <p>IT DECIDES AND IT DOES NOT SETTLE. What it leaves behind is {@link #gateGreen}, which both
+     * closers select on, and the log the arguer reads when it is red. The sentence a passing bump
+     * settles on quotes a scan that has not been taken yet, so this cannot be where it is written.
+     */
+    private String gatePhase(String task) throws IOException {
+        trace.progress(bump, "gate: building and testing the whole repository under JDK " + to);
+        // The gate measures bytecode, so it must compile bytecode rather than inherit the
+        // baseline's. Without this Maven finds the old classes newer than the sources and skips
+        // the compile, and the target is read off the level the project started at.
+        runner.clearClasses();
+        Runner.Result build = runner.build(to);
+        trace.built("gate-build", build);
+        if (build.infra()) {
+            lastVerdict = null;
+            lastLog = build.summary();
+            return "the repository does not build under JDK " + to;
+        }
+        runner.clearReports();
+        Runner.Result test = runner.test(to);
+        trace.built("gate-test", test);
+        // THE SCORER DECIDES, NOT THE EXIT CODE. A green build with an unraised module or a
+        // quietly dropped test is exactly the false pass this measures.
+        Gate.Verdict v = Gate.decide(pre, Gate.passing(ws), !test.infra(),
+                Gate.effectiveTarget(ws), Integer.parseInt(to));
+        trace.applied("gate", v.state() + " (pre=" + v.preTests()
+                + " lost=" + v.lost() + " effective-target=" + v.effectiveTarget() + ")"
+                + names(v.missing())
+                + perModule(Integer.parseInt(to)));
+        gateGreen = v.pass();
+        // KEPT WHETHER IT PASSED OR NOT, which is what the field's name says. Only the arguer reads
+        // it, and the arguer does not run on a green gate, so it is the same verdict it always saw.
+        lastVerdict = v;
+        if (!gateGreen) {
+            lastLog = failureFor(v, test);
+        }
+        return v.state();
+    }
+
+    /**
+     * SECURITY AFTER: THE ONLY MOMENT THE AFTER SCAN MEANS ANYTHING.
+     *
+     * <p>The workspace has just built and tested green at the target, so the offline collect is
+     * complete. On any other exit the collect copies whatever resolved before the build died, and
+     * the count falls because modules are missing rather than because anything was fixed: the
+     * corpus's largest apparent wins are dead builds. That is why this is selection on the gate and
+     * not a stage that always runs and decides for itself whether to bother.
+     *
+     * <p>IT WRITES THE ACCOUNT OF A PASSING BUMP, because the last fact in that sentence is the
+     * number this stage has just measured. See {@link #account}.
+     */
+    private String securityAfterPhase(String task) throws IOException {
+        trace.progress(bump, "security: scanning after a green gate, under JDK " + to);
+        after = security.scan(to, "after");
+        delta = Security.compare(before, after);
+        trace.applied("security-delta", delta.valid()
+                ? delta.before() + " -> " + delta.after() + " CRITICAL+HIGH; cleared "
+                + delta.cleared() + ", introduced " + delta.introduced()
+                : "UNKNOWN: " + delta.why());
+        securityAfterAdvisory();
+        account = passed();
+        return "CRITICAL+HIGH " + securitySummary();
+    }
+
+    /**
+     * WHAT A GREEN BUMP SETTLED ON: the state on the first line, then what it conserved, at what
+     * level, against what CVE count.
+     *
+     * <p>A wire format rather than prose. The sweep splits it at the first newline and files the
+     * word; the page reads "N tests conserved" back out of the second line with a pattern. So it is
+     * assembled in one place, and this is it.
+     */
+    private String passed() {
+        return "PASS\n" + lastVerdict.preTests() + " tests conserved, effective target "
+                + lastVerdict.effectiveTarget() + "; CRITICAL+HIGH " + securitySummary();
+    }
+
+    /**
+     * THE VERDICT: ARGUES ONLY WHAT EXECUTION COULD NOT SETTLE.
+     *
+     * <p>Only when the gate never went green, which is the mirror of the after-scan and the reason
+     * both are selection. A bump that passed has nothing left unsettled to argue, and an arguer
+     * handed one would find something to say regardless, because saying something is what it is
+     * for.
+     */
+    private String verdictPhase(String task) throws IOException {
+        String context = brief(lastLog)
+                + (lastVerdict == null ? "" : "\nThe scorer's last verdict: " + lastVerdict.state())
+                // THE GATE RUNS ONCE. Telling the arguers a budget was exhausted biases them
+                // toward blocked-dependency over "nobody tried", and the word they choose is what
+                // the corpus keeps.
+                + "\nThe repository gate ran once and was not green. Repair happened per module,"
+                + " during the walk, and there is no repository-level retry.";
+        // The planner names the ONE question execution could not settle. Without it the arguer was
+        // choosing the question and answering it, and a verdict in this corpus once called a
+        // dependency incompatible with JDK 21 on the strength of a compile error the troubleshooter
+        // had caused itself.
+        String question = agents.verdictPlanner().run(context);
+        context = context + "\n\nWhat is actually unsettled here:\n" + question;
+        String argued = agents.verdictDoer().run(context);
+
+        // THE WORD IS WHAT THE CORPUS RECORDS, and nothing after this re-reads the log to check it.
+        // One verdict here called a dependency incompatible with JDK 21 on the strength of a
+        // compile error the troubleshooter had caused itself, and it stood because no one asked.
+        for (int again = 0; again < REASK; again++) {
+            String judgement = agents.verdictVerifier().run(context
+                    + "\n\nYour colleague argues:\n" + argued);
+            if (word(judgement, "sound", "wrong").equals("sound")) {
+                break;
+            }
+            trace.progress(bump, "verdict-critic: " + judgement.lines().findFirst().orElse(""));
+            argued = agents.verdictDoer().run(context
+                    + "\n\nYou argued:\n" + argued
+                    + "\n\nA reviewer checked it against the record and disagrees:\n" + judgement
+                    + "\nArgue it again, or keep your word and answer the objection.");
+        }
+        account = word(argued, "blocked-dependency", "behavior-change", "infra") + "\n" + argued;
+        return account;
+    }
+
+    /**
+     * THE ESTIMATOR: WHAT THE SAME WORK WOULD HAVE COST A PERSON, priced from the record.
+     *
+     * <p>It runs on every bump that reached the gate, green or red, which is what it always claimed
+     * to do and what it now does. It throws because an Agent may be plain code and plain code
+     * touches the workspace; the signature was the only thing pretending otherwise.
+     */
+    private String price(String task) throws IOException {
         String context = "The bump " + bump + " (JDK " + from + " -> " + to
                 + ")"
                 + ". What the workspace became:\n" + tree.diff();
@@ -1064,6 +1424,7 @@ public final class Bump {
         }
         Matcher m = Pattern.compile("minutes:\\s*(\\d+)").matcher(estimate);
         trace.priced(bump, m.find() ? m.group(1) : "", estimate);
+        return estimate;
     }
 
     private static String[] parseHop(String claim) {

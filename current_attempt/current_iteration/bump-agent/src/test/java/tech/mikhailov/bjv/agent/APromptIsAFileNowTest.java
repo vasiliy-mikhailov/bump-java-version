@@ -54,8 +54,8 @@ class APromptIsAFileNowTest {
                             + ", so substitution moved but this one did not follow it");
                 }
             }
-            assertTrue(defined.size() >= Chain.agentNames().size(),
-                    "every agent the chain names is built, on " + hop);
+            assertTrue(defined.size() >= Shape.agentNames(Bump.stages()).size(),
+                    "every agent the tree reaches is built, on " + hop);
         }
     }
 

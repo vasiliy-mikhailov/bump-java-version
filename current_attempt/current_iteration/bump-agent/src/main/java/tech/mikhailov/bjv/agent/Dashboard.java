@@ -65,10 +65,10 @@ public final class Dashboard {
      * a {@code prepare} stage with a {@code preparer} and a {@code prepare-critic} for hours after
      * all three were deleted, and showed none of the agents added in their place. Nothing failed and
      * no test went red; the page whose whole job is to say what a bump is doing simply said
-     * something untrue. {@link Chain} is now the one declaration, and a test binds it to the agents
-     * that actually exist.
+     * something untrue. It is walked off {@link Bump#stages} now, which is the tree the harness
+     * runs, so a stage that is deleted is deleted here too.
      */
-    private static final String[][] CHAIN = Chain.stages().stream()
+    private static final String[][] CHAIN = Bump.stages().stream()
             .filter(s -> !s.nested())
             .map(s -> {
                 String[] row = new String[s.steps().size() + 1];
@@ -560,14 +560,14 @@ public final class Dashboard {
                         + " stroke-width='1' marker-end='url(#a)'/>");
             }
         }
-        // The loop, over the two states it actually joins.
-        int a = cx[3];
-        int bx = cx[4];
-        g.append("<path d='M" + bx + "," + (spine - 11) + " C" + bx + "," + (spine - 26) + " "
-                + a + "," + (spine - 26) + " " + a + "," + (spine - 11)
-                + "' fill='none' stroke='#484f58' stroke-width='1' marker-end='url(#a)'/>");
-        g.append("<text x='" + ((a + bx) / 2) + "' y='" + (spine - 20)
-                + "' class='ml' text-anchor='middle'>\u21ba</text>");
+        // NO ARC. It joined positions three and four of CHAIN, hand-typed when CHAIN was a
+        // hand-typed array and those were bump and troubleshoot. CHAIN is walked off the program
+        // now, so the same two indices had become module-filter and modules, and the strip was
+        // telling every reader that the filter re-runs per module.
+        //
+        // There is nothing to repoint it at. The only loop left is module-gate to module-repair,
+        // which is nested two levels down and never reaches this spine at all. A picture that
+        // cannot draw a fact should omit it rather than draw a different one.
 
         // THE EXITS IN ONE LINE, so the picture is a stream with its outfalls under it rather than
         // a spine beside a list. Every exit is drawn even at zero: a machine with its unused

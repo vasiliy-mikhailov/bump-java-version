@@ -860,9 +860,10 @@ final class Api {
     /**
      * One bump: its chain, everything it did, and what it moved.
      *
-     * <p>The chain is {@link Chain} with each step's speaking count filled in from the trace, so the
-     * strip is drawn from the same declaration the harness runs. It used to be a hand-typed copy in
-     * the dashboard, which is how the page went on advertising a stage that had been deleted.
+     * <p>The chain is {@link Bump#stages} with each step's speaking count filled in from the trace,
+     * so the strip is walked off the same tree the harness runs. It used to be a hand-typed copy in
+     * the dashboard, and then a declaration beside the program; both went stale, which is how the
+     * page came to advertise a stage that had been deleted.
      */
     private String bump(String slug) {
         List<String> raw = lines(results.resolve(slug).resolve("trace.jsonl"));
@@ -879,7 +880,7 @@ final class Api {
         return Json.object(
                 Json.field("summary", summary(settled.isEmpty()
                         ? Map.of("bump", unslug(events), "state", "bumping") : settled)),
-                Json.field("chain", Json.array(Chain.stages(), s -> Json.object(
+                Json.field("chain", Json.array(Bump.stages(), s -> Json.object(
                         Json.field("title", Json.string(s.title())),
                         Json.field("within", Json.string(s.within())),
                         Json.field("steps", Json.array(s.steps(), step -> Json.object(
@@ -1313,10 +1314,10 @@ final class Api {
         Hop h = new Hop(Integer.parseInt(pair[0]), Integer.parseInt(pair.length > 1 ? pair[1] : pair[0]));
         Map<String, String> stageOf = new LinkedHashMap<>();
         Map<String, String> roleOf = new LinkedHashMap<>();
-        // THE CHAIN IS A PROGRAM AND IT HAS BLOCKS. modules and troubleshoot each run a sub-chain
-        // between their planner and their verifier, and a flat list of agents says nothing about
-        // that: it reads as fourteen stages in a row rather than two loops with bodies. The nesting
-        // has always been declared in Chain; it simply never left the server.
+        // THE CHAIN IS A PROGRAM AND IT HAS BLOCKS. modules and the repair campaign each run a
+        // sub-chain between their planner and their verifier, and a flat list of agents says
+        // nothing about that: it reads as a row of stages rather than two blocks with bodies. The
+        // nesting is the tree's own now, walked rather than declared.
         Map<String, String> withinOf = new LinkedHashMap<>();
         // What the loop itself is, so the body can be shown between a header and a closer rather
         // than merely indented under a name.
@@ -1325,8 +1326,9 @@ final class Api {
         Map<String, String> repeatsOf = new LinkedHashMap<>();
         // Which bill of materials the stage works from, so the two pages connect.
         Map<String, String> readsOf = new LinkedHashMap<>();
-        for (Chain.Stage s : Chain.stages()) {
-            for (Chain.Step step : s.steps()) {
+        List<Shape.Stage> shape = Bump.stages();
+        for (Shape.Stage s : shape) {
+            for (Shape.Step step : s.steps()) {
                 stageOf.put(step.name(), s.title());
                 roleOf.put(step.name(), step.role());
                 withinOf.put(step.name(), s.within());
@@ -1339,13 +1341,13 @@ final class Api {
         }
         Path root = (results.getParent() == null ? results : results.getParent())
                 .resolve("prompts");
-        // IN THE CHAIN'S ORDER, WHICH IS NOT THE ORDER THE FACTORY HANDS THEM BACK. Measured on
-        // the live page: after-pins arrived after troubleshoot and step, and modules-verifier after
-        // that, so the settings page drew the module block missing its third pass and the loop
-        // closing in the wrong place. Chain declares the order once and a test binds the two; the
+        // IN THE ORDER THE BUMP REACHES THEM, WHICH IS NOT THE ORDER THE FACTORY HANDS THEM BACK.
+        // Measured on the live page: after-pins arrived after the repair agents, and
+        // modules-verifier after that, so the settings page drew the module block missing its third
+        // pass and the loop closing in the wrong place. The order is the tree's, walked above; the
         // factory's order is an accident of how the methods happen to be listed, and nothing should
         // depend on it.
-        List<String> order = Chain.agentNames();
+        List<String> order = Shape.agentNames(shape);
         List<SubAgentDefinition> defined = new ArrayList<>(Agents.forHop(h, results));
         defined.sort(java.util.Comparator.comparingInt(d -> {
             int at = order.indexOf(d.name());

@@ -36,7 +36,7 @@ import java.io.IOException;
  * verifier. The inner one closes first, so an outer verifier judges a finished piece of work rather
  * than a half-run loop.
  */
-final class Triad implements Agents.Agent {
+final class Triad extends Flow.Node {
 
     /** One execution of one plan. Not necessarily an agent: the enumerator's doer is Maven. */
     @FunctionalInterface
@@ -60,7 +60,6 @@ final class Triad implements Agents.Agent {
         String read() throws IOException;
     }
 
-    private final String stage;
     private final Agents.Agent planner;
     private final Doer doer;
     private final Agents.Agent verifier;
@@ -71,7 +70,7 @@ final class Triad implements Agents.Agent {
 
     Triad(String stage, Agents.Agent planner, Doer doer, Agents.Agent verifier, Facts facts,
           Trace trace, String bump, int rounds) {
-        this.stage = stage;
+        super(stage);
         this.planner = planner;
         this.doer = doer;
         this.verifier = verifier;
@@ -79,15 +78,6 @@ final class Triad implements Agents.Agent {
         this.trace = trace;
         this.bump = bump;
         this.rounds = Math.max(1, rounds);
-    }
-
-    /**
-     * The stage's name, which is the node's name: a triad is an agent like any other and a picture
-     * walked off the program needs to be able to say which one this is.
-     */
-    @Override
-    public String name() {
-        return stage;
     }
 
     /**
@@ -118,17 +108,17 @@ final class Triad implements Agents.Agent {
                     + "\n\nWhat the workspace says now:\n" + state);
             String verdict = verdictOf(judgement);
             if (verdict.equals("done")) {
-                trace.progress(bump, stage + ": settled after " + round
+                trace.progress(bump, name() + ": settled after " + round
                         + (round == 1 ? " round" : " rounds"));
                 return did;
             }
             if (round == rounds) {
                 // The budget is spent, and saying so is more useful than a verdict nobody reached.
-                trace.progress(bump, stage + ": " + rounds + " rounds spent, last word was "
+                trace.progress(bump, name() + ": " + rounds + " rounds spent, last word was "
                         + verdict + " — " + firstLine(judgement));
                 return did;
             }
-            trace.progress(bump, stage + ": " + verdict + " — " + firstLine(judgement));
+            trace.progress(bump, name() + ": " + verdict + " — " + firstLine(judgement));
             if (verdict.equals("replan")) {
                 plan = planner.run(brief
                         + "\n\nYour previous plan:\n" + plan

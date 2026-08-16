@@ -51,8 +51,8 @@ class AnAgentIsBuiltForItsHopTest {
     void everyHopBuildsTheWholeChainAndTheOrderIsTheChains() {
         for (Hop hop : List.of(new Hop(8, 11), new Hop(11, 17), new Hop(17, 21), new Hop(21, 25))) {
             List<SubAgentDefinition> all = Agents.forHop(hop, Path.of("/tmp"));
-            assertEquals(Chain.agentNames().size(), all.size(),
-                    "every hop gets the whole chain, and the chain is declared once: " + hop);
+            assertEquals(Shape.agentNames(Bump.stages()).size(), all.size(),
+                    "every hop gets the whole chain, and the chain is the tree: " + hop);
             assertEquals("survey-planner", all.get(0).name(), "which starts where the chain starts");
             assertEquals("estimator-verifier", all.get(all.size() - 1).name(),
                     "and ends where it ends: every stage plans, does and verifies, including the last");
@@ -162,7 +162,7 @@ class AnAgentIsBuiltForItsHopTest {
         List<String> factory = Agents.forHop(new Hop(17, 21), Path.of("/tmp")).stream()
                 .map(SubAgentDefinition::name)
                 .toList();
-        List<String> chain = Chain.agentNames();
+        List<String> chain = Shape.agentNames(Bump.stages());
 
         assertEquals(chain.size(), factory.size(), "the same agents, either way round");
         assertTrue(factory.containsAll(chain), "and the same names");
