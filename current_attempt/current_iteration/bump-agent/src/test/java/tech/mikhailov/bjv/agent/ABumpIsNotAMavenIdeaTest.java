@@ -20,14 +20,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * harness behaved as though there were. {@code apply_recipe} was one command,
  * {@code mvn rewrite-maven-plugin:run}, and half this corpus by repository is Gradle-only.
  *
- * <p>MEASURED ACROSS 405 TRACES BEFORE ANY OF THIS WAS WRITTEN. 955 of 1496 Maven calls returned
- * rc=0. Of 622 Gradle calls, zero did, ever, and all 491 that reached Maven at all carry one line:
- * "Goal requires a project to execute but there is no POM". 453 of those were issued after the
- * answer was already known in that same bump; one spent 132 calls and then passed at 225 findings
- * to 225. The pin phases hold no editor, so the phase could see the floor was violated and had no
- * way whatsoever to act: pin doers made zero edit_file calls in the entire corpus. PASS rate 88.1
- * per cent on Maven against 58.6 on Gradle; CRITICAL+HIGH cleared 36.7 per cent against 17.4, with
- * 86.2 per cent of Gradle bumps clearing exactly nothing.
+ * <p>MEASURED ACROSS 405 TRACES, THEN PUT THROUGH A SKEPTIC, WHICH TOOK HALF OF IT APART. What
+ * survived: of 622 Gradle apply_recipe calls, zero ever returned rc=0, and all 491 that reached
+ * Maven at all carry one line, "Goal requires a project to execute but there is no POM". 582 were
+ * issued after that bump had already seen the error once. 89 of 178 distinct repositories are
+ * Gradle-only. The pin phases hold no editor, so on a pom-less root the phase could read the
+ * violated floor in full and had no way to act: pin doers made zero edit_file calls in the corpus,
+ * while the phases that hold one made 1041 on those same repositories.
+ *
+ * <p>WHAT DID NOT SURVIVE, recorded because it is the more useful half. The raw PASS gap of 88.1
+ * per cent against 58.6 is mostly an artefact of no-baseline, which is decided before any pin agent
+ * exists and has its own cause: the Maven baseline carries -Dmaven.test.failure.ignore=true and the
+ * Gradle one does not. Among bumps that reached a gate it is 90.9 against 89.5. The CVE gap is
+ * wider in the sweep with zero apply_recipe calls than in the sweeps with the tool, and where the
+ * tool exists per-bump movement is 38.0 against 38.5. The repository that spent 132 calls and
+ * passed at 225 findings to 225 does the same at one call and at none.
+ *
+ * <p>So this fixes a mechanism that was measurably, totally broken, and the outcome it buys is not
+ * yet measured. Saying otherwise would make this comment the folklore the rest of them warn about.
+ * The Maven actuator is inert on its own terms too: 143 of 229 instrumented runs changed nothing,
+ * so the honest contrast is 37.6 per cent effective against 0, not 955 against 0.
  *
  * <p>The agents diagnosed it themselves, repeatedly, and were right: "The tool appears to always
  * invoke the Maven rewrite plugin regardless of the recipe type, making it impossible to use
@@ -74,7 +86,11 @@ class ABumpIsNotAMavenIdeaTest {
         // repositories exist, so the host's nexus-mirror.init.gradle does not reach it. Without
         // this the plugin comes from the open internet or not at all.
         assertTrue(init.contains("initscript"), init);
-        assertTrue(init.contains("BJV_REPO_URL"), "the mirror is named, not hardcoded past reach");
+        // WRITTEN IN, NOT READ OUT. jvm-run passes three variables into the container and this is
+        // not one of them, so a getenv here resolves to nothing and silently takes a fallback that
+        // happens to be right. A configured mirror would have been ignored without a word.
+        assertTrue(init.contains("http://nexus:8081/repository/maven-public/"), init);
+        assertFalse(init.contains("System.getenv"), init);
         // The mirror is http and Gradle 6+ refuses plaintext without the opt-in; on 5.x the
         // property does not exist, which is why it is inside a catch.
         assertTrue(init.contains("allowInsecureProtocol"), init);

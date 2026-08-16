@@ -256,11 +256,18 @@ final class Migrate {
     private String rewriteGradle(String from) {
         try {
             Files.writeString(ws.resolve(INIT), initScript());
-            // The wrapper when the project has one, because its version is what the project builds
-            // under and the distributions are staged by version; the image's own gradle otherwise,
-            // which is the fallback jvmjob already makes.
-            String gradle = Files.isRegularFile(ws.resolve("gradlew")) ? "./gradlew" : "gradle";
-            String goal = gradle + " --no-daemon --init-script " + INIT + " rewriteRun";
+            // THE WRAPPER THROUGH bash, NOT AS A PROGRAM. Three of fourteen wrappers in this
+            // corpus ship without the exec bit, and jvmjob already invokes every one of them as
+            // `bash ./gradlew` for that reason. Running it directly works on the eleven and fails
+            // on the three with Permission denied, which reads like a project fault and is not one.
+            String gradle = Files.isRegularFile(ws.resolve("gradlew")) ? "bash ./gradlew" : "gradle";
+            // MEASURED ON rr_17_238, A GRADLE 8 KOTLIN REPOSITORY THAT DIED TWICE. Parsing a whole
+            // project into an OpenRewrite LST holds far more type metadata than compiling it does,
+            // and the default metaspace is sized for the compile. Reproducible, and reproducibly
+            // fixed by this.
+            String goal = gradle + " --no-daemon"
+                    + " -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g'"
+                    + " --init-script " + INIT + " rewriteRun";
             Shell.Output out = Shell.run(ws, Runner.env(ws), Duration.ofSeconds(2700),
                     hoptools + "/jvm-run", from, "jvmjob", "run", goal);
             return "recipe run (gradle) rc=" + out.code() + "\n" + Runner.tail(out.text());
@@ -278,13 +285,22 @@ final class Migrate {
      * mirror was the only reachable source.
      */
     String initScript() {
+        // RESOLVED HERE, NOT READ THERE. jvm-run passes exactly three variables into the container
+        // -- HOME, BJV_JDK, BJV_INNER -- so a System.getenv("BJV_REPO_URL") inside the Gradle
+        // process is always unset and always silently takes the fallback. That happens to be the
+        // right address today, which is the worst kind of working: a configured mirror would be
+        // ignored without a word. The harness JVM does hold the value, so it writes it in.
+        String mirror = Env.get("BJV_REPO_URL");
+        if (mirror == null || mirror.isBlank()) {
+            mirror = "http://nexus:8081/repository/maven-public/";
+        }
         StringBuilder jars = new StringBuilder();
         for (String coordinate : RECIPE_JARS.split(",")) {
             jars.append("        rewrite \"").append(coordinate.strip()).append("\"\n");
         }
         return """
                 // Written by the harness for one invocation. Not the project's file.
-                def repoUrl = System.getenv("BJV_REPO_URL") ?: "http://nexus:8081/repository/maven-public/"
+                def repoUrl = "%s"
                 def mirror = { r -> r.url = repoUrl; try { r.allowInsecureProtocol = true } catch (Throwable ignored) { } }
 
                 initscript {
@@ -293,7 +309,7 @@ final class Migrate {
                     // An init script's own classpath is resolved before any of those exist, so without
                     // this the plugin is fetched from the open internet or not at all.
                     repositories {
-                        maven { r -> r.url = System.getenv("BJV_REPO_URL") ?: "http://nexus:8081/repository/maven-public/"
+                        maven { r -> r.url = "%s"
                                      // Gradle 6+ refuses a plaintext repository without the opt-in and the
                                      // mirror is http. On 5.x the property does not exist and http is fine.
                                      try { r.allowInsecureProtocol = true } catch (Throwable ignored) { } }
@@ -318,7 +334,7 @@ final class Migrate {
                         setFailOnInvalidActiveRecipes(true)
                     }
                 }
-                """.formatted(REWRITE_GRADLE_PLUGIN, jars, activeRecipe());
+                """.formatted(mirror, mirror, REWRITE_GRADLE_PLUGIN, jars, activeRecipe());
     }
 
     /** The one literal OpenRewrite accepts as a recipe document's type. Anything else is not a recipe. */
