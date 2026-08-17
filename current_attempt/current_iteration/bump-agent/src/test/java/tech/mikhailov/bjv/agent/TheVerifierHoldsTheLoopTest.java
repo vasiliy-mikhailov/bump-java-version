@@ -109,6 +109,35 @@ class TheVerifierHoldsTheLoopTest {
     }
 
     /** A triad whose agents are scripted, so the control flow is the only thing under test. */
+    @Test
+    void theObjectionReachesTheProgressNoteEvenWhenTheReplyOpensWithABlankLine() throws IOException {
+        // MEASURED, NOT HYPOTHETICAL. Of 1,544 verifier replies in this corpus, 1,468 began with a
+        // blank line, and the note took lines().findFirst() literally, so 95 per cent of them
+        // logged as "<stage>: again — " with nothing after the dash. The objection was never lost
+        // to the doer, which is handed the whole judgement; what was lost was the one line a person
+        // reads to work out why a bump is still going.
+        Script s = new Script(List.of("\n\nagain: the parent block still reads 2.7.3", "done"));
+
+        s.triad(3).run("go");
+
+        assertTrue(s.notes.stream().anyMatch(n -> n.contains("the parent block still reads 2.7.3")),
+                "the note carries the objection: " + s.notes);
+    }
+
+    @Test
+    void silenceIsNotLoggedAsThoughSomebodyHadObjected() throws IOException {
+        // verdictOf reads a blank reply as `again`, deliberately: defaulting silence to `done`
+        // would close a stage because a request came back empty. But then the note for a reviewer
+        // who objected and the note for a reviewer who said nothing are the same sentence, and they
+        // call for opposite responses from whoever is reading. It fired 64 times in 1,544 calls.
+        Script s = new Script(List.of("", "done"));
+
+        s.triad(3).run("go");
+
+        assertTrue(s.notes.stream().anyMatch(n -> n.contains("answered nothing")),
+                "silence says so: " + s.notes);
+    }
+
     private static final class Script {
 
         record Run(String plan, String feedback) {
