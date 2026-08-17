@@ -196,15 +196,26 @@ class TheAgentCanAskWhichBuildSystemTest {
     }
 
     @Test
-    void theVerifierIsToldThatUnreachableIsATerminalAnswer(@TempDir Path ws) {
+    void theVerifierIsToldThatBeingGradleIsNotAnExcuse(@TempDir Path ws) {
         String critic = Agents.forHop(new Hop(17, 21), ws).stream()
                 .filter(d -> d.name().equals("after-pins-verifier"))
                 .findFirst().orElseThrow().systemPrompt();
 
-        assertTrue(critic.contains("UNREACHABLE IS A REAL ANSWER"), critic);
-        assertTrue(critic.contains("Call build_system"),
-                "and it is told to check rather than take the claim on trust");
-        assertTrue(critic.contains("cannot start"),
-                "with the reason `again` is wrong there, not just that it is");
+        // THIS ASSERTED THE OPPOSITE, AND STAYED GREEN THE WHOLE TIME THE OPPOSITE WAS FALSE. The
+        // paragraph it pinned told the verifier that a Gradle module could not be pinned by
+        // anyone, so accepting a colleague's claim to that effect was `done`. The class doc above
+        // was corrected when the Gradle actuator landed and this method was not, which is the
+        // disagreement to notice: a doc says what is true, an assertion says what the file must
+        // keep saying, and only the second one holds the prompt.
+        //
+        // THE VERIFIER IS THE HALF THAT MATTERS HERE. A doer that reports a pin unapplied costs
+        // one pin; a verifier that accepts the report makes the excuse free, and 74 of the 84 pins
+        // reported BLOCKED in that window named Gradle.
+        assertTrue(critic.contains("BEING GRADLE IS NOT A REASON A PIN COULD NOT BE APPLIED"),
+                critic);
+        assertTrue(critic.contains("that is `again` with the recipe named"),
+                "and it is told what to answer instead, not merely what not to answer");
+        assertFalse(critic.contains("UNREACHABLE IS A REAL ANSWER"),
+                "the escape it replaces is gone rather than sitting beside its correction");
     }
 }

@@ -9,12 +9,11 @@
                 floors: a project already at or above one is finished, and a project that does not
                 use a dependency at all is not given it. Never lower a version.
 
-                CALL build_system FIRST. apply_recipe runs the OpenRewrite MAVEN plugin, so on a
-                Gradle module no recipe can execute and this phase has no other way to write. That
-                is not a recipe that failed and it is not worth a retry: say which modules are
-                Gradle and that the pins for them are unapplied, and let the bump phase, which does
-                hold an editor, deal with them. A phase that reports "every pin met" because its
-                only tool could not start is the worst answer available here.
+                CALL build_system FIRST. It reports, per module, whether it is Maven, Gradle or
+                both, and that tells you where a version lives, not whether you can reach it.
+                apply_recipe reaches both: the Maven plugin on a pom project, the Gradle plugin
+                through an init script on a Gradle one, from the same recipe document. So a Gradle
+                module is not a module you can report as unapplied. It is a module you pin.
 
                 USE apply_recipe. Do not edit a pom or a build.gradle by hand. A version can live in
                 a dependency, in dependencyManagement, in a property the dependency reads, in a

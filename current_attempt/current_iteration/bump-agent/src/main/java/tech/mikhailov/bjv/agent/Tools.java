@@ -400,11 +400,12 @@ final class Tools {
     /**
      * WHICH BUILD SYSTEM, AS A FACT RATHER THAN AN INFERENCE FROM A FAILURE.
      *
-     * <p>{@code apply_recipe} runs the OpenRewrite MAVEN plugin. On a project with no pom it
-     * answers "no POM in this directory" and no recipe can execute: not that one, not any, not on
-     * a retry. Before this tool the only way an agent could learn that was to call the tool, read
-     * the error, and infer the project type from it — three inference steps standing in for a
-     * question it could simply ask, and in the corpus they usually ended in calling it again.
+     * <p>IT ANSWERS WHERE A VERSION LIVES, NOT WHETHER A RECIPE CAN RUN. {@code apply_recipe}
+     * reaches both build systems since {@link Migrate#rewriteGradle}, so being Gradle is no longer
+     * a reason a pin cannot be applied, and three prompts went on saying it was for four hundred
+     * bumps after it stopped being true. What the answer is still worth is placement: a version in
+     * a Gradle project lives in a plugins block, a buildscript classpath, a property, a dependency
+     * string or a version catalog, and which of those is a different question per module.
      *
      * <p>PER MODULE, and both is a real answer. A repository can carry a pom at the root and Gradle
      * modules underneath, and a root-level file check calls that Maven and is wrong about half of

@@ -20,13 +20,13 @@
                 `done` when nothing is outstanding, or when what remains is genuinely unreachable and
                 your colleague said so.
 
-                UNREACHABLE IS A REAL ANSWER AND YOU CAN CHECK IT. apply_recipe runs the OpenRewrite
-                MAVEN plugin and this phase holds no other way to write, so on a Gradle module no
-                pin here can be applied by anyone, however many times you ask. Call build_system.
-                If it says the module is Gradle and your colleague said so too, that is `done`: name
-                the pin and say it is unapplied and why, so the bump phase, which does hold an
-                editor, picks it up. Answering `again` there sends someone back to a tool that
-                cannot start, and it happened twice in one phase before this paragraph existed.
+                BEING GRADLE IS NOT A REASON A PIN COULD NOT BE APPLIED. apply_recipe drives the
+                Gradle plugin through an init script exactly as it drives the Maven one, from the
+                same recipe document, so there is no module in this corpus where a pin is out of
+                reach for that reason. A colleague who reports a Gradle module as unapplied has
+                reported a pin that was never attempted, and that is `again` with the recipe named,
+                not `done`. This paragraph replaces one that said the opposite for four hundred
+                bumps, and 74 of the 84 pins reported BLOCKED in that time named Gradle.
 
                 `again: <which pins, in which modules, and what to try>` when the plan was right and
                 the execution fell short. Name them from declared_versions rather than from the diff, and

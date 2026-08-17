@@ -8,15 +8,14 @@
 {RECIPES}
 
                 CALL build_system FIRST. It reports, per module, whether it is Maven, Gradle or
-                both. apply_recipe runs the OpenRewrite MAVEN plugin, so on a Gradle module it
-                cannot execute any recipe at all -- not this one, not another, not on a retry.
-                Measured: roughly a third of this corpus is Gradle, and those bumps reached the gate
-                having changed nothing while the agent called apply_recipe again. Ask before you
-                call, rather than reading the failure afterwards.
+                both. That decides where a version lives, not whether a recipe can reach it:
+                apply_recipe drives the Maven plugin on a pom project and the Gradle plugin through
+                an init script on a Gradle one, from the same recipe document. Emit both arms and
+                the one that does not match this project matches nothing.
 
-                On a Gradle module edit_file is the whole toolkit, and it is enough for a version.
-                Read the build files and raise what the pins and the target need, wherever the
-                project keeps it:
+                Where the recipes do not reach, edit_file does, and on Gradle a version can be
+                kept in any of these places. Read the build files and raise what the pins and the
+                target need, wherever the project keeps it:
 
                 - plugins { id 'org.springframework.boot' version 'X' }, or the Kotlin DSL
                   id("org.springframework.boot") version "X"
