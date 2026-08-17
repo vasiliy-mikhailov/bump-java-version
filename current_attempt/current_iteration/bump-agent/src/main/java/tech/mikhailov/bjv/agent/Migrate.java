@@ -317,6 +317,19 @@ final class Migrate {
         String goal = "mvn -B -ntp -U -Denforcer.skip=true " + REWRITE_PLUGIN + ":run"
                 + " -Drewrite.configLocation=$(pwd)/rewrite.yml"
                 + " -Drewrite.activeRecipes=" + activeRecipe()
+                // A NAME THIS CANNOT RESOLVE IS A FAILURE, NOT A RUN THAT CHANGED NOTHING. The
+                // plugin defaults this to false, in its own words "to prevent one improper recipe
+                // from failing the build", and the effect on this corpus is the opposite of
+                // protective: of the Spring recipe ids agents wrote, 42 resolved, 12 named
+                // org.openrewrite.spring.something, a package that does not exist, and 6 passed
+                // parameters to a recipe that takes none. Every one of those exited 0 having
+                // edited nothing, which reads downstream exactly like a pin that was already met,
+                // so the verifier had nothing to object to and the phase closed green.
+                //
+                // The Gradle actuator has set the equivalent since it was written, and the comment
+                // beside it calls itself strictly better than this side. This is that side catching
+                // up, and Maven is the larger half: 787 of the 1439 manifest rows.
+                + " -Drewrite.failOnInvalidActiveRecipes=true"
                 + " -Drewrite.recipeArtifactCoordinates=" + RECIPE_JARS;
         try {
             Shell.Output out = Shell.run(ws, Runner.env(ws), Duration.ofSeconds(2700),
