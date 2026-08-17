@@ -96,6 +96,9 @@ class APromptIsAFileNowTest {
         if (!Files.isDirectory(dir)) {
             return;
         }
+        String source = Files.readString(
+                Path.of("src/main/java/tech/mikhailov/bjv/agent/Agents.java"),
+                StandardCharsets.UTF_8);
         Set<String> keys = new TreeSet<>();
         Set<String> platforms = new TreeSet<>();
         try (var dirs = Files.list(dir)) {
@@ -111,25 +114,51 @@ class APromptIsAFileNowTest {
                         here.add(key);
                         assertFalse(Files.readString(f, StandardCharsets.UTF_8).isBlank(),
                                 f + " is empty, and an empty fragment is a save that went wrong");
-                        // AND THE SHARED HALF HAS A SLOT FOR IT. A fragment whose prompt lost its
-                        // {PLATFORM} line would be loaded, held and never said, and the prompt
-                        // reads perfectly well without it.
-                        assertTrue(Files.readString(
-                                        Path.of("src/main/resources/prompts", key + ".md"),
-                                        StandardCharsets.UTF_8).contains("{PLATFORM}"),
-                                key + ".md has no slot for its platform half");
+                        // AND SOMETHING ASKS FOR IT BY NAME. The loader names its key rather
+                        // than listing this directory, so a fragment nobody names is a file
+                        // somebody edits for nothing and this is what notices.
+                        //
+                        // A FRAGMENT KEY IS NOT A BODY FILENAME, though it was one until
+                        // after-pins stopped borrowing before-pins' fragment. Both pin phases
+                        // still share pins.md, differing by {WHEN} and {PINS}, because the
+                        // mechanics of raising a version do not change between them; what changes
+                        // is the platform half, so after-pins composes that same body with a
+                        // fragment of its own. There is no after-pins.md and there should not be.
+                        // This assertion used to open that file, which was asserting a
+                        // coincidence: it held only while every fragment happened to be spliced
+                        // into a body of the same name.
+                        //
+                        // The slot needs no assertion here. withPlatform throws when a body has
+                        // no {PLATFORM} line, at class initialisation, which is before any bump
+                        // starts and long before anything a test could miss.
+                        // MATCHED STRUCTURALLY, NOT BY THE LAMBDA'S VARIABLE NAME. The first
+                        // version of this looked for the literal followed by ", p)" and went red
+                        // on bumper, whose call site happens to spell the same argument
+                        // "platform". What is being asserted is that a withPlatform call names
+                        // this key, and the name of its other argument is nobody's business.
+                        assertTrue(java.util.regex.Pattern
+                                        .compile("withPlatform\\([^,]+,\\s*\""
+                                                + java.util.regex.Pattern.quote(key) + "\"")
+                                        .matcher(source).find(),
+                                key + " is a fragment that no withPlatform call names");
                     }
                 }
                 if (keys.isEmpty()) {
                     keys.addAll(here);
                 }
-                assertEquals(keys, here, platform + " does not carry the same eleven texts");
+                assertEquals(keys, here, platform + " does not carry the same texts as the others");
             }
         }
         assertEquals(new TreeSet<>(Managed.PLATFORMS), platforms, "one directory per regime");
-        assertEquals(11, keys.size(),
-                "eleven distinct texts serve the fourteen agents inside the module walk, because"
-                        + " the two pin phases share three of them");
+        // FOURTEEN AGENTS, FOURTEEN FRAGMENTS, ELEVEN BODIES. The count was eleven while the
+        // two pin phases shared a fragment as well as a body. They still share the body, because
+        // raising a version works the same way whichever phase asks for it; they no longer share
+        // the platform half, because what a Boot module needs to hear about enabling a hop and
+        // what it needs to hear about a CVE in a member of its managed set are different things,
+        // and one of them has a wrong move that silences a scanner.
+        assertEquals(14, keys.size(),
+                "one fragment per module-scoped agent, since after-pins stopped borrowing "
+                        + "the platform half that belongs to before-pins");
     }
 
     @Test

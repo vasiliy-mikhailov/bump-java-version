@@ -169,7 +169,15 @@ final class Agents {
      * there are thirty-three of them rather than forty-two.
      */
     private static final List<String> MODULE_PROMPTS = List.of(
+            // BEFORE AND AFTER SHARE A BODY AND NOT A FRAGMENT. One .md serves both pin phases,
+            // differing by {WHEN} and {PINS}, and that is right: the mechanics of raising a version
+            // do not change between them. The platform half does. Enabling a hop on a Boot module
+            // is a question about what the set already gives you; hardening one is a question about
+            // a CVE in a member of that set, where the obvious edit silences the scanner and takes
+            // the artifact out of the set in the same stroke. Sharing the fragment made after-pins
+            // read its own list through before-pins' argument.
             "pins-planner", "pins", "pins-critic",
+            "after-pins-planner", "after-pins", "after-pins-critic",
             "bump-planner", "bumper", "bump-critic",
             "troubleshoot-planner", "troubleshoot-loop-critic", "troubleshoot-loop",
             "troubleshooter", "trouble-critic");
@@ -239,8 +247,10 @@ final class Agents {
         }
         slot.appendTail(out);
         if (!placed) {
-            throw new IllegalStateException("/prompts/" + key + ".md has no {PLATFORM} line, so "
-                    + "the platform half of it would never be said");
+            // NAMES THE KEY, NOT A FILE, because the two parted company when after-pins got
+            // a fragment of its own: its body is pins.md and its key is after-pins.
+            throw new IllegalStateException("the body composed for fragment " + key + " has no "
+                    + "{PLATFORM} line, so the platform half of it would never be said");
         }
         return out.toString();
     }
@@ -550,17 +560,17 @@ final class Agents {
      */
     private String bumpPrompt(String platform) {
         StringBuilder recipes = new StringBuilder();
-        recipes.append("                - org.openrewrite.java.migrate.UpgradePluginsForJava")
+        recipes.append("- org.openrewrite.java.migrate.UpgradePluginsForJava")
                 .append(hop.to()).append('\n')
-                .append("                - org.openrewrite.java.migrate.UpgradeBuildToJava")
+                .append("- org.openrewrite.java.migrate.UpgradeBuildToJava")
                 .append(hop.to()).append('\n')
-                .append("                - org.openrewrite.java.migrate.jacoco.UpgradeJaCoCo\n");
+                .append("- org.openrewrite.java.migrate.jacoco.UpgradeJaCoCo\n");
         if (hop.crosses(11)) {
-            recipes.append("                - org.openrewrite.java.migrate.Java8toJava11 "
+            recipes.append("- org.openrewrite.java.migrate.Java8toJava11 "
                     + "— the only recipe that handles the modules JEP 320 removed, and this hop "
                     + "crosses rung 11\n");
         }
-        recipes.append("                - org.openrewrite.gradle.UpdateJavaCompatibility with "
+        recipes.append("- org.openrewrite.gradle.UpdateJavaCompatibility with "
                 + "version ").append(hop.to()).append(" — the Gradle half, a no-op on Maven\n");
         return withPlatform(P_BUMPER, "bumper", platform)
                 .replace("{RECIPES}", recipes.toString())
@@ -570,15 +580,25 @@ final class Agents {
 
     private String pinPrompt(String base, boolean after) {
         return base.replace("{ALSO}", also(after)).replace("{PINS}", (after ? Floors.after(hop.to()) : Floors.before(hop.to()))
-                        .lines().map(l -> "                - " + l.strip())
+                        .lines().map(l -> "- " + l.strip())
                         .collect(java.util.stream.Collectors.joining("\n")))
                 .replace("{FROM}", String.valueOf(hop.from()))
                 .replace("{TARGET}", String.valueOf(hop.to()))
+                // WHAT EACH PHASE IS FOR, NOW THAT ALMOST EVERYTHING HAPPENS IN THE SECOND ONE.
+                // The after brief used to say these versions REQUIRE the new JDK, which is true of
+                // Spring Boot 3 and false of mockito, hamcrest and most of the list: they were
+                // simply deferred, because the module gate compiles before this phase runs and
+                // nothing that only matters to a test run needs to be in place for a compile.
                 .replace("{WHEN}", after
-                        ? "The JDK has already been raised. These versions require it, so this is "
-                        + "the first moment they can be applied at all."
-                        : "The JDK has NOT been raised yet. These versions must be in place first, "
-                        + "because the new JDK will not compile without them.");
+                        ? "The JDK has already been raised and this module compiles under it. "
+                        + "Nearly every floor is raised here, because only what javac itself "
+                        + "cannot start without was done before the bump. So this list is the "
+                        + "long one, and it holds what the test run will need as well as what "
+                        + "the scanner will."
+                        : "The JDK has NOT been raised yet, and this list is deliberately short: "
+                        + "it holds only what javac cannot start without. Everything else waits "
+                        + "until the module compiles, where a version is cheaper to raise and "
+                        + "easier to attribute when it breaks something.");
     }
 
     /**
@@ -795,14 +815,14 @@ final class Agents {
                 this::read);
         perPlatform(out, "after-pins-planner",
                 "decides which post-JDK pins to raise, in which module",
-                p -> pinPrompt(withPlatform(P_PINS_PLANNER, "pins-planner", p), true),
+                p -> pinPrompt(withPlatform(P_PINS_PLANNER, "after-pins-planner", p), true),
                 n -> Tools.judging(ws, tree, trace, n));
         perPlatform(out, "after-pins-doer", "raises the versions that only run on the new JDK",
-                p -> pinPrompt(withPlatform(P_PINS, "pins", p), true),
+                p -> pinPrompt(withPlatform(P_PINS, "after-pins", p), true),
                 n -> Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()), trace, n));
         perPlatform(out, "after-pins-verifier",
                 "checks every post-JDK pin landed, module by module",
-                p -> pinPrompt(withPlatform(P_PINS_CRITIC, "pins-critic", p), true),
+                p -> pinPrompt(withPlatform(P_PINS_CRITIC, "after-pins-critic", p), true),
                 n -> Tools.judging(ws, tree, trace, n));
 
         out.add(define("modules-verifier", "closes one module, or sends it back",

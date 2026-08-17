@@ -31,78 +31,78 @@ final class Floors {
 
     private static final String TO_11 = """
             org.projectlombok:lombok 1.18.30 — older Lombok reads javac internals that moved, and dies with ExceptionInInitializerError on TypeTags, which never names Lombok
-            net.bytebuddy:byte-buddy 1.14.12 — refuses a class file major it does not know, which Mockito reports as being unable to mock a class
-            net.bytebuddy:byte-buddy-agent 1.14.12 — moves with byte-buddy; a split pair fails in the same place
-            org.mockito:mockito-core 5.18.0 — carries the Byte Buddy floor transitively
-            com.tngtech.archunit:archunit 1.4.1 — reads bytecode directly and rejects a major it predates
-            com.tngtech.archunit:archunit-junit5 1.4.1 — moves with archunit
-            org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
-            javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
-            org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
-            javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
-            org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
-            org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
-            org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
+            [after] net.bytebuddy:byte-buddy 1.14.12 — refuses a class file major it does not know, which Mockito reports as being unable to mock a class
+            [after] net.bytebuddy:byte-buddy-agent 1.14.12 — moves with byte-buddy; a split pair fails in the same place
+            [after] org.mockito:mockito-core 5.18.0 — carries the Byte Buddy floor transitively
+            [after] com.tngtech.archunit:archunit 1.4.1 — reads bytecode directly and rejects a major it predates
+            [after] com.tngtech.archunit:archunit-junit5 1.4.1 — moves with archunit
+            [after] org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
+            [after] javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
+            [after] org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
+            [after] javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
+            [after] org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
+            [after] org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
+            [after] org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
             [after] org.springframework.boot:spring-boot-starter-parent 2.7.18 or newer — the last of the 2.x line, and the ceiling here because Boot 3 needs Java 17. Run UpgradeSpringBoot_2_7 rather than writing a version: it carries newVersion 2.7.x, chains 2.0 through 2.6 beneath it, and moves the maven plugin and the BOM along with the parent. Six minor releases of renamed properties and withdrawn APIs sit between a Boot 2.1 project and 2.7, and a number typed into the parent block crosses none of them
             [after] org.springframework.boot:spring-boot-dependencies 2.7.18 or newer — the same floor for a project that imports the BOM instead of inheriting the parent; the same recipe raises it, and knows to override a managed version to do so
             """;
 
     private static final String TO_17 = """
             org.projectlombok:lombok 1.18.30 — older Lombok reads javac internals that moved, and dies with ExceptionInInitializerError on TypeTags, which never names Lombok
-            net.bytebuddy:byte-buddy 1.14.12 — refuses a class file major it does not know, which Mockito reports as being unable to mock a class
-            net.bytebuddy:byte-buddy-agent 1.14.12 — moves with byte-buddy; a split pair fails in the same place
-            org.mockito:mockito-core 5.18.0 — carries the Byte Buddy floor transitively
-            com.tngtech.archunit:archunit 1.4.1 — reads bytecode directly and rejects a major it predates
-            com.tngtech.archunit:archunit-junit5 1.4.1 — moves with archunit
-            org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
-            org.gradle:gradle-wrapper 7.6 — older wrappers cannot run the toolchain this target needs
-            javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
-            org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
-            javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
-            org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
-            org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
-            org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
+            [after] net.bytebuddy:byte-buddy 1.14.12 — refuses a class file major it does not know, which Mockito reports as being unable to mock a class
+            [after] net.bytebuddy:byte-buddy-agent 1.14.12 — moves with byte-buddy; a split pair fails in the same place
+            [after] org.mockito:mockito-core 5.18.0 — carries the Byte Buddy floor transitively
+            [after] com.tngtech.archunit:archunit 1.4.1 — reads bytecode directly and rejects a major it predates
+            [after] com.tngtech.archunit:archunit-junit5 1.4.1 — moves with archunit
+            [after] org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
+            [after] org.gradle:gradle-wrapper 7.6 — older wrappers cannot run the toolchain this target needs
+            [after] javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
+            [after] org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
+            [after] javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
+            [after] org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
+            [after] org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
+            [after] org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
             [after] org.springframework.boot:spring-boot-starter-parent 3.5.16 or newer — Boot 3 needs Java 17, so it is reachable from here up, and the 3.5 line is where the free tooling ends since the only recipe for 4.1 is proprietary. Run UpgradeSpringBoot_3_5 on ANY project on the Boot 3 line whatever patch it declares, and never write a version into the parent block: the recipe carries newVersion 3.5.x, resolves the head of the line itself, and does nothing if already there. Being on 3.5 is NOT evidence of being current, and no version in the pom tells you either way. Measured on a project sitting at 3.5.4: the recipe took the parent to 3.5.16, Tomcat 10.1.43 to 10.1.55, jackson-databind 2.19.2 to 2.21.4, migrated fastjson 1.2.67 to fastjson2 2.0.64, and moved CRITICAL+HIGH from 24 to 1 over the same 129 packages, with all five tests still passing
             [after] org.springframework.boot:spring-boot-dependencies 3.5.16 — the same floor for a project that imports the BOM instead of inheriting the parent, reached the same way
             """;
 
     private static final String TO_21 = """
             org.projectlombok:lombok 1.18.30 — older Lombok reads javac internals that moved, and dies with ExceptionInInitializerError on TypeTags, which never names Lombok
-            net.bytebuddy:byte-buddy 1.14.12 — refuses a class file major it does not know, which Mockito reports as being unable to mock a class
-            net.bytebuddy:byte-buddy-agent 1.14.12 — moves with byte-buddy; a split pair fails in the same place
-            org.mockito:mockito-core 5.18.0 — carries the Byte Buddy floor transitively
-            com.tngtech.archunit:archunit 1.4.1 — reads bytecode directly and rejects a major it predates
-            com.tngtech.archunit:archunit-junit5 1.4.1 — moves with archunit
-            org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
-            org.gradle:gradle-wrapper 8.10.2 — older wrappers cannot run the toolchain this target needs
-            org.apache.tomcat.embed:tomcat-embed-core 9.0.105 — the newest 9.0 the mirror carries, and the fewest CVEs of that line; only where Spring is absent, since Boot brings a newer Tomcat of its own
-            javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
-            org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
-            javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
-            org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
-            org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
-            org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
+            [after] net.bytebuddy:byte-buddy 1.14.12 — refuses a class file major it does not know, which Mockito reports as being unable to mock a class
+            [after] net.bytebuddy:byte-buddy-agent 1.14.12 — moves with byte-buddy; a split pair fails in the same place
+            [after] org.mockito:mockito-core 5.18.0 — carries the Byte Buddy floor transitively
+            [after] com.tngtech.archunit:archunit 1.4.1 — reads bytecode directly and rejects a major it predates
+            [after] com.tngtech.archunit:archunit-junit5 1.4.1 — moves with archunit
+            [after] org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
+            [after] org.gradle:gradle-wrapper 8.10.2 — older wrappers cannot run the toolchain this target needs
+            [after] org.apache.tomcat.embed:tomcat-embed-core 9.0.105 — the newest 9.0 the mirror carries, and the fewest CVEs of that line; only where Spring is absent, since Boot brings a newer Tomcat of its own
+            [after] javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
+            [after] org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
+            [after] javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
+            [after] org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
+            [after] org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
+            [after] org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
             [after] org.springframework.boot:spring-boot-starter-parent 3.5.16 or newer — Boot 3 needs Java 17, so it is reachable from here up, and the 3.5 line is where the free tooling ends since the only recipe for 4.1 is proprietary. Run UpgradeSpringBoot_3_5 on ANY project on the Boot 3 line whatever patch it declares, and never write a version into the parent block: the recipe carries newVersion 3.5.x, resolves the head of the line itself, and does nothing if already there. Being on 3.5 is NOT evidence of being current, and no version in the pom tells you either way. Measured on a project sitting at 3.5.4: the recipe took the parent to 3.5.16, Tomcat 10.1.43 to 10.1.55, jackson-databind 2.19.2 to 2.21.4, migrated fastjson 1.2.67 to fastjson2 2.0.64, and moved CRITICAL+HIGH from 24 to 1 over the same 129 packages, with all five tests still passing
             [after] org.springframework.boot:spring-boot-dependencies 3.5.16 — the same floor for a project that imports the BOM instead of inheriting the parent, reached the same way
             """;
 
     private static final String TO_25 = """
             org.projectlombok:lombok 1.18.46 — the 1.18.30 line does not understand the JDK 25 AST
-            net.bytebuddy:byte-buddy 1.17.6 — the first line that knows class file 69
-            net.bytebuddy:byte-buddy-agent 1.17.6 — moves with byte-buddy
-            org.mockito:mockito-core 5.18.0 — carries the Byte Buddy floor transitively
-            com.tngtech.archunit:archunit 1.4.1 — reads bytecode directly and rejects a major it predates
-            com.tngtech.archunit:archunit-junit5 1.4.1 — moves with archunit
-            org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
+            [after] net.bytebuddy:byte-buddy 1.17.6 — the first line that knows class file 69
+            [after] net.bytebuddy:byte-buddy-agent 1.17.6 — moves with byte-buddy
+            [after] org.mockito:mockito-core 5.18.0 — carries the Byte Buddy floor transitively
+            [after] com.tngtech.archunit:archunit 1.4.1 — reads bytecode directly and rejects a major it predates
+            [after] com.tngtech.archunit:archunit-junit5 1.4.1 — moves with archunit
+            [after] org.jacoco:jacoco-maven-plugin 0.8.15 — instruments bytecode and refuses a major it predates
             org.jetbrains.kotlin:kotlin 2.3.20 — every Kotlin 1.x either crashes on JDK 25 or silently falls back below the target, which the gate reads as an unraised bump
-            org.gradle:gradle-wrapper 9.1.0 — older wrappers cannot run the toolchain this target needs
-            org.apache.tomcat.embed:tomcat-embed-core 9.0.105 — the newest 9.0 the mirror carries, and the fewest CVEs of that line; only where Spring is absent, since Boot brings a newer Tomcat of its own
-            javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
-            org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
-            javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
-            org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
-            org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
-            org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
+            [after] org.gradle:gradle-wrapper 9.1.0 — older wrappers cannot run the toolchain this target needs
+            [after] org.apache.tomcat.embed:tomcat-embed-core 9.0.105 — the newest 9.0 the mirror carries, and the fewest CVEs of that line; only where Spring is absent, since Boot brings a newer Tomcat of its own
+            [after] javax.xml.bind:jaxb-api 2.3.1 — JEP 320 removed the Java EE modules from the JDK; a project that used them needs them as dependencies now
+            [after] org.glassfish.jaxb:jaxb-runtime 2.3.1 — the runtime half of the same removal
+            [after] javax.annotation:javax.annotation-api 1.3.2 — removed by the same JEP
+            [after] org.hamcrest:hamcrest 2.2 — the old hamcrest-core split, which surefire stops resolving
+            [after] org.junit.platform:junit-platform-launcher 1.10.2 — newer surefire needs it declared rather than inherited
+            [after] org.apache.maven.plugins:maven-compiler-plugin 3.13.0 — older compiler plugins reject the target outright
             [after] org.springframework.boot:spring-boot-starter-parent 3.5.16 or newer — Boot 3 needs Java 17, so it is reachable from here up, and the 3.5 line is where the free tooling ends since the only recipe for 4.1 is proprietary. Run UpgradeSpringBoot_3_5 on ANY project on the Boot 3 line whatever patch it declares, and never write a version into the parent block: the recipe carries newVersion 3.5.x, resolves the head of the line itself, and does nothing if already there. Being on 3.5 is NOT evidence of being current, and no version in the pom tells you either way. Measured on a project sitting at 3.5.4: the recipe took the parent to 3.5.16, Tomcat 10.1.43 to 10.1.55, jackson-databind 2.19.2 to 2.21.4, migrated fastjson 1.2.67 to fastjson2 2.0.64, and moved CRITICAL+HIGH from 24 to 1 over the same 129 packages, with all five tests still passing
             [after] org.springframework.boot:spring-boot-dependencies 3.5.16 — the same floor for a project that imports the BOM instead of inheriting the parent, reached the same way
             """;
@@ -122,7 +122,15 @@ final class Floors {
                 .collect(java.util.stream.Collectors.joining("\n"));
     }
 
-    /** The pins that only work once the JDK has moved. */
+    /**
+     * The pins raised after the module compiles, which is now almost all of them.
+     *
+     * <p>It used to mean "the ones that only work once the JDK has moved", and for Spring Boot 3
+     * that is still literally why it is here. For the rest it is an ordering choice rather than a
+     * requirement: the module gate compiles between the two phases, so anything a compile does not
+     * need is cheaper here, where it lands against a module that is known to build and a break can
+     * be attributed to the version that caused it.
+     */
     static String after(int target) {
         return forTarget(target).lines()
                 .filter(l -> l.strip().startsWith("[after]"))

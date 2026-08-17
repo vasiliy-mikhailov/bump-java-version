@@ -1,19 +1,17 @@
-# WHAT ENABLES THE JDK 8 TO 11 BUMP. Below one of these the bump does not happen.
+# WHAT JAVAC CANNOT START WITHOUT, on the way from JDK 8 to JDK 11.
+#
+# Short on purpose, and it used to be fifteen rows. The module gate compiles immediately
+# after the bump and the hardens list is raised behind it, so a floor only matters here if
+# a compile fails without it. Lombok does: it is an annotation processor running inside
+# javac, an old one dies on TypeTags, and nothing in the bump phase raises it. Kotlin does
+# above 21, and for a worse reason than crashing: 1.x silently falls back below the target,
+# which the gate reads as an unraised bump and files against the repository.
+#
+# Everything else moved to hardens. Most of it was only ever needed for the TEST run, which
+# happens at the repository gate, after that list has been raised.
 #
 # Every row is the head of a line and answers only for projects already on it: same major, same
 # minor, lower patch. One artifact may hold several rows, one per line.
 #
 # group:artifact <tab> version <tab> any|maven|gradle <tab> other spellings, comma separated
 org.projectlombok:lombok	1.18.30	any	
-net.bytebuddy:byte-buddy	1.14.12	any	
-net.bytebuddy:byte-buddy-agent	1.14.12	any	
-org.mockito:mockito-core	5.18.0	any	
-com.tngtech.archunit:archunit	1.4.1	any	com.tngtech.archunit:*
-com.tngtech.archunit:archunit-junit5	1.4.1	any	
-org.jacoco:jacoco-maven-plugin	0.8.15	any	org.jacoco:org.jacoco.core,org.jacoco:jacoco,org.jacoco:*
-javax.xml.bind:jaxb-api	2.3.1	any	
-org.glassfish.jaxb:jaxb-runtime	2.3.1	any	
-javax.annotation:javax.annotation-api	1.3.2	any	
-org.hamcrest:hamcrest	2.2	any	
-org.junit.platform:junit-platform-launcher	1.10.2	any	
-org.apache.maven.plugins:maven-compiler-plugin	3.13.0	maven	
