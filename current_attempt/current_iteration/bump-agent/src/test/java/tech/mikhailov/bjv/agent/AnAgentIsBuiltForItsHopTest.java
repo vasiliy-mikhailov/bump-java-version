@@ -97,8 +97,8 @@ class AnAgentIsBuiltForItsHopTest {
         // Both rose by one when tomcat-embed-core 10.1.55 was added to every block. It had been in
         // all four hardens tsv files and in no Floors line since the bill of materials was written,
         // so compliance scored every project against a floor no agent was ever asked to reach.
-        assertEquals(16, pins(11), "8 to 11 pins sixteen");
-        assertEquals(19, pins(25), "21 to 25 pins nineteen");
+        assertEquals(17, pins(11), "8 to 11 pins seventeen");
+        assertEquals(20, pins(25), "21 to 25 pins twenty");
     }
 
     private static int pins(int target) {
