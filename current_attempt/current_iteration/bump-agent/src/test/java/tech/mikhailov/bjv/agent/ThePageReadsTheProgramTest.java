@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>THE NESTING RULE IS A REAL CONSTRAINT AND NOT A PREFERENCE. The settings page groups agents by
  * consecutive stage and then recurses by title through the groups that HAVE agents. A stage whose
  * {@code within} names something with no agent in it is a stage nothing draws: it and everything
- * under it vanish from the page, silently, with the endpoint still returning all thirty-four.
+ * under it vanish from the page, silently, with the endpoint still returning every agent it has.
  */
 class ThePageReadsTheProgramTest {
 
@@ -51,7 +51,7 @@ class ThePageReadsTheProgramTest {
     }
 
     @Test
-    void theSettingsPageAnswersThirtyFourAgentsInTheOrderTheBumpRunsThem() throws Exception {
+    void theSettingsPageAnswersEveryAgentInTheOrderTheBumpRunsThem() throws Exception {
         // Measured on the live page once, before any of this: unsorted, after-pins arrived after
         // the repair agents and modules-verifier after that, so the module block drew missing its
         // third pass and the loop closed in the wrong place. The order is the tree's walk now, so
@@ -66,8 +66,20 @@ class ThePageReadsTheProgramTest {
             named.add(m.group(1));
         }
 
-        assertEquals(34, named.size(), "thirty-four agents, one object each");
-        assertEquals(NAMED, named, "in the order the bump reaches them");
+        // SIXTY-FIVE OBJECTS FOR THIRTY-SEVEN NAMES, and the difference is the module walk: the
+        // fourteen agents inside it exist once per platform, because a pin doer told to raise an
+        // artifact Spring Boot manages and one told to raise an artifact nothing manages are given
+        // opposite instructions.
+        assertEquals(Agents.forHop(new Hop(17, 21), Path.of("/tmp")).size(), named.size(),
+                "every agent the catalogue holds, one object each");
+
+        // AND THE ORDER IS STILL THE TREE'S. The page sorts on the stem, because a shape drawn
+        // before any module is looked at cannot name a platform, so what has to match the walk is
+        // the sequence of stems. A platform-keyed agent whose three copies were split across the
+        // page would put a stage's third pass under the next stage's heading, which is the exact
+        // failure this test was written for.
+        List<String> stems = named.stream().map(Agents::stem).distinct().toList();
+        assertEquals(NAMED, stems, "in the order the bump reaches them");
 
         // AND THE STALE EDGE IS GONE. The page used to list the arguer's three agents before the
         // estimator's, because the declaration it sorted by still ended with the estimator, while
@@ -127,13 +139,14 @@ class ThePageReadsTheProgramTest {
         }
         // COUNTED, so that a walk which quietly stopped finding stages reads as a failure rather
         // than as agreement. A skip list and an empty list look identical from the outside.
-        assertEquals(6, nested, "five stages inside the module walk, and the step campaign");
+        assertEquals(7, nested,
+                "six stages inside the module walk, and the step campaign");
     }
 
     @Test
     void theStagesOfOneModulesTurnHangUnderModulesAndTheStepsUnderTheirCampaign() {
-        for (String title : List.of("before-pins", "bump", "module-gate", "module-repair",
-                "after-pins")) {
+        for (String title : List.of("platform", "before-pins", "bump", "module-gate",
+                "module-repair", "after-pins")) {
             assertEquals("modules", stage(title).within(),
                     title + " is part of what the modules stage does");
         }

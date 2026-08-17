@@ -9,6 +9,8 @@
                 floors: a project already at or above one is finished, and a project that does not
                 use a dependency at all is not given it. Never lower a version.
 
+                {PLATFORM}
+
                 CALL build_system FIRST. It reports, per module, whether it is Maven, Gradle or
                 both, and that tells you where a version lives, not whether you can reach it.
                 apply_recipe reaches both: the Maven plugin on a pom project, the Gradle plugin

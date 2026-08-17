@@ -107,13 +107,18 @@ class NoPromptSaysRecipesCannotReachGradleTest {
         // doer is told it can reach the module; the verifier is told that being Gradle is not a
         // reason a pin went unapplied, because the verifier is the half that accepted the excuse.
         List<SubAgentDefinition> defs = Agents.forHop(new Hop(17, 21), ws);
-        String doer = of(defs, "before-pins-doer");
-        String critic = of(defs, "before-pins-verifier");
+        // ON EVERY PLATFORM. The capability is the harness's and has nothing to do with what
+        // manages a module's versions, so a correction that reached only one of the three copies
+        // would leave the excuse standing for the other two.
+        for (String platform : Managed.PLATFORMS) {
+            String doer = of(defs, Agents.named("before-pins-doer", platform));
+            String critic = of(defs, Agents.named("before-pins-verifier", platform));
 
-        assertTrue(doer.contains("apply_recipe reaches both"),
-                "the pin doer is told the tool reaches either build system: " + doer);
-        assertTrue(critic.contains("BEING GRADLE IS NOT A REASON A PIN COULD NOT BE APPLIED"),
-                "and the verifier is told not to accept it as one: " + critic);
+            assertTrue(doer.contains("apply_recipe reaches both"),
+                    "the pin doer is told the tool reaches either build system: " + doer);
+            assertTrue(critic.contains("BEING GRADLE IS NOT A REASON A PIN COULD NOT BE APPLIED"),
+                    "and the verifier is told not to accept it as one: " + critic);
+        }
     }
 
     private static String of(List<SubAgentDefinition> defs, String name) {

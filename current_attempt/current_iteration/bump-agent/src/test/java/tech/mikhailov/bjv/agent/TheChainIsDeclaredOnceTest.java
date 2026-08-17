@@ -44,13 +44,58 @@ class TheChainIsDeclaredOnceTest {
 
     private static final List<String> NAMED = Shape.agentNames(STAGES);
 
+    /**
+     * THE TREE CANNOT NAME A PLATFORM, so the correspondence is on the stem.
+     *
+     * <p>Fourteen of these agents are defined once per platform and named
+     * {@code before-pins-planner@spring-boot}. The shape is walked before any module has been
+     * looked at, and it must be: {@code Bump.stages} builds a bump with no workspace, no agents and
+     * no trace, and Dashboard reads it from a static initialiser, so a platform resolved at
+     * construction time takes the page down rather than one request. What the tree can say is
+     * before-pins-planner, and what the catalogue holds is three of it.
+     */
+    private static String stem(String agent) {
+        return Agents.stem(agent);
+    }
+
     @Test
     void everyAgentTheTreeReachesIsDefined() {
-        Set<String> defined = new TreeSet<>(DEFINED.stream().map(SubAgentDefinition::name).toList());
+        Set<String> defined = new TreeSet<>(
+                DEFINED.stream().map(d -> stem(d.name())).toList());
         Set<String> missing = new TreeSet<>(NAMED);
         missing.removeAll(defined);
 
         assertTrue(missing.isEmpty(), "the tree names agents nobody built: " + missing);
+    }
+
+    @Test
+    void everyModuleScopedAgentIsBuiltForEveryPlatformAndNeverBare() {
+        // THE HALF THE STEM COMPARISON CANNOT SEE. One platform's copy missing would leave the
+        // stem defined and the walk would fail on the module that detected that regime, hours in,
+        // with a lookup for an agent nobody made. A bare definition surviving beside the keyed
+        // three is the other direction: it would be catalogued, described on the page, and reached
+        // by nothing.
+        Set<String> defined = new TreeSet<>(DEFINED.stream().map(SubAgentDefinition::name).toList());
+        Set<String> moduleScoped = new TreeSet<>();
+        for (String name : defined) {
+            if (!name.equals(stem(name))) {
+                moduleScoped.add(stem(name));
+            }
+        }
+
+        assertEquals(14, moduleScoped.size(),
+                "fourteen agents run inside the module walk: " + moduleScoped);
+        for (String name : moduleScoped) {
+            assertFalse(defined.contains(name),
+                    name + " is defined bare as well as per platform, so two of it exist");
+            for (String platform : Managed.PLATFORMS) {
+                assertTrue(defined.contains(Agents.named(name, platform)),
+                        name + " is not built for " + platform);
+            }
+        }
+        assertEquals(20 + 3 + 14 * 3, DEFINED.size(),
+                "twenty above the walk, three detecting the platform, and fourteen inside it once"
+                        + " for each of the three regimes");
     }
 
     @Test
@@ -64,11 +109,13 @@ class TheChainIsDeclaredOnceTest {
         // and the only written record of the budget they spend. The campaign is a node now, which
         // is what makes this assertion hold with nothing beside the program to hold it up.
         Set<String> named = new TreeSet<>(NAMED);
-        Set<String> orphans = new TreeSet<>(DEFINED.stream().map(SubAgentDefinition::name).toList());
+        Set<String> orphans = new TreeSet<>(DEFINED.stream().map(d -> stem(d.name())).toList());
         orphans.removeAll(named);
 
         assertTrue(orphans.isEmpty(), "defined but no stage runs them: " + orphans);
-        assertEquals(34, NAMED.size(), "and the whole chain is thirty-four");
+        assertEquals(37, NAMED.size(),
+                "and the whole chain is thirty-seven: thirty-four, plus the three that decide"
+                        + " which regime manages a module");
     }
 
     @Test
@@ -122,6 +169,9 @@ class TheChainIsDeclaredOnceTest {
                 "no baseline, no bump");
         assertTrue(titles.indexOf("security-before") < titles.indexOf("modules"),
                 "the scan has to precede the work, or it is not the project's own state");
+        assertTrue(titles.indexOf("platform") < titles.indexOf("before-pins"),
+                "what manages a module is settled before anything is told how to raise a version"
+                        + " in it, because every stage after it is keyed by the answer");
         assertTrue(titles.indexOf("before-pins") < titles.indexOf("bump"),
                 "lombok moves before the JDK, or javac dies before anything else runs");
         assertTrue(titles.indexOf("bump") < titles.indexOf("after-pins"),
@@ -150,6 +200,7 @@ class TheChainIsDeclaredOnceTest {
         // and everything nested under it inherits that; saying it again on each of before-pins,
         // bump and after-pins is three chances to disagree with the one place it is decided.
         assertEquals("per module", repeatsOf("modules"));
+        assertEquals("", repeatsOf("platform"));
         assertEquals("", repeatsOf("bump"));
         assertEquals("", repeatsOf("before-pins"));
         assertEquals("", repeatsOf("after-pins"));
@@ -263,7 +314,7 @@ class TheChainIsDeclaredOnceTest {
         // that restates a tool set instead of asking for one will show up as a name the catalogue
         // does not carry.
         List<String> catalogued = Agents.forHop(new Hop(17, 21), Path.of("/tmp")).stream()
-                .map(SubAgentDefinition::name)
+                .map(d -> stem(d.name()))
                 .toList();
 
         for (String name : NAMED) {

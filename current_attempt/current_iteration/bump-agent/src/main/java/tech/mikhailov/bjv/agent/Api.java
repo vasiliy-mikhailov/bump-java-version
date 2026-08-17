@@ -1349,8 +1349,15 @@ final class Api {
         // depend on it.
         List<String> order = Shape.agentNames(shape);
         List<SubAgentDefinition> defined = new ArrayList<>(Agents.forHop(h, results));
+        // ON THE STEM, BECAUSE THE TREE CANNOT NAME A PLATFORM. Fourteen of these agents exist once
+        // per platform and are named before-pins-planner@spring-boot and so on, while the shape is
+        // walked before any module has been looked at and can only ever say before-pins-planner.
+        // Sorting on the full name would send all forty-two of them to the end of the page, in the
+        // order the factory happens to build them, which is the failure the sort exists to prevent.
+        // The sort is stable, so one agent's three platforms stay in the order definitions() lists
+        // them.
         defined.sort(java.util.Comparator.comparingInt(d -> {
-            int at = order.indexOf(d.name());
+            int at = order.indexOf(Agents.stem(d.name()));
             // An agent the chain does not name goes last rather than first, so a new one shows up
             // as obviously unplaced instead of quietly heading the list.
             return at < 0 ? order.size() : at;
@@ -1359,23 +1366,28 @@ final class Api {
             // BOTH TEXTS TRAVEL. The page cannot offer a revert without something to revert TO, and
             // a reader comparing an edit to the built-in should not have to redeploy to see it.
             boolean edited = Prompts.edited(root, d.name(), h);
+            // WHERE IT SITS IS THE STEM'S, WHAT IT SAYS IS ITS OWN. The three platforms of one
+            // agent run in the same stage, in the same role, as often as each other; what differs
+            // is the text, and an edit is stored against the full name because the three are edited
+            // apart.
+            String stem = Agents.stem(d.name());
             return Json.object(
                     Json.field("name", Json.string(d.name())),
-                    Json.field("role", Json.string(roleOf.getOrDefault(d.name(), "doer"))),
-                    Json.field("stage", Json.string(stageOf.getOrDefault(d.name(), ""))),
+                    Json.field("role", Json.string(roleOf.getOrDefault(stem, "doer"))),
+                    Json.field("stage", Json.string(stageOf.getOrDefault(stem, ""))),
                     // The stage this one runs inside, empty at the top level.
-                    Json.field("within", Json.string(withinOf.getOrDefault(d.name(), ""))),
-                    Json.field("repeats", Json.string(repeatsOf.getOrDefault(d.name(), ""))),
-                    Json.field("reads", Json.string(readsOf.getOrDefault(d.name(), ""))),
+                    Json.field("within", Json.string(withinOf.getOrDefault(stem, ""))),
+                    Json.field("repeats", Json.string(repeatsOf.getOrDefault(stem, ""))),
+                    Json.field("reads", Json.string(readsOf.getOrDefault(stem, ""))),
                     // HOW MANY ROWS THAT LIST ACTUALLY HAS, counted from the file rather than
                     // written down beside it. A number typed into a page is a number that goes
                     // stale the first time somebody edits the list it describes.
                     Json.field("pins", String.valueOf(
-                            readsOf.getOrDefault(d.name(), "").isEmpty() ? 0
-                                    : Bom.of(h, readsOf.get(d.name())).size())),
+                            readsOf.getOrDefault(stem, "").isEmpty() ? 0
+                                    : Bom.of(h, readsOf.get(stem)).size())),
                     // The deterministic step that IS the loop, on the stage that owns one.
                     Json.field("loop", Json.string(
-                            loopOf.getOrDefault(stageOf.getOrDefault(d.name(), ""), ""))),
+                            loopOf.getOrDefault(stageOf.getOrDefault(stem, ""), ""))),
                     Json.field("description", Json.string(d.description())),
                     Json.field("builtIn", Json.string(d.systemPrompt())),
                     Json.field("edited", String.valueOf(edited)),

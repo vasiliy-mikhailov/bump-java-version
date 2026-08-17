@@ -69,12 +69,32 @@ class ThePrescribedHopIsNotNegotiableTest {
         assertFalse(above.contains("Java8toJava11"),
                 "and a hop that never reaches 11 is not told about it: a rule that cannot fire is "
                         + "an invitation to apply it anyway");
+
+        // THE RECIPE PROGRAM IS THE HOP'S AND NOT THE REGIME'S. The bump doer is defined once per
+        // platform and the recipes are chosen by the rungs the hop crosses, so a hop that lost a
+        // recipe on one of the three would be a rung nobody crosses on a third of this corpus.
+        for (String platform : Managed.PLATFORMS) {
+            assertTrue(bumperPrompt(new Hop(8, 17), platform).contains("Java8toJava11"),
+                    "the rungs a hop crosses reach every platform's copy: " + platform);
+            assertFalse(bumperPrompt(new Hop(17, 21), platform).contains("Java8toJava11"),
+                    "and so does the rule about which cannot fire: " + platform);
+        }
     }
 
-    /** What the agent that moves the target is actually handed, for one hop. */
+    /**
+     * What the agent that moves the target is actually handed, for one hop.
+     *
+     * <p>The recipe program is the hop's, so the platform copies are handed the same one; this
+     * reads the unmanaged copy, and {@link #aMultiStepHopStillGetsTheRecipesOfEveryRungItCrosses}
+     * holds all three against each other so that staying true of one of them is not enough.
+     */
     private static String bumperPrompt(Hop hop) {
+        return bumperPrompt(hop, "adhoc");
+    }
+
+    private static String bumperPrompt(Hop hop, String platform) {
         return Agents.forHop(hop, java.nio.file.Path.of("/tmp")).stream()
-                .filter(d -> d.name().equals("bump-doer"))
+                .filter(d -> d.name().equals(Agents.named("bump-doer", platform)))
                 .findFirst().orElseThrow()
                 .systemPrompt();
     }

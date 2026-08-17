@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * events in one sweep attributed to nobody; and calls that failed before any answer existed to
  * report. A listener under the model sees all three.
  *
- * <p>The part that needed care is identity. Two models serve all thirty-four agents, so the
+ * <p>The part that needed care is identity. Two models serve every agent in the chain, so the
  * listener cannot be told who is speaking, and the streaming path makes a thread-local a guess.
  * What travels with every request is the system message, and every agent's prompt is distinct.
  */

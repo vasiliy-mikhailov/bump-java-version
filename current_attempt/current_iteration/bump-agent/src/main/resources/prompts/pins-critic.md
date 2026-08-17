@@ -15,6 +15,8 @@
                 tree at once and report the first version it found anywhere, so one module could
                 stand in for six that were still below the floor. Read the rows.
 
+                {PLATFORM}
+
                 You hold the loop. Answer with one of three words.
 
                 `done` when nothing is outstanding, or when what remains is genuinely unreachable and

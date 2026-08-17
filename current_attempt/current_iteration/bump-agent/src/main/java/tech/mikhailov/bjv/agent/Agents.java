@@ -2,8 +2,13 @@ package tech.mikhailov.bjv.agent;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.deepagents.langchain4j.logging.ToolInvocationLogMode;
 import com.deepagents.langchain4j.subagents.SubAgentDefinition;
@@ -155,6 +160,124 @@ final class Agents {
         }
     }
 
+    /**
+     * THE ELEVEN DISTINCT TEXTS THE FOURTEEN MODULE-SCOPED AGENTS DRAW ON.
+     *
+     * <p>Eleven and not fourteen, by the rule stated just above: the two pin phases share
+     * pins.md, pins-planner.md and pins-critic.md and differ only by substitution, so a file each
+     * would be the same words twice. The platform fragments are keyed the same way, which is why
+     * there are thirty-three of them rather than forty-two.
+     */
+    private static final List<String> MODULE_PROMPTS = List.of(
+            "pins-planner", "pins", "pins-critic",
+            "bump-planner", "bumper", "bump-critic",
+            "troubleshoot-planner", "troubleshoot-loop-critic", "troubleshoot-loop",
+            "troubleshooter", "trouble-critic");
+
+    /**
+     * THE PLATFORM HALF OF EVERY MODULE-SCOPED PROMPT, HELD BY (platform, key).
+     *
+     * <p>Versions are managed in regimes whose knowledge is almost disjoint. On a Spring Boot
+     * module you raise Boot and Tomcat, Jackson and Lombok move with it, and pinning one of them
+     * directly overrides the managed set rather than following it; on a module nothing manages you
+     * raise each artifact and own the conflicts. A prompt written for one regime is actively wrong
+     * in the other.
+     *
+     * <p>COMPOSITION, NOT THIRTY-THREE STANDALONE PROMPTS. Four fifths of what a pin doer is told
+     * is the same whatever manages it, and copying the whole text three times is how a file called
+     * Chain came to say one thing while the program did another. That file was deleted rather than
+     * kept in step, and this is the same decision made in advance.
+     *
+     * <p>Read at class initialisation, so a fragment that is missing or empty fails before any bump
+     * starts rather than when a detector happens to answer quarkus on the ninth module of the
+     * fortieth repository. {@link Bom} fails on an unreadable row for the same reason.
+     */
+    private static final Map<String, String> FRAGMENTS = fragments();
+
+    private static Map<String, String> fragments() {
+        Map<String, String> out = new LinkedHashMap<>();
+        for (String platform : Managed.PLATFORMS) {
+            for (String key : MODULE_PROMPTS) {
+                out.put(platform + "/" + key, text("platform/" + platform + "/" + key));
+            }
+        }
+        return Map.copyOf(out);
+    }
+
+    /**
+     * WHERE THE PLATFORM HALF GOES: a line of its own, so the seam is visible in the file.
+     *
+     * <p>The indentation of that line is kept and the fragment is re-indented to it. Four of these
+     * eleven files were Java text blocks before the prompts moved to disk and still carry sixteen
+     * spaces of their own, while the rest sit at the margin, so a fixed indent would leave one
+     * group or the other looking like a paste.
+     */
+    private static final Pattern PLATFORM_SLOT =
+            Pattern.compile("(?m)^([ \\t]*)\\{PLATFORM}[ \\t]*$");
+
+    /**
+     * One module-scoped prompt, composed for one platform.
+     *
+     * <p>A body with no slot in it throws rather than quietly shipping the shared four fifths on
+     * their own. That failure would be invisible otherwise: the text reads perfectly well without
+     * the missing half, and an agent inside the module walk that is told nothing about the regime
+     * it is acting in is the exact thing this scheme exists to remove.
+     */
+    private static String withPlatform(String body, String key, String platform) {
+        String fragment = FRAGMENTS.get(platform + "/" + key);
+        if (fragment == null) {
+            throw new IllegalStateException(
+                    "no prompt fragment for " + key + " on platform " + platform);
+        }
+        Matcher slot = PLATFORM_SLOT.matcher(body);
+        StringBuilder out = new StringBuilder();
+        boolean placed = false;
+        while (slot.find()) {
+            placed = true;
+            slot.appendReplacement(out,
+                    Matcher.quoteReplacement(indented(fragment, slot.group(1))));
+        }
+        slot.appendTail(out);
+        if (!placed) {
+            throw new IllegalStateException("/prompts/" + key + ".md has no {PLATFORM} line, so "
+                    + "the platform half of it would never be said");
+        }
+        return out.toString();
+    }
+
+    /** A fragment at the slot's own margin, with whatever nesting it wrote of its own kept. */
+    private static String indented(String fragment, String pad) {
+        return fragment.stripIndent().strip().lines()
+                .map(line -> line.isBlank() ? "" : pad + line)
+                .collect(java.util.stream.Collectors.joining("\n"));
+    }
+
+    /**
+     * THE PLATFORM RIDES IN THE AGENT'S NAME, which is what keeps everything else keyed as it was.
+     *
+     * <p>{@link Prompts} stores an override per agent per hop, the settings page lists agents, and
+     * the trace attributes a tool call to one. A before-pins doer written for a Boot module IS a
+     * different agent from the one written for a module nothing manages: it is handed different
+     * text and it will be edited apart. Saying that in the name says it once, instead of adding a
+     * third key to the store, the page, the file layout and every lookup in between.
+     */
+    static String named(String agent, String platform) {
+        return agent + "@" + platform;
+    }
+
+    /**
+     * The bare agent behind a platform-keyed name, which is what the tree knows it as.
+     *
+     * <p>The shape is drawn before any module has been looked at, so no node can name a platform:
+     * the walk says before-pins-planner and the catalogue holds three of them. Anything that joins
+     * the two, the settings page's sort and the test that binds the catalogue to the tree, joins on
+     * this.
+     */
+    static String stem(String agent) {
+        int at = agent.indexOf('@');
+        return at < 0 ? agent : agent.substring(0, at);
+    }
+
     private static final String P_PINS = text("pins");
 
     private static final String P_PINS_PLANNER = text("pins-planner");
@@ -177,6 +300,17 @@ final class Agents {
     private static final String P_MODULE_PLANNER = text("module-planner");
 
     private static final String P_MODULE_VERIFIER = text("module-verifier");
+
+    /**
+     * THE DETECTOR'S OWN THREE, KEYED BY HOP AND NOT BY PLATFORM.
+     *
+     * <p>They run first inside the module walk, before anything knows which regime this module is
+     * in, which is the one place in that walk where a platform-keyed prompt would be a question
+     * answering itself.
+     */
+    private static final String P_PLATFORM_PLANNER = text("platform-planner");
+    private static final String P_PLATFORM_DOER = text("platform-doer");
+    private static final String P_PLATFORM_VERIFIER = text("platform-verifier");
 
     // ---- the planners of the stages that used to be pairs ----------------------------------
     //
@@ -248,13 +382,13 @@ final class Agents {
     // ---- pair 3: land the target ----
 
     /** Lands the effective bytecode target: the pins the recipe under-applied, in every dialect. */
-    Agent bumpDoer() {
-        return agent("bump-doer");
+    Agent bumpDoer(String platform) {
+        return agent(named("bump-doer", platform));
     }
 
     /** Checks the landing: the pin grep is re-run for it, so it judges the state, not the claim. */
-    Agent bumpVerifier() {
-        return agent("bump-verifier");
+    Agent bumpVerifier(String platform) {
+        return agent(named("bump-verifier", platform));
     }
 
     // ---- pair 4: the residue the wall table does not know ----
@@ -269,9 +403,8 @@ final class Agents {
      * to a loop counter, and it is why this one can see the landed steps and rewind past a line that
      * led nowhere.
      */
-    Agent moduleRepairStepPlanner(String floor) {
-        return runtime("module-repair-step-planner", steer("module-repair-step-planner", floor),
-                P_TROUBLESHOOT_LOOP);
+    Agent moduleRepairStepPlanner(String platform, String floor) {
+        return steered(named("module-repair-step-planner", platform), floor);
     }
 
     /**
@@ -281,18 +414,33 @@ final class Agents {
      * steps adding up to nothing, or a declaration of defeat that had a route left. This one reads
      * the whole thing and is the only agent that may send the loop back to where it started.
      */
-    Agent moduleRepairVerifier(String floor) {
-        return runtime("module-repair-verifier", steer("module-repair-verifier", floor),
-                P_TROUBLESHOOT_LOOP_CRITIC);
+    Agent moduleRepairVerifier(String platform, String floor) {
+        return steered(named("module-repair-verifier", platform), floor);
     }
 
-    Agent moduleRepairStepDoer() {
-        return agent("module-repair-step-doer");
+    /**
+     * The two agents that hold the campaign's floor, taken from the catalogue rather than rebuilt
+     * beside it.
+     *
+     * <p>They cannot come through {@link #agent} unchanged, because rewind_to has to be bounded by
+     * the commit the campaign started from and that is not known until a campaign starts. What they
+     * take from the catalogue is the PROMPT, which is the half that used to drift: the definition
+     * and the factory each restated it, and these two already disagreed about the floor itself, the
+     * catalogue describing a rewind bounded by nothing while the running agent was bounded by the
+     * campaign.
+     */
+    private Agent steered(String name, String floor) {
+        SubAgentDefinition d = definition(name);
+        return runtime(d.name(), steer(d.name(), floor), d.systemPrompt());
+    }
+
+    Agent moduleRepairStepDoer(String platform) {
+        return agent(named("module-repair-step-doer", platform));
     }
 
     /** Judges the troubleshooting edit: migration fix, or gaming the gate? */
-    Agent moduleRepairStepVerifier() {
-        return agent("module-repair-step-verifier");
+    Agent moduleRepairStepVerifier(String platform) {
+        return agent(named("module-repair-step-verifier", platform));
     }
 
     // ---- pair 6: what the bump actually did to the vulnerabilities ----
@@ -400,7 +548,7 @@ final class Agents {
      * code, and wrong on six of 102 workspaces until it was fixed. The recipes are named here and
      * the agent runs them, checks what moved, and runs more if the target is still not met.
      */
-    private String bumpPrompt() {
+    private String bumpPrompt(String platform) {
         StringBuilder recipes = new StringBuilder();
         recipes.append("                - org.openrewrite.java.migrate.UpgradePluginsForJava")
                 .append(hop.to()).append('\n')
@@ -414,7 +562,8 @@ final class Agents {
         }
         recipes.append("                - org.openrewrite.gradle.UpdateJavaCompatibility with "
                 + "version ").append(hop.to()).append(" — the Gradle half, a no-op on Maven\n");
-        return P_BUMPER.replace("{RECIPES}", recipes.toString())
+        return withPlatform(P_BUMPER, "bumper", platform)
+                .replace("{RECIPES}", recipes.toString())
                 .replace("{FROM}", String.valueOf(hop.from()))
                 .replace("{TARGET}", String.valueOf(hop.to()));
     }
@@ -432,20 +581,49 @@ final class Agents {
                         + "because the new JDK will not compile without them.");
     }
 
-    Agent beforePinsDoer() {
-        return runtime("before-pins-doer", Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()), trace, "before-pins-doer"), pinPrompt(P_PINS, false));
+    /**
+     * THE MODULE-SCOPED AGENTS, EACH ASKED FOR BY THE PLATFORM ITS MODULE IS IN.
+     *
+     * <p>Four of these used to restate a prompt and a tool set instead of asking the catalogue for
+     * one, which is the thing {@code TheChainIsDeclaredOnceTest} exists to stop: the settings page
+     * reads the catalogue, so a factory that builds something else describes an agent nobody runs.
+     * They resolve through {@link #agent} now, and the two that genuinely cannot go through
+     * {@link #steered} instead.
+     */
+    Agent beforePinsDoer(String platform) {
+        return agent(named("before-pins-doer", platform));
     }
 
-    Agent beforePinsVerifier() {
-        return agent("before-pins-verifier");
+    Agent beforePinsVerifier(String platform) {
+        return agent(named("before-pins-verifier", platform));
     }
 
-    Agent afterPinsDoer() {
-        return runtime("after-pins-doer", Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()), trace, "after-pins-doer"), pinPrompt(P_PINS, true));
+    Agent afterPinsDoer(String platform) {
+        return agent(named("after-pins-doer", platform));
     }
 
-    Agent afterPinsVerifier() {
-        return agent("after-pins-verifier");
+    Agent afterPinsVerifier(String platform) {
+        return agent(named("after-pins-verifier", platform));
+    }
+
+    /**
+     * WHICH REGIME MANAGES THIS MODULE, asked first and answered by a pair like everything else.
+     *
+     * <p>Hop-keyed rather than platform-keyed, because these three run before the platform is
+     * known. Their facts are {@link Managed#report} and {@link Declared#report}, which state what
+     * the build files say without judging any of it; the judging is the doer's, and the closed set
+     * of three words it may answer is what the rest of the walk is keyed by.
+     */
+    Agent platformPlanner() {
+        return agent("platform-planner");
+    }
+
+    Agent platformDoer() {
+        return agent("platform-doer");
+    }
+
+    Agent platformVerifier() {
+        return agent("platform-verifier");
     }
 
     /**
@@ -456,18 +634,16 @@ final class Agents {
      * was wrong, only that the attempt was, so an objection to the plan came back as another attempt
      * at the same plan until the budget ran out.
      */
-    Agent beforePinsPlanner() {
-        return agent("before-pins-planner");
+    Agent beforePinsPlanner(String platform) {
+        return agent(named("before-pins-planner", platform));
     }
 
-    Agent afterPinsPlanner() {
-        return agent("after-pins-planner");
+    Agent afterPinsPlanner(String platform) {
+        return agent(named("after-pins-planner", platform));
     }
 
-    Agent bumpPlanner() {
-        return runtime("bump-planner",
-                Tools.checking(ws, tree, String.valueOf(hop.to()), trace, "bump-planner"),
-                floors(P_BUMP_PLANNER));
+    Agent bumpPlanner(String platform) {
+        return agent(named("bump-planner", platform));
     }
 
     /** Which modules this bump should leave alone, and a reviewer of that answer. */
@@ -509,9 +685,8 @@ final class Agents {
                 floors(P_MODULE_FILTER_PLANNER));
     }
 
-    Agent moduleRepairPlanner() {
-        return runtime("module-repair-planner", steer("module-repair-planner", ""),
-                floors(P_TROUBLESHOOT_PLANNER));
+    Agent moduleRepairPlanner(String platform) {
+        return agent(named("module-repair-planner", platform));
     }
 
     Agent verdictPlanner() {
@@ -532,80 +707,144 @@ final class Agents {
         return migrate != null ? migrate : new Migrate(ws, "", trace);
     }
 
+    /**
+     * SIXTY-FIVE, BECAUSE FOURTEEN OF THEM EXIST ONCE PER PLATFORM.
+     *
+     * <p>Twenty agents run above the module walk and are keyed by hop alone: what a surveyor or an
+     * estimator is told does not depend on what manages any one module's versions. Three more are
+     * the detector, also hop-keyed, because they run before the platform is known. The remaining
+     * fourteen run inside the walk and are defined once per platform under the name
+     * {@code <name>@<platform>}, which is 20 + 3 + 14 * 3.
+     *
+     * <p>THE ORDER IS STILL THE ORDER THE CHAIN REACHES THEM, with each module-scoped agent's three
+     * platforms sitting together where the bare one used to sit. The settings page sorts by the
+     * tree's walk and the tree can only ever name the bare fourteen, so the platforms of one agent
+     * have to arrive as a run or the page interleaves them with the next stage's.
+     */
     List<SubAgentDefinition> definitions() {
-        return List.of(
-                define("survey-planner", "says what would settle which JDK this project is on",
-                        floors(P_SURVEY_PLANNER), read("survey-planner")),
-                define("survey-doer", "reads what JDK the project is actually on", P_SURVEYOR,
-                        read("survey-doer")),
-                define("survey-verifier", "checks the survey against the build files", P_SURVEY_CRITIC,
-                        read("survey-verifier")),
-                define("security-before-planner", "says which CVE families this hop could move",
-                        floors(P_SECURITY_PLANNER), read("security-before-planner")),
-                define("security-before-doer", "reads the pre-bump vulnerability scan",
-                        P_SECURITY_BEFORE, read("security-before-doer")),
-                define("security-before-verifier", "checks that reading", P_SECURITY_BEFORE_CRITIC,
-                        read("security-before-verifier")),
-                define("module-filter-planner", "says where to look for a vendored or generated module",
-                        floors(P_MODULE_FILTER_PLANNER), read("module-filter-planner")),
-                define("module-filter-doer", "says which modules this bump should leave alone",
-                        floors(P_MODULE_FILTER), read("module-filter-doer")),
-                define("module-filter-verifier", "checks every skip is evidenced",
-                        floors(P_MODULE_FILTER_CRITIC), read("module-filter-verifier")),
-                define("modules-planner", "says what one module needs, and nothing about its siblings",
-                        floors(P_MODULE_PLANNER), Tools.judging(ws, tree, trace, "modules-planner")),
-                define("before-pins-planner", "decides which pins to raise, in which module",
-                        pinPrompt(P_PINS_PLANNER, false), Tools.judging(ws, tree, trace, "before-pins-planner")),
-                define("before-pins-doer", "raises the versions the new JDK needs, before it moves",
-                        pinPrompt(P_PINS, false),
-                        Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()), trace, "before-pins-doer")),
-                define("before-pins-verifier", "checks every pre-JDK pin landed, module by module",
-                        pinPrompt(P_PINS_CRITIC, false), Tools.judging(ws, tree, trace, "before-pins-verifier")),
+        List<SubAgentDefinition> out = new ArrayList<>();
+        out.add(define("survey-planner", "says what would settle which JDK this project is on",
+                floors(P_SURVEY_PLANNER), read("survey-planner")));
+        out.add(define("survey-doer", "reads what JDK the project is actually on", P_SURVEYOR,
+                read("survey-doer")));
+        out.add(define("survey-verifier", "checks the survey against the build files",
+                P_SURVEY_CRITIC, read("survey-verifier")));
+        out.add(define("security-before-planner", "says which CVE families this hop could move",
+                floors(P_SECURITY_PLANNER), read("security-before-planner")));
+        out.add(define("security-before-doer", "reads the pre-bump vulnerability scan",
+                P_SECURITY_BEFORE, read("security-before-doer")));
+        out.add(define("security-before-verifier", "checks that reading", P_SECURITY_BEFORE_CRITIC,
+                read("security-before-verifier")));
+        out.add(define("module-filter-planner",
+                "says where to look for a vendored or generated module",
+                floors(P_MODULE_FILTER_PLANNER), read("module-filter-planner")));
+        out.add(define("module-filter-doer", "says which modules this bump should leave alone",
+                floors(P_MODULE_FILTER), read("module-filter-doer")));
+        out.add(define("module-filter-verifier", "checks every skip is evidenced",
+                floors(P_MODULE_FILTER_CRITIC), read("module-filter-verifier")));
+        out.add(define("modules-planner",
+                "says what one module needs, and nothing about its siblings",
+                floors(P_MODULE_PLANNER), Tools.judging(ws, tree, trace, "modules-planner")));
 
-                define("bump-planner", "groups the remaining target declarations by module",
-                        floors(P_BUMP_PLANNER),
-                        Tools.checking(ws, tree, targetJdk, trace, "bump-planner")),
-                define("bump-doer", "moves the project to the target JDK", bumpPrompt(),
-                        Tools.raising(ws, runner, recipes(), tree, targetJdk, String.valueOf(hop.to()), trace, "bump-doer")),
-                define("bump-verifier", "checks every module reached the target", P_BUMP_CRITIC,
-                        Tools.checking(ws, tree, targetJdk, trace, "bump-verifier")),
-                define("module-repair-planner", "says what the campaign is for, and when it is over",
-                        floors(P_TROUBLESHOOT_PLANNER), steer("module-repair-planner", "")),
-                define("module-repair-verifier", "judges the campaign, not the step",
-                        P_TROUBLESHOOT_LOOP_CRITIC, steer("module-repair-verifier", "")),
-                define("module-repair-step-planner", "decides the next step, and when to stop",
-                        P_TROUBLESHOOT_LOOP, steer("module-repair-step-planner", "")),
-                define("module-repair-step-doer", "clears one wall the deterministic table did not know",
-                        P_TROUBLESHOOTER, patch("module-repair-step-doer")),
-                define("module-repair-step-verifier", "migration fix, or gaming the gate", P_TROUBLE_CRITIC,
-                        read("module-repair-step-verifier")),
-                define("after-pins-planner", "decides which post-JDK pins to raise, in which module",
-                        pinPrompt(P_PINS_PLANNER, true), Tools.judging(ws, tree, trace, "after-pins-planner")),
-                define("after-pins-doer", "raises the versions that only run on the new JDK",
-                        pinPrompt(P_PINS, true),
-                        Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()), trace, "after-pins-doer")),
-                define("after-pins-verifier", "checks every post-JDK pin landed, module by module",
-                        pinPrompt(P_PINS_CRITIC, true), Tools.judging(ws, tree, trace, "after-pins-verifier")),
-                define("modules-verifier", "closes one module, or sends it back",
-                        floors(P_MODULE_VERIFIER), Tools.judging(ws, tree, trace, "modules-verifier")),
-                define("security-after-planner", "says which findings the bump could have moved",
-                        floors(P_SECURITY_PLANNER), read("security-after-planner")),
-                define("security-after-doer", "reads what the bump did to the vulnerability count",
-                        P_SECURITY_AFTER, read("security-after-doer")),
-                define("security-after-verifier", "checks that judgement", P_SECURITY_AFTER_CRITIC,
-                        read("security-after-verifier")),
-                define("verdict-planner", "names the one question execution could not settle",
-                        floors(P_VERDICT_PLANNER), read("verdict-planner")),
-                define("verdict-doer", "argues an unsettled bump into the corpus vocabulary", P_VERDICT,
-                        read("verdict-doer")),
-                define("verdict-verifier", "checks that word against what actually happened",
-                        P_VERDICT_CRITIC, read("verdict-verifier")),
-                define("estimator-planner", "lists the distinct pieces of work that landed",
-                        floors(P_ESTIMATOR_PLANNER), read("estimator-planner")),
-                define("estimator-doer", "prices the work a developer would have done", P_ESTIMATOR,
-                        read("estimator-doer")),
-                define("estimator-verifier", "checks the price against the work in the log",
-                        P_ESTIMATOR_CRITIC, read("estimator-verifier")));
+        // FIRST INSIDE THE WALK, AND THE ONLY STAGE IN IT THAT IS NOT PLATFORM-KEYED. Everything
+        // after this one is chosen by the word this one settles on.
+        out.add(define("platform-planner", "says what would settle which regime manages a module",
+                floors(P_PLATFORM_PLANNER), Tools.judging(ws, tree, trace, "platform-planner")));
+        out.add(define("platform-doer", "names what manages this module's dependency versions",
+                floors(P_PLATFORM_DOER), Tools.judging(ws, tree, trace, "platform-doer")));
+        out.add(define("platform-verifier", "checks that word against what the build files say",
+                floors(P_PLATFORM_VERIFIER), Tools.judging(ws, tree, trace, "platform-verifier")));
+
+        perPlatform(out, "before-pins-planner", "decides which pins to raise, in which module",
+                p -> pinPrompt(withPlatform(P_PINS_PLANNER, "pins-planner", p), false),
+                n -> Tools.judging(ws, tree, trace, n));
+        perPlatform(out, "before-pins-doer",
+                "raises the versions the new JDK needs, before it moves",
+                p -> pinPrompt(withPlatform(P_PINS, "pins", p), false),
+                n -> Tools.pinning(ws, recipes(), tree, String.valueOf(hop.from()), trace, n));
+        perPlatform(out, "before-pins-verifier",
+                "checks every pre-JDK pin landed, module by module",
+                p -> pinPrompt(withPlatform(P_PINS_CRITIC, "pins-critic", p), false),
+                n -> Tools.judging(ws, tree, trace, n));
+        perPlatform(out, "bump-planner", "groups the remaining target declarations by module",
+                p -> floors(withPlatform(P_BUMP_PLANNER, "bump-planner", p)),
+                n -> Tools.checking(ws, tree, targetJdk, trace, n));
+        perPlatform(out, "bump-doer", "moves the project to the target JDK",
+                this::bumpPrompt,
+                n -> Tools.raising(ws, runner, recipes(), tree, targetJdk,
+                        String.valueOf(hop.to()), trace, n));
+        perPlatform(out, "bump-verifier", "checks every module reached the target",
+                p -> floors(withPlatform(P_BUMP_CRITIC, "bump-critic", p)),
+                n -> Tools.checking(ws, tree, targetJdk, trace, n));
+        perPlatform(out, "module-repair-planner",
+                "says what the campaign is for, and when it is over",
+                p -> floors(withPlatform(P_TROUBLESHOOT_PLANNER, "troubleshoot-planner", p)),
+                n -> steer(n, ""));
+        perPlatform(out, "module-repair-verifier", "judges the campaign, not the step",
+                p -> floors(withPlatform(P_TROUBLESHOOT_LOOP_CRITIC, "troubleshoot-loop-critic", p)),
+                n -> steer(n, ""));
+        perPlatform(out, "module-repair-step-planner", "decides the next step, and when to stop",
+                p -> floors(withPlatform(P_TROUBLESHOOT_LOOP, "troubleshoot-loop", p)),
+                n -> steer(n, ""));
+        perPlatform(out, "module-repair-step-doer",
+                "clears one wall the deterministic table did not know",
+                p -> floors(withPlatform(P_TROUBLESHOOTER, "troubleshooter", p)),
+                this::patch);
+        perPlatform(out, "module-repair-step-verifier", "migration fix, or gaming the gate",
+                p -> floors(withPlatform(P_TROUBLE_CRITIC, "trouble-critic", p)),
+                this::read);
+        perPlatform(out, "after-pins-planner",
+                "decides which post-JDK pins to raise, in which module",
+                p -> pinPrompt(withPlatform(P_PINS_PLANNER, "pins-planner", p), true),
+                n -> Tools.judging(ws, tree, trace, n));
+        perPlatform(out, "after-pins-doer", "raises the versions that only run on the new JDK",
+                p -> pinPrompt(withPlatform(P_PINS, "pins", p), true),
+                n -> Tools.pinning(ws, recipes(), tree, String.valueOf(hop.to()), trace, n));
+        perPlatform(out, "after-pins-verifier",
+                "checks every post-JDK pin landed, module by module",
+                p -> pinPrompt(withPlatform(P_PINS_CRITIC, "pins-critic", p), true),
+                n -> Tools.judging(ws, tree, trace, n));
+
+        out.add(define("modules-verifier", "closes one module, or sends it back",
+                floors(P_MODULE_VERIFIER), Tools.judging(ws, tree, trace, "modules-verifier")));
+        out.add(define("security-after-planner", "says which findings the bump could have moved",
+                floors(P_SECURITY_PLANNER), read("security-after-planner")));
+        out.add(define("security-after-doer",
+                "reads what the bump did to the vulnerability count",
+                P_SECURITY_AFTER, read("security-after-doer")));
+        out.add(define("security-after-verifier", "checks that judgement", P_SECURITY_AFTER_CRITIC,
+                read("security-after-verifier")));
+        out.add(define("verdict-planner", "names the one question execution could not settle",
+                floors(P_VERDICT_PLANNER), read("verdict-planner")));
+        out.add(define("verdict-doer", "argues an unsettled bump into the corpus vocabulary",
+                P_VERDICT, read("verdict-doer")));
+        out.add(define("verdict-verifier", "checks that word against what actually happened",
+                P_VERDICT_CRITIC, read("verdict-verifier")));
+        out.add(define("estimator-planner", "lists the distinct pieces of work that landed",
+                floors(P_ESTIMATOR_PLANNER), read("estimator-planner")));
+        out.add(define("estimator-doer", "prices the work a developer would have done", P_ESTIMATOR,
+                read("estimator-doer")));
+        out.add(define("estimator-verifier", "checks the price against the work in the log",
+                P_ESTIMATOR_CRITIC, read("estimator-verifier")));
+        return List.copyOf(out);
+    }
+
+    /**
+     * One module-scoped agent, defined once for each platform.
+     *
+     * <p>The tool set is built from the KEYED NAME rather than from a literal, which removes a
+     * hazard the flat list carried and would have tripled. Every {@code Tools.*} factory takes the
+     * agent's name as its last argument, for trace attribution, and those literals were typed by
+     * hand at each definition and again at each accessor that restated one. A trace attributing a
+     * call to an agent nobody defined is a record that cannot be followed back.
+     */
+    private void perPlatform(List<SubAgentDefinition> out, String name, String description,
+                             Function<String, String> prompt,
+                             Function<String, Map<ToolSpecification, ToolExecutor>> tools) {
+        for (String platform : Managed.PLATFORMS) {
+            String keyed = named(name, platform);
+            out.add(define(keyed, description, prompt.apply(platform), tools.apply(keyed)));
+        }
     }
 
     /**
@@ -621,9 +860,10 @@ final class Agents {
     /** One definition. The framework's record, so nothing here reinvents its shape. */
     private SubAgentDefinition define(String name, String description, String prompt,
                                       Map<ToolSpecification, ToolExecutor> tools) {
-        // WHO IS SPEAKING, ANSWERABLE LATER. Two models serve all thirty-four agents, so a listener
+        // WHO IS SPEAKING, ANSWERABLE LATER. Two models serve all sixty-five agents, so a listener
         // under them cannot be told the name; the system prompt is what travels with the request,
-        // and every agent's is distinct.
+        // and every agent's is distinct, the platform-keyed ones included: the fragment that
+        // differs is what makes each of a stem's three a different text.
         Listening.register(name, prompt);
         return new SubAgentDefinition(name, description, prompt, false, tools);
     }

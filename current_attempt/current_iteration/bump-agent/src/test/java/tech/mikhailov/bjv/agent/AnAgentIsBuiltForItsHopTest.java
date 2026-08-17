@@ -6,6 +6,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,8 +26,12 @@ class AnAgentIsBuiltForItsHopTest {
 
     @Test
     void thePinPairCarriesOnlyTheFloorsItsHopCanReach(@TempDir Path ws) {
-        String low = pinsFor(new Hop(8, 11), ws);
-        String high = pinsFor(new Hop(21, 25), ws);
+        // ON EVERY PLATFORM, because the floors belong to the hop and not to the regime. The pin
+        // doer exists once per platform now, and a floor that reached only one of the three would
+        // be a rule most of this corpus never hears: nothing manages 43 per cent of its modules.
+        for (String platform : Managed.PLATFORMS) {
+        String low = pinsFor(new Hop(8, 11), ws, platform);
+        String high = pinsFor(new Hop(21, 25), ws, platform);
 
         assertNotEquals(low, high, "the same agent, told different things");
 
@@ -44,14 +49,19 @@ class AnAgentIsBuiltForItsHopTest {
         // 21 to 25 gets the ones 8 to 11 was spared.
         assertTrue(high.contains("1.18.46"), "the JDK 25 lombok");
         assertTrue(high.contains("2.3.20"), "and the kotlin pin");
-
+        }
     }
 
     @Test
     void everyHopBuildsTheWholeChainAndTheOrderIsTheChains() {
         for (Hop hop : List.of(new Hop(8, 11), new Hop(11, 17), new Hop(17, 21), new Hop(21, 25))) {
             List<SubAgentDefinition> all = Agents.forHop(hop, Path.of("/tmp"));
-            assertEquals(Shape.agentNames(Bump.stages()).size(), all.size(),
+            // THE WHOLE CHAIN, AND INSIDE THE MODULE WALK ONE OF EACH PER PLATFORM. The catalogue
+            // is bigger than the tree by construction: the shape is drawn before any module has
+            // been looked at, so it can only ever name before-pins-doer, and the catalogue holds
+            // three of it. What must hold either way is the stems.
+            assertEquals(new TreeSet<>(Shape.agentNames(Bump.stages())),
+                    new TreeSet<>(all.stream().map(d -> Agents.stem(d.name())).toList()),
                     "every hop gets the whole chain, and the chain is the tree: " + hop);
             assertEquals("survey-planner", all.get(0).name(), "which starts where the chain starts");
             assertEquals("estimator-verifier", all.get(all.size() - 1).name(),
@@ -99,12 +109,14 @@ class AnAgentIsBuiltForItsHopTest {
         assertFalse(new Hop(8, 11).crossesJakarta());
     }
 
-    /** What the pre-JDK pin pair is told, which is where the hop's versions now live. */
-    private static String pinsFor(Hop hop, Path ws) {
-        return Agents.forHop(hop, ws).stream()
-                .filter(d -> d.name().equals("before-pins-doer"))
-                .findFirst().orElseThrow()
-                .systemPrompt();
+    /**
+     * What the pre-JDK pin pair is told on one platform, which is where the hop's versions live.
+     *
+     * <p>Keyed by platform as well as by hop: the pin doer runs inside the module walk and is
+     * defined once for each regime, so the bare name finds nothing at all.
+     */
+    private static String pinsFor(Hop hop, Path ws, String platform) {
+        return prompt(Agents.forHop(hop, ws), Agents.named("before-pins-doer", platform));
     }
 
     @Test
@@ -129,18 +141,24 @@ class AnAgentIsBuiltForItsHopTest {
     @Test
     void eachPinPairIsToldOnlyItsOwnPhase(@TempDir Path ws) {
         var defs = Agents.forHop(new Hop(21, 25), ws);
-        String beforePins = prompt(defs, "before-pins-doer");
-        String afterPins = prompt(defs, "after-pins-doer");
+        // THE SPLIT IS THE HOP'S, NOT THE REGIME'S, so it has to hold on all three. Which pins can
+        // be applied before the JDK moves and which cannot is a fact about the JDK, and a phase
+        // that leaked the other half on one platform would be a pin applied where it cannot resolve.
+        for (String platform : Managed.PLATFORMS) {
+            String beforePins = prompt(defs, Agents.named("before-pins-doer", platform));
+            String afterPins = prompt(defs, Agents.named("after-pins-doer", platform));
 
-        assertTrue(beforePins.contains("1.18.46"), "the pre-JDK pair gets lombok");
-        assertFalse(beforePins.contains("3.5.16"), "and is not shown a pin it cannot apply yet");
-        assertTrue(beforePins.contains("has NOT been raised"), "it knows where it stands");
+            assertTrue(beforePins.contains("1.18.46"), "the pre-JDK pair gets lombok");
+            assertFalse(beforePins.contains("3.5.16"),
+                    "and is not shown a pin it cannot apply yet");
+            assertTrue(beforePins.contains("has NOT been raised"), "it knows where it stands");
 
-        // 3.5, not 4.1: UpgradeSpringBoot_3_5 chains the whole migration and is free, while the
-        // only recipe that reaches 4.1 is under the Moderne Proprietary License.
-        assertTrue(afterPins.contains("3.5.16"), "the post-JDK pair gets spring-boot");
-        assertFalse(afterPins.contains("1.18.46"), "and is not asked to redo the first phase");
-        assertTrue(afterPins.contains("has already been raised"), "it knows where it stands");
+            // 3.5, not 4.1: UpgradeSpringBoot_3_5 chains the whole migration and is free, while
+            // the only recipe that reaches 4.1 is under the Moderne Proprietary License.
+            assertTrue(afterPins.contains("3.5.16"), "the post-JDK pair gets spring-boot");
+            assertFalse(afterPins.contains("1.18.46"), "and is not asked to redo the first phase");
+            assertTrue(afterPins.contains("has already been raised"), "it knows where it stands");
+        }
     }
 
     private static String prompt(List<SubAgentDefinition> defs, String name) {
@@ -164,10 +182,14 @@ class AnAgentIsBuiltForItsHopTest {
                 .toList();
         List<String> chain = Shape.agentNames(Bump.stages());
 
-        assertEquals(chain.size(), factory.size(), "the same agents, either way round");
-        assertTrue(factory.containsAll(chain), "and the same names");
+        // ON THE STEMS, because fourteen of the factory's entries exist three times over and the
+        // tree names each of them once. That is also what the page sorts on, for the same reason.
+        List<String> stems = factory.stream().map(Agents::stem).distinct().toList();
 
-        assertNotEquals(chain, factory,
+        assertEquals(chain.size(), stems.size(), "the same agents, either way round");
+        assertTrue(stems.containsAll(chain), "and the same names");
+
+        assertNotEquals(chain, stems,
                 "the two orders differ; if they ever stop differing the sort in Api.settings is "
                         + "still correct and this test is the record of why it exists");
 

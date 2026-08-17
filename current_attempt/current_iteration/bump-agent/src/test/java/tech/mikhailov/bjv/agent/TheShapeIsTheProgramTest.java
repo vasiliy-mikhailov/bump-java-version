@@ -216,6 +216,7 @@ class TheShapeIsTheProgramTest {
         assertEquals("""
                 modules
                     module
+                        platform
                         before-pins
                         bump
                         module-gate
@@ -240,6 +241,7 @@ class TheShapeIsTheProgramTest {
                 module-filter
                 modules
                     module
+                        platform
                         before-pins
                         bump
                         module-gate

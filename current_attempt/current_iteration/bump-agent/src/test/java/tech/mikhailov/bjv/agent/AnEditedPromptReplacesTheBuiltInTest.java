@@ -84,6 +84,27 @@ class AnEditedPromptReplacesTheBuiltInTest {
     }
 
     @Test
+    void aPlatformKeyedAgentIsStoredAsItsOwnPrompt(@TempDir Path root) throws IOException {
+        // FOURTEEN OF THESE AGENTS EXIST ONCE PER PLATFORM and carry it in the name, because a pin
+        // doer written for a module Spring Boot manages is a different agent from the one written
+        // for a module nothing manages: they are handed different text and they are edited apart.
+        // The store had to admit the name, and nothing else about it changed.
+        Prompts.save(root, "before-pins-doer@spring-boot", TO_21, "for boot");
+
+        assertEquals("for boot", Prompts.override(root, "before-pins-doer@spring-boot", TO_21));
+        assertEquals("", Prompts.override(root, "before-pins-doer@adhoc", TO_21),
+                "and an edit to one regime is not an edit to another");
+        assertEquals("", Prompts.override(root, "before-pins-doer", TO_21),
+                "nor to a bare name no bump ever asks for");
+
+        // The tail admits what the name admits and no separator, so it still cannot leave the
+        // store: these are the same hostile shapes the test below rejects, wearing an @.
+        for (String hostile : new String[] {"a@../escape", "a@b/c", "a@", "@b", "a@B", "a@b@c"}) {
+            assertEquals("", Prompts.override(root, hostile, TO_21), hostile);
+        }
+    }
+
+    @Test
     void theEditedListIsWhatTheHeaderCounts(@TempDir Path root) throws IOException {
         Prompts.save(root, "survey-planner", TO_21, "a");
         Prompts.save(root, "bump-doer", TO_21, "b");

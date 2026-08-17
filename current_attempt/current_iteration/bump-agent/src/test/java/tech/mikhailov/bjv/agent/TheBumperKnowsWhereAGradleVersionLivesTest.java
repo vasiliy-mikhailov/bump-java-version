@@ -34,8 +34,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class TheBumperKnowsWhereAGradleVersionLivesTest {
 
-    private static String bumper(@TempDir Path ws) {
-        return prompt(Agents.forHop(new Hop(17, 21), ws), "bump-doer");
+    /**
+     * What the bump doer is told, on one platform.
+     *
+     * <p>The doer runs inside the module walk and is defined once for each regime, so the bare
+     * name finds nothing. Every claim in this file is about where a Gradle version lives rather
+     * than about what manages it, so each of them is asserted on all three.
+     */
+    private static String bumper(Path ws, String platform) {
+        return prompt(Agents.forHop(new Hop(17, 21), ws), Agents.named("bump-doer", platform));
     }
 
     private static String prompt(List<SubAgentDefinition> defs, String name) {
@@ -49,8 +56,10 @@ class TheBumperKnowsWhereAGradleVersionLivesTest {
         // "no POM in this directory" and infer the project type from it: three inference steps
         // standing in for a question. build_system answers the question, so the instruction is to
         // ask. What the answer is FOR has changed since; that it is asked first has not.
-        assertTrue(bumper(ws).contains("CALL build_system FIRST"),
-                "the bump doer is told to establish the fact before acting");
+        for (String platform : Managed.PLATFORMS) {
+            assertTrue(bumper(ws, platform).contains("CALL build_system FIRST"),
+                    "the bump doer is told to establish the fact before acting, on " + platform);
+        }
     }
 
     @Test
@@ -58,9 +67,11 @@ class TheBumperKnowsWhereAGradleVersionLivesTest {
         // The replacement for the deleted paragraph, asserted so the escape cannot come back in
         // the same position wearing different words. build_system used to be asked in order to
         // find out whether the phase could act at all; it is asked now to find out where.
-        String p = bumper(ws);
-        assertTrue(p.contains("where a version lives, not whether a recipe can reach it"),
-                "the question build_system answers is placement: " + p);
+        for (String platform : Managed.PLATFORMS) {
+            String p = bumper(ws, platform);
+            assertTrue(p.contains("where a version lives, not whether a recipe can reach it"),
+                    "the question build_system answers is placement: " + p);
+        }
     }
 
     @Test
@@ -75,13 +86,15 @@ class TheBumperKnowsWhereAGradleVersionLivesTest {
 
     @Test
     void itSaysWhereAGradleVersionActuallyLives(@TempDir Path ws) {
-        String p = bumper(ws);
-        // Five dialects, because "edit the build file" is not an instruction on a project that
-        // could be keeping the version in any of them.
-        assertTrue(p.contains("spring-boot-gradle-plugin"), "the buildscript classpath form");
-        assertTrue(p.contains("libs.versions.toml"), "the version catalog");
-        assertTrue(p.contains("extra[") || p.contains("ext["), "the property form");
-        assertTrue(p.contains("gradle-wrapper.properties"), "and the wrapper, which has a floor");
+        for (String platform : Managed.PLATFORMS) {
+            String p = bumper(ws, platform);
+            // Five dialects, because "edit the build file" is not an instruction on a project that
+            // could be keeping the version in any of them.
+            assertTrue(p.contains("spring-boot-gradle-plugin"), "the buildscript classpath form");
+            assertTrue(p.contains("libs.versions.toml"), "the version catalog");
+            assertTrue(p.contains("extra[") || p.contains("ext["), "the property form");
+            assertTrue(p.contains("gradle-wrapper.properties"), "and the wrapper, with its floor");
+        }
     }
 
     @Test
@@ -90,8 +103,11 @@ class TheBumperKnowsWhereAGradleVersionLivesTest {
         // phase told to edit a file is a prompt that lies about its own tool set. This is the one
         // assertion in the original file that was about a capability rather than a wording, and it
         // is the only one that stayed true across the change that invalidated the rest.
-        String pins = prompt(Agents.forHop(new Hop(17, 21), ws), "after-pins-doer");
-        assertFalse(pins.contains("edit_file"),
-                "after-pins is not promised a tool it does not hold: " + pins);
+        for (String platform : Managed.PLATFORMS) {
+            String pins = prompt(Agents.forHop(new Hop(17, 21), ws),
+                    Agents.named("after-pins-doer", platform));
+            assertFalse(pins.contains("edit_file"),
+                    "after-pins is not promised a tool it does not hold: " + pins);
+        }
     }
 }

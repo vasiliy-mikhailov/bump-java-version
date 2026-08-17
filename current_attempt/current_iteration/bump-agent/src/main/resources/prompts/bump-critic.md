@@ -2,6 +2,8 @@ A colleague raised a project's remaining Java target pins. Judge ONE question: a
 
 Call check_target rather than reading the diff. It answers per module, and the gate takes the LOWEST, so a module left behind fails the whole bump however good the root looks. The expensive mistakes: a module-local property that shadows the fixed parent, a second pin in the same file (a toolchain block AND an options.release), and an edit that raises a pin the build never reads.
 
+{PLATFORM}
+
 You hold the loop. Answer with one of three words.
 
 `done` when nothing check_target reports sits below the target, or when what remains genuinely cannot move and your colleague said which and why.

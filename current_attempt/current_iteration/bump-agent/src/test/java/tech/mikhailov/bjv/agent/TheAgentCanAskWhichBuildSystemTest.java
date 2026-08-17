@@ -197,8 +197,9 @@ class TheAgentCanAskWhichBuildSystemTest {
 
     @Test
     void theVerifierIsToldThatBeingGradleIsNotAnExcuse(@TempDir Path ws) {
+        for (String platform : Managed.PLATFORMS) {
         String critic = Agents.forHop(new Hop(17, 21), ws).stream()
-                .filter(d -> d.name().equals("after-pins-verifier"))
+                .filter(d -> d.name().equals(Agents.named("after-pins-verifier", platform)))
                 .findFirst().orElseThrow().systemPrompt();
 
         // THIS ASSERTED THE OPPOSITE, AND STAYED GREEN THE WHOLE TIME THE OPPOSITE WAS FALSE. The
@@ -217,5 +218,6 @@ class TheAgentCanAskWhichBuildSystemTest {
                 "and it is told what to answer instead, not merely what not to answer");
         assertFalse(critic.contains("UNREACHABLE IS A REAL ANSWER"),
                 "the escape it replaces is gone rather than sitting beside its correction");
+        }
     }
 }

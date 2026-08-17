@@ -10,6 +10,8 @@ FAIL_target_not_bumped four stages later, so group what you find by module and s
 which are genuinely separate declarations rather than one property read from several
 places.
 
+{PLATFORM}
+
 Produce a short ordered list: module, file and line, and whether it should move by
 recipe or by hand. A module-local property that shadows a fixed parent is the mistake
 that costs most here; if you see one, say so plainly.

@@ -8,9 +8,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -84,19 +87,73 @@ class APromptIsAFileNowTest {
     }
 
     @Test
+    void everyPlatformFragmentIsReachedByName() throws IOException {
+        // THE MIRROR OF THE TEST ABOVE, FOR THE COMPOSED HALF. The loader names its key rather than
+        // listing the directory, so a fragment nobody loads is a prompt somebody is editing for
+        // nothing and only this would notice. The other direction, a fragment that is named and
+        // missing, throws at class initialisation and needs no test.
+        Path dir = Path.of("src/main/resources/prompts/platform");
+        if (!Files.isDirectory(dir)) {
+            return;
+        }
+        Set<String> keys = new TreeSet<>();
+        Set<String> platforms = new TreeSet<>();
+        try (var dirs = Files.list(dir)) {
+            for (Path p : dirs.toList()) {
+                String platform = p.getFileName().toString();
+                assertTrue(Managed.PLATFORMS.contains(platform),
+                        platform + " is not a regime the detector can answer with");
+                platforms.add(platform);
+                Set<String> here = new TreeSet<>();
+                try (var files = Files.list(p)) {
+                    for (Path f : files.filter(x -> x.toString().endsWith(".md")).toList()) {
+                        String key = f.getFileName().toString().replace(".md", "");
+                        here.add(key);
+                        assertFalse(Files.readString(f, StandardCharsets.UTF_8).isBlank(),
+                                f + " is empty, and an empty fragment is a save that went wrong");
+                        // AND THE SHARED HALF HAS A SLOT FOR IT. A fragment whose prompt lost its
+                        // {PLATFORM} line would be loaded, held and never said, and the prompt
+                        // reads perfectly well without it.
+                        assertTrue(Files.readString(
+                                        Path.of("src/main/resources/prompts", key + ".md"),
+                                        StandardCharsets.UTF_8).contains("{PLATFORM}"),
+                                key + ".md has no slot for its platform half");
+                    }
+                }
+                if (keys.isEmpty()) {
+                    keys.addAll(here);
+                }
+                assertEquals(keys, here, platform + " does not carry the same eleven texts");
+            }
+        }
+        assertEquals(new TreeSet<>(Managed.PLATFORMS), platforms, "one directory per regime");
+        assertEquals(11, keys.size(),
+                "eleven distinct texts serve the fourteen agents inside the module walk, because"
+                        + " the two pin phases share three of them");
+    }
+
+    @Test
     void theTextThatSurvivedTheMoveIsTheTextThatWasThere() {
         // Spot checks against versions and phrases that were in the compiled constants before the
         // move, one per substitution helper, so a silently mangled text block would show up here
         // rather than in a sweep. The values come from the hop's own floors.
-        String pins8 = prompt(new Hop(8, 11), "before-pins-doer");
-        assertTrue(pins8.contains("1.18.30"), "the lombok floor for 8 to 11 reached the doer");
-        assertTrue(pins8.contains("JDK 8") && pins8.contains("JDK 11"), "and its hop did");
+        // ON EVERY PLATFORM, because substitution runs on the composed text: the platform half is
+        // spliced in first and the hop's numbers are resolved over the whole of it, so a fragment
+        // is free to name the target and a phase that lost its floors on one regime would be a
+        // silent hole in a third of the walk.
+        for (String platform : Managed.PLATFORMS) {
+            String pins8 = prompt(new Hop(8, 11), Agents.named("before-pins-doer", platform));
+            assertTrue(pins8.contains("1.18.30"), "the lombok floor for 8 to 11 reached the doer");
+            assertTrue(pins8.contains("JDK 8") && pins8.contains("JDK 11"), "and its hop did");
 
-        String pins25 = prompt(new Hop(21, 25), "after-pins-doer");
-        assertTrue(pins25.contains("3.5.16"), "the boot floor for 21 to 25 reached the doer");
+            String pins25 = prompt(new Hop(21, 25), Agents.named("after-pins-doer", platform));
+            assertTrue(pins25.contains("3.5.16"), "the boot floor for 21 to 25 reached the doer");
 
-        assertTrue(prompt(new Hop(17, 21), "module-repair-step-doer").contains("ONE MODULE"),
-                "and the repair doer still knows its scope");
+            assertTrue(prompt(new Hop(17, 21),
+                            Agents.named("module-repair-step-doer", platform))
+                            .contains("ONE MODULE"),
+                    "and the repair doer still knows its scope");
+        }
     }
 
     private static String prompt(Hop hop, String agent) {

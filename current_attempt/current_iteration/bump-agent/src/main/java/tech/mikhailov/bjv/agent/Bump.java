@@ -78,6 +78,17 @@ public final class Bump {
     /** What is left of it. Read and decremented by the step loop, never reset mid-bump. */
     private int repairLeft = REPAIR_BUDGET;
 
+    /**
+     * WHAT A MODULE IS TREATED AS BEFORE THE DETECTOR HAS SPOKEN, AND AFTER IT HAS FAILED TO.
+     *
+     * <p>Derived rather than typed. {@link Managed#platformIn} answers this for a reply that names
+     * nothing, and writing the word here as well would be one fact in two files, which is what the
+     * deletion of Chain.java was about. It is the regime that owns its own conflicts, which is also
+     * the safe thing to tell an agent when nobody knows: it asks for evidence before every pin
+     * rather than trusting a managed set that may not be there.
+     */
+    private static final String UNRESOLVED_PLATFORM = Managed.platformIn("");
+
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
             System.err.println("usage: Bump <checkout> <repo|sha[|from|to]> [results-dir]");
@@ -334,8 +345,9 @@ public final class Bump {
     /**
      * THE STEP CAMPAIGN, WHICH IS A STAGE AND WAS NOT A NODE.
      *
-     * <p>Three of the thirty-four agents spend the whole repair budget here, and for as long as the
-     * campaign was ordinary code inside {@code module-repair} the picture drew that stage as a leaf
+     * <p>Three agents spend the whole repair budget here, one such three for each platform, and
+     * for as long as the campaign was ordinary code inside {@code module-repair} the picture drew
+     * that stage as a leaf
      * and said nothing about them. The one written record of what bounds them lived in a
      * declaration beside the program, and it was wrong: it said twelve per module, which is what
      * one campaign may order, and a module reaches the campaign once per gate turn.
@@ -351,10 +363,13 @@ public final class Bump {
     private String campaignLog = "";
     private String campaignFloor = "";
     private String campaignAim = "";
+    /** And a fourth: which regime the module is in, so the steps are asked for the right agents. */
+    private String campaignPlatform = UNRESOLVED_PLATFORM;
     private boolean campaignLanded;
 
     private final Agents.Agent stepCampaign = Flow.code("module-repair-step", task -> {
-        campaignLanded = campaignOfSteps(campaignLog, campaignFloor, campaignAim);
+        campaignLanded = campaignOfSteps(campaignLog, campaignFloor, campaignAim,
+                campaignPlatform);
         return campaignLanded ? "a step landed" : "nothing landed";
     }).triplet().repeats("up to " + MODULE_TURNS * (REASK + 1) * STEPS + " per module, "
             + REPAIR_BUDGET + " per bump");
@@ -396,15 +411,35 @@ public final class Bump {
         boolean[] counted = {false};  // it is already counted as having needed repair
         int[] turn = {0};
         String[] log = {""};
+        // WHAT MANAGES THIS MODULE'S VERSIONS: written by the first stage below, read by the rest.
+        //
+        // Per module for the same reason the turn state is: it is allocated here, this method runs
+        // once per module, and so no module can read the regime of the one before it.
+        //
+        // IT STARTS AT THE FALLBACK AND IS RESOLVED INSIDE A NODE BODY, WHICH IS NOT A PREFERENCE.
+        // This method is also called once with a NULL module, to draw the picture, on a bump that
+        // has no agents, no trace and no workspace, and Dashboard reads Bump.stages() from a static
+        // initialiser. A platform resolved while these nodes are being CONSTRUCTED is therefore an
+        // ExceptionInInitializerError that takes the whole page down rather than one failed
+        // request. The platform stage below resolves it in its body, where a module exists.
+        String[] platform = {UNRESOLVED_PLATFORM};
         return Flow.seq("module",
+                // FIRST, BECAUSE EVERY STAGE AFTER IT IS KEYED BY WHAT IT SETTLES. A pin doer told
+                // to raise an artifact Spring Boot manages and a pin doer told to raise one nothing
+                // manages are given opposite instructions, and until this stage existed they were
+                // one agent handed whichever of the two the text happened to say.
+                Flow.code("platform", task -> {
+                    platform[0] = platformOf(m);
+                    return label(m) + ": " + platform[0];
+                }).triplet(),
                 Flow.code("before-pins", task -> {
                     trace.progress(bump, "module " + label(m) + ": pinning what the hop needs");
-                    pinPhase("before-pins-doer", false, m);
+                    pinPhase("before-pins-doer", false, m, platform[0]);
                     return label(m) + ": pinned";
                 }).triplet().reads("enables"),
                 Flow.code("bump", task -> {
                     trace.progress(bump, "module " + label(m) + ": moving the JDK");
-                    bumpModule(m);
+                    bumpModule(m, platform[0]);
                     return label(m) + ": bumped";
                 }).triplet(),
                 // COMPILE IT NOW, while its diff is the only thing that changed. This is the shape
@@ -474,7 +509,7 @@ public final class Bump {
                                     // NOTHING LANDED CLOSES THE GATE. Going round again would ask
                                     // the same question of the same tree, and the repository gate
                                     // is the arbiter either way.
-                                    open[0] = moduleRepair(m, log[0]);
+                                    open[0] = moduleRepair(m, log[0], platform[0]);
                                     return open[0] ? label(m) + ": a repair landed"
                                             : label(m) + ": nothing landed";
                                 }))
@@ -486,7 +521,7 @@ public final class Bump {
                 // compiles; asking it of one that does not is the wrong question.
                 Flow.code("after-pins", task -> {
                     trace.progress(bump, "module " + label(m) + ": hardening what the bump left");
-                    pinPhase("after-pins-doer", true, m);
+                    pinPhase("after-pins-doer", true, m, platform[0]);
                     return label(m) + ": hardened";
                 }).triplet().reads("hardens"));
     }
@@ -824,10 +859,14 @@ public final class Bump {
      * <p>The verifier reads the same tool and holds the loop. Nothing between the floors and the
      * agents parses anything.
      */
-    private void pinPhase(String stage, boolean after, Modules.Module only) throws IOException {
-        Agents.Agent planner = after ? agents.afterPinsPlanner() : agents.beforePinsPlanner();
-        Agents.Agent doer = after ? agents.afterPinsDoer() : agents.beforePinsDoer();
-        Agents.Agent verifier = after ? agents.afterPinsVerifier() : agents.beforePinsVerifier();
+    private void pinPhase(String stage, boolean after, Modules.Module only, String platform)
+            throws IOException {
+        Agents.Agent planner = after ? agents.afterPinsPlanner(platform)
+                : agents.beforePinsPlanner(platform);
+        Agents.Agent doer = after ? agents.afterPinsDoer(platform)
+                : agents.beforePinsDoer(platform);
+        Agents.Agent verifier = after ? agents.afterPinsVerifier(platform)
+                : agents.beforePinsVerifier(platform);
 
         // SCOPED TO ONE MODULE, and said in the first line so it cannot be skimmed past. An
         // agent handed the whole module list and asked about one of them will drift into the
@@ -863,6 +902,72 @@ public final class Bump {
                 verifier, () -> Declared.report(ws, List.of(only)), trace, bump, REASK + 1)
                 .run(brief);
         tree.land(stage + " " + label(only));
+    }
+
+    /**
+     * WHICH REGIME MANAGES THIS MODULE'S VERSIONS, settled by a pair rather than by a predicate.
+     *
+     * <p>Every stage after it in the walk is keyed by the word it settles on, because the regimes
+     * ask for opposite work: on a Spring Boot module the managed set moves as a set and pinning one
+     * of its members overrides it, while on a module nothing manages every artifact is raised on
+     * its own and the conflicts are the raiser's.
+     *
+     * <p>WHY AN AGENT AND NOT A STRING MATCH. Of the 277 Boot-managed modules in this corpus, 41
+     * name a Boot parent themselves and a match would find them; 185 inherit an in-repo parent pom
+     * that is itself Boot, which is visible only after following that chain to its outermost pom,
+     * and two of the corpus's import-scope BOMs are written as a property rather than a literal, so
+     * nothing matching text will ever find them. {@link Managed#report} states all of it without
+     * judging any of it, and this pair does the judging.
+     *
+     * <p>THE ANSWER IS CLOSED, AND THE FALLBACK IS COUNTABLE. A fourth word names a prompt
+     * directory that does not exist, so it becomes the unmanaged regime, which is also the safe one
+     * to be wrong towards. What a fallback must not be is invisible: a detector that quietly missed
+     * would key five later stages to the wrong instructions with nothing in the record to say so.
+     */
+    private String platformOf(Modules.Module m) throws IOException {
+        String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")\n\n"
+                + "YOU ARE LOOKING AT ONE MODULE: " + label(m)
+                + "\nDecide what manages its dependency versions. Nothing is edited in this stage."
+                + "\n\nThe modules of this project, for context only:\n" + moduleList();
+        // WHAT THE VERIFIER ACTUALLY SAID, which a triad keeps to itself: it answers with the
+        // doer's last word either way, so a pair that agreed and a pair that ran out of rounds come
+        // back as the same value. That difference is most of what "detection failed" means.
+        String[] judged = {""};
+        String said = new Triad("platform", agents.platformPlanner(),
+                (plan, feedback) -> agents.platformDoer().run(brief
+                        + "\n\nWhat to look at, and what would settle it:\n" + plan + feedback),
+                task -> {
+                    judged[0] = agents.platformVerifier().run(task);
+                    return judged[0];
+                },
+                () -> Managed.report(ws, m, allModules) + "\n" + Declared.report(ws, List.of(m)),
+                trace, bump, REASK + 1)
+                .run(brief);
+
+        String platform = Managed.platformIn(said);
+        // A blank verdict is `again`, exactly as Triad reads one: silence is not agreement.
+        boolean settled = !judged[0].isBlank()
+                && word(judged[0], "done", "again", "replan").equals("done");
+        // WHY TWO TESTS AND NOT ONE. A word outside the three is what the verifier is there to
+        // reject, so most out-of-set answers arrive here as a loop that never closed. The second
+        // catches the one that gets past it, a verifier approving a word this walk has no prompts
+        // for: platformIn answers with the fallback for "micronaut" exactly as it does for a
+        // considered unmanaged, and the two are told apart by whether the word is in the answer at
+        // all. That is a containment test rather than a second parser -- the labelled line is read
+        // in one place, and this does not read it.
+        boolean named = !platform.equals(UNRESOLVED_PLATFORM)
+                || said.toLowerCase().contains(UNRESOLVED_PLATFORM);
+        if (!settled || !named) {
+            platform = UNRESOLVED_PLATFORM;
+            trace.progress(bump, "platform: " + label(m) + " fell back to " + platform + " ("
+                    + (settled ? "the answer named no platform this walk has prompts for"
+                            : "the pair never settled") + "): "
+                    + said.lines().findFirst().orElse(""));
+        }
+        // PER MODULE, IN THE RECORD, so a corpus can be grouped by regime afterwards. Said only in
+        // prose, the one fact that chose every prompt below it would be unrecoverable from a trace.
+        trace.applied("platform", label(m) + ": " + platform);
+        return platform;
     }
 
     /** The modules, as a list the planner can name back. */
@@ -989,7 +1094,7 @@ public final class Bump {
      * <p>It is the pin the GATE measures, so a bumper that stops early does not fail here, it fails
      * four stages later as FAIL_target_not_bumped with nothing left to try.
      */
-    private void bumpModule(Modules.Module m) throws IOException {
+    private void bumpModule(Modules.Module m, String platform) throws IOException {
         int target = Integer.parseInt(to);
         // A module that declares no target of its own inherits the parent's, and inventing one
         // here is the most expensive edit available: a module-local property shadows a correctly
@@ -1004,14 +1109,14 @@ public final class Bump {
                     + "inherits, and inventing one here is how a module shadows a raised parent");
             return;
         }
-        new Triad("bump:" + label(m), agents.bumpPlanner(),
+        new Triad("bump:" + label(m), agents.bumpPlanner(platform),
                 (plan, feedback) -> {
-                    String said = agents.bumpDoer().run(moduleBrief(m)
+                    String said = agents.bumpDoer(platform).run(moduleBrief(m)
                             + "\n\nThe plan you are carrying out:\n" + plan + feedback);
                     trace.applied("bump", label(m) + "\n" + said + "\n" + tree.diff());
                     return said;
                 },
-                agents.bumpVerifier(), () -> bumpFacts(m, target), trace, bump, REASK + 1)
+                agents.bumpVerifier(platform), () -> bumpFacts(m, target), trace, bump, REASK + 1)
                 .run(moduleBrief(m));
         tree.land("bump " + label(m));
     }
@@ -1068,23 +1173,24 @@ public final class Bump {
      *
      * @return true when a step landed and the gate should be re-run, false when the campaign is over
      */
-    private boolean moduleRepair(Modules.Module m, String log) throws IOException {
+    private boolean moduleRepair(Modules.Module m, String log, String platform)
+            throws IOException {
         // SCOPED, AND SAID FIRST. An agent handed a reactor log and asked about one module drifts
         // into the others, and the diff it leaves is then the next module's turn's problem.
         String scoped = "YOU ARE REPAIRING ONE MODULE: " + label(m)
                 + "\nIt does not compile under JDK " + to + ". Every other module in this "
                 + "repository is somebody else's turn; do not edit them.\n\n" + log;
-        return repairCampaign(scoped);
+        return repairCampaign(scoped, platform);
     }
 
-    private boolean repairCampaign(String log) throws IOException {
+    private boolean repairCampaign(String log, String platform) throws IOException {
         String floor = tree.head();
         String feedback = "";
         // WHAT THE CAMPAIGN IS FOR, decided before anyone edits. A campaign with no stated end runs
         // until its budget is spent, and this planner is also the one place a failure that is not
         // this bump's doing can be named as such: a test red before anything moved is not a wall,
         // and treating it as one has cost this corpus whole runs.
-        String aim = agents.moduleRepairPlanner().run(brief(log)
+        String aim = agents.moduleRepairPlanner(platform).run(brief(log)
                 + "\n\nWhat has landed so far:\n" + tree.history(floor));
         if (aim.stripLeading().startsWith("NOT-OURS")) {
             trace.progress(bump, "module-repair: " + aim.lines().findFirst().orElse(""));
@@ -1098,9 +1204,10 @@ public final class Bump {
             campaignLog = log;
             campaignFloor = floor;
             campaignAim = "\n\nWhat this campaign is for:\n" + aim + feedback;
+            campaignPlatform = platform;
             stepCampaign.run("");
             boolean landed = campaignLanded;
-            String judgement = agents.moduleRepairVerifier(floor)
+            String judgement = agents.moduleRepairVerifier(platform, floor)
                     .run("The failing build:\n" + log
                             + "\n\nThe whole campaign, since it began:\n" + tree.diffSince(floor)
                             + "\n\nThe steps that landed:\n" + tree.history(floor));
@@ -1117,7 +1224,8 @@ public final class Bump {
     }
 
     /** One campaign: the loop proposer orders steps until it stops or the budget is spent. */
-    private boolean campaignOfSteps(String log, String floor, String feedback) throws IOException {
+    private boolean campaignOfSteps(String log, String floor, String feedback, String platform)
+            throws IOException {
         boolean landed = false;
         for (int step = 0; step < STEPS; step++) {
             // THE ALLOWANCE IS THE BUMP'S, NOT THIS MODULE'S. A module that needs thirty steps may
@@ -1128,7 +1236,7 @@ public final class Bump {
                 return landed;
             }
             repairLeft--;
-            String order = agents.moduleRepairStepPlanner(floor)
+            String order = agents.moduleRepairStepPlanner(platform, floor)
                     .run(brief(log) + feedback
                             + "\n\nSteps landed so far in this campaign:\n" + tree.history(floor)
                             + "\n\nWhat the campaign has changed:\n" + tree.diffSince(floor));
@@ -1137,7 +1245,7 @@ public final class Bump {
                 trace.progress(bump, "module-repair-step: " + head.lines().findFirst().orElse(""));
                 return landed;
             }
-            if (step(log, order)) {
+            if (step(log, order, platform)) {
                 landed = true;
                 tree.land("step: " + head.lines().findFirst().orElse("").strip());
             } else {
@@ -1158,9 +1266,9 @@ public final class Bump {
      * never do is end the campaign, because whether the campaign should end is a judgement one
      * level up.
      */
-    private boolean step(String log, String order) throws IOException {
+    private boolean step(String log, String order, String platform) throws IOException {
         String brief = brief(log) + "\n\nThe step you have been asked to make:\n" + order;
-        String reply = agents.moduleRepairStepDoer().run(brief);
+        String reply = agents.moduleRepairStepDoer(platform).run(brief);
         List<String> rejected = new ArrayList<>();
         for (int attempt = 0; attempt <= REASK; attempt++) {
             if (reply.stripLeading().startsWith("BLOCKED:")) {
@@ -1173,7 +1281,8 @@ public final class Bump {
                 return false;
             }
             trace.applied("step-doer", now);
-            String judgement = agents.moduleRepairStepVerifier().run("The failing build said:\n" + log
+            String judgement = agents.moduleRepairStepVerifier(platform)
+                    .run("The failing build said:\n" + log
                     + "\n\nThe edits now in the workspace:\n" + now + "\n\nWhat they said:\n" + reply);
             if ("sound".equals(word(judgement, "sound", "gaming", "off-target"))) {
                 return true;
@@ -1184,7 +1293,7 @@ public final class Bump {
                 trace.progress(bump, "step rejected twice; handing back to the loop");
                 return false;
             }
-            reply = agents.moduleRepairStepDoer().run(brief
+            reply = agents.moduleRepairStepDoer(platform).run(brief
                     + "\n\nYour earlier attempts at this step, and why they were rejected:\n"
                     + String.join("\n\n", rejected)
                     + "\nEach was reverted. Do not repeat one.");

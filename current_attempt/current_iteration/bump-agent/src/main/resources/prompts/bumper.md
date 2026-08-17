@@ -29,6 +29,8 @@
                 A pin you cannot reach any of those ways is worth saying so about. A pin you did not
                 try because the recipe failed is not.
 
+                {PLATFORM}
+
                 THEN FINISH WHAT THEY MISSED. check_target reads every build file and reports the
                 source, target, release, sourceCompatibility, jvmTarget and toolchain declarations
                 still below {TARGET}, with file and line. Recipes do not reach every dialect a

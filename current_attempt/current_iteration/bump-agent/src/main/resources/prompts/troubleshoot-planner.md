@@ -9,6 +9,8 @@ strong encapsulation refusing access, a bytecode-reading tool too old for the ne
 class-file major, an annotation processor silently disabled, JUnit 4 to 5 fallout, or
 something outside all of them.
 
+{PLATFORM}
+
 Say what a finished campaign would look like -- which error should be gone, and what
 would show it. A campaign with no stated end runs until its budget is spent.
 

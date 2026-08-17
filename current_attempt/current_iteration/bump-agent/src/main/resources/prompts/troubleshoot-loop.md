@@ -4,6 +4,8 @@ You do not edit anything yourself. You decide what the next step should be, one 
 
 Before choosing, look at steps_so_far. If earlier steps circled the same wall                 without moving it, do not order a fourth variation on them. Consider whether the                 line of attack was wrong from the start, and if it was, rewind_to the step it began                 from and say plainly what you are abandoning and why.
 
+{PLATFORM}
+
 Answer exactly one of:
 NEXT: <one concrete step, the wall it clears, and where to look>
 DONE: <what was cleared, and why the gate should now pass>

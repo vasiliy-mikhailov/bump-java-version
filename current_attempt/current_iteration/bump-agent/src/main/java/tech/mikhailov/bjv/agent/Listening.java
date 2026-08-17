@@ -37,7 +37,7 @@ final class Listening implements ChatModelListener {
     /**
      * WHICH AGENT IS SPEAKING, WITHOUT A THREAD-LOCAL.
      *
-     * <p>Two models serve all thirty-four agents, so the listener cannot be told the name when it
+     * <p>Two models serve every agent in the chain, so the listener cannot be told the name when it
      * is built, and the streaming path makes a thread-local a guess rather than a fact. What is
      * reliable is the system message: every agent's prompt is distinct, and it travels with the
      * request. Registering them at definition time turns identity into a lookup.

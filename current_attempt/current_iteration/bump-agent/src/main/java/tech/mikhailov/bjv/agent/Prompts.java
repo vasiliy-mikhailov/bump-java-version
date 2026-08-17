@@ -133,9 +133,16 @@ final class Prompts {
      * <p>The agent name comes off a URL, so it is checked rather than trusted: a name with a slash
      * or a dot-dot in it would write outside the store. Every real name is lower-case letters and
      * hyphens, so anything else is a caller doing something it should not.
+     *
+     * <p>AND ONE OPTIONAL {@code @platform} TAIL, because fourteen of the agents inside the module
+     * walk exist once per platform and carry it in the name: before-pins-doer@spring-boot is a
+     * different agent from before-pins-doer@adhoc, handed different text and edited apart. Nothing
+     * else about the store changes, which is the point of putting the platform in the name rather
+     * than adding a third key to a path, a page and every lookup between them. The tail admits the
+     * same characters the name does and no separator, so it still cannot leave the store.
      */
     private static Path fileFor(Path root, String agent, Hop hop) {
-        if (root == null || !agent.matches("[a-z][a-z0-9-]*")) {
+        if (root == null || !agent.matches("[a-z][a-z0-9-]*(@[a-z][a-z0-9-]*)?")) {
             return null;
         }
         return root.resolve(hop.from() + "-" + hop.to()).resolve(agent + ".txt");
