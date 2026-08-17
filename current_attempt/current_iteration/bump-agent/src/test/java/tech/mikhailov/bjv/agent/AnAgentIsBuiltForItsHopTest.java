@@ -89,8 +89,16 @@ class AnAgentIsBuiltForItsHopTest {
             assertTrue(rules >= previous, "a higher target cannot reach fewer rules");
             previous = rules;
         }
-        assertEquals(15, pins(11), "8 to 11 pins fifteen");
-        assertEquals(18, pins(25), "21 to 25 pins eighteen");
+        // A BARE COUNT, AND DELIBERATELY SO. What it catches is a row quietly leaving the list,
+        // which is the failure this whole area keeps producing: a shorter list is a healthier
+        // looking percentage and nothing else complains about one. So when these numbers move,
+        // they should move because somebody meant them to, and the reason belongs here.
+        //
+        // Both rose by one when tomcat-embed-core 10.1.55 was added to every block. It had been in
+        // all four hardens tsv files and in no Floors line since the bill of materials was written,
+        // so compliance scored every project against a floor no agent was ever asked to reach.
+        assertEquals(16, pins(11), "8 to 11 pins sixteen");
+        assertEquals(19, pins(25), "21 to 25 pins nineteen");
     }
 
     private static int pins(int target) {
