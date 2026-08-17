@@ -1,20 +1,26 @@
 NOTHING MANAGES THIS MODULE'S VERSIONS, so "its manager owns that number" is neither an
 explanation available here nor an excuse. A colleague who offers it has said something
-declared_versions settles: it prints the manager's coordinates beside a blank version, and
-where it prints a number instead, the pin was simply not attempted.
+declared_versions settles: where an artifact is managed it prints the manager's coordinates
+in place of the version, and where it prints a number instead, the pin was simply not
+attempted.
 
-Two shapes of outstanding belong to this regime, and both are one read of declared_versions.
-Half a family: tomcat-embed-core raised while tomcat-embed-el and tomcat-embed-websocket sit
-at the old version, byte-buddy without byte-buddy-agent, archunit without archunit-junit5.
-They print adjacent, so read the neighbours of the row you checked. And a property raised
-while the dependency still writes a literal: the property row and the dependency row print
-separately, only the dependency is what resolves, and the property moving is not evidence
-that anything else did.
+THE ROW YOU ARE CHECKING MAY NAME A COORDINATE NO MODULE DECLARES.
+org.jetbrains.kotlin:kotlin is the head of a line, not an artifact anybody writes, so
+declared_versions will never print it, and its absence is neither an outstanding pin nor a
+met one. Read what the module declares on that line, the library and the compiler both,
+and judge those. This project has
+been wrong in the other direction on exactly this reading: a check looked for an artifact
+called spring-boot, found nothing, called the floor met, and every Spring project in the
+corpus kept the version it came in with.
 
-A floor artifact the module does not declare is met when whatever carries it is at its own
-floor, mockito-core carrying byte-buddy being the usual case. Asking for both is asking for
-an edit nothing needs, and it spends a turn of the loop.
+THE SHAPE OF OUTSTANDING THAT BELONGS TO THIS REGIME IS HALF OF A COORDINATE THIS MODULE
+NAMES TWICE. A Gradle module declares lombok once to compile against and once as the
+processor, and the two print adjacent, so the neighbours of the row you checked are part of
+the check. Kotlin splits the same way across the library and the compiler, and there the half
+that was left behind is the half the gate misreads.
 
-Meeting a floor by ADDING a dependency the module never used is not a pin. It is a new
-artifact on a module that owns every conflict it acquires, and it is worth naming whichever
-of the three words you answer with.
+A MODULE THAT NEVER DECLARED THE ARTIFACT IS FINISHED, not outstanding: javac runs no
+processor this module does not have, and these are floors rather than requirements. Meeting
+one by ADDING a dependency the module never used is not a pin. It is a new artifact on a
+module that owns every conflict it acquires, and it is worth naming in whichever of the three
+words you answer with.

@@ -1,27 +1,32 @@
 NOTHING MANAGES THIS MODULE'S VERSIONS. There is no managed set to follow or to override, so
-every conflict a raise causes is settled in this module and by this stage.
+the number goes onto this module's own declaration, and every conflict a raise causes is
+settled in this module and by this stage.
 
-PINNING WHAT THE MODULE DOES NOT DECLARE IS THE RIGHT MOVE HERE, and the wrong one on a
-managed module. Where a floor artifact arrives under a carrier rather than in a build file,
-org.openrewrite.maven.AddManagedDependency writes the version into dependencyManagement and
-org.openrewrite.gradle.UpgradeTransitiveDependencyVersion adds the Gradle constraint. Nothing
-else reaches a version this module never writes.
+ONE ROW, AND bump_patch IS THE WHOLE MOVE. Every lombok floor in this project is on the 1.18
+line, so whatever the hop the raise is a patch: give bump_patch the coordinates and the
+version, and it picks the actuator for Maven or Gradle without you having to know which this
+module is. Then read declared_versions. If lombok still prints low, the version was not where
+the recipe looked, and the placement column says where it is instead: a property wants
+org.openrewrite.maven.ChangePropertyValue, and a Gradle module that prints the same coordinate
+twice, once to compile against and once as the processor, needs the second row moved as well
+as the first.
 
-A SPLIT FAMILY IS THE FAILURE THIS REGIME PRODUCES. tomcat-embed-core, tomcat-embed-el and
-tomcat-embed-websocket share a version by contract; byte-buddy moves with byte-buddy-agent,
-archunit with archunit-junit5, jaxb-api with jaxb-runtime. Name every member the module
-declares in the same recipe, then read them adjacent in declared_versions. Core raised with
-el left behind is worse than not having run at all, because it compiles.
+KOTLIN IS NOT A PATCH MOVE, AND NOTHING HERE MIGRATES IT. The row asks for a 2.x where the
+module declares a 1.x, so bump_patch refuses it and says so, and bump_line covers Spring
+Boot's lines only and says that too. Neither refusal is an obstacle; both are tools declining
+to write a number across a crossing they cannot carry. apply_recipe is the way through: emit
+org.openrewrite.maven.UpgradeDependencyVersion and
+org.openrewrite.gradle.UpgradeDependencyVersion in one recipe, naming the artifacts this
+module actually declares, the library and the compiler together, on the one version. A
+compiler left behind while the library moves is the fallback the row is about, and the gate
+reads it as a bump that never happened.
 
-THE HIGHEST NUMBER CARRYING THE RIGHT ARTIFACT NAME IS NOT THE FLOOR. tomcat-embed-core sits
-on two lines in this corpus and the 10.1 one is where the servlet API is jakarta, so crossing
-to it renames imports in this project's own source, which is not something a pin does. Take
-the row for the line this module is already on. bump_patch refuses the crossing for that
-reason, and bump_line knows only Spring Boot's lines, so a minor crossed on anything else is
-a migration with no recipe behind it.
+WHERE NO RECIPE IN THE TOOL DESCRIPTION REACHES THE PLACEMENT, SAY SO AS BLOCKED, naming the
+placement declared_versions printed. A recipe id that does not exist is skipped with a
+warning and the run still reports success, so a guessed name turns a pin you could have
+reported into one nobody knows about.
 
-WHICH DECLARATION WINS AFTERWARDS DEPENDS ON THE BUILD SYSTEM. Maven takes the nearest, so a
-version this module writes itself beats the same artifact arriving under a carrier: raising
-mockito-core does not lift a byte-buddy declared here directly. Gradle takes the highest in
-the graph. build_system says which of the two this module is, and declared_versions shows
-whether the direct declaration you would be competing with exists.
+AN ARTIFACT FROM THE LONG LIST IS NOT OWED HERE. It is owed at after-pins, where the module
+has already compiled and a break can be attributed to the version that caused it. Raising it
+early on this lane puts a number on a module with no manager to reconcile it, before anything
+has compiled that could tell you it was wrong.

@@ -1,10 +1,26 @@
 THE REGIME: a platform BOM manages this module, so most rows in
 declared_versions are not this module's to set, and a version written onto one of
 them is a fault rather than a fix. An io.quarkus row with no version of its own
-is satisfied by whatever the platform says. The row to read is the platform's.
+is satisfied by whatever the platform says.
 
-WHAT THE REPORT CANNOT SHOW YOU. quarkus-maven-plugin has no row at all: its
-block carries <executions>, and rows are cut from blocks whose children are flat
+WHAT YOU ARE JUDGING IS SHORT: lombok, and above 21 kotlin as well. Nothing else
+is on the list, so a colleague who reports a survey of this module has answered a
+different question, and a colleague who reports the list unmet has one row to
+name. Quarkus manages no lombok, read in quarkus-bom at 3.16.1 and again at
+3.36.1, so a lombok row below the floor has no BOM excuse and is plainly this
+module's to fix.
+
+A SATISFIED LOMBOK ROW IS NOT A SATISFIED POM. declared_versions keys a row by
+coordinate and kind within a file, so two <dependency> blocks for
+org.projectlombok:lombok collapse to the first one read and the second is not in
+the report at all. AlanSilvaLima/curso-rest-quarkus is that shape: 1.18.38 in the
+compile block, 1.18.30 in the provided one, one row. Both were under the floor
+there so nothing was hidden that mattered, and the arrangement that makes a
+raised first block cover a low second one is the same arrangement. Grep
+org.projectlombok and count the blocks before `done` rests on that row.
+
+WHAT THE REPORT CANNOT SHOW YOU. quarkus-maven-plugin has no row where its block
+carries <executions>, because rows are cut from blocks whose children are flat
 tags. A property row appears only where the tag name ends in version, so
 quarkus.platform.version has one and version.io.quarkus has none. A report
 showing the property raised is therefore not evidence the plugin moved with it.
@@ -18,7 +34,6 @@ at 3.2.4.Final. A colleague who moved the property to the first of those has lef
 a build that cannot resolve its own plugin, and that is `again` with both lists
 named rather than `done`.
 
-The rows that do carry a number are the ones to hold a colleague to. An
-io.quarkiverse extension is outside the platform and moves only by hand, and one
-left on its javax release while the platform crossed to Quarkus 3 takes the whole
-build down in augmentation rather than at any pin you can see here.
+An io.quarkiverse extension is outside the platform and moves only by hand, and
+one left on its javax release while the platform crossed to Quarkus 3 takes the
+whole build down in augmentation rather than at any pin you can see here.

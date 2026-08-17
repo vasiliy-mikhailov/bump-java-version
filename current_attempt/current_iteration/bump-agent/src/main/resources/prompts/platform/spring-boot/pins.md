@@ -1,22 +1,22 @@
-THE REGIME: SPRING BOOT MANAGES THIS MODULE'S VERSIONS. Most of the floors above name artifacts
-inside that set: lombok, byte-buddy and its agent, mockito-core, hamcrest, jackson, tomcat. Raising
-one of those the ordinary way writes a version onto the declaration and takes it out of the set for
-good, so that artifact keeps its number while the rest of the set moves past it at the next Boot
-raise.
+THE REGIME: SPRING BOOT MANAGES THIS MODULE'S VERSIONS, and the row you have been handed is one of
+the numbers it manages. Overriding a member of the managed set is the work of this phase, which is
+the reverse of what the phase after the compile is told, and the reason is narrow: javac will not
+start under the new JDK with a lombok that cannot read it, nothing in the bump raises lombok, and
+Boot, which would carry it, cannot be moved until the JDK has moved. So the override happens here,
+on this row, and on nothing else.
 
-MOVING BOOT ITSELF IS bump_line, AND IT CARRIES NO RECIPE ID. Hand it
-org.springframework.boot:spring-boot-starter-parent and the line to land on; the harness derives the
-recipe and picks the actuator. Naming the recipe yourself is where this misfires: of the Spring
-recipe ids written in this corpus, 42 were right, 12 named org.openrewrite.spring.something, a
-package that does not exist, and 6 passed parameters to a recipe that takes none. What a name it
-cannot resolve costs you depends on which build system you are on, and neither answer is good: the
-Gradle actuator fails the run, and the Maven one reports a successful run that changed nothing, so
-on the larger half of this corpus a misspelling reads exactly like a pin that was already met.
+bump_patch REACHES A MANAGED NUMBER AND SAYS NOTHING ABOUT HAVING DONE SO. The recipe the harness
+writes for it carries overrideManagedVersion, so on a Boot module it puts the version onto the
+declaration itself and that artifact stops following the set. On this row that is the intended
+effect. It is also why the same call is the wrong reflex at after-pins, where the same silence
+covers a member the Boot raise would have carried.
 
-RAISING A MEMBER WITHOUT LEAVING THE SET is the move when the list above asks for one and carries no
-Boot line. declared_versions says which of these this module is:
-- it names a Boot parent, its own or one at the end of an in-repo chain: the override is a property
-  in this module's own properties block, which org.openrewrite.maven.ChangePropertyValue reaches.
+WHERE THE OVERRIDE GOES, AND WHAT REACHES IT. declared_versions says which of these this module is:
+- it names a Boot parent, its own or one at the end of an in-repo chain: the override is a
+  lombok.version property in this module's own properties block, which
+  org.openrewrite.maven.ChangePropertyValue reaches. Prefer it to writing the number onto the
+  declaration: the dependency stays version-less, the rest of the set stays parameterised, and the
+  number sits in one place the next phase can read and reconcile.
 - it imports spring-boot-dependencies at import scope: the property route does nothing there,
   because the property is read in the imported pom's own context, and the override is a
   dependencyManagement entry ahead of the import, which org.openrewrite.maven.AddManagedDependency
@@ -24,13 +24,36 @@ Boot line. declared_versions says which of these this module is:
 - it is Gradle under the Boot plugin: org.openrewrite.gradle.UpgradeTransitiveDependencyVersion
   raises a version that arrives through the platform, which is what a managed member is there.
 
-A FLOOR CAN SIT BELOW WHAT THE SET ALREADY GIVES YOU, and a managed row shows no number to compare
-it against. inspect_jar reports which versions of an artifact are present in the local repository,
-which is what the set actually resolved, and that is the only way to compare a managed row to a
-floor. Where your list carries a tomcat-embed-core line, that line says as much in its own text:
-it is for projects where Spring is absent, because Boot brings a newer Tomcat, so writing it into
-a Boot module is a downgrade dressed as a pin.
+READ WHAT THE SET ALREADY GIVES BEFORE YOU WRITE ANYTHING. A managed row prints no number to compare
+against a floor, and inspect_jar reports which versions of an artifact are present in the local
+repository, which is what resolved here. Where that is already at or above the floor, the floor is
+met, because compliance is measured against the packages that RESOLVED rather than against what this
+module declares: DONE over an empty diff is the correct answer and a common one. Writing the floor
+number into a managed property that is already above it lowers the version, which is the one thing
+this phase is told never to do.
 
-WHAT FINISHED LOOKS LIKE when you call declared_versions afterwards: the number sits in a property,
-a dependencyManagement entry or the platform, and the starter rows still read (managed by ...). A
-starter that has grown a version of its own is a pin the next stage has to undo.
+THE NUMBER YOU WRITE OUTLIVES THIS PHASE, which is why it is worth being exact about. after-pins
+moves Boot, the set moves with it, and your override goes on winning: the artifact holds the number
+you gave it while everything around it advances. That is accepted here because the alternative is a
+compile that never starts, and it is the reason to write the floor rather than anything below it,
+and to say in your answer which placement you used, so the next phase is reconciling something it
+can see.
+
+BOOT IS NOT YOURS IN THIS PASS. bump_line crosses Spring Boot's lines and it is the right tool at
+after-pins; run here, where the Boot floor names the 3.5 line, it files a parent that declares a
+Java version this module has not reached. Where the only route you can find to this row runs through
+Boot, that is BLOCKED with the reason named, and after-pins is where it gets picked up.
+
+ON THE HOP THAT CARRIES THE KOTLIN ROW, ONE PROPERTY DOES BOTH HALVES. It is not a patch move, so
+bump_patch refuses it, and bump_line knows Spring Boot's lines only, so it refuses too; neither
+refusal is an obstacle. On a Maven module under Boot, kotlin.version is the parameter that drives
+the kotlin-bom Boot imports and the kotlin-maven-plugin it manages, so ChangePropertyValue moves the
+library and the compiler on one number. On Gradle the plugin version lives in a plugins block or a
+version catalog, which Boot does not own; where nothing in apply_recipe's list reaches that
+placement, say so as BLOCKED naming the placement declared_versions printed, rather than reporting a
+raise that landed on the library alone.
+
+WHAT FINISHED LOOKS LIKE when you call declared_versions afterwards: exactly one artifact in this
+module has grown a number of its own, and it is the one in the list above. The starter rows still
+read (managed by ...), and any other member that has acquired a version during this phase is a pin
+the next stage has to undo.

@@ -1,17 +1,44 @@
-THE LIST YOU ARE HOLDING NAMES ONLY SPRING BOOT and this module declares none of
-it, so NOTHING-OUTSTANDING is a true answer to that list. It is also the answer
-this regime has given every time it was asked: apedano/account-service and
-AlanSilvaLima/curso-rest-quarkus both closed this phase on it, both were right
-about the list, and neither looked at the one number a Quarkus module has. That
-number is the half worth planning.
+MOST OF THE LIST YOU ARE HOLDING IS INSIDE THE PLATFORM, WHICH IS NOT THE SAME
+AS ABSENT. quarkus-bom manages net.bytebuddy:byte-buddy and byte-buddy-agent,
+org.mockito:mockito-core, org.hamcrest:hamcrest,
+org.junit.platform:junit-platform-launcher, org.glassfish.jaxb:jaxb-runtime, the
+org.jacoco jars and javax.annotation:javax.annotation-api. Not one of them is
+written in this module's build files and every one of them resolves here, at
+whatever number the platform says: at platform 3.16.1 that is byte-buddy
+1.14.18, mockito 5.14.1, jacoco 0.8.12, junit-platform-launcher 1.10.5 and
+jaxb-runtime 4.0.5; at 3.36.1 it is byte-buddy 1.18.8, mockito 5.21.0, jacoco
+0.8.14 and junit-platform-launcher 6.0.3. So whether one of those floors is met
+is a question about which platform version this module sits on, and the answer
+to one that is not met is quarkus.platform.version. It is never a version
+written onto the row.
 
-THE LIST CANNOT NAME THE ONLY LEVER THIS REGIME HAS. The platform BOM sets every
-version this module resolves, so the artifacts a scanner counts are not declared
-in the build files at all and none of them can be raised on its own. Measured on
-apedano/account-service before its bump: 35 CRITICAL+HIGH over 232 packages, of
-which the netty family carried 23, quarkus-vertx-http, quarkus-core and
-quarkus-resteasy 5 between them, and jackson 3. Not one of those artifacts
-appears in its pom. What moves all of them at once is quarkus.platform.version.
+WHAT THE PLATFORM DOES NOT CARRY IS YOURS. archunit appears in neither BOM read.
+javax.xml.bind:jaxb-api appears only as an exclusion, never managed. The
+maven-compiler-plugin floor is a plugin and no BOM sets a plugin version.
+Tomcat, Spring Boot and the Gradle wrapper are floors for the projects that use
+them, and a Maven Quarkus module that uses none of the three is satisfied by
+absence rather than by an edit.
+
+THE COMPILER PLUGIN FLOOR HAS NO ROW TO READ IT OFF. In a generated Quarkus pom
+the maven-compiler-plugin block carries <configuration>, and rows are cut only
+from blocks whose children are flat tags, so declared_versions prints nothing
+for that coordinate. The number reaches the plugin through
+${compiler-plugin.version}, which does get a property row because its tag name
+ends in version. Plan against that property and say what it feeds. It is often
+already above the floor by the time you see it: curso-rest-quarkus came in at
+3.14.0 and the bump phase's own recipes took it to 3.15.0 before this phase ran.
+
+SO NOTHING-OUTSTANDING IS STILL COMMON AND STILL CORRECT, and it is now
+something to earn floor by floor against the platform's managed numbers rather
+than assert from the module declaring none of the list. apedano/account-service
+and AlanSilvaLima/curso-rest-quarkus both closed this phase without looking at
+the one number a Quarkus module has, which is the half worth planning.
+
+THE PLATFORM VERSION IS ALSO THE ONLY LEVER OVER WHAT THE SCANNER COUNTS.
+Measured on apedano/account-service before its bump: 35 CRITICAL+HIGH over 232
+packages, of which the netty family carried 23, quarkus-vertx-http, quarkus-core
+and quarkus-resteasy 5 between them, and jackson 3. Not one of those artifacts
+appears in its pom, and none of them can be raised on its own.
 
 THE ENABLING PHASE MOVES THAT NUMBER ONLY AS FAR AS THE HOP NEEDS. On that same
 module it went 3.1.2.Final to 3.2.4.Final, which carried netty 4.1.93.Final to
@@ -39,7 +66,8 @@ polish on a module that already compiles.
 
 WHERE THE NUMBER LIVES DECIDES WHOSE TURN IT IS. Name the module, the property
 and the version. declared_versions prints a property row and has no row for
-quarkus-maven-plugin, so read the pom for the places that property is read:
-three of them on the module measured here, its own declaration, the BOM import
-and the plugin. A property declared in a parent this module does not own is that
-parent module's turn, and this module is then genuinely NOTHING-OUTSTANDING.
+quarkus-maven-plugin where its block carries <executions>, so read the pom for
+the places that property is read: three of them on the module measured here, its
+own declaration, the BOM import and the plugin. A property declared in a parent
+this module does not own is that parent module's turn, and this module is then
+genuinely NOTHING-OUTSTANDING.

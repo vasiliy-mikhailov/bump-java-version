@@ -3,6 +3,18 @@ move is that property rather than the artifact under it. An io.quarkus row with
 no version of its own follows the platform, and writing a version onto it
 overrides the set every extension in this module was built against.
 
+LOMBOK IS YOUR WHOLE LIST AND THE PLATFORM DOES NOT MANAGE IT. quarkus-bom
+carries no org.projectlombok entry, read at 3.16.1 and again at 3.36.1, so
+lombok here is a literal version in this pom and
+org.openrewrite.maven.UpgradeDependencyVersion with groupId org.projectlombok
+and artifactId lombok is what moves it. Run it once and let it find every block
+rather than the one you were shown: curso-rest-quarkus declared lombok twice in
+a single pom, 1.18.38 in one block and 1.18.30 in the provided one, and both had
+to land on the floor. Above 21 the list also carries kotlin, and there the
+stdlib follows the platform while the kotlin-maven-plugin does not, so the
+plugin is the half you move, with org.openrewrite.maven.UpgradePluginVersion, or
+with ChangePropertyValue where its version reads a property.
+
 THERE IS NO bump_line FOR THIS GROUP. It migrates Spring Boot lines and says so
 plainly for anything else. The move here is apply_recipe with
 org.openrewrite.maven.ChangePropertyValue, which this corpus has run 330 times,
@@ -24,10 +36,11 @@ name: one property is read in several places and the report shows only some of
 them, three on the module measured here, its own declaration, the BOM import and
 the plugin version.
 
-CROSSING FROM 2 TO 3 IS A JAKARTA MIGRATION, not a number. Both repositories here
-that crossed it renamed javax to jakarta through their own sources, 15 files in
-one and 16 in the other, and the recipe for that is
-org.openrewrite.java.migrate.jakarta.JavaxEEApiToJakarta. An io.quarkiverse
-artifact is outside the platform, keeps its own number, and has to cross with it:
-pagopa-gpd-payments-pull went to 3.2.0.Final and took
+CROSSING FROM 2 TO 3 IS A JAKARTA MIGRATION, not a number, and this is the phase
+that can carry one, because the module gate and its repair turns are still ahead
+of you. Both repositories here that crossed it renamed javax to jakarta through
+their own sources, 15 files in one and 16 in the other, and the recipe for that
+is org.openrewrite.java.migrate.jakarta.JavaxEEApiToJakarta. An io.quarkiverse
+artifact is outside the platform, keeps its own number, and has to cross with
+it: pagopa-gpd-payments-pull went to 3.2.0.Final and took
 io.quarkiverse.quarkus-reactive-h2-client from 0.1.1 to 0.2.2.
