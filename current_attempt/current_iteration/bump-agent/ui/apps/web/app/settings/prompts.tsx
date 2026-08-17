@@ -2,11 +2,47 @@
 
 import { useEffect, useState } from 'react'
 import type { AgentPrompt } from '@bjv/types'
-import { CARDS, EmptyNote, PromptCard, TabRow } from '@bjv/ui'
+import { CARDS, EmptyNote, PromptCard, TabRow, lanesOf } from '@bjv/ui'
 import { href, read } from '@/lib/api'
 import { BomFile, type Bom } from './bom'
 
 const HOPS = ['8-11', '11-17', '17-21', '21-25'] as const
+
+/**
+ * THE HEAD OF A LANE, WHICH IS THE THING THAT MAKES IT A LANE.
+ *
+ * Three platforms in three columns is only a comparison if a reader can tell which column is
+ * which without reading a suffix on every card, and it is only true if the columns are columns.
+ * They were neither: the cards sat in an auto-fit grid whose column count came from the viewport,
+ * so the alignment held at one width and quietly failed at another.
+ */
+const LANE_HEAD = {
+  position: 'sticky' as const,
+  top: 0,
+  padding: '0 2px 6px',
+  fontSize: '11px',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '.08em',
+  fontWeight: 700,
+  color: 'var(--text-primary)',
+  borderBottom: '2px solid var(--accent-primary)',
+  marginBottom: '4px',
+}
+
+/**
+ * A PLATFORM WITH NO AGENT FOR THIS ROLE, said out loud.
+ *
+ * Every agent has all three today, so this should never render. It exists because the alternative
+ * to drawing a hole is closing it, and closing it moves every card after it one lane left under a
+ * heading that now lies about it.
+ */
+const LANE_GAP = {
+  border: '1px dashed var(--border-soft)',
+  borderRadius: '8px',
+  padding: '12px 14px',
+  fontSize: '12px',
+  color: 'var(--text-tertiary)',
+}
 
 /**
  * EVERY PROMPT, FOR ONE HOP, IN THE ORDER THE CHAIN REACHES THEM.
@@ -328,16 +364,62 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
                       />
                     ))}
 
-              <div style={CARDS}>
-                {block.agents.map((p) => (
-                  <PromptCard
-                    key={p.name}
-                    prompt={p}
-                    onSave={(text) => write(p.name, { text })}
-                    onRevert={() => write(p.name, { revert: true })}
-                  />
-                ))}
-              </div>
+              {(() => {
+                const { platforms, rows } = lanesOf(block.agents)
+                if (platforms.length === 0) {
+                  return (
+                    <div style={CARDS}>
+                      {block.agents.map((p) => (
+                        <PromptCard
+                          key={p.name}
+                          prompt={p}
+                          onSave={(text) => write(p.name, { text })}
+                          onRevert={() => write(p.name, { revert: true })}
+                        />
+                      ))}
+                    </div>
+                  )
+                }
+                return (
+                  // SCROLLS SIDEWAYS RATHER THAN WRAPPING. Wrapping is what broke it: three lanes
+                  // that become two are not two lanes, they are the same six cards in an order
+                  // nobody can read. A reader on a narrow screen would rather push the third lane
+                  // off the edge and drag it back than be shown a comparison that is not one.
+                  <div style={{ overflowX: 'auto', paddingBottom: '4px' }}>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: `repeat(${platforms.length}, minmax(360px, 1fr))`,
+                        gap: '14px',
+                        alignItems: 'start',
+                      }}
+                    >
+                      {platforms.map((platform) => (
+                        <div key={`lane:${platform}`} style={LANE_HEAD}>
+                          {platform}
+                        </div>
+                      ))}
+                      {rows.flatMap((row) =>
+                        row.cells.map((cell) => {
+                          const p = cell.prompt
+                          return p === null ? (
+                            <div key={`${row.stem}@${cell.platform}`} style={LANE_GAP}>
+                              no {cell.platform} prompt for {row.stem}
+                            </div>
+                          ) : (
+                            <PromptCard
+                              key={p.name}
+                              prompt={p}
+                              onSave={(text) => write(p.name, { text })}
+                              onRevert={() => write(p.name, { revert: true })}
+                            />
+                          )
+                        }),
+                      )}
+                    </div>
+                  </div>
+                )
+              })()}
             </section>
           ))
         )}
