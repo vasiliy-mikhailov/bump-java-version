@@ -75,7 +75,10 @@ fi
 # working tree, so an image built from uncommitted edits is normal and a bare sha would claim
 # otherwise.
 STAMP="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
-if [ -n "$(git status --porcelain 2>/dev/null)" ]; then STAMP="$STAMP-dirty"; fi
+# SCOPED TO WHAT GOES IN THE IMAGE. Unscoped, this repository is permanently dirty: proxy/ carries
+# routing changes that are deliberately never committed and the runs_* trees are gigabytes of
+# untracked sweep output. Every stamp therefore read -dirty, which is the same as no flag at all.
+if [ -n "$(git status --porcelain . 2>/dev/null)" ]; then STAMP="$STAMP-dirty"; fi
 run "cd $R && docker build -q --build-arg BJV_COMMIT=$STAMP -t bjv ."
 
 # ONE LONG-LIVED CONTAINER. The dashboard serves the page and runs the supervisor on a daemon
