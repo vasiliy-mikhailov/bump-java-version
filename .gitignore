@@ -32,7 +32,14 @@ Thumbs.db
 *.log
 
 # Secrets — .env is the per-host config (vLLM endpoint + key). Never commit.
+#
+# THE GLOB, NOT JUST THE NAME. A second run root wanted a second env, so .env.fresh was
+# created beside it: a byte-for-byte copy of the key, untracked, in a PUBLIC repository, one
+# git add -A away from being published. It also made every deploy stamp read -dirty, because
+# the stamp counts untracked files, which is how it was noticed at all.
 .env
+.env.*
+!.env.example
 attempt_3/verify/baseline/
 attempt_4/results/
 attempt_4/iter-001_failed_experiments/
