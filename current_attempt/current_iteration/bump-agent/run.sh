@@ -29,6 +29,11 @@ HOPTOOLS=${BJV_HOPTOOLS:-${BJV_ITER:+$BJV_ITER/hoptools}}
 HOPTOOLS=${HOPTOOLS:-$(cd "$HERE/../hoptools" 2>/dev/null && pwd)}
 : "${HOPTOOLS:?set BJV_HOPTOOLS to the host path of hoptools/}"
 AGENT_IMAGE=${BJV_IMAGE:-bjv}
+# WHAT THE TAG RESOLVED TO WHEN THIS LANE STARTED. bjv moves on every deploy and a running lane
+# keeps the image it began with, so the tag is not an answer to what produced a result. Resolved
+# once here and passed in, because the container cannot ask.
+BJV_IMAGE_ID=$(docker image inspect -f '{{.Id}}' "$AGENT_IMAGE" 2>/dev/null || echo "")
+export BJV_IMAGE_ID
 WS=$ROOT/ws
 RESULTS=$ROOT/results
 mkdir -p "$WS" "$RESULTS" 2>/dev/null

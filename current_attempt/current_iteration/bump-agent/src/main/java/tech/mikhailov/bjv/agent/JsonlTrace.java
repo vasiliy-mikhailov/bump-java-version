@@ -24,6 +24,28 @@ final class JsonlTrace implements Trace, DeepAgentFlowListener {
     private final Path settlements;
     private final String bump;
 
+    /**
+     * WHICH PIPELINE THIS ROW CAME FROM, computed here because this is where the row is written.
+     *
+     * <p>Everything it needs is already held: the bump string carries the hop, and the settlements
+     * file sits in the results root the prompt and bill-of-materials stores hang off. A failure to
+     * work it out must not cost a settlement, so it answers with nothing and the row is written
+     * either way: a bump recorded without its version is worse than one recorded with it, and a
+     * bump not recorded at all is worse than both.
+     */
+    private String version() {
+        try {
+            String[] p = bump.split("\\|");
+            if (p.length < 4) {
+                return "";
+            }
+            return Version.fields(new Hop(Integer.parseInt(p[2]), Integer.parseInt(p[3])),
+                    settlements.getParent() == null ? settlements : settlements.getParent());
+        } catch (RuntimeException cannotTell) {
+            return "";
+        }
+    }
+
     JsonlTrace(Path trace, Path settlements, String bump) {
         this.trace = trace;
         this.settlements = settlements;
@@ -205,7 +227,7 @@ final class JsonlTrace implements Trace, DeepAgentFlowListener {
     public void settled(String bumpKey, String state, String because, boolean baseline, boolean gate) {
         write("settled", of("state", state, "because", because,
                 "baseline", String.valueOf(baseline), "gate", String.valueOf(gate)));
-        Settlement.note(settlements, bumpKey, state, because, baseline, gate);
+        Settlement.note(settlements, bumpKey, state, because, baseline, gate, version());
     }
 
     @Override

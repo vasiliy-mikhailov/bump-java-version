@@ -71,7 +71,12 @@ fi
 # ONE IMAGE. The agent, the dashboard and the supervisor are the same jar with different main
 # classes; three Dockerfiles copying the same artifact meant three builds and three chances for one
 # of them to be a version behind.
-run "cd $R && docker build -q -t bjv ."
+# THE COMMIT GOES IN WITH THE BUILD. -dirty is not cosmetic here: this script packages the
+# working tree, so an image built from uncommitted edits is normal and a bare sha would claim
+# otherwise.
+STAMP="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+if [ -n "$(git status --porcelain 2>/dev/null)" ]; then STAMP="$STAMP-dirty"; fi
+run "cd $R && docker build -q --build-arg BJV_COMMIT=$STAMP -t bjv ."
 
 # ONE LONG-LIVED CONTAINER. The dashboard serves the page and runs the supervisor on a daemon
 # thread. They were two because the supervisor needed the docker socket to stop a lane; a lane now

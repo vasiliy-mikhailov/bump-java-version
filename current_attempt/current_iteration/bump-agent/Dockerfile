@@ -16,6 +16,12 @@ COPY --from=docker:29-cli /usr/local/bin/docker /usr/local/bin/docker
 
 RUN apk upgrade --no-cache \
  && apk add --no-cache git bash openssh-client ca-certificates
+# WHICH COMMIT THIS IMAGE IS, stamped here because nothing downstream can work it out: the lanes
+# run the tag bjv and every deploy moves it. The value carries a -dirty suffix when the tree it was
+# built from had uncommitted changes, which matters because deploy.sh packages the WORKING TREE and
+# not HEAD, so an image can legitimately contain code that is in no commit at all.
+ARG BJV_COMMIT=""
+RUN printf '%s' "$BJV_COMMIT" > /bjv.commit
 COPY target/bump-agent-0.1.0-SNAPSHOT.jar /bump-agent.jar
 COPY run.sh /opt/bjv/run.sh
 RUN chmod +x /opt/bjv/run.sh

@@ -23,13 +23,25 @@ final class Settlement {
 
     static void note(Path file, String bump, String state, String because,
                      boolean baselineGreen, boolean gateGreen) {
+        note(file, bump, state, because, baselineGreen, gateGreen, "");
+    }
+
+    /**
+     * The same row, carrying which pipeline produced it.
+     *
+     * <p>A sweep runs for a fortnight and the harness changes daily, so a settled row without this
+     * cannot be told apart from a settled row produced by different code. See {@link Version}.
+     */
+    static void note(Path file, String bump, String state, String because,
+                     boolean baselineGreen, boolean gateGreen, String version) {
         try {
             if (file.getParent() != null) {
                 Files.createDirectories(file.getParent());
             }
             String row = "{\"at\":\"" + System.currentTimeMillis() + "\",\"bump\":\"" + escape(bump)
                     + "\",\"state\":\"" + escape(state) + "\",\"because\":\"" + escape(because)
-                    + "\",\"baseline\":" + baselineGreen + ",\"gate\":" + gateGreen + "}\n";
+                    + "\",\"baseline\":" + baselineGreen + ",\"gate\":" + gateGreen
+                    + (version.isEmpty() ? "" : "," + version) + "}\n";
             Files.writeString(file, row, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
             System.err.println("settlement: " + e.getMessage());
