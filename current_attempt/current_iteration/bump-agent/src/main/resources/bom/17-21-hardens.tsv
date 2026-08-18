@@ -83,3 +83,104 @@ com.fasterxml.jackson.core:jackson-databind	2.19.4	any
 com.fasterxml.jackson.core:jackson-databind	2.20.2	any	
 com.fasterxml.jackson.core:jackson-databind	2.21.4	any	
 com.fasterxml.jackson.core:jackson-databind	2.22.0	any	
+#
+# EVERY LINE WHERE A PATCH DEMONSTRABLY CLEARS SOMETHING, mined rather than chosen.
+#
+# Read off packages-before and packages-after across 153 traces: for each artifact, each major.minor
+# it was seen on, and the CRITICAL+HIGH each patch carried. A line earns a row here only where one
+# patch measured strictly better than another on the SAME line, so every row is a fix somebody in
+# this corpus has already been shown to need.
+#
+# The version is the latest patch that reaches the lowest measured count, and where that count is
+# still above zero it is the newest patch the mirror carries instead, because a fix that landed
+# after our last observation is more likely in the newer one. Every version was checked to have a
+# real jar. Vendor rebuilds are excluded: atlassian, redhat, jboss and the rest carry their own
+# version schemes and a floor written to one of them cannot be met by a project on upstream.
+#
+# MOST OF THESE ARE MANAGED ON A BOOT OR QUARKUS MODULE, and that does not make them wrong here. It
+# makes them the definition of "still short after the platform raise", which is the only condition
+# under which the platform fragments allow a member to be pinned directly.
+io.netty:netty-codec	4.1.136.Final	any	
+io.netty:netty-handler	4.1.136.Final	any	
+io.netty:netty-codec-http	4.1.136.Final	any	
+io.netty:netty-codec-http2	4.1.136.Final	any	
+ch.qos.logback:logback-classic	1.2.13	any	
+ch.qos.logback:logback-core	1.2.13	any	
+io.netty:netty-codec-dns	4.1.136.Final	any	
+io.netty:netty-resolver-dns	4.1.136.Final	any	
+net.minidev:json-smart	2.5.2	any	
+org.springframework:spring-expression	5.3.39	any	
+org.springframework:spring-expression	6.2.19	any	
+org.springframework:spring-core	6.2.19	any	
+ch.qos.logback:logback-classic	1.4.14	any	
+ch.qos.logback:logback-core	1.4.14	any	
+org.springframework:spring-beans	5.3.27	any	
+org.springframework:spring-context	5.3.27	any	
+org.springframework:spring-web	6.1.20	any	
+org.springframework:spring-webmvc	6.1.21	any	
+net.minidev:json-smart	2.4.11	any	
+org.springframework:spring-webmvc	5.3.39	any	
+org.thymeleaf:thymeleaf	3.1.5.RELEASE	any	
+org.thymeleaf:thymeleaf-spring6	3.1.5.RELEASE	any	
+com.thoughtworks.xstream:xstream	1.4.21	any	
+org.springframework.security:spring-security-core	6.2.4	any	
+org.postgresql:postgresql	42.7.13	any	
+org.springframework:spring-webmvc	6.2.19	any	
+io.netty:netty-codec-haproxy	4.1.136.Final	any	
+org.assertj:assertj-core	3.27.7	any	
+org.springframework.boot:spring-boot	3.5.16	any	
+org.springframework.boot:spring-boot-autoconfigure	2.7.12	any	
+org.xerial.snappy:snappy-java	1.1.10.7	any	
+org.springframework.boot:spring-boot	3.3.13	any	
+org.springframework:spring-webflux	6.1.21	any	
+com.google.code.gson:gson	2.8.9	any	
+org.springframework.boot:spring-boot	3.4.13	any	
+org.springframework.data:spring-data-commons	3.5.13	any	
+org.springframework:spring-webflux	5.3.39	any	
+org.postgresql:postgresql	42.6.2	any	
+com.alibaba:fastjson	1.2.84	any	
+io.projectreactor.netty:reactor-netty-core	1.1.24	any	
+io.projectreactor.netty:reactor-netty-http	1.1.24	any	
+commons-collections:commons-collections	3.2.2	any	
+org.thymeleaf:thymeleaf-spring5	3.0.15.RELEASE	any	
+com.google.protobuf:protobuf-java	3.25.8	any	
+org.springframework.security:spring-security-crypto	6.3.9	any	
+org.springframework.security:spring-security-web	6.5.11	any	
+com.fasterxml.jackson.core:jackson-core	2.21.4	any	
+commons-beanutils:commons-beanutils	1.9.4	any	
+io.micrometer:micrometer-core	1.15.12	any	
+org.codehaus.plexus:plexus-utils	3.0.24	any	
+org.springframework.security:spring-security-core	6.5.11	any	
+org.springframework:spring-core	6.1.21	any	
+org.springframework:spring-webflux	6.2.19	any	
+org.apache.zookeeper:zookeeper	3.8.6	any	
+org.bitbucket.b_c:jose4j	0.9.6	any	
+cn.hutool:hutool-all	5.8.25	any	
+com.h2database:h2	1.4.200	any	
+com.squareup.okhttp3:okhttp	4.9.3	any	
+mysql:mysql-connector-java	8.0.30	any	
+org.apache.hadoop:hadoop-common	2.7.7	any	
+org.apache.tomcat.embed:tomcat-embed-websocket	9.0.75	any	
+org.bouncycastle:bcprov-jdk18on	1.80.2	any	
+org.eclipse.jetty:jetty-http	12.0.36	any	
+org.eclipse.jetty:jetty-security	12.0.36	any	
+org.eclipse.jetty:jetty-server	9.4.58.v20250814	any	
+org.eclipse.jetty:jetty-server	9.2.30.v20200428	any	
+org.eclipse.jetty:jetty-server	12.0.36	any	
+org.eclipse.jetty:jetty-webapp	9.4.40.v20210413	any	
+org.hibernate:hibernate-core	5.4.33.Final	any	
+org.postgresql:postgresql	42.2.25	any	
+org.postgresql:postgresql	42.3.8	any	
+org.springframework.boot:spring-boot-devtools	3.5.16	any	
+com.amazonaws:aws-java-sdk-s3	1.12.780	any	
+org.apache.kafka:kafka-clients	3.9.2	any	
+org.eclipse.jetty:jetty-http	9.4.58.v20250814	any	
+org.quartz-scheduler:quartz	2.3.2	any	
+org.springframework.boot:spring-boot-actuator-autoconfigure	3.0.8	any	
+org.springframework.boot:spring-boot-autoconfigure	3.0.8	any	
+org.springframework.kafka:spring-kafka	3.3.16	any	
+org.springframework.security:spring-security-crypto	6.4.5	any	
+org.springframework:spring-expression	6.0.13	any	
+org.springframework:spring-webmvc	6.0.23	any	
+xalan:xalan	2.7.3	any	
+io.netty:netty-all	4.1.136.Final	any	

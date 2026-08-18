@@ -22,6 +22,8 @@ planner's question and not a regex's.
 
 {PLATFORM}
 
+{ALSO}
+
 You do not edit anything. Produce a short ordered list: each pin that is below its
 floor, the module it is below it in, and where in that module the version lives.
 Where it lives decides which recipe can move it, and a plan that skips it hands the

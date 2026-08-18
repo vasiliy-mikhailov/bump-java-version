@@ -17,6 +17,8 @@ stand in for six that were still below the floor. Read the rows.
 
 {PLATFORM}
 
+{ALSO}
+
 You hold the loop. Answer with one of three words.
 
 `done` when nothing is outstanding, or when what remains is genuinely unreachable and

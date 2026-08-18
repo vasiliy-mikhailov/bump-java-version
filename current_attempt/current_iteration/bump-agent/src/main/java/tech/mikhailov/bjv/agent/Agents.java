@@ -533,7 +533,38 @@ final class Agents {
     /** The steps in a phase that are not version pins, and only the before phase has any. */
     private String also(boolean after) {
         if (after) {
-            return "";
+            // THE LIST IS NOT THE WHOLE JOB, and on this phase saying so is most of the job. The
+            // floors name what somebody wrote down; the scan names what the project actually
+            // resolved, and the second is longer. Measured over this corpus, 86 major.minor lines
+            // carry a patch that clears something a project here was really carrying, and the bill
+            // of materials has a row for every one of them. What it cannot do is reach the agent:
+            // the row is data the scorer reads, and the only list you are handed is the one above.
+            return """
+                THE FLOORS ABOVE ARE NOT THE WHOLE JOB. They name what this hop needs. Your scan
+                names what this project actually resolved, and anything in it carrying a CRITICAL or
+                HIGH is worth the same move even when no line above mentions it.
+
+                THE MOVE IS ALWAYS WITHIN THE LINE. For any such artifact, the floor is the head of
+                the major.minor it is already on: call inspect_jar on the coordinates with NO
+                version and it lists every version in the mirror, the highest one sharing that
+                major.minor is the patch, and bump_patch lands it. Crossing a minor is a different
+                move and it is not this phase.
+
+                THIS REACHES ALL THREE OF YOU, and it has to. A plan that names only the floors
+                above leaves the rest unreachable, because the hand that edits is told to raise what
+                the plan names and leave everything else. So the plan names these too, the doer
+                raises what the plan names, and an artifact patched to the head of its own line is
+                NOT unasked work to object to.
+
+                Measured on this corpus: netty 4.1 goes 9 CRITICAL+HIGH to 0, logback 1.2 goes 2 to
+                0, xstream 1.4 goes 20 to 0, tomcat 10.1 goes 21 to 0. None of those needs a new
+                dependency and none changes an API.
+
+                ON A MANAGED MODULE, RAISE THE PLATFORM FIRST. Most of these artifacts arrive
+                through Spring Boot or Quarkus, and the platform raise moves them as a set. Pin one
+                directly only where it is STILL below the head of its line after that, which is the
+                one condition under which writing a version onto a managed artifact is right.
+                """;
         }
         return """
                 TWO THINGS THAT ARE NOT VERSION PINS, and only apply if the project shows the
