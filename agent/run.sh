@@ -213,7 +213,7 @@ one() {
 
   docker run --rm --name "bjvagent_$slug" \
     "${vols[@]}" "${envs[@]}" \
-    "$AGENT_IMAGE" tech.mikhailov.bjv.agent.Bump "$w" "$repo|$sha|$from|$to" "$RESULTS" \
+    "$AGENT_IMAGE" tech.mikhailov.bjv.bump.Bump "$w" "$repo|$sha|$from|$to" "$RESULTS" \
     >> "$ROOT/$slug.log" 2>&1
   rm -f "$RESULTS/claims/$bslug" 2>/dev/null
   echo "[$slug] done: $(grep -c . "$ROOT/$slug.log" 2>/dev/null) log lines"

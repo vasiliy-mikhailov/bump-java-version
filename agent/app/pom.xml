@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>tech.mikhailov.bjv</groupId>
+    <artifactId>bump-agent-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+  </parent>
+  <!-- STILL bump-agent, SO THE JAR IS STILL bump-agent-0.1.0-SNAPSHOT.jar. Only the directory in
+       front of it moved, from target/ to app/target/. The Dockerfile COPYs that path by name and
+       deploy.sh ships it by name, and renaming the artifact as well would have been two moving
+       parts in the one place this repo has already been burned. -->
+  <artifactId>bump-agent</artifactId>
+  <packaging>jar</packaging>
+  <!-- THIS PIPELINE: the bump chain, its prompts and BOM tables, and the dashboard that reads the
+       record. It is the only module that shades, and the only one that has a main class. -->
+  <dependencies>
+    <dependency>
+      <groupId>tech.mikhailov.bjv</groupId>
+      <artifactId>bump-agent-engine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tech.mikhailov.bjv</groupId>
+      <artifactId>bump-agent-jvm</artifactId>
+    </dependency>
+    <!-- Declared here as well as in engine because the bump and web packages import deepagents
+         types directly, and a compile that leans on someone else's transitive is a compile that
+         breaks when that someone else stops needing it. -->
+    <dependency>
+      <groupId>com.deepagents</groupId>
+      <artifactId>langchain4j-deepagents</artifactId>
+    </dependency>
+    <!-- The logging binding belongs to the program, not to the libraries: engine and jvm leave the
+         choice to whoever consumes them. -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+  <build><plugins>
+    <!-- One fat jar: the deepagents artifact is a locally-installed SNAPSHOT, so the build host
+         ships a self-contained binary rather than asking every other machine to install it. The
+         two sibling modules land in here the same way every other dependency does. -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <executions><execution>
+        <phase>package</phase>
+        <goals><goal>shade</goal></goals>
+        <configuration>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <mainClass>tech.mikhailov.bjv.bump.Bump</mainClass>
+            </transformer>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+          </transformers>
+          <filters><filter>
+            <artifact>*:*</artifact>
+            <excludes><exclude>META-INF/*.SF</exclude><exclude>META-INF/*.DSA</exclude>
+              <exclude>META-INF/*.RSA</exclude></excludes>
+          </filter></filters>
+        </configuration>
+      </execution></executions>
+    </plugin>
+  </plugins></build>
+</project>

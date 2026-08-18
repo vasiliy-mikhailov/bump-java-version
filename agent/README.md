@@ -40,6 +40,33 @@ certifies. Neither gets `write_file`. An edit under a test source root is refuse
 
 **Free things first.** Every loop turn tries `Walls` before spending a model call.
 
+## The modules
+
+```
+agent/           the Maven parent: every version is decided here, nothing is built here
+  engine/        the agent loop, the model wiring, the trace and the JSONL record it is
+                 written as. Depends on no other module
+  jvm/           what a JVM project is: the module tree, a build under a chosen JDK, the
+                 bytecode majors it actually reached, gradle distributions, jars.
+                 Depends on engine
+  app/           this pipeline: the bump chain with its prompts and BOM tables, and the
+                 dashboard that reads the record. Depends on both, and is the only module
+                 that shades
+```
+
+The split is so that **engine and jvm can leave**: neither depends on anything above it, so
+another pipeline can take them as jars without taking the bump with them. `bump` and `web`
+are one module because they are both this pipeline, and a fourth module would buy nothing.
+
+```
+mvn -B -o test       # every module, one reactor pass, per-module totals that add up
+mvn -B -o package    # -> app/target/bump-agent-0.1.0-SNAPSHOT.jar
+```
+
+Both run from `agent/`. The jar path is written down twice, in `Dockerfile` (which `COPY`s
+it rather than building it) and in `deploy.sh` (which ships it). They move together, or the
+image reuses the cached layer and ships the previous jar while reporting success.
+
 ## Running on an internal VM
 
 Compose does **not** migrate anything by itself. `dashboard` reads `results/`. `run.sh` (or the
@@ -67,7 +94,7 @@ absolute location so nested `docker run -v $BJV_WS:/work` hits the checkout:
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
   -v "$WS:$WS" -v "$BJV_HOPTOOLS:$BJV_HOPTOOLS:ro" \
   -e OC_KEY -e OC_BASE -e OC_MODEL -e BJV_HOPTOOLS -e BJV_JDK_IMAGE \
-  "$BJV_IMAGE" tech.mikhailov.bjv.agent.Bump \
+  "$BJV_IMAGE" tech.mikhailov.bjv.bump.Bump \
   "$WS" 'group/project|sha|11|17' "$RESULTS"
 ```
 

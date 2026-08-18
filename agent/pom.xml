@@ -1,9 +1,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
   <groupId>tech.mikhailov.bjv</groupId>
-  <artifactId>bump-agent</artifactId>
+  <artifactId>bump-agent-parent</artifactId>
   <version>0.1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
+  <!-- THREE LAYERS, AND TWO OF THEM CAN LEAVE. engine is the agent loop, the model wiring and the
+       record; jvm is everything that knows what a JDK, a pom, a gradle wrapper and a jar are; app
+       is THIS pipeline, the bump chain and the dashboard it is read through.
+
+       engine depends on nothing else here and jvm depends only on engine, so another pipeline can
+       take either as a jar without taking the bump with it. bump and web are one module and not
+       two because they are both this pipeline: web reads what bump wrote, and separating them buys
+       nothing today. app is also the only module that shades, because a library that shades is a
+       library nobody can depend on. -->
+  <modules>
+    <module>engine</module>
+    <module>jvm</module>
+    <module>app</module>
+  </modules>
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -11,7 +25,16 @@
     <!-- langchain4j 1.9.1 still ships jackson 2.20.1 and opennlp 2.5.4; pin the patched lines. -->
     <jackson.version>2.21.5</jackson.version>
     <opennlp.version>2.5.9</opennlp.version>
+    <deepagents.version>0.1.0-SNAPSHOT</deepagents.version>
+    <slf4j.version>2.0.16</slf4j.version>
+    <junit.version>5.11.4</junit.version>
+    <surefire.version>3.2.5</surefire.version>
+    <shade.version>3.6.0</shade.version>
   </properties>
+  <!-- EVERY VERSION IS DECIDED HERE. Three poms that each name a version is three places for the
+       jackson and opennlp pins to drift apart, and those two are security pins: they exist because
+       langchain4j ships older lines transitively, so a module that resolved its own would quietly
+       ship the unpatched one. -->
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -26,56 +49,62 @@
         <artifactId>opennlp-tools</artifactId>
         <version>${opennlp.version}</version>
       </dependency>
+      <dependency>
+        <groupId>tech.mikhailov.bjv</groupId>
+        <artifactId>bump-agent-engine</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>tech.mikhailov.bjv</groupId>
+        <artifactId>bump-agent-jvm</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.deepagents</groupId>
+        <artifactId>langchain4j-deepagents</artifactId>
+        <version>${deepagents.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>dev.langchain4j</groupId>
+        <artifactId>langchain4j-http-client-jdk</artifactId>
+        <version>${langchain4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
-    <dependency>
-      <groupId>com.deepagents</groupId>
-      <artifactId>langchain4j-deepagents</artifactId>
-      <version>0.1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>dev.langchain4j</groupId>
-      <artifactId>langchain4j-http-client-jdk</artifactId>
-      <version>${langchain4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>2.0.16</version>
-      <scope>runtime</scope>
-    </dependency>
+    <!-- Every module has tests and all of them run in one reactor pass, so the test framework is
+         inherited rather than repeated three times. -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>5.11.4</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <build><plugins>
-    <!-- One fat jar: the deepagents artifact is a locally-installed SNAPSHOT, so the build host
-         ships a self-contained binary rather than asking every other machine to install it. -->
+  <build><pluginManagement><plugins>
+    <!-- SUREFIRE IS PINNED, NOT INHERITED FROM THE LIFECYCLE. 3.2.5 is exactly what Maven 3.9.9
+         was already binding by default, so this changes no behaviour today; what it buys is that
+         all three modules run their tests on one named version, and that the version stops moving
+         when the machine's Maven does. `mvn test` from here runs the whole reactor: the totals are
+         per module now, and they add up to what the single module used to print. -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-surefire-plugin</artifactId>
+      <version>${surefire.version}</version>
+    </plugin>
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-shade-plugin</artifactId>
-      <version>3.6.0</version>
-      <executions><execution>
-        <phase>package</phase>
-        <goals><goal>shade</goal></goals>
-        <configuration>
-          <transformers>
-            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-              <mainClass>tech.mikhailov.bjv.agent.Bump</mainClass>
-            </transformer>
-            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-          </transformers>
-          <filters><filter>
-            <artifact>*:*</artifact>
-            <excludes><exclude>META-INF/*.SF</exclude><exclude>META-INF/*.DSA</exclude>
-              <exclude>META-INF/*.RSA</exclude></excludes>
-          </filter></filters>
-        </configuration>
-      </execution></executions>
+      <version>${shade.version}</version>
     </plugin>
-  </plugins></build>
+  </plugins></pluginManagement></build>
 </project>

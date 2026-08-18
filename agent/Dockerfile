@@ -6,6 +6,9 @@
 # com.deepagents:langchain4j-deepagents in a local repository, which no build host has. See
 # deploy.sh, which does the three steps in the one order that works.
 #
+# The build context is the agent directory, which is the Maven parent: engine, jvm and app
+# are three modules of one reactor and only app produces the fat jar.
+#
 # THIS TRADES AWAY ONE THING AND IT IS WORTH SAYING. The dashboard used to run from an image with no
 # docker client in it at all, so an image that could not reach the daemon could not be talked into
 # starting a build. Now it carries one, and the only thing between it and the daemon is that its
@@ -22,9 +25,13 @@ RUN apk upgrade --no-cache \
 # not HEAD, so an image can legitimately contain code that is in no commit at all.
 ARG BJV_COMMIT=""
 RUN printf '%s' "$BJV_COMMIT" > /bjv.commit
-COPY target/bump-agent-0.1.0-SNAPSHOT.jar /bump-agent.jar
+# app/, NOT target/. engine and jvm are their own modules now and app is the only one that
+# shades, so the jar moved one directory down. This path and the one deploy.sh ships have to
+# be the same string; when they are not, this COPY fails loudly instead of the image quietly
+# carrying whatever was there before.
+COPY app/target/bump-agent-0.1.0-SNAPSHOT.jar /bump-agent.jar
 COPY run.sh /opt/bjv/run.sh
 RUN chmod +x /opt/bjv/run.sh
 EXPOSE 8086
 ENTRYPOINT ["java", "-cp", "/bump-agent.jar"]
-CMD ["tech.mikhailov.bjv.agent.Bump"]
+CMD ["tech.mikhailov.bjv.bump.Bump"]

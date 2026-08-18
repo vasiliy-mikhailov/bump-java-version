@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 # Build here, ship the jar, then build the image there. IN THAT ORDER, AND ALL THREE.
 #
-# The Dockerfile copies target/bump-agent-0.1.0-SNAPSHOT.jar rather than building it, and the jar
-# can only be built on a machine that has com.deepagents:langchain4j-deepagents installed locally,
-# which the host does not. So syncing src/ and running `docker build` on the host does exactly
-# nothing: the COPY layer hits cache and the image ships the previous jar. It reports success. A
-# live sweep ran an hour of already-committed-and-pushed code that way, and the trace is what
-# caught it, not the deploy.
+# The Dockerfile copies app/target/bump-agent-0.1.0-SNAPSHOT.jar rather than building it, and
+# the jar can only be built on a machine that has com.deepagents:langchain4j-deepagents
+# installed locally, which the host does not. So syncing the sources and running `docker build`
+# on the host does exactly nothing: the COPY layer hits cache and the image ships the previous
+# jar. It reports success. A live sweep ran an hour of already-committed-and-pushed code that
+# way, and the trace is what caught it, not the deploy.
+#
+# THAT PATH HAS A MODULE IN FRONT OF IT NOW. engine, jvm and app are separate jars and only
+# app shades, so the artifact is app/target/bump-agent-0.1.0-SNAPSHOT.jar. It is named here
+# and in the Dockerfile, and those two move together or the image ships the previous jar.
 set -euo pipefail
 cd "$(dirname "$0")"
 H=${BJV_HOST:-mh}
@@ -55,12 +59,19 @@ docker run --rm \
     pnpm config set store-dir /pnpm-store
     pnpm install --frozen-lockfile
     pnpm build'
-rm -rf src/main/resources/ui
-cp -r ui/apps/web/out src/main/resources/ui
+rm -rf app/src/main/resources/ui
+cp -r ui/apps/web/out app/src/main/resources/ui
+# ONE REACTOR PASS, FROM THE PARENT. engine, then jvm, then app; the shade runs in app and
+# nowhere else, so the only fat jar this produces is app/target/bump-agent-0.1.0-SNAPSHOT.jar.
 mvn -B -o package
 if [ -z "$LOCAL" ]; then
-  rsync -a --delete src/ "$H:$R/src/"
-  rsync -a target/bump-agent-0.1.0-SNAPSHOT.jar "$H:$R/target/"
+  # THREE SOURCE TREES AND THE PARENT POM. --delete keeps the far side from accumulating
+  # files this checkout no longer has; target/ is excluded, and rsync protects an excluded
+  # path on the receiver, so a remote build output is never deleted out from under a build.
+  rsync -a --delete --exclude=target/ pom.xml engine jvm app "$H:$R/"
+  # The jar lands in a directory that a fresh checkout does not have yet.
+  run "mkdir -p $R/app/target"
+  rsync -a app/target/bump-agent-0.1.0-SNAPSHOT.jar "$H:$R/app/target/"
 fi
 # THE DOCKERFILES TOO. They live here and are built there, so a new one is a build failure and an
 # edited one is silently the old one -- the same shape as this script not shipping itself, which

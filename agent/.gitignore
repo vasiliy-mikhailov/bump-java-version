@@ -4,7 +4,7 @@ results/
 
 # The UI is a pnpm workspace that deploy.sh builds before the jar. Everything below is a build
 # product: node_modules and .next are regenerable, and the static export is copied into
-# src/main/resources/ui to be served off the classpath, so the jar carries it and git need not.
+# app/src/main/resources/ui to be served off the classpath, so the jar carries it and git need not.
 # The playwright shots are the same, output rather than source.
 **/node_modules/
 **/.next/
@@ -13,4 +13,11 @@ results/
 **/test-results/
 **/shots/
 *.tsbuildinfo
-src/main/resources/ui/
+app/src/main/resources/ui/
+
+# maven-shade writes dependency-reduced-pom.xml beside whichever module it shades, so this
+# one now appears under app/. It is a build output and was tracked by accident: the copy in
+# git had gone stale enough to name a main class that no longer exists, and because it is
+# rewritten by every package it made `git status --porcelain .` dirty forever, which is what
+# deploy.sh stamps the image from.
+dependency-reduced-pom.xml
