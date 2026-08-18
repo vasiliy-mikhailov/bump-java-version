@@ -273,18 +273,41 @@ final class Corpus {
      */
     private final Map<String, Long> began = new ConcurrentHashMap<>();
 
+    /**
+     * WHEN THIS BUMP FIRST WROTE ANYTHING, cached, but NEVER cached as nought.
+     *
+     * <p>This used computeIfAbsent, which memoises whatever the function returns, and the function
+     * returns nought when the trace file is not there yet. A page load a few seconds after a sweep
+     * starts finds most lanes still cloning and no trace written, so nought was remembered for the
+     * rest of the process: the column read "-" for the whole run while the traces beneath it grew to
+     * hundreds of lines. Observed on a fresh sweep, where three of sixteen rows showed a duration
+     * and the other thirteen never would have.
+     *
+     * <p>A missing measurement is not a measurement of nought, which is the most expensive recurring
+     * mistake in this corpus and the reason compliance reports minus one rather than zero per cent.
+     * Here it wore a cache. So the answer is only remembered once there is one: a bump that has not
+     * written yet is re-read next time, which costs one stat of a file the caller is about to read
+     * anyway.
+     */
     private long startedAt(String slug) {
-        return began.computeIfAbsent(slug, key -> {
-            Path trace = results.trace(key);
-            if (!Files.isRegularFile(trace)) {
-                return 0L;
-            }
-            try (var lines = Files.lines(trace)) {
-                return lines.findFirst().map(l -> Results.num(Json.row(l).get("at"))).orElse(0L);
-            } catch (IOException | RuntimeException unreadable) {
-                return 0L;
-            }
-        });
+        Long known = began.get(slug);
+        if (known != null && known != 0L) {
+            return known;
+        }
+        Path trace = results.trace(slug);
+        if (!Files.isRegularFile(trace)) {
+            return 0L;
+        }
+        long at;
+        try (var lines = Files.lines(trace)) {
+            at = lines.findFirst().map(l -> Results.num(Json.row(l).get("at"))).orElse(0L);
+        } catch (IOException | RuntimeException unreadable) {
+            return 0L;
+        }
+        if (at != 0L) {
+            began.put(slug, at);
+        }
+        return at;
     }
 
     /**
