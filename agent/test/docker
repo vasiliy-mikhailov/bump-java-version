@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# A DOCKER THAT ONLY HAS TO BE HONEST ABOUT LANES. run.sh reaches the outside world through exactly
+# two commands, docker and git, so shimming those two on PATH is the smallest seam that lets one(),
+# inflight(), running() and the watchdog run unmodified: the claim files are real, the container
+# registry they are checked against is a directory, and the cap arithmetic under test is the
+# script's own rather than a model of it.
+#
+# Registry: $BJV_FAKE/ps holds one file per running container, named as `docker ps` would name it.
+# A lane is a process that creates its file, blocks, and removes it however it ends, which is what
+# a real lane is from run.sh's point of view.
+set -u
+PS=${BJV_FAKE:?BJV_FAKE unset}/ps
+EV=$BJV_FAKE/events.log
+mkdir -p "$PS"
+
+ev() { printf '%s\t%s\n' "$(date +%s%3N)" "$*" >> "$EV" 2>/dev/null; }
+
+sub=${1:-}; shift || true
+case "$sub" in
+  ps)
+    ls "$PS" 2>/dev/null
+    exit 0 ;;
+  image)
+    # `docker image inspect -f '{{.Id}}' bjv`
+    echo "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    exit 0 ;;
+  rm)
+    # `docker rm -f bjvagent_<slug>` from the postpone path: the lane must actually die.
+    for a in "$@"; do
+      case "$a" in bjvagent_*) rm -f "$PS/$a"; ev "rm $a" ;; esac
+    done
+    exit 0 ;;
+  run) ;;
+  *) exit 0 ;;
+esac
+
+name=""
+mounts=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --name) name=${2:-}; shift 2 ;;
+    -v) mounts+=("${2:-}"); shift 2 ;;
+    -e) shift 2 ;;
+    --rm|-d|-i|-t|-it) shift ;;
+    -*) shift ;;
+    *) break ;;
+  esac
+done
+cmd=("$@")            # image, then the command
+rest=("${cmd[@]:1}")
+
+# Container path back to host path, so the housekeeping runs really do what run.sh believes they do.
+# The postponed-marker clearing especially: a shim that exits 0 without removing anything would make
+# a correct fix look broken, because the `||` fallback never fires after a successful docker.
+unmap() {
+  local p=$1 m host cont
+  for m in ${mounts+"${mounts[@]}"}; do
+    host=${m%%:*}; cont=${m#*:}; cont=${cont%%:*}
+    case "$p" in
+      "$cont") printf '%s' "$host"; return 0 ;;
+      "$cont"/*) printf '%s%s' "$host" "${p#$cont}"; return 0 ;;
+    esac
+  done
+  return 1
+}
+
+case "$name" in
+  bjvagent_*) ;;
+  *)
+    case "${rest[0]:-}" in
+      chown) exit 0 ;;                       # the one-way ownership fix at startup
+      rm)                                    # `alpine rm -rf /w/<slug>`
+        tgt=${rest[$(( ${#rest[@]} - 1 ))]}
+        h=$(unmap "$tgt") && [ -n "$h" ] && rm -rf "$h"
+        exit 0 ;;
+      sh)                                    # `alpine sh -c 'rm -f /p/*'`
+        inner=${rest[*]:2}
+        case "$inner" in
+          "rm -f "*)
+            g=${inner#rm -f }; d=${g%/\*}
+            h=$(unmap "$d") && [ -n "$h" ] && rm -f "$h"/* 2>/dev/null
+            ev "cleared $d"
+            ;;
+        esac
+        exit 0 ;;
+    esac
+    exit 0 ;;
+esac
+
+# THE LANE. Blocks for a per-slug time, holds its registry entry for exactly that long, and settles
+# the bump on a clean exit so the next pass skips it -- the same two facts a real lane leaves behind.
+slug=${name#bjvagent_}
+key=""; res=""
+i=0
+while [ $i -lt ${#rest[@]} ]; do
+  if [ "${rest[$i]}" = "tech.mikhailov.bjv.bump.Bump" ]; then
+    key=${rest[$(( i + 2 ))]:-}; res=${rest[$(( i + 3 ))]:-}
+  fi
+  i=$(( i + 1 ))
+done
+
+dur=$(awk -F'\t' -v s="$slug" '$1==s{print $2; exit}' "$BJV_FAKE/durations.tsv" 2>/dev/null)
+case "${dur:-}" in ''|*[!0-9]*) dur=${BJV_FAKE_DUR:-2} ;; esac
+
+: > "$PS/$name"
+ev "start $slug ${dur}s"
+trap 'rm -f "$PS/$name" 2>/dev/null' EXIT
+
+steps=$(( dur * 10 ))
+while [ $steps -gt 0 ]; do
+  [ -e "$PS/$name" ] || { ev "killed $slug"; exit 137; }   # docker rm -f, i.e. postponed
+  sleep 0.1
+  steps=$(( steps - 1 ))
+done
+
+[ -n "$res" ] && printf '{"bump":"%s","state":"PASS"}\n' "$key" >> "$res/settlements.jsonl"
+ev "exit $slug"
+exit 0

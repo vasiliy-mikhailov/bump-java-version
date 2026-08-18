@@ -92,6 +92,34 @@ STAMP="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 if [ -n "$(git status --porcelain . 2>/dev/null)" ]; then STAMP="$STAMP-dirty"; fi
 run "cd $R && docker build -q --build-arg BJV_COMMIT=$STAMP -t bjv ."
 
+# EVERY ENTRY CLASS MUST LOAD, CHECKED BEFORE ANYTHING IS RECREATED.
+#
+# This cost nine hours of a live sweep and about twelve hundred no-op bumps. Bump moved from
+# tech.mikhailov.bjv.agent to tech.mikhailov.bjv.bump in a package split. The image was correct,
+# run.sh on disk was correct, deploy.sh was correct, and every lane still died instantly with
+# ClassNotFoundException, because the LAUNCHER ALREADY RUNNING had the old name parsed in memory.
+# Nothing said a word: the deploy reported success and the evidence was in per-lane logs nobody
+# reads.
+#
+# A class that cannot be loaded is the cheapest deploy failure to detect and one of the most
+# expensive to miss. The names are read out of the scripts that invoke them rather than typed here,
+# so this cannot drift from what is actually launched.
+for cls in $(grep -ho "tech\.mikhailov\.bjv\.[a-z]*\.[A-Z][A-Za-z]*" "$HERE/run.sh" "$HERE/deploy.sh" | sort -u); do
+  if run "docker run --rm --entrypoint java bjv -cp /bump-agent.jar $cls 2>&1 | grep -q ClassNotFoundException"; then
+    echo "deploy.sh: $cls is launched by a script here but cannot be loaded from the image" >&2
+    exit 1
+  fi
+done
+
+# AND A RUNNING LAUNCHER IS NOW STALE, which no image check can fix. bash parses a function when it
+# reads it, so a run.sh already executing keeps the class names and paths it started with. Saying so
+# is the difference between a restart somebody schedules and an outage somebody discovers.
+if pgrep -f "bash ./run.s[h]" >/dev/null 2>&1; then
+  echo "deploy.sh: a run.sh launcher may be running with the PREVIOUS script in memory." >&2
+  echo "           Class and path changes reach it only on restart; lanes it starts until then" >&2
+  echo "           use the old names. Restart it while the in-flight lanes are cheap to lose." >&2
+fi
+
 # ONE LONG-LIVED CONTAINER. The dashboard serves the page and runs the supervisor on a daemon
 # thread. They were two because the supervisor needed the docker socket to stop a lane; a lane now
 # stops itself when it sees its own postponement, so nothing here needs the daemon and a public

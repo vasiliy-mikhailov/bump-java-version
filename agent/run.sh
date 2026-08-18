@@ -360,7 +360,22 @@ while read -r slug repo sha from to; do
   one "$slug" "$repo" "$sha" "$from" "$to" &
   done_n=$((done_n+1))
 done < "$MAN"
-wait
+# A PASS THAT HAS RUN OUT OF ROWS HAS NOT RUN OUT OF WORK, and draining before looking again is
+# what left seven of sixteen slots idle for hours. The rows a supervisor set aside are exactly the
+# work those slots could do, and they are only reconsidered on the next pass, which this `wait`
+# would not let start until the slowest straggler exited.
+#
+# THE SAME REASONING AS THE GUARD INSIDE THE LOOP, one level up. That guard was deliberately
+# changed from parking on a completion to polling, because max_lanes was being re-read at exactly
+# the moments its value could not matter. This was the other such moment.
+#
+# So when something is set aside, wait only for a slot rather than for the tail. When nothing is,
+# there is no next pass to start and draining is the honest thing to do.
+if [ "$postponed_n" -gt 0 ]; then
+  while [ "$(running)" -ge "$(mine)" ]; do sleep 2; done
+else
+  wait
+fi
 echo "manifest complete: $done_n launched, $skipped already settled, $postponed_n postponed"
 
 # NOTHING LEFT BUT THE ONES THAT WERE SET ASIDE. A postponement frees a slot for work that can
@@ -373,9 +388,22 @@ echo "manifest complete: $done_n launched, $skipped already settled, $postponed_
   # repos hands the slot straight back to the lane that was going nowhere. The smoke test caught
   # this on its first run -- a pass that skipped one bump and launched another cleared the marker
   # regardless, which made postponing mean nothing at all.
-  if [ "$done_n" -gt 0 ] || [ "$postponed_n" -eq 0 ] || [ "$rounds" -ge 3 ]; then
+  # TWO DECISIONS, AND THEY WERE ONE. Whether to go round again, and whether to CLEAR what was set
+  # aside, are not the same question, and conflating them is what made a productive pass exit with
+  # work still on the table. Going again is right whenever something is set aside: the pass may
+  # have launched five hundred repos and still be leaving three slots empty. Clearing is the
+  # narrow one and keeps its old rule.
+  if [ "$postponed_n" -eq 0 ] || [ "$rounds" -ge 3 ]; then
     [ "$postponed_n" -gt 0 ] && echo "$postponed_n left postponed; they run when nothing else is waiting"
     break
+  fi
+  if [ "$done_n" -gt 0 ]; then
+    # NOT CLEARED AFTER A PASS THAT LAUNCHED SOMETHING. A postponement frees a slot for work that
+    # can progress, so it has to outlast every round that still had such work; clearing it here
+    # would hand the slot straight back to the lane that was going nowhere. The pass goes again
+    # anyway, and a bump still set aside is simply skipped again, cheaply.
+    echo "$done_n launched, $postponed_n still set aside; going again without clearing them"
+    continue
   fi
   echo "only postponed bumps remain ($postponed_n); clearing them and going again"
   # THE MARKERS ARE ROOT-OWNED. The supervisor writes them from inside a container, so the launcher

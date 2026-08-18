@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# The other half of the seam. run.sh clones a repo and checks out a sha before it starts a lane;
+# neither fact is under test, so the clone makes an empty directory and the checkout succeeds.
+set -u
+
+cmd=""
+args=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -C|-c) shift 2 ;;
+    -*) shift ;;
+    *) cmd=$1; shift; args=("$@"); break ;;
+  esac
+done
+
+case "$cmd" in
+  clone)
+    dest=""
+    for a in ${args+"${args[@]}"}; do
+      case "$a" in -*) ;; *) dest=$a ;; esac
+    done
+    [ -n "$dest" ] && mkdir -p "$dest"
+    exit 0 ;;
+  ls-remote)
+    echo -e "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef\tHEAD"
+    exit 0 ;;
+  *)
+    exit 0 ;;
+esac
