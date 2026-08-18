@@ -125,7 +125,18 @@ clone_repo() {
     GIT_SSH_COMMAND="ssh -i ${GIT_SSH_KEY} -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new" \
       git clone -q "$url" "$dest"
   elif [ -n "${GIT_TOKEN:-}" ]; then
-    git -c http.extraHeader="Authorization: Bearer ${GIT_TOKEN}" clone -q "$url" "$dest"
+    # BASIC, NOT BEARER, AND THAT IS NOT A PREFERENCE. GitHub accepts a personal access token as a
+    # Bearer credential for git over HTTP; GitLab does not, and refuses the clone outright. Measured
+    # against the local mirror: Bearer FAILS, Basic with oauth2 as the username succeeds, both on
+    # the internal address and through the public name.
+    #
+    # Basic works for BOTH hosts, since GitHub accepts the token as the password with any username,
+    # so this is one form rather than a fork on which host the row happens to name.
+    #
+    # The header rather than credentials in the url: a url carrying a token turns up in git error
+    # text, in ps, and in any log that echoes what it tried to clone.
+    git -c http.extraHeader="Authorization: Basic $(printf 'oauth2:%s' "${GIT_TOKEN}" | base64 | tr -d '\n')" \
+      clone -q "$url" "$dest"
   else
     git clone -q "$url" "$dest"
   fi
