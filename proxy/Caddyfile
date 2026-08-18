@@ -3,7 +3,7 @@
 }
 
 inference.mikhailov.tech {
-	handle_path /qwen-3.6-27b-fp8/* {
+	handle_path /qwen-3.8-27b-nvfp4/* {
 		reverse_proxy inference-vllm:8000 {
 			header_up Host {upstream_hostport}
 		}
@@ -13,8 +13,13 @@ inference.mikhailov.tech {
 			header_up Host {upstream_hostport}
 		}
 	}
+	handle_path /qwen-3.6-27b-nvfp4/* {
+		reverse_proxy q36:8000 {
+			header_up Host {upstream_hostport}
+		}
+	}
 	handle {
-		respond "Not found. Models are served at /qwen-3.6-27b-fp8/v1 (FP8) and /qwen-3.6-35b-a3b-awq/v1 (AWQ)." 404
+		respond "Not found. Models: /qwen-3.8-27b-nvfp4/v1 (RTX 6000, 262k ctx), /qwen-3.6-27b-nvfp4/v1 (RTX 5090, 131k ctx), /qwen-3.6-35b-a3b-awq/v1 (AWQ, currently offline)." 404
 	}
 }
 
@@ -25,5 +30,122 @@ nexus.mikhailov.tech {
 	reverse_proxy nexus:8081 {
 		header_up -Authorization
 		header_up Host {upstream_hostport}
+	}
+}
+
+improve-java-tests-department.mikhailov.tech, java-test-evolution-lab.mikhailov.tech {
+	reverse_proxy java-test-evolution-lab:3100
+}
+
+fix-java-bugs.mikhailov.tech {
+	basic_auth {
+		admin $2a$14$ua/haN8RFatR5a6rGEWtE.SsHKh88voAynRpKifXTR65yJdgoyVSi
+	}
+	redir /dash /dash/
+	handle_path /dash/* {
+		reverse_proxy fjb-dashboard:8091
+	}
+	handle {
+		reverse_proxy fjb-n8n:5678 {
+			header_up Cookie "n8n-auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc2MWM0MGZlLTIwNGItNDQ1Ni05MzZlLWQ0N2M3MjdiYWQwZiIsImhhc2giOiIwTENUN2VnTUhQIiwidXNlZE1mYSI6ZmFsc2UsImlhdCI6MTc4NDc0NTYzMiwiZXhwIjoyMTAwMTA1NjMyfQ.Y6QTc3NbiSp7Ch75tiOHxtCMFj3yvJr9cIFpaWfeumQ"
+		}
+	}
+}
+
+improve-java-tests.mikhailov.tech {
+	basic_auth {
+		admin $2a$14$W.KAH0.t5jPeJFov5YJrgeFg3vtwmPNoIl6hy6SdD185r9ki3gRm.
+	}
+	redir /dashboard /dashboard/
+	handle_path /dashboard/* {
+		reverse_proxy ijtspring:3000
+	}
+	handle {
+		reverse_proxy ijtspring:3000
+	}
+}
+
+improve-javascript-tests.mikhailov.tech {
+	basic_auth {
+		admin $2a$14$dg3wfyTWuaKw0yvHwFzDce40nhD6XsHHvLq0p62/TrMpphn8Hbbk.
+	}
+	redir /dashboard /dashboard/
+	handle_path /dashboard/* {
+		reverse_proxy ijst-n8n:3000
+	}
+	handle {
+		reverse_proxy ijst-n8n:5678 {
+			header_up Cookie "n8n-auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc5MTk4ZmY4LWQ4NzYtNGFhMS05NzY1LWIyMWE0YjE1NGVhNSIsImhhc2giOiJpM3NwMk9SZEpvIiwidXNlZE1mYSI6ZmFsc2UsImlhdCI6MTc4NTU1ODY1MSwiZXhwIjoyMTAwOTE4NjUxfQ.oiCaXK8MdZC__G4rrRrTuVlP9iOc-RjW2-zOQfeyQ40"
+		}
+	}
+}
+
+improve-java-tests-spring.mikhailov.tech, improve-java-tests-n8n.mikhailov.tech {
+	basic_auth {
+		admin $2a$14$ziDa3wZaEwNXv6f4whPsX.ZjHeeqnh0rYkVPQ8/K99moK2cVt3WiO
+	}
+	redir /dashboard /dashboard/
+	handle_path /dashboard/* {
+		reverse_proxy ijtspring:3000
+	}
+	handle {
+		reverse_proxy ijtspring:3000
+	}
+}
+
+fix-java-svace-markers.mikhailov.tech {
+	basic_auth {
+		admin $2a$14$1q19p9K1jrBu1m8s46aRPu6OQIQfBuS6OrNMc9YTjEIcGo8Lmjxpi
+	}
+	redir /dashboard /dashboard/
+	handle_path /dashboard/* {
+		reverse_proxy fsm:8085
+	}
+	redir /dash /dashboard/
+	handle {
+		reverse_proxy fsm:8085
+	}
+}
+
+fix-java-svace-markers-spring.mikhailov.tech {
+	basic_auth {
+		admin $2a$14$1q19p9K1jrBu1m8s46aRPu6OQIQfBuS6OrNMc9YTjEIcGo8Lmjxpi
+	}
+	redir /dashboard /dashboard/
+	handle_path /dashboard/* {
+		reverse_proxy fsm:8085
+	}
+	redir /dash /dashboard/
+	handle {
+		reverse_proxy fsm:8085
+	}
+}
+
+moex-orbit-demo.mikhailov.tech {
+	handle_path /_portal/* {
+		reverse_proxy moex-orbit-portal:3101
+	}
+	handle_path /_strategy/* {
+		reverse_proxy moex-orbit-strategy:3102
+	}
+	handle_path /_stabilization/* {
+		reverse_proxy moex-orbit-stabilization:3103
+	}
+	handle {
+		reverse_proxy moex-orbit-shell:3100
+	}
+}
+
+bump-java-version.mikhailov.tech {
+	basic_auth {
+		admin $2a$14$xTw52.l1zmtNvPOEimLW..5NVJPXvngSbbj9Lsib4SEFquG89egfq
+	}
+	redir /dashboard /dashboard/
+	handle_path /dashboard/* {
+		reverse_proxy bjv-dashboard:8086
+	}
+	redir /dash /dashboard/
+	handle {
+		reverse_proxy bjv-dashboard:8086
 	}
 }

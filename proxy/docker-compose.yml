@@ -22,21 +22,24 @@ services:
     env_file:
       - ../.env
     volumes:
-      - /mnt/steam/forge/shared/models:/root/.cache/huggingface
+      - /mnt/ember/models:/root/.cache/huggingface
+      - /home/vmihaylov/vllm-config/froggeric-chat-template.jinja:/froggeric.jinja:ro
     networks:
       - proxy-net
     command:
       - --model=Qwen/Qwen3.6-27B-FP8
-      - --served-model-name=qwen-3.6-27b-fp8
+      - --served-model-name=qwen-3.8-27b-nvfp4
       - --max-model-len=262144
       - --max-num-batched-tokens=32768
-      - --max-num-seqs=128
+      - --max-num-seqs=10
       - --kv-cache-dtype=fp8
       - --gpu-memory-utilization=0.85
       - --enable-prefix-caching
       - --enable-auto-tool-choice
       - --tool-call-parser=qwen3_xml
       - --reasoning-parser=qwen3
+      - --chat-template=/froggeric.jinja
+      - --trust-request-chat-template
       - --trust-remote-code
       - --host=0.0.0.0
       - --port=8000
