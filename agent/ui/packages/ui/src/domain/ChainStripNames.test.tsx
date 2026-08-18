@@ -39,7 +39,9 @@ describe('ChainStrip step names', () => {
   it('keeps the full agent name reachable, because that is what the trace is keyed on', () => {
     const { container } = render(<ChainStrip stages={[triplet('bump')]} />)
 
-    const titles = [...container.querySelectorAll('[title]')].map((e) => e.getAttribute('title'))
+    const titles = Array.from(container.querySelectorAll('[title]')).map((e) =>
+      e.getAttribute('title'),
+    )
     expect(titles).toContain('bump-planner')
     expect(titles).toContain('bump-verifier')
   })

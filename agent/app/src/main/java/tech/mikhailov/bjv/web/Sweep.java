@@ -129,6 +129,20 @@ final class Sweep {
                 Math.max(attempts, 1), events, live, postponedReason(slug));
     }
 
+    /**
+     * IS THIS BUMP SET ASIDE, ASKED THE WAY THE LAUNCHER ASKS IT.
+     *
+     * <p>run.sh tests {@code [ -e "$RESULTS/postponed/$1" ]} (run.sh:115), which is existence and
+     * not regularity, so this asks exactly that and nothing stricter. A reader that called a marker
+     * absent because it was a directory, a symlink or a socket would disagree with the process the
+     * marker exists to stop, and the disagreement would show up as a button that reported nothing
+     * had happened while a lane was already stopping. {@link #postponedReason} stays stricter
+     * because it goes on to read the file's contents.
+     */
+    boolean postponed(String slug) {
+        return Files.exists(postponedDir().resolve(slug));
+    }
+
     /** The reason a bump was set aside, or null if it was not. */
     String postponedReason(String slug) {
         Path marker = postponedDir().resolve(slug);

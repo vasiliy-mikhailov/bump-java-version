@@ -24,9 +24,10 @@ import tech.mikhailov.bjv.engine.Json;
  *
  * <p>WHAT IS LEFT HERE IS THE ROUTING. Six jobs shared this file because they shared a request
  * router: the corpus list, one bump's record, the security tables, the settings surface, the event
- * stream, and the one write that hands a settled bump back to the sweep. Each is now the class the
- * switch below names, and the switch is the whole of what they have in common. Reading a path off
- * the table and reading how a number is counted are different acts and no longer the same file.
+ * stream, and the writes that reach back into the sweep, which are handing a settled bump to a lane
+ * again and setting one aside from it. Each is now the class the switch below names, and the switch
+ * is the whole of what they have in common. Reading a path off the table and reading how a number
+ * is counted are different acts and no longer the same file.
  */
 final class Api {
 
@@ -36,6 +37,7 @@ final class Api {
     private final Exposure exposure;
     private final Settings settings;
     private final Rerun rerun;
+    private final Postpone postpone;
     private final Feed feed;
 
     Api(Path results) {
@@ -45,6 +47,7 @@ final class Api {
         this.exposure = new Exposure(results);
         this.settings = new Settings(results);
         this.rerun = new Rerun(results);
+        this.postpone = new Postpone(results);
         this.feed = new Feed(results, corpus);
     }
 
@@ -58,6 +61,18 @@ final class Api {
             case "/api/summary" -> Zone.json(x, corpus.overview());
             case "/api/live" -> feed.open(x, Zone.param(x, "slug"), Zone.param(x, "have"));
             case "/api/rerun" -> Zone.json(x, rerun.ask(Zone.param(x, "slug")));
+            // SET ASIDE AND TAKE BACK. Two routes and one class: the direction belongs in the path,
+            // where a stale tab cannot get it wrong, while the code that writes the marker and the
+            // code that removes it stay the same code, because the failure worth preventing is the
+            // two of them disagreeing about which file the launcher reads. Either route takes an
+            // explicit `state` for a caller that would rather carry the direction in the query.
+            case "/api/postpone" -> Zone.json(x, postpone.ask(Zone.param(x, "slug"),
+                    Zone.param(x, "state"), Zone.param(x, "why"), true));
+            case "/api/resume" -> Zone.json(x, postpone.ask(Zone.param(x, "slug"),
+                    Zone.param(x, "state"), Zone.param(x, "why"), false));
+            // WHAT IS SET ASIDE RIGHT NOW, so a toggle can render in the state it is already in
+            // rather than in the state the last click left in one reader's tab.
+            case "/api/postponed" -> Zone.json(x, postpone.listing());
             case "/api/security" -> Zone.json(x, exposure.report());
             case "/api/bump" -> Zone.json(x, detail.bump(Zone.param(x, "slug")));
             case "/api/settings" -> Zone.json(x, settings.agents(Zone.param(x, "hop")));

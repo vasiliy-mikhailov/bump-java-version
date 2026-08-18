@@ -4,13 +4,18 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import type { BumpDetail } from '@bjv/types'
 import {
   Card,
-  CORNER,
+  CORNER_BUSY,
+  CORNER_BUTTON,
+  CORNER_MARK,
+  CORNER_REFUSED,
   ChainStrip,
   EmptyNote,
   EventFeed,
   PackageTable,
   PageHeader,
   SecurityDelta,
+  SetAsideButton,
+  SetAsideNote,
   TabRow,
   VerdictPill,
 } from '@bjv/ui'
@@ -39,6 +44,7 @@ function BumpPage() {
   const [only, setOnly] = useState<string | undefined>(undefined)
   const [tab, setTab] = useState<Tab>('summary')
   const [again, setAgain] = useState<Rerun>({ turns: 0, busy: false, queued: false, why: '' })
+  const [hold, setHold] = useState<Aside>({ busy: false, said: null, why: '', refused: '' })
   const said = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
@@ -76,6 +82,29 @@ function BumpPage() {
     // resubscribing on each one would reopen the stream forever.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, detail !== null])
+
+  // WHICH STATE THE TOGGLE IS ALREADY IN. A bump that is set aside looks otherwise exactly like one
+  // waiting for a lane, and a control that cannot say which of the two it is looking at is a coin
+  // flip. There is no per-bump field carrying it, so the answer comes from the directory listing
+  // that is the state: one request, once, for a page about one bump.
+  useEffect(() => {
+    if (slug === '') {
+      return
+    }
+    read<Postponements>('/api/postponed')
+      .then((r) =>
+        // AN ANSWER THAT ARRIVES AFTER A CLICK MUST NOT UNDO IT. `said` is null only until somebody
+        // has asked, and a listing taken before the ask would otherwise put the control back into
+        // the state the reader just left.
+        setHold((h) => (h.said === null ? { ...h, said: r.postponed.includes(slug) } : h)),
+      )
+      .catch(() => {
+        // Not fatal and not silenced elsewhere: the detail read above is what tells a reader the
+        // api is unreachable, and failing that read is what draws the error page. A listing that
+        // could not be taken leaves the control reading "not set aside", which the first ask
+        // corrects, because the server answers with what is on disk rather than what was asked.
+      })
+  }, [slug])
 
   // THE CONTROL UNMOUNTS ON SUCCESS, so something has to catch the focus it was holding. Without
   // this a keyboard user is returned to the document body by their own click, which is the one
@@ -115,6 +144,34 @@ function BumpPage() {
       )
   }
 
+  /**
+   * Set this bump aside, or bring it back. One handler, because the two are one toggle.
+   *
+   * A REFUSAL IS A 200 HERE TOO, for the same reason it is for a rerun. It is recognised off the
+   * STATE rather than off the presence of an `error`: the answer carries what is on disk now, so an
+   * ask that did not move it is a refusal whether or not a reason came with it. Trusting the error
+   * field alone would call a silent no-op a success and leave the control showing the state the
+   * reader asked for rather than the one the launcher will see.
+   */
+  const askAside = (aside: boolean) => {
+    setHold((h) => ({ ...h, busy: true, refused: '' }))
+    setAside(slug, aside)
+      .then((r) =>
+        setHold({
+          busy: false,
+          said: r.postponed,
+          why: r.why,
+          refused:
+            r.postponed === aside
+              ? ''
+              : (r.error ?? 'the server declined without saying why'),
+        }),
+      )
+      .catch((e: Error) =>
+        setHold((h) => ({ ...h, busy: false, refused: `the request itself failed: ${e.message}` })),
+      )
+  }
+
   if (failed !== null) {
     return (
       <>
@@ -137,6 +194,15 @@ function BumpPage() {
   }
 
   const { summary, chain, events, packages, cves } = detail
+  // WHAT THE PAGE BELIEVES ABOUT THIS BUMP BEING HELD: whatever the server last said, whether that
+  // came from the listing on load or from an ask. `null` means nobody has answered yet, which is
+  // not the same fact as "not held" and is why the record keeps three states rather than two.
+  const aside = hold.said ?? false
+  // A MARKER ONLY MATTERS TO A BUMP RUN.SH WILL STILL LOOK AT. It tests a repository for a
+  // settlement first and skips it before it ever consults the postponed directory, so offering
+  // this on a settled verdict would offer a write that changes nothing. A bump that IS held keeps
+  // the control whatever its verdict, or there would be no way back from it.
+  const holdable = aside || summary.verdict === 'bumping' || summary.verdict === 'queued'
   const shown = only === undefined ? events : events.filter((e) => e.agent === only)
   const at = (t: Tab, agent?: string) =>
     href(
@@ -161,6 +227,16 @@ function BumpPage() {
                 <b style={{ color: 'var(--danger)' }}>Not queued.</b> {again.why}
               </div>
             )}
+            {hold.refused === '' ? null : (
+              <div role="alert" style={REFUSED_NOTE}>
+                <b style={{ color: 'var(--danger)' }}>Unchanged.</b> {hold.refused}
+              </div>
+            )}
+            {/* THE STATE, IN PROSE, ONLY WHERE IT IS THE ANSWER TO A QUESTION. A held bump looks
+                otherwise exactly like one waiting for a lane, and the difference between the two is
+                hours. The component owns the wording, so the tooltip and the note cannot disagree
+                about what postponement means. */}
+            {aside ? <SetAsideNote why={hold.why} /> : null}
           </>
         }
         back={{ label: 'bumps', href: href('/') }}
@@ -204,8 +280,8 @@ function BumpPage() {
                 }}
                 style={{
                   ...CORNER_BUTTON,
-                  ...(again.why === '' ? null : REFUSED),
-                  ...(again.busy ? BUSY : null),
+                  ...(again.why === '' ? null : CORNER_REFUSED),
+                  ...(again.busy ? CORNER_BUSY : null),
                 }}
               >
                 {/* DRAWN, NOT TYPED. Every unicode repeat mark is at the mercy of whichever face
@@ -234,6 +310,18 @@ function BumpPage() {
                 </svg>
               </button>
             )}
+            {/* ITS CONVERSE, BESIDE IT. One asks for the work sooner, the other gives its lane to
+                work that can progress, and a reader meeting them together should be able to tell
+                which is which without pressing either: same box, same measured mark size, same
+                refusal shape, opposite drawing. */}
+            {holdable ? (
+              <SetAsideButton
+                setAside={aside}
+                busy={hold.busy}
+                refused={hold.refused !== ''}
+                onAsk={() => askAside(!aside)}
+              />
+            ) : null}
             <Nav current="bumps" />
           </>
         }
@@ -321,58 +409,72 @@ function BumpPage() {
 type Rerun = { turns: number; busy: boolean; queued: boolean; why: string }
 
 /**
- * THE BUTTON TWIN OF THE CORNER GEAR.
+ * What asking to set this bump aside has done so far.
  *
- * It spreads CORNER rather than restating its numbers, so the two corner controls share one box by
- * construction and cannot drift apart the next time either is adjusted. A button does not inherit
- * fontFamily, and the `font` shorthand would take CORNER's fontSize down with it, so the family is
- * named on a line of its own.
- *
- * The border is reserved transparent and paid for out of the padding: a refusal can turn it red
- * without moving the gear beside it by a pixel. No hover, because the gear has none and matching
- * that corner is the whole argument for this shape.
+ * `said` IS THE SERVER'S ANSWER, NOT THE READER'S REQUEST, and `null` until there has been one. It
+ * is a tri-state on purpose: a page that stored `false` before anyone asked could not tell a bump
+ * nobody has touched from one an ask just released.
  */
-const CORNER_BUTTON = {
-  ...CORNER,
-  display: 'inline-flex',
-  alignItems: 'center',
-  appearance: 'none',
-  background: 'none',
-  border: '1px solid transparent',
-  padding: '0 calc(0.35rem - 1px)',
-  margin: 0,
-  fontFamily: 'inherit',
-  cursor: 'pointer',
-  transition: 'color 120ms ease, border-color 120ms ease',
-} as const
+type Aside = { busy: boolean; said: boolean | null; why: string; refused: string }
 
 /**
- * 1.25em, MEASURED OFF THE RENDERED PAGE RATHER THAN REASONED ABOUT.
+ * THE POSTPONE ENDPOINT, WRITTEN DOWN IN ONE PLACE.
  *
- * The gear beside it is emoji-presented: U+2699 with no variation selector falls through to the
- * colour emoji face, which is why it is blue in a monochrome header, and an emoji glyph overshoots
- * its em. Measured on the real page at 1.25rem, the gear's ink is 22.2px square while a 1em drawing
- * came out at 12. Guessing from a text face said the opposite, which is why this number is taken
- * from a screenshot of the thing itself.
+ * ONE ROUTE, BOTH DIRECTIONS, BY CHOICE RATHER THAN BY CONSTRAINT. The server offers a pair,
+ * /api/postpone and /api/resume, and either of them also takes an explicit `state`. This page uses
+ * the one route and names the state, because what makes the direction safe is naming it rather
+ * than which path carries it, and a caller with one url has one place to be wrong about.
  *
- * 1.25em puts the arrow at about 85 per cent of the gear's diameter, where a stroked mark reads as
- * the same weight as a filled one rather than as a larger, thinner ring. If the gear ever loses its
- * emoji presentation this drops back to roughly 0.8em, so re-measure rather than trusting the
- * number. Vertical padding is nil because the drawing is already taller than the glyph's line box.
+ * `state` IS NAMED RATHER THAN LEFT TO FLIP. The endpoint will flip whatever it finds if the
+ * parameter is left off, but a flip acts on what the page believed when it rendered, and two
+ * readers on the same bump would then undo each other. Naming the state wanted makes a second
+ * click a no-op instead of a reversal.
+ *
+ * `postponed` in the reply is READ BACK OFF DISK rather than echoed from the request, so it is the
+ * state the launcher will actually see. `error` is the refusal; `why` is the reason recorded on the
+ * marker, which is a different thing and mostly the supervisor's words rather than this page's.
+ */
+type Postponement = {
+  postponed: boolean
+  was: boolean
+  changed: boolean
+  /** The reason on the marker, empty when there is none to read. Not a refusal. */
+  why: string
+  /** The file the server wrote, which is the one run.sh tests for. */
+  marker?: string
+  /** Present only when the write was refused. */
+  error?: string
+}
+
+const setAside = (slug: string, aside: boolean) =>
+  post<Postponement>(
+    `/api/postpone?slug=${encodeURIComponent(slug)}&state=${aside ? 'on' : 'off'}`,
+  )
+
+/**
+ * EVERY BUMP CURRENTLY SET ASIDE, in one listing, because a toggle has to render in the state it is
+ * already in and there is no per-bump field carrying it. The markers are one flat directory, so the
+ * whole answer is a directory listing and the page asks for it once.
+ *
+ * The names in it are already flattened by the server, with the same rule that names a bump's
+ * results directory, which is the slug this page is holding. So membership is a plain comparison
+ * and the flattening is not written out here a second time. A marker under a name nothing tests for
+ * is the bug this codebase keeps finding, and it is found by writing the rule once.
+ */
+type Postponements = { dir: string; postponed: string[] }
+
+/**
+ * The rerun mark's own sizing, which is CORNER_MARK plus the one thing only it does.
  *
  * ONE TURN PER ASK, FROM A COUNTER THAT ONLY GOES UP, so it never rewinds when an ask is refused.
  * A transition rather than a keyframe: tokens.css is the portal's file, taken verbatim and read by
  * two tools, and its reduced-motion block already clamps transitions for nothing.
  */
 const TURN = {
-  width: '1.25em',
-  height: '1.25em',
-  display: 'block',
+  ...CORNER_MARK,
   transition: 'transform 600ms cubic-bezier(.4,0,.2,1)',
 } as const
 
-const BUSY = { opacity: 0.55, cursor: 'progress' } as const
-const REFUSED = { color: 'var(--danger)', borderColor: 'var(--danger)' } as const
 const SAID = { fontSize: '12px', color: 'var(--text-tertiary)', padding: '0.2rem 0.35rem' } as const
 const REFUSED_NOTE = { marginTop: '4px', maxWidth: '60ch', color: 'var(--text-secondary)' } as const
 

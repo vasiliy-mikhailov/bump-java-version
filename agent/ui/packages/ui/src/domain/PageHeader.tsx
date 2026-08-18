@@ -73,3 +73,54 @@ export const CORNER: Style = {
   padding: '0.2rem 0.35rem',
   borderRadius: '5px',
 }
+
+/**
+ * THE BUTTON TWIN OF THE CORNER GEAR.
+ *
+ * It spreads CORNER rather than restating its numbers, so every corner control shares one box by
+ * construction and they cannot drift apart the next time one of them is adjusted. A button does not
+ * inherit fontFamily, and the `font` shorthand would take CORNER's fontSize down with it, so the
+ * family is named on a line of its own.
+ *
+ * The border is reserved transparent and paid for out of the padding: a refusal can turn it red
+ * without moving the gear beside it by a pixel. No hover, because the gear has none and matching
+ * that corner is the whole argument for this shape.
+ *
+ * It lives here beside CORNER rather than in the page that first needed it, because there are two
+ * such buttons now and a second copy of these numbers is how the corner stops looking like one row.
+ */
+export const CORNER_BUTTON: Style = {
+  ...CORNER,
+  display: 'inline-flex',
+  alignItems: 'center',
+  appearance: 'none',
+  background: 'none',
+  border: '1px solid transparent',
+  padding: '0 calc(0.35rem - 1px)',
+  margin: 0,
+  fontFamily: 'inherit',
+  cursor: 'pointer',
+  transition: 'color 120ms ease, border-color 120ms ease',
+}
+
+/** An ask is in flight. Dimmed rather than removed, so the row does not reflow under the pointer. */
+export const CORNER_BUSY: Style = { opacity: 0.55, cursor: 'progress' }
+
+/** The last ask was refused. Reserved border, so this costs no layout. */
+export const CORNER_REFUSED: Style = { color: 'var(--danger)', borderColor: 'var(--danger)' }
+
+/**
+ * 1.25em, MEASURED OFF THE RENDERED PAGE RATHER THAN REASONED ABOUT.
+ *
+ * The gear these sit beside is emoji-presented: U+2699 with no variation selector falls through to
+ * the colour emoji face, which is why it is blue in a monochrome header, and an emoji glyph
+ * overshoots its em. Measured on the real page at 1.25rem, the gear's ink is 22.2px square while a
+ * 1em drawing came out at 12. Guessing from a text face said the opposite, which is why this number
+ * is taken from a screenshot of the thing itself.
+ *
+ * 1.25em puts a drawn mark at about 85 per cent of the gear's diameter, where a stroked mark reads
+ * as the same weight as a filled one rather than as a larger, thinner ring. If the gear ever loses
+ * its emoji presentation this drops back to roughly 0.8em, so re-measure rather than trusting the
+ * number. Vertical padding is nil because the drawing is already taller than the glyph's line box.
+ */
+export const CORNER_MARK: Style = { width: '1.25em', height: '1.25em', display: 'block' }

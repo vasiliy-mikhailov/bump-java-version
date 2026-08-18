@@ -21,6 +21,23 @@ export {
 } from './pipeline'
 export { CARDS, PromptCard, type PromptCardProps } from './PromptCard'
 export { lanesOf, platformOf, stemOf, type Lanes, type LaneCell, type LaneRow } from './lanes'
-export { CORNER, PageHeader, type Crumb, type PageHeaderProps } from './PageHeader'
+export {
+  CORNER,
+  CORNER_BUSY,
+  CORNER_BUTTON,
+  CORNER_MARK,
+  CORNER_REFUSED,
+  PageHeader,
+  type Crumb,
+  type PageHeaderProps,
+} from './PageHeader'
 export { SecurityDelta, type SecurityDeltaProps } from './SecurityDelta'
+export {
+  ASIDE_WHY,
+  BACK_WHY,
+  SetAsideButton,
+  SetAsideNote,
+  type SetAsideButtonProps,
+  type SetAsideNoteProps,
+} from './SetAside'
 export { VerdictPill, type VerdictPillProps } from './VerdictPill'
