@@ -103,6 +103,33 @@ export type BumpSummary = {
   bomPairMissedAfter: number | null
   /** The floors it still sits below, named, so the number can be argued with. */
   bomOutstanding: string | null
+  /**
+   * WHICH PIPELINE PRODUCED THIS ROW. Null on every bump that settled before the stamp
+   * existed, which is most of the corpus and always will be, so an unstamped row is the
+   * ordinary case rather than a failure and must not be drawn as one.
+   *
+   * `commit` is the git commit the image was built from, with a `-dirty` suffix when the tree
+   * it was built from was not clean. `image` is the image id the LANE started from, which is
+   * not necessarily the one the tag points at now: a running lane keeps its image however many
+   * times a deploy moves the tag under it, and this sweep was deployed seven times in a day.
+   */
+  commit: string | null
+  image: string | null
+  /**
+   * WHY TWO HASHES WHEN A COMMIT IS ALREADY HERE, which is the whole reason these exist.
+   *
+   * Prompt and bill-of-materials edits live in a store beside the results, OUTSIDE the image,
+   * and take effect on the next lane to start. So a commit or an image alone calls two runs
+   * the same pipeline exactly when one of them has been edited from the settings page, which
+   * is precisely the case a reader is trying to tell apart.
+   *
+   * `prompts` is eight hex characters over every system prompt for that hop, overrides
+   * included; `boms` the same over both bill-of-materials lists for that hop. Equal means the
+   * two runs could not have been handed different instructions. Different means they were, and
+   * comparing their outcomes is comparing two pipelines rather than two repositories.
+   */
+  prompts: string | null
+  boms: string | null
 }
 
 /**

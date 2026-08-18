@@ -115,4 +115,42 @@ class APipelineHasAVersionTest {
         assertTrue(row.contains("\"state\":\"PASS\""), row);
         assertTrue(row.strip().endsWith("}"), "and it is still valid JSON: " + row);
     }
+
+    @Test
+    void theRowTheListReadsCarriesTheStamp(@TempDir Path ws) throws Exception {
+        // The settlement has carried the fingerprint since the row above. It reached nobody:
+        // the corpus row the page is built from dropped all four fields on the floor, so the
+        // one reader who needs to know which harness produced a verdict could not see it.
+        java.lang.reflect.Method m = Api.class.getDeclaredMethod("summary", java.util.Map.class);
+        m.setAccessible(true);
+
+        String row = (String) m.invoke(new Api(ws), java.util.Map.of(
+                "bump", "o/r|sha|17|21", "state", "PASS", "commit", "63a5f296",
+                "image", "sha256:7439b8dceb", "prompts", "5ed4079d", "boms", "e1cc07d3"));
+
+        assertTrue(row.contains("\"commit\":\"63a5f296\""), row);
+        assertTrue(row.contains("\"image\":\"sha256:7439b8dceb\""), row);
+        // AND BOTH HASHES, because the commit alone is the answer that is wrong in the one
+        // direction that matters: it cannot see an edit made from the settings page.
+        assertTrue(row.contains("\"prompts\":\"5ed4079d\""), row);
+        assertTrue(row.contains("\"boms\":\"e1cc07d3\""), row);
+    }
+
+    @Test
+    void anUnstampedRowIsNullRatherThanEmpty(@TempDir Path ws) throws Exception {
+        // MOST OF THIS CORPUS IS THIS ROW and no amount of waiting will change it: a bump that
+        // settled before the stamp existed has no fingerprint to recover. So the field is JSON
+        // null, which a page can render as not recorded, rather than an empty string, which it
+        // would draw as a pipeline whose identity is the empty pipeline.
+        java.lang.reflect.Method m = Api.class.getDeclaredMethod("summary", java.util.Map.class);
+        m.setAccessible(true);
+
+        String row = (String) m.invoke(new Api(ws),
+                java.util.Map.of("bump", "o/r|sha|17|21", "state", "PASS"));
+
+        assertTrue(row.contains("\"commit\":null"), row);
+        assertTrue(row.contains("\"image\":null"), row);
+        assertTrue(row.contains("\"prompts\":null"), row);
+        assertTrue(row.contains("\"boms\":null"), row);
+    }
 }

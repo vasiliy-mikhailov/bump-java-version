@@ -33,16 +33,31 @@ final class JsonlTrace implements Trace, DeepAgentFlowListener {
      * either way: a bump recorded without its version is worse than one recorded with it, and a
      * bump not recorded at all is worse than both.
      */
+    /**
+     * COMPUTED ONCE PER LANE, because it is asked for on every progress write.
+     *
+     * <p>Version.prompts builds all sixty-five agents for the hop and hashes what each is handed,
+     * which is the right answer and far too much work to repeat per event. A lane keeps the image
+     * it started with, so the value it would compute later is the value it computed first.
+     */
+    private volatile String version;
+
     private String version() {
+        if (version != null) {
+            return version;
+        }
         try {
             String[] p = bump.split("\\|");
             if (p.length < 4) {
-                return "";
+                version = "";
+                return version;
             }
-            return Version.fields(new Hop(Integer.parseInt(p[2]), Integer.parseInt(p[3])),
+            version = Version.fields(new Hop(Integer.parseInt(p[2]), Integer.parseInt(p[3])),
                     settlements.getParent() == null ? settlements : settlements.getParent());
+            return version;
         } catch (RuntimeException cannotTell) {
-            return "";
+            version = "";
+            return version;
         }
     }
 
@@ -247,7 +262,7 @@ final class JsonlTrace implements Trace, DeepAgentFlowListener {
     @Override
     public void progress(String bumpKey, String note) {
         write("progress", of("note", note));
-        Settlement.note(settlements, bumpKey, "bumping", note);
+        Settlement.note(settlements, bumpKey, "bumping", note, false, false, version());
     }
 
     @Override

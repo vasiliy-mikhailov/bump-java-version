@@ -1,10 +1,17 @@
 import type { BumpSummary } from '@bjv/types'
 import { EmptyNote } from '../primitives/EmptyNote'
 import { RelativeTime, duration, spellMinutes } from '../primitives/RelativeTime'
+import { PipelineMark } from './PipelineMark'
+import type { StampedBump } from './pipeline'
 import { VerdictPill } from './VerdictPill'
 
 export type BumpTableProps = {
-  bumps: BumpSummary[]
+  /**
+   * The stamp fields are optional on this type rather than required, which is what lets a caller
+   * hand over plain summaries: a row from before the stamp existed carries none of them, and so
+   * does every row until the wire types carry them.
+   */
+  bumps: StampedBump[]
   hrefFor: (slug: string) => string
   now?: number
 }
@@ -28,6 +35,15 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
             <th style={{ ...th, textAlign: 'right' }}>took</th>
             <th style={{ ...th, textAlign: 'right' }}>a person would have</th>
             <th style={{ ...th, textAlign: 'right' }}>last event</th>
+            {/* WHAT THE COLUMN MEANS, ON THE HEADING. The cells carry the four fields as recorded;
+                the notation they are compressed into has to be explained once, and once is here
+                rather than repeated on every row. */}
+            <th
+              style={th}
+              title="which pipeline produced the row: the commit its image was built from, then four characters folding the image and the prompt and bill-of-materials hashes, because an edit made from the settings page changes what the agents are handed without changing the commit. Two rows that read alike ran the same pipeline."
+            >
+              pipeline
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -166,6 +182,14 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                     <RelativeTime at={b.at} now={now} />
                   </span>
                 )}
+              </td>
+              <td style={td}>
+                {/* A DIFFERENCE BETWEEN TWO ROWS IS NOT NECESSARILY A DIFFERENCE BETWEEN TWO
+                    REPOSITORIES. The harness is deployed while the sweep it is running continues,
+                    and a lane keeps the image it started with, so several generations of the
+                    program are alive in one corpus at once. Without this column a reader comparing
+                    two bumps has no way to tell which kind of difference they are looking at. */}
+                <PipelineMark stamp={b} />
               </td>
             </tr>
           ))}

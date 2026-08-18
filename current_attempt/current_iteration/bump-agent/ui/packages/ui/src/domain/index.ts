@@ -12,6 +12,13 @@ export { cveTotals, type CveTotals } from './cves'
 export { ChainStrip, type ChainStripProps } from './ChainStrip'
 export { EventFeed, type EventFeedProps } from './EventFeed'
 export { PackageTable, collapse, type PackageTableProps } from './PackageTable'
+export { PipelineMark, type PipelineMarkProps } from './PipelineMark'
+export {
+  pipelineOf,
+  type Pipeline,
+  type PipelineStamp,
+  type StampedBump,
+} from './pipeline'
 export { CARDS, PromptCard, type PromptCardProps } from './PromptCard'
 export { lanesOf, platformOf, stemOf, type Lanes, type LaneCell, type LaneRow } from './lanes'
 export { CORNER, PageHeader, type Crumb, type PageHeaderProps } from './PageHeader'

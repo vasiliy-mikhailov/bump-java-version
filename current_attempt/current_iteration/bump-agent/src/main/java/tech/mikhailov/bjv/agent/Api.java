@@ -827,7 +827,22 @@ final class Api {
                 Json.field("bomPairApplied", bom(slug, "pairApplied")),
                 Json.field("bomPairMissedBefore", bom(slug, "pairMissedBefore")),
                 Json.field("bomPairMissedAfter", bom(slug, "pairMissedAfter")),
-                Json.field("bomOutstanding", Json.optional(bom(slug, "outstanding"))));
+                Json.field("bomOutstanding", Json.optional(bom(slug, "outstanding"))),
+                // WHICH PIPELINE PRODUCED THIS ROW, so that a difference between two bumps
+                // can be told from a difference between two harnesses. A sweep runs for a
+                // fortnight and the harness changes daily, so a row settled a week ago was
+                // not produced by the program answering this request. Null on everything
+                // that settled before the stamp existed, which is most of the corpus and
+                // will stay that way: absent is the ordinary case here, not a fault.
+                Json.field("commit", Json.optional(r.get("commit"))),
+                Json.field("image", Json.optional(r.get("image"))),
+                // THE IMAGE IS NOT THE PIPELINE, which is why the two hashes are here beside
+                // a commit that looks like it says everything. Prompt and bill-of-materials
+                // edits live in a store beside the results, OUTSIDE the image, so a commit
+                // or an image alone calls two runs the same pipeline exactly when one of
+                // them was edited from the settings page. See Version.
+                Json.field("prompts", Json.optional(r.get("prompts"))),
+                Json.field("boms", Json.optional(r.get("boms"))));
     }
 
     /**
