@@ -45,9 +45,14 @@ class ThePageReadsTheProgramTest {
 
     private static String settings() throws Exception {
         Path results = Files.createTempDirectory("bjv-settings");
-        Method settings = Api.class.getDeclaredMethod("settings", String.class);
-        settings.setAccessible(true);
-        return (String) settings.invoke(new Api(results), "17-21");
+        // Settings is package-private in tech.mikhailov.bjv.web, where every type is, so
+        // it is named here rather than imported.
+        Class<?> page = Class.forName("tech.mikhailov.bjv.web.Settings");
+        var made = page.getDeclaredConstructor(Path.class);
+        made.setAccessible(true);
+        Method agents = page.getDeclaredMethod("agents", String.class);
+        agents.setAccessible(true);
+        return (String) agents.invoke(made.newInstance(results), "17-21");
     }
 
     @Test

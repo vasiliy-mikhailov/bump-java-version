@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * <p>So the hop answers those questions itself, from the same tables the code applies, and the
  * agents built for it are told only what it can reach.
  */
-record Hop(int from, int to) {
+public record Hop(int from, int to) {
 
     /** The LTS rungs, which is what "one hop" is measured in even when a hop spans several. */
     private static final int[] LTS = {8, 11, 17, 21, 25};

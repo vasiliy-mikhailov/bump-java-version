@@ -1,4 +1,4 @@
-package tech.mikhailov.bjv.agent;
+package tech.mikhailov.bjv.web;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -43,9 +43,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TheListIsSortedByWhatItShowsTest {
 
     private static String bumps(Path results, long mark) throws Exception {
-        Method m = Api.class.getDeclaredMethod("bumps", long.class);
+        Method m = Corpus.class.getDeclaredMethod("bumps", long.class);
         m.setAccessible(true);
-        return (String) m.invoke(new Api(results), mark);
+        return (String) m.invoke(new Corpus(results), mark);
     }
 
     /**

@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>THE PATH IS EXACT AND IT IS NOT HYPOTHETICAL. {@code Flow.each().inside()} reports the body
  * built for a NULL item, because a shape is what the program can do rather than what one
  * repository made it do; {@link Bump#stages} builds a bump with no workspace, no runner, no trace
- * and no agents, purely to walk it, and Api reads that walk on every request.
+ * and no agents, purely to walk it, and Settings reads that walk on every request.
  * A resolve at construction time is therefore an {@code ExceptionInInitializerError} in a class
  * initialiser, which does not fail one request. It fails every request that class ever serves, for
  * the life of the process, including the pages that have nothing to do with prompts.
@@ -72,7 +72,7 @@ class TheShapeCannotResolveAPlatformTest {
     // THE STATIC-INITIALISER CASE IS GONE RATHER THAN FIXED. It pinned the worst consequence of
     // resolving a platform during a shape walk: the legacy page read the walk into a static field,
     // so a null dereference here was not one failed request, it was an ExceptionInInitializerError
-    // that took the class down. That page is deleted and Api reads the walk per request, so the
+    // that took the class down. That page is deleted and Settings reads the walk per request, so
     // blast radius is a 500. The test above still holds the rule, which was never about the page.
 
 

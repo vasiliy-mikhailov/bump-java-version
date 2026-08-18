@@ -1,4 +1,4 @@
-package tech.mikhailov.bjv.agent;
+package tech.mikhailov.bjv.web;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -27,9 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TheListPollsOnlyWhatMovedTest {
 
     private static String bumps(Path results, long mark) throws Exception {
-        Method m = Api.class.getDeclaredMethod("bumps", long.class);
+        Method m = Corpus.class.getDeclaredMethod("bumps", long.class);
         m.setAccessible(true);
-        return (String) m.invoke(new Api(results), mark);
+        return (String) m.invoke(new Corpus(results), mark);
     }
 
     /** A settlement row as the sweep writes them. */
@@ -90,12 +90,12 @@ class TheListPollsOnlyWhatMovedTest {
     @Test
     void rubbishInTheParameterIsTreatedAsNoMark(@TempDir Path results) throws Exception {
         settle(results, "old/one", "PASS", 1_000);
-        Method m = Api.class.getDeclaredMethod("bumps", String.class);
+        Method m = Corpus.class.getDeclaredMethod("bumps", String.class);
         m.setAccessible(true);
 
         // A hand-typed url should degrade to the full list, not to an exception or an empty page.
         for (String bad : new String[] {null, "", "  ", "not-a-number", "9e9"}) {
-            String out = (String) m.invoke(new Api(results), bad);
+            String out = (String) m.invoke(new Corpus(results), bad);
             assertTrue(out.contains("old/one"), "since=" + bad + " should mean the lot: " + out);
         }
     }

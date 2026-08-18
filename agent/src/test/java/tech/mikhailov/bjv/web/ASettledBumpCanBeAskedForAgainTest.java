@@ -1,4 +1,4 @@
-package tech.mikhailov.bjv.agent;
+package tech.mikhailov.bjv.web;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -31,9 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ASettledBumpCanBeAskedForAgainTest {
 
     private static String rerun(Path results, String slug) throws Exception {
-        Method m = Api.class.getDeclaredMethod("rerun", String.class);
+        Method m = Rerun.class.getDeclaredMethod("ask", String.class);
         m.setAccessible(true);
-        return (String) m.invoke(new Api(results), slug);
+        return (String) m.invoke(new Rerun(results), slug);
     }
 
     private static String settle(Path results, String repo, String state) throws IOException {
@@ -164,9 +164,9 @@ class ASettledBumpCanBeAskedForAgainTest {
         settle(results, "Alpha/first", "PASS");
         settle(results, "alpha/first", "PASS");
 
-        java.lang.reflect.Method m = Api.class.getDeclaredMethod("bumps", String.class);
+        java.lang.reflect.Method m = Corpus.class.getDeclaredMethod("bumps", String.class);
         m.setAccessible(true);
-        List<String> shown = reposIn((String) m.invoke(new Api(results), ""));
+        List<String> shown = reposIn((String) m.invoke(new Corpus(results), ""));
 
         assertEquals(List.of("aartiPl/tablevis", "Alpha/first", "alpha/first", "zeta/last"), shown,
                 "case-folded first, and a bumping row does not jump the queue");

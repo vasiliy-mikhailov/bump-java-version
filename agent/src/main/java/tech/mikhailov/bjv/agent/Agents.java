@@ -43,7 +43,7 @@ import dev.langchain4j.service.tool.ToolExecutor;
  * tool call lands in the trace in full, so feedback filed against a reply is a labelled complaint
  * about a prompt anyone can find.
  */
-final class Agents {
+public final class Agents {
 
     @FunctionalInterface
     /**
@@ -55,7 +55,7 @@ final class Agents {
      * <p>{@code throws IOException} because the ones that are not model calls touch the workspace.
      * A lambda that cannot throw is still an Agent; the signature only has to permit it.
      */
-    interface Agent {
+    public interface Agent {
         String run(String task) throws IOException;
 
         /**
@@ -283,7 +283,7 @@ final class Agents {
      * the two, the settings page's sort and the test that binds the catalogue to the tree, joins on
      * this.
      */
-    static String stem(String agent) {
+    public static String stem(String agent) {
         int at = agent.indexOf('@');
         return at < 0 ? agent : agent.substring(0, at);
     }
@@ -904,7 +904,7 @@ final class Agents {
      * <p>The settings page asks what a 17-to-21 bump will be told before one is running, which is
      * the whole point of being able to see them.
      */
-    static List<SubAgentDefinition> forHop(Hop hop, Path ws) {
+    public static List<SubAgentDefinition> forHop(Hop hop, Path ws) {
         return new Agents(null, null, ws, null, new Tree(ws, note -> { }), hop, null).definitions();
     }
 

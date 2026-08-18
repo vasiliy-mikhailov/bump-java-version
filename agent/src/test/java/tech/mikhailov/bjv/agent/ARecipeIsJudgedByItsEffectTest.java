@@ -27,7 +27,7 @@ class ARecipeIsJudgedByItsEffectTest {
 
     @Test
     void anUnchangedTreeSaysSoBeforeAnythingElse() {
-        String said = Tools.reported("same", "same", LOG);
+        String said = Rewrites.reported("same", "same", LOG);
 
         // FIRST, because an agent reads the top of a tool result and the exit code is further down
         // saying the opposite.
@@ -37,7 +37,7 @@ class ARecipeIsJudgedByItsEffectTest {
 
     @Test
     void aChangedTreeSaysThatInstead() {
-        String said = Tools.reported("", " M pom.xml", LOG);
+        String said = Rewrites.reported("", " M pom.xml", LOG);
 
         assertTrue(said.startsWith("the working tree changed"), said);
         assertFalse(said.contains("NOTHING CHANGED"), said);
@@ -54,7 +54,7 @@ class ARecipeIsJudgedByItsEffectTest {
                 "recipe run rc=0\n[ERROR] ChangePropertyValue.newValue: is required",
                 "recipe run rc=0\n[WARN] a wording no one has written yet",
         }) {
-            assertTrue(Tools.reported("x", "x", reason).startsWith("NOTHING CHANGED"),
+            assertTrue(Rewrites.reported("x", "x", reason).startsWith("NOTHING CHANGED"),
                     "not recognised, but caught: " + reason);
         }
     }
@@ -66,7 +66,7 @@ class ARecipeIsJudgedByItsEffectTest {
         // one, which is the argument for measuring the effect rather than the vocabulary.
         String clean = "recipe run rc=0\n[INFO] Applied recipe com.bjv.Bump\n[INFO] BUILD SUCCESS";
 
-        assertTrue(Tools.reported("tree", "tree", clean).startsWith("NOTHING CHANGED"), clean);
+        assertTrue(Rewrites.reported("tree", "tree", clean).startsWith("NOTHING CHANGED"), clean);
     }
 
     @Test

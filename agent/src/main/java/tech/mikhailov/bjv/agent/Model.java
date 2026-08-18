@@ -23,7 +23,7 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
  * grounds are not recorded cannot be audited or tuned. So it stays on, {@link Streamed} captures it
  * off the stream, and an empty answer is re-asked rather than read as agreement.
  */
-final class Model {
+public final class Model {
 
     private static final int MAX_TOKENS = 16_000;
 
@@ -74,11 +74,11 @@ final class Model {
     }
 
     /** Producers and critics share a configuration; what differs is what the chain does with them. */
-    static ChatModel forProducer(Trace trace) {
+    public static ChatModel forProducer(Trace trace) {
         return build(trace, true);
     }
 
-    static ChatModel forCritic(Trace trace) {
+    public static ChatModel forCritic(Trace trace) {
         return build(trace, true);
     }
 
@@ -92,7 +92,7 @@ final class Model {
      * was making the second attempt worse than the first. Thinking off measured 0 of 10 runaway at
      * 340 tokens and 17 seconds.
      */
-    static ChatModel forRetry(Trace trace) {
+    public static ChatModel forRetry(Trace trace) {
         return build(trace, false);
     }
 

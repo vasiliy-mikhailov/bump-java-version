@@ -28,7 +28,7 @@ import java.util.List;
  * <p>The store sits beside the results rather than inside them: {@code results/} is what the
  * dashboard serves, and a prompt is not a record of anything that happened.
  */
-final class Prompts {
+public final class Prompts {
 
     /**
      * Where overrides live, set once by whoever knows the run root.
@@ -43,13 +43,13 @@ final class Prompts {
     }
 
     /** Point the store at a run root. {@code results} is the directory the harness was given. */
-    static void beside(Path results) {
+    public static void beside(Path results) {
         Path root = results.getParent() == null ? results : results.getParent();
         store = root.resolve("prompts");
     }
 
     /** The edited text for one agent on one hop, or empty when the code's own still stands. */
-    static String override(String agent, Hop hop) {
+    public static String override(String agent, Hop hop) {
         return override(store, agent, hop);
     }
 
@@ -76,7 +76,7 @@ final class Prompts {
         }
     }
 
-    static boolean edited(Path root, String agent, Hop hop) {
+    public static boolean edited(Path root, String agent, Hop hop) {
         Path file = fileFor(root, agent, hop);
         return file != null && Files.isRegularFile(file);
     }
@@ -87,7 +87,7 @@ final class Prompts {
      * <p>Written beside and renamed over, so an agent reading this file while it is being written
      * sees the old text or the new one and never half of each.
      */
-    static void save(Path root, String agent, Hop hop, String text) throws IOException {
+    public static void save(Path root, String agent, Hop hop, String text) throws IOException {
         Path file = fileFor(root, agent, hop);
         if (file == null) {
             throw new IOException("no prompt store configured");
@@ -100,7 +100,7 @@ final class Prompts {
     }
 
     /** Throw the edit away. The built-in is not restored; it was never gone. */
-    static void revert(Path root, String agent, Hop hop) throws IOException {
+    public static void revert(Path root, String agent, Hop hop) throws IOException {
         Path file = fileFor(root, agent, hop);
         if (file != null) {
             Files.deleteIfExists(file);

@@ -37,7 +37,7 @@ import java.util.Set;
  * is meant to become what a deterministic pinning step applies, at which point the prose stops
  * carrying versions and starts carrying only the reasons.
  */
-final class Bom {
+public final class Bom {
 
     /**
      * One floor: what it is, how low it may be, and every way a build file can spell it.
@@ -142,7 +142,7 @@ final class Bom {
     private static volatile Path store = null;
 
     /** Point the store at a run root, before anything reads a list. */
-    static void beside(Path results) {
+    public static void beside(Path results) {
         Path root = results.getParent() == null ? results : results.getParent();
         store = root.resolve("bom");
     }
@@ -162,14 +162,14 @@ final class Bom {
      * a file, the comments in it are half of what it says, and a round trip through records and
      * back would quietly drop them.
      */
-    record Source(String text, boolean edited) {
+    public record Source(String text, boolean edited) {
     }
 
-    static Source textFor(Hop hop, String part) {
+    public static Source textFor(Hop hop, String part) {
         return textFor(key(hop, part));
     }
 
-    static Source textFor(String key) {
+    public static Source textFor(String key) {
         Path file = fileFor(store, key);
         if (file != null && Files.isRegularFile(file)) {
             try {
@@ -196,7 +196,7 @@ final class Bom {
     }
 
     /** Save an edit, staged and renamed over so no reader sees half of each. */
-    static void save(String key, String text) throws IOException {
+    public static void save(String key, String text) throws IOException {
         Path file = fileFor(store, key);
         if (file == null) {
             throw new IOException("no bill-of-materials store configured");
@@ -215,7 +215,7 @@ final class Bom {
     }
 
     /** Throw the edit away. The built-in is not restored; it was never gone. */
-    static void revert(String key) throws IOException {
+    public static void revert(String key) throws IOException {
         Path file = fileFor(store, key);
         if (file != null) {
             Files.deleteIfExists(file);
@@ -255,17 +255,17 @@ final class Bom {
      * that did not happen; {@code hardens} is polish on a project that already builds and tests
      * green. A phase column inside one file made them look like the same thing measured twice.
      */
-    static List<Floor> of(Hop hop, String part) {
+    public static List<Floor> of(Hop hop, String part) {
         return parse(key(hop, part), textFor(hop, part).text(), part);
     }
 
     /** Which two files a hop reads. */
-    static String key(Hop hop, String part) {
+    public static String key(Hop hop, String part) {
         return name(hop) + "-" + part;
     }
 
     /** The two halves, named once so nothing has to remember the spelling. */
-    static List<String> parts() {
+    public static List<String> parts() {
         return List.of("enables", "hardens");
     }
 

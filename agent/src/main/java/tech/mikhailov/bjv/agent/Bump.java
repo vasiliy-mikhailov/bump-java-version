@@ -328,7 +328,7 @@ public final class Bump {
      * the agents' names are the same on every hop; what differs by hop is the prompts, and
      * {@link Agents#forHop} is what answers for those.
      */
-    static List<Shape.Stage> stages() {
+    public static List<Shape.Stage> stages() {
         return Shape.of(new Bump(Path.of("."), "shape|shape|17|21", null).everything);
     }
 

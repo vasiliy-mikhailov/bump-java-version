@@ -1,4 +1,4 @@
-package tech.mikhailov.bjv.agent;
+package tech.mikhailov.bjv.web;
 
 import java.io.IOException;
 import java.nio.file.Files;

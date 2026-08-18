@@ -121,10 +121,7 @@ class APipelineHasAVersionTest {
         // The settlement has carried the fingerprint since the row above. It reached nobody:
         // the corpus row the page is built from dropped all four fields on the floor, so the
         // one reader who needs to know which harness produced a verdict could not see it.
-        java.lang.reflect.Method m = Api.class.getDeclaredMethod("summary", java.util.Map.class);
-        m.setAccessible(true);
-
-        String row = (String) m.invoke(new Api(ws), java.util.Map.of(
+        String row = row(ws, java.util.Map.of(
                 "bump", "o/r|sha|17|21", "state", "PASS", "commit", "63a5f296",
                 "image", "sha256:7439b8dceb", "prompts", "5ed4079d", "boms", "e1cc07d3"));
 
@@ -142,15 +139,29 @@ class APipelineHasAVersionTest {
         // settled before the stamp existed has no fingerprint to recover. So the field is JSON
         // null, which a page can render as not recorded, rather than an empty string, which it
         // would draw as a pipeline whose identity is the empty pipeline.
-        java.lang.reflect.Method m = Api.class.getDeclaredMethod("summary", java.util.Map.class);
-        m.setAccessible(true);
-
-        String row = (String) m.invoke(new Api(ws),
-                java.util.Map.of("bump", "o/r|sha|17|21", "state", "PASS"));
+        String row = row(ws, java.util.Map.of("bump", "o/r|sha|17|21", "state", "PASS"));
 
         assertTrue(row.contains("\"commit\":null"), row);
         assertTrue(row.contains("\"image\":null"), row);
         assertTrue(row.contains("\"prompts\":null"), row);
         assertTrue(row.contains("\"boms\":null"), row);
+    }
+
+    /**
+     * One corpus row, rendered by the class that renders every corpus row.
+     *
+     * <p>Corpus is package-private in tech.mikhailov.bjv.web, where every type is: it is named
+     * here rather than imported, because one test in another package is not a reason to make a
+     * class public forever.
+     */
+    private static String row(Path results, java.util.Map<String, String> settled)
+            throws Exception {
+        Class<?> corpus = Class.forName("tech.mikhailov.bjv.web.Corpus");
+        var made = corpus.getDeclaredConstructor(Path.class);
+        made.setAccessible(true);
+        java.lang.reflect.Method summary =
+                corpus.getDeclaredMethod("summary", java.util.Map.class);
+        summary.setAccessible(true);
+        return (String) summary.invoke(made.newInstance(results), settled);
     }
 }

@@ -1,4 +1,4 @@
-package tech.mikhailov.bjv.agent;
+package tech.mikhailov.bjv.web;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TheLiveStreamResumesWhereTheReaderStoppedTest {
 
     private static long after(Path trace, String have) throws Exception {
-        Method m = Api.class.getDeclaredMethod("after", Path.class, String.class);
+        Method m = Feed.class.getDeclaredMethod("after", Path.class, String.class);
         m.setAccessible(true);
         return (long) m.invoke(null, trace, have);
     }

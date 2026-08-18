@@ -1,4 +1,4 @@
-package tech.mikhailov.bjv.agent;
+package tech.mikhailov.bjv.web;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -7,6 +7,9 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.Executors;
+
+import tech.mikhailov.bjv.agent.Bom;
+import tech.mikhailov.bjv.agent.Prompts;
 
 /**
  * THE SERVER, WHICH IS ALL THAT IS LEFT OF A 1,604-LINE PAGE.

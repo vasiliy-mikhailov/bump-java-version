@@ -131,14 +131,12 @@ class TheRecordIsTheWireTest {
         // completion, so a seventeen-second call filed its own prompt seventeen seconds late --
         // after the streamed reasoning that prompt had caused. Read top to bottom, the record
         // showed the model thinking and then what it had been asked.
-        java.lang.reflect.Method m = Api.class.getDeclaredMethod("event", java.util.Map.class);
-        m.setAccessible(true);
-        Api api = new Api(java.nio.file.Path.of("/tmp"));
+        java.lang.reflect.Method m = event();
 
-        String out = (String) m.invoke(api, fields(
+        String out = (String) m.invoke(null, fields(
                 "kind", "exchange", "at", "1", "direction", "to", "agent", "survey-planner",
                 "messages", "2", "sent", "state what would settle whether it is on 21"));
-        String back = (String) m.invoke(api, fields(
+        String back = (String) m.invoke(null, fields(
                 "kind", "exchange", "at", "2", "direction", "back", "agent", "survey-planner",
                 "in", "2654", "out", "1138", "ms", "17205", "finish", "TOOL_EXECUTION",
                 "tools", "glob", "got", "reading the root pom"));
@@ -155,10 +153,9 @@ class TheRecordIsTheWireTest {
 
     @Test
     void aFailedCallIsStillTheReplyHalf() throws Exception {
-        java.lang.reflect.Method m = Api.class.getDeclaredMethod("event", java.util.Map.class);
-        m.setAccessible(true);
+        java.lang.reflect.Method m = event();
 
-        String json = (String) m.invoke(new Api(java.nio.file.Path.of("/tmp")), fields(
+        String json = (String) m.invoke(null, fields(
                 "kind", "exchange", "at", "1", "direction", "back", "agent", "bump-doer",
                 "ms", "31000", "finish", "ERROR", "in", "0", "out", "0",
                 "error", "SocketTimeoutException: read timed out"));
@@ -221,6 +218,20 @@ class TheRecordIsTheWireTest {
         assertTrue(said.contains("[tool result]"), said);
         assertTrue(said.contains("glob"), said);
         assertTrue(said.contains("no files match"), said);
+    }
+
+    /**
+     * The one renderer of a trace event, which the record page and the live stream share.
+     *
+     * <p>Detail is package-private in tech.mikhailov.bjv.web, where every type is: it is named
+     * here rather than imported, because one test in another package is not a reason to make a
+     * class public forever.
+     */
+    private static java.lang.reflect.Method event() throws Exception {
+        java.lang.reflect.Method m = Class.forName("tech.mikhailov.bjv.web.Detail")
+                .getDeclaredMethod("event", java.util.Map.class);
+        m.setAccessible(true);
+        return m;
     }
 
     /** Map.of stops at ten pairs and an exchange carries more than that. */

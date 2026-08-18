@@ -25,7 +25,7 @@ import java.util.List;
  * English in it. See {@link Flow.Node}: each of the three is written one line above the body that
  * makes it true, and dies with that body.
  */
-final class Shape {
+public final class Shape {
 
     private Shape() {
     }
@@ -38,7 +38,7 @@ final class Shape {
      * campaign both "do" by running a sub-chain, and pretending a model sits there would be its own
      * untruth.
      */
-    record Step(String name, String role, boolean agent) {
+    public record Step(String name, String role, boolean agent) {
     }
 
     /**
@@ -47,7 +47,7 @@ final class Shape {
      * <p>{@code within} names the stage this one hangs under, empty at the top. See {@link #of} for
      * why that is the nearest ancestor that SPEAKS rather than the nearest ancestor there is.
      */
-    record Stage(String title, String within, List<Step> steps, String repeats, String reads) {
+    public record Stage(String title, String within, List<Step> steps, String repeats, String reads) {
 
         boolean nested() {
             return !within.isBlank();
@@ -105,7 +105,7 @@ final class Shape {
     }
 
     /** Every agent the tree reaches, in the order it reaches them. What {@link Agents} must define. */
-    static List<String> agentNames(List<Stage> stages) {
+    public static List<String> agentNames(List<Stage> stages) {
         return stages.stream()
                 .flatMap(s -> s.steps().stream())
                 .filter(Step::agent)

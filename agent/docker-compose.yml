@@ -23,7 +23,7 @@ services:
       BJV_DASH_TOKEN: ${BJV_DASH_TOKEN:?set BJV_DASH_TOKEN in .env}
     volumes:
       - ${BJV_RUNROOT:?set BJV_RUNROOT}/results:/results
-    command: ["tech.mikhailov.bjv.agent.Dashboard", "/results", "8086"]
+    command: ["tech.mikhailov.bjv.web.Serve", "/results", "8086"]
 
   supervisor:
     profiles: ["supervisor"]
@@ -41,7 +41,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${BJV_RUNROOT:?set BJV_RUNROOT}/results:/results
-    command: ["tech.mikhailov.bjv.agent.Supervisor", "/results"]
+    command: ["tech.mikhailov.bjv.web.Supervisor", "/results"]
     depends_on:
       - dashboard
 

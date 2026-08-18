@@ -15,7 +15,7 @@ package tech.mikhailov.bjv.agent;
  * {@link #asked} reports an opinion. A reader who cannot tell which of the two decided a settlement
  * cannot audit it.
  */
-interface Trace {
+public interface Trace {
 
     /** A model call and its answer, both in full. The unit prompt training replays. */
     void asked(String agent, String prompt, String reply);

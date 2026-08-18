@@ -123,7 +123,7 @@ run '
     -e BJV_SUPERVISOR_MINUTES="${BJV_SUPERVISOR_MINUTES:-20}" \
     --user "$(id -u):$(id -g)" \
     -v '"$(dirname "$RESULTS")"':/runroot \
-    bjv tech.mikhailov.bjv.agent.Serve /runroot/results 8086 >/dev/null
+    bjv tech.mikhailov.bjv.web.Serve /runroot/results 8086 >/dev/null
   echo "dashboard and supervisor recreated as one container"
 '
 

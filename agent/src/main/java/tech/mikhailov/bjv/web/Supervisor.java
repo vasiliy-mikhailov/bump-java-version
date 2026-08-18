@@ -1,4 +1,4 @@
-package tech.mikhailov.bjv.agent;
+package tech.mikhailov.bjv.web;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,6 +17,13 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.service.tool.ToolExecutor;
+
+import tech.mikhailov.bjv.agent.Agents;
+import tech.mikhailov.bjv.agent.JsonlTrace;
+import tech.mikhailov.bjv.agent.Model;
+import tech.mikhailov.bjv.agent.Reasoning;
+import tech.mikhailov.bjv.agent.Reply;
+import tech.mikhailov.bjv.agent.Trace;
 
 /**
  * THE ONE AGENT THAT STANDS OUTSIDE A BUMP.

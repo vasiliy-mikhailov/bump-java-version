@@ -111,7 +111,7 @@ class ABumpIsNotAMavenIdeaTest {
 
     @Test
     void theGeneratedDocumentCoversEveryPlaceOneVersionCanBeWritten() {
-        String yaml = Tools.bumpYaml("org.springframework.boot", "spring-boot-gradle-plugin",
+        String yaml = Rewrites.bumpYaml("org.springframework.boot", "spring-boot-gradle-plugin",
                 "2.7.18");
 
         assertTrue(yaml.startsWith("type: specs.openrewrite.org/v1beta/recipe"),
@@ -143,14 +143,14 @@ class ABumpIsNotAMavenIdeaTest {
     @Test
     void theMigrationIsDerivedFromTheTargetRatherThanRemembered() {
         assertEquals("org.openrewrite.java.spring.boot2.UpgradeSpringBoot_2_7",
-                Tools.migrationFor("org.springframework.boot", "2.7.18"));
+                Rewrites.migrationFor("org.springframework.boot", "2.7.18"));
         assertEquals("org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5",
-                Tools.migrationFor("org.springframework.boot", "3.5.16"));
+                Rewrites.migrationFor("org.springframework.boot", "3.5.16"));
         assertEquals("org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0",
-                Tools.migrationFor("org.springframework.boot", "4.0.0"));
+                Rewrites.migrationFor("org.springframework.boot", "4.0.0"));
         // The patch is the recipe's business, so naming the line alone means the same thing.
         assertEquals("org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5",
-                Tools.migrationFor("org.springframework.boot", "3.5"));
+                Rewrites.migrationFor("org.springframework.boot", "3.5"));
     }
 
     @Test
@@ -160,13 +160,13 @@ class ABumpIsNotAMavenIdeaTest {
         // which the Gradle actuator fails loudly on and the Maven one calls a success that changed
         // nothing. That second behaviour is why guessing has to happen here and not in a prompt.
         for (String beyond : new String[] {"2.8.0", "3.6.0", "4.1.0", "5.0.0"}) {
-            assertEquals("", Tools.migrationFor("org.springframework.boot", beyond),
+            assertEquals("", Rewrites.migrationFor("org.springframework.boot", beyond),
                     beyond + " has no free migration recipe");
         }
-        assertEquals("", Tools.migrationFor("org.postgresql", "42.7.2"),
+        assertEquals("", Rewrites.migrationFor("org.postgresql", "42.7.2"),
                 "and nothing outside Spring Boot is covered, which it says rather than inventing");
-        assertEquals("", Tools.migrationFor("org.springframework.boot", "three"));
-        assertEquals("", Tools.migrationFor("org.springframework.boot", "3"),
+        assertEquals("", Rewrites.migrationFor("org.springframework.boot", "three"));
+        assertEquals("", Rewrites.migrationFor("org.springframework.boot", "3"),
                 "a major with no minor names no line");
     }
 
@@ -196,7 +196,7 @@ class ABumpIsNotAMavenIdeaTest {
         // Tree.diff() lists untracked files, because a whole class of correct migration is a new
         // file. The recipe document and the init script are the harness's own, and counting them
         // would report every run as having changed the working tree, which is the exact signal
-        // Tools.reported() uses to decide whether anything happened.
+        // Rewrites.reported() uses to decide whether anything happened.
         Files.createDirectories(ws.resolve(".git/info"));
         new Tree(ws, null).excludeBuildOutput();
 

@@ -18,7 +18,7 @@ import com.deepagents.langchain4j.flow.DeepAgentFlowListener;
  * analysis and for prompt tuning. {@code settlements.jsonl} is the last word per bump, for a reader
  * who wants to know what happened rather than how.
  */
-final class JsonlTrace implements Trace, DeepAgentFlowListener {
+public final class JsonlTrace implements Trace, DeepAgentFlowListener {
 
     private final Path trace;
     private final Path settlements;
@@ -61,7 +61,7 @@ final class JsonlTrace implements Trace, DeepAgentFlowListener {
         }
     }
 
-    JsonlTrace(Path trace, Path settlements, String bump) {
+    public JsonlTrace(Path trace, Path settlements, String bump) {
         this.trace = trace;
         this.settlements = settlements;
         this.bump = bump;

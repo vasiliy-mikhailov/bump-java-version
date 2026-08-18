@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  * earliest-colliding and the default, so it was the easiest verdict to trigger by accident, which
  * is exactly backwards for a construction whose whole point is that a reviewer can stop the work.
  */
-final class Reply {
+public final class Reply {
 
     private Reply() {
     }
@@ -43,7 +43,7 @@ final class Reply {
      * "unsound" and "against" outright. And a match immediately preceded by a negation is not a
      * match, which kills "not done".
      */
-    static String word(String reply, String... allowed) {
+    public static String word(String reply, String... allowed) {
         if (reply == null || reply.isBlank()) {
             return allowed[0];
         }

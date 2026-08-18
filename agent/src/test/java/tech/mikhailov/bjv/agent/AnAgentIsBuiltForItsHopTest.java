@@ -198,7 +198,7 @@ class AnAgentIsBuiltForItsHopTest {
         assertTrue(stems.containsAll(chain), "and the same names");
 
         assertNotEquals(chain, stems,
-                "the two orders differ; if they ever stop differing the sort in Api.settings is "
+                "the two orders differ; if they ever stop differing the sort in Settings.agents is "
                         + "still correct and this test is the record of why it exists");
 
         // AND THE CHAIN'S ORDER IS THE RUN'S. Repair happens inside the module walk now, so the

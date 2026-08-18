@@ -28,7 +28,7 @@ import dev.langchain4j.http.client.sse.ServerSentEventParser;
  * <p>It touches nothing. The response is passed through exactly as received, and a failure to parse
  * is silent by design: a trace that cannot be written must never be the reason a bump fails.
  */
-final class Reasoning {
+public final class Reasoning {
 
     private Reasoning() {
     }
@@ -270,7 +270,7 @@ final class Reasoning {
      * unquoted and legitimately, so every numeric argument silently read as absent and fell back to
      * its default. what_happened's `limit` was ignored on every call an agent ever made.
      */
-    static int number(String json, String name, int fallback) {
+    public static int number(String json, String name, int fallback) {
         int at = json.indexOf("\"" + name + "\":");
         if (at < 0) {
             return fallback;
@@ -290,7 +290,7 @@ final class Reasoning {
         }
     }
 
-    static String field(String json, String name) {
+    public static String field(String json, String name) {
         int at = json.indexOf("\"" + name + "\":");
         if (at < 0) {
             return "";

@@ -73,7 +73,7 @@ final class Prove {
         };
 
         // What Bump does before any agent runs, so the harness's own files do not read back as
-        // the agent's work when Tools.reported() asks whether the tree moved.
+        // the agent's work when Rewrites.reported() asks whether the tree moved.
         Tree tree = new Tree(ws, null);
         tree.excludeBuildOutput();
         System.out.println("actuator this workspace needs: " + Migrate.actuatorFor(ws));
