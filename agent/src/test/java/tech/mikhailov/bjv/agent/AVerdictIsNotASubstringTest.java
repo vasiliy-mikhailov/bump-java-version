@@ -30,7 +30,7 @@ class AVerdictIsNotASubstringTest {
         String reply = "Not done — module `core` still declares maven.compiler.release 11.\n"
                 + "again: raise the property in core/pom.xml";
 
-        assertEquals("again", Bump.word(reply, "done", "again", "replan"));
+        assertEquals("again", Reply.word(reply, "done", "again", "replan"));
     }
 
     @Test
@@ -38,7 +38,7 @@ class AVerdictIsNotASubstringTest {
         for (String opening : List.of("not done", "nothing done", "this is not done",
                 "isn't done yet", "cannot be done", "never done")) {
             String reply = opening + ".\nagain: the pin is still below the floor";
-            assertEquals("again", Bump.word(reply, "done", "again", "replan"),
+            assertEquals("again", Reply.word(reply, "done", "again", "replan"),
                     "opening with \"" + opening + "\" is not agreement");
         }
     }
@@ -47,15 +47,15 @@ class AVerdictIsNotASubstringTest {
     void againstIsNotAgain() {
         String reply = "replan: the plan works against a property the build never reads";
 
-        assertEquals("replan", Bump.word(reply, "done", "again", "replan"));
+        assertEquals("replan", Reply.word(reply, "done", "again", "replan"));
     }
 
     @Test
     void unsoundIsNotSound() {
         // The security critic's rejection used to read as its approval.
         assertEquals("wrong-call",
-                Bump.word("wrong-call: the delta is unsound", "sound", "wrong-call"));
-        assertEquals("overclaimed", Bump.word("The reading is unsound.\noverclaimed: it credits the"
+                Reply.word("wrong-call: the delta is unsound", "sound", "wrong-call"));
+        assertEquals("overclaimed", Reply.word("The reading is unsound.\noverclaimed: it credits the"
                 + " bump with CVEs that were never reachable", "sound", "overclaimed"));
     }
 
@@ -64,29 +64,29 @@ class AVerdictIsNotASubstringTest {
         // Every prompt asks for the word first, and when it arrives that way nothing else matters.
         String reply = "replan: this module inherits everything; nothing here is done or again";
 
-        assertEquals("replan", Bump.word(reply, "done", "again", "replan"));
+        assertEquals("replan", Reply.word(reply, "done", "again", "replan"));
     }
 
     @Test
     void theVerdictSurvivesTheDecorationModelsAddToIt() {
         for (String decorated : List.of("**done**", "- done", "> done", "`done`", "  done  ",
                 "done.", "done!", "done: every pin met")) {
-            assertEquals("done", Bump.word(decorated, "done", "again", "replan"),
+            assertEquals("done", Reply.word(decorated, "done", "again", "replan"),
                     "decorated as: " + decorated);
         }
     }
 
     @Test
     void aPlainAgreementIsStillAgreement() {
-        assertEquals("done", Bump.word("done: every pin is at or above its floor",
+        assertEquals("done", Reply.word("done: every pin is at or above its floor",
                 "done", "again", "replan"));
-        assertEquals("sound", Bump.word("sound", "sound", "wrong-call"));
+        assertEquals("sound", Reply.word("sound", "sound", "wrong-call"));
     }
 
     @Test
     void silenceFallsBackRatherThanGuessing() {
-        assertEquals("done", Bump.word("", "done", "again", "replan"));
-        assertEquals("done", Bump.word(null, "done", "again", "replan"));
+        assertEquals("done", Reply.word("", "done", "again", "replan"));
+        assertEquals("done", Reply.word(null, "done", "again", "replan"));
     }
 
     @Test

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * THE CHAIN EXISTED TWICE AND THE COPIES DRIFTED. NOW IT EXISTS ONCE, AS THE PROGRAM.
  *
- * <p>{@link Agents} built the agents and {@link Dashboard} carried a hand-typed array of the same
+ * <p>{@link Agents} built the agents and the legacy page carried a hand-typed array of the same
  * chain. When a stage was deleted, only one copy heard about it: the page went on advertising a
  * {@code prepare} stage with a {@code preparer} and a {@code prepare-critic} for hours after all
  * three were gone, and showed none of the agents added in their place. Nothing failed and no test
@@ -50,7 +50,7 @@ class TheChainIsDeclaredOnceTest {
      * <p>Fourteen of these agents are defined once per platform and named
      * {@code before-pins-planner@spring-boot}. The shape is walked before any module has been
      * looked at, and it must be: {@code Bump.stages} builds a bump with no workspace, no agents and
-     * no trace, and Dashboard reads it from a static initialiser, so a platform resolved at
+     * no trace. The legacy page read it from a static initialiser, so a platform resolved at
      * construction time takes the page down rather than one request. What the tree can say is
      * before-pins-planner, and what the catalogue holds is three of it.
      */

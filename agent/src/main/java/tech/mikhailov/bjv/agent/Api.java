@@ -99,7 +99,7 @@ final class Api {
     private Map<String, Map<String, String>> settlements() {
         Map<String, Map<String, String>> latest = new LinkedHashMap<>();
         for (String line : lines(results.resolve("settlements.jsonl"))) {
-            Map<String, String> r = Dashboard.row(line);
+            Map<String, String> r = Json.row(line);
             String bump = r.getOrDefault("bump", "");
             if (isBump(bump)) {
                 latest.put(slug(bump), r);
@@ -189,7 +189,7 @@ final class Api {
                 return 0L;
             }
             try (var lines = Files.lines(trace)) {
-                return lines.findFirst().map(l -> num(Dashboard.row(l).get("at"))).orElse(0L);
+                return lines.findFirst().map(l -> num(Json.row(l).get("at"))).orElse(0L);
             } catch (IOException | RuntimeException unreadable) {
                 return 0L;
             }
@@ -281,7 +281,7 @@ final class Api {
         }
         try {
             for (String line : Files.readAllLines(file, java.nio.charset.StandardCharsets.UTF_8)) {
-                Map<String, String> row = Dashboard.row(line);
+                Map<String, String> row = Json.row(line);
                 String bump = row.get("bump");
                 if (bump != null && !bump.isBlank()) {
                     byBump.put(bump.replaceAll("[^A-Za-z0-9]+", "_"), row);
@@ -414,7 +414,7 @@ final class Api {
         }
         try (var lines = Files.lines(trace)) {
             String found = lines.filter(l -> l.contains("\"kind\":\"priced\""))
-                    .map(l -> Dashboard.row(l).getOrDefault("minutes", ""))
+                    .map(l -> Json.row(l).getOrDefault("minutes", ""))
                     .filter(m -> m.matches("\\d+"))
                     .reduce((first, last) -> last)
                     .orElse("");
@@ -552,7 +552,7 @@ final class Api {
             }
             for (String line : text.substring(0, lastBreak).split("\n")) {
                 if (!line.isBlank()) {
-                    write(out, "trace", event(Dashboard.row(line)));
+                    write(out, "trace", event(Json.row(line)));
                 }
             }
             return from + text.substring(0, lastBreak + 1)
@@ -882,7 +882,7 @@ final class Api {
      */
     private String bump(String slug) {
         List<String> raw = lines(results.resolve(slug).resolve("trace.jsonl"));
-        List<Map<String, String>> events = raw.stream().map(Dashboard::row).toList();
+        List<Map<String, String>> events = raw.stream().map(Json::row).toList();
 
         Map<String, Integer> spoke = new LinkedHashMap<>();
         for (Map<String, String> e : events) {
@@ -1080,7 +1080,7 @@ final class Api {
         }
         List<Map<String, String>> events =
                 lines(results.resolve(slug).resolve("trace.jsonl")).stream()
-                        .map(Dashboard::row).toList();
+                        .map(Json::row).toList();
         Map<String, String[]> before = inventory(events, "packages-before");
         Map<String, String[]> after = inventory(events, "packages-after");
         if (after.isEmpty()) {
@@ -1584,7 +1584,7 @@ final class Api {
                 Json.field("latest", Json.array(
                         findings.subList(Math.max(0, findings.size() - 8), findings.size()),
                         line -> {
-                            Map<String, String> r = Dashboard.row(line);
+                            Map<String, String> r = Json.row(line);
                             return Json.object(
                                     Json.field("at", String.valueOf(num(r.get("at")))),
                                     Json.field("bump", Json.string(r.getOrDefault("bump", ""))),

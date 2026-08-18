@@ -106,7 +106,7 @@ final class Supervisor {
                     .run("The sweep as it stands:\n\n" + digest
                             + "\n\nA colleague reports:\n" + claim
                             + "\n\nDoes it hold?");
-            String verdict = Bump.word(judgement, "holds", "refuted");
+            String verdict = Reply.word(judgement, "holds", "refuted");
             record(claim, verdict, judgement);
         }
     }

@@ -1,5 +1,7 @@
 package tech.mikhailov.bjv.agent;
 
+import java.util.LinkedHashMap;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -46,5 +48,61 @@ final class Json {
         return "{" + values.entrySet().stream()
                 .map(e -> string(e.getKey()) + ":" + e.getValue())
                 .collect(Collectors.joining(",")) + "}";
+    }
+    /** Tolerant of both quoted strings and bare numbers/booleans; the two files differ on that. */
+    static Map<String, String> row(String jsonl) {
+        Map<String, String> out = new LinkedHashMap<>();
+        int i = 1;
+        while (i < jsonl.length() - 1) {
+            int k1 = jsonl.indexOf('"', i);
+            int k2 = k1 < 0 ? -1 : jsonl.indexOf('"', k1 + 1);
+            if (k2 < 0) {
+                break;
+            }
+            String key = jsonl.substring(k1 + 1, k2);
+            int colon = jsonl.indexOf(':', k2);
+            if (colon < 0) {
+                break;
+            }
+            int scan = colon + 1;
+            while (scan < jsonl.length() && jsonl.charAt(scan) == ' ') {
+                scan++;
+            }
+            if (scan < jsonl.length() && jsonl.charAt(scan) == '"') {
+                StringBuilder v = new StringBuilder();
+                int p = scan + 1;
+                while (p < jsonl.length()) {
+                    char ch = jsonl.charAt(p);
+                    if (ch == '\\' && p + 1 < jsonl.length()) {
+                        char n = jsonl.charAt(++p);
+                        switch (n) {
+                            case 'n' -> v.append('\n');
+                            case 't' -> v.append('\t');
+                            case 'r' -> v.append('\r');
+                            case 'u' -> {
+                                v.append((char) Integer.parseInt(jsonl, p + 1, p + 5, 16));
+                                p += 4;
+                            }
+                            default -> v.append(n);
+                        }
+                    } else if (ch == '"') {
+                        break;
+                    } else {
+                        v.append(ch);
+                    }
+                    p++;
+                }
+                out.put(key, v.toString());
+                i = p + 1;
+            } else {
+                int stop = scan;
+                while (stop < jsonl.length() && ",}".indexOf(jsonl.charAt(stop)) < 0) {
+                    stop++;
+                }
+                out.put(key, jsonl.substring(scan, stop).trim());
+                i = stop + 1;
+            }
+        }
+        return out;
     }
 }

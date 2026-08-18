@@ -149,7 +149,7 @@ final class Triad extends Flow.Node {
         if (judgement == null || judgement.isBlank()) {
             return "again";
         }
-        return Bump.word(judgement, "done", "again", "replan");
+        return Reply.word(judgement, "done", "again", "replan");
     }
 
     /**

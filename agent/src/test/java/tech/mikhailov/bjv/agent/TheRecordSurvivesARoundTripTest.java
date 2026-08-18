@@ -18,7 +18,7 @@ class TheRecordSurvivesARoundTripTest {
         String nasty = "line one\n\t\"quoted\" \\ backslash\nline three";
         new JsonlTrace(trace, dir.resolve("settlements.jsonl"), "r|s|8|11")
                 .asked("fixer", nasty, "a reply");
-        Map<String, String> row = Dashboard.row(Files.readAllLines(trace).get(0));
+        Map<String, String> row = Json.row(Files.readAllLines(trace).get(0));
         assertEquals(nasty, row.get("prompt"));
         assertEquals("asked", row.get("kind"));
         assertEquals("a reply", row.get("reply"));

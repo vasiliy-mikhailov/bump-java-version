@@ -56,8 +56,8 @@ class TheGateSaysWhichTestsItLostTest {
     }
 
     @Test
-    void theDashboardCanStillParseTheTraceLineTheNamesAreAppendedTo() {
-        // Dashboard.java reads the gate chip out of this line. The names go after the closing
+    void theRecordCanStillParseTheTraceLineTheNamesAreAppendedTo() {
+        // Api reads the gate chip out of this line. The names go after the closing
         // paren precisely so that regex keeps matching; a reformat here silently empties a column.
         String line = "turn 1: FAIL_test_conservation (pre=7 lost=4 effective-target=21)"
                 + "\n  com.yu.utils.KaptchaTest#render\n  ... and 3 more";

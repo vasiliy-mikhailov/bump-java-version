@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>THE PATH IS EXACT AND IT IS NOT HYPOTHETICAL. {@code Flow.each().inside()} reports the body
  * built for a NULL item, because a shape is what the program can do rather than what one
  * repository made it do; {@link Bump#stages} builds a bump with no workspace, no runner, no trace
- * and no agents, purely to walk it; and {@code Dashboard} reads that walk into a static field.
+ * and no agents, purely to walk it, and Api reads that walk on every request.
  * A resolve at construction time is therefore an {@code ExceptionInInitializerError} in a class
  * initialiser, which does not fail one request. It fails every request that class ever serves, for
  * the life of the process, including the pages that have nothing to do with prompts.
@@ -69,16 +69,12 @@ class TheShapeCannotResolveAPlatformTest {
         }
     }
 
-    @Test
-    void theDashboardsOwnStaticInitialiserSurvivesIt() {
-        // THE CONSEQUENCE, PINNED WHERE IT LANDS. Dashboard holds the chain in a static field read
-        // from Bump.stages(), so this is not "one page returns a 500": the class never initialises
-        // and every request it serves fails for the life of the process. Forcing initialisation is
-        // the whole assertion.
-        assertDoesNotThrow(() -> Class.forName(Dashboard.class.getName(), true,
-                        Dashboard.class.getClassLoader()),
-                "a platform resolved at construction time takes the whole dashboard with it");
-    }
+    // THE STATIC-INITIALISER CASE IS GONE RATHER THAN FIXED. It pinned the worst consequence of
+    // resolving a platform during a shape walk: the legacy page read the walk into a static field,
+    // so a null dereference here was not one failed request, it was an ExceptionInInitializerError
+    // that took the class down. That page is deleted and Api reads the walk per request, so the
+    // blast radius is a 500. The test above still holds the rule, which was never about the page.
+
 
     @Test
     void aModuleStartsAtTheFallbackRatherThanAtNothing() throws Exception {

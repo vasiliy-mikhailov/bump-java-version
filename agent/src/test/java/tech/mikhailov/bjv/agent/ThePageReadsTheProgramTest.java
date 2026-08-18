@@ -181,26 +181,11 @@ class ThePageReadsTheProgramTest {
         }
     }
 
-    @Test
-    void theSpineTheDashboardDrawsIsTheTopOfTheTree() throws Exception {
-        // The bump strip renders the stages a bump passes through, including the ones it never
-        // reached, because a strip that lists only who has spoken shows a chain of ten as a chain
-        // of two and hides where the run actually stopped. It was a hand-typed array once and it
-        // advertised a stage that had been deleted for hours.
-        Field chain = Dashboard.class.getDeclaredField("CHAIN");
-        chain.setAccessible(true);
-        String[][] drawn = (String[][]) chain.get(null);
+    // THE SPINE TEST WENT WITH THE PAGE IT GUARDED. It read a static String[][] CHAIN out of the
+    // legacy dashboard and checked the arc it drew matched the top of the tree. That page is
+    // deleted; the client draws the same spine from Bump.stages() over the API, which the tests
+    // above already hold to the program.
 
-        List<Shape.Stage> top = STAGES.stream().filter(s -> !s.nested()).toList();
-        assertEquals(top.size(), drawn.length, "one row per top-level stage");
-        for (int i = 0; i < top.size(); i++) {
-            List<String> row = new ArrayList<>(List.of(drawn[i]));
-            List<String> expected = new ArrayList<>();
-            expected.add(top.get(i).title());
-            top.get(i).steps().forEach(s -> expected.add(s.name()));
-            assertEquals(expected, row, "the spine is the tree, walked");
-        }
-    }
 
     private static String stageOf(String agent) {
         return STAGES.stream()

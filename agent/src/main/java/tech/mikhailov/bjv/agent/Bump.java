@@ -418,10 +418,12 @@ public final class Bump {
         //
         // IT STARTS AT THE FALLBACK AND IS RESOLVED INSIDE A NODE BODY, WHICH IS NOT A PREFERENCE.
         // This method is also called once with a NULL module, to draw the picture, on a bump that
-        // has no agents, no trace and no workspace, and Dashboard reads Bump.stages() from a static
-        // initialiser. A platform resolved while these nodes are being CONSTRUCTED is therefore an
-        // ExceptionInInitializerError that takes the whole page down rather than one failed
-        // request. The platform stage below resolves it in its body, where a module exists.
+        // has no agents, no trace and no workspace. This used to be sharper: the legacy page
+        // read stages() from a STATIC INITIALISER, so a null dereference here was not a 500 on
+        // one page, it was an ExceptionInInitializerError that took the whole class with it.
+        // That page is deleted and only Api reads this now, per request. The rule stands anyway,
+        // because the reason it existed is that a shape is what the program can do rather than
+        // what one repository made it do.
         String[] platform = {UNRESOLVED_PLATFORM};
         return Flow.seq("module",
                 // FIRST, BECAUSE EVERY STAGE AFTER IT IS KEYED BY WHAT IT SETTLES. A pin doer told
@@ -947,7 +949,7 @@ public final class Bump {
         String platform = Managed.platformIn(said);
         // A blank verdict is `again`, exactly as Triad reads one: silence is not agreement.
         boolean settled = !judged[0].isBlank()
-                && word(judged[0], "done", "again", "replan").equals("done");
+                && Reply.word(judged[0], "done", "again", "replan").equals("done");
         // WHY TWO TESTS AND NOT ONE. A word outside the three is what the verifier is there to
         // reject, so most out-of-set answers arrive here as a loop that never closed. The second
         // catches the one that gets past it, a verifier approving a word this walk has no prompts
@@ -1211,7 +1213,7 @@ public final class Bump {
                     .run("The failing build:\n" + log
                             + "\n\nThe whole campaign, since it began:\n" + tree.diffSince(floor)
                             + "\n\nThe steps that landed:\n" + tree.history(floor));
-            if (word(judgement, "done", "again").equals("done") || campaign == REASK) {
+            if (Reply.word(judgement, "done", "again").equals("done") || campaign == REASK) {
                 return landed;
             }
             trace.progress(bump, "module-repair-verifier sent the campaign back: "
@@ -1284,7 +1286,7 @@ public final class Bump {
             String judgement = agents.moduleRepairStepVerifier(platform)
                     .run("The failing build said:\n" + log
                     + "\n\nThe edits now in the workspace:\n" + now + "\n\nWhat they said:\n" + reply);
-            if ("sound".equals(word(judgement, "sound", "gaming", "off-target"))) {
+            if ("sound".equals(Reply.word(judgement, "sound", "gaming", "off-target"))) {
                 return true;
             }
             tree.revert();
@@ -1323,8 +1325,6 @@ public final class Bump {
         }
         return b.toString();
     }
-
-
 
     /**
      * What to put in front of the next agent: the scorer's finding, in the terms it can act on.
@@ -1491,7 +1491,7 @@ public final class Bump {
         for (int again = 0; again < REASK; again++) {
             String judgement = agents.verdictVerifier().run(context
                     + "\n\nYour colleague argues:\n" + argued);
-            if (word(judgement, "sound", "wrong").equals("sound")) {
+            if (Reply.word(judgement, "sound", "wrong").equals("sound")) {
                 break;
             }
             trace.progress(bump, "verdict-critic: " + judgement.lines().findFirst().orElse(""));
@@ -1500,7 +1500,7 @@ public final class Bump {
                     + "\n\nA reviewer checked it against the record and disagrees:\n" + judgement
                     + "\nArgue it again, or keep your word and answer the objection.");
         }
-        account = word(argued, "blocked-dependency", "behavior-change", "infra") + "\n" + argued;
+        account = Reply.word(argued, "blocked-dependency", "behavior-change", "infra") + "\n" + argued;
         return account;
     }
 
@@ -1525,7 +1525,7 @@ public final class Bump {
         // NOTHING DOWNSTREAM DEPENDS ON THIS NUMBER, which is exactly why it drifts: an estimate
         // nobody checks is read later as though it had been measured.
         String judged = agents.estimatorVerifier().run(context + "\n\nThe estimate:\n" + estimate);
-        if (!word(judged, "sound", "off").equals("sound")) {
+        if (!Reply.word(judged, "sound", "off").equals("sound")) {
             trace.progress(bump, "estimator-critic: " + judged.lines().findFirst().orElse(""));
             estimate = agents.estimatorDoer().run(context + "\n\nYou estimated:\n" + estimate
                     + "\n\nA reviewer checked it against the log:\n" + judged
@@ -1542,69 +1542,4 @@ public final class Bump {
         return m.find() ? new String[]{m.group(1), m.group(2)} : null;
     }
 
-    /**
-     * WHICH VERDICT AN AGENT ACTUALLY GAVE, which is not the first place its letters appear.
-     *
-     * <p>This was {@code indexOf} over the whole lowercased reply, taking the earliest hit. Three
-     * collisions follow from that and all three are ordinary English rather than adversarial input:
-     *
-     * <ul>
-     *   <li>{@code done} is inside "not done", "nothing done", "abandoned". A verifier that opens by
-     *       denying completion scored {@code done} before reaching its real verdict.
-     *   <li>{@code again} is inside "against".
-     *   <li>{@code sound} is inside "unsound", so the security critic's rejection read as approval.
-     * </ul>
-     *
-     * <p>The first is the expensive one. {@code done} is both the earliest-colliding word and the
-     * default when nothing matches, so the approving answer was the easiest to trigger by accident,
-     * which is precisely backwards for a construction whose whole purpose is that a reviewer can
-     * stop the work.
-     *
-     * <p>Three rules, in order. A line that STARTS with one of the words is the verdict, because
-     * that is what every prompt asks for. Failing that, a whole-word match wins, which kills
-     * "unsound" and "against" outright. And a match immediately preceded by a negation is not a
-     * match, which kills "not done".
-     */
-    static String word(String reply, String... allowed) {
-        if (reply == null || reply.isBlank()) {
-            return allowed[0];
-        }
-        for (String line : reply.lines().toList()) {
-            String l = line.strip().toLowerCase().replaceFirst("^[-*>#`\\s]+", "");
-            for (String w : allowed) {
-                if (l.equals(w) || l.startsWith(w + ":") || l.startsWith(w + " ")
-                        || l.startsWith(w + ".") || l.startsWith(w + ",")
-                        || l.startsWith(w + ";") || l.startsWith(w + "!")) {
-                    return w;
-                }
-            }
-        }
-        String lower = reply.toLowerCase();
-        int best = Integer.MAX_VALUE;
-        String chosen = allowed[0];
-        for (String w : allowed) {
-            Matcher m = Pattern.compile("\\b" + Pattern.quote(w) + "\\b").matcher(lower);
-            while (m.find()) {
-                if (negated(lower, m.start())) {
-                    continue;
-                }
-                if (m.start() < best) {
-                    best = m.start();
-                    chosen = w;
-                }
-                break;
-            }
-        }
-        return chosen;
-    }
-
-    /** Whether the words just before a match turn it into its opposite. */
-    private static boolean negated(String text, int at) {
-        String before = text.substring(Math.max(0, at - 24), at);
-        return NEGATION.matcher(before).find();
-    }
-
-    private static final Pattern NEGATION = Pattern.compile(
-            "\\b(not|isn't|isnt|is not|no|never|nothing|cannot|can't|cant|wasn't|wasnt|"
-                    + "aren't|arent|hasn't|hasnt|far from|less than)\\b[\\s\\p{Punct}]*$");
 }
