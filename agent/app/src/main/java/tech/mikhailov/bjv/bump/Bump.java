@@ -1,19 +1,27 @@
 package tech.mikhailov.bjv.bump;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import tech.mikhailov.bjv.engine.Agent;
 import tech.mikhailov.bjv.engine.Env;
 import tech.mikhailov.bjv.engine.Flow;
+import tech.mikhailov.bjv.engine.Journal;
+import tech.mikhailov.bjv.engine.Json;
 import tech.mikhailov.bjv.engine.JsonlTrace;
 import tech.mikhailov.bjv.engine.Model;
 import tech.mikhailov.bjv.engine.Prompts;
@@ -57,6 +65,20 @@ import tech.mikhailov.bjv.jvm.Tree;
  * <p>PRODUCERS EDIT THE WORKSPACE THROUGH THEIR TOOLS, so what a phase did is read back from git,
  * not from what the agent said it did. A producer that describes an edit it never made is then
  * indistinguishable from one that made none, which is the honest reading.
+ *
+ * <p>A KILLED BUMP CONTINUES RATHER THAN BEGINNING AGAIN. The sweep runs for a fortnight and the
+ * harness changes daily, so lanes are killed; one of them had twenty hours in it. Almost nothing
+ * here has to be checkpointed to survive that, because the agents are stateless and the workspace
+ * is durable: what was edited is committed as each stage lands, and the readers re-read it for
+ * free. What a {@link Journal} holds is the little that cannot be derived again -- the baseline
+ * measured before anything moved, the module list an agent chose, and which model-driven stages
+ * have already been paid for -- and {@link #journaled} is the only thing that touches it.
+ *
+ * <p>THE GATES ARE NOT AMONG THEM, deliberately. module-gate and gate are deterministic builds and
+ * they are the arbiter; running one again after a kill is not waste but the answer to the only
+ * question a resume actually has, which is what is true of the tree as it now is. The decision to
+ * resume at all is {@link #resuming}, and it takes three conditions to say yes and any one to say
+ * no, because a wrong resume is worse than a slow one.
  */
 public final class Bump {
 
@@ -123,11 +145,58 @@ public final class Bump {
         String slug = bump.replaceAll("[^A-Za-z0-9]+", "_");
         JsonlTrace trace = new JsonlTrace(results.resolve(slug).resolve("trace.jsonl"),
                 results.resolve("settlements.jsonl"), bump, Fingerprint.OF_A_BUMP);
+        // THE JOURNAL SITS BESIDE THE TRACE IT BELONGS TO, and its rows carry the tree they landed
+        // on: that is what a resume is checked against. The supplier is asked at write time rather
+        // than now, because every stage that lands moves the tree it is asked about.
+        Path journalFile = results.resolve(slug).resolve("journal.jsonl");
+        Tree checkoutTree = new Tree(checkout, note -> trace.progress(bump, note));
+        String sha = checkoutTree.head();
+        Journal journal = new Journal(journalFile, checkoutTree::head);
+        boolean resumed = resuming(journal, results.resolve("settlements.jsonl"), bump, sha);
+        if (!resumed) {
+            // A FRESH START MUST NOT REPLAY A STALE JOURNAL, which is the whole failure mode of
+            // getting a resume wrong: the skipped stages would be skipped against edits that are
+            // not in this checkout. The old file is moved aside rather than deleted, because it is
+            // the evidence of what the killed attempt did and this record never rewrites history.
+            // AND A MIGRATED TREE HAS NO BEFORE LEFT TO MEASURE. Starting fresh runs the
+            // baseline, which measures what passed under the project's OWN JDK; on a checkout that
+            // has already been pinned, bumped and repaired that number is not a baseline, it is the
+            // migration's own result wearing the label of the thing it is judged against. The
+            // journal exists because that measurement cannot be taken twice.
+            //
+            // Under the shipped launcher this cannot happen, because run.sh re-clones. It is
+            // guarded anyway: the launcher that makes this feature worth having is one that
+            // PRESERVES the checkout, and this is the trap laid for it.
+            if (checkoutTree.migrated()) {
+                String why = "no-baseline\nthis checkout already carries bjv commits and its"
+                        + " journal does not stand on it, so there is no before-state left to"
+                        + " measure; re-clone at " + bump.split("\\|")[1] + " and run it again";
+                trace.settled(bump, why.split("\n", 2)[0], why, false, false);
+                System.out.println(why);
+                return;
+            }
+            journal = restarted(journalFile, checkoutTree);
+        }
         try {
-            Bump b = new Bump(checkout, bump, trace);
+            Bump b = new Bump(checkout, bump, trace, journal, resumed);
+            if (resumed) {
+                trace.progress(bump, "resuming: a journal for this bump stands on the checkout at "
+                        + sha + ", so the stages it records are not paid for twice; the gates run"
+                        + " again regardless, because they are the arbiter of the tree as it is now");
+                // BACK TO THE LAST THING THAT LANDED. Uncommitted work is, by this workspace's own
+                // convention, the step being judged right now: the stage that made it was killed
+                // before it committed and before any critic read it, so nobody ever accepted it.
+                // Left in place it would turn up in the next stage's diff and be judged as that
+                // stage's work. HEAD does not move, so the sha this resume was checked against is
+                // still the sha it stands on.
+                checkoutTree.revert();
+            }
             String account = b.run();
             String state = account.split("\n", 2)[0];
-            trace.settled(bump, state, account, b.baselineGreen, b.gateGreen);
+            // WHETHER THIS WAS ONE ATTEMPT OR TWO, in the row the sweep compares on. A resumed bump
+            // carries a different budget history and possibly a different module order, so it is
+            // not the same trial as a fresh one and a comparison has to be able to leave it out.
+            trace.settled(bump, state, account, b.baselineGreen, b.gateGreen, resumed);
             // A GREEN GATE IS NOT COMPLIANCE. The verdict says the project builds under the target
             // and lost no test; it says nothing about whether the versions the target needs were
             // reached. Measured here because this is the last moment the working tree exists and
@@ -152,6 +221,139 @@ public final class Bump {
             System.exit(1);
         }
     }
+
+    /**
+     * THE ONE SETTLEMENT STATE THAT MEANS A RUN WAS INTERRUPTED RATHER THAN CONCLUDED.
+     *
+     * <p>Every other word in that column is a bump that finished having something to say, including
+     * {@code requeued}, which is somebody asking for the work to be done again from the start.
+     */
+    private static final String IN_FLIGHT = "bumping";
+
+    /**
+     * DOES THIS ATTEMPT PICK UP A KILLED ONE, and the answer is no unless all three agree.
+     *
+     * <p>A journal that recorded a completed stage, a last settlement row that still reads
+     * {@link #IN_FLIGHT}, and a checkout standing where the journal left it. Any one of them
+     * missing and the bump starts fresh, because a wrong resume is worse than a slow one: the
+     * stages it skips are skipped against edits that are not in this tree, and the bump is then
+     * judged on a workspace nobody built.
+     *
+     * <p>Package-visible and static because it is the rule rather than a step of the run, and a
+     * rule with three clauses is worth being able to test one clause at a time.
+     */
+    static boolean resuming(Journal journal, Path settlements, String bump, String sha) {
+        if (journal.tree().isEmpty()) {
+            return false;
+        }
+        if (!IN_FLIGHT.equals(lastSettledState(settlements, bump))) {
+            return false;
+        }
+        return journal.standsOn(sha);
+    }
+
+    /**
+     * What the record last said about this bump, or nothing when it has never said anything.
+     *
+     * <p>Read leniently, for the reason the journal is: this file is appended to by a process that
+     * gets killed, so a torn last line is the normal case rather than a fault. Rows for other bumps
+     * share the file, so the key is checked rather than assumed.
+     */
+    private static String lastSettledState(Path settlements, String bump) {
+        if (!Files.isReadable(settlements)) {
+            return "";
+        }
+        String text;
+        try {
+            text = new String(Files.readAllBytes(settlements), StandardCharsets.UTF_8);
+        } catch (IOException unreadable) {
+            return "";
+        }
+        String state = "";
+        for (String line : text.split("\n")) {
+            if (!line.contains(bump)) {
+                continue;
+            }
+            Map<String, String> row;
+            try {
+                row = Json.row(line);
+            } catch (RuntimeException torn) {
+                continue;
+            }
+            if (!bump.equals(row.getOrDefault("bump", ""))) {
+                continue;
+            }
+            String said = row.getOrDefault("state", "");
+            if (!said.isBlank()) {
+                state = said;
+            }
+        }
+        return state;
+    }
+
+    /**
+     * A JOURNAL WITH NOTHING IN IT, and the old one kept where it fell.
+     *
+     * <p>Moved aside rather than truncated. The rows are what the killed attempt actually did, and
+     * a file that is emptied to make room cannot be read afterwards by anyone asking why a bump
+     * that had twenty hours in it started again from nothing.
+     */
+    private static Journal restarted(Path journalFile, Tree checkout) {
+        Path aside = journalFile.resolveSibling("journal." + System.currentTimeMillis() + ".jsonl");
+        try {
+            if (Files.isRegularFile(journalFile)) {
+                Files.move(journalFile, aside, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException couldNotMove) {
+            // THE FRESH RUN GOES SOMEWHERE ELSE RATHER THAN ON TOP. A journal that could not be
+            // moved still holds the killed attempt's rows, and handing it back would replay every
+            // one of them into a run that was decided to start over, which is the exact failure
+            // this whole path exists to prevent.
+            System.err.println("journal: could not set aside " + journalFile + ": "
+                    + couldNotMove.getMessage());
+            return new Journal(aside, checkout::head);
+        }
+        return new Journal(journalFile, checkout::head);
+    }
+
+    /**
+     * WHAT THIS BUMP HAS ALREADY FINISHED, so a killed one does not begin again from nothing.
+     *
+     * <p>Null for a bump built to be read rather than run: {@link #stages()} constructs one with no
+     * workspace, no trace and no agents, and a journal is a file. See {@link #journaled}, which is
+     * the only thing that touches it and answers with the bare node when there is none.
+     *
+     * <p>WHAT GOES IN IT IS WHAT CANNOT BE DERIVED AGAIN. Almost everything a bump knows is cheap
+     * to re-derive: the agents are stateless, so there is no conversation to rebuild, and the
+     * workspace is durable, so what was edited is in git and {@link Declared} re-reads it for free.
+     * Three things are not: the baseline measured before anything moved, the module list an agent
+     * chose, and which model-driven stages have already been paid for.
+     */
+    private final Journal journal;
+
+    /**
+     * WHETHER THIS PROCESS PICKED UP WHERE A KILLED ONE STOPPED.
+     *
+     * <p>It is in the settlement row because a resumed bump is not the same trial as a fresh one:
+     * it carries a different budget history and possibly a different module order. This corpus
+     * refuses to let an agent choose the hop for exactly that reason, and a comparison that mixed
+     * resumed rows with fresh ones would be measuring two experiments as one.
+     */
+    private final boolean resumed;
+
+    /** The passing set, under the project's own JDK, before anything moved. */
+    private static final String BASELINE_PRE = "baseline-pre";
+    /** The same read split by module, so a loss is attributed where it happened. */
+    private static final String BASELINE_BY_MODULE = "baseline-by-module";
+    /** Whether that suite was all green, which is a fact about the project and not about the bump. */
+    private static final String BASELINE_GREEN = "baseline-green";
+    /** What the gate decided, recorded because the closing stages select on it. */
+    private static final String GATE_GREEN = "gate-green";
+    /** The modules the filter kept: an agent's decision, which a second run would make differently. */
+    private static final String MODULE_LIST = "modules";
+
+    /** The key every repository-wide stage journals under: there is one of each per bump. */
+    private static final Supplier<String> REPO = () -> "repo";
 
     private final Path ws;
     private final String bump;
@@ -229,7 +431,12 @@ public final class Bump {
     private Security.Scan after = Security.Scan.notMeasured("the gate never went green");
     private Security.Delta delta = Security.Delta.unknown("not computed", -1, -1);
 
+    /** A bump with nothing to resume from: what {@link #stages()} builds, and what a test reads. */
     private Bump(Path ws, String bump, Trace trace) {
+        this(ws, bump, trace, null, false);
+    }
+
+    private Bump(Path ws, String bump, Trace trace, Journal journal, boolean resumed) {
         String[] parts = bump.split("\\|");
         // from and to are REQUIRED now: the hop is the experiment's independent variable and there
         // is no sensible default for it. A row without one is a manifest bug, not a thing to guess.
@@ -241,6 +448,25 @@ public final class Bump {
         this.from = parts[2];
         this.to = parts[3];
         this.trace = trace;
+        this.journal = journal;
+        this.resumed = resumed;
+        if (resumed) {
+            // THE BUDGET IS DERIVED RATHER THAN KEPT, which is why no row records it. A second copy
+            // of a number these rows already carry is a number that drifts, and this one drifts in
+            // the expensive direction: a resume that refilled the allowance would let a bump order
+            // the whole 192 steps again on every kill, which over a fortnight is unbounded repair.
+            //
+            // A COMPLETED CAMPAIGN IS CHARGED WHAT IT WAS ENTITLED TO ORDER. The row says the
+            // campaign finished, not how many of its steps it used, and the two readings differ in
+            // opposite directions: under-charging refills a budget that was spent. So the maximum
+            // is charged, and a resumed bump repairs less rather than more.
+            repairLeft = Math.max(0, REPAIR_BUDGET - STEPS * journal.count("module-repair-step"));
+            // A SCAN TAKEN NOW IS NOT A SCAN OF THIS PROJECT'S PRIOR STATE. The tree has moved, so
+            // the before-scan cannot be retaken and is not: the resumed run says so instead of
+            // quietly comparing the migrated tree against itself.
+            before = Security.Scan.notMeasured("the pre-migration scan belongs to the attempt that"
+                    + " was killed; the tree has moved and it cannot be taken again");
+        }
         this.tree = new Tree(ws, note -> trace.progress(bump, note));
         // THE MODULES STAGE, ASSEMBLED HERE AND NOT AS A FIELD INITIALISER: a triad keeps the trace
         // and the bump it is running, and field initialisers run before the constructor body has
@@ -275,8 +501,63 @@ public final class Bump {
         // THE ORDER, AND THE ONLY PLACE IT EXISTS. Here rather than in a field initialiser for the
         // same reason as the stage above: it holds that stage, and that stage does not exist until
         // the line before this one.
-        this.everything = Flow.seq("", survey, baseline, securityBefore, moduleFilter,
-                modulesStage, gate, securityAfter, estimator, verdict);
+        //
+        // WHICH STAGES A RESUME SKIPS IS DECIDED ON THIS LINE, and it is the model-driven ones. The
+        // journal is a constructor argument, so the wrapping happens here rather than on the field:
+        // a field initialiser runs before the constructor body and would read a journal that does
+        // not exist yet, which is the same trap the modules stage above is assembled here to avoid.
+        //
+        // THE GATES ARE NOT WRAPPED, and that is the part to keep right. module-gate and gate are
+        // deterministic builds, they are the arbiter, and they are cheap beside an agent. Running
+        // one again on a resume is not waste, it is the answer to the only question that matters
+        // after a kill: what is true of the tree as it now is. The baseline is not wrapped either,
+        // for the opposite reason: it cannot be re-measured at all once the tree has moved, so it
+        // is carried as facts rather than as an answer. See {@link #baselinePhase}.
+        //
+        // survey and module-filter are not wrapped here even though both are model-driven, because
+        // both build something the rest of the bump runs on: the runner, the agents and the scanner
+        // in one, the recipes in the other. Their model halves are wrapped inside their own bodies,
+        // where the construction can happen either way.
+        this.everything = Flow.seq("", survey, baseline, journaled(securityBefore, REPO),
+                moduleFilter, modulesStage, gate, journaled(securityAfter, REPO),
+                journaled(estimator, REPO), journaled(verdict, REPO));
+        // The campaign, wrapped for the same reason and keyed by the field the walk sets before it
+        // hands over. It is reached through this rather than past it; see {@link #repairSteps}.
+        this.repairSteps = journaled(stepCampaign, () -> campaignKey);
+    }
+
+    /**
+     * THE SAME NODE, MINUS WHAT IT HAS ALREADY DONE, or the same node when there is no journal.
+     *
+     * <p>{@link Flow#resumable} needs a journal, and a bump built for its shape alone has none: it
+     * has no workspace and no trace either, because every node holds a body it has not run. This
+     * answers with the bare node in that case, so the picture and the tests can walk a tree that
+     * was never going to journal anything.
+     *
+     * <p>THE KEY IS A SUPPLIER BECAUSE THE WALK IS PER MODULE. before-pins completes once for every
+     * module, and a key decided when the tree was built would be the same key for all of them.
+     */
+    private Agent journaled(Agent node, Supplier<String> key) {
+        return journal == null ? node : Flow.resumable(node, journal, key);
+    }
+
+    /**
+     * SOMETHING A KILLED ATTEMPT MEASURED THAT CANNOT BE MEASURED AGAIN, if this run is its
+     * continuation.
+     *
+     * <p>Empty on a fresh run even when a file happens to be there. Starting fresh was a decision
+     * taken in {@link #main} against three conditions, and a stage that read a fact back anyway
+     * would quietly undo it.
+     */
+    private Optional<String> recalled(String name) {
+        return journal == null || !resumed ? Optional.empty() : journal.fact(name);
+    }
+
+    /** The same, for the writing half. A bump with no journal records nothing and says nothing. */
+    private void record(String name, String value) {
+        if (journal != null) {
+            journal.fact(name, value);
+        }
     }
 
     /**
@@ -382,14 +663,50 @@ public final class Bump {
     private String campaignAim = "";
     /** And a fourth: which regime the module is in, so the steps are asked for the right agents. */
     private String campaignPlatform = UNRESOLVED_PLATFORM;
-    private boolean campaignLanded;
 
-    private final Agent stepCampaign = Flow.code("module-repair-step", task -> {
-        campaignLanded = campaignOfSteps(campaignLog, campaignFloor, campaignAim,
-                campaignPlatform);
-        return campaignLanded ? "a step landed" : "nothing landed";
-    }).triplet().repeats("up to " + MODULE_TURNS * (REASK + 1) * STEPS + " per module, "
+    /**
+     * And a fifth, which is the journal's rather than the agents': which campaign this is.
+     *
+     * <p>{@code <module>#<round>}, because the same node completes once per campaign and a module
+     * reaches a campaign once per gate turn. Keyed on the module alone, the second module's first
+     * campaign would replay the first module's answer and order no steps at all.
+     */
+    private String campaignKey = "";
+    /**
+     * WHICH CAMPAIGN THIS IS FOR THIS MODULE, COUNTED ACROSS THE GATE TURNS AND NOT WITHIN ONE.
+     *
+     * <p>The key was module + "#" + the inner loop index, and that index is reset on every call to
+     * {@link #repairCampaign}, which the module gate calls once per TURN. So a module had at most
+     * two distinct keys while it could run six campaigns, and turns two and three replayed turn
+     * one. That is not a resume bug: it degraded runs that never resumed at all. The replayed
+     * answer said a step had landed, which kept the gate open, so the remaining turns recompiled an
+     * untouched tree while still paying a repair planner and a repair verifier each time.
+     *
+     * <p>RESET PER MODULE RATHER THAN PER BUMP, because a resume has to produce the same sequence
+     * of keys or replay lines up with the wrong campaign. The walk is sequential and replays the
+     * same modules in the same order, so a per-module count reproduces exactly; a process-wide
+     * count would not, the moment an earlier module ran a different number of campaigns.
+     */
+    private String campaignModule = "";
+    private int campaignsForModule;
+
+    /** What a campaign answers with when it ordered a step that stuck. The journal replays it. */
+    private static final String LANDED = "a step landed";
+
+    private final Agent stepCampaign = Flow.code("module-repair-step", task ->
+            campaignOfSteps(campaignLog, campaignFloor, campaignAim, campaignPlatform)
+                    ? LANDED : "nothing landed")
+            .triplet().repeats("up to " + MODULE_TURNS * (REASK + 1) * STEPS + " per module, "
             + REPAIR_BUDGET + " per bump");
+
+    /**
+     * THE SAME CAMPAIGN, JOURNALED, and it is what {@link #repairCampaign} actually runs.
+     *
+     * <p>Assigned in the constructor, because it wraps the field above and the journal is a
+     * constructor argument. The picture is drawn off the unwrapped node inside the module walk and
+     * is the same either way: a wrapper delegates its name and everything under it.
+     */
+    private final Agent repairSteps;
 
     /**
      * THE MODULE WALK: ONE MODULE AT A TIME, ALL THE WAY THROUGH.
@@ -447,20 +764,33 @@ public final class Bump {
                 // to raise an artifact Spring Boot manages and a pin doer told to raise one nothing
                 // manages are given opposite instructions, and until this stage existed they were
                 // one agent handed whichever of the two the text happened to say.
+                // NOT JOURNALED, ALONE AMONG THE MODULE STAGES, and it is the one whose answer is
+                // not the point. What this settles is the regime the four stages under it are
+                // keyed by, and it settles it in a variable: a replayed answer returns the sentence
+                // and sets nothing, so a resumed module would pin and bump under the fallback
+                // regime while its journal row said Spring Boot. One triad per resumed module is
+                // the price of that, and it is the cheapest of the five.
                 Flow.code("platform", task -> {
                     platform[0] = platformOf(m);
                     return label(m) + ": " + platform[0];
                 }).triplet(),
-                Flow.code("before-pins", task -> {
+                // KEYED ON THE MODULE, WHICH IS WHAT MAKES THE WALK RESUMABLE AT ALL. Each of these
+                // completes once per module, so a journal keyed on the stage alone would watch the
+                // first module finish and skip the other nineteen. What they edited is committed
+                // when they land, so a module the journal names is a module whose work is in git.
+                //
+                // The key is read when the node runs rather than when it is built, because this
+                // method is also called once with a null module to draw the picture.
+                journaled(Flow.code("before-pins", task -> {
                     trace.progress(bump, "module " + label(m) + ": pinning what the hop needs");
                     pinPhase("before-pins-doer", false, m, platform[0]);
                     return label(m) + ": pinned";
-                }).triplet().reads("enables"),
-                Flow.code("bump", task -> {
+                }).triplet().reads("enables"), () -> label(m)),
+                journaled(Flow.code("bump", task -> {
                     trace.progress(bump, "module " + label(m) + ": moving the JDK");
                     bumpModule(m, platform[0]);
                     return label(m) + ": bumped";
-                }).triplet(),
+                }).triplet(), () -> label(m)),
                 // COMPILE IT NOW, while its diff is the only thing that changed. This is the shape
                 // the repository gate used to have, one module wide, and the reason the repository
                 // no longer needs one: the turns were repair's, and repair has moved here.
@@ -539,11 +869,11 @@ public final class Bump {
                         .repeats("until green, or the turns run out"),
                 // AFTER THE REPAIR, NOT BEFORE IT. Hardening polishes a module that already
                 // compiles; asking it of one that does not is the wrong question.
-                Flow.code("after-pins", task -> {
+                journaled(Flow.code("after-pins", task -> {
                     trace.progress(bump, "module " + label(m) + ": hardening what the bump left");
                     pinPhase("after-pins-doer", true, m, platform[0]);
                     return label(m) + ": hardened";
-                }).triplet().reads("hardens"));
+                }).triplet().reads("hardens"), () -> label(m)));
     }
 
     /**
@@ -607,13 +937,28 @@ public final class Bump {
      * a second source for something each of them already decides.
      */
     private String run() throws IOException {
+        String last;
         try {
-            everything.run("");
+            last = everything.run("");
         } catch (Flow.Settled settled) {
             // NO TOOLING, NO BUILD, NOTHING TO CONSERVE. Every stage after the one that threw is
             // skipped, the estimator included: an attempt that never reached the gate has no work
             // to price. That is what the returns this replaces did, from inside those same places.
             return settled.account();
+        }
+        if (account.isBlank()) {
+            // A REPLAYED CLOSER WRITES NO FIELD, so the account is settled here instead.
+            //
+            // Both closers set {@link #account} from inside their bodies, and a resumed bump can
+            // reach either of them with the answer already in the journal, in which case the body
+            // does not run. Neither fact is lost: the sequence answers with the verdict's own last
+            // word, which IS the account of a red bump, and a green one's account is assembled from
+            // the gate that has just re-run. Without this a resumed bump settles as the empty
+            // string, which the sweep files as a state nobody has a name for.
+            account = gateGreen && lastVerdict != null ? passed() : last;
+        }
+        if (account.isBlank()) {
+            account = "infra\nthe bump ran to the end and no stage settled it";
         }
         return account;
     }
@@ -622,13 +967,48 @@ public final class Bump {
      * SURVEY: does the project agree it is where the manifest says?
      *
      * <p>It is also where the tools the rest of the bump runs on are built, because they have to
-     * target the hop, and the hop is what this stage has just finished asking about.
+     * target the hop, and this is the stage that asks about the hop.
+     *
+     * <p>THE BUILDING COMES FIRST AND THE ASKING SECOND, which is a resume talking. The asking is
+     * journaled, so a continued bump gets the answer back without paying for it; the tools are not,
+     * because they are objects in a process that has just started and a bump that skipped making
+     * them would resume into a stage with no runner to call. Nothing is lost by the order: the hop
+     * is prescribed by the manifest, so the tools do not depend on what the surveyor concludes.
      */
     private String surveyPhase(String task) throws IOException {
+        // THE TOOLS FIRST, BECAUSE A RESUME SKIPS THE ANSWER AND NOT THE TOOLING. This stage is
+        // where the runner, the scanner and the agents are made, and every stage after it runs on
+        // them; a survey that came back out of the journal without building them would resume into
+        // a bump whose next stage has no runner to call. They do not depend on what the surveyor
+        // says either, because the hop is prescribed, so nothing is lost by making them first.
+        hoptools = Env.get("BJV_HOPTOOLS");
+        if (hoptools == null) {
+            throw new IllegalStateException(
+                    "BJV_HOPTOOLS must be the host path of hoptools/ (jvm-run is invoked from it)");
+        }
+        runner = new Runner(ws, hoptools);
+        security = new Security(ws, hoptools, trace);
+        // The producers' try_build must target the hop the survey settled, so they are built now.
+        agents = new Agents(Model.forProducer(trace), ws, runner, tree, Hop.of(from, to), trace);
+        // AND THE ASKING IS WHAT THE JOURNAL HOLDS. Wrapped here rather than around the stage,
+        // because the wrapper has to sit inside the construction above and outside the three model
+        // calls below. It is the same node name the stage carries, so the journal's row says
+        // "survey" and the picture is untouched: nothing walks a node built inside a body.
+        return journaled(Flow.code("survey", this::surveyAsk), REPO).run(task);
+    }
+
+    /**
+     * What the survey is actually for: whether the project agrees it is where the manifest says.
+     *
+     * <p>Separated from the tooling above it because this half is the half a resume replays, and
+     * the tooling is the half it must not. Nothing here is read by anything else in the bump; the
+     * answer is a record, which is exactly why it is safe to hand back out of the journal.
+     */
+    private String surveyAsk(String task) throws IOException {
         // THE HOP IS PRESCRIBED, NOT DISCOVERED. It arrives in the manifest row and nothing here
         // may change it: the target is the experiment's independent variable, and an agent that
         // picks it makes every run a different experiment. It also went wrong in exactly the way
-        // that predicts — the surveyor demoted three repos from 11->17 to 8->11 off a `release 8`
+        // that predicts: the surveyor demoted three repos from 11->17 to 8->11 off a `release 8`
         // flag, the chain then baselined at a JDK those projects cannot build on, and all three
         // were recorded as the project's failure.
         //
@@ -655,15 +1035,6 @@ public final class Bump {
                     + " while the manifest prescribes " + from + "->" + to
                     + "; proceeding with the prescribed hop");
         }
-        hoptools = Env.get("BJV_HOPTOOLS");
-        if (hoptools == null) {
-            throw new IllegalStateException(
-                    "BJV_HOPTOOLS must be the host path of hoptools/ (jvm-run is invoked from it)");
-        }
-        runner = new Runner(ws, hoptools);
-        security = new Security(ws, hoptools, trace);
-        // The producers' try_build must target the hop the survey settled, so they are built now.
-        agents = new Agents(Model.forProducer(trace), ws, runner, tree, Hop.of(from, to), trace);
         return claim;
     }
 
@@ -679,6 +1050,23 @@ public final class Bump {
         if (!tooling.isEmpty()) {
             trace.progress(bump, "infra: " + tooling);
             throw new Flow.Settled("infra\n" + tooling);
+        }
+        // AND THEN: HAS ANYONE ALREADY MEASURED IT. This is the one stage a resume must not run
+        // again, and not because it is expensive. It is measured under the project's OWN JDK before
+        // anything moved, and the tree has moved: a second run of it would build a migrated tree at
+        // the old level and call the result the baseline, so every conservation judgement after it
+        // would be against a set that never existed. That is why the journal keeps facts at all.
+        Optional<String> measured = recalled(BASELINE_PRE);
+        if (measured.isPresent()) {
+            pre = tests(measured.get());
+            baselineByModule = perModuleTests(recalled(BASELINE_BY_MODULE).orElse(""));
+            baselineGreen = Boolean.parseBoolean(recalled(BASELINE_GREEN).orElse("false"));
+            String counted = "tests passing under JDK " + from + ": " + pre.size()
+                    + " (read back from the journal: this was measured before anything moved, and"
+                    + " once the tree is edited it cannot be measured again)";
+            trace.progress(bump, "baseline: " + counted);
+            trace.applied("baseline", counted);
+            return counted;
         }
         trace.progress(bump, "baseline: building and testing under JDK " + from);
         Runner.Result preBuild = runner.build(from);
@@ -723,11 +1111,57 @@ public final class Bump {
                     : "no test passed under the project's own JDK " + from + ", so there is nothing"
                     + " to conserve and a bump here would be unverifiable:\n" + preTest.summary()));
         }
+        // WRITTEN THE MOMENT IT EXISTS, and after the check above rather than before it: a bump
+        // that settles here has no baseline to carry, and a fact recorded for it would be a set
+        // nobody measured. Three rows, because the three answer different questions and the last
+        // of them decides which closing stages a resumed bump runs.
+        record(BASELINE_PRE, String.join("\n", pre));
+        record(BASELINE_BY_MODULE, joinedPerModule(baselineByModule));
+        record(BASELINE_GREEN, String.valueOf(baselineGreen));
         String counted = "tests passing under JDK " + from + ": " + pre.size()
                 + (baselineGreen ? "" : " (the suite is not all green; the red ones were red before"
                 + " this bump and are not in the set)");
         trace.applied("baseline", counted);
         return counted;
+    }
+
+    /**
+     * THE PASSING SET, AS ONE LINE PER TEST.
+     *
+     * <p>Safe because {@code Gate.passing} escapes control characters injectively before a name
+     * reaches a set: JUnit 5 display names carry literal newlines, and a set written one per line
+     * would otherwise come back as more tests than were ever run. The same fold is what lets the
+     * per-module map below use a tab.
+     */
+    private static Set<String> tests(String recorded) {
+        Set<String> out = new LinkedHashSet<>();
+        for (String line : recorded.split("\n")) {
+            if (!line.isBlank()) {
+                out.add(line);
+            }
+        }
+        return out;
+    }
+
+    /** Each module's own set, as {@code <module>\t<test>} rows. Root's path is empty and stays so. */
+    private static String joinedPerModule(Map<String, Set<String>> byModule) {
+        StringBuilder b = new StringBuilder();
+        byModule.forEach((module, passing) -> passing.forEach(
+                test -> b.append(module).append('\t').append(test).append('\n')));
+        return b.toString();
+    }
+
+    private static Map<String, Set<String>> perModuleTests(String recorded) {
+        Map<String, Set<String>> out = new LinkedHashMap<>();
+        for (String line : recorded.split("\n")) {
+            int tab = line.indexOf('\t');
+            if (tab < 0) {
+                continue;
+            }
+            out.computeIfAbsent(line.substring(0, tab), m -> new LinkedHashSet<>())
+                    .add(line.substring(tab + 1));
+        }
+        return out;
     }
 
     /** SECURITY BEFORE: the project's own state, and the last moment it still is. */
@@ -1031,23 +1465,49 @@ public final class Bump {
             trace.applied("modules", "one module; no filtering to do");
             return allModules;
         }
+        // WHAT THE FILTER CHOSE IS A JOURNALED FACT, and it is a fact of a different kind from the
+        // baseline. The baseline cannot be measured again; this could be asked again, and that is
+        // the problem: it is an agent's judgement about which trees are vendored or generated, so a
+        // second pass would answer it differently and a resumed bump would walk a different set of
+        // modules from the one it had already half finished.
+        Optional<String> chosen = recalled(MODULE_LIST);
+        if (chosen.isPresent()) {
+            List<String> labels = List.of(chosen.get().split("\n"));
+            List<Modules.Module> kept = allModules.stream()
+                    .filter(m -> labels.contains(label(m))).toList();
+            if (!kept.isEmpty()) {
+                trace.applied("modules", "read back from the journal: working on " + kept.size()
+                        + " of " + allModules.size() + "\n" + String.join("\n", labels));
+                return kept;
+            }
+            // A LIST THAT NAMES NOTHING IN THIS TREE IS NOT THIS TREE'S LIST. Nothing should be
+            // able to produce that, since the resume was checked against the workspace sha, and
+            // filtering to nothing would walk no modules at all and gate an untouched repository.
+            trace.progress(bump, "modules: the journal names no module this checkout has; "
+                    + "choosing again rather than walking nothing");
+        }
         String listing = allModules.stream().map(m -> "  " + label(m))
                 .collect(java.util.stream.Collectors.joining("\n"));
         String brief = "Migration: JDK " + from + " -> " + to + " (" + bump + ")"
                 + "\n\nThe modules, read from the build files:\n" + listing;
         String[] answer = {""};
-        new Triad("module-filter", agents.moduleFilterPlanner(),
-                (plan, feedback) -> {
-                    answer[0] = agents.moduleFilterDoer().run(brief
-                            + "\n\nWhere to look, and what would count as evidence:\n"
-                            + plan + feedback);
-                    return answer[0];
-                },
-                agents.moduleFilterVerifier(),
-                () -> "The modules, unchanged by this stage:\n" + listing,
-                trace, bump, REASK + 1)
-                .run(brief);
-        String said = answer[0];
+        // THE ASKING IS JOURNALED, THE PARSE IS NOT. What the reply means is decided by skips()
+        // below, which is deterministic and reads the same reply the same way every time, so there
+        // is one record of the decision rather than two that can disagree.
+        String said = journaled(Flow.code("module-filter", task -> {
+            new Triad("module-filter", agents.moduleFilterPlanner(),
+                    (plan, feedback) -> {
+                        answer[0] = agents.moduleFilterDoer().run(brief
+                                + "\n\nWhere to look, and what would count as evidence:\n"
+                                + plan + feedback);
+                        return answer[0];
+                    },
+                    agents.moduleFilterVerifier(),
+                    () -> "The modules, unchanged by this stage:\n" + listing,
+                    trace, bump, REASK + 1)
+                    .run(brief);
+            return answer[0];
+        }), REPO).run(brief);
         List<Modules.Module> keep = new ArrayList<>();
         List<String> skipped = new ArrayList<>();
         for (Modules.Module m : allModules) {
@@ -1057,6 +1517,8 @@ public final class Bump {
                 keep.add(m);
             }
         }
+        record(MODULE_LIST, keep.stream().map(Bump::label)
+                .collect(java.util.stream.Collectors.joining("\n")));
         trace.applied("modules", allModules.size() + " modules, working on " + keep.size()
                 + (skipped.isEmpty() ? "" : "; skipping " + String.join(", ", skipped))
                 + "\n" + listing);
@@ -1200,10 +1662,39 @@ public final class Bump {
         String scoped = "YOU ARE REPAIRING ONE MODULE: " + label(m)
                 + "\nIt does not compile under JDK " + to + ". Every other module in this "
                 + "repository is somebody else's turn; do not edit them.\n\n" + log;
-        return repairCampaign(scoped, platform);
+        return repairCampaign(label(m), scoped, platform);
     }
 
-    private boolean repairCampaign(String log, String platform) throws IOException {
+    /**
+     * THE NEXT CAMPAIGN FOR THIS MODULE, COUNTED ACROSS ITS GATE TURNS AND NOT WITHIN ONE.
+     *
+     * <p>A method rather than two lines inside the loop because the invariant it holds is worth a
+     * test, and the version this replaces passed a suite of 338 while being wrong. It keyed on the
+     * inner loop index, which resets on every call, while the module gate calls that method once
+     * per TURN: two distinct keys for up to six campaigns, so turns two and three replayed turn
+     * one. A replayed answer saying a step landed keeps the gate open, so those turns recompiled an
+     * untouched tree and still paid a planner and a verifier each time. It degraded runs that never
+     * resumed.
+     *
+     * <p>RESET PER MODULE, NOT PER BUMP, because a resume must produce the same key sequence or
+     * replay lines up with the wrong campaign. The walk is sequential and replays the same modules
+     * in the same order, so counting per module reproduces exactly.
+     *
+     * <p>KNOWN LIMIT: an outer verifier answering `again` re-runs the whole walk, and this counter
+     * resets with it, so a second pass replays the first pass's campaigns rather than running new
+     * ones. That is the honest reading, since those campaigns did happen, and the gate is re-run
+     * either way because it is never journaled. It is written down because it is the one case where
+     * this key means something other than what it appears to.
+     */
+    private String nextCampaignKey(String module) {
+        if (!module.equals(campaignModule)) {
+            campaignModule = module;
+            campaignsForModule = 0;
+        }
+        return module + "#" + campaignsForModule++;
+    }
+
+    private boolean repairCampaign(String module, String log, String platform) throws IOException {
         String floor = tree.head();
         String feedback = "";
         // WHAT THE CAMPAIGN IS FOR, decided before anyone edits. A campaign with no stated end runs
@@ -1225,8 +1716,12 @@ public final class Bump {
             campaignFloor = floor;
             campaignAim = "\n\nWhat this campaign is for:\n" + aim + feedback;
             campaignPlatform = platform;
-            stepCampaign.run("");
-            boolean landed = campaignLanded;
+            campaignKey = nextCampaignKey(module);
+            // WHAT LANDED IS READ OFF THE ANSWER, NOT OFF A FIELD, and that is what makes this
+            // resumable rather than merely journaled. A replayed node returns the sentence it
+            // returned before and runs no body, so a field the body used to set would still hold
+            // the previous campaign's outcome and this loop would act on it.
+            boolean landed = LANDED.equals(repairSteps.run(""));
             String judgement = agents.moduleRepairVerifier(platform, floor)
                     .run("The failing build:\n" + log
                             + "\n\nThe whole campaign, since it began:\n" + tree.diffSince(floor)
@@ -1432,6 +1927,12 @@ public final class Bump {
                 + names(v.missing())
                 + perModule(Integer.parseInt(to)));
         gateGreen = v.pass();
+        // RECORDED, THOUGH NOTHING READS IT BACK, and the difference is worth stating. Both closing
+        // stages select on this word, so the journal would be an incomplete account of the run
+        // without it. What a resume does NOT do is trust it: this stage is a build, it is the
+        // arbiter, and it has just run again, so the value above is the tree's own answer about the
+        // tree as it now is rather than a memory of what it was before the kill.
+        record(GATE_GREEN, String.valueOf(gateGreen));
         // KEPT WHETHER IT PASSED OR NOT, which is what the field's name says. Only the arguer reads
         // it, and the arguer does not run on a green gate, so it is the same verdict it always saw.
         lastVerdict = v;

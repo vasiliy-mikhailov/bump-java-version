@@ -261,9 +261,16 @@ public final class JsonlTrace implements Trace, DeepAgentFlowListener {
 
     @Override
     public void settled(String bumpKey, String state, String because, boolean baseline, boolean gate) {
+        settled(bumpKey, state, because, baseline, gate, false);
+    }
+
+    @Override
+    public void settled(String bumpKey, String state, String because, boolean baseline, boolean gate,
+                        boolean resumed) {
         write("settled", of("state", state, "because", because,
-                "baseline", String.valueOf(baseline), "gate", String.valueOf(gate)));
-        Settlement.note(settlements, bumpKey, state, because, baseline, gate, version());
+                "baseline", String.valueOf(baseline), "gate", String.valueOf(gate),
+                "resumed", String.valueOf(resumed)));
+        Settlement.settled(settlements, bumpKey, state, because, baseline, gate, version(), resumed);
     }
 
     @Override

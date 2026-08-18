@@ -58,6 +58,23 @@ public interface Trace {
     /** What the bump became, the argument for it, and what the builds actually did. */
     void settled(String bump, String state, String because, boolean baselineGreen, boolean gateGreen);
 
+    /**
+     * The same, saying whether this attempt picked up a killed one rather than starting fresh.
+     *
+     * <p>A RESUMED BUMP IS NOT THE SAME TRIAL AS A FRESH ONE. It carries a different budget history
+     * and possibly a different module order, so a comparison over the corpus has to be able to
+     * leave it out. This corpus already refuses to let an agent choose the hop for that reason: a
+     * run whose conditions differ is a different experiment, whether or not anyone meant it to be.
+     *
+     * <p>A DEFAULT, so that a trace double written to answer a question about something else does
+     * not have to grow a method. Dropping the flag loses a filter; refusing the row would lose the
+     * settlement.
+     */
+    default void settled(String bump, String state, String because, boolean baselineGreen,
+                         boolean gateGreen, boolean resumed) {
+        settled(bump, state, because, baselineGreen, gateGreen);
+    }
+
     /** The bump did not finish. A dropped connection must not look like nothing having happened. */
     void failed(String bump, Throwable cause);
 

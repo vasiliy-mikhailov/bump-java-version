@@ -3,6 +3,7 @@ package tech.mikhailov.bjv.engine;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -291,6 +292,74 @@ public final class Flow {
             @Override
             public List<Agent> inside() {
                 return List.of(body);
+            }
+        };
+    }
+
+    /**
+     * THE SAME NODE, MINUS WHAT IT HAS ALREADY DONE.
+     *
+     * <p>A bump is killed and restarted constantly, because the sweep runs for a fortnight and the
+     * harness changes daily. Almost everything the run knows is cheap to derive again: the agents
+     * are stateless, so there is no conversation to rebuild, and the workspace is durable, so what
+     * was edited is in git where the readers re-read it for free. What is not cheap is the model
+     * calls. This returns the answer the {@link Journal} already holds for (node, key), and
+     * otherwise runs the node and journals what it returned.
+     *
+     * <p>A DECORATOR, so that nothing else here changes. Resumability is not a fourth combinator:
+     * it does not decide anything, it does not repeat anything, and a bump built out of it reads
+     * exactly like the bump without it.
+     *
+     * <p>THE KEY IS SUPPLIED RATHER THAN FIXED BECAUSE THE WALK IS PER MODULE. The same node
+     * completes once for every module, and a key decided when the tree was built would be the same
+     * key for all of them.
+     *
+     * <p>{@link Agent#name()} AND {@link Agent#inside()} DELEGATE, and that is not decoration. The
+     * pages walk the tree for the shape, and {@link Shape} reads {@code steps}, {@code repeats} and
+     * {@code reads} off {@link Node}: a wrapper that reported its own would delete every wrapped
+     * stage from the picture and orphan everything beneath it. The name is also the journal's own
+     * node column, so an unnamed node cannot be journaled without colliding with every other
+     * unnamed one, and this refuses rather than resuming the wrong thing.
+     *
+     * <p>The row is written after the node returns, which is the ordering the journal's safety rests
+     * on: see {@link Journal#done}. A node that ends the run instead of returning, by throwing
+     * {@link Settled}, journals nothing, and the resume runs it again.
+     */
+    public static Node resumable(Agent node, Journal journal, Supplier<String> key) {
+        if (node.name().isBlank()) {
+            throw new IllegalArgumentException("a node with no name cannot be journaled");
+        }
+        return new Node(node.name()) {
+            @Override
+            public String run(String task) throws IOException {
+                String forKey = key.get();
+                Optional<String> already = journal.answered(node.name(), forKey);
+                if (already.isPresent()) {
+                    return already.get();
+                }
+                String answer = node.run(task);
+                journal.done(node.name(), forKey, answer);
+                return answer;
+            }
+
+            @Override
+            public List<Agent> inside() {
+                return node.inside();
+            }
+
+            @Override
+            List<Shape.Step> steps() {
+                return node instanceof Node inner ? inner.steps() : super.steps();
+            }
+
+            @Override
+            String repeats() {
+                return node instanceof Node inner ? inner.repeats() : super.repeats();
+            }
+
+            @Override
+            String reads() {
+                return node instanceof Node inner ? inner.reads() : super.reads();
             }
         };
     }

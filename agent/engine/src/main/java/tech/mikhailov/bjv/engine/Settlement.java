@@ -34,13 +34,36 @@ public final class Settlement {
      */
     public static void note(Path file, String bump, String state, String because,
                      boolean baselineGreen, boolean gateGreen, String version) {
+        write(file, bump, state, because, baselineGreen, gateGreen, version, "");
+    }
+
+    /**
+     * The same row, saying whether the bump that wrote it started fresh or picked up a killed one.
+     *
+     * <p>A RESUMED BUMP IS A DIFFERENT TRIAL. It carries a different budget history and possibly a
+     * different module order, so a corpus comparison has to be able to exclude it, and this is the
+     * field that lets it.
+     *
+     * <p>ON THE SETTLED ROW AND NOT ON A PROGRESS NOTE, which is why it is a second method rather
+     * than an argument to the one above. A progress note says where a bump is up to; it is not a
+     * trial and has nothing to be excluded from, and a note that carried the field would have to
+     * answer for every row a resumed bump writes on its way through.
+     */
+    public static void settled(Path file, String bump, String state, String because,
+                     boolean baselineGreen, boolean gateGreen, String version, boolean resumed) {
+        write(file, bump, state, because, baselineGreen, gateGreen, version,
+                ",\"resumed\":" + resumed);
+    }
+
+    private static void write(Path file, String bump, String state, String because,
+                     boolean baselineGreen, boolean gateGreen, String version, String extra) {
         try {
             if (file.getParent() != null) {
                 Files.createDirectories(file.getParent());
             }
             String row = "{\"at\":\"" + System.currentTimeMillis() + "\",\"bump\":\"" + escape(bump)
                     + "\",\"state\":\"" + escape(state) + "\",\"because\":\"" + escape(because)
-                    + "\",\"baseline\":" + baselineGreen + ",\"gate\":" + gateGreen
+                    + "\",\"baseline\":" + baselineGreen + ",\"gate\":" + gateGreen + extra
                     + (version.isEmpty() ? "" : "," + version) + "}\n";
             Files.writeString(file, row, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {

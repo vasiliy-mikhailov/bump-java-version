@@ -149,6 +149,24 @@ public final class Tree {
         }
     }
 
+    /**
+     * WHETHER THIS CHECKOUT HAS ALREADY BEEN BUMPED, read off the commits rather than guessed.
+     *
+     * <p>Every stage that lands commits with a bjv: subject, so one of those existing means the
+     * tree is not where the manifest put it. A caller about to measure a before-state needs to know
+     * that, because a migrated tree has no before-state to measure.
+     */
+    public boolean migrated() {
+        try {
+            Shell.Output out = git("log", "--format=%s", "--grep=^bjv:", "-1");
+            return out.ok() && !out.text().strip().isEmpty();
+        } catch (IOException | InterruptedException e) {
+            // UNREADABLE IS NOT UNMIGRATED. A caller uses this to refuse, so the safe answer when
+            // git will not say is the one that refuses.
+            return true;
+        }
+    }
+
     /** Where the tree stands now, so a caller can come back to it. */
     public String head() {
         try {
