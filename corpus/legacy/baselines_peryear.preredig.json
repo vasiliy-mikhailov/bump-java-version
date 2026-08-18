@@ -1,0 +1,500 @@
+[
+ {
+  "repo": "brameldering/spring-boot-rabbitmq-amqp",
+  "sha": "3f58e0c34e2a626671c9159655dc8fec253a2f3e",
+  "jv_from": 21,
+  "year": 2025,
+  "quarter": 4,
+  "attempts": 1,
+  "tests": 3,
+  "mock": []
+ },
+ {
+  "repo": "ahmetcalik/ecommerce-backend",
+  "sha": "5d6e73fb03642d708b3a5990ed4243d1b696a27e",
+  "jv_from": 21,
+  "year": 2026,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 224,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "emdzej/keycloak-api-keys",
+  "sha": "dc27cc657aa5126a8cf09d30c448b1fbc65afb8d",
+  "jv_from": 21,
+  "year": 2026,
+  "quarter": 1,
+  "attempts": 1,
+  "tests": 149,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "emdzej/keycloak-api-keys",
+  "sha": "efdd5da6589aea40528e25131349ac9d3916ccd0",
+  "jv_from": 21,
+  "year": 2026,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 149,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "JSJ-Experiments/sherpa-onnx-builds",
+  "sha": "e4f48ce6a62f527d079237d0aaafdcef125c67ed",
+  "jv_from": 8,
+  "year": 2025,
+  "quarter": 3,
+  "attempts": 1,
+  "tests": 28,
+  "mock": []
+ },
+ {
+  "repo": "JSJ-Experiments/sherpa-onnx-builds",
+  "sha": "1f5f9633cc71f0426cbcea591fba56ef8a646984",
+  "jv_from": 8,
+  "year": 2025,
+  "quarter": 4,
+  "attempts": 1,
+  "tests": 28,
+  "mock": []
+ },
+ {
+  "repo": "JSJ-Experiments/sherpa-onnx-builds",
+  "sha": "6762232110eab5aa5edd533707eb485905228401",
+  "jv_from": 8,
+  "year": 2026,
+  "quarter": 1,
+  "attempts": 1,
+  "tests": 28,
+  "mock": []
+ },
+ {
+  "repo": "JSJ-Experiments/sherpa-onnx-builds",
+  "sha": "a90437cfee0e1db1f117d8037fd930751579a241",
+  "jv_from": 8,
+  "year": 2026,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 28,
+  "mock": []
+ },
+ {
+  "repo": "muralim1969/episteme-activemq-auth-plugin",
+  "sha": "ca4ba71eca5024f5edd35ac667db9fb48e5ce826",
+  "jv_from": 17,
+  "year": 2025,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 22,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "CAcertOrg/cacert-votebot",
+  "sha": "e78c4507da8874b418d588820424073e1ba58693",
+  "jv_from": 8,
+  "year": 2016,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 19,
+  "mock": []
+ },
+ {
+  "repo": "CAcertOrg/cacert-votebot",
+  "sha": "c5d6e7184a804f8f9665cd507c9c5334fea01a51",
+  "jv_from": 8,
+  "year": 2017,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 19,
+  "mock": []
+ },
+ {
+  "repo": "CAcertOrg/cacert-votebot",
+  "sha": "f89afa17553e9958619688e2bd7cd315d161813b",
+  "jv_from": 8,
+  "year": 2017,
+  "quarter": 4,
+  "attempts": 1,
+  "tests": 19,
+  "mock": []
+ },
+ {
+  "repo": "CAcertOrg/cacert-votebot",
+  "sha": "44b852d8b5dceef699aae8b6d2f4f0f824127a63",
+  "jv_from": 8,
+  "year": 2018,
+  "quarter": 1,
+  "attempts": 1,
+  "tests": 19,
+  "mock": []
+ },
+ {
+  "repo": "CAcertOrg/cacert-votebot",
+  "sha": "8ec375dc1b0f6414e5050531d8a3f63b55d54486",
+  "jv_from": 8,
+  "year": 2018,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 30,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "CAcertOrg/cacert-votebot",
+  "sha": "aaea6fdca43be92282a209886ba5138c8c551f71",
+  "jv_from": 8,
+  "year": 2020,
+  "quarter": 4,
+  "attempts": 2,
+  "tests": 32,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "CAcertOrg/cacert-votebot",
+  "sha": "f2d3858679b826b147f93747c4316bff5189b29a",
+  "jv_from": 11,
+  "year": 2022,
+  "quarter": 1,
+  "attempts": 1,
+  "tests": 32,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "dcadea/jresult",
+  "sha": "ab8900e9c3d2154eb94055c9f09d06ebb5d1bea7",
+  "jv_from": 21,
+  "year": 2024,
+  "quarter": 4,
+  "attempts": 1,
+  "tests": 68,
+  "mock": []
+ },
+ {
+  "repo": "MohamedAwad10/ecommerce-backend",
+  "sha": "37f63c4260cb962fc09d18c94bf63b4443b6874f",
+  "jv_from": 21,
+  "year": 2024,
+  "quarter": 4,
+  "attempts": 2,
+  "tests": 23,
+  "mock": []
+ },
+ {
+  "repo": "GilbertoHdz/quiz-spring-boot",
+  "sha": "44c752e22dab359d7e247761baf5a3f6b085bd25",
+  "jv_from": 17,
+  "year": 2025,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 6,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "pwestlin/spring-auth-server-resource",
+  "sha": "b681329fa1a8ad7fc587a6f4264e3024b1d8c0f6",
+  "jv_from": 21,
+  "year": 2025,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 6,
+  "mock": []
+ },
+ {
+  "repo": "gulziraAbudula/jquery-selenium-automation-tdd",
+  "sha": "bad6a670982d5ca12e3fcbfce08c89999b401fe7",
+  "jv_from": 21,
+  "year": 2025,
+  "quarter": 4,
+  "attempts": 1,
+  "tests": 19,
+  "mock": []
+ },
+ {
+  "repo": "gulziraAbudula/jquery-selenium-automation-tdd",
+  "sha": "c99ba0ac09086f30fcac90cf6544319b57ce5964",
+  "jv_from": 21,
+  "year": 2026,
+  "quarter": 1,
+  "attempts": 1,
+  "tests": 19,
+  "mock": []
+ },
+ {
+  "repo": "mohripan/ticketing-idol",
+  "sha": "80808b1792b899a05b86b527eebc1b71e6476f2d",
+  "jv_from": 21,
+  "year": 2025,
+  "quarter": 3,
+  "attempts": 1,
+  "tests": 4,
+  "mock": []
+ },
+ {
+  "repo": "jrcdsf/stats-service",
+  "sha": "ce39710cd8d7b55ff465ce153c1555b9e8db3346",
+  "jv_from": 11,
+  "year": 2022,
+  "quarter": 3,
+  "attempts": 1,
+  "tests": 13,
+  "mock": []
+ },
+ {
+  "repo": "ardoco/Replication-Package-ICSE24_Recovering-Trace-Links-Between-Software-Documentation-And-Code",
+  "sha": "8b71f6d722ee9b82e4932b871ca0e371df69ebb1",
+  "jv_from": 17,
+  "year": 2023,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 8,
+  "mock": []
+ },
+ {
+  "repo": "ardoco/Replication-Package-ICSE24_Recovering-Trace-Links-Between-Software-Documentation-And-Code",
+  "sha": "1e5da8efc58f6f7a9dfdad7bdf186e9aaa0c20d6",
+  "jv_from": 17,
+  "year": 2023,
+  "quarter": 3,
+  "attempts": 1,
+  "tests": 113,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "mulirous/simulador-tarifas",
+  "sha": "f5fea172ac97323d2343442bb9bc10aba8d5300d",
+  "jv_from": 21,
+  "year": 2026,
+  "quarter": 1,
+  "attempts": 2,
+  "tests": 35,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "Jerriel0915/zwei",
+  "sha": "59e98bb05684a87255006720d9340de80a6279f7",
+  "jv_from": 17,
+  "year": 2025,
+  "quarter": 4,
+  "attempts": 1,
+  "tests": 12,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "Jerriel0915/zwei",
+  "sha": "6ff24c0686851a010cfa1bf418f2817e1fa56690",
+  "jv_from": 17,
+  "year": 2026,
+  "quarter": 1,
+  "attempts": 1,
+  "tests": 17,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "Jerriel0915/zwei",
+  "sha": "da96667fe8185a7909a2c87a4d46b723ac388ecf",
+  "jv_from": 17,
+  "year": 2026,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 33,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "cegeka/XPTraining-battle",
+  "sha": "094e60c2d1c3ca9e81ca848e998a14cce9600dda",
+  "jv_from": 8,
+  "year": 2017,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 4,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "cegeka/XPTraining-battle",
+  "sha": "ed35048e6ce027220392302b04a484c662fa87d6",
+  "jv_from": 8,
+  "year": 2019,
+  "quarter": 1,
+  "attempts": 1,
+  "tests": 4,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "cegeka/XPTraining-battle",
+  "sha": "20c213562cebfe524b47710b714783f0a0cb84fb",
+  "jv_from": 17,
+  "year": 2021,
+  "quarter": 4,
+  "attempts": 1,
+  "tests": 4,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "cegeka/XPTraining-battle",
+  "sha": "b828c337d49501aaaa24755093fd05f9e9f8780e",
+  "jv_from": 17,
+  "year": 2023,
+  "quarter": 4,
+  "attempts": 1,
+  "tests": 4,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "cegeka/XPTraining-battle",
+  "sha": "34a0944e9ecf50f7a8dcb48143c7a608fbb91b03",
+  "jv_from": 21,
+  "year": 2024,
+  "quarter": 4,
+  "attempts": 1,
+  "tests": 4,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "bojanantonovic/spring-jpa-demo",
+  "sha": "ee8c1a156a3d2e393b91db605c0e76ee046c99fd",
+  "jv_from": 17,
+  "year": 2022,
+  "quarter": 1,
+  "attempts": 1,
+  "tests": 3,
+  "mock": []
+ },
+ {
+  "repo": "soyoung00427/rate_limit_and_metrics",
+  "sha": "d2f1530b876b5ffd6f0ccc4757a164b61da36ce7",
+  "jv_from": 11,
+  "year": 2025,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 3,
+  "mock": []
+ },
+ {
+  "repo": "sathishjayapal/eventstracker",
+  "sha": "37d9d44989ec9f61a11d823b67941b220a16d031",
+  "jv_from": 21,
+  "year": 2025,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 16,
+  "mock": []
+ },
+ {
+  "repo": "sathishjayapal/eventstracker",
+  "sha": "6fea4242afcc33bda85b10752fd698217c934447",
+  "jv_from": 21,
+  "year": 2025,
+  "quarter": 3,
+  "attempts": 1,
+  "tests": 60,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "sathishjayapal/eventstracker",
+  "sha": "b8a838e30e05542d6d59bd0bad09c1e3ae47eac6",
+  "jv_from": 21,
+  "year": 2025,
+  "quarter": 4,
+  "attempts": 2,
+  "tests": 12,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "sathishjayapal/eventstracker",
+  "sha": "13c528f88ab0ae4f1cd0d74a576cd369638195bc",
+  "jv_from": 21,
+  "year": 2026,
+  "quarter": 1,
+  "attempts": 1,
+  "tests": 12,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "sathishjayapal/eventstracker",
+  "sha": "61d020a1cc56273fae13c0f1b3076d674f04acab",
+  "jv_from": 21,
+  "year": 2026,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 19,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "btraceio/jafar",
+  "sha": "ed341ff724fdea6196b2d043dc817769783e9d26",
+  "jv_from": 21,
+  "year": 2024,
+  "quarter": 4,
+  "attempts": 1,
+  "tests": 3,
+  "mock": [
+   "mockito"
+  ]
+ },
+ {
+  "repo": "Maksym-Buriak/MyChatApp",
+  "sha": "3d9b22c9f6e679e1ad737746b8fcdf9d00841d47",
+  "jv_from": 17,
+  "year": 2025,
+  "quarter": 3,
+  "attempts": 2,
+  "tests": 4,
+  "mock": []
+ },
+ {
+  "repo": "chulbulji67/online-grocery",
+  "sha": "7fe01f735fcd09cb5b43f9f31cf934b53a7e603c",
+  "jv_from": 21,
+  "year": 2025,
+  "quarter": 2,
+  "attempts": 1,
+  "tests": 21,
+  "mock": [
+   "mockito"
+  ]
+ }
+]

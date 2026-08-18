@@ -4,7 +4,7 @@ Bump a Maven project **one Java LTS step** (8→11, 11→17, 17→21, 21→25) s
 
 ## Usage
 
-The deliverable is one self-contained skill — **`current_attempt/.agents/skills/bump-java-version/SKILL.md`** — a standard-tools-only hand manual (JDKs, Maven, and OpenRewrite recipes from Maven Central; **no project-specific scripts**). It isn't executed; it's **read and followed** by a coding agent.
+The deliverable is one self-contained skill — **`attic/.agents/skills/bump-java-version/SKILL.md`** — a standard-tools-only hand manual (JDKs, Maven, and OpenRewrite recipes from Maven Central; **no project-specific scripts**). It isn't executed; it's **read and followed** by a coding agent.
 
 **Done (PASS) =** `mvn compile` succeeds under `jv_to` **and** the pre-pass test set ⊆ the post-pass test set — no previously-passing test is lost. Stage facts (repo, sha, `jv_from`, `jv_to`, workdir) are passed in by the caller, never baked into the skill, so it stays portable.
 
@@ -36,10 +36,10 @@ The repo ships a harness that runs the **same** Qwen-27B headless through three 
 
 ```bash
 # one repo, one agent
-current_attempt/portability/agent_drive_one.sh <repo> <sha> <from> <to> <slug> <agent>
+attic/portability/agent_drive_one.sh <repo> <sha> <from> <to> <slug> <agent>
 
 # a whole dataset across all three agents
-OC_KEY=… python3 current_attempt/portability/agent_sweep.py <opencode|kilocode|openhands> <N>
+OC_KEY=… python3 attic/portability/agent_sweep.py <opencode|kilocode|openhands> <N>
 ```
 
 Each run clones the repo, copies the skill in read-only as `.bump-skill/`, lets the agent bump it, then scores test conservation under `jv_to`. A stage PASSes only when the previously-passing tests all survive. Three stranger agents agreeing on one skill makes portability inherent; any cross-agent disagreement pinpoints the instruction to tighten. Latest panel: **96 % (26/27)** on the 8→11 / 11→17 set, and **6/6** on a first 21→25 smoke.
@@ -312,7 +312,7 @@ reachable via SSH alias `mh` at `$HOME/java_8_11_17_to_java_21`. Write a fresh
    project one Java LTS step
    (8→11, 11→17, 17→21, 21→25), conserving every previously-passing test.
 2. ## Usage — the prominent hero section. State that the deliverable is one
-   self-contained skill `current_attempt/.agents/skills/bump-java-version/SKILL.md`
+   self-contained skill `attic/.agents/skills/bump-java-version/SKILL.md`
    (a standard-tools-only hand manual — JDKs, Maven, OpenRewrite from Maven
    Central; no scripts) that an agent READS and follows, and give the PASS
    criterion (mvn compile under jv_to AND pre-pass tests ⊆ post-pass tests). Two
@@ -320,7 +320,7 @@ reachable via SSH alias `mh` at `$HOME/java_8_11_17_to_java_21`. Write a fresh
    SKILL.md; show the one-line instruction; list the steps it performs) and "With
    the three-agent panel" (the same Qwen run headless through opencode/kilocode/
    openhands on the identical skill via
-   `current_attempt/portability/agent_drive_one.sh` and `agent_sweep.py`; show the
+   `attic/portability/agent_drive_one.sh` and `agent_sweep.py`; show the
    commands and the latest panel result). End the Usage section with a
    collapsible <details> embedding the full `SKILL.md` verbatim in a fenced code
    block (use a fence longer than the skill's own code fences), so the skill reads

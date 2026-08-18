@@ -1,0 +1,800 @@
+[
+ {
+  "repo": "AadiManchekar/Fleet",
+  "sha": "0eb9b21eab305ae5de06967e52173e46e1cf0fc4",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "AadiManchekar/Fleet",
+  "sha": "82a95fea485745ebe020ff89bd626f9cf73289a0",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "AjinkyaGokhale/esp-flasher-java",
+  "sha": "74b9192c52505d633f6c70069a142fee16caa70d",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 4
+ },
+ {
+  "repo": "AjinkyaGokhale/esp-flasher-java",
+  "sha": "cf1dc672ca930e0f105964564523c4324bbb7199",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 4
+ },
+ {
+  "repo": "Armaan4477/voting-system",
+  "sha": "13a7d4a29e35db4f6d6c67adae2ec3581f43e46e",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "Armaan4477/voting-system",
+  "sha": "a79910e27c66fb9c23210b5e1cb326ebfe099c82",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "Buhle8/microservices",
+  "sha": "7930f4dbd7e6c645fbef4c9477a268f4a156a805",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "EnKarin/BookCrossingServer",
+  "sha": "eac1d17620c1a2f60db69ba76254336f99f6f9c2",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 1
+ },
+ {
+  "repo": "FilippoPracucci/sap-assignment-03",
+  "sha": "f6ebf03c71d212b2b8696056d28d0b6f28c50fe2",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "FilippoPracucci/sap-assignment-03",
+  "sha": "e9b8538b40cc97f573830ae2353eacb5f95d6205",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "Hoxtygen/home360-server",
+  "sha": "d79a467bae35e1ed8b0c1418d292d3176374d7f2",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "Hoxtygen/home360-server",
+  "sha": "645c4bb2c33f731730bdcec86eda5da2b9eaa832",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "IoT-DC3/dc3-parent",
+  "sha": "c8d3cb8b3cae6ecb38fd4e860263245a490d74ca",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "IoT-DC3/dc3-parent",
+  "sha": "8d3e78c1e7f7ec60d93cc28ae795ae730480a903",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "LevitchiDorian/EasyToEat",
+  "sha": "78e46a626c985f9849af90b6528c9c2e380868d1",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 8
+ },
+ {
+  "repo": "Mashirofate/ticket-project",
+  "sha": "e23be08e1ad0721d3b037b21d01852fbdce1cc69",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 4
+ },
+ {
+  "repo": "Nitinpoudel2/Microservices",
+  "sha": "69ac34bfd910823d751ee49a056923c2419521c7",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "Rock007k/Booshow",
+  "sha": "965af44710698ad64008a810e7e9b2f34cafb81f",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "SomeUnusualProgramming/product-service",
+  "sha": "8d2b43f5687a9c46459f7c8189deeb01f69dd776",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "SomeUnusualProgramming/product-service",
+  "sha": "dd57d2dfb3f0d2e286b55423652e38fd43db2545",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "YashChaudhari999/Hospital-Management-System-Java-MongoDB",
+  "sha": "30207754c4a7559da299139d0202ce967ab9f210",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 1
+ },
+ {
+  "repo": "alliance-genome/agr_mati",
+  "sha": "587a664782b83be659b782de7dd6cc1254f6c04d",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 4
+ },
+ {
+  "repo": "alliance-genome/agr_mati",
+  "sha": "a3569de4f13b3d9323d1bffbc8c578aa8f8e1b5d",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 4
+ },
+ {
+  "repo": "alliance-genome/agr_mati",
+  "sha": "32b2ae07f5405b68fd17d537ca72271a35355e43",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 4
+ },
+ {
+  "repo": "anjali9in/FullStackDAJR",
+  "sha": "f3055ab1a8eb5c23cd8050b666061acbb55b87b4",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 8
+ },
+ {
+  "repo": "cichan02/airport",
+  "sha": "bc31fefbb18b1424b812d3b402de2205ade9f9bd",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 8
+ },
+ {
+  "repo": "cichan02/airport",
+  "sha": "96c27c9094c965fcf7ca076b2157fa8032b765da",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 8
+ },
+ {
+  "repo": "dipukr/maven",
+  "sha": "82ec65a4684b9686b1f4bacd2476e92c63778898",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 4
+ },
+ {
+  "repo": "dipukr/maven",
+  "sha": "1f19bbdf892e86928cf973b73c7fe41b2075f0e1",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 4
+ },
+ {
+  "repo": "ekinciyasin/eSchool",
+  "sha": "5af706395e37b8894d6a3819d5c65ba238390b04",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 1
+ },
+ {
+  "repo": "felix-murcia/OAuth2Server",
+  "sha": "0610f197844a6bbaebeafcda9b7d430e9b6cbbeb",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 3
+ },
+ {
+  "repo": "felix-murcia/OAuth2Server",
+  "sha": "59bd2d74a03b72032f5435eb653478d6baa44be4",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "folio-org/mod-circulation-bff",
+  "sha": "29a95910b7b6049ee0750b2a3b392adbd9f5b49b",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 8
+ },
+ {
+  "repo": "forestwanglin/openai-java",
+  "sha": "aca73a8ca6c8914baf3a23d6838534f0f9ea39a6",
+  "jv_from": 8,
+  "jv_to": 11,
+  "attempts": 3
+ },
+ {
+  "repo": "forestwanglin/openai-java",
+  "sha": "5c693456a5bfd3fd37859183dd92f68db11de0f7",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "forestwanglin/openai-java",
+  "sha": "d39f26704326a98f0f327379130e305b47add662",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "guanyang/spring-base-parent",
+  "sha": "0c27daa8b2f56f132ed32accd8647f0107083266",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 1
+ },
+ {
+  "repo": "hoangtien2k3/ecommerce-microservices",
+  "sha": "1cc1ae18593c198e906cc478fdf968ff768db376",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 1
+ },
+ {
+  "repo": "iProgrammeruz/youtube.com",
+  "sha": "41a7adbfe3925f4f9d3fc9319d81eb6081332541",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 8
+ },
+ {
+  "repo": "jankod/SpringBoot3weboo",
+  "sha": "7a98ce9ee71978eab418cd32e291f8429cfa4394",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "jankod/SpringBoot3weboo",
+  "sha": "356191f4ee51c6a2ad6542eb3da3b1fcbb8ac210",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "jhipster/jhipster-sample-app-vuejs",
+  "sha": "14867b03023177f5629b6ecfa98cb6d2dc07da36",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 8
+ },
+ {
+  "repo": "joe-bookwood/jhipster-test",
+  "sha": "4aef116b5f6d7640769ddfba17f7908fe1634eab",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 8
+ },
+ {
+  "repo": "junior-vs/studio-quarkus",
+  "sha": "6b1aa257dccc0574e16d9f8ed61fb82cd08662f2",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 5
+ },
+ {
+  "repo": "khnnyy/LeninSystem",
+  "sha": "45507d14a8f3c34b4444819e18f9ff76be4d0713",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 6
+ },
+ {
+  "repo": "khnnyy/LeninSystem",
+  "sha": "6ccd39fc8bf0127588bd6db5711fd2ddb1eee220",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 6
+ },
+ {
+  "repo": "ksbrwsk/raspberrypi-boot",
+  "sha": "c1b8fb1ea4133542da6bdc5cec82a9d5a72744b8",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 5
+ },
+ {
+  "repo": "lucabritten/FIT-Combiner-Tool",
+  "sha": "3f4d0f48b2f996e0e627f971837e90dc0b567535",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "lucabritten/FIT-Combiner-Tool",
+  "sha": "90366ab388c8b660d3204765d78280eed6e521d1",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "mika-alaoutinen/WineApp",
+  "sha": "0c774d6fc77fcaef7cb92e5c8e739d7c78bbe60b",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 4
+ },
+ {
+  "repo": "msgoat/cnj-config-backend-spring",
+  "sha": "ff9639d612306157a15b68c9235b793591f35fb4",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 1
+ },
+ {
+  "repo": "msgoat/cnj-rest-backend-quarkus",
+  "sha": "4dca0a88e007586bf223fc96923da3b8a69bf623",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 5
+ },
+ {
+  "repo": "namnn269/SpringBootDemo",
+  "sha": "bfb8d73b0f5aef56b5627250b65925cb71c23f31",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 6
+ },
+ {
+  "repo": "namnn269/SpringBootDemo",
+  "sha": "14682dee0fc4e10481e1a6560a6a390f2f3f41cd",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 6
+ },
+ {
+  "repo": "phani-kb/nvd-tool",
+  "sha": "46ee77289601d244691d0fb98283c3c7237c9a85",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 6
+ },
+ {
+  "repo": "phani-kb/nvd-tool",
+  "sha": "d5fd3364cd602cd5fa28ae61e9e4a228387e1ade",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 6
+ },
+ {
+  "repo": "pmoustopoulos/department-api",
+  "sha": "8013535372842a102b4ae304922c9c60cc8f8a7d",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "pmoustopoulos/department-api",
+  "sha": "82ed7493dd24c4bd6d450a40097ab9591a2b8da1",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "prasadus92/spring-async-example",
+  "sha": "b7f832a64154d608919db374667bd9fb990793a7",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 1
+ },
+ {
+  "repo": "qthanh04/trustbank-backend",
+  "sha": "2e9ceccce17b9d76d4cc033165842d18f76c123f",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 1
+ },
+ {
+  "repo": "sayyadhasan/boot-demo1",
+  "sha": "415829ab224a489552dddbcbd95c2ec40c07de09",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 2
+ },
+ {
+  "repo": "sayyadhasan/boot-demo1",
+  "sha": "cc693f9306776da9e954609d7e623f8527c4ac2b",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "skjolber/gtfs-databinding",
+  "sha": "3b8c7e589aa00a495cea78e4992eaff7c6911b95",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 1
+ },
+ {
+  "repo": "soserdev/shortener-kubernetes",
+  "sha": "536d9baa1f5b1811cf6075609543839d89b049fa",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 1
+ },
+ {
+  "repo": "sukumarrkv/spring-boot-microservices",
+  "sha": "4d9dffc69318f26197fdbf58e6a7f4f39fa2780f",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 4
+ },
+ {
+  "repo": "sukumarrkv/spring-boot-microservices",
+  "sha": "2302f9d90e7605be68ce4febad30930cbb079659",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 4
+ },
+ {
+  "repo": "timmaxx/topjava34",
+  "sha": "58bd4b04342f2455548d8aacd734ba1199077a5c",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "ucsb-cs156-f25/proj-dining-f25-06",
+  "sha": "e74397aed809c97addeb71f5c04f766a64488b78",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 1
+ },
+ {
+  "repo": "ucsb-cs156-s25/proj-rec-s25-13",
+  "sha": "9cf726ee7eddec79d46680f61d50bfa5e61924c9",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 1
+ },
+ {
+  "repo": "vi13x/MusicCatalog",
+  "sha": "e6a1e1b67b249093df0ae2d76b857421e5c540e2",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "vi13x/MusicCatalog",
+  "sha": "07e04499fa0fc8e109ebd1e43b1e7e0e6236e37d",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "warpedcodemonkey/rms",
+  "sha": "3140ffb0cd9927746a6bd737dc7f6e46d980ce7d",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "warpedcodemonkey/rms",
+  "sha": "de92bbb46d9ef1ebcc6992a35bdd9694fdbebff2",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "zappee/gombi",
+  "sha": "92c4b6200fe362ef2ba6801a8e525a4b72060bbd",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 5
+ },
+ {
+  "repo": "zappee/gombi",
+  "sha": "3493a183940ab64a0afe525ef77694f532a2e63d",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 5
+ },
+ {
+  "repo": "mariocelzo/petclinic-dependability-analysis",
+  "sha": "52e528b2ad877f3172b90bd3ec0ea53254465506",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "mariocelzo/petclinic-dependability-analysis",
+  "sha": "5ffaf2e221da15686b701951299b5c5b0034c192",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "Zvikar72/webgot",
+  "sha": "e25f7a7560a1335f3eb3100131fb3e36985cd738",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 3
+ },
+ {
+  "repo": "Zvikar72/webgot",
+  "sha": "60fc807d3616bba9ef64e27552d35c781dd49eea",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "Zvikar72/webgot",
+  "sha": "47df923c8c79cb6112679266896fa2e9f6c7e4b1",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "alexmanrique/spring-boot-application-example",
+  "sha": "d0ff4e8138b5f8ae1b589f439b468d08113cdad6",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 1
+ },
+ {
+  "repo": "faresabdeldaym/test10",
+  "sha": "bd86dc6ee03947ad220577067a3aaed80fd5a946",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 3
+ },
+ {
+  "repo": "faresabdeldaym/test10",
+  "sha": "491fe2d84d9613400a624d06c5dc30d005e97b0d",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "faresabdeldaym/test10",
+  "sha": "a282828154d90617a2c60ce34a3d34f6069b0c26",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "mincong-h/java-examples",
+  "sha": "063f8788d04d3038dcb6ffe7c066b8415f8aa3f7",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 1
+ },
+ {
+  "repo": "jegarps/webgoat",
+  "sha": "317573c897097a19d544b29a420d335e8e118aeb",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 5
+ },
+ {
+  "repo": "jegarps/webgoat",
+  "sha": "2bd6b3621092ed4b7d8a2156095d579cbe2094fe",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 5
+ },
+ {
+  "repo": "jegarps/webgoat",
+  "sha": "7e1a2287f5779910b9c26116add1774f59e79945",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 5
+ },
+ {
+  "repo": "GHCbflam1/TheGoat",
+  "sha": "9576c6b9da66f627882b24034d973eae4e851fed",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 4
+ },
+ {
+  "repo": "GHCbflam1/TheGoat",
+  "sha": "3ad51e6d6b6367306f6f1142636d081d4905fbfd",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 4
+ },
+ {
+  "repo": "GHCbflam1/TheGoat",
+  "sha": "10e36c203f4dcf9c6f37318d943cd7d65267e2c7",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 4
+ },
+ {
+  "repo": "darshant2003/webgoat",
+  "sha": "dea4a9d2a9a7357342642ff127bf48b66bb22009",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 3
+ },
+ {
+  "repo": "darshant2003/webgoat",
+  "sha": "c7e04cef97a8c4eacda9a035332261ce54fa531f",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "darshant2003/webgoat",
+  "sha": "50692300ebfd9a8b52e14ca2b5537ec39de8e726",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "callicoder/spring-boot-websocket-chat-demo",
+  "sha": "2b708ddf1074192f5db056895cb1e3c055a546a9",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 1
+ },
+ {
+  "repo": "payara/Cloud-Connectors",
+  "sha": "0e18abbf7b99de6bb5732ca638fc3c244076270f",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 1
+ },
+ {
+  "repo": "querqy/querqy",
+  "sha": "3a26b6855829a77a0aa31974f294a7cf011eb934",
+  "jv_from": 8,
+  "jv_to": 11,
+  "attempts": 4
+ },
+ {
+  "repo": "querqy/querqy",
+  "sha": "db5d22db6d98b50edff52d301cbefc5d0d563751",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 4
+ },
+ {
+  "repo": "querqy/querqy",
+  "sha": "61e66a7ef6e14c3a45f9e09515e4a9d28687bccd",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 4
+ },
+ {
+  "repo": "Cantara/xorcery-jsonapi-jdk11",
+  "sha": "ace9943b377ba413ed37d9d2ff9acaa347bee95e",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 1
+ },
+ {
+  "repo": "ningpp/hibernate-self-reference",
+  "sha": "5093215ef11f87690e714e5e6eb453e85dbad6d8",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 2
+ },
+ {
+  "repo": "ningpp/hibernate-self-reference",
+  "sha": "a1e32361d0f1a02ba41a2db6b72d7ae407b20980",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "vaadin/cdi",
+  "sha": "fdd2b01ef28ed01699dce9fa541f1193bdef82e3",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 3
+ },
+ {
+  "repo": "vaadin/cdi",
+  "sha": "2a01f622738c82793dc550c26e4ff78e1927a66c",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "vaadin/cdi",
+  "sha": "634cdd4f2f7eeb4fe3aac3dd6dfbbbd71ad7cbc1",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "albonidrizi/asteral",
+  "sha": "d8dd5e4b6ef3692fa9e56c4198c7c571da8a5f04",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 4
+ },
+ {
+  "repo": "albonidrizi/asteral",
+  "sha": "a619ca0509b38ce8ae617270c28fe3eb57ce4760",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 4
+ },
+ {
+  "repo": "adlnet/elrr-datasync",
+  "sha": "b98cbe9babea6504374aae036efc0ec3d864b8bf",
+  "jv_from": 8,
+  "jv_to": 11,
+  "attempts": 3
+ },
+ {
+  "repo": "adlnet/elrr-datasync",
+  "sha": "69ea5468a81cc13a136ad77950d5d8e2bea85e8b",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 3
+ },
+ {
+  "repo": "adlnet/elrr-datasync",
+  "sha": "26a63c3a2ecfd037de18d5fe32cac8437268b9be",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "jerry-tech/Todo-Spring",
+  "sha": "142f1d940752ebcaa27a28b39253f7c0c406e799",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 2
+ },
+ {
+  "repo": "prebid/prebid-server-java",
+  "sha": "b06e42c03de34d624a03a0c9d0a345da798bc0c1",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 4
+ },
+ {
+  "repo": "prebid/prebid-server-java",
+  "sha": "1340886817912864a5c9efd662d3b70bd728c334",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 4
+ },
+ {
+  "repo": "prebid/prebid-server-java",
+  "sha": "08bef4e193ae8cfb83dc49bd6b83cd78979d732f",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 4
+ }
+]

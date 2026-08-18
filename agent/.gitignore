@@ -1,0 +1,16 @@
+target/
+results/
+.env
+
+# The UI is a pnpm workspace that deploy.sh builds before the jar. Everything below is a build
+# product: node_modules and .next are regenerable, and the static export is copied into
+# src/main/resources/ui to be served off the classpath, so the jar carries it and git need not.
+# The playwright shots are the same, output rather than source.
+**/node_modules/
+**/.next/
+**/out/
+**/.turbo/
+**/test-results/
+**/shots/
+*.tsbuildinfo
+src/main/resources/ui/

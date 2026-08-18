@@ -61,21 +61,21 @@ per_repo_iter.*/
 sweep_results*.json
 
 # 2026-06-14: dig corpus + sweep output + p12 clones are regenerating data, not source
-current_attempt/corpus/baselines_peryear.json*
-current_attempt/corpus/dig_remaining.txt
-current_attempt/corpus/legacy/
-current_attempt/corpus/datasets/
-current_attempt/current_sweep/out/
-current_attempt/current_sweep/datasets/
-current_attempt/current_sweep/logs/
-current_attempt/p12/
-current_attempt/scripts/
+attic/corpus/baselines_peryear.json*
+attic/corpus/dig_remaining.txt
+attic/corpus/legacy/
+attic/corpus/datasets/
+attic/current_sweep/out/
+attic/current_sweep/datasets/
+attic/current_sweep/logs/
+attic/p12/
+attic/scripts/
 *.loose
 
-current_attempt/current_sweep/gradle-8.10.2/
-current_attempt/current_sweep/.dockerignore
+attic/current_sweep/gradle-8.10.2/
+attic/current_sweep/.dockerignore
 history/
-current_attempt/current_iteration/runs/
+runs/
 
 # Cursor-specific
 .cursor/

@@ -1,0 +1,100 @@
+[
+ {
+  "repo": "66910sheremet/moex-john",
+  "sha": "15c4732568ff30daa95adb1e75fbbe854b6fdc9c",
+  "jv_from": 11,
+  "jv_to": 17,
+  "attempts": 6
+ },
+ {
+  "repo": "66910sheremet/moex-john",
+  "sha": "7f8ae246fecee650f6bd60321380ef1161b2e9d2",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 6
+ },
+ {
+  "repo": "AadiManchekar/Fleet",
+  "sha": "0eb9b21eab305ae5de06967e52173e46e1cf0fc4",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "AadiManchekar/Fleet",
+  "sha": "82a95fea485745ebe020ff89bd626f9cf73289a0",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "Advancedboy/ident-lite",
+  "sha": "9987615d604e8bc8e1776c2c1a07b4c1d9ac1258",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "Advancedboy/ident-lite",
+  "sha": "5efd3d62e0000654f08f462d2cdcf90f610337c8",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "AjinkyaGokhale/esp-flasher-java",
+  "sha": "74b9192c52505d633f6c70069a142fee16caa70d",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 4
+ },
+ {
+  "repo": "AjinkyaGokhale/esp-flasher-java",
+  "sha": "cf1dc672ca930e0f105964564523c4324bbb7199",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 4
+ },
+ {
+  "repo": "AkselGlyholt/velocity-limbo-handler",
+  "sha": "190b6656db77050e47c4e6507175ed2f8e399f83",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 3
+ },
+ {
+  "repo": "AkselGlyholt/velocity-limbo-handler",
+  "sha": "fe073627b5241e1fe8661479a45af480689bcd51",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 3
+ },
+ {
+  "repo": "Al-rimi/OnlineEducationPlatform",
+  "sha": "c76c763d44fa88ef81bfc13e560785f2e51a6ecd",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "AleksandrChistov/topjava",
+  "sha": "bac4fa694c1eb7e23a102e9a2da073aecac258f6",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ },
+ {
+  "repo": "Alfresco/rest-api-explorer",
+  "sha": "495582b7077744963caef72c6138876d2d985acc",
+  "jv_from": 17,
+  "jv_to": 21,
+  "attempts": 2
+ },
+ {
+  "repo": "Alfresco/rest-api-explorer",
+  "sha": "8ddaa6c1c09a2f5fa6826e5129b3e390e7016923",
+  "jv_from": 21,
+  "jv_to": 25,
+  "attempts": 2
+ }
+]

@@ -1,0 +1,101 @@
+#!/bin/bash
+# jvmjob — runs INSIDE the all-JDK image at /work, with JAVA_HOME pinned to BJV_JDK.
+# Owns ALL Java logic: JDK selection, gradle-dist staging, RO dep cache, build-tool detection
+# (prefer ./mvnw/./gradlew), build/test/scan. The harness picks the JDK + mounts; the scorer's
+# bytecode gate (effective_target==jv_to) enforces correctness, so a shared all-JDK env is safe.
+#   jvmjob build | test | scan | run "<cmd>"   (env: BJV_JDK = feature version)
+set -uo pipefail
+export JAVA_HOME="/opt/jdk/${BJV_JDK:?BJV_JDK must be set}"
+export PATH="$JAVA_HOME/bin:$PATH"
+[ -d /dists ] && { mkdir -p "$HOME/.gradle/wrapper"; ln -sfn /dists "$HOME/.gradle/wrapper/dists"; }
+[ -d /ro/caches/modules-2 ] && export GRADLE_RO_DEP_CACHE=/ro/caches
+# Expose ALL installed JDKs to Gradle toolchain resolution (so a project's current/old toolchain always
+# resolves and recipes can configure it; the bytecode gate, not the env, enforces the final target).
+mkdir -p "$HOME/.gradle"
+grep -q installations.paths "$HOME/.gradle/gradle.properties" 2>/dev/null || \
+  echo 'org.gradle.java.installations.paths=/opt/jdk/8,/opt/jdk/11,/opt/jdk/17,/opt/jdk/21,/opt/jdk/25' >> "$HOME/.gradle/gradle.properties"
+cd /work || exit 2
+# --- offline wrapper-dist normalization (P3: keep every build input resolvable offline) ---
+# The frozen dist mirror is keyed on the canonical services.gradle.org URL. An agent that repoints the
+# wrapper to another valid mirror host (e.g. downloads.gradle.org) or adds a distributionSha256Sum makes
+# the offline dist cache miss and forces a network download -> false FAIL_build_post. Normalize the host
+# to the staged mirror and drop the checksum so any well-formed wrapper bump resolves offline. Only the
+# mirror host + checksum change; the pinned VERSION is untouched, so bytecode/edits scoring is unaffected.
+# (Proven: rr_17_30 allegro/tradukisto bumped 8.5 via downloads.gradle.org -> Network is unreachable.)
+for _wp in $(find . -name gradle-wrapper.properties 2>/dev/null); do
+  sed -i -E 's#//[A-Za-z0-9._-]+/distributions/gradle-#//services.gradle.org/distributions/gradle-#' "$_wp" 2>/dev/null || true
+  sed -i '/^distributionSha256Sum=/d' "$_wp" 2>/dev/null || true
+done
+tool() { if [ -f pom.xml ]; then echo mvn; elif [ -f ./gradlew ]; then echo gradlew; else echo gradle; fi; }
+mvncmd() { if [ -x ./mvnw ] && { [ -f .mvn/wrapper/maven-wrapper.properties ] || [ -f .mvn/wrapper/maven-wrapper.jar ]; }; then echo ./mvnw; else echo mvn; fi; }   # a mvnw without .mvn/wrapper cannot boot (ClassNotFound MavenWrapperMain); use system mvn
+# Kotlin Multiplatform: under Kotlin 1.9.20+ the plain `test` lifecycle task no longer wires the per-target
+# JVM test task (:jvmTest), so a bare `./gradlew test` runs 0 JVM tests and every pre-pass test looks LOST
+# (false FAIL_test_conservation, e.g. rr_17_158 bip21 17->21: pre 32, post 0). When the multiplatform plugin
+# is applied, also request `jvmTest` so the JVM tests run regardless of Kotlin version. `jvmTest` (not the
+# `allTests`/`check` aggregates) avoids js/native target tasks that can't run offline and avoids pulling in
+# lint/verification tasks; score.py passet() globs **/TEST-*.xml recursively, so build/test-results/jvmTest
+# is picked up automatically once the task runs. Plain-Java Gradle projects are untouched (is_kmp false).
+is_kmp() { grep -rhsE 'kotlin\("multiplatform"\)|kotlin-multiplatform|org\.jetbrains\.kotlin\.multiplatform|plugins\.kotlin\.?[mM]ultiplatform' --include='*.gradle' --include='*.gradle.kts' . 2>/dev/null | grep -vqE '^[[:space:]]*(//|#|\*)|apply[[:space:]]+false'; }
+case "${1:-}" in
+  build) case "$(tool)" in
+           mvn)     exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp -DskipTests test-compile;;
+           gradlew) exec timeout -k 15 "${BJV_INNER:-5100}" bash ./gradlew --no-daemon --rerun-tasks testClasses;;
+           gradle)  exec timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon --rerun-tasks testClasses;; esac;;
+  test)  case "$(tool)" in
+           mvn)     exec timeout -k 15 "${BJV_INNER:-5100}" "$(mvncmd)" -B -ntp test -Dmaven.test.failure.ignore=true;;
+           gradlew) timeout -k 15 "${BJV_INNER:-5100}" bash ./gradlew --no-daemon test --continue --rerun-tasks; trc=$?
+                    # KMP: run jvmTest as a SEPARATE invocation. A combined `test jvmTest` aborts at task
+                    # SELECTION when jvmTest is absent (--continue only continues past EXECUTION failures) ->
+                    # 0 XML -> false FAIL_test_conservation. Separate, its absence cannot suppress `test`.
+                    is_kmp && timeout -k 15 "${BJV_INNER:-5100}" bash ./gradlew --no-daemon jvmTest --continue --rerun-tasks
+                    exit "$trc";;
+           gradle)  timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon test --continue --rerun-tasks; trc=$?
+                    is_kmp && timeout -k 15 "${BJV_INNER:-5100}" gradle --no-daemon jvmTest --continue --rerun-tasks
+                    exit "$trc";; esac;;
+  scan)  exec timeout -k 15 "${BJV_INNER:-5100}" osv-scanner scan source --offline-vulnerabilities -r .;;
+  trivy) # security count over RESOLVED module dependencies (offline).
+         # wipe previous collections first: copy-dependencies does NOT prune, so stale jars from an
+         # earlier resolve would still be scanned and mask any version change.
+         find . -type d \( -path "*/target/dependency" -o -path "*/build/deps" \) -prune -exec rm -rf {} + 2>/dev/null || true Maven: each module copies its own
+         # deps to <module>/target/dependency, so trivy rootfs PkgPath carries the module prefix and the
+         # scorer can attribute per module. Gradle: an init-script task does the same into build/deps.
+         if [ -f pom.xml ]; then
+           timeout -k 15 "${BJV_INNER:-5100}" mvn -o -B -ntp -q dependency:copy-dependencies \
+             -DincludeScope=test -DfailOnError=false >/tmp/trivy_collect.log 2>&1 || true
+         else
+           cat > /tmp/collect.init.gradle <<'GINIT'
+// Collect each project's resolved dependency jars into <project>/build/deps so trivy rootfs
+// can attribute findings per module via PkgPath. Registered in afterEvaluate because the
+// java plugin (and therefore testRuntimeClasspath) does not exist during allprojects{}.
+allprojects { p ->
+  p.afterEvaluate {
+    def cfg = p.configurations.findByName("testRuntimeClasspath")
+    if (cfg == null) cfg = p.configurations.findByName("runtimeClasspath")
+    if (cfg == null) cfg = p.configurations.findByName("compileClasspath")
+    if (cfg != null && cfg.canBeResolved) {
+      p.tasks.register("bjvCollectDeps") {
+        doLast {
+          def dest = new File(p.projectDir, "build/deps")
+          dest.mkdirs()
+          try {
+            cfg.resolvedConfiguration.lenientConfiguration.getFiles().each { f ->
+              if (f.name.endsWith(".jar")) {
+                java.nio.file.Files.copy(f.toPath(), new File(dest, f.name).toPath(),
+                  java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+              }
+            }
+          } catch (Exception e) { println "bjvCollectDeps skip ${p.path}: ${e.message}" }
+        }
+      }
+    }
+  }
+}
+GINIT
+           timeout -k 15 "${BJV_INNER:-5100}" sh -c '(./gradlew --no-daemon --init-script /tmp/collect.init.gradle bjvCollectDeps 2>/dev/null || gradle --no-daemon --init-script /tmp/collect.init.gradle bjvCollectDeps 2>/dev/null)' >/tmp/trivy_collect.log 2>&1 || true
+         fi
+         exec timeout -k 15 "${BJV_INNER:-5100}" trivy rootfs --scanners vuln \
+           --skip-db-update --skip-java-db-update --offline-scan \
+           --severity CRITICAL,HIGH --format json --quiet /work ;;
+  run)   shift; exec timeout -k 15 "${BJV_INNER:-5100}" bash -lc "$*";;
+  *) echo "usage: jvmjob build|test|scan|run \"<cmd>\"" >&2; exit 2;;
+esac
