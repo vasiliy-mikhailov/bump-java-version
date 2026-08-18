@@ -104,11 +104,22 @@ run "cd $R && docker build -q --build-arg BJV_COMMIT=$STAMP -t bjv ."
 # A class that cannot be loaded is the cheapest deploy failure to detect and one of the most
 # expensive to miss. The names are read out of the scripts that invoke them rather than typed here,
 # so this cannot drift from what is actually launched.
+# RUN WITH A LEASH, BECAUSE THE IMAGE IS A JRE. Two earlier versions of this check were wrong in
+# opposite ways: the first ran each class, and the server class starts an HTTP server that never
+# returns, so the guard hung the deploy it exists to protect; the second used javap, which is not in
+# a JRE image, so every class read as missing and the guard would have refused every deploy.
+#
+# So: run it, but under a timeout and under a name, and read the error rather than the exit code. A
+# class that is absent says so in the first line. A class that loads and then blocks is a pass, and
+# the leash plus the name is what stops that leaving a container behind.
 for cls in $(grep -ho "tech\.mikhailov\.bjv\.[a-z]*\.[A-Z][A-Za-z]*" "$HERE/run.sh" "$HERE/deploy.sh" | sort -u); do
-  if run "docker run --rm --entrypoint java bjv -cp /bump-agent.jar $cls 2>&1 | grep -q ClassNotFoundException"; then
-    echo "deploy.sh: $cls is launched by a script here but cannot be loaded from the image" >&2
+  run "docker rm -f bjv-probe >/dev/null 2>&1 || true"
+  if run "timeout 25 docker run --rm --name bjv-probe --entrypoint java bjv -cp /bump-agent.jar $cls 2>&1 | grep -q 'ClassNotFoundException\|Could not find or load main class'"; then
+    run "docker rm -f bjv-probe >/dev/null 2>&1 || true"
+    echo "deploy.sh: $cls is launched by a script here but is not in the image" >&2
     exit 1
   fi
+  run "docker rm -f bjv-probe >/dev/null 2>&1 || true"
 done
 
 # AND A RUNNING LAUNCHER IS NOW STALE, which no image check can fix. bash parses a function when it
