@@ -22,7 +22,7 @@
          that records the wire, and the blank-reply re-ask. Only this module builds agents. -->
     <dependency>
       <groupId>tech.mikhailov.ratchet</groupId>
-      <artifactId>ratchet-langchain4j</artifactId>
+      <artifactId>ratchet-llm</artifactId>
     </dependency>
     <dependency>
       <groupId>tech.mikhailov.bjv</groupId>

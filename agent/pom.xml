@@ -20,7 +20,7 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <ratchet.version>0.1.0</ratchet.version>
+    <ratchet.version>0.2.0</ratchet.version>
     <langchain4j.version>1.9.1</langchain4j.version>
     <!-- langchain4j 1.9.1 still ships jackson 2.20.1 and opennlp 2.5.4; pin the patched lines. -->
     <jackson.version>2.21.5</jackson.version>
@@ -60,7 +60,7 @@
       </dependency>
       <dependency>
         <groupId>tech.mikhailov.ratchet</groupId>
-        <artifactId>ratchet-langchain4j</artifactId>
+        <artifactId>ratchet-llm</artifactId>
         <version>${ratchet.version}</version>
       </dependency>
       <dependency>
