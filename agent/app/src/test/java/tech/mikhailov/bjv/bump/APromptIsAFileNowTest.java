@@ -1,6 +1,5 @@
 package tech.mikhailov.bjv.bump;
 
-import com.deepagents.langchain4j.subagents.SubAgentDefinition;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -43,8 +42,8 @@ class APromptIsAFileNowTest {
     @Test
     void everyAgentOfEveryHopGetsAPromptThatSaysSomething() {
         for (Hop hop : HOPS) {
-            List<SubAgentDefinition> defined = Agents.forHop(hop, Path.of("/tmp"));
-            for (SubAgentDefinition d : defined) {
+            List<Definition> defined = Agents.forHop(hop, Path.of("/tmp"));
+            for (Definition d : defined) {
                 String prompt = d.systemPrompt();
                 assertFalse(prompt.isBlank(), d.name() + " has no prompt on " + hop);
                 // AN AGENT GIVEN NOTHING TO DO DOES SOMETHING ARBITRARY, and the trace records it

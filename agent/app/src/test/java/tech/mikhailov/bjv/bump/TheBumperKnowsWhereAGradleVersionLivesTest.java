@@ -1,6 +1,5 @@
 package tech.mikhailov.bjv.bump;
 
-import com.deepagents.langchain4j.subagents.SubAgentDefinition;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -45,7 +44,7 @@ class TheBumperKnowsWhereAGradleVersionLivesTest {
         return prompt(Agents.forHop(new Hop(17, 21), ws), Agents.named("bump-doer", platform));
     }
 
-    private static String prompt(List<SubAgentDefinition> defs, String name) {
+    private static String prompt(List<Definition> defs, String name) {
         return defs.stream().filter(d -> d.name().equals(name)).findFirst().orElseThrow()
                 .systemPrompt();
     }

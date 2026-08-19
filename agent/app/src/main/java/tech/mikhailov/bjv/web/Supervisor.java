@@ -10,9 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.deepagents.langchain4j.logging.ToolInvocationLogMode;
-import com.deepagents.langchain4j.subagents.SubAgentRuntime;
-
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
@@ -20,6 +17,7 @@ import dev.langchain4j.service.tool.ToolExecutor;
 
 import tech.mikhailov.bjv.bump.Agents;
 import tech.mikhailov.bjv.engine.Agent;
+import tech.mikhailov.bjv.engine.Asking;
 import tech.mikhailov.bjv.engine.JsonlTrace;
 import tech.mikhailov.bjv.engine.Model;
 import tech.mikhailov.bjv.engine.Reasoning;
@@ -300,8 +298,8 @@ final class Supervisor {
 
     private Agent agent(String name, ChatModel model,
                         Map<ToolSpecification, ToolExecutor> tools, String prompt) {
-        var runtime = new SubAgentRuntime(model, prompt, tools, "agent:" + name,
-                ToolInvocationLogMode.NONE, trace instanceof JsonlTrace j ? j : null);
+        var runtime = new Asking(model, prompt, tools, "agent:" + name,
+                trace instanceof JsonlTrace j ? j : null);
         return task -> {
             String reply = attempt(runtime, task);
             if (reply.isBlank()) {
@@ -311,9 +309,8 @@ final class Supervisor {
                 // A blank means the reasoning entered a cycle greedy decoding cannot leave, so the
                 // retry asks a model that does not reason at all.
                 trace.progress("supervisor", name + " answered nothing; asking once more");
-                reply = attempt(new SubAgentRuntime(Model.forRetry(trace), prompt, tools,
-                        "agent:" + name, ToolInvocationLogMode.NONE,
-                        trace instanceof JsonlTrace j2 ? j2 : null), task);
+                reply = attempt(new Asking(Model.forRetry(trace), prompt, tools,
+                        "agent:" + name, trace instanceof JsonlTrace j2 ? j2 : null), task);
             }
             trace.asked(name, prompt + "\n\n---\n\n" + task, reply);
             return reply;
@@ -330,7 +327,7 @@ final class Supervisor {
      * supervisor reads as "nothing is wrong", which is the most expensive thing it could possibly
      * say by mistake.
      */
-    private String attempt(SubAgentRuntime runtime, String task) {
+    private String attempt(Asking runtime, String task) {
         try {
             String reply = runtime.run(task);
             return reply == null ? "" : reply;

@@ -9,8 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.deepagents.langchain4j.flow.DeepAgentFlowListener;
-
 /**
  * The trace as one append-only file per bump, plus the settlements file beside it.
  *
@@ -18,7 +16,7 @@ import com.deepagents.langchain4j.flow.DeepAgentFlowListener;
  * analysis and for prompt tuning. {@code settlements.jsonl} is the last word per bump, for a reader
  * who wants to know what happened rather than how.
  */
-public final class JsonlTrace implements Trace, DeepAgentFlowListener {
+public final class JsonlTrace implements Trace, FlowListening {
 
     private final Path trace;
     private final Path settlements;
@@ -240,17 +238,12 @@ public final class JsonlTrace implements Trace, DeepAgentFlowListener {
         write("tool", of("agent", agent, "tool", tool, "arguments", arguments, "result", result));
     }
 
-    // --- the library's own report; its payloads arrive truncated, Tools records them in full ---
+    // --- what the agent loop reports while it runs; its payloads arrive shortened ---
 
     @Override
     public void onToolInvocation(String context, String toolName, Object memoryId,
                                  String argumentsTruncated, String resultTruncated) {
         // Recorded already at the executor; writing the shortened duplicate would double the file.
-    }
-
-    @Override
-    public void onOrchestratorSystemReady(String assembledSystemPrompt) {
-        write("system", of("prompt", assembledSystemPrompt));
     }
 
     @Override

@@ -9,9 +9,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import com.deepagents.langchain4j.files.FileToolFactory;
-import com.deepagents.langchain4j.files.WorkspaceFileOperations;
-
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.service.tool.ToolExecutor;
@@ -21,9 +18,11 @@ import tech.mikhailov.bjv.engine.Reasoning;
 /**
  * READING A WORKSPACE: what every agent gets, whatever else its phase allows.
  *
- * <p>read_file, list_dir and edit_file come from the agent framework and are filtered down to the
- * ones a phase should hold. grep and glob are written here because the framework carries neither,
- * and a model asking for a tool that does not exist does not degrade, it throws.
+ * <p>read_file, list_dir and edit_file are {@link Workspace}'s, filtered down to the ones a phase
+ * should hold. grep and glob are written here because nothing else was going to write them, and a
+ * model asking for a tool that does not exist does not degrade, it throws. All five are this
+ * program's own now: the three that used to arrive from a jar were the only part of that jar this
+ * program ever ran.
  *
  * <p>Both of the written ones carry a measured correction in their bodies rather than in their
  * prose: which shape of filter a grep will honour, and which build output a glob is allowed to
@@ -34,10 +33,18 @@ final class Looking {
     private Looking() {
     }
 
-    /** The built-ins, filtered, plus grep and glob. Fails loudly if an upstream rename strips one. */
+    /**
+     * The file tools, filtered, plus grep and glob.
+     *
+     * <p>FAILS LOUDLY IF A NAME ASKED FOR IS NOT THERE. langchain4j keys executors by name while
+     * advertising the specifications as a list, so a tool that quietly disappears from the set, or
+     * one whose name is mistyped where the phase is declared, leaves an agent holding a promise
+     * nothing answers. The count is the whole guard, and it is checked at construction rather than
+     * at the first call.
+     */
     static Map<ToolSpecification, ToolExecutor> only(Path root, Set<String> names) {
         Map<ToolSpecification, ToolExecutor> kept = new LinkedHashMap<>();
-        FileToolFactory.build(new WorkspaceFileOperations(root))
+        Workspace.tools(root)
                 .forEach((spec, executor) -> {
                     if (names.contains(spec.name())) {
                         kept.put(spec, executor);

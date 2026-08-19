@@ -1,6 +1,5 @@
 package tech.mikhailov.bjv.bump;
 
-import com.deepagents.langchain4j.subagents.SubAgentDefinition;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -69,7 +68,7 @@ class NoPromptSaysRecipesCannotReachGradleTest {
     void noAgentOnAnyHopIsToldARecipeCannotReachGradle(@TempDir Path ws) {
         List<String> offences = new ArrayList<>();
         for (Hop hop : EVERY_HOP) {
-            for (SubAgentDefinition d : Agents.forHop(hop, ws)) {
+            for (Definition d : Agents.forHop(hop, ws)) {
                 for (String claim : FALSE_NOW) {
                     if (d.systemPrompt().contains(claim)) {
                         offences.add(hop.from() + "->" + hop.to() + " " + d.name()
@@ -108,7 +107,7 @@ class NoPromptSaysRecipesCannotReachGradleTest {
         // an agent that spent four hundred bumps being told the opposite is not a correction. The
         // doer is told it can reach the module; the verifier is told that being Gradle is not a
         // reason a pin went unapplied, because the verifier is the half that accepted the excuse.
-        List<SubAgentDefinition> defs = Agents.forHop(new Hop(17, 21), ws);
+        List<Definition> defs = Agents.forHop(new Hop(17, 21), ws);
         // ON EVERY PLATFORM. The capability is the harness's and has nothing to do with what
         // manages a module's versions, so a correction that reached only one of the three copies
         // would leave the excuse standing for the other two.
@@ -123,7 +122,7 @@ class NoPromptSaysRecipesCannotReachGradleTest {
         }
     }
 
-    private static String of(List<SubAgentDefinition> defs, String name) {
+    private static String of(List<Definition> defs, String name) {
         return defs.stream().filter(d -> d.name().equals(name)).findFirst().orElseThrow()
                 .systemPrompt();
     }

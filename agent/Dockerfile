@@ -2,9 +2,9 @@
 # different main classes, and three Dockerfiles copying the same artifact meant three builds, three
 # pushes, and three chances for one of them to be a version behind. The class to run is the command.
 #
-# The jar is built elsewhere and copied in. It cannot be built here: it needs
-# com.deepagents:langchain4j-deepagents in a local repository, which no build host has. See
-# deploy.sh, which does the three steps in the one order that works.
+# The jar is built elsewhere and copied in, so this file never sees a compiler and an image built
+# without building the jar first ships whatever jar was already there. See deploy.sh, which does the
+# three steps in the one order that works.
 #
 # The build context is the agent directory, which is the Maven parent: engine, jvm and app
 # are three modules of one reactor and only app produces the fat jar.

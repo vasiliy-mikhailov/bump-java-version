@@ -1,6 +1,5 @@
 package tech.mikhailov.bjv.bump;
 
-import com.deepagents.langchain4j.subagents.SubAgentDefinition;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -38,7 +37,7 @@ import tech.mikhailov.bjv.engine.Shape;
  */
 class TheChainIsDeclaredOnceTest {
 
-    private static final List<SubAgentDefinition> DEFINED =
+    private static final List<Definition> DEFINED =
             Agents.forHop(new Hop(17, 21), Path.of("/tmp"));
 
     /** The stages, walked off the tree a bump runs. There is no other list of them. */
@@ -77,7 +76,7 @@ class TheChainIsDeclaredOnceTest {
         // with a lookup for an agent nobody made. A bare definition surviving beside the keyed
         // three is the other direction: it would be catalogued, described on the page, and reached
         // by nothing.
-        Set<String> defined = new TreeSet<>(DEFINED.stream().map(SubAgentDefinition::name).toList());
+        Set<String> defined = new TreeSet<>(DEFINED.stream().map(Definition::name).toList());
         Set<String> moduleScoped = new TreeSet<>();
         for (String name : defined) {
             if (!name.equals(stem(name))) {

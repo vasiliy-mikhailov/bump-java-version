@@ -12,13 +12,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.deepagents.langchain4j.subagents.SubAgentDefinition;
-
 import com.sun.net.httpserver.HttpExchange;
 
 import tech.mikhailov.bjv.bump.Agents;
 import tech.mikhailov.bjv.bump.Bom;
 import tech.mikhailov.bjv.bump.Bump;
+import tech.mikhailov.bjv.bump.Definition;
 import tech.mikhailov.bjv.bump.Hop;
 import tech.mikhailov.bjv.engine.Json;
 import tech.mikhailov.bjv.engine.Prompts;
@@ -83,7 +82,7 @@ final class Settings {
         // factory's order is an accident of how the methods happen to be listed, and nothing should
         // depend on it.
         List<String> order = Shape.agentNames(shape);
-        List<SubAgentDefinition> defined = new ArrayList<>(Agents.forHop(h, results.dir()));
+        List<Definition> defined = new ArrayList<>(Agents.forHop(h, results.dir()));
         // ON THE STEM, BECAUSE THE TREE CANNOT NAME A PLATFORM. Fourteen of these agents exist once
         // per platform and are named before-pins-planner@spring-boot and so on, while the shape is
         // walked before any module has been looked at and can only ever say before-pins-planner.

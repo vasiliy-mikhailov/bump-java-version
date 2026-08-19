@@ -1,6 +1,5 @@
 package tech.mikhailov.bjv.bump;
 
-import com.deepagents.langchain4j.subagents.SubAgentDefinition;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -95,7 +94,7 @@ class AfterPinsReadsItsOwnListTest {
         // if the call site names the other key, which is precisely the bug: one argument, spelled
         // once, sent both phases to the same text. So this reads the prompt the agent is actually
         // built with and looks for a sentence only the other phase's fragment has.
-        List<SubAgentDefinition> defs = Agents.forHop(new Hop(17, 21), Path.of("/tmp"));
+        List<Definition> defs = Agents.forHop(new Hop(17, 21), Path.of("/tmp"));
         for (String platform : Managed.PLATFORMS) {
             for (Pair pair : PAIRS) {
                 String before = fragment(platform, pair.before());
@@ -155,7 +154,7 @@ class AfterPinsReadsItsOwnListTest {
         return text.replaceAll("[ \\t]+", " ").strip();
     }
 
-    private static String prompt(List<SubAgentDefinition> defs, String agent) {
+    private static String prompt(List<Definition> defs, String agent) {
         return defs.stream().filter(d -> d.name().equals(agent)).findFirst().orElseThrow()
                 .systemPrompt();
     }

@@ -1,6 +1,5 @@
 package tech.mikhailov.bjv.bump;
 
-import com.deepagents.langchain4j.subagents.SubAgentDefinition;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -57,7 +56,7 @@ class AnAgentIsBuiltForItsHopTest {
     @Test
     void everyHopBuildsTheWholeChainAndTheOrderIsTheChains() {
         for (Hop hop : List.of(new Hop(8, 11), new Hop(11, 17), new Hop(17, 21), new Hop(21, 25))) {
-            List<SubAgentDefinition> all = Agents.forHop(hop, Path.of("/tmp"));
+            List<Definition> all = Agents.forHop(hop, Path.of("/tmp"));
             // THE WHOLE CHAIN, AND INSIDE THE MODULE WALK ONE OF EACH PER PLATFORM. The catalogue
             // is bigger than the tree by construction: the shape is drawn before any module has
             // been looked at, so it can only ever name before-pins-doer, and the catalogue holds
@@ -68,7 +67,7 @@ class AnAgentIsBuiltForItsHopTest {
             assertEquals("survey-planner", all.get(0).name(), "which starts where the chain starts");
             assertEquals("estimator-verifier", all.get(all.size() - 1).name(),
                     "and ends where it ends: every stage plans, does and verifies, including the last");
-            for (SubAgentDefinition d : all) {
+            for (Definition d : all) {
                 assertFalse(d.systemPrompt().isBlank(), d.name() + " has no prompt on " + hop);
                 assertFalse(d.systemPrompt().contains("{FLOORS}"),
                         d.name() + " has an unresolved token on " + hop);
@@ -171,7 +170,7 @@ class AnAgentIsBuiltForItsHopTest {
         }
     }
 
-    private static String prompt(List<SubAgentDefinition> defs, String name) {
+    private static String prompt(List<Definition> defs, String name) {
         return defs.stream().filter(d -> d.name().equals(name)).findFirst().orElseThrow()
                 .systemPrompt();
     }
@@ -188,7 +187,7 @@ class AnAgentIsBuiltForItsHopTest {
         // KNOWN to differ, so that anything showing the chain sorts by Chain and no future reader
         // assumes the factory's order means something.
         List<String> factory = Agents.forHop(new Hop(17, 21), Path.of("/tmp")).stream()
-                .map(SubAgentDefinition::name)
+                .map(Definition::name)
                 .toList();
         List<String> chain = Shape.agentNames(Bump.stages());
 

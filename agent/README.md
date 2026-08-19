@@ -1,8 +1,9 @@
 # bump-agent
 
 One Java LTS bump, run as a fixed-order chain of producer/critic pairs with a full trace.
-Ported from the fix-java-svace-markers harness; the agents are deepagents `SubAgentRuntime`
-instances with per-role tools, and the order is Java, not a paragraph an agent can rewrite.
+Ported from the fix-java-svace-markers harness; an agent is a langchain4j tool loop with a system
+prompt and a per-role tool set (`engine/Asking`), and the order is Java, not a paragraph an agent
+can rewrite.
 
 ## The chain
 
@@ -110,9 +111,9 @@ The endpoint still needs tool-calling.
 
 ## Images
 
-**bjv-agent.** Fat jar. Rebuild needs `com.deepagents:langchain4j-deepagents` in a local Maven
-repo. First copy: retag Hub `vasiliymikhailov/bjv-agent` or `docker load` a save from the research
-host, then `docker push $BJV_IMAGE`.
+**bjv-agent.** Fat jar, built from Central artifacts only. First copy: retag Hub
+`vasiliymikhailov/bjv-agent` or `docker load` a save from the research host, then
+`docker push $BJV_IMAGE`.
 
 **bjv-alljdk.** Produced by the `current_sweep/` Dockerfile chain plus
 `current_iteration/Dockerfile.alljdk`.

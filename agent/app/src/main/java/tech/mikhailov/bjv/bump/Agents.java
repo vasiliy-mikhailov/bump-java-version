@@ -10,14 +10,11 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.deepagents.langchain4j.logging.ToolInvocationLogMode;
-import com.deepagents.langchain4j.subagents.SubAgentDefinition;
-import com.deepagents.langchain4j.subagents.SubAgentRuntime;
-
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.tool.ToolExecutor;
 import tech.mikhailov.bjv.engine.Agent;
+import tech.mikhailov.bjv.engine.Asking;
 import tech.mikhailov.bjv.engine.JsonlTrace;
 import tech.mikhailov.bjv.engine.Listening;
 import tech.mikhailov.bjv.engine.Model;
@@ -416,7 +413,7 @@ public final class Agents {
      * campaign.
      */
     private Agent steered(String name, String floor) {
-        SubAgentDefinition d = definition(name);
+        Definition d = definition(name);
         return runtime(d.name(), steer(d.name(), floor), d.systemPrompt());
     }
 
@@ -487,19 +484,17 @@ public final class Agents {
     /** One agent, already wired to the trace. Callers cannot reach a runtime that is not. */
     /** The same agent, asked again without thinking. Built on demand: most calls never need it. */
     private Agent retry(String name, Map<ToolSpecification, ToolExecutor> tools, String prompt) {
-        SubAgentRuntime r = new SubAgentRuntime(Model.forRetry(trace), prompt, tools,
-                "agent:" + name + ":retry", ToolInvocationLogMode.NONE,
+        return new Asking(Model.forRetry(trace), prompt, tools, "agent:" + name + ":retry",
                 trace instanceof JsonlTrace j ? j : null);
-        return r::run;
     }
 
     /**
      * EVERY AGENT, AS DATA, BUILT FOR THIS HOP.
      *
-     * <p>{@link SubAgentDefinition} is the framework's own shape and this class used to hand-roll a
-     * worse one: sixteen factory methods each assembled a name, a prompt and a tool set and then
-     * threw the assembly away, which is why the prompts could only be read by opening this file and
-     * why there was no way to ask what a different hop would be told.
+     * <p>{@link Definition} is the shape, and this class used to hand-roll a worse one: sixteen
+     * factory methods each assembled a name, a prompt and a tool set and then threw the assembly
+     * away, which is why the prompts could only be read by opening this file and why there was no
+     * way to ask what a different hop would be told.
      *
      * <p>As data they can be listed, rendered, diffed between hops, and composed. The order is the
      * order the chain reaches them.
@@ -748,8 +743,8 @@ public final class Agents {
      * tree's walk and the tree can only ever name the bare fourteen, so the platforms of one agent
      * have to arrive as a run or the page interleaves them with the next stage's.
      */
-    List<SubAgentDefinition> definitions() {
-        List<SubAgentDefinition> out = new ArrayList<>();
+    List<Definition> definitions() {
+        List<Definition> out = new ArrayList<>();
         out.add(define("survey-planner", "says what would settle which JDK this project is on",
                 floors(P_SURVEY_PLANNER), read("survey-planner")));
         out.add(define("survey-doer", "reads what JDK the project is actually on", P_SURVEYOR,
@@ -865,7 +860,7 @@ public final class Agents {
      * hand at each definition and again at each accessor that restated one. A trace attributing a
      * call to an agent nobody defined is a record that cannot be followed back.
      */
-    private void perPlatform(List<SubAgentDefinition> out, String name, String description,
+    private void perPlatform(List<Definition> out, String name, String description,
                              Function<String, String> prompt,
                              Function<String, Map<ToolSpecification, ToolExecutor>> tools) {
         for (String platform : Managed.PLATFORMS) {
@@ -880,31 +875,31 @@ public final class Agents {
      * <p>The settings page asks what a 17-to-21 bump will be told before one is running, which is
      * the whole point of being able to see them.
      */
-    public static List<SubAgentDefinition> forHop(Hop hop, Path ws) {
+    public static List<Definition> forHop(Hop hop, Path ws) {
         return new Agents(null, null, ws, null, new Tree(ws, note -> { }), hop, null).definitions();
     }
 
-    /** One definition. The framework's record, so nothing here reinvents its shape. */
-    private SubAgentDefinition define(String name, String description, String prompt,
-                                      Map<ToolSpecification, ToolExecutor> tools) {
+    /** One definition, and the one place a name, a description, a prompt and a tool set are joined. */
+    private Definition define(String name, String description, String prompt,
+                              Map<ToolSpecification, ToolExecutor> tools) {
         // WHO IS SPEAKING, ANSWERABLE LATER. Two models serve all sixty-five agents, so a listener
         // under them cannot be told the name; the system prompt is what travels with the request,
         // and every agent's is distinct, the platform-keyed ones included: the fragment that
         // differs is what makes each of a stem's three a different text.
         Listening.register(name, prompt);
-        return new SubAgentDefinition(name, description, prompt, false, tools);
+        return new Definition(name, description, prompt, tools);
     }
 
     /** The definition by name, which is how the chain asks for one. */
-    SubAgentDefinition definition(String name) {
+    Definition definition(String name) {
         return definitions().stream().filter(d -> d.name().equals(name)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("no agent called " + name));
     }
 
     /** A runnable agent from its definition. */
     private Agent agent(String name) {
-        SubAgentDefinition d = definition(name);
-        return runtime(d.name(), d.extraTools(), d.systemPrompt());
+        Definition d = definition(name);
+        return runtime(d.name(), d.tools(), d.systemPrompt());
     }
 
     /**
@@ -933,8 +928,7 @@ public final class Agents {
         // differently, and a critic that spends its budget thinking answers nothing at all.
         boolean judges = name.endsWith("-critic") || name.equals("verdict-doer")
                 || name.equals("estimator-doer");
-        SubAgentRuntime runtime = new SubAgentRuntime(judges ? judging : model, prompt, tools,
-                "agent:" + name, ToolInvocationLogMode.NONE,
+        Asking runtime = new Asking(judges ? judging : model, prompt, tools, "agent:" + name,
                 trace instanceof JsonlTrace j ? j : null);
         return task -> {
             String reply;

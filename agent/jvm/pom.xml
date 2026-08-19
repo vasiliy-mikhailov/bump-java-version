@@ -16,5 +16,12 @@
       <groupId>tech.mikhailov.bjv</groupId>
       <artifactId>bump-agent-engine</artifactId>
     </dependency>
+    <!-- Declared rather than inherited from engine, because this module's tools name
+         ToolSpecification, ToolExecutor and JsonObjectSchema in their own signatures. It compiled
+         on engine's transitive for as long as engine happened to have one. -->
+    <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j</artifactId>
+    </dependency>
   </dependencies>
 </project>

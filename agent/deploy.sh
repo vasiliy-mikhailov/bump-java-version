@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Build here, ship the jar, then build the image there. IN THAT ORDER, AND ALL THREE.
 #
-# The Dockerfile copies app/target/bump-agent-0.1.0-SNAPSHOT.jar rather than building it, and
-# the jar can only be built on a machine that has com.deepagents:langchain4j-deepagents
-# installed locally, which the host does not. So syncing the sources and running `docker build`
-# on the host does exactly nothing: the COPY layer hits cache and the image ships the previous
-# jar. It reports success. A live sweep ran an hour of already-committed-and-pushed code that
-# way, and the trace is what caught it, not the deploy.
+# The Dockerfile copies app/target/bump-agent-0.1.0-SNAPSHOT.jar rather than building it, so
+# syncing the sources and running `docker build` does exactly nothing on its own: the COPY layer
+# hits cache and the image ships the previous jar. It reports success. A live sweep ran an hour of
+# already-committed-and-pushed code that way, and the trace is what caught it, not the deploy.
+#
+# Every dependency the jar needs is now an ordinary artifact from Central. It used to need a
+# locally-installed SNAPSHOT that no build host had, which made "build the jar first" a fact about
+# one machine; it is a fact about this script's order now.
 #
 # THAT PATH HAS A MODULE IN FRONT OF IT NOW. engine, jvm and app are separate jars and only
 # app shades, so the artifact is app/target/bump-agent-0.1.0-SNAPSHOT.jar. It is named here
