@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import tech.mikhailov.bjv.engine.Json;
+import tech.mikhailov.ratchet.record.Json;
 
 /**
  * WHAT THE SCAN RESOLVED, BEFORE AND AFTER, AND EVERY WAY THE PAGES COUNT IT.

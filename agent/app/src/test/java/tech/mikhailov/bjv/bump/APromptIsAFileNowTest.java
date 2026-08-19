@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import tech.mikhailov.bjv.engine.Shape;
+import tech.mikhailov.ratchet.flow.Shape;
 
 /**
  * THE PROMPTS ARE FILES, AND SUBSTITUTION MOVED WITH THEM.

@@ -11,9 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Prompts;
-import tech.mikhailov.bjv.engine.Settlement;
-import tech.mikhailov.bjv.engine.Version;
+import tech.mikhailov.ratchet.config.Prompts;
+import tech.mikhailov.ratchet.record.Settlement;
 
 /**
  * A SETTLED BUMP HAS TO SAY WHICH PIPELINE PRODUCED IT.

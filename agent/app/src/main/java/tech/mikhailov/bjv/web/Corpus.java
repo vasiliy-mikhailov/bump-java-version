@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import tech.mikhailov.bjv.engine.Json;
+import tech.mikhailov.ratchet.record.Json;
 
 /**
  * THE WHOLE CORPUS, NOT JUST THE PART THAT HAS STARTED.

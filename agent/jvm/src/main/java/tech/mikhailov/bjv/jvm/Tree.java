@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import tech.mikhailov.bjv.engine.Shell;
 
 /**
  * THE WORKSPACE AS A THING THAT CAN BE ROLLED BACK TO A NAMED POINT.

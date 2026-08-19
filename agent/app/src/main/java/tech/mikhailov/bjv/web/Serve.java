@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.concurrent.Executors;
 
 import tech.mikhailov.bjv.bump.Bom;
-import tech.mikhailov.bjv.engine.Prompts;
+import tech.mikhailov.ratchet.config.Prompts;
 
 /**
  * THE SERVER, WHICH IS ALL THAT IS LEFT OF A 1,604-LINE PAGE.

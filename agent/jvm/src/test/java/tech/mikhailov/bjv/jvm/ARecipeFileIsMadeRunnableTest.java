@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Trace;
+import tech.mikhailov.ratchet.record.Trace;
 
 /**
  * THE ONE WAY A PIN REACHES A PROJECT, WHICH HAD NEVER ONCE WORKED.

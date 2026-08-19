@@ -10,9 +10,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import tech.mikhailov.bjv.engine.Settlement;
-import tech.mikhailov.bjv.engine.Shell;
-import tech.mikhailov.bjv.engine.Version;
+import tech.mikhailov.ratchet.record.Settlement;
+import tech.mikhailov.bjv.jvm.Shell;
 import tech.mikhailov.bjv.jvm.Declared;
 import tech.mikhailov.bjv.jvm.Migrate;
 import tech.mikhailov.bjv.jvm.Modules;

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Reply;
+import tech.mikhailov.ratchet.flow.Reply;
 import tech.mikhailov.bjv.jvm.Modules;
 
 /**

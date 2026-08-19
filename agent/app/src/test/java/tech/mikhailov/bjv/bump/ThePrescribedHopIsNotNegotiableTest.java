@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Trace;
+import tech.mikhailov.ratchet.record.Trace;
 
 /**
  * The hop is the experiment's independent variable. An agent that picks it makes every run a

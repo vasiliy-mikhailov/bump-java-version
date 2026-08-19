@@ -1,9 +1,11 @@
-package tech.mikhailov.bjv.engine;
+package tech.mikhailov.bjv.bump;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+
+import tech.mikhailov.ratchet.config.Env;
+import tech.mikhailov.ratchet.record.Digest;
+import tech.mikhailov.ratchet.record.Settlement;
 
 /**
  * WHICH PIPELINE PRODUCED THIS BUMP, recorded on the bump rather than remembered.
@@ -120,19 +122,15 @@ public final class Version {
         }
     }
 
-    /** Short and stable. Eight hex characters is enough to group a fortnight of runs. */
+    /**
+     * Short and stable. Eight hex characters is enough to group a fortnight of runs.
+     *
+     * <p>THE HASHING COMES FROM THE LIBRARY NOW, not from a copy kept here. Rows written before
+     * the split and rows written after it are comparable only because both sides take the same
+     * digest of the same text, so there is one implementation and this is not it.
+     */
     private static String digest(String s) {
-        try {
-            byte[] d = MessageDigest.getInstance("SHA-256")
-                    .digest(s.getBytes(StandardCharsets.UTF_8));
-            StringBuilder b = new StringBuilder();
-            for (int i = 0; i < 4; i++) {
-                b.append(String.format("%02x", d[i]));
-            }
-            return b.toString();
-        } catch (NoSuchAlgorithmException impossible) {
-            return "";
-        }
+        return Digest.of(s);
     }
 
     /** The whole fingerprint as JSON fields, for the settlement row and the trace. */

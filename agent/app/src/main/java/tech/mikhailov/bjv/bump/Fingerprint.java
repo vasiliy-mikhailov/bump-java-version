@@ -2,9 +2,9 @@ package tech.mikhailov.bjv.bump;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Supplier;
 
-import tech.mikhailov.bjv.engine.Prompts;
-import tech.mikhailov.bjv.engine.Version;
+import tech.mikhailov.ratchet.config.Prompts;
 
 /**
  * WHAT A BUMP PUTS ITS NAME TO: the prompts its agents are handed, and the lists they are scored
@@ -21,6 +21,29 @@ import tech.mikhailov.bjv.engine.Version;
  * that knows a key is two Java version numbers.
  */
 final class Fingerprint implements Version.Parts {
+
+    /**
+     * THE PIPELINE FIELDS FOR ONE BUMP, as a string of JSON fields ready to append.
+     *
+     * <p>The record writer used to work this out itself. To do that it had to know that a bump key
+     * is four fields separated by pipes and that the third and fourth of them are a Java version
+     * pair, which is this package's grammar and nobody else's: a general record writer carrying
+     * one pipeline's key format is a record writer only that pipeline can use. So it takes a
+     * supplier now, and this is the supplier.
+     *
+     * <p>Asked at write time and at most once per lane, never here. NO LEADING COMMA: the writer
+     * puts one in when the answer is not empty, and a second one makes a row nothing can parse.
+     */
+    static Supplier<String> provenanceOf(String bump, Path settlements) {
+        return () -> {
+            String[] p = bump.split("\\|");
+            if (p.length < 4) {
+                return "";
+            }
+            Path root = settlements.getParent() == null ? settlements : settlements.getParent();
+            return Version.fields(p[2] + "-" + p[3], root, OF_A_BUMP);
+        };
+    }
 
     /** The one instance. It holds nothing, and every caller is asking the same question. */
     static final Fingerprint OF_A_BUMP = new Fingerprint();

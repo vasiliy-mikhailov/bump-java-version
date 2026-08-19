@@ -12,7 +12,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Trace;
+import tech.mikhailov.ratchet.record.Trace;
 
 /**
  * WHICH BUILD SYSTEM, ASKED RATHER THAN INFERRED FROM A FAILURE.

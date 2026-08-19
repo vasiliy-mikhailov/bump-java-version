@@ -7,8 +7,8 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.service.tool.ToolExecutor;
 
-import tech.mikhailov.bjv.engine.Reasoning;
-import tech.mikhailov.bjv.engine.Trace;
+import tech.mikhailov.ratchet.record.Json;
+import tech.mikhailov.ratchet.record.Trace;
 import tech.mikhailov.bjv.jvm.Tree;
 
 /**
@@ -57,9 +57,9 @@ final class Ledger {
                         .addIntegerProperty("limit", "how many of the most recent events, default 80")
                         .build())
                 .build(), (request, memoryId) -> {
-                    String stage = Reasoning.field(request.arguments(), "stage");
-                    String agent = Reasoning.field(request.arguments(), "agent");
-                    int limit = Reasoning.number(request.arguments(), "limit", 60);
+                    String stage = Json.read(request.arguments(), "stage");
+                    String agent = Json.read(request.arguments(), "agent");
+                    int limit = Json.number(request.arguments(), "limit", 60);
                     String log = trace.happened(stage, agent, limit);
                     return log.isBlank() ? "nothing recorded yet for that filter" : log;
                 });
@@ -85,7 +85,7 @@ final class Ledger {
                         .required("sha")
                         .build())
                 .build(), (request, memoryId) -> {
-                    String asked = Reasoning.field(request.arguments(), "sha").strip();
+                    String asked = Json.read(request.arguments(), "sha").strip();
                     String sha = tree.resolve(asked);
                     if (sha.isBlank()) {
                         return "no commit called " + asked + ". Use history for the list.";
@@ -135,7 +135,7 @@ final class Ledger {
                         .required("sha")
                         .build())
                 .build(), (request, memoryId) -> {
-                    String asked = Reasoning.field(request.arguments(), "sha").strip();
+                    String asked = Json.read(request.arguments(), "sha").strip();
                     String sha = tree.resolve(asked);
                     if (sha.isBlank()) {
                         return "no commit called " + asked + ". Use steps_so_far for the list.";

@@ -13,7 +13,7 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.service.tool.ToolExecutor;
 
-import tech.mikhailov.bjv.engine.Reasoning;
+import tech.mikhailov.ratchet.record.Json;
 
 /**
  * READING A WORKSPACE: what every agent gets, whatever else its phase allows.
@@ -205,6 +205,6 @@ final class Looking {
      * any argument containing an escaped quote.
      */
     private static String field(String json, String key) {
-        return Reasoning.field(json, key);
+        return Json.read(json, key);
     }
 }

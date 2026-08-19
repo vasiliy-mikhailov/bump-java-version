@@ -19,9 +19,9 @@ import tech.mikhailov.bjv.bump.Bom;
 import tech.mikhailov.bjv.bump.Bump;
 import tech.mikhailov.bjv.bump.Definition;
 import tech.mikhailov.bjv.bump.Hop;
-import tech.mikhailov.bjv.engine.Json;
-import tech.mikhailov.bjv.engine.Prompts;
-import tech.mikhailov.bjv.engine.Shape;
+import tech.mikhailov.ratchet.record.Json;
+import tech.mikhailov.ratchet.config.Prompts;
+import tech.mikhailov.ratchet.flow.Shape;
 
 /**
  * WHAT A READER MAY CHANGE, AND WHAT THEY MAY ONLY SEE.

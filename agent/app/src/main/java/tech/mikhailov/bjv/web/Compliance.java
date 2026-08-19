@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import tech.mikhailov.bjv.engine.Json;
+import tech.mikhailov.ratchet.record.Json;
 
 /**
  * HOW MUCH OF WHAT THE TARGET NEEDS EACH BUMP REACHED, joined by bump.

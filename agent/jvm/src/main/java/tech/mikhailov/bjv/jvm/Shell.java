@@ -1,4 +1,4 @@
-package tech.mikhailov.bjv.engine;
+package tech.mikhailov.bjv.jvm;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

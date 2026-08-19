@@ -15,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Agent;
-import tech.mikhailov.bjv.engine.Journal;
-import tech.mikhailov.bjv.engine.JsonlTrace;
-import tech.mikhailov.bjv.engine.Trace;
+import tech.mikhailov.ratchet.flow.Agent;
+import tech.mikhailov.ratchet.record.Journal;
+import tech.mikhailov.ratchet.record.JsonlTrace;
+import tech.mikhailov.ratchet.record.Trace;
 import tech.mikhailov.bjv.jvm.Modules;
 
 /**
@@ -298,7 +298,7 @@ class AKilledBumpPicksUpWhereItStoppedTest {
 
     /** A settlement row, in the shape the file already holds them. */
     private static void settle(Path settlements, String bump, String state) {
-        tech.mikhailov.bjv.engine.Settlement.note(settlements, bump, state, "because", false,
+        tech.mikhailov.ratchet.record.Settlement.note(settlements, bump, state, "because", false,
                 false, "");
     }
 

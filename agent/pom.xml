@@ -14,13 +14,13 @@
        nothing today. app is also the only module that shades, because a library that shades is a
        library nobody can depend on. -->
   <modules>
-    <module>engine</module>
     <module>jvm</module>
     <module>app</module>
   </modules>
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <ratchet.version>0.1.0</ratchet.version>
     <langchain4j.version>1.9.1</langchain4j.version>
     <!-- langchain4j 1.9.1 still ships jackson 2.20.1 and opennlp 2.5.4; pin the patched lines. -->
     <jackson.version>2.21.5</jackson.version>
@@ -48,10 +48,20 @@
         <artifactId>opennlp-tools</artifactId>
         <version>${opennlp.version}</version>
       </dependency>
+      <!-- THE ENGINE IS A LIBRARY NOW, and it is not this project's to version any more.
+           tech.mikhailov.ratchet is published on its own release cadence, so this names a fixed
+           release and never a snapshot: a snapshot resolves to whatever the local repository
+           happened to warm, and two lanes on the same version number would run different bytes
+           with nothing saying so. -->
       <dependency>
-        <groupId>tech.mikhailov.bjv</groupId>
-        <artifactId>bump-agent-engine</artifactId>
-        <version>${project.version}</version>
+        <groupId>tech.mikhailov.ratchet</groupId>
+        <artifactId>ratchet-core</artifactId>
+        <version>${ratchet.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>tech.mikhailov.ratchet</groupId>
+        <artifactId>ratchet-langchain4j</artifactId>
+        <version>${ratchet.version}</version>
       </dependency>
       <dependency>
         <groupId>tech.mikhailov.bjv</groupId>

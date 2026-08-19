@@ -17,18 +17,18 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import tech.mikhailov.bjv.engine.Agent;
-import tech.mikhailov.bjv.engine.Env;
-import tech.mikhailov.bjv.engine.Flow;
-import tech.mikhailov.bjv.engine.Journal;
-import tech.mikhailov.bjv.engine.Json;
-import tech.mikhailov.bjv.engine.JsonlTrace;
-import tech.mikhailov.bjv.engine.Model;
-import tech.mikhailov.bjv.engine.Prompts;
-import tech.mikhailov.bjv.engine.Reply;
-import tech.mikhailov.bjv.engine.Shape;
-import tech.mikhailov.bjv.engine.Trace;
-import tech.mikhailov.bjv.engine.Triad;
+import tech.mikhailov.ratchet.flow.Agent;
+import tech.mikhailov.ratchet.config.Env;
+import tech.mikhailov.ratchet.flow.Flow;
+import tech.mikhailov.ratchet.record.Journal;
+import tech.mikhailov.ratchet.record.Json;
+import tech.mikhailov.ratchet.record.JsonlTrace;
+import tech.mikhailov.ratchet.llm.Model;
+import tech.mikhailov.ratchet.config.Prompts;
+import tech.mikhailov.ratchet.flow.Reply;
+import tech.mikhailov.ratchet.flow.Shape;
+import tech.mikhailov.ratchet.record.Trace;
+import tech.mikhailov.ratchet.flow.Triad;
 import tech.mikhailov.bjv.jvm.Declared;
 import tech.mikhailov.bjv.jvm.Migrate;
 import tech.mikhailov.bjv.jvm.Modules;
@@ -128,6 +128,25 @@ public final class Bump {
      */
     private static final String UNRESOLVED_PLATFORM = Managed.platformIn("");
 
+    /**
+     * WHICH LINES SURVIVE THE BUDGET when an agent is shown what happened before it.
+     *
+     * <p>The record writer keeps the highest-ranked lines and drops the rest, and it ranks by kind
+     * alone unless a pipeline says what its own decisive words are. Kind alone is true of any
+     * pipeline; these two lists are not, which is why they arrive from here.
+     *
+     * <p>THE MEASUREMENT BEHIND THEM: shown an unranked tail, 13 of 349 agent turns were given the
+     * verdict that had just been reached, and the rest were given file reads. A run wired with the
+     * ranking and no lists compiles, runs, and looks entirely healthy while making slowly worse
+     * decisions, so the constructor that takes a provenance supplier is the one that takes these
+     * as well and there is no form that takes one without the other.
+     */
+    private static final List<String> DECISIVE = List.of("fail_", "pass (");
+
+    /** Words that mean somebody objected. Rank below a verdict, above an ordinary note. */
+    private static final List<String> DISPUTED = List.of(
+            "gaming", "off-target", "blocked:", "rejected", "declined", "reverted");
+
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
             System.err.println("usage: Bump <checkout> <repo|sha[|from|to]> [results-dir]");
@@ -143,8 +162,10 @@ public final class Bump {
         Bom.beside(results);
 
         String slug = bump.replaceAll("[^A-Za-z0-9]+", "_");
+        Path settlements = results.resolve("settlements.jsonl");
         JsonlTrace trace = new JsonlTrace(results.resolve(slug).resolve("trace.jsonl"),
-                results.resolve("settlements.jsonl"), bump, Fingerprint.OF_A_BUMP);
+                settlements, bump, Fingerprint.provenanceOf(bump, settlements),
+                DECISIVE, DISPUTED);
         // THE JOURNAL SITS BESIDE THE TRACE IT BELONGS TO, and its rows carry the tree they landed
         // on: that is what a resume is checked against. The supplier is asked at write time rather
         // than now, because every stage that lands moves the tree it is asked about.

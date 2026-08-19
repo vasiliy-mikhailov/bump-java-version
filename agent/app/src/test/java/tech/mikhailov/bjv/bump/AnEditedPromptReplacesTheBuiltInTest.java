@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Prompts;
+import tech.mikhailov.ratchet.config.Prompts;
 
 /**
  * AN EDIT REPLACES THE BUILT-IN ENTIRELY, AND REVERT PUTS IT BACK BY DELETING THE EDIT.

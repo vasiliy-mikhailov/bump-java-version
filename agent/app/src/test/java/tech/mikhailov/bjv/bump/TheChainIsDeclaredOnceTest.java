@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Shape;
+import tech.mikhailov.ratchet.flow.Shape;
 
 /**
  * THE CHAIN EXISTED TWICE AND THE COPIES DRIFTED. NOW IT EXISTS ONCE, AS THE PROGRAM.

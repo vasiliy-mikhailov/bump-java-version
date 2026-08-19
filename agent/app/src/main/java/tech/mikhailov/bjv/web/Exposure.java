@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import tech.mikhailov.bjv.engine.Json;
+import tech.mikhailov.ratchet.record.Json;
 
 /**
  * WHERE THE CORPUS'S CLEARED VULNERABILITIES ACTUALLY WENT.

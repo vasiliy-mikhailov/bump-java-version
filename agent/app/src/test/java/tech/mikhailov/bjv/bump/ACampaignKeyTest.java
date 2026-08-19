@@ -27,8 +27,8 @@ class ACampaignKeyTest {
 
     private static Object bumpForShape() throws Exception {
         Constructor<Bump> c = Bump.class.getDeclaredConstructor(
-                Path.class, String.class, tech.mikhailov.bjv.engine.Trace.class,
-                tech.mikhailov.bjv.engine.Journal.class, boolean.class);
+                Path.class, String.class, tech.mikhailov.ratchet.record.Trace.class,
+                tech.mikhailov.ratchet.record.Journal.class, boolean.class);
         c.setAccessible(true);
         return c.newInstance(Path.of("."), "shape|shape|17|21", null, null, false);
     }

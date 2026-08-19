@@ -10,7 +10,7 @@
 # locally-installed SNAPSHOT that no build host had, which made "build the jar first" a fact about
 # one machine; it is a fact about this script's order now.
 #
-# THAT PATH HAS A MODULE IN FRONT OF IT NOW. engine, jvm and app are separate jars and only
+# THAT PATH HAS A MODULE IN FRONT OF IT NOW. jvm and app are separate jars and only
 # app shades, so the artifact is app/target/bump-agent-0.1.0-SNAPSHOT.jar. It is named here
 # and in the Dockerfile, and those two move together or the image ships the previous jar.
 set -euo pipefail
@@ -63,14 +63,20 @@ docker run --rm \
     pnpm build'
 rm -rf app/src/main/resources/ui
 cp -r ui/apps/web/out app/src/main/resources/ui
-# ONE REACTOR PASS, FROM THE PARENT. engine, then jvm, then app; the shade runs in app and
+# ONE REACTOR PASS, FROM THE PARENT. jvm, then app; the shade runs in app and
 # nowhere else, so the only fat jar this produces is app/target/bump-agent-0.1.0-SNAPSHOT.jar.
 mvn -B -o package
 if [ -z "$LOCAL" ]; then
-  # THREE SOURCE TREES AND THE PARENT POM. --delete keeps the far side from accumulating
+  # TWO SOURCE TREES AND THE PARENT POM. --delete keeps the far side from accumulating
   # files this checkout no longer has; target/ is excluded, and rsync protects an excluded
   # path on the receiver, so a remote build output is never deleted out from under a build.
-  rsync -a --delete --exclude=target/ pom.xml engine jvm app "$H:$R/"
+  #
+  # engine IS NOT IN THIS LIST ANY MORE, and naming a directory that no longer exists is an
+  # rsync failure and not a warning. The engine is a published library now, so the far side
+  # resolves it from the repository like any other dependency; the corollary is that the
+  # offline package below cannot succeed until that version is in the local repository, and
+  # it says so loudly rather than building something short of it.
+  rsync -a --delete --exclude=target/ pom.xml jvm app "$H:$R/"
   # The jar lands in a directory that a fresh checkout does not have yet.
   run "mkdir -p $R/app/target"
   rsync -a app/target/bump-agent-0.1.0-SNAPSHOT.jar "$H:$R/app/target/"

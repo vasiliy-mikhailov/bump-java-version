@@ -10,9 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Agent;
-import tech.mikhailov.bjv.engine.Shape;
-import tech.mikhailov.bjv.engine.Trace;
+import tech.mikhailov.ratchet.flow.Agent;
+import tech.mikhailov.ratchet.flow.Shape;
+import tech.mikhailov.ratchet.record.Trace;
 import tech.mikhailov.bjv.jvm.Modules;
 
 /**

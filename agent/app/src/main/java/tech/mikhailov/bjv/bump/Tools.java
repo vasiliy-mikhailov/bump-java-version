@@ -8,8 +8,8 @@ import java.util.Set;
 import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.service.tool.ToolExecutor;
 
-import tech.mikhailov.bjv.engine.Reasoning;
-import tech.mikhailov.bjv.engine.Trace;
+import tech.mikhailov.ratchet.record.Json;
+import tech.mikhailov.ratchet.record.Trace;
 import tech.mikhailov.bjv.jvm.Migrate;
 import tech.mikhailov.bjv.jvm.Rewrites;
 import tech.mikhailov.bjv.jvm.Runner;
@@ -159,7 +159,7 @@ final class Tools {
         Map<ToolSpecification, ToolExecutor> wrapped = new LinkedHashMap<>();
         tools.forEach((spec, executor) -> wrapped.put(spec, (request, memoryId) -> {
             if ("edit_file".equals(spec.name())) {
-                String path = Reasoning.field(request.arguments(), "path");
+                String path = Json.read(request.arguments(), "path");
                 if (forbidden(path)) {
                     return "REFUSED: " + path + " is test code, which may never be edited. A lost "
                             + "test scores zero regardless of anything else this bump achieves.";

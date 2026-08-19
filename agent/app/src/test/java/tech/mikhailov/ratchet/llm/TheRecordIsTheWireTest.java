@@ -1,4 +1,6 @@
-package tech.mikhailov.bjv.engine;
+package tech.mikhailov.ratchet.llm;
+
+import tech.mikhailov.ratchet.record.Trace;
 
 import org.junit.jupiter.api.Test;
 

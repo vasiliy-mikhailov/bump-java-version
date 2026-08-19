@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Trace;
+import tech.mikhailov.ratchet.record.Trace;
 import tech.mikhailov.bjv.jvm.Rewrites;
 
 /**

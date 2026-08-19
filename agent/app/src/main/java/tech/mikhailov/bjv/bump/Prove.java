@@ -7,7 +7,7 @@ import dev.langchain4j.service.tool.ToolExecutor;
 import java.nio.file.Path;
 import java.util.Map;
 
-import tech.mikhailov.bjv.engine.Trace;
+import tech.mikhailov.ratchet.record.Trace;
 import tech.mikhailov.bjv.jvm.Migrate;
 import tech.mikhailov.bjv.jvm.Tree;
 

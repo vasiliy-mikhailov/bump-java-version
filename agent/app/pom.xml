@@ -15,8 +15,14 @@
        record. It is the only module that shades, and the only one that has a main class. -->
   <dependencies>
     <dependency>
-      <groupId>tech.mikhailov.bjv</groupId>
-      <artifactId>bump-agent-engine</artifactId>
+      <groupId>tech.mikhailov.ratchet</groupId>
+      <artifactId>ratchet-core</artifactId>
+    </dependency>
+    <!-- The model wiring: the streaming reply, the thinking budget, the tool loop, the listener
+         that records the wire, and the blank-reply re-ask. Only this module builds agents. -->
+    <dependency>
+      <groupId>tech.mikhailov.ratchet</groupId>
+      <artifactId>ratchet-langchain4j</artifactId>
     </dependency>
     <dependency>
       <groupId>tech.mikhailov.bjv</groupId>

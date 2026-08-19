@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Shape;
+import tech.mikhailov.ratchet.flow.Shape;
 
 /**
  * THE SAME AGENT IS A DIFFERENT AGENT ON A DIFFERENT HOP.

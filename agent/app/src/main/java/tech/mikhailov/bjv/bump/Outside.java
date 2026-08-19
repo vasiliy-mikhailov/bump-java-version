@@ -12,8 +12,8 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.service.tool.ToolExecutor;
 
-import tech.mikhailov.bjv.engine.Env;
-import tech.mikhailov.bjv.engine.Reasoning;
+import tech.mikhailov.ratchet.config.Env;
+import tech.mikhailov.ratchet.record.Json;
 import tech.mikhailov.bjv.jvm.Jars;
 import tech.mikhailov.bjv.jvm.Migrate;
 
@@ -60,8 +60,8 @@ final class Outside {
                         .build())
                 .build();
         ToolExecutor exec = (request, memoryId) -> {
-            String artifact = Reasoning.field(request.arguments(), "artifact");
-            String type = Reasoning.field(request.arguments(), "type");
+            String artifact = Json.read(request.arguments(), "artifact");
+            String type = Json.read(request.arguments(), "type");
             String[] parts = artifact.split(":");
             if (parts.length < 2) {
                 return "artifact must be groupId:artifactId or groupId:artifactId:version, got: "

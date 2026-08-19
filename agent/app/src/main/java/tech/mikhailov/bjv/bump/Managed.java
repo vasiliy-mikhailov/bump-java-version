@@ -14,7 +14,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import tech.mikhailov.bjv.engine.Version;
 import tech.mikhailov.bjv.jvm.Declared;
 import tech.mikhailov.bjv.jvm.Modules;
 

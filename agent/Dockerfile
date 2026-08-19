@@ -6,8 +6,8 @@
 # without building the jar first ships whatever jar was already there. See deploy.sh, which does the
 # three steps in the one order that works.
 #
-# The build context is the agent directory, which is the Maven parent: engine, jvm and app
-# are three modules of one reactor and only app produces the fat jar.
+# The build context is the agent directory, which is the Maven parent: jvm and app are two
+# modules of one reactor and only app produces the fat jar.
 #
 # THIS TRADES AWAY ONE THING AND IT IS WORTH SAYING. The dashboard used to run from an image with no
 # docker client in it at all, so an image that could not reach the daemon could not be talked into
@@ -25,7 +25,7 @@ RUN apk upgrade --no-cache \
 # not HEAD, so an image can legitimately contain code that is in no commit at all.
 ARG BJV_COMMIT=""
 RUN printf '%s' "$BJV_COMMIT" > /bjv.commit
-# app/, NOT target/. engine and jvm are their own modules now and app is the only one that
+# app/, NOT target/. jvm and app are separate modules and app is the only one that
 # shades, so the jar moved one directory down. This path and the one deploy.sh ships have to
 # be the same string; when they are not, this COPY fails loudly instead of the image quietly
 # carrying whatever was there before.

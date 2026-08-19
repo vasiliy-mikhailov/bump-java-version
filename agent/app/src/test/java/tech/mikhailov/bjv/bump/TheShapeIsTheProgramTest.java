@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import tech.mikhailov.bjv.engine.Agent;
-import tech.mikhailov.bjv.engine.Flow;
-import tech.mikhailov.bjv.engine.Trace;
-import tech.mikhailov.bjv.engine.Triad;
+import tech.mikhailov.ratchet.flow.Agent;
+import tech.mikhailov.ratchet.flow.Flow;
+import tech.mikhailov.ratchet.record.Trace;
+import tech.mikhailov.ratchet.flow.Triad;
 import tech.mikhailov.bjv.jvm.Modules;
 
 /**

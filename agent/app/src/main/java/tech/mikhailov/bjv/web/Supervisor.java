@@ -16,13 +16,13 @@ import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.service.tool.ToolExecutor;
 
 import tech.mikhailov.bjv.bump.Agents;
-import tech.mikhailov.bjv.engine.Agent;
-import tech.mikhailov.bjv.engine.Asking;
-import tech.mikhailov.bjv.engine.JsonlTrace;
-import tech.mikhailov.bjv.engine.Model;
-import tech.mikhailov.bjv.engine.Reasoning;
-import tech.mikhailov.bjv.engine.Reply;
-import tech.mikhailov.bjv.engine.Trace;
+import tech.mikhailov.ratchet.flow.Agent;
+import tech.mikhailov.ratchet.llm.Asking;
+import tech.mikhailov.ratchet.record.JsonlTrace;
+import tech.mikhailov.ratchet.llm.Model;
+import tech.mikhailov.ratchet.record.Json;
+import tech.mikhailov.ratchet.flow.Reply;
+import tech.mikhailov.ratchet.record.Trace;
 
 /**
  * THE ONE AGENT THAT STANDS OUTSIDE A BUMP.
@@ -204,9 +204,9 @@ final class Supervisor {
                         .required("repo")
                         .build())
                 .build(), (request, memoryId) -> {
-                    String repo = Reasoning.field(request.arguments(), "repo");
-                    String who = Reasoning.field(request.arguments(), "agent");
-                    int limit = Reasoning.number(request.arguments(), "limit", 60);
+                    String repo = Json.read(request.arguments(), "repo");
+                    String who = Json.read(request.arguments(), "agent");
+                    int limit = Json.number(request.arguments(), "limit", 60);
                     return sweep.lanes().stream()
                             .filter(l -> l.repo().equalsIgnoreCase(repo))
                             .findFirst()
@@ -231,8 +231,8 @@ final class Supervisor {
                         .required("repo", "why")
                         .build())
                 .build(), (request, memoryId) -> {
-                    String repo = Reasoning.field(request.arguments(), "repo");
-                    String why = Reasoning.field(request.arguments(), "why");
+                    String repo = Json.read(request.arguments(), "repo");
+                    String why = Json.read(request.arguments(), "why");
                     if (why.isBlank()) {
                         return "REFUSED: a postponement without a reason is indistinguishable from "
                                 + "a bump nobody ran. Say what is wrong with this one.";
@@ -279,7 +279,7 @@ final class Supervisor {
                         .required("repo")
                         .build())
                 .build(), (request, memoryId) -> {
-                    String repo = Reasoning.field(request.arguments(), "repo");
+                    String repo = Json.read(request.arguments(), "repo");
                     var lane = sweep.lanes().stream()
                             .filter(l -> l.repo().equalsIgnoreCase(repo)).findFirst();
                     if (lane.isEmpty()) {

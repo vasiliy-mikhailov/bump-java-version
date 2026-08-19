@@ -10,7 +10,7 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.service.tool.ToolExecutor;
 
-import tech.mikhailov.bjv.engine.Reasoning;
+import tech.mikhailov.ratchet.record.Json;
 
 /**
  * MOVING A VERSION, WHICH IS AN OPENREWRITE RUN AND NOT AN EDIT.
@@ -64,9 +64,9 @@ public final class Rewrites {
                         .build())
                 .build();
         ToolExecutor exec = (request, memoryId) -> {
-            String group = Reasoning.field(request.arguments(), "groupId").strip();
-            String artifact = Reasoning.field(request.arguments(), "artifactId").strip();
-            String version = Reasoning.field(request.arguments(), "newVersion").strip();
+            String group = Json.read(request.arguments(), "groupId").strip();
+            String artifact = Json.read(request.arguments(), "artifactId").strip();
+            String version = Json.read(request.arguments(), "newVersion").strip();
             if (group.isEmpty() || artifact.isEmpty() || version.isEmpty()) {
                 return "bump_patch needs groupId, artifactId and newVersion, all three of them";
             }
@@ -135,9 +135,9 @@ public final class Rewrites {
                         .build())
                 .build();
         ToolExecutor exec = (request, memoryId) -> {
-            String group = Reasoning.field(request.arguments(), "groupId").strip();
-            String artifact = Reasoning.field(request.arguments(), "artifactId").strip();
-            String version = Reasoning.field(request.arguments(), "newVersion").strip();
+            String group = Json.read(request.arguments(), "groupId").strip();
+            String artifact = Json.read(request.arguments(), "artifactId").strip();
+            String version = Json.read(request.arguments(), "newVersion").strip();
             if (group.isEmpty() || artifact.isEmpty() || version.isEmpty()) {
                 return "bump_line needs groupId, artifactId and newVersion, all three of them";
             }
@@ -246,7 +246,7 @@ public final class Rewrites {
                         .build())
                 .build();
         ToolExecutor exec = (request, memoryId) -> {
-            String yaml = Reasoning.field(request.arguments(), "yaml");
+            String yaml = Json.read(request.arguments(), "yaml");
             if (!yaml.contains("recipeList")) {
                 return "that is not a recipe file: it needs a recipeList. "
                         + "See the tool description for the shape and the recipes worth using.";
