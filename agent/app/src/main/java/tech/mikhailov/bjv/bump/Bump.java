@@ -28,7 +28,6 @@ import tech.mikhailov.ratchet.config.Prompts;
 import tech.mikhailov.ratchet.flow.Reply;
 import tech.mikhailov.ratchet.flow.Shape;
 import tech.mikhailov.ratchet.record.Trace;
-import tech.mikhailov.ratchet.flow.Triad;
 import tech.mikhailov.bjv.jvm.Declared;
 import tech.mikhailov.bjv.jvm.Migrate;
 import tech.mikhailov.bjv.jvm.Modules;
@@ -50,12 +49,13 @@ import tech.mikhailov.bjv.jvm.Tree;
  * that close on it. Two of those three are selection on the gate's own word, so a reader can see
  * from the shape alone that the scan follows a green gate and the arguer follows a red one.
  *
- * <p>EVERY STAGE IS PLANNER, DOER, VERIFIER, and the verifier holds the loop. See {@link Triad}.
- * The three passes are ordered inside a module rather than across the repository: one module is
- * pinned, bumped, compiled, repaired and hardened before the walk moves on, because the context a
- * repair needs is the diff that caused it and that diff exists for about one module's worth of
- * time. Their order within the module is what the two pin phases are for: Lombok has to be in place
- * before the JDK moves, and Spring Boot cannot resolve until after it has.
+ * <p>EVERY STAGE IS PLANNER, DOER, VERIFIER, and the verifier holds the loop. See
+ * {@link Flow#triad}. The three passes are ordered inside a module rather than across the
+ * repository: one module is pinned, bumped, compiled, repaired and hardened before the walk moves
+ * on, because the context a repair needs is the diff that caused it and that diff exists for about
+ * one module's worth of time. Their order within the module is what the two pin phases are for:
+ * Lombok has to be in place before the JDK moves, and Spring Boot cannot resolve until after it
+ * has.
  *
  * <p>THE GATE IS NOT A TOOL. Producers can try their own build, and what they learn from it is
  * feedback; the build that DECIDES runs here, between the stages, because whether the gate ran after
@@ -499,10 +499,10 @@ public final class Bump {
         // THE STAGE BUILDS ITS OWN BRIEF, which is why the two agent roles splice it in rather than
         // read it off the task. A sequence hands every step the same task, and this brief names the
         // modules the bump works on: those are chosen by a stage four nodes earlier, so a task
-        // fixed before the run cannot carry them. The concatenation is exactly what Triad does with
-        // a brief handed in, in the same order, so the prompts are the ones these agents have
+        // fixed before the run cannot carry them. The concatenation is exactly what a triad does
+        // with a brief handed in, in the same order, so the prompts are the ones these agents have
         // always been given.
-        this.modulesStage = new Triad("modules",
+        this.modulesStage = Flow.triad("modules",
                 brief -> agents.modulesPlanner().run(modulesBrief() + brief),
                 walkDoer,
                 brief -> agents.modulesVerifier().run(modulesBrief() + brief),
@@ -900,9 +900,9 @@ public final class Bump {
     /**
      * THE WALK, STANDING AS THE MODULES STAGE'S DOER.
      *
-     * <p>A block rather than a lambda because {@link Triad#inside()} can only show a doer that is
-     * an agent, and a stage whose work is a whole walk drew as a leaf: the stage was in the picture
-     * and everything it did was not.
+     * <p>A block rather than a lambda because a triad's {@link Agent#inside()} can only show a
+     * doer that is an agent, and a stage whose work is a whole walk drew as a leaf: the stage was
+     * in the picture and everything it did was not.
      *
      * <p>THE OBJECTION IS PLACED HERE, which is the only place that knows what it means. See
      * {@link #walkObjection}: it goes into the brief of every module-scoped stage that shapes a
@@ -913,7 +913,7 @@ public final class Bump {
      * brief in the walk on the pass that works. The objection is the half that was costing a whole
      * second walk to say nothing at all.
      */
-    private final Triad.Doer walkDoer = new Flow.Block(walk) {
+    private final Flow.Doer walkDoer = new Flow.Block(walk) {
         @Override
         public String run(String plan, String feedback) throws IOException {
             walkObjection = objection(feedback);
@@ -1255,7 +1255,7 @@ public final class Bump {
     private void advisory(String stage, Agent planner, Agent doer, Agent verifier,
                           String brief) {
         try {
-            new Triad(stage, planner,
+            Flow.triad(stage, planner,
                     (plan, feedback) -> doer.run(brief
                             + "\n\nWhat this reading should cover:\n" + plan + feedback),
                     verifier, () -> "Nothing in the workspace changed; this stage only reads.",
@@ -1364,7 +1364,7 @@ public final class Bump {
                 // walk, which is every walk that is not answering a reviewer.
                 + walkObjection;
 
-        new Triad(stage, planner,
+        Flow.triad(stage, planner,
                 (plan, feedback) -> {
                     if (plan.stripLeading().startsWith("NOTHING-OUTSTANDING")) {
                         return "NOTHING-OUTSTANDING: the plan found no pin below its floor.";
@@ -1408,7 +1408,7 @@ public final class Bump {
         // doer's last word either way, so a pair that agreed and a pair that ran out of rounds come
         // back as the same value. That difference is most of what "detection failed" means.
         String[] judged = {""};
-        String said = new Triad("platform", agents.platformPlanner(),
+        String said = Flow.triad("platform", agents.platformPlanner(),
                 (plan, feedback) -> agents.platformDoer().run(brief
                         + "\n\nWhat to look at, and what would settle it:\n" + plan + feedback),
                 task -> {
@@ -1420,7 +1420,7 @@ public final class Bump {
                 .run(brief);
 
         String platform = Managed.platformIn(said);
-        // A blank verdict is `again`, exactly as Triad reads one: silence is not agreement.
+        // A blank verdict is `again`, exactly as a triad reads one: silence is not agreement.
         boolean settled = !judged[0].isBlank()
                 && Reply.word(judged[0], "done", "again", "replan").equals("done");
         // WHY TWO TESTS AND NOT ONE. A word outside the three is what the verifier is there to
@@ -1516,7 +1516,7 @@ public final class Bump {
         // below, which is deterministic and reads the same reply the same way every time, so there
         // is one record of the decision rather than two that can disagree.
         String said = journaled(Flow.code("module-filter", task -> {
-            new Triad("module-filter", agents.moduleFilterPlanner(),
+            Flow.triad("module-filter", agents.moduleFilterPlanner(),
                     (plan, feedback) -> {
                         answer[0] = agents.moduleFilterDoer().run(brief
                                 + "\n\nWhere to look, and what would count as evidence:\n"
@@ -1612,7 +1612,7 @@ public final class Bump {
                     + "inherits, and inventing one here is how a module shadows a raised parent");
             return;
         }
-        new Triad("bump:" + label(m), agents.bumpPlanner(platform),
+        Flow.triad("bump:" + label(m), agents.bumpPlanner(platform),
                 (plan, feedback) -> {
                     String said = agents.bumpDoer(platform).run(moduleBrief(m)
                             + "\n\nThe plan you are carrying out:\n" + plan + feedback);

@@ -20,7 +20,7 @@ import tech.mikhailov.ratchet.llm.Listening;
 import tech.mikhailov.ratchet.llm.Model;
 import tech.mikhailov.ratchet.config.Prompts;
 import tech.mikhailov.ratchet.record.Trace;
-import tech.mikhailov.ratchet.flow.Triad;
+import tech.mikhailov.ratchet.flow.Flow;
 import tech.mikhailov.bjv.jvm.Declared;
 import tech.mikhailov.bjv.jvm.Migrate;
 import tech.mikhailov.bjv.jvm.Runner;
@@ -38,7 +38,7 @@ import tech.mikhailov.bjv.jvm.Tree;
  * <p>THE UNIT IS A TRIAD, NOT A PAIR. A planner decides, a doer executes one plan once, and a
  * verifier reads the workspace and returns done, again or replan. The loop belongs to the verifier:
  * when the producer held it, the critic saw only the end state, and a pin check that answered about
- * an arbitrary module went unnoticed for as long as that shape existed. See {@link Triad}.
+ * an arbitrary module went unnoticed for as long as that shape existed. See {@link Flow#triad}.
  *
  * <p>PLANNERS AND VERIFIERS READ, DOERS EDIT, AND THE SPLIT DECIDES THE TOOLS. A doer reaches the
  * workspace through {@code edit_file} and can try its own build; a critic gets {@code read_file},
