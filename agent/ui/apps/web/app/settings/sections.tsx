@@ -6,6 +6,7 @@ import {
   EmptyNote,
   FIELD,
   LabeledField,
+  Loaded,
   Pill,
   READONLY,
   RelativeTime,
@@ -57,9 +58,6 @@ export function RunSection() {
       .catch((e: Error) => setFailed(e.message))
   }, [])
 
-  if (failed !== null) return <EmptyNote>The run could not be read: {failed}</EmptyNote>
-  if (run === null) return <EmptyNote>Reading the run…</EmptyNote>
-
   const save = () => {
     setBusy(true)
     setSaid(undefined)
@@ -78,118 +76,122 @@ export function RunSection() {
   }
 
   return (
-    <>
-      <SettingCard
-        title="parallel lanes"
-        provenance={run.lanes === null ? 'not set' : `currently ${run.lanes}`}
-        footnote={
-          <>
-            Takes effect at the start of the next round, not immediately. Lowering it does not stop a
-            bump that is already running — the sweep simply stops replacing finished lanes until it
-            is back under the number.
-          </>
-        }
-      >
-        <p style={{ margin: '0 0 12px', fontSize: '13px', lineHeight: 1.6, maxWidth: '72ch' }}>
-          How many repositories are bumped at the same time. Between {run.min} and {run.max}. The
-          server clamps what you save, so what appears here afterwards is what it kept, not what you
-          typed.
-        </p>
-        <LabeledField label="lanes">
-          <input
-            style={FIELD}
-            value={typed}
-            inputMode="numeric"
-            onChange={(e) => setTyped(e.target.value)}
-          />
-        </LabeledField>
-        <SaveRow onSave={save} busy={busy} said={said} />
-      </SettingCard>
+    <Loaded what="run" failed={failed} value={run}>
+      {(run) => (
+        <>
+          <SettingCard
+            title="parallel lanes"
+            provenance={run.lanes === null ? 'not set' : `currently ${run.lanes}`}
+            footnote={
+              <>
+                Takes effect at the start of the next round, not immediately. Lowering it does not stop a
+                bump that is already running — the sweep simply stops replacing finished lanes until it
+                is back under the number.
+              </>
+            }
+          >
+            <p style={{ margin: '0 0 12px', fontSize: '13px', lineHeight: 1.6, maxWidth: '72ch' }}>
+              How many repositories are bumped at the same time. Between {run.min} and {run.max}. The
+              server clamps what you save, so what appears here afterwards is what it kept, not what you
+              typed.
+            </p>
+            <LabeledField label="lanes">
+              <input
+                style={FIELD}
+                value={typed}
+                inputMode="numeric"
+                onChange={(e) => setTyped(e.target.value)}
+              />
+            </LabeledField>
+            <SaveRow onSave={save} busy={busy} said={said} />
+          </SettingCard>
 
-      <div style={{ height: '18px' }} />
+          <div style={{ height: '18px' }} />
 
-      <SettingCard
-        title="the repair budget"
-        provenance="the environment's"
-        footnote={
-          <>
-            Set on the container and read at launch, so changing one means a redeploy. Repair happens
-            inside the module walk: a module is compiled on its own and repaired until it compiles or
-            its turns run out. The repository gate runs once after the walk and does not retry, so
-            there is no gate-turn budget any more.
-          </>
-        }
-      >
-        <LabeledField
-          label="module-gate turns"
-          hint="How many times one module may be compiled and repaired before the walk moves on."
-        >
-          <input style={READONLY} value={run.turns} readOnly />
-        </LabeledField>
-        <LabeledField
-          label="steps per campaign"
-          hint="Steps one repair campaign may order, and a campaign may run twice."
-        >
-          <input style={READONLY} value={run.steps} readOnly />
-        </LabeledField>
-        {/* THE ONE THAT ACTUALLY BINDS. Turns times steps times campaigns is per module, so on a
-            twenty-module repository the per-module numbers alone would allow seven hundred steps.
-            This is the whole bump's allowance and the walk draws it down across every module. */}
-        <LabeledField
-          label="repair steps per bump"
-          hint="The whole bump's allowance, shared by every module. This is the ceiling that binds."
-        >
-          <input style={READONLY} value={run.repairBudget} readOnly />
-        </LabeledField>
-      </SettingCard>
+          <SettingCard
+            title="the repair budget"
+            provenance="the environment's"
+            footnote={
+              <>
+                Set on the container and read at launch, so changing one means a redeploy. Repair happens
+                inside the module walk: a module is compiled on its own and repaired until it compiles or
+                its turns run out. The repository gate runs once after the walk and does not retry, so
+                there is no gate-turn budget any more.
+              </>
+            }
+          >
+            <LabeledField
+              label="module-gate turns"
+              hint="How many times one module may be compiled and repaired before the walk moves on."
+            >
+              <input style={READONLY} value={run.turns} readOnly />
+            </LabeledField>
+            <LabeledField
+              label="steps per campaign"
+              hint="Steps one repair campaign may order, and a campaign may run twice."
+            >
+              <input style={READONLY} value={run.steps} readOnly />
+            </LabeledField>
+            {/* THE ONE THAT ACTUALLY BINDS. Turns times steps times campaigns is per module, so on a
+                twenty-module repository the per-module numbers alone would allow seven hundred steps.
+                This is the whole bump's allowance and the walk draws it down across every module. */}
+            <LabeledField
+              label="repair steps per bump"
+              hint="The whole bump's allowance, shared by every module. This is the ceiling that binds."
+            >
+              <input style={READONLY} value={run.repairBudget} readOnly />
+            </LabeledField>
+          </SettingCard>
 
-      <div style={{ height: '18px' }} />
+          <div style={{ height: '18px' }} />
 
-      <SettingCard
-        title="where dependencies come from"
-        provenance={run.repository === '' ? 'not set' : 'the environment\u2019s'}
-        footnote={
-          <>
-            Builds here resolve offline through a local mirror, so what is not in it does not exist
-            as far as a bump is concerned: a version the agent raises to and the mirror has never
-            seen fails the build rather than downloading. Until now this was knowable only by
-            reading settings.xml on the host. Maven learns the mirror from that file and never
-            needed it named anywhere else, but Gradle cannot read a Maven settings file, so the
-            moment a recipe has to run under Gradle the URL has to be configuration rather than a
-            line inside a file handed to one build tool.
-            <br />
-            Read-only, like the model endpoint. A repository URL a web page can rewrite is a supply
-            chain a web page can redirect.
-          </>
-        }
-      >
-        <LabeledField
-          label="repository"
-          hint="The mirror every build resolves through. BJV_REPO_URL."
-        >
-          <input
-            style={READONLY}
-            value={run.repository === '' ? 'not set' : run.repository}
-            readOnly
-          />
-        </LabeledField>
-        <LabeledField label="maven settings" hint="Handed to maven; this is where it reads the mirror.">
-          <input style={READONLY} value={run.mavenSettings || 'not set'} readOnly />
-        </LabeledField>
-        <LabeledField label="maven repository" hint="The warm cache mounted at /root/.m2.">
-          <input style={READONLY} value={run.mavenCache || 'not set'} readOnly />
-        </LabeledField>
-        <LabeledField label="gradle cache" hint="Mounted read-only for gradle builds.">
-          <input style={READONLY} value={run.gradleCache || 'not set'} readOnly />
-        </LabeledField>
-        <LabeledField
-          label="gradle distributions"
-          hint="Which wrapper versions can be staged. A version missing here cannot be downloaded."
-        >
-          <input style={READONLY} value={run.gradleDists || 'not set'} readOnly />
-        </LabeledField>
-      </SettingCard>
-    </>
+          <SettingCard
+            title="where dependencies come from"
+            provenance={run.repository === '' ? 'not set' : 'the environment\u2019s'}
+            footnote={
+              <>
+                Builds here resolve offline through a local mirror, so what is not in it does not exist
+                as far as a bump is concerned: a version the agent raises to and the mirror has never
+                seen fails the build rather than downloading. Until now this was knowable only by
+                reading settings.xml on the host. Maven learns the mirror from that file and never
+                needed it named anywhere else, but Gradle cannot read a Maven settings file, so the
+                moment a recipe has to run under Gradle the URL has to be configuration rather than a
+                line inside a file handed to one build tool.
+                <br />
+                Read-only, like the model endpoint. A repository URL a web page can rewrite is a supply
+                chain a web page can redirect.
+              </>
+            }
+          >
+            <LabeledField
+              label="repository"
+              hint="The mirror every build resolves through. BJV_REPO_URL."
+            >
+              <input
+                style={READONLY}
+                value={run.repository === '' ? 'not set' : run.repository}
+                readOnly
+              />
+            </LabeledField>
+            <LabeledField label="maven settings" hint="Handed to maven; this is where it reads the mirror.">
+              <input style={READONLY} value={run.mavenSettings || 'not set'} readOnly />
+            </LabeledField>
+            <LabeledField label="maven repository" hint="The warm cache mounted at /root/.m2.">
+              <input style={READONLY} value={run.mavenCache || 'not set'} readOnly />
+            </LabeledField>
+            <LabeledField label="gradle cache" hint="Mounted read-only for gradle builds.">
+              <input style={READONLY} value={run.gradleCache || 'not set'} readOnly />
+            </LabeledField>
+            <LabeledField
+              label="gradle distributions"
+              hint="Which wrapper versions can be staged. A version missing here cannot be downloaded."
+            >
+              <input style={READONLY} value={run.gradleDists || 'not set'} readOnly />
+            </LabeledField>
+          </SettingCard>
+        </>
+      )}
+    </Loaded>
   )
 }
 
@@ -219,56 +221,62 @@ export function ModelSection() {
       .catch((e: Error) => setFailed(e.message))
   }, [])
 
-  if (failed !== null) return <EmptyNote>The model could not be read: {failed}</EmptyNote>
-  if (model === null) return <EmptyNote>Reading the model…</EmptyNote>
-
   return (
-    <SettingCard
-      title="the endpoint"
-      provenance="the environment's"
-      footnote={
-        <>
-          This page does not set any of these, and it never shows the key. The sibling tool does show
-          its own, and says in its mount contract why that is a trade rather than an oversight: the
-          reveal and copy buttons cannot work otherwise. On a portal several developers reach, a
-          settings page that renders a credential publishes it to all of them.
-        </>
-      }
-    >
-      <div style={{ margin: '0 0 12px' }}>
-        <Pill tone={model.keySet ? 'good' : 'alarm'}>
-          {model.keySet ? 'key set' : 'no key'}
-        </Pill>
-        <span style={{ marginLeft: '8px', fontSize: '12.5px', color: 'var(--text-secondary)' }}>
-          {model.keySet
-            ? 'the agents are using the key from the environment'
-            : 'every agent call will be refused until one is set on the container'}
-        </span>
-      </div>
-      <LabeledField label="model" hint="What to ask for. Must be a name the endpoint below serves.">
-        <input style={READONLY} value={model.model} readOnly />
-      </LabeledField>
-      <LabeledField
-        label="endpoint"
-        hint="OpenAI-shaped, ending in /v1. The scheme decides the protocol."
-      >
-        <input style={READONLY} value={model.endpoint} readOnly />
-      </LabeledField>
-      <LabeledField
-        label="patience"
-        hint="Minutes one call may take before the harness stops waiting. Generous on purpose: a
+    <Loaded what="model" failed={failed} value={model}>
+      {(model) => (
+        <SettingCard
+          title="the endpoint"
+          provenance="the environment's"
+          footnote={
+            <>
+              This page does not set any of these, and it never shows the key. The sibling tool does show
+              its own, and says in its mount contract why that is a trade rather than an oversight: the
+              reveal and copy buttons cannot work otherwise. On a portal several developers reach, a
+              settings page that renders a credential publishes it to all of them.
+            </>
+          }
+        >
+          <div style={{ margin: '0 0 12px' }}>
+            <Pill tone={model.keySet ? 'good' : 'alarm'}>
+              {model.keySet ? 'key set' : 'no key'}
+            </Pill>
+            <span style={{ marginLeft: '8px', fontSize: '12.5px', color: 'var(--text-secondary)' }}>
+              {model.keySet
+                ? 'the agents are using the key from the environment'
+                : 'every agent call will be refused until one is set on the container'}
+            </span>
+          </div>
+          <LabeledField label="model" hint="What to ask for. Must be a name the endpoint below serves.">
+            <input style={READONLY} value={model.model} readOnly />
+          </LabeledField>
+          <LabeledField
+            label="endpoint"
+            hint="OpenAI-shaped, ending in /v1. The scheme decides the protocol."
+          >
+            <input style={READONLY} value={model.endpoint} readOnly />
+          </LabeledField>
+          <LabeledField
+            label="patience"
+            // THE INDENTATION OF THE TWO LINES BELOW IS PART OF THE STRING, not part of the
+            // layout. A quoted JSX attribute is taken verbatim, newlines and leading spaces
+            // included, so re-indenting this block rewrites the sentence a reader is served.
+            // It survived exactly that once already, and the only thing that caught it was a
+            // byte comparison of the rendered page. Left at the column it was written at.
+            hint="Minutes one call may take before the harness stops waiting. Generous on purpose: a
              reasoning model that derails can take two hours, and cutting the budget short turns a
              rare stall into a common one."
-      >
-        <input style={READONLY} value={`${model.patienceMinutes} minutes`} readOnly />
-      </LabeledField>
-    </SettingCard>
+          >
+            <input style={READONLY} value={`${model.patienceMinutes} minutes`} readOnly />
+          </LabeledField>
+        </SettingCard>
+      )}
+    </Loaded>
   )
 }
 
 type Subject = { queued: number; settled: number; hops: Record<string, number> }
 
-type Loaded = {
+type Uploaded = {
   accepted: number
   added: number
   /** How many rows carried a credential. The COUNT: no response ever carries a key's value. */
@@ -293,14 +301,14 @@ type Loaded = {
 function RegistryUpload({ onLoaded }: { onLoaded: () => void }) {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
-  const [result, setResult] = useState<Loaded | null>(null)
+  const [result, setResult] = useState<Uploaded | null>(null)
   const [failed, setFailed] = useState<string | null>(null)
 
   const send = (body: string) => {
     if (body.trim() === '') return
     setBusy(true)
     setFailed(null)
-    read<Loaded>('/api/settings/registry', {
+    read<Uploaded>('/api/settings/registry', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body,
@@ -452,45 +460,48 @@ export function SubjectSection() {
       .catch((e: Error) => setFailed(e.message))
   }, [])
 
-  if (failed !== null) return <EmptyNote>The queue could not be read: {failed}</EmptyNote>
-  if (subject === null) return <EmptyNote>Reading the queue…</EmptyNote>
-
-  const hops = Object.entries(subject.hops)
   return (
-    <SettingCard
-      title="the queue"
-      provenance="the manifest's"
-      footnote={
-        <>
-          The hop is the experiment&rsquo;s independent variable: it arrives in the manifest row and
-          nothing in the chain may change it. A surveyor that disagrees is recorded as disagreeing
-          and the prescribed hop is run anyway.
-        </>
-      }
-    >
-      <div style={{ display: 'flex', gap: '26px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-        <LabeledField label="rows in the queue">
-          <input style={READONLY} value={String(subject.queued)} readOnly />
-        </LabeledField>
-        <LabeledField label="bumps with a record">
-          <input style={READONLY} value={String(subject.settled)} readOnly />
-        </LabeledField>
-      </div>
-      {hops.length === 0 ? (
-        <EmptyNote>No queue file; this deployment is not running a sweep.</EmptyNote>
-      ) : (
-        <table style={{ borderCollapse: 'collapse', fontSize: '12.5px' }}>
-          <tbody>
-            {hops.map(([hop, n]) => (
-              <tr key={hop}>
-                <td style={{ padding: '3px 24px 3px 0' }}>{hop}</td>
-                <td style={{ padding: '3px 0', color: 'var(--text-tertiary)' }}>{n}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </SettingCard>
+    <Loaded what="queue" failed={failed} value={subject}>
+      {(subject) => {
+        const hops = Object.entries(subject.hops)
+        return (
+          <SettingCard
+            title="the queue"
+            provenance="the manifest's"
+            footnote={
+              <>
+                The hop is the experiment&rsquo;s independent variable: it arrives in the manifest row and
+                nothing in the chain may change it. A surveyor that disagrees is recorded as disagreeing
+                and the prescribed hop is run anyway.
+              </>
+            }
+          >
+            <div style={{ display: 'flex', gap: '26px', flexWrap: 'wrap', margin: '0 0 14px' }}>
+              <LabeledField label="rows in the queue">
+                <input style={READONLY} value={String(subject.queued)} readOnly />
+              </LabeledField>
+              <LabeledField label="bumps with a record">
+                <input style={READONLY} value={String(subject.settled)} readOnly />
+              </LabeledField>
+            </div>
+            {hops.length === 0 ? (
+              <EmptyNote>No queue file; this deployment is not running a sweep.</EmptyNote>
+            ) : (
+              <table style={{ borderCollapse: 'collapse', fontSize: '12.5px' }}>
+                <tbody>
+                  {hops.map(([hop, n]) => (
+                    <tr key={hop}>
+                      <td style={{ padding: '3px 24px 3px 0' }}>{hop}</td>
+                      <td style={{ padding: '3px 0', color: 'var(--text-tertiary)' }}>{n}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </SettingCard>
+        )
+      }}
+    </Loaded>
   )
 }
 
@@ -524,57 +535,58 @@ export function SupervisorSection() {
       .catch((e: Error) => setFailed(e.message))
   }, [])
 
-  if (failed !== null) return <EmptyNote>The supervisor could not be read: {failed}</EmptyNote>
-  if (sup === null) return <EmptyNote>Reading the supervisor…</EmptyNote>
-
   return (
-    <SettingCard
-      title="the watch"
-      provenance={`every ${sup.everyMinutes} minutes`}
-      footnote={
-        <>
-          It reads every bump&rsquo;s trace and looks for what one bump cannot see about itself: a
-          lane that has stopped moving, a failure shape repeating across repositories. It may
-          postpone a bump; it never edits one.
-        </>
-      }
-    >
-      <div style={{ display: 'flex', gap: '26px', flexWrap: 'wrap', margin: '0 0 14px' }}>
-        <LabeledField label="findings">
-          <input style={READONLY} value={String(sup.findings)} readOnly />
-        </LabeledField>
-        <LabeledField label="postponed">
-          <input style={READONLY} value={String(sup.postponed)} readOnly />
-        </LabeledField>
-      </div>
-      {sup.latest.length === 0 ? (
-        <EmptyNote>Nothing found yet. On a healthy sweep that is the expected answer.</EmptyNote>
-      ) : (
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {sup.latest
-            .slice()
-            .reverse()
-            .map((f, i) => (
-              <li
-                key={`${f.at}-${i}`}
-                style={{
-                  padding: '8px 0',
-                  borderTop: i === 0 ? 'none' : '1px solid var(--border-soft)',
-                  fontSize: '12.5px',
-                }}
-              >
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
-                  <Pill tone={f.held ? 'warn' : 'quiet'}>{f.held ? 'held' : 'noted'}</Pill>
-                  <span style={{ color: 'var(--text-tertiary)' }}>{f.bump}</span>
-                  <span style={{ marginLeft: 'auto', color: 'var(--text-tertiary)' }}>
-                    <RelativeTime at={f.at} />
-                  </span>
-                </div>
-                <div style={{ marginTop: '3px', color: 'var(--text-secondary)' }}>{f.what}</div>
-              </li>
-            ))}
-        </ul>
+    <Loaded what="supervisor" failed={failed} value={sup}>
+      {(sup) => (
+        <SettingCard
+          title="the watch"
+          provenance={`every ${sup.everyMinutes} minutes`}
+          footnote={
+            <>
+              It reads every bump&rsquo;s trace and looks for what one bump cannot see about itself: a
+              lane that has stopped moving, a failure shape repeating across repositories. It may
+              postpone a bump; it never edits one.
+            </>
+          }
+        >
+          <div style={{ display: 'flex', gap: '26px', flexWrap: 'wrap', margin: '0 0 14px' }}>
+            <LabeledField label="findings">
+              <input style={READONLY} value={String(sup.findings)} readOnly />
+            </LabeledField>
+            <LabeledField label="postponed">
+              <input style={READONLY} value={String(sup.postponed)} readOnly />
+            </LabeledField>
+          </div>
+          {sup.latest.length === 0 ? (
+            <EmptyNote>Nothing found yet. On a healthy sweep that is the expected answer.</EmptyNote>
+          ) : (
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              {sup.latest
+                .slice()
+                .reverse()
+                .map((f, i) => (
+                  <li
+                    key={`${f.at}-${i}`}
+                    style={{
+                      padding: '8px 0',
+                      borderTop: i === 0 ? 'none' : '1px solid var(--border-soft)',
+                      fontSize: '12.5px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
+                      <Pill tone={f.held ? 'warn' : 'quiet'}>{f.held ? 'held' : 'noted'}</Pill>
+                      <span style={{ color: 'var(--text-tertiary)' }}>{f.bump}</span>
+                      <span style={{ marginLeft: 'auto', color: 'var(--text-tertiary)' }}>
+                        <RelativeTime at={f.at} />
+                      </span>
+                    </div>
+                    <div style={{ marginTop: '3px', color: 'var(--text-secondary)' }}>{f.what}</div>
+                  </li>
+                ))}
+            </ul>
+          )}
+        </SettingCard>
       )}
-    </SettingCard>
+    </Loaded>
   )
 }

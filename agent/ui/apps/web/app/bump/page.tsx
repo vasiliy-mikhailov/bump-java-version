@@ -11,12 +11,16 @@ import {
   ChainStrip,
   EmptyNote,
   EventFeed,
+  HEADER_NOTE,
+  Loaded,
   PackageTable,
   PageHeader,
   SecurityDelta,
+  Section,
   SetAsideButton,
   SetAsideNote,
   TabRow,
+  useAsk,
   VerdictPill,
 } from '@bjv/ui'
 import type { TraceEvent } from '@bjv/types'
@@ -43,9 +47,47 @@ function BumpPage() {
   const [slug, setSlug] = useState('')
   const [only, setOnly] = useState<string | undefined>(undefined)
   const [tab, setTab] = useState<Tab>('summary')
-  const [again, setAgain] = useState<Rerun>({ turns: 0, busy: false, queued: false, why: '' })
-  const [hold, setHold] = useState<Aside>({ busy: false, said: null, why: '', refused: '' })
+  const [held, setHeld] = useState<Held>({ said: null, why: '' })
   const said = useRef<HTMLSpanElement>(null)
+
+  /**
+   * Ask for this bump again.
+   *
+   * A REFUSAL IS A 200. The server answers {queued:false,why} when there is nothing settled under
+   * the slug, so what reaches the hook's catch is the network and the page being served without its
+   * api, and the two have to read differently or a wrong slug looks like an outage.
+   */
+  const again = useAsk<void, Requeue>({
+    send: () => post<Requeue>(`/api/rerun?slug=${encodeURIComponent(slug)}`),
+    read: (r) => ({ landed: r.queued, why: r.why }),
+    // The bump IS queued now, so the pill says so rather than going on showing a verdict that is
+    // about to be replaced. Which also takes the control away, and should: a second ask would be a
+    // second row in the manifest for a bump already waiting for a lane.
+    onAnswer: (r) => {
+      if (r.queued) {
+        setDetail((d) => (d === null ? d : { ...d, summary: { ...d.summary, verdict: 'queued' } }))
+      }
+    },
+  })
+
+  /**
+   * Set this bump aside, or bring it back. One machine, because the two are one toggle.
+   *
+   * A REFUSAL IS A 200 HERE TOO, and it is recognised off the STATE rather than off the presence of
+   * an `error`: the answer carries what is on disk now, so an ask that did not move it is a refusal
+   * whether or not a reason came with it.
+   *
+   * EVERY ANSWER UPDATES WHAT THE PAGE BELIEVES, refusals included, because the answer is read back
+   * off disk rather than echoed from the request. It is the state the launcher will see.
+   */
+  const hold = useAsk<boolean, Postponement>({
+    send: (aside) =>
+      post<Postponement>(
+        `/api/postpone?slug=${encodeURIComponent(slug)}&state=${aside ? 'on' : 'off'}`,
+      ),
+    read: (r, aside) => ({ landed: r.postponed === aside, why: r.error }),
+    onAnswer: (r) => setHeld({ said: r.postponed, why: r.why }),
+  })
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search)
@@ -75,8 +117,8 @@ function BumpPage() {
     }
     return live(`/api/live?slug=${encodeURIComponent(slug)}&have=${detail.events.length}`, {
       trace: (e) =>
-        setDetail((held) =>
-          held === null ? held : { ...held, events: [...held.events, e as TraceEvent] }),
+        setDetail((known) =>
+          known === null ? known : { ...known, events: [...known.events, e as TraceEvent] }),
     })
     // Deliberately not depending on `detail`: it changes with every event that arrives, and
     // resubscribing on each one would reopen the stream forever.
@@ -96,7 +138,7 @@ function BumpPage() {
         // AN ANSWER THAT ARRIVES AFTER A CLICK MUST NOT UNDO IT. `said` is null only until somebody
         // has asked, and a listing taken before the ask would otherwise put the control back into
         // the state the reader just left.
-        setHold((h) => (h.said === null ? { ...h, said: r.postponed.includes(slug) } : h)),
+        setHeld((h) => (h.said === null ? { ...h, said: r.postponed.includes(slug) } : h)),
       )
       .catch(() => {
         // Not fatal and not silenced elsewhere: the detail read above is what tells a reader the
@@ -110,312 +152,249 @@ function BumpPage() {
   // this a keyboard user is returned to the document body by their own click, which is the one
   // interaction a mouse never notices going wrong.
   useEffect(() => {
-    if (again.queued) {
+    if (again.landed) {
       said.current?.focus()
     }
-  }, [again.queued])
-
-  /**
-   * Ask for this bump again.
-   *
-   * A REFUSAL IS A 200. The server answers {queued:false,why} when there is nothing settled under
-   * the slug, so the catch here is for the network and for the page being served without its api,
-   * and the two have to read differently or a wrong slug looks like an outage.
-   */
-  const askAgain = () => {
-    setAgain((a) => ({ turns: a.turns + 1, busy: true, queued: false, why: '' }))
-    post<{ queued: boolean; why?: string }>(`/api/rerun?slug=${encodeURIComponent(slug)}`)
-      .then((r) => {
-        setAgain((a) => ({
-          ...a,
-          busy: false,
-          queued: r.queued,
-          why: r.queued ? '' : (r.why ?? 'the server declined without saying why'),
-        }))
-        // The bump IS queued now, so the pill says so rather than going on showing a verdict that
-        // is about to be replaced. Which also takes the control away, and should: a second ask
-        // would be a second row in the manifest for a bump already waiting for a lane.
-        if (r.queued) {
-          setDetail((d) => (d === null ? d : { ...d, summary: { ...d.summary, verdict: 'queued' } }))
-        }
-      })
-      .catch((e: Error) =>
-        setAgain((a) => ({ ...a, busy: false, why: `the request itself failed: ${e.message}` })),
-      )
-  }
-
-  /**
-   * Set this bump aside, or bring it back. One handler, because the two are one toggle.
-   *
-   * A REFUSAL IS A 200 HERE TOO, for the same reason it is for a rerun. It is recognised off the
-   * STATE rather than off the presence of an `error`: the answer carries what is on disk now, so an
-   * ask that did not move it is a refusal whether or not a reason came with it. Trusting the error
-   * field alone would call a silent no-op a success and leave the control showing the state the
-   * reader asked for rather than the one the launcher will see.
-   */
-  const askAside = (aside: boolean) => {
-    setHold((h) => ({ ...h, busy: true, refused: '' }))
-    setAside(slug, aside)
-      .then((r) =>
-        setHold({
-          busy: false,
-          said: r.postponed,
-          why: r.why,
-          refused:
-            r.postponed === aside
-              ? ''
-              : (r.error ?? 'the server declined without saying why'),
-        }),
-      )
-      .catch((e: Error) =>
-        setHold((h) => ({ ...h, busy: false, refused: `the request itself failed: ${e.message}` })),
-      )
-  }
-
-  if (failed !== null) {
-    return (
-      <>
-        <PageHeader title="bump" subtitle="—" actions={<Nav current="bumps" />} />
-        <div style={{ padding: '0 24px' }}>
-          <EmptyNote>This bump could not be read: {failed}</EmptyNote>
-        </div>
-      </>
-    )
-  }
-  if (detail === null) {
-    return (
-      <>
-        <PageHeader title="bump" subtitle="—" actions={<Nav current="bumps" />} />
-        <div style={{ padding: '0 24px' }}>
-          <EmptyNote>Reading the record…</EmptyNote>
-        </div>
-      </>
-    )
-  }
-
-  const { summary, chain, events, packages, cves } = detail
-  // WHAT THE PAGE BELIEVES ABOUT THIS BUMP BEING HELD: whatever the server last said, whether that
-  // came from the listing on load or from an ask. `null` means nobody has answered yet, which is
-  // not the same fact as "not held" and is why the record keeps three states rather than two.
-  const aside = hold.said ?? false
-  // A MARKER ONLY MATTERS TO A BUMP RUN.SH WILL STILL LOOK AT. It tests a repository for a
-  // settlement first and skips it before it ever consults the postponed directory, so offering
-  // this on a settled verdict would offer a write that changes nothing. A bump that IS held keeps
-  // the control whatever its verdict, or there would be no way back from it.
-  const holdable = aside || summary.verdict === 'bumping' || summary.verdict === 'queued'
-  const shown = only === undefined ? events : events.filter((e) => e.agent === only)
-  const at = (t: Tab, agent?: string) =>
-    href(
-      `/bump/?slug=${encodeURIComponent(slug)}&tab=${t}` +
-        (agent === undefined ? '' : `&agent=${encodeURIComponent(agent)}`),
-    )
+  }, [again.landed])
 
   return (
-    <>
-      <PageHeader
-        title={summary.repo}
-        subtitle={
-          <>
-            JDK {summary.from} → {summary.to} · {summary.sha.slice(0, 12)} ·{' '}
-            <VerdictPill verdict={summary.verdict} />
-            {/* A REASON IS A SENTENCE, and a sentence does not belong in a right-aligned row of
-                corner controls, where it either truncates to nothing or deforms the header. It
-                also must not be carried by colour alone, so the red is on one bolded word and
-                the rest is prose. */}
-            {again.why === '' ? null : (
-              <div role="alert" style={REFUSED_NOTE}>
-                <b style={{ color: 'var(--danger)' }}>Not queued.</b> {again.why}
-              </div>
-            )}
-            {hold.refused === '' ? null : (
-              <div role="alert" style={REFUSED_NOTE}>
-                <b style={{ color: 'var(--danger)' }}>Unchanged.</b> {hold.refused}
-              </div>
-            )}
-            {/* THE STATE, IN PROSE, ONLY WHERE IT IS THE ANSWER TO A QUESTION. A held bump looks
-                otherwise exactly like one waiting for a lane, and the difference between the two is
-                hours. The component owns the wording, so the tooltip and the note cannot disagree
-                about what postponement means. */}
-            {aside ? <SetAsideNote why={hold.why} /> : null}
-          </>
-        }
-        back={{ label: 'bumps', href: href('/') }}
-        actions={
-          <>
-            {/* A SETTLED VERDICT IS ONLY TRUE OF THE HARNESS THAT REACHED IT. The floors, the
-                prompts and the tools all moved today, so a verdict from this morning was decided
-                by an agent that no longer exists.
+    <Loaded
+      what="record"
+      subject="This bump"
+      failed={failed}
+      value={detail}
+      header={<PageHeader title="bump" subtitle="—" actions={<Nav current="bumps" />} />}
+    >
+      {(detail) => {
+        const { summary, chain, events, packages, cves } = detail
+        // WHAT THE PAGE BELIEVES ABOUT THIS BUMP BEING HELD: whatever the server last said, whether that
+        // came from the listing on load or from an ask. `null` means nobody has answered yet, which is
+        // not the same fact as "not held" and is why the record keeps three states rather than two.
+        const aside = held.said ?? false
+        // A MARKER ONLY MATTERS TO A BUMP RUN.SH WILL STILL LOOK AT. It tests a repository for a
+        // settlement first and skips it before it ever consults the postponed directory, so offering
+        // this on a settled verdict would offer a write that changes nothing. A bump that IS held keeps
+        // the control whatever its verdict, or there would be no way back from it.
+        const holdable = aside || summary.verdict === 'bumping' || summary.verdict === 'queued'
+        const shown = only === undefined ? events : events.filter((e) => e.agent === only)
+        const at = (t: Tab, agent?: string) =>
+          href(
+            `/bump/?slug=${encodeURIComponent(slug)}&tab=${t}` +
+              (agent === undefined ? '' : `&agent=${encodeURIComponent(agent)}`),
+          )
 
-                Three renderings, not two. The word comes back at the one moment it says something
-                the pill does not yet: that this click landed. It is also what the focus lands on,
-                which is why it is an element and not a pill variant.
+        return (
+          <>
+            <PageHeader
+              title={summary.repo}
+              subtitle={
+                <>
+                  JDK {summary.from} → {summary.to} · {summary.sha.slice(0, 12)} ·{' '}
+                  <VerdictPill verdict={summary.verdict} />
+                  {/* A REASON IS A SENTENCE, and a sentence does not belong in a right-aligned row of
+                      corner controls, where it either truncates to nothing or deforms the header. It
+                      also must not be carried by colour alone, so the red is on one bolded word and
+                      the rest is prose. */}
+                  {again.refused === '' ? null : (
+                    <div role="alert" style={HEADER_NOTE}>
+                      <b style={{ color: 'var(--danger)' }}>Not queued.</b> {again.refused}
+                    </div>
+                  )}
+                  {hold.refused === '' ? null : (
+                    <div role="alert" style={HEADER_NOTE}>
+                      <b style={{ color: 'var(--danger)' }}>Unchanged.</b> {hold.refused}
+                    </div>
+                  )}
+                  {/* THE STATE, IN PROSE, ONLY WHERE IT IS THE ANSWER TO A QUESTION. A held bump looks
+                      otherwise exactly like one waiting for a lane, and the difference between the two is
+                      hours. The component owns the wording, so the tooltip and the note cannot disagree
+                      about what postponement means. */}
+                  {aside ? <SetAsideNote why={held.why} /> : null}
+                </>
+              }
+              back={{ label: 'bumps', href: href('/') }}
+              actions={
+                <>
+                  {/* A SETTLED VERDICT IS ONLY TRUE OF THE HARNESS THAT REACHED IT. The floors, the
+                      prompts and the tools all moved today, so a verdict from this morning was decided
+                      by an agent that no longer exists.
 
-                WITHHELD ONLY WHILE A LANE HOLDS IT. A queued bump keeps its button: it can sit a
-                long time, because the drainer waits for a free lane and a lane runs for hours, and
-                a reader with no way to ask has no way to tell waiting from lost. Two repositories
-                sat requeued and unclaimed for ninety minutes with nothing on the page to say so.
-                Asking again is answered rather than duplicated: the server sees the row already
-                pending and says so instead of adding a second. */}
-            {again.queued ? (
-              <span ref={said} tabIndex={-1} role="status" style={SAID}>
-                queued
-              </span>
-            ) : summary.verdict === 'bumping' ? null : (
-              <button
-                type="button"
-                aria-label={
-                  again.why === ''
-                    ? 'Run this bump again'
-                    : 'Run this bump again. The last ask was refused'
+                      Three renderings, not two. The word comes back at the one moment it says something
+                      the pill does not yet: that this click landed. It is also what the focus lands on,
+                      which is why it is an element and not a pill variant.
+
+                      WITHHELD ONLY WHILE A LANE HOLDS IT. A queued bump keeps its button: it can sit a
+                      long time, because the drainer waits for a free lane and a lane runs for hours, and
+                      a reader with no way to ask has no way to tell waiting from lost. Two repositories
+                      sat requeued and unclaimed for ninety minutes with nothing on the page to say so.
+                      Asking again is answered rather than duplicated: the server sees the row already
+                      pending and says so instead of adding a second. */}
+                  {again.landed ? (
+                    <span ref={said} tabIndex={-1} role="status" style={SAID}>
+                      queued
+                    </span>
+                  ) : summary.verdict === 'bumping' ? null : (
+                    <button
+                      type="button"
+                      aria-label={
+                        again.refused === ''
+                          ? 'Run this bump again'
+                          : 'Run this bump again. The last ask was refused'
+                      }
+                      title="Run this bump again"
+                      aria-busy={again.busy || undefined}
+                      // aria-disabled rather than the real attribute, which would drop the control out
+                      // of the tab order mid-action and strand a keyboard user on the body.
+                      aria-disabled={again.busy || undefined}
+                      onClick={() => {
+                        if (!again.busy) {
+                          again.ask()
+                        }
+                      }}
+                      style={{
+                        ...CORNER_BUTTON,
+                        ...(again.refused === '' ? null : CORNER_REFUSED),
+                        ...(again.busy ? CORNER_BUSY : null),
+                      }}
+                    >
+                      {/* DRAWN, NOT TYPED. Every unicode repeat mark is at the mercy of whichever face
+                          the reader's machine falls back to, and U+21BB lands hairline beside the dense
+                          U+2699 gear it has to sit next to; a path takes currentColor for both themes
+                          and a stroke width that can be matched to the gear by eye.
+
+                          r=5 about (8,8). large-arc=1 with sweep=1 picks the 300° clockwise sweep, so
+                          the tangent at the terminus is exactly (1,0) and the head is axis-aligned; a
+                          3.2 base against a 1.5 stroke still reads as an arrow at 16px, where a
+                          narrower one becomes a blob. */}
+                      <svg
+                        viewBox="0 0 16 16"
+                        aria-hidden="true"
+                        focusable="false"
+                        style={{ ...TURN, transform: `rotate(${again.asks * 360}deg)` }}
+                      >
+                        <path
+                          d="M12.33 5.5A5 5 0 1 1 8 3"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.7"
+                          strokeLinecap="round"
+                        />
+                        <path d="M11.2 3L8 1.4L8 4.6Z" fill="currentColor" />
+                      </svg>
+                    </button>
+                  )}
+                  {/* ITS CONVERSE, BESIDE IT. One asks for the work sooner, the other gives its lane to
+                      work that can progress, and a reader meeting them together should be able to tell
+                      which is which without pressing either: same box, same measured mark size, same
+                      refusal shape, opposite drawing. */}
+                  {holdable ? (
+                    <SetAsideButton
+                      setAside={aside}
+                      busy={hold.busy}
+                      refused={hold.refused !== ''}
+                      onAsk={() => hold.ask(!aside)}
+                    />
+                  ) : null}
+                  <Nav current="bumps" />
+                </>
+              }
+            />
+
+            <div style={{ padding: '14px 24px 0' }}>
+              <ChainStrip
+                stages={chain}
+                {...(only === undefined ? {} : { only })}
+                hrefFor={(agent) => at('record', agent)}
+                allHref={at('record')}
+              />
+            </div>
+
+            <div style={{ padding: '12px 24px 0' }}>
+              <TabRow
+                label="This bump"
+                tabs={[
+                  { label: 'summary', href: at('summary'), current: tab === 'summary' },
+                  { label: 'the record', href: at('record'), current: tab === 'record' },
+                ]}
+              />
+            </div>
+
+            {tab === 'summary' ? (
+              <>
+                {summary.because == null ? null : (
+                  <Section title="what it settled as">
+                    <Card>
+                      <div
+                        style={{
+                          fontSize: '12.5px',
+                          color: 'var(--text-secondary)',
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      >
+                        {summary.because}
+                      </div>
+                    </Card>
+                  </Section>
+                )}
+
+                {/* Nothing to show only when there was nothing before AND nothing measured after.
+                    `after` is null on every bump that did not reach a green gate, and null is not
+                    zero: a project with 337 findings and no second scan still has 337. */}
+                {cves.before === 0 && (cves.after ?? 0) === 0 ? null : (
+                  <Section title="vulnerabilities">
+                    <SecurityDelta
+                      before={cves.before}
+                      after={cves.after}
+                      distinctBefore={cves.distinctBefore}
+                      distinctAfter={cves.distinctAfter}
+                    />
+                  </Section>
+                )}
+
+                <Section title="dependencies" gutter="heading" id="dependencies">
+                  <PackageTable packages={packages} />
+                </Section>
+              </>
+            ) : (
+              <Section
+                title={
+                  only === undefined
+                    ? `the record · ${events.length.toLocaleString()} event(s)`
+                    : `the record · what ${only} did · ${shown.length.toLocaleString()} of ${events.length.toLocaleString()}`
                 }
-                title="Run this bump again"
-                aria-busy={again.busy || undefined}
-                // aria-disabled rather than the real attribute, which would drop the control out
-                // of the tab order mid-action and strand a keyboard user on the body.
-                aria-disabled={again.busy || undefined}
-                onClick={() => {
-                  if (!again.busy) {
-                    askAgain()
-                  }
-                }}
-                style={{
-                  ...CORNER_BUTTON,
-                  ...(again.why === '' ? null : CORNER_REFUSED),
-                  ...(again.busy ? CORNER_BUSY : null),
-                }}
               >
-                {/* DRAWN, NOT TYPED. Every unicode repeat mark is at the mercy of whichever face
-                    the reader's machine falls back to, and U+21BB lands hairline beside the dense
-                    U+2699 gear it has to sit next to; a path takes currentColor for both themes
-                    and a stroke width that can be matched to the gear by eye.
-
-                    r=5 about (8,8). large-arc=1 with sweep=1 picks the 300° clockwise sweep, so
-                    the tangent at the terminus is exactly (1,0) and the head is axis-aligned; a
-                    3.2 base against a 1.5 stroke still reads as an arrow at 16px, where a
-                    narrower one becomes a blob. */}
-                <svg
-                  viewBox="0 0 16 16"
-                  aria-hidden="true"
-                  focusable="false"
-                  style={{ ...TURN, transform: `rotate(${again.turns * 360}deg)` }}
-                >
-                  <path
-                    d="M12.33 5.5A5 5 0 1 1 8 3"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                  />
-                  <path d="M11.2 3L8 1.4L8 4.6Z" fill="currentColor" />
-                </svg>
-              </button>
+                {only === undefined ? null : (
+                  <p style={{ margin: '0 0 10px', fontSize: '12px' }}>
+                    <a href={at('record')} style={{ color: 'var(--accent-primary)' }}>
+                      show every agent
+                    </a>
+                  </p>
+                )}
+                <EventFeed events={shown} />
+              </Section>
             )}
-            {/* ITS CONVERSE, BESIDE IT. One asks for the work sooner, the other gives its lane to
-                work that can progress, and a reader meeting them together should be able to tell
-                which is which without pressing either: same box, same measured mark size, same
-                refusal shape, opposite drawing. */}
-            {holdable ? (
-              <SetAsideButton
-                setAside={aside}
-                busy={hold.busy}
-                refused={hold.refused !== ''}
-                onAsk={() => askAside(!aside)}
-              />
-            ) : null}
-            <Nav current="bumps" />
           </>
-        }
-      />
-
-      <div style={{ padding: '14px 24px 0' }}>
-        <ChainStrip
-          stages={chain}
-          {...(only === undefined ? {} : { only })}
-          hrefFor={(agent) => at('record', agent)}
-          allHref={at('record')}
-        />
-      </div>
-
-      <div style={{ padding: '12px 24px 0' }}>
-        <TabRow
-          label="This bump"
-          tabs={[
-            { label: 'summary', href: at('summary'), current: tab === 'summary' },
-            { label: 'the record', href: at('record'), current: tab === 'record' },
-          ]}
-        />
-      </div>
-
-      {tab === 'summary' ? (
-        <>
-          {summary.because == null ? null : (
-            <Section title="what it settled as">
-              <Card>
-                <div
-                  style={{
-                    fontSize: '12.5px',
-                    color: 'var(--text-secondary)',
-                    whiteSpace: 'pre-wrap',
-                  }}
-                >
-                  {summary.because}
-                </div>
-              </Card>
-            </Section>
-          )}
-
-          {/* Nothing to show only when there was nothing before AND nothing measured after.
-              `after` is null on every bump that did not reach a green gate, and null is not
-              zero: a project with 337 findings and no second scan still has 337. */}
-          {cves.before === 0 && (cves.after ?? 0) === 0 ? null : (
-            <Section title="vulnerabilities">
-              <SecurityDelta
-                before={cves.before}
-                after={cves.after}
-                distinctBefore={cves.distinctBefore}
-                distinctAfter={cves.distinctAfter}
-              />
-            </Section>
-          )}
-
-          <section id="dependencies" style={{ margin: '0 0 22px', scrollMarginTop: '12px' }}>
-            <h2 style={LABEL}>dependencies</h2>
-            <PackageTable packages={packages} />
-          </section>
-        </>
-      ) : (
-        <Section
-          title={
-            only === undefined
-              ? `the record · ${events.length.toLocaleString()} event(s)`
-              : `the record · what ${only} did · ${shown.length.toLocaleString()} of ${events.length.toLocaleString()}`
-          }
-        >
-          {only === undefined ? null : (
-            <p style={{ margin: '0 0 10px', fontSize: '12px' }}>
-              <a href={at('record')} style={{ color: 'var(--accent-primary)' }}>
-                show every agent
-              </a>
-            </p>
-          )}
-          <EventFeed events={shown} />
-        </Section>
-      )}
-    </>
+        )
+      }}
+    </Loaded>
   )
 }
 
-/** What asking for a rerun has done so far. One record because the four move together. */
-type Rerun = { turns: number; busy: boolean; queued: boolean; why: string }
+/** What the rerun endpoint answers: whether it queued the bump, and why not when it did not. */
+type Requeue = { queued: boolean; why?: string }
 
 /**
- * What asking to set this bump aside has done so far.
+ * WHAT THE SERVER LAST SAID ABOUT THIS BUMP BEING HELD, which is the page's own fact rather than
+ * the ask machine's: it arrives from the postponed listing on load as well as from an ask.
  *
  * `said` IS THE SERVER'S ANSWER, NOT THE READER'S REQUEST, and `null` until there has been one. It
  * is a tri-state on purpose: a page that stored `false` before anyone asked could not tell a bump
  * nobody has touched from one an ask just released.
+ *
+ * `why` is the reason recorded on the marker, which is mostly the supervisor's words rather than
+ * this page's, and is a different thing from a refusal.
  */
-type Aside = { busy: boolean; said: boolean | null; why: string; refused: string }
+type Held = { said: boolean | null; why: string }
 
 /**
  * THE POSTPONE ENDPOINT, WRITTEN DOWN IN ONE PLACE.
@@ -446,11 +425,6 @@ type Postponement = {
   error?: string
 }
 
-const setAside = (slug: string, aside: boolean) =>
-  post<Postponement>(
-    `/api/postpone?slug=${encodeURIComponent(slug)}&state=${aside ? 'on' : 'off'}`,
-  )
-
 /**
  * EVERY BUMP CURRENTLY SET ASIDE, in one listing, because a toggle has to render in the state it is
  * already in and there is no per-bump field carrying it. The markers are one flat directory, so the
@@ -476,25 +450,6 @@ const TURN = {
 } as const
 
 const SAID = { fontSize: '12px', color: 'var(--text-tertiary)', padding: '0.2rem 0.35rem' } as const
-const REFUSED_NOTE = { marginTop: '4px', maxWidth: '60ch', color: 'var(--text-secondary)' } as const
-
-const LABEL = {
-  fontSize: '11px',
-  textTransform: 'uppercase',
-  letterSpacing: '.06em',
-  color: 'var(--text-tertiary)',
-  fontWeight: 500,
-  margin: '18px 24px 10px',
-} as const
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section style={{ margin: '0 0 22px', padding: '0 24px' }}>
-      <h2 style={{ ...LABEL, margin: '18px 0 10px' }}>{title}</h2>
-      {children}
-    </section>
-  )
-}
 
 export default function Page() {
   return (

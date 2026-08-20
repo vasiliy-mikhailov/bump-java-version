@@ -64,6 +64,27 @@ export function PageHeader({ title, subtitle, back, actions }: PageHeaderProps) 
   )
 }
 
+/**
+ * A SENTENCE HANGING UNDER THE HEADER, which is where every state and every refusal ends up.
+ *
+ * A REASON IS A SENTENCE, and a sentence does not belong in the right-aligned row of corner
+ * controls, where it either truncates to nothing or deforms the header. So it goes into the
+ * subtitle, under the title, measured to sixty characters because a line longer than that stops
+ * being read across a full-bleed header.
+ *
+ * It lives here beside CORNER for the same reason CORNER_BUTTON does: there are two of these notes
+ * now — the corner controls' refusals, and the prose that explains a bump being held — and a second
+ * copy of these three declarations is how they start disagreeing about where a sentence sits.
+ *
+ * The bold word carries the state and the rest is prose, wherever this is used: the fact must not
+ * be carried by colour alone.
+ */
+export const HEADER_NOTE: Style = {
+  marginTop: '4px',
+  maxWidth: '60ch',
+  color: 'var(--text-secondary)',
+}
+
 /** The gear-shaped corner link, at the sibling's metrics so the two corners match. */
 export const CORNER: Style = {
   fontSize: '1.25rem',

@@ -27,6 +27,7 @@ export {
   CORNER_BUTTON,
   CORNER_MARK,
   CORNER_REFUSED,
+  HEADER_NOTE,
   PageHeader,
   type Crumb,
   type PageHeaderProps,

@@ -1,5 +1,6 @@
 import type { Package } from '@bjv/types'
 import { EmptyNote } from '../primitives/EmptyNote'
+import { CELL, HEAD, MONO, ROW, TABLE } from '../primitives/table'
 
 export type PackageTableProps = { packages: Package[] }
 
@@ -22,25 +23,25 @@ export function PackageTable({ packages }: PackageTableProps) {
   const rows = collapse(packages)
   return (
     <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
+      <table style={TABLE}>
         <thead>
           <tr>
-            <th style={th}>package</th>
-            <th style={th}>modules</th>
-            <th style={th}>before</th>
-            <th style={th}>after</th>
-            <th style={{ ...th, textAlign: 'right' }}>CVEs</th>
+            <th style={HEAD}>package</th>
+            <th style={HEAD}>modules</th>
+            <th style={HEAD}>before</th>
+            <th style={HEAD}>after</th>
+            <th style={{ ...HEAD, textAlign: 'right' }}>CVEs</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.key} style={{ borderTop: '1px solid var(--border-soft)' }}>
-              <td style={{ ...td, fontFamily: 'ui-monospace, Menlo, monospace' }}>{r.name}</td>
-              <td style={{ ...td, color: 'var(--text-tertiary)' }}>
+            <tr key={r.key} style={ROW}>
+              <td style={{ ...CELL, fontFamily: MONO }}>{r.name}</td>
+              <td style={{ ...CELL, color: 'var(--text-tertiary)' }}>
                 {r.modules === 1 ? r.module : `${r.modules} modules`}
               </td>
-              <td style={td}>{r.versionBefore ?? '—'}</td>
-              <td style={td}>
+              <td style={CELL}>{r.versionBefore ?? '—'}</td>
+              <td style={CELL}>
                 {r.versionAfter == null ? (
                   '—'
                 ) : r.versionAfter === r.versionBefore ? (
@@ -49,7 +50,7 @@ export function PackageTable({ packages }: PackageTableProps) {
                   r.versionAfter
                 )}
               </td>
-              <td style={{ ...td, textAlign: 'right' }}>
+              <td style={{ ...CELL, textAlign: 'right' }}>
                 <span style={{ color: 'var(--cve-remaining)' }}>{r.cvesBefore}</span>
                 {' → '}
                 {/* NOT MEASURED IS NOT ZERO. A green 0 here told a reader the dependency had been
@@ -80,19 +81,6 @@ export function PackageTable({ packages }: PackageTableProps) {
     </div>
   )
 }
-
-/** The sibling's `th`: 11px, uppercase, letterspaced, on a strong rule. */
-const th = {
-  textAlign: 'left',
-  color: 'var(--text-tertiary)',
-  fontWeight: 500,
-  fontSize: '11px',
-  textTransform: 'uppercase',
-  letterSpacing: '.06em',
-  padding: '9px 24px',
-  borderBottom: '1px solid var(--border-strong)',
-} as const
-const td = { padding: '8px 24px', verticalAlign: 'top' } as const
 
 type Row = Package & { key: string; modules: number }
 

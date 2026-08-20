@@ -1,8 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Card, EmptyNote, SaveRow, type Style } from '@bjv/ui'
-import { href, read } from '@/lib/api'
+import { Card, SaveRow, type Style } from '@bjv/ui'
 
 type File = {
   part: 'enables' | 'hardens'
@@ -14,8 +12,6 @@ type File = {
 }
 
 type Bom = { hop: string; name: string; files: File[] }
-
-const HOPS = ['8-11', '11-17', '17-21', '21-25']
 
 /**
  * THE TWO LISTS A HOP WORKS TO, AS THE TWO FILES THEY ARE.
@@ -95,31 +91,6 @@ export function BomFile({
 
 export type { Bom, File }
 
-const RUNGS: Style = { display: 'flex', gap: '6px', marginBottom: '18px' }
-
-function rungStyle(current: boolean): Style {
-  return {
-    font: 'inherit',
-    fontSize: '12.5px',
-    fontWeight: current ? 600 : 400,
-    padding: '5px 11px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    border: '1px solid var(--border-soft)',
-    color: current ? 'var(--text-primary)' : 'var(--text-tertiary)',
-    background: current ? 'var(--state-selected-bg)' : 'transparent',
-  }
-}
-
-const LABEL: Style = {
-  fontSize: '11px',
-  textTransform: 'uppercase',
-  letterSpacing: '.06em',
-  color: 'var(--text-tertiary)',
-  fontWeight: 500,
-  margin: '0 0 6px',
-}
-
 const ABOUT: Style = {
   margin: '0 0 10px',
   fontSize: '12.5px',
@@ -144,12 +115,4 @@ const EDITOR: Style = {
   color: 'var(--text-primary)',
   resize: 'vertical',
   marginBottom: '12px',
-}
-
-const NOTE: Style = {
-  margin: '4px 0 0',
-  fontSize: '12px',
-  color: 'var(--text-tertiary)',
-  maxWidth: '90ch',
-  lineHeight: 1.5,
 }

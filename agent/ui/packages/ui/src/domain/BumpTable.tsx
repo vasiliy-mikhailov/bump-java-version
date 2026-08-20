@@ -1,6 +1,7 @@
 import type { BumpSummary } from '@bjv/types'
 import { EmptyNote } from '../primitives/EmptyNote'
 import { RelativeTime, duration, spellMinutes } from '../primitives/RelativeTime'
+import { CELL, HEAD, ROW, TABLE } from '../primitives/table'
 import { PipelineMark } from './PipelineMark'
 import type { StampedBump } from './pipeline'
 import { VerdictPill } from './VerdictPill'
@@ -23,23 +24,23 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
   }
   return (
     <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12.5px' }}>
+      <table style={TABLE}>
         <thead>
           <tr>
-            <th style={th}>repository</th>
-            <th style={th}>hop</th>
-            <th style={th}>verdict</th>
-            <th style={{ ...th, textAlign: 'right' }}>tests</th>
-            <th style={{ ...th, textAlign: 'right' }}>CVEs</th>
-            <th style={{ ...th, textAlign: 'right' }}>BOM compliance</th>
-            <th style={{ ...th, textAlign: 'right' }}>took</th>
-            <th style={{ ...th, textAlign: 'right' }}>a person would have</th>
-            <th style={{ ...th, textAlign: 'right' }}>last event</th>
+            <th style={HEAD}>repository</th>
+            <th style={HEAD}>hop</th>
+            <th style={HEAD}>verdict</th>
+            <th style={{ ...HEAD, textAlign: 'right' }}>tests</th>
+            <th style={{ ...HEAD, textAlign: 'right' }}>CVEs</th>
+            <th style={{ ...HEAD, textAlign: 'right' }}>BOM compliance</th>
+            <th style={{ ...HEAD, textAlign: 'right' }}>took</th>
+            <th style={{ ...HEAD, textAlign: 'right' }}>a person would have</th>
+            <th style={{ ...HEAD, textAlign: 'right' }}>last event</th>
             {/* WHAT THE COLUMN MEANS, ON THE HEADING. The cells carry the four fields as recorded;
                 the notation they are compressed into has to be explained once, and once is here
                 rather than repeated on every row. */}
             <th
-              style={th}
+              style={HEAD}
               title="which pipeline produced the row: the commit its image was built from, then four characters folding the image and the prompt and bill-of-materials hashes, because an edit made from the settings page changes what the agents are handed without changing the commit. Two rows that read alike ran the same pipeline."
             >
               pipeline
@@ -48,8 +49,8 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
         </thead>
         <tbody>
           {bumps.map((b) => (
-            <tr key={b.slug} style={{ borderTop: '1px solid var(--border-soft)' }}>
-              <td style={td}>
+            <tr key={b.slug} style={ROW}>
+              <td style={CELL}>
                 <a
                   href={hrefFor(b.slug)}
                   style={{ color: 'var(--text-primary)', textDecoration: 'none' }}
@@ -57,13 +58,13 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                   {b.repo}
                 </a>
               </td>
-              <td style={{ ...td, color: 'var(--text-tertiary)' }}>
+              <td style={{ ...CELL, color: 'var(--text-tertiary)' }}>
                 {b.from} → {b.to}
               </td>
-              <td style={td}>
+              <td style={CELL}>
                 <VerdictPill verdict={b.verdict} href={hrefFor(b.slug)} />
               </td>
-              <td style={{ ...td, textAlign: 'right' }}>
+              <td style={{ ...CELL, textAlign: 'right' }}>
                 {b.preTests == null ? (
                   '—'
                 ) : (
@@ -75,7 +76,7 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                   </>
                 )}
               </td>
-              <td style={{ ...td, textAlign: 'right' }}>
+              <td style={{ ...CELL, textAlign: 'right' }}>
                 {/* THE NUMBERS ARE THE LINK. "77 -> 12" is the summary of a table that says which
                     dependencies moved, and that table was reachable only by clicking the repo name
                     and scrolling past everything else. A reader who wants the detail is already
@@ -109,7 +110,7 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                   </a>
                 )}
               </td>
-              <td style={{ ...td, textAlign: 'right' }}>
+              <td style={{ ...CELL, textAlign: 'right' }}>
                 {/* A GREEN GATE AND A COMPLIANT PROJECT ARE DIFFERENT CLAIMS. The verdict says the
                     project builds under the target and kept every test it had. This says how many
                     of the floors that target actually needs it reached, measured against the
@@ -148,7 +149,7 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                   </span>
                 )}
               </td>
-              <td style={{ ...td, textAlign: 'right' }}>
+              <td style={{ ...CELL, textAlign: 'right' }}>
                 {/* HOW LONG IT HAS BEEN GOING. Beside the column on its right this is the whole
                     diagnosis: old and recently active is slow, old and silent is stuck. */}
                 {b.startedAt === 0 ? (
@@ -162,7 +163,7 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                   </>
                 )}
               </td>
-              <td style={{ ...td, textAlign: 'right' }}>
+              <td style={{ ...CELL, textAlign: 'right' }}>
                 {/* THE ESTIMATE, AND ONLY EVER ITS OWN COLUMN. It is what the estimator triad
                     priced the work that LANDED at, checked against the log by a verifier. Putting
                     it beside `took` is the whole point; adding it to anything measured would be
@@ -173,7 +174,7 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                   <span>{spellMinutes(b.humanMinutes)}</span>
                 )}
               </td>
-              <td style={{ ...td, textAlign: 'right' }}>
+              <td style={{ ...CELL, textAlign: 'right' }}>
                 {/* A queued row has no event yet, and "56 years ago" is worse than saying so. */}
                 {b.at === 0 ? (
                   <span style={{ color: 'var(--text-tertiary)' }}>—</span>
@@ -183,7 +184,7 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
                   </span>
                 )}
               </td>
-              <td style={td}>
+              <td style={CELL}>
                 {/* A DIFFERENCE BETWEEN TWO ROWS IS NOT NECESSARILY A DIFFERENCE BETWEEN TWO
                     REPOSITORIES. The harness is deployed while the sweep it is running continues,
                     and a lane keeps the image it started with, so several generations of the
@@ -199,7 +200,6 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
   )
 }
 
-/** The sibling's `th`: 11px, uppercase, letterspaced, on a strong rule. */
 /**
  * HOW LONG THIS BUMP HAS COST SO FAR, which for a settled one is how long it took.
  *
@@ -223,15 +223,3 @@ function took(b: BumpSummary, now: number): number {
 function stale(b: BumpSummary, now: number): boolean {
   return b.verdict === 'bumping' && b.at > 0 && now - b.at > 5 * 60_000
 }
-
-const th = {
-  textAlign: 'left',
-  color: 'var(--text-tertiary)',
-  fontWeight: 500,
-  fontSize: '11px',
-  textTransform: 'uppercase',
-  letterSpacing: '.06em',
-  padding: '9px 24px',
-  borderBottom: '1px solid var(--border-strong)',
-} as const
-const td = { padding: '9px 24px', verticalAlign: 'top' } as const

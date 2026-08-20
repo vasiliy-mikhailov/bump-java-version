@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { AgentPrompt } from '@bjv/types'
-import { CARDS, EmptyNote, PromptCard, TabRow, lanesOf } from '@bjv/ui'
+import { CARDS, HEADING, Loaded, PromptCard, TabRow, lanesOf } from '@bjv/ui'
 import { href, read } from '@/lib/api'
 import { BomFile, type Bom } from './bom'
 
@@ -281,148 +281,139 @@ export function PromptsSection({ onCount }: { onCount: (n: number, stages: numbe
       </p>
 
       <div>
-        {failed !== null ? (
-          <EmptyNote>The prompts could not be read: {failed}</EmptyNote>
-        ) : prompts === null ? (
-          <EmptyNote>Reading the prompts…</EmptyNote>
-        ) : (
-          blocks.map((block) => (
-            <section
-              key={block.key}
-              style={{
-                margin: '0 0 22px',
-                // INDENTED WITH A RULE DOWN THE LEFT, because a block that is only shifted right
-                // has no visible end, and the end is half of what a block tells a reader.
-                // PROPORTIONAL TO DEPTH, not a boolean. It was `depth === 0 ? 0 : 22px`, which
-                // drew a stage nested two deep at the same indent as its own parent, so
-                // module-repair-step read as a sibling of module-repair rather than its body.
-                marginLeft: block.depth === 0 ? 0 : '22px',
-                paddingLeft: block.depth === 0 ? 0 : `${block.depth * 16}px`,
-                borderLeft: block.depth === 0 ? undefined : '2px solid var(--border-strong)',
-              }}
-            >
-              <h2
+        <Loaded what="prompts" failed={failed} value={prompts}>
+          {() =>
+            blocks.map((block) => (
+              <section
+                key={block.key}
                 style={{
-                  fontSize: '11px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '.06em',
-                  color: 'var(--text-tertiary)',
-                  fontWeight: 500,
-                  margin: '0 0 10px',
+                  margin: '0 0 22px',
+                  // INDENTED WITH A RULE DOWN THE LEFT, because a block that is only shifted right
+                  // has no visible end, and the end is half of what a block tells a reader.
+                  // PROPORTIONAL TO DEPTH, not a boolean. It was `depth === 0 ? 0 : 22px`, which
+                  // drew a stage nested two deep at the same indent as its own parent, so
+                  // module-repair-step read as a sibling of module-repair rather than its body.
+                  marginLeft: block.depth === 0 ? 0 : '22px',
+                  paddingLeft: block.depth === 0 ? 0 : `${block.depth * 16}px`,
+                  borderLeft: block.depth === 0 ? undefined : '2px solid var(--border-strong)',
                 }}
               >
-                {block.title}
-                {/* HOW OFTEN, BESIDE WHERE. Nesting says a stage sits inside modules and says
-                    nothing about how many times it happens, and a reader will answer the second
-                    question from the first: three peers inside a loop read as three per-module
-                    passes, when only bump walks the module list. */}
-                {/* WHICH LIST IT WORKS TO, linked. A reader looking at before-pins should not
-                    have to know that the phase runs before the JDK moves in order to work out
-                    which half of the bill of materials it is acting on, and a reader editing a
-                    list should be able to see which agent will act on what they typed. */}
-                {block.reads === '' ? null : (
-                  <a
-                    href={href('/settings/?a=bom')}
-                    style={{ color: 'var(--accent-primary)', marginLeft: '8px' }}
-                  >
-                    {block.reads === 'hardens' ? 'hardens the result' : 'enables the bump'}
-                    {/* COUNTED FROM THE FILE, not written down beside it. A number typed onto a
-                        page goes stale the first time somebody edits the list it describes, and
-                        this one is editable from the next tab along. */}
-                    {block.pins === 0 ? null : `  ${block.pins} pins`}
-                    {' \u2192'}
-                  </a>
-                )}
-                {block.repeats === '' ? null : (
-                  <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>
-                    {block.repeats}
-                  </span>
-                )}
-                {block.opens === '' ? null : (
-                  <span style={{ color: 'var(--accent-primary)', marginLeft: '8px' }}>
-                    {'\u21bb '}
-                    {block.opens}
-                    {' \u2014 everything below runs inside this'}
-                  </span>
-                )}
-              </h2>
-              {/* THE LIST THIS STAGE WORKS TO, between its name and the agents that read it,
-                  which is the order a reader meets them in. */}
-              {block.reads === '' || bom === null
-                ? null
-                : bom.files
-                    .filter((f) => f.part === block.reads)
-                    .map((f) => (
-                      <BomFile
-                        key={f.part}
-                        file={f}
-                        typed={typed[f.part]}
-                        busy={busy === f.part}
-                        said={said[f.part]}
-                        onType={(text) => setTyped((s) => ({ ...s, [f.part]: text }))}
-                        onSave={(text) => saveBom(f.part, text)}
-                      />
-                    ))}
-
-              {(() => {
-                const { platforms, rows } = lanesOf(block.agents)
-                if (platforms.length === 0) {
-                  return (
-                    <div style={CARDS}>
-                      {block.agents.map((p) => (
-                        <PromptCard
-                          key={p.name}
-                          prompt={p}
-                          onSave={(text) => write(p.name, { text })}
-                          onRevert={() => write(p.name, { revert: true })}
+                {/* The block's own heading, at the site's one heading treatment, with no leading
+                    above it: the block is already separated by its own margin and its rule. */}
+                <h2 style={{ ...HEADING, margin: '0 0 10px' }}>
+                  {block.title}
+                  {/* HOW OFTEN, BESIDE WHERE. Nesting says a stage sits inside modules and says
+                      nothing about how many times it happens, and a reader will answer the second
+                      question from the first: three peers inside a loop read as three per-module
+                      passes, when only bump walks the module list. */}
+                  {/* WHICH LIST IT WORKS TO, linked. A reader looking at before-pins should not
+                      have to know that the phase runs before the JDK moves in order to work out
+                      which half of the bill of materials it is acting on, and a reader editing a
+                      list should be able to see which agent will act on what they typed. */}
+                  {block.reads === '' ? null : (
+                    <a
+                      href={href('/settings/?a=bom')}
+                      style={{ color: 'var(--accent-primary)', marginLeft: '8px' }}
+                    >
+                      {block.reads === 'hardens' ? 'hardens the result' : 'enables the bump'}
+                      {/* COUNTED FROM THE FILE, not written down beside it. A number typed onto a
+                          page goes stale the first time somebody edits the list it describes, and
+                          this one is editable from the next tab along. */}
+                      {block.pins === 0 ? null : `  ${block.pins} pins`}
+                      {' \u2192'}
+                    </a>
+                  )}
+                  {block.repeats === '' ? null : (
+                    <span style={{ color: 'var(--text-secondary)', marginLeft: '8px' }}>
+                      {block.repeats}
+                    </span>
+                  )}
+                  {block.opens === '' ? null : (
+                    <span style={{ color: 'var(--accent-primary)', marginLeft: '8px' }}>
+                      {'\u21bb '}
+                      {block.opens}
+                      {' \u2014 everything below runs inside this'}
+                    </span>
+                  )}
+                </h2>
+                {/* THE LIST THIS STAGE WORKS TO, between its name and the agents that read it,
+                    which is the order a reader meets them in. */}
+                {block.reads === '' || bom === null
+                  ? null
+                  : bom.files
+                      .filter((f) => f.part === block.reads)
+                      .map((f) => (
+                        <BomFile
+                          key={f.part}
+                          file={f}
+                          typed={typed[f.part]}
+                          busy={busy === f.part}
+                          said={said[f.part]}
+                          onType={(text) => setTyped((s) => ({ ...s, [f.part]: text }))}
+                          onSave={(text) => saveBom(f.part, text)}
                         />
                       ))}
+
+                {(() => {
+                  const { platforms, rows } = lanesOf(block.agents)
+                  if (platforms.length === 0) {
+                    return (
+                      <div style={CARDS}>
+                        {block.agents.map((p) => (
+                          <PromptCard
+                            key={p.name}
+                            prompt={p}
+                            onSave={(text) => write(p.name, { text })}
+                            onRevert={() => write(p.name, { revert: true })}
+                          />
+                        ))}
+                      </div>
+                    )
+                  }
+                  return (
+                    // SCROLLS SIDEWAYS RATHER THAN WRAPPING. Wrapping is what broke it: three lanes
+                    // that become two are not two lanes, they are the same six cards in an order
+                    // nobody can read. A reader on a narrow screen would rather push the third lane
+                    // off the edge and drag it back than be shown a comparison that is not one.
+                    <div style={{ overflowX: 'auto', paddingBottom: '4px' }}>
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: `repeat(${platforms.length}, minmax(360px, 1fr))`,
+                          gap: '14px',
+                          alignItems: 'start',
+                        }}
+                      >
+                        {platforms.map((platform) => (
+                          <div key={`lane:${platform}`} style={LANE_HEAD}>
+                            {platform}
+                          </div>
+                        ))}
+                        {rows.flatMap((row) =>
+                          row.cells.map((cell) => {
+                            const p = cell.prompt
+                            return p === null ? (
+                              <div key={`${row.stem}@${cell.platform}`} style={LANE_GAP}>
+                                no {cell.platform} prompt for {row.stem}
+                              </div>
+                            ) : (
+                              <PromptCard
+                                key={p.name}
+                                prompt={p}
+                                onSave={(text) => write(p.name, { text })}
+                                onRevert={() => write(p.name, { revert: true })}
+                              />
+                            )
+                          }),
+                        )}
+                      </div>
                     </div>
                   )
-                }
-                return (
-                  // SCROLLS SIDEWAYS RATHER THAN WRAPPING. Wrapping is what broke it: three lanes
-                  // that become two are not two lanes, they are the same six cards in an order
-                  // nobody can read. A reader on a narrow screen would rather push the third lane
-                  // off the edge and drag it back than be shown a comparison that is not one.
-                  <div style={{ overflowX: 'auto', paddingBottom: '4px' }}>
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: `repeat(${platforms.length}, minmax(360px, 1fr))`,
-                        gap: '14px',
-                        alignItems: 'start',
-                      }}
-                    >
-                      {platforms.map((platform) => (
-                        <div key={`lane:${platform}`} style={LANE_HEAD}>
-                          {platform}
-                        </div>
-                      ))}
-                      {rows.flatMap((row) =>
-                        row.cells.map((cell) => {
-                          const p = cell.prompt
-                          return p === null ? (
-                            <div key={`${row.stem}@${cell.platform}`} style={LANE_GAP}>
-                              no {cell.platform} prompt for {row.stem}
-                            </div>
-                          ) : (
-                            <PromptCard
-                              key={p.name}
-                              prompt={p}
-                              onSave={(text) => write(p.name, { text })}
-                              onRevert={() => write(p.name, { revert: true })}
-                            />
-                          )
-                        }),
-                      )}
-                    </div>
-                  </div>
-                )
-              })()}
-            </section>
-          ))
-        )}
+                })()}
+              </section>
+            ))
+          }
+        </Loaded>
       </div>
     </>
   )

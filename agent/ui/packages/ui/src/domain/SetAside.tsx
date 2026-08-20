@@ -1,5 +1,5 @@
 import type { Style } from '../primitives/style'
-import { CORNER_BUSY, CORNER_BUTTON, CORNER_MARK, CORNER_REFUSED } from './PageHeader'
+import { CORNER_BUSY, CORNER_BUTTON, CORNER_MARK, CORNER_REFUSED, HEADER_NOTE } from './PageHeader'
 
 /**
  * SET A BUMP ASIDE, AND BRING IT BACK. The converse of the rerun control, and its sibling.
@@ -74,7 +74,7 @@ export type SetAsideNoteProps = {
  */
 export function SetAsideNote({ why }: SetAsideNoteProps) {
   return (
-    <div role="status" style={NOTE}>
+    <div role="status" style={HEADER_NOTE}>
       <b style={{ color: 'var(--state-blocked-dependency)' }}>Set aside.</b> Its lane is free for
       work that can progress. It is still in the corpus: it runs at the end, once the bumps that
       were set aside are all that is left. The button above brings it back.
@@ -151,8 +151,6 @@ export function SetAsideButton({ setAside, busy, refused, onAsk }: SetAsideButto
  * state becomes a colour in domain.css.
  */
 const HELD: Style = { color: 'var(--state-blocked-dependency)' }
-
-const NOTE: Style = { marginTop: '4px', maxWidth: '60ch', color: 'var(--text-secondary)' }
 
 /** Quieter than the explanation above it, because it is evidence rather than instruction. */
 const REASON: Style = { marginTop: '2px', color: 'var(--text-tertiary)', whiteSpace: 'pre-wrap' }
