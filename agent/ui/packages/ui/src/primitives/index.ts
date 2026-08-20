@@ -5,20 +5,30 @@
  * are testable at all, and it is what stops a `Pill` growing a `verdict` prop the next time somebody
  * is in a hurry.
  *
- * Several of these are the sibling tool's shapes at its measurements — `Tally`, `ProgressBar`, the
- * strip they sit in. That is deliberate and is the thing spec 17 predicted: with two tools, the
- * overlap is finally a fact rather than a guess, and these are the first candidates to lift into a
- * package both import instead of both copying.
+ * FIVE OF THESE ARE NO LONGER IN THIS DIRECTORY. `EmptyNote`, `Pill`, `ProgressBar`, `Tally` and
+ * the `Style` type come from `ratchet-ui`, which is what spec 17 predicted: with two tools the
+ * overlap became a fact rather than a guess, and these are the ones whose two versions differed by
+ * palette rather than by behaviour. They are re-exported from here rather than imported directly
+ * by each screen, so this barrel stays the one public surface and no call site had to move.
  */
 
 export { Card, type CardProps } from './Card'
 export { CodeBlock, type CodeBlockProps } from './CodeBlock'
 export { Disclosure, type DisclosureProps } from './Disclosure'
-export { EmptyNote, type EmptyNoteProps } from './EmptyNote'
+export {
+  EmptyNote,
+  Pill,
+  ProgressBar,
+  STRIP,
+  Tally,
+  type EmptyNoteProps,
+  type PillProps,
+  type PillTone,
+  type ProgressBarProps,
+  type TallyProps,
+} from 'ratchet-ui/components'
 export { FIELD, LabeledField, READONLY, type LabeledFieldProps } from './LabeledField'
 export { Loaded, type LoadedProps } from './Loaded'
-export { Pill, type PillProps, type PillTone } from './Pill'
-export { ProgressBar, type ProgressBarProps } from './ProgressBar'
 export {
   RelativeTime,
   duration,
@@ -31,7 +41,6 @@ export { HEADING, PAGE_GUTTER, Section, type SectionProps } from './Section'
 export { SettingCard, type SettingCardProps } from './SettingCard'
 export { TabRow, type TabItem, type TabRowProps } from './TabRow'
 export { CELL, CELL_NESTED, HEAD, HEAD_NESTED, MONO, ROW, TABLE } from './table'
-export { STRIP, Tally, type TallyProps } from './Tally'
 export { TextFold, type TextFoldProps } from './TextFold'
 export type { Style } from './style'
 export {

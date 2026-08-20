@@ -4,6 +4,13 @@
 
 @source "../app";
 @source "../../../packages/ui/src";
+/* `Pill` lives in `ratchet-ui` now and carries the one Tailwind class in this package,
+   `animate-pulse` on the dot that marks a moving row. Tailwind scans the globs named here and
+   nothing else, so without this line the utility is simply never emitted: no error, no warning,
+   no failing test, and not even a trace in the exported HTML, because a running pill only exists
+   at run time from fetched data. `dist` rather than `src`, because the package ships its
+   compiled output and only `tokens.css` out of `src`. Paths here are relative to THIS file. */
+@source "../../../packages/ui/node_modules/ratchet-ui/dist";
 
 /**
  * THE TYPE IS THE SHARED IDENTITY, and it is one declaration.

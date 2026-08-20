@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { EmptyNote } from './EmptyNote'
+import { EmptyNote } from 'ratchet-ui/components'
 import { PAGE_GUTTER } from './Section'
 
 export type LoadedProps<T> = {

@@ -1,5 +1,11 @@
 import type { Style } from '../primitives/style'
-import { CORNER_BUSY, CORNER_BUTTON, CORNER_MARK, CORNER_REFUSED, HEADER_NOTE } from './PageHeader'
+import {
+  CORNER_BUSY,
+  CORNER_BUTTON,
+  CORNER_MARK,
+  CORNER_REFUSED,
+  HEADER_NOTE,
+} from 'ratchet-ui/components'
 
 /**
  * SET A BUMP ASIDE, AND BRING IT BACK. The converse of the rerun control, and its sibling.

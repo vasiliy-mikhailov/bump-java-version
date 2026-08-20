@@ -1,10 +1,9 @@
-import type { CSSProperties } from 'react'
-
 /**
  * A style object that may also carry CSS custom properties.
  *
- * `React.CSSProperties` has no index signature, so `{'--tone': …}` is a type error without this. It
- * exists so a component can set a token ONCE and refer to it from three declarations (text,
- * background, border) instead of repeating `var(--state-pass)` three times and letting one drift.
+ * ONE LINE, AND IT STAYS A FILE. The type itself is `ratchet-ui`'s, where it is
+ * `WithTokens<CSSProperties>` and expands to exactly what this used to declare. Keeping the module
+ * here means the twenty-odd `import type { Style } from './style'` lines in this package go on
+ * working, which is the difference between a re-export and a rename across twenty files.
  */
-export type Style = CSSProperties & Record<`--${string}`, string | number>
+export type { Style } from 'ratchet-ui/components'

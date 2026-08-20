@@ -1,5 +1,5 @@
 import type { BumpSummary } from '@bjv/types'
-import { EmptyNote } from '../primitives/EmptyNote'
+import { EmptyNote } from 'ratchet-ui/components'
 import { RelativeTime, duration, spellMinutes } from '../primitives/RelativeTime'
 import { CELL, HEAD, ROW, TABLE } from '../primitives/table'
 import { PipelineMark } from './PipelineMark'

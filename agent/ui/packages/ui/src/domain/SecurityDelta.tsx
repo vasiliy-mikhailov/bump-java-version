@@ -1,4 +1,4 @@
-import { Tally } from '../primitives/Tally'
+import { Tally } from 'ratchet-ui/components'
 
 export type SecurityDeltaProps = {
   before: number

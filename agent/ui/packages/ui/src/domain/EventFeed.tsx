@@ -1,5 +1,5 @@
 import type { TraceEvent } from '@bjv/types'
-import { EmptyNote } from '../primitives/EmptyNote'
+import { EmptyNote } from 'ratchet-ui/components'
 import { TextFold } from '../primitives/TextFold'
 
 export type EventFeedProps = { events: TraceEvent[] }

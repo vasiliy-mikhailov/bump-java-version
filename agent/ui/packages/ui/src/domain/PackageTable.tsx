@@ -1,5 +1,5 @@
 import type { Package } from '@bjv/types'
-import { EmptyNote } from '../primitives/EmptyNote'
+import { EmptyNote } from 'ratchet-ui/components'
 import { CELL, HEAD, MONO, ROW, TABLE } from '../primitives/table'
 
 export type PackageTableProps = { packages: Package[] }

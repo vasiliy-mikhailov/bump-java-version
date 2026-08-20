@@ -31,7 +31,7 @@ export {
   PageHeader,
   type Crumb,
   type PageHeaderProps,
-} from './PageHeader'
+} from 'ratchet-ui/components'
 export { SecurityDelta, type SecurityDeltaProps } from './SecurityDelta'
 export {
   ASIDE_WHY,

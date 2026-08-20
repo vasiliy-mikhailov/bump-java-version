@@ -65,6 +65,31 @@
   --cve-cleared: #1a7f37;
   --cve-introduced: #cf222e;
   --cve-remaining: var(--text-tertiary);
+
+  /* === What the shared components ask for ===
+     `ratchet-ui` draws the pill, the tally and the progress bar and carries no colour: it reads tone
+     names, and this is where a tone becomes one of this tool's states. The first six ARE `Pill`'s
+     old TONE record, moved out of TypeScript into the one file that already decides what a state
+     looks like, so nothing on the page changes colour.
+
+     Declared here and not in `.dark`, because these are aliases of names the dark block already
+     redefines and a custom property resolves against the computed value on the element. Same
+     arrangement as `--step-agent` and `--cve-remaining` above. */
+  --state-good: var(--state-pass);
+  --state-warn: var(--state-fail-target-not-bumped);
+  --state-quiet: var(--state-no-baseline);
+  --state-alarm: var(--state-fail-test-conservation);
+  --state-running: var(--state-bumping);
+  --state-aside: var(--state-blocked-dependency);
+
+  /* A count that MOVED, which is the CVE vocabulary and not the settlement one. The two happen to
+     resolve to the same green and the same red today, and they are still different claims. */
+  --state-count-good: var(--cve-cleared);
+  --state-count-alarm: var(--cve-introduced);
+
+  /* The bar under the header, from the colour of working to the colour of finished. */
+  --state-progress-from: var(--state-bumping);
+  --state-progress-to: var(--state-pass);
 }
 
 .dark {

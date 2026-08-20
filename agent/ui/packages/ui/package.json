@@ -12,7 +12,10 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run"
   },
-  "dependencies": { "@bjv/types": "workspace:*" },
+  "dependencies": {
+    "@bjv/types": "workspace:*",
+    "ratchet-ui": "github:vasiliy-mikhailov/ratchet-ui#v0.2.0"
+  },
   "peerDependencies": { "react": "^19" },
   "devDependencies": {
     "@bjv/config": "workspace:*",

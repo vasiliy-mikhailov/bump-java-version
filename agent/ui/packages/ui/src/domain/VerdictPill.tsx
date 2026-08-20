@@ -1,5 +1,5 @@
 import type { Verdict } from '@bjv/types'
-import { Pill, type PillTone } from '../primitives/Pill'
+import { Pill, type PillTone } from 'ratchet-ui/components'
 
 export type VerdictPillProps = { verdict: Verdict; href?: string }
 
