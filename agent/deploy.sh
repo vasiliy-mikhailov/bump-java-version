@@ -61,6 +61,20 @@ docker run --rm \
     pnpm config set store-dir /pnpm-store
     pnpm install --frozen-lockfile
     pnpm build'
+
+# AND THE ONE TAILWIND CLASS IN THE BUNDLE, WHICH GOES MISSING WITHOUT A SOUND. `Pill` ships from
+# `ratchet-ui` now and renders `animate-pulse` on the dot that marks a moving row. Tailwind emits a
+# utility only where an @source glob in apps/web/app/globals.css finds it, node_modules is covered
+# by exactly one of those globs, and losing that line breaks nothing anything can see: the install
+# succeeds, the build succeeds, all 118 tests pass, and the class is not even in the exported HTML,
+# because a running pill exists only at run time from fetched data. The dot just stops pulsing.
+# So the question gets asked here, which is the only place it can be: it takes a built stylesheet.
+if ! grep -rqs "\.animate-pulse{" ui/apps/web/out/_next/static --include="*.css"; then
+  echo "deploy.sh: the built stylesheet carries no .animate-pulse rule, so the dot marking a" >&2
+  echo "           moving row will not pulse. The @source globs in apps/web/app/globals.css" >&2
+  echo "           have to cover packages/ui/node_modules/ratchet-ui/dist, where Pill lives." >&2
+  exit 1
+fi
 rm -rf app/src/main/resources/ui
 cp -r ui/apps/web/out app/src/main/resources/ui
 # ONE REACTOR PASS, FROM THE PARENT. jvm, then app; the shade runs in app and
