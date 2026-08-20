@@ -40,13 +40,13 @@ export function EventFeed({ events }: EventFeedProps) {
             >
               {e.kind}
             </span>
-            {e.agent === undefined ? null : (
+            {e.agent === null ? null : (
               <span style={{ fontSize: '12px', color: 'var(--role-doer)' }}>{e.agent}</span>
             )}
-            {e.stage === undefined ? null : (
+            {e.stage === null ? null : (
               <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{e.stage}</span>
             )}
-            {e.tool === undefined ? null : (
+            {e.tool === null ? null : (
               <span
                 style={{
                   fontSize: '11.5px',

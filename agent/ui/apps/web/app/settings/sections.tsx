@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import type { Finding } from '@bjv/types'
 import {
   Disclosure,
   EmptyNote,
@@ -517,11 +518,16 @@ export function SubjectPanel() {
   )
 }
 
+/**
+ * `latest` used to be that same shape written out inline, which is `Finding` under another name and
+ * was the only reason `Finding` looked unused. A grep for it found no importers; a grep for its
+ * fields found this.
+ */
 type Supervisor = {
   everyMinutes: string
   findings: number
   postponed: number
-  latest: { at: number; bump: string; kind: string; what: string; held: boolean }[]
+  latest: Finding[]
 }
 
 /** Not a setting: a thing that watches the run. Which is why it sits apart in the tab bar. */

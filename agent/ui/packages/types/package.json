@@ -4,9 +4,17 @@
   "private": true,
   "type": "module",
   "exports": { ".": "./src/index.ts" },
-  "scripts": { "typecheck": "tsc -p tsconfig.json" },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ratchet-ui": "github:vasiliy-mikhailov/ratchet-ui#v0.1.0"
+  },
   "devDependencies": {
     "@bjv/config": "workspace:*",
-    "typescript": "^5.9.3"
+    "@types/node": "^22",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }

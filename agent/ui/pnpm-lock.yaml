@@ -67,13 +67,23 @@ importers:
   packages/config: {}
 
   packages/types:
+    dependencies:
+      ratchet-ui:
+        specifier: github:vasiliy-mikhailov/ratchet-ui#v0.1.0
+        version: https://codeload.github.com/vasiliy-mikhailov/ratchet-ui/tar.gz/be4bf33358b0aee16ceecb3ce9b4fdb980e9beb1
     devDependencies:
       '@bjv/config':
         specifier: workspace:*
         version: link:../config
+      '@types/node':
+        specifier: ^22
+        version: 22.20.1
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/node@22.20.1)(happy-dom@20.11.2)(jiti@2.7.0)(lightningcss@1.32.0)
 
   packages/ui:
     dependencies:
@@ -1145,6 +1155,10 @@ packages:
     resolution: {integrity: sha512-Qb1gy5OrP5+zDf2Bvnzdl3jsTf1qXVMazbvCoKhtKqVs4/YK4ozX4gKQJJVyNe+cajNPn0KoC0MC3FUmaHWEmQ==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
 
+  ratchet-ui@https://codeload.github.com/vasiliy-mikhailov/ratchet-ui/tar.gz/be4bf33358b0aee16ceecb3ce9b4fdb980e9beb1:
+    resolution: {gitHosted: true, tarball: https://codeload.github.com/vasiliy-mikhailov/ratchet-ui/tar.gz/be4bf33358b0aee16ceecb3ce9b4fdb980e9beb1}
+    version: 0.1.0
+
   react-dom@19.2.3:
     resolution: {integrity: sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg==}
     peerDependencies:
@@ -2101,6 +2115,8 @@ snapshots:
       ansi-regex: 5.0.1
       ansi-styles: 5.2.0
       react-is: 17.0.2
+
+  ratchet-ui@https://codeload.github.com/vasiliy-mikhailov/ratchet-ui/tar.gz/be4bf33358b0aee16ceecb3ce9b4fdb980e9beb1: {}
 
   react-dom@19.2.3(react@19.2.3):
     dependencies:

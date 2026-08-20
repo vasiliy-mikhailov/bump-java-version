@@ -14,6 +14,38 @@
  * the page can no longer be the only place that knows what a state looks like.
  */
 
+import type { State } from 'ratchet-ui/wire'
+
+/**
+ * THE PART OF THE WIRE THAT IS NOT OURS, taken from `ratchet-ui` rather than written down twice.
+ *
+ * A sibling tool serves a dashboard of this shape over a different subject, and the two of them
+ * were describing the same documents in two places. These four are where that costs nobody a
+ * rename: `Manifest`, `NavItem`, `Badge` and `Health` were already identical field for field,
+ * because both tools were written against the same mounting spec. Adopting them is an import and a
+ * deleted declaration.
+ *
+ * And it is proved rather than asserted. `conformance.test.ts` runs the shared package's validators
+ * over responses captured from this very server, which is a different question from whether two
+ * type declarations look alike: a type is a promise between compilers and says nothing about the
+ * bytes a running server sends.
+ *
+ * WHAT IS DELIBERATELY NOT TAKEN is most of the file below, and one omission is worth naming.
+ * `BumpSummary` is not the shared `WorkItem`, and the difference is real rather than an oversight:
+ * this server calls a row's identity `slug` and its state `verdict`, where the shared contract says
+ * `id` and `state`. Two renames, in the Java, which is a change to a running sweep rather than a
+ * change to a type. The conformance test measures that gap exactly, and finds it is the whole of
+ * the difference across every row, so whoever decides to close it can read the size of the job
+ * instead of estimating it.
+ *
+ * `Finding` IS A FALSE FRIEND and that is why it is not among these. Both packages export the name.
+ * Here it is something the supervisor noticed across bumps; there it is a claim about work carrying
+ * a critic's judgement, and that package's `Verdict` is the judgement rather than this file's
+ * settlement state. Two pairs of names, each pair one careless import from being swapped with no
+ * compiler complaint. The shared package kept them apart on purpose and so does this one.
+ */
+export type { Badge, Health, Manifest, NavItem } from 'ratchet-ui/wire'
+
 /** What the gate or the closers settled a bump as. The corpus vocabulary, unabridged. */
 export type Verdict =
   | 'PASS'
@@ -29,6 +61,25 @@ export type Verdict =
   | 'bumping'
   /** In the manifest, not yet picked up by a lane. Most of a fresh sweep is this. */
   | 'queued'
+
+/**
+ * THE COMPILER'S PROOF THAT THIS VOCABULARY FITS THE SHARED WIRE, costing nothing at runtime.
+ *
+ * `ratchet-ui`'s `State` is a bare `string`, which reads like a type that gave up and is not. The
+ * two pipelines sharing these shapes have disjoint state vocabularies, and the authority on either
+ * of them is a `grep` in a shell script rather than a union in TypeScript. This project's is at
+ * `agent/run.sh:87`, where a bump counts as still working because its settlement matches
+ * `"state":"(bumping|requeued)"`. A union in a shared package would make that two places deciding,
+ * free to drift, and the direction they drift in is the bad one: a bump finished on the page and
+ * unfinished to the loop that is supposed to stop working on it.
+ *
+ * So the shared type stays a string, this file keeps the real vocabulary, and the assignability is
+ * asserted here instead. Written as a constrained type parameter rather than as
+ * `'PASS' satisfies Verdict`, because that form proves one member and this proves all twelve,
+ * including the one somebody adds next year.
+ */
+type Carries<Wide, Narrow extends Wide> = Narrow
+type _TheWireCarriesEveryVerdict = Carries<State, Verdict>
 
 /** One row of the corpus: a repository, at a commit, moved between two LTS levels. */
 export type BumpSummary = {
@@ -174,11 +225,23 @@ export type TraceEvent = {
     | 'settled'
     | 'priced'
     | 'exchange'
-  /** Which agent spoke, for `asked` and `tool`. */
-  agent?: string
-  /** Which stage recorded it, for `applied`. */
-  stage?: string
-  tool?: string
+  /**
+   * WHICH AGENT SPOKE, OR NULL ON A LINE NO AGENT PRODUCED. Null, and never absent.
+   *
+   * These three were declared `?: string`, and the server has never once sent them that way.
+   * `Json.optional` writes the key on every line and gives it JSON null when there is nothing to
+   * say, so `agent === undefined` is false on every deterministic step there has ever been. The
+   * feed asked exactly that question and drew three empty labels on every line of every record.
+   *
+   * Which is the same rule as `because` on the row above, and the second time this distinction has
+   * cost something here. It was found by running the shared package's validators over responses
+   * this server actually sent: `conformance.test.ts`, and `EventFeed.test.tsx` for the rendering.
+   */
+  agent: string | null
+  /** Which stage recorded it, or null on a line no stage claimed. */
+  stage: string | null
+  /** Which tool was called, or null on the kinds that call none. */
+  tool: string | null
   /** The body. Long, frequently: the page folds it rather than the server truncating it. */
   text: string
   /** The server's own token counts, present on `exchange` and zero elsewhere. */
@@ -275,20 +338,6 @@ export type AgentPrompt = {
   edited: boolean
 }
 
-/** The manifest a shell reads. Mirrors spec 17 of the sibling tool, field for field. */
-export type Manifest = {
-  id: string
-  name: string
-  description: string
-  version: string
-  basePath: string
-  assetPrefix: string
-  api: string
-  health: string
-  nav: { label: string; path: string; badge: string | null }[]
-  badges: Record<string, { endpoint: string; field: string }>
-}
-
 /** The header's two numbers: how big the corpus is, and whether it is still moving. */
 export type Summary = {
   bumps: number
@@ -332,5 +381,3 @@ export type Security = {
   }[]
   byBump: { slug: string; repo: string; from: number; to: number; before: number; after: number }[]
 }
-
-export type Health = { ok: true; version: string } | { ok: false; why: string }
