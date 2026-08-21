@@ -9,7 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "ratchet-ui": "github:vasiliy-mikhailov/ratchet-ui#v0.2.0"
+    "ratchet-ui": "github:vasiliy-mikhailov/ratchet-ui#v0.3.0"
   },
   "devDependencies": {
     "@bjv/config": "workspace:*",

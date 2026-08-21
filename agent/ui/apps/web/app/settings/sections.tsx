@@ -3,9 +3,12 @@
 import { useEffect, useState } from 'react'
 import type { Finding } from '@bjv/types'
 import {
+  ACCOUNT,
+  Account,
   Disclosure,
   EmptyNote,
   FIELD,
+  KeyStatus,
   LabeledField,
   Loaded,
   Pill,
@@ -91,11 +94,11 @@ export function RunSection() {
               </>
             }
           >
-            <p style={{ margin: '0 0 12px', fontSize: '13px', lineHeight: 1.6, maxWidth: '72ch' }}>
+            <Account>
               How many repositories are bumped at the same time. Between {run.min} and {run.max}. The
               server clamps what you save, so what appears here afterwards is what it kept, not what you
               typed.
-            </p>
+            </Account>
             <LabeledField label="lanes">
               <input
                 style={FIELD}
@@ -237,16 +240,15 @@ export function ModelSection() {
             </>
           }
         >
-          <div style={{ margin: '0 0 12px' }}>
-            <Pill tone={model.keySet ? 'good' : 'alarm'}>
-              {model.keySet ? 'key set' : 'no key'}
-            </Pill>
-            <span style={{ marginLeft: '8px', fontSize: '12.5px', color: 'var(--text-secondary)' }}>
-              {model.keySet
-                ? 'the agents are using the key from the environment'
-                : 'every agent call will be refused until one is set on the container'}
-            </span>
-          </div>
+          {/* WHAT THE ABSENCE MEANS IS THIS PAGE'S SENTENCE AND NOT THE COMPONENT'S. The sibling
+              tool's settings page can set a key, so its no-key sentence tells a reader what to do
+              next; this one deliberately renders no key field at all, so its sentence has to say
+              that the fix is somewhere else entirely. Neither is true of the other page. */}
+          <KeyStatus
+            keyed={model.keySet}
+            keySource="the environment"
+            whenAbsent="every agent call will be refused until one is set on the container"
+          />
           <LabeledField label="model" hint="What to ask for. Must be a name the endpoint below serves.">
             <input style={READONLY} value={model.model} readOnly />
           </LabeledField>
@@ -335,7 +337,10 @@ function RegistryUpload({ onLoaded }: { onLoaded: () => void }) {
         </>
       }
     >
-      <p style={{ margin: '0 0 10px', fontSize: '13px', lineHeight: 1.6, maxWidth: '72ch' }}>
+      {/* THE ONE PARAGRAPH ON THIS PAGE THAT IS NOT AN `Account`, said out loud rather than made
+          into a third prop: it leads straight into the block below it and sits closer to it than a
+          paragraph that stands on its own. */}
+      <p style={{ ...ACCOUNT, margin: '0 0 10px' }}>
         One bump per line, five comma-separated fields:
       </p>
       <pre
@@ -357,19 +362,19 @@ https://github.com/owner/name, bdc86ebe64e2ec6d…, 11, 17,
 https://github.com/owner/other,                 , 17, 21,
 https://git.internal/team/thing, 9f1c2d…        , 11, 17, ghp_xxx`}
       </pre>
-      <p style={{ margin: '0 0 12px', fontSize: '13px', lineHeight: 1.6, maxWidth: '72ch' }}>
+      <Account>
         <strong>Every comma is mandatory, including the last one.</strong> The sha and the key may be
         blank, but they may not be missing: a row with a comma dropped is a row whose columns cannot
         be told apart, and guessing which optional was left out is how a key gets read as a JDK
         level.
-      </p>
-      <p style={{ margin: '0 0 12px', fontSize: '13px', lineHeight: 1.6, maxWidth: '72ch' }}>
+      </Account>
+      <Account>
         A blank sha takes the default branch and records the commit it resolved, so a re-run still
         measures the same tree. A branch name is refused for the opposite reason. A key is used to
         clone and is stored where this page cannot read it back — the reply below says how many rows
         carried one and never what they were. A line that will not parse is reported back with the
         others rather than dropped.
-      </p>
+      </Account>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '0 0 12px' }}>
         <input

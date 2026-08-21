@@ -1,6 +1,6 @@
 import type { Package } from '@bjv/types'
-import { EmptyNote } from 'ratchet-ui/components'
-import { CELL, HEAD, MONO, ROW, TABLE } from '../primitives/table'
+import { DataTable, EmptyNote, type Column } from 'ratchet-ui/components'
+import { MONO } from '../primitives/table'
 
 export type PackageTableProps = { packages: Package[] }
 
@@ -15,70 +15,72 @@ export type PackageTableProps = { packages: Package[] }
  * Rows are collapsed where every module agrees, which is the common case, and the module count is
  * shown instead. A reader who needs the per-module detail can still see it in the count; a reader
  * who does not is no longer reading the same line six times.
+ *
+ * BOTH TABLES ON THIS SITE MOVED TO `DataTable` IN ONE COMMIT, and that is not tidiness. The guard
+ * that keeps the corpus and this table set alike, `tables.test.tsx`, works by comparing the insets
+ * of two RENDERED tables. Converting one and leaving the other keeps that test passing while the two
+ * drift through different code paths, which is the one arrangement worse than the drift it was
+ * written to catch.
  */
 export function PackageTable({ packages }: PackageTableProps) {
-  if (packages.length === 0) {
-    return <EmptyNote>No dependency scan for this bump.</EmptyNote>
-  }
-  const rows = collapse(packages)
+  const columns: Column<Row>[] = [
+    { head: 'package', cellStyle: { fontFamily: MONO }, cell: (r) => r.name },
+    {
+      head: 'modules',
+      cellStyle: { color: 'var(--text-tertiary)' },
+      cell: (r) => (r.modules === 1 ? r.module : `${r.modules} modules`),
+    },
+    { head: 'before', cell: (r) => r.versionBefore ?? '—' },
+    {
+      head: 'after',
+      cell: (r) =>
+        r.versionAfter == null ? (
+          '—'
+        ) : r.versionAfter === r.versionBefore ? (
+          <span style={{ color: 'var(--text-tertiary)' }}>unchanged</span>
+        ) : (
+          r.versionAfter
+        ),
+    },
+    {
+      head: 'CVEs',
+      align: 'right',
+      cell: (r) => (
+        <>
+          <span style={{ color: 'var(--cve-remaining)' }}>{r.cvesBefore}</span>
+          {' → '}
+          {/* NOT MEASURED IS NOT ZERO. A green 0 here told a reader the dependency had been cleaned
+              up on bumps that were never scanned a second time at all. */}
+          {r.cvesAfter === null ? (
+            <span style={{ color: 'var(--text-tertiary)' }} title="no after scan">
+              —
+            </span>
+          ) : (
+            <span
+              style={{
+                color:
+                  r.cvesAfter < r.cvesBefore
+                    ? 'var(--cve-cleared)'
+                    : r.cvesAfter > r.cvesBefore
+                      ? 'var(--cve-introduced)'
+                      : 'var(--cve-remaining)',
+              }}
+            >
+              {r.cvesAfter}
+            </span>
+          )}
+        </>
+      ),
+    },
+  ]
+
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={TABLE}>
-        <thead>
-          <tr>
-            <th style={HEAD}>package</th>
-            <th style={HEAD}>modules</th>
-            <th style={HEAD}>before</th>
-            <th style={HEAD}>after</th>
-            <th style={{ ...HEAD, textAlign: 'right' }}>CVEs</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.key} style={ROW}>
-              <td style={{ ...CELL, fontFamily: MONO }}>{r.name}</td>
-              <td style={{ ...CELL, color: 'var(--text-tertiary)' }}>
-                {r.modules === 1 ? r.module : `${r.modules} modules`}
-              </td>
-              <td style={CELL}>{r.versionBefore ?? '—'}</td>
-              <td style={CELL}>
-                {r.versionAfter == null ? (
-                  '—'
-                ) : r.versionAfter === r.versionBefore ? (
-                  <span style={{ color: 'var(--text-tertiary)' }}>unchanged</span>
-                ) : (
-                  r.versionAfter
-                )}
-              </td>
-              <td style={{ ...CELL, textAlign: 'right' }}>
-                <span style={{ color: 'var(--cve-remaining)' }}>{r.cvesBefore}</span>
-                {' → '}
-                {/* NOT MEASURED IS NOT ZERO. A green 0 here told a reader the dependency had been
-                    cleaned up on bumps that were never scanned a second time at all. */}
-                {r.cvesAfter === null ? (
-                  <span style={{ color: 'var(--text-tertiary)' }} title="no after scan">
-                    —
-                  </span>
-                ) : (
-                  <span
-                    style={{
-                      color:
-                        r.cvesAfter < r.cvesBefore
-                          ? 'var(--cve-cleared)'
-                          : r.cvesAfter > r.cvesBefore
-                            ? 'var(--cve-introduced)'
-                            : 'var(--cve-remaining)',
-                    }}
-                  >
-                    {r.cvesAfter}
-                  </span>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      rows={collapse(packages)}
+      columns={columns}
+      rowKey={(r) => r.key}
+      empty={<EmptyNote>No dependency scan for this bump.</EmptyNote>}
+    />
   )
 }
 
@@ -116,6 +118,11 @@ export function collapse(packages: Package[]): Row[] {
  *
  * A row whose after was never measured cannot be scored, so it sorts as having cleared nothing and
  * keeps its place by what it carried.
+ *
+ * THE SORT STAYS HERE rather than becoming a prop on the shared shell. The sibling's index table has
+ * a written decision NOT to sort, because its order is the run's plan and sorting by state groups
+ * everything nobody has reached at one end, which looks like progress. Order belongs to whoever owns
+ * the rows.
  */
 export function best(a: Row, b: Row): number {
   return cleared(b) - cleared(a) || left(b) - left(a) || a.name.localeCompare(b.name)

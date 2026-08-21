@@ -5,6 +5,14 @@ export type RelativeTimeProps = { at: number; now?: number }
  *
  * The `now` prop exists so this is testable without freezing a clock globally, and so a table of
  * fifty rows shares one reading rather than taking fifty that disagree by milliseconds.
+ *
+ * THIS ONE STAYS IN THIS REPOSITORY, and the file it used to share with `duration` is the reason it
+ * is worth saying why. The sibling tool has a "how long ago" too and the two do not converge: this
+ * crosses into minutes at sixty seconds and rounds, that one crosses at ninety and floors, it has a
+ * day rung this reaches at forty-eight hours, its version is a component with a timer inside it that
+ * slows down as the number does, and it has two variants where 0 means "nothing yet" in one and an
+ * epoch in the other. Two products, not one written twice. `ratchet-ui`'s `time.ts` carries the same
+ * note, so that nobody spends an afternoon trying again.
  */
 export function relative(at: number, now: number): string {
   const s = Math.max(0, Math.round((now - at) / 1000))
@@ -17,26 +25,15 @@ export function relative(at: number, now: number): string {
 }
 
 /**
- * A DURATION, NOT A TIME AGO. `relative` says "3h ago"; this says "3h 4m", which is what a reader
- * wants of a bump still running, of a sweep's elapsed time, and of an eta that has not happened.
+ * A DURATION IS NOT A TIME AGO, AND ONLY ONE OF THE TWO TRAVELLED.
  *
- * Seconds survive below an hour because that is the range where they carry information: "8m 45s"
- * against "9m" is the difference between a fast bump and a rounded one. Above an hour they are
- * noise and the minutes are what matters.
+ * `relative` says "3h ago"; `duration` says "3h 4m", which is what a reader wants of a bump still
+ * running, of a sweep's elapsed time, and of an eta that has not happened. Both dashboards had
+ * written the second one and their two versions differed only in the rounding, so it is now
+ * `ratchet-ui/time`, which reaches no React at all and can therefore be used by a test or a server
+ * log line as well as by a cell. Re-exported from here so that no call site had to move.
  */
-export function duration(ms: number): string {
-  const s = Math.max(0, Math.round(ms / 1000))
-  if (s < 60) return `${s}s`
-  const m = Math.floor(s / 60)
-  if (m < 60) return s % 60 === 0 ? `${m}m` : `${m}m ${s % 60}s`
-  const h = Math.floor(m / 60)
-  return m % 60 === 0 ? `${h}h` : `${h}h ${m % 60}m`
-}
-
-/** The estimator speaks in whole minutes, so its unit is the one that comes back out. */
-export function spellMinutes(minutes: number): string {
-  return duration(minutes * 60_000)
-}
+export { duration, spellMinutes } from 'ratchet-ui/time'
 
 export function RelativeTime({ at, now = Date.now() }: RelativeTimeProps) {
   return (

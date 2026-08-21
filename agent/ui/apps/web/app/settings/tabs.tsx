@@ -1,19 +1,25 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import type { Style } from '@bjv/ui'
+import { SectionTabs } from '@bjv/ui'
 import { href } from '@/lib/api'
 
 /**
  * THE SECTIONS OF THIS PAGE, AS THE SIBLING TOOL ARRANGES THEM.
  *
- * A ruled bar, the sections on the left and the supervisor pushed to the right — because the
+ * A ruled bar, the sections on the left and the supervisor pushed to the right, because the
  * supervisor is not a setting, it is a thing that watches the run, and putting it in the same row
  * as "the model" would invite a reader to look for a value to change in it.
  *
  * `?a=` keys the tab, which is the sibling's parameter name. Two tools whose settings pages take
  * different query parameters for the same idea are two tools; a shell that deep-links into either
  * of them should not have to remember which is which.
+ *
+ * THE BAR ITSELF IS NOW `SectionTabs` IN `ratchet-ui`, and the two files that met in it had never
+ * seen each other: the tab inset, the radius, the token under the current tab, the bar's own inset
+ * and its bottom rule were identical declarations in both, and both had written the trailing
+ * departure with an auto left margin and the same argument for it in words. What stayed here is
+ * everything that is about THIS tool: the routes, the words on the tabs, and the copy under them.
  */
 export const TABS = [
   // THE SHAPE, NOT THE PROMPTS. A list of thirty-four prompts is an inventory; what a reader
@@ -37,43 +43,27 @@ export const ABOUT: Record<TabName, { title: string; subtitle: string }> = {
   supervisor: { title: 'the supervisor', subtitle: 'what it sees that one bump cannot' },
 }
 
-const BAR: Style = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '4px',
-  padding: '10px 24px',
-  borderBottom: '1px solid var(--border-soft)',
-  background: 'var(--bg-panel)',
-}
-
-function tabStyle(current: boolean): Style {
-  return {
-    padding: '5px 11px',
-    borderRadius: '6px',
-    fontSize: '12.5px',
-    textDecoration: 'none',
-    whiteSpace: 'nowrap',
-    color: current ? 'var(--text-primary)' : 'var(--text-tertiary)',
-    background: current ? 'var(--state-selected-bg)' : 'transparent',
-    fontWeight: current ? 600 : 400,
-  }
-}
-
 export function SettingsTabs({ current }: { current: TabName }) {
   return (
-    <nav style={BAR} aria-label="Settings sections">
-      {TABS.map((t) => (
-        <a key={t.a} href={href(`/settings/?a=${t.a}`)} style={tabStyle(current === t.a)}>
-          {t.label}
-        </a>
-      ))}
-      <a
-        href={href('/settings/?a=supervisor')}
-        style={{ ...tabStyle(current === 'supervisor'), marginLeft: 'auto' }}
-      >
-        the supervisor
-      </a>
-    </nav>
+    <SectionTabs
+      label="Settings sections"
+      tabs={TABS.map((t) => ({
+        href: href(`/settings/?a=${t.a}`),
+        label: t.label,
+        current: current === t.a,
+      }))}
+      // ONE DEPARTURE, AND IT IS LIT WHEN THE READER IS ON IT. The sibling's version of this bar
+      // never lights a departure, on the grounds that lighting one claims the reader is already
+      // there. That is right for a link that leaves the page; the supervisor is a section of this
+      // page wearing a divider, so it is lit like any other.
+      trailing={[
+        {
+          href: href('/settings/?a=supervisor'),
+          label: 'the supervisor',
+          current: current === 'supervisor',
+        },
+      ]}
+    />
   )
 }
 
