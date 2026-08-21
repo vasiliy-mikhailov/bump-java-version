@@ -109,6 +109,34 @@ purpose — do not reuse `BJV_IMAGE` for builds.
 `BJV_THINKING=false` if the LLM is not Qwen and rejects `chat_template_kwargs.enable_thinking`.
 The endpoint still needs tool-calling.
 
+## Rounds
+
+A lane has a wall-clock budget. When it runs out the bump stops **between stages**, keeps its
+checkout and its journal, and goes back to the queue in state `paused` with its round one higher;
+the next lane continues on the same workspace while the pipeline is unchanged, and starts the work
+over when it is not. Nothing about the clock reaches the container: it reacts to a marker file the
+launcher writes, so no prompt, tool or environment variable can tell an agent it is being timed.
+
+| variable | default | what it is |
+| --- | --- | --- |
+| `BJV_ROUND_MINUTES` | 360 | one lane's budget, in minutes of elapsed time. Also live-readable per lane from `$BJV_RUNROOT/round_minutes`, the way `max_lanes` is |
+| `BJV_ROUND_GRACE` | 45 | minutes after the budget before a lane that never stopped is killed outright |
+| `BJV_MAX_ROUNDS` | 4 | rounds one bump may have before it settles `out-of-rounds`. 0 disables the cap, and then the launcher cannot terminate |
+| `BJV_WS_FLOOR_GB` | 60 | free space below which a boundary wipes the workspace instead of keeping it |
+| `BJV_ROUND_KEEP_HOURS` | 48 | how long a paused workspace nobody came back for is kept |
+| `BJV_KEEP_WS` | unset | keep the checkout of a bump that reached a verdict, for inspection |
+
+**360 is measured, not chosen.** Over the 178 terminal bumps of one sweep, which cost 733 lane-hours
+between them, a six-hour budget ends 13% of bumps and 7% of the PASSes at a boundary, and those 13%
+are holding 278 of the 733 lane-hours. 240 would cut 22 PASSes, 17% of every success in that corpus,
+to reclaim 64 more lane-hours. It is calibrated at 8 lanes against one endpoint: elapsed time moves
+with contention, so raising `max_lanes` without raising this raises the round rate silently.
+
+**A terminal settlement now wipes `ws/<slug>`.** Nothing ever did before, so every repository the
+harness had touched kept its checkout and its build output: 178 of 186 directories and 27 of 33 GB
+in the tree this was measured on, which on a 1400-row corpus projects past the free space on the
+disk. Preserving a workspace across a round boundary is affordable only because of that line.
+
 ## Images
 
 **bjv-agent.** Fat jar, built from Central artifacts only. First copy: retag Hub

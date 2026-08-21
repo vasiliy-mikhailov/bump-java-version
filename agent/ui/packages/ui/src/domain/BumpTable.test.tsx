@@ -27,6 +27,7 @@ const ROW: BumpSummary = {
   from: 17,
   to: 21,
   verdict: 'PASS',
+  round: null,
   because: null,
   baselineGreen: true,
   gateGreen: true,
@@ -170,9 +171,46 @@ describe('the two lamps beside the verdict', () => {
     // Straight after the verdict, so the two facts sit beside the word they support.
     expect(heads.indexOf('green')).toBe(heads.indexOf('verdict') + 1)
     expect(heads.indexOf('tests')).toBe(heads.indexOf('green') + 1)
+    // AND THE ROUND SITS BESIDE `took`, WHICH IS THE COLUMN IT QUALIFIES. Four hours over one
+    // round and four hours over three are different facts about a repository, and neither number
+    // says the other.
+    expect(heads.indexOf('round')).toBe(heads.indexOf('took') + 1)
     const green = container.querySelectorAll('th')[heads.indexOf('green')]
     expect(green?.getAttribute('title')).toContain(
       'the baseline before the bump, then the gate after it',
     )
+  })
+
+  /**
+   * THE ROUND SHOWS UP EXACTLY WHEN IT MEANS SOMETHING.
+   *
+   * Six bumps in seven finish inside their first lane budget, so a column printing "1" on nearly
+   * every row is a column a reader learns to skip past, and the row worth finding -- the repository
+   * that has held a lane three times without settling -- would be hidden inside it.
+   */
+  it('shows the round only on a bump that has taken more than one', () => {
+    const cellsFor = (round: string | null) => {
+      const { container } = render(
+        <BumpTable bumps={[{ ...ROW, round }]} hrefFor={(slug) => `/bump/${slug}`} now={ROW.at} />,
+      )
+      const heads = Array.from(container.querySelectorAll('th')).map((th) => th.textContent)
+      return container.querySelectorAll('td')[heads.indexOf('round')]?.textContent
+    }
+
+    expect(cellsFor(null)).toBe('')
+    expect(cellsFor('1')).toBe('')
+    expect(cellsFor('3')).toBe('3')
+  })
+
+  /**
+   * A PAUSED BUMP HAS NOT BEEN JUDGED, so its gate lamp says "never reached" rather than "ran and
+   * was not green". The bump stopped between two stages and the gate may not have had its turn.
+   */
+  it('draws the gate lamp as unreached while a bump is between rounds', () => {
+    for (const verdict of ['paused', 'out-of-rounds'] as Verdict[]) {
+      const [, gate] = lamps({ verdict, gateGreen: false })
+      expect(hollow(gate)).toBe(true)
+      expect(gate.label).toContain('before the gate reached a verdict')
+    }
   })
 })

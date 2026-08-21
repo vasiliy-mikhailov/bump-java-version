@@ -127,6 +127,8 @@ describe('a corpus row measured against the shared work item', () => {
       'behavior-change',
       'infra',
       'bumping',
+      'paused',
+      'out-of-rounds',
       'queued',
     ])
     const served = fixture<BumpSummary[]>('bumps').map((row) => row.verdict)

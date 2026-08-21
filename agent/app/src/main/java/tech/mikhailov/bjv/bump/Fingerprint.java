@@ -2,6 +2,7 @@ package tech.mikhailov.bjv.bump;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import tech.mikhailov.ratchet.config.Prompts;
@@ -35,13 +36,33 @@ final class Fingerprint implements Version.Parts {
      * puts one in when the answer is not empty, and a second one makes a row nothing can parse.
      */
     static Supplier<String> provenanceOf(String bump, Path settlements) {
+        return provenanceOf(bump, settlements, () -> 0);
+    }
+
+    /**
+     * The same fields, with the round this lane is running appended.
+     *
+     * <p>ADDITIVE, AND LAST. {@code run.sh} greps {@code "bump":"} out of this file and bash
+     * re-reads a running script by byte offset, so a launcher cannot be corrected while it is up: a
+     * field may be appended to this row and never moved or renamed.
+     *
+     * <p>OUTSIDE {@link Version#fields}, WHICH IS NOT A DETAIL. That string is also what the fourth
+     * resume condition compares, so a round number inside it would make every round read as a new
+     * pipeline and nothing would ever resume.
+     *
+     * <p>Zero means nobody is counting, and an absent field is not round one: most of this corpus
+     * settled before rounds existed.
+     */
+    static Supplier<String> provenanceOf(String bump, Path settlements, IntSupplier round) {
         return () -> {
             String[] p = bump.split("\\|");
             if (p.length < 4) {
                 return "";
             }
             Path root = settlements.getParent() == null ? settlements : settlements.getParent();
-            return Version.fields(p[2] + "-" + p[3], root, OF_A_BUMP);
+            String fields = Version.fields(p[2] + "-" + p[3], root, OF_A_BUMP);
+            int n = round.getAsInt();
+            return n <= 0 ? fields : fields + ",\"round\":\"" + n + "\"";
         };
     }
 

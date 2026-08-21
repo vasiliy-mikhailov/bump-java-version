@@ -41,7 +41,13 @@ final class Corpus {
         this.compliance = new Compliance(this.results);
     }
 
-    /** A count for the shell's navigation, without the shell knowing what a bump is. */
+    /**
+     * A count for the shell's navigation, without the shell knowing what a bump is.
+     *
+     * <p>PAUSED IS DELIBERATELY NOT A SECOND BADGE. The shell's manifest declares which field a nav
+     * item polls, so a count nothing declares is a field nobody reads; the parked bumps are visible
+     * where they belong, as their own verdict in the list and in the histogram above it.
+     */
     String badges() {
         long running = results.settlements().values().stream()
                 .filter(r -> "bumping".equals(r.getOrDefault("state", ""))).count();
@@ -183,8 +189,16 @@ final class Corpus {
                 Json.field("to", parts.length > 3 ? parts[3] : "0"),
                 // REQUEUED READS AS QUEUED. The state exists so the runner knows the old
                 // verdict no longer counts; a reader already has a word for waiting.
+                //
+                // PAUSED DOES NOT, and that is the whole point of the feature being visible. A bump
+                // that has never started and a bump that has burned three lane budgets are both
+                // waiting, and a reader who cannot tell them apart cannot find the second one.
                 Json.field("verdict", Json.string("requeued".equals(r.get("state"))
                         ? "queued" : r.getOrDefault("state", "bumping"))),
+                // WHICH ROUND OF ITS LANE BUDGET THIS ROW BELONGS TO. Optional because most of the
+                // corpus settled before rounds existed, and absent is not one: a dash means nobody
+                // was counting, which is a different fact from a first round.
+                Json.field("round", Json.optional(r.get("round"))),
                 Json.field("because", Json.optional(because)),
                 Json.field("baselineGreen", String.valueOf("true".equals(r.get("baseline")))),
                 Json.field("gateGreen", String.valueOf("true".equals(r.get("gate")))),

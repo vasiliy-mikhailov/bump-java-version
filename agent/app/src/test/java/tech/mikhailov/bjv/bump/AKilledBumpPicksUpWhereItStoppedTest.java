@@ -207,7 +207,7 @@ class AKilledBumpPicksUpWhereItStoppedTest {
     }
 
     /**
-     * A RESUME TAKES THREE CONDITIONS TO SAY YES AND ANY ONE OF THEM TO SAY NO.
+     * A RESUME TAKES FOUR CONDITIONS TO SAY YES AND ANY ONE OF THEM TO SAY NO.
      *
      * <p>Starting fresh has to remain the behaviour when anything is off, because a wrong resume is
      * worse than a slow one: the stages it skips are skipped against edits that are not in this
@@ -220,32 +220,175 @@ class AKilledBumpPicksUpWhereItStoppedTest {
         Journal journal = new Journal(file, () -> "sha1");
         journal.done("before-pins", "core", "core: pinned", "sha1");
 
-        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha1"),
+        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha1", PIPELINE),
                 "nothing has settled anything about this bump, so nothing says it was interrupted");
 
         settle(settlements, BUMP, "bumping");
-        assertTrue(Bump.resuming(journal, settlements, BUMP, "sha1"));
+        assertTrue(Bump.resuming(journal, settlements, BUMP, "sha1", PIPELINE));
 
-        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha2"),
+        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha2", PIPELINE),
                 "the checkout is not where the journal left it, and replaying onto it is worse "
                         + "than starting over");
 
         assertFalse(Bump.resuming(new Journal(dir.resolve("empty.jsonl"), () -> "sha1"),
-                settlements, BUMP, "sha1"), "nothing completed, so there is nothing to pick up");
+                settlements, BUMP, "sha1", PIPELINE),
+                "nothing completed, so there is nothing to pick up");
 
         settle(settlements, BUMP, "PASS");
-        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha1"),
+        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha1", PIPELINE),
                 "that bump finished; a settled row is not an interrupted one");
 
         settle(settlements, BUMP, "requeued");
-        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha1"),
+        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha1", PIPELINE),
                 "and a requeue is somebody asking for the work to be done again from the start");
 
         // A ROW FOR SOMEBODY ELSE IS NOT A ROW FOR THIS BUMP. The file is shared by the whole
         // sweep, so the key is checked rather than assumed.
         settle(settlements, "other/repo|def456|17|21", "bumping");
-        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha1"),
+        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha1", PIPELINE),
                 "the last row about THIS bump still says it finished");
+    }
+
+    /**
+     * A ROUND BOUNDARY IS A RESUMABLE STATE AND A REQUEUE IS NOT, WHICH IS WHY THEY ARE TWO WORDS.
+     *
+     * <p>Both mean the bump is unfinished and both send it back to the queue. They mean opposite
+     * things about the stored state: a boundary is this attempt stopped mid-sentence, and a requeue
+     * is somebody on a page asking for the work to be done again from the start. Resuming one of
+     * those would hand that person back exactly what they were trying to discard.
+     */
+    @Test
+    void aRoundBoundaryIsPickedUpAndARequeueIsNot(@TempDir Path dir) throws Exception {
+        Path settlements = dir.resolve("settlements.jsonl");
+        Journal journal = new Journal(dir.resolve("journal.jsonl"), () -> "sha1");
+        journal.done("before-pins", "core", "core: pinned", "sha1");
+
+        settle(settlements, BUMP, "paused");
+        assertTrue(Bump.resuming(journal, settlements, BUMP, "sha1", PIPELINE),
+                "the lane ran out of budget between two stages; the tree and the journal are the "
+                        + "ones it left");
+
+        settle(settlements, BUMP, "requeued");
+        assertFalse(Bump.resuming(journal, settlements, BUMP, "sha1", PIPELINE));
+    }
+
+    /**
+     * AND NOT WHEN THE PIPELINE MOVED UNDER IT, WHICH IS WHAT A ROUND BOUNDARY MADE ROUTINE.
+     *
+     * <p>This sweep deploys about once every ten hours against a six-hour budget, so a paused bump
+     * meeting a different pipeline is the ordinary case rather than the exotic one. Skipping stages
+     * a different pipeline paid for would file one pipeline's work under another's name.
+     *
+     * <p>THE FIELDS ARE COMPARED ONE AT A TIME AND EMPTY IS A VALUE. Every row written before the
+     * launcher forwarded the image identity carries an empty one, and reading empty as "no
+     * objection" would resume across exactly the change that introduced this check.
+     */
+    @Test
+    void aResumeIsRefusedWhenTheRowWasWrittenByADifferentPipeline(@TempDir Path dir)
+            throws Exception {
+        Path settlements = dir.resolve("settlements.jsonl");
+        Journal journal = new Journal(dir.resolve("journal.jsonl"), () -> "sha1");
+        journal.done("before-pins", "core", "core: pinned", "sha1");
+        settle(settlements, BUMP, "paused");
+
+        assertTrue(Bump.resuming(journal, settlements, BUMP, "sha1", PIPELINE));
+
+        for (String moved : List.of(
+                fingerprint("ff7a4ab4", "sha256:6f2c1b0a9d3", "54906737", "bb42094f"),
+                fingerprint("ff7a4ab3", "sha256:00000000000", "54906737", "bb42094f"),
+                fingerprint("ff7a4ab3", "sha256:6f2c1b0a9d3", "c3d4e5f6", "bb42094f"),
+                fingerprint("ff7a4ab3", "sha256:6f2c1b0a9d3", "54906737", "0a0a0a0a"))) {
+            assertFalse(Bump.resuming(journal, settlements, BUMP, "sha1", moved),
+                    "one field moved and that is a different pipeline: " + moved);
+        }
+
+        // A ROW FROM BEFORE ANY OF THIS EXISTED NAMES NO PIPELINE, and it is not a match for one.
+        Path older = dir.resolve("older.jsonl");
+        tech.mikhailov.ratchet.record.Settlement.note(older, BUMP, "paused", "b", false, false, "");
+        assertFalse(Bump.resuming(journal, older, BUMP, "sha1", PIPELINE),
+                "a blank fingerprint agrees with nothing except another blank one");
+
+        // AND A HOST WHERE NOTHING CAN BE STAMPED STILL RESUMES, because empty matches empty and
+        // the comparison simply loses those dimensions rather than refusing every run.
+        assertTrue(Bump.resuming(journal, older, BUMP, "sha1", ""));
+    }
+
+    /**
+     * THE ROUND REACHES THE ROW, LAST, AND IT IS NOT PART OF THE FINGERPRINT.
+     *
+     * <p>Last because {@code run.sh} greps this file and bash cannot be corrected while it runs, so
+     * a field may be appended and never moved. Outside the fingerprint because that string is what
+     * the fourth resume condition compares: a round number inside it would make every round read as
+     * a new pipeline, and nothing would ever resume.
+     */
+    @Test
+    void theRoundIsAppendedToTheRowWithoutJoiningTheFingerprint(@TempDir Path dir)
+            throws Exception {
+        Path settlements = dir.resolve("settlements.jsonl");
+        int[] round = {3};
+        JsonlTrace trace = new JsonlTrace(dir.resolve("trace.jsonl"), settlements, BUMP,
+                Fingerprint.provenanceOf(BUMP, settlements, () -> round[0]), List.of(), List.of());
+        trace.settled(BUMP, "paused", "the lane ended between stages", false, false, true);
+
+        String row = Files.readAllLines(settlements).get(0);
+        assertTrue(row.contains(",\"round\":\"3\"}"),
+                "the round is the last field on the row: " + row);
+        assertFalse(Bump.pipelineOf(BUMP, dir).contains("round"),
+                "and it is not in the string the resume condition compares");
+
+        // ZERO MEANS NOBODY IS COUNTING, which is most of this corpus and is not round one.
+        Path other = dir.resolve("other.jsonl");
+        new JsonlTrace(dir.resolve("t2.jsonl"), other, BUMP,
+                Fingerprint.provenanceOf(BUMP, other), List.of(), List.of())
+                .settled(BUMP, "PASS", "148 conserved", true, true, false);
+        assertFalse(Files.readAllLines(other).get(0).contains("round"),
+                "an absent round is absent, never nought");
+    }
+
+    /**
+     * A ROUND BOUNDARY SAYS NOTHING TO AN AGENT ABOUT A CLOCK, and that is a property to assert
+     * rather than a convention to remember.
+     *
+     * <p>The account lands in the trace, and the trace is fed back to the agents of the next round
+     * in ranked lines. This project's own finding is that a model told it is racing a clock produces
+     * garbage and gives up, so the words that would tell it one must not be in there: no minutes, no
+     * budget, no rounds remaining, no hurry.
+     */
+    @Test
+    void theBoundaryAccountTellsNobodyTheyAreRacingAClock(@TempDir Path dir) {
+        String account = Round.of(dir, BUMP).account("the module walk, before core");
+
+        for (String clock : List.of("minute", "hour", "budget", "clock", "time", "remaining",
+                "quickly", "hurry", "deadline", "out of")) {
+            assertFalse(account.toLowerCase(java.util.Locale.ROOT).contains(clock),
+                    "the account an agent may read says '" + clock + "': " + account);
+        }
+        assertTrue(account.startsWith("paused\n"), account);
+        assertTrue(account.contains("the module walk, before core"),
+                "it does say where it stopped, which is what a reader came for: " + account);
+    }
+
+    /**
+     * AND THE ROUND IS COUNTED OFF THE RECORD RATHER THAN KEPT ANYWHERE.
+     *
+     * <p>A stored counter would be a second copy of a fact these rows already carry, and two copies
+     * of one fact drift. The shell counts the same rows the same way, which is what lets either
+     * side write a boundary row without a number crossing between them.
+     */
+    @Test
+    void theRoundIsOneMoreThanTheBoundariesOnTheRecord(@TempDir Path dir) throws Exception {
+        Files.createDirectories(dir);
+        assertEquals(1, Round.of(dir, BUMP).number(), "a bump nobody has paused is in its first");
+
+        Path settlements = dir.resolve("settlements.jsonl");
+        settle(settlements, BUMP, "paused");
+        settle(settlements, "other/repo|def456|17|21", "paused");
+        assertEquals(2, Round.of(dir, BUMP).number(),
+                "somebody else's boundary is not this bump's round");
+
+        settle(settlements, BUMP, "bumping");
+        settle(settlements, BUMP, "paused");
+        assertEquals(3, Round.of(dir, BUMP).number());
     }
 
     /**
@@ -294,12 +437,55 @@ class AKilledBumpPicksUpWhereItStoppedTest {
                 "a progress note is not a trial and has nothing to be excluded from: " + rows.get(2));
     }
 
+    /**
+     * A BOUNDARY THROWN MID-WALK HAS TO REACH {@code run}, AND THAT IS AN ASSERTION RATHER THAN AN
+     * INFERENCE.
+     *
+     * <p>The walk is where a round will most often end, because it is where the hours go, and it is
+     * the deepest place a boundary is thrown from: through a per-module sequence, a walk, a block
+     * standing as a doer, and the triad that holds the loop. Two broad catches exist in the library
+     * around a model call. A third one added on this path would swallow the settlement and the
+     * launcher would read a paused bump as a crash.
+     */
+    @Test
+    void aBoundaryThrownInsideTheWalkTravelsOutOfIt() {
+        List<String> visited = new ArrayList<>();
+        Agent walk = tech.mikhailov.ratchet.flow.Flow.each("", () -> List.of("core", "web", "app"),
+                m -> m,
+                m -> tech.mikhailov.ratchet.flow.Flow.seq("module",
+                        tech.mikhailov.ratchet.flow.Flow.code("platform", task -> {
+                            if ("web".equals(m)) {
+                                throw new tech.mikhailov.ratchet.flow.Flow.Settled(
+                                        "paused\nthe lane ended between stages, at web");
+                            }
+                            visited.add(m);
+                            return m;
+                        })));
+
+        var settled = assertThrows(tech.mikhailov.ratchet.flow.Flow.Settled.class,
+                () -> walk.run(""));
+
+        assertEquals("paused", settled.account().split("\n", 2)[0],
+                "the state the sweep files is the first line of the account it carried");
+        assertEquals(List.of("core"), visited,
+                "the modules before it are done and the ones after it are not started");
+    }
+
     // ---- fixtures ----
 
-    /** A settlement row, in the shape the file already holds them. */
+    /** One pipeline, as the row records it and as the resume condition compares it. */
+    private static String fingerprint(String commit, String image, String prompts, String boms) {
+        return "\"commit\":\"" + commit + "\",\"image\":\"" + image + "\",\"prompts\":\"" + prompts
+                + "\",\"boms\":\"" + boms + "\"";
+    }
+
+    private static final String PIPELINE =
+            fingerprint("ff7a4ab3", "sha256:6f2c1b0a9d3", "54906737", "bb42094f");
+
+    /** A settlement row, in the shape the file already holds them, from THIS pipeline. */
     private static void settle(Path settlements, String bump, String state) {
         tech.mikhailov.ratchet.record.Settlement.note(settlements, bump, state, "because", false,
-                false, "");
+                false, PIPELINE);
     }
 
     /** A workspace on disk, for the two tests that read build files rather than fields. */

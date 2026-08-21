@@ -33,6 +33,7 @@ export {
   type Crumb,
   type PageHeaderProps,
 } from 'ratchet-ui/components'
+export { RoundHistory, type RoundHistoryProps } from './RoundHistory'
 export { SecurityDelta, type SecurityDeltaProps } from './SecurityDelta'
 export {
   ASIDE_WHY,

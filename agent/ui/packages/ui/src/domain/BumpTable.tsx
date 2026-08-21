@@ -204,6 +204,33 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
       ),
     },
     {
+      /**
+       * WHICH ROUND OF THE LANE BUDGET THIS IS, AND BLANK WHILE THAT MEANS NOTHING.
+       *
+       * A lane has a wall clock: when it runs out the bump stops between stages, keeps its
+       * checkout, and goes back to the queue with this number one higher. Six rounds in seven
+       * finish inside the first one, so a column that printed "1" on nearly every row would be a
+       * column a reader learns to ignore. It shows something exactly when there is something to
+       * see, which is the row that has held a lane more than once.
+       *
+       * BLANK COVERS TWO DIFFERENT FACTS AND THAT IS DELIBERATE. Round one, and a row from before
+       * lanes had a budget at all. Neither is anything a reader has to act on, and a column that
+       * distinguished them would spend every row saying so.
+       */
+      head: 'round',
+      align: 'right',
+      headTitle:
+        'how many lane budgets this bump has taken. Blank on the first, which is nearly all of them. It counts rounds of the SAME attempt: when the harness is deployed under a paused bump the run starts over and this goes back to one, and the record page shows every boundary so that case is visible.',
+      cell: (b) =>
+        b.round == null || b.round === '1' ? (
+          <span style={{ color: 'var(--text-tertiary)' }} />
+        ) : (
+          <span style={{ color: 'var(--verdict-again)' }} title={`round ${b.round} of this attempt`}>
+            {b.round}
+          </span>
+        ),
+    },
+    {
       head: 'a person would have',
       align: 'right',
       // THE ESTIMATE, AND ONLY EVER ITS OWN COLUMN. It is what the estimator triad priced the work
@@ -282,7 +309,17 @@ const NO_GATE_BEHIND_IT = new Set<Verdict>(['no-baseline'])
  * of the answer that has not arrived.
  */
 function gateRan(verdict: Verdict): boolean {
-  return verdict !== 'queued' && verdict !== 'bumping' && !NO_GATE_BEHIND_IT.has(verdict)
+  // `paused` IS MID-FLIGHT IN EVERY SENSE, so it belongs with `bumping` rather than with a verdict.
+  // The bump stopped between two stages and the gate may not have had its turn yet; drawing the
+  // lamp dim would say it ran and did not go green, which invents the half of the answer that has
+  // not arrived. `out-of-rounds` is the same fact with the harness having given up.
+  return (
+    verdict !== 'queued' &&
+    verdict !== 'bumping' &&
+    verdict !== 'paused' &&
+    verdict !== 'out-of-rounds' &&
+    !NO_GATE_BEHIND_IT.has(verdict)
+  )
 }
 
 /**
@@ -340,6 +377,14 @@ function gateSays(b: BumpSummary): string {
   // baseline; a first run settles `no-baseline` in the baseline stage and never gets here.
   if (b.verdict === 'NO_BASELINE_NOTESTS') {
     return `the gate ran under JDK ${b.to} and had no baseline set to hold the project to, so there was nothing to conserve`
+  }
+  // BETWEEN ROUNDS, WHICH IS NOT THE SAME AS NOT STARTED. The lane ran out of its wall clock and
+  // stopped between two stages; whether the gate gets a turn is the next lane's business.
+  if (b.verdict === 'paused') {
+    return 'the round ended before the gate reached a verdict; the next lane continues from where this one stopped'
+  }
+  if (b.verdict === 'out-of-rounds') {
+    return 'the harness stopped spending lanes on this bump before the gate reached a verdict'
   }
   if (gateRan(b.verdict)) {
     return 'the gate ran and never went green, which is what settled this bump'

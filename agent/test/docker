@@ -103,30 +103,73 @@ esac
 
 # THE LANE. Blocks for a per-slug time, holds its registry entry for exactly that long, and settles
 # the bump on a clean exit so the next pass skips it -- the same two facts a real lane leaves behind.
+#
+# AND IT READS THE ROUND MARKER, because the real one does. run.sh does not kill a lane at the
+# budget: it writes $RESULTS/expiring/<bslug> and the container settles itself between stages. A
+# shim that ignored that would only ever exercise the backstop, so this one honours it by default
+# and a slug listed in $BJV_FAKE/wedged.tsv does not, which is the lane that has to be killed.
 slug=${name#bjvagent_}
-key=""; res=""
+work=""; key=""; res=""
 i=0
 while [ $i -lt ${#rest[@]} ]; do
   if [ "${rest[$i]}" = "tech.mikhailov.bjv.bump.Bump" ]; then
-    key=${rest[$(( i + 2 ))]:-}; res=${rest[$(( i + 3 ))]:-}
+    work=${rest[$(( i + 1 ))]:-}; key=${rest[$(( i + 2 ))]:-}; res=${rest[$(( i + 3 ))]:-}
   fi
   i=$(( i + 1 ))
 done
+bslug=$(printf '%s' "$key" | sed 's/[^A-Za-z0-9]\+/_/g')
 
 dur=$(awk -F'\t' -v s="$slug" '$1==s{print $2; exit}' "$BJV_FAKE/durations.tsv" 2>/dev/null)
 case "${dur:-}" in ''|*[!0-9]*) dur=${BJV_FAKE_DUR:-2} ;; esac
+wedged=$(awk -v s="$slug" '$1==s{print 1; exit}' "$BJV_FAKE/wedged.tsv" 2>/dev/null)
+
+# WHAT THE FINGERPRINT LOOKS LIKE ON THE WIRE, so the launcher's backstop row has something real to
+# lift. A killed lane leaves no settled row of its own, and run.sh copies these four fields out of
+# whatever the bump last wrote rather than recomputing what it cannot compute.
+FP='"commit":"ff7a4ab3","image":"sha256:6f2c1b0a9d3","prompts":"54906737","boms":"bb42094f"'
 
 : > "$PS/$name"
 ev "start $slug ${dur}s"
 trap 'rm -f "$PS/$name" 2>/dev/null' EXIT
 
+# EVERY ROUND LEAVES A LINE IN THE WORKSPACE, and says how many it found there. That count is how a
+# test tells a preserved checkout from a re-cloned one from the INSIDE, which no amount of log
+# reading can -- and it goes into the event log because the workspace itself is wiped the moment the
+# bump settles, so a test that read it afterwards would be reading a directory that is gone.
+seen=0
+if [ -n "$work" ]; then
+  mkdir -p "$work"
+  echo "$slug round" >> "$work/rounds.log"
+  seen=$(grep -c . "$work/rounds.log" 2>/dev/null)
+  ev "ws $slug $seen"
+fi
+# A BUMP THAT HAS ALREADY HAD A ROUND FINISHES IN THIS ONE, which is what the feature is for and
+# what lets a scenario terminate. A wedged lane is the exception: it is the bump that never gets
+# anywhere, which is the case the round cap exists for.
+[ -z "$wedged" ] && [ "$seen" -gt 1 ] && dur=1
+# One progress row, as a real lane writes on its way through, carrying the pipeline it is.
+[ -n "$res" ] && printf '{"at":"%s","bump":"%s","state":"bumping","because":"working","baseline":false,"gate":false,%s}\n' \
+  "$(date +%s%3N)" "$key" "$FP" >> "$res/settlements.jsonl"
+
 steps=$(( dur * 10 ))
 while [ $steps -gt 0 ]; do
-  [ -e "$PS/$name" ] || { ev "killed $slug"; exit 137; }   # docker rm -f, i.e. postponed
+  [ -e "$PS/$name" ] || { ev "killed $slug"; exit 137; }   # docker rm -f: postponed, or the grace
+  if [ -z "$wedged" ] && [ -n "$res" ] && [ -e "$res/expiring/$bslug" ]; then
+    # THE GRACEFUL BOUNDARY, WHICH IS THE JAVA'S AND NOT THE LAUNCHER'S. Between stages, with the
+    # round the record already carries plus one, and the pipeline this lane put its name to.
+    n=$(grep -F "\"bump\":\"$key\"," "$res/settlements.jsonl" 2>/dev/null |
+        grep -c '"state":"paused"')
+    n=$(( n + 1 ))
+    printf '{"at":"%s","bump":"%s","state":"paused","because":"the lane ended between stages","baseline":false,"gate":false,"resumed":false,%s,"round":"%s"}\n' \
+      "$(date +%s%3N)" "$key" "$FP" "$n" >> "$res/settlements.jsonl"
+    ev "paused $slug round $n"
+    exit 0
+  fi
   sleep 0.1
   steps=$(( steps - 1 ))
 done
 
-[ -n "$res" ] && printf '{"bump":"%s","state":"PASS"}\n' "$key" >> "$res/settlements.jsonl"
+[ -n "$res" ] && printf '{"at":"%s","bump":"%s","state":"PASS","because":"148 conserved","baseline":true,"gate":true,"resumed":false,%s}\n' \
+  "$(date +%s%3N)" "$key" "$FP" >> "$res/settlements.jsonl"
 ev "exit $slug"
 exit 0

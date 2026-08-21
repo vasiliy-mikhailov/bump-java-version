@@ -1,6 +1,7 @@
 package tech.mikhailov.bjv.web;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,8 +56,61 @@ final class Detail {
                                 Json.field("spoke",
                                         String.valueOf(spoke.getOrDefault(step.name(), 0))))))))),
                 Json.field("events", Json.array(events, Detail::event)),
+                Json.field("rounds", Json.array(boundaries(slug), Detail::boundary)),
                 Json.field("packages", Inventory.packages(events)),
                 Json.field("cves", Inventory.cves(events)));
+    }
+
+    /**
+     * EVERY ROUND THIS BUMP HAS ENDED, WHICH THE ROUND NUMBER ON ITS OWN CANNOT SAY.
+     *
+     * <p>A single number lies in the one case a reader most needs to see. When the pipeline moves
+     * under a paused bump the run starts over and the count goes back to one, so a repository that
+     * has been picked up five times and never once resumed reads as round one, which is exactly the
+     * repository somebody should look at: deploying is starving it. Two consecutive boundaries with
+     * different fingerprints say that, and only the whole list can.
+     *
+     * <p>ITS OWN READ RATHER THAN {@link Results#settlements}, which keeps the LAST row per bump.
+     * This wants ALL of them for one bump, and no other page does.
+     */
+    private List<Map<String, String>> boundaries(String slug) {
+        List<Map<String, String>> ended = new ArrayList<>();
+        for (String line : Results.lines(results.dir().resolve("settlements.jsonl"))) {
+            if (!line.contains("\"state\":\"paused\"") && !line.contains("\"state\":\"out-of-rounds\"")) {
+                continue;
+            }
+            Map<String, String> row;
+            try {
+                row = Json.row(line);
+            } catch (RuntimeException torn) {
+                // The file is appended to by processes that get killed. A torn row is a normal
+                // event here rather than a fault, and it is not a round.
+                continue;
+            }
+            if (slug.equals(Results.slug(row.getOrDefault("bump", "")))) {
+                ended.add(row);
+            }
+        }
+        return ended;
+    }
+
+    /**
+     * ONE ROUND BOUNDARY: when it happened, what it stopped in front of, and which pipeline it was.
+     *
+     * <p>The fingerprint travels because it is the diagnosis. The page compares one line's against
+     * the line above it, and where they differ it says the round started over rather than
+     * continued, which is invisible in the numbers alone.
+     */
+    private static String boundary(Map<String, String> r) {
+        return Json.object(
+                Json.field("at", String.valueOf(Results.num(r.getOrDefault("at", "0")))),
+                Json.field("state", Json.string(r.getOrDefault("state", ""))),
+                Json.field("round", Json.optional(r.get("round"))),
+                Json.field("because", Json.optional(r.get("because"))),
+                Json.field("commit", Json.optional(r.get("commit"))),
+                Json.field("image", Json.optional(r.get("image"))),
+                Json.field("prompts", Json.optional(r.get("prompts"))),
+                Json.field("boms", Json.optional(r.get("boms"))));
     }
 
     /**

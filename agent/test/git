@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
-# The other half of the seam. run.sh clones a repo and checks out a sha before it starts a lane;
-# neither fact is under test, so the clone makes an empty directory and the checkout succeeds.
+# The other half of the seam. run.sh clones a repo and checks out a sha before it starts a lane.
+#
+# A CLONE IS NOW A FACT THE TESTS READ. It used to be enough for the clone to succeed silently,
+# because a workspace was wiped and re-cloned on every attempt and there was nothing to tell apart.
+# A workspace that SURVIVES a round boundary makes "was this cloned again" the whole question, and
+# an exit-0-and-say-nothing shim would make a correct keep and a wrong re-clone identical. So each
+# clone appends to $BJV_FAKE/clones.log and leaves a .git behind, which is what run.sh checks for
+# before it trusts a workspace that is already there.
 set -u
 
 cmd=""
@@ -19,7 +25,10 @@ case "$cmd" in
     for a in ${args+"${args[@]}"}; do
       case "$a" in -*) ;; *) dest=$a ;; esac
     done
-    [ -n "$dest" ] && mkdir -p "$dest"
+    if [ -n "$dest" ]; then
+      mkdir -p "$dest/.git"
+      printf '%s\t%s\n' "$(date +%s%3N)" "$dest" >> "${BJV_FAKE:-/tmp}/clones.log" 2>/dev/null
+    fi
     exit 0 ;;
   ls-remote)
     echo -e "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef\tHEAD"

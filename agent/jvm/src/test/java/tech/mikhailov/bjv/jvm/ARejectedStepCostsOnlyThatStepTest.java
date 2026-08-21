@@ -157,4 +157,55 @@ class ARejectedStepCostsOnlyThatStepTest {
     void aNameThatIsNotACommitAnswersRatherThanThrows() {
         assertEquals("", tree.resolve("not-a-sha"), "a typo must come back as an answer");
     }
+
+    /**
+     * A FOURTH SCOPE, AND IT IS NOT A CRITIC'S: BACK TO WHAT THE MANIFEST NAMED.
+     *
+     * <p>A launcher that preserves a checkout across a round boundary hands the next lane a tree
+     * that may have been migrated by a pipeline that is no longer running. That tree has to go back
+     * to the commit the manifest names before anything measures a baseline on it, and the origin
+     * and its credential belong to the launcher, so this is the one undo that has to work without
+     * the network. The workspace is a full clone, so it does.
+     */
+    @Test
+    void aPreservedCheckoutGoesBackToWhatTheManifestNamed() throws Exception {
+        String manifest = tree.head();
+        write("pom.xml", "<project><properties><java.version>21</java.version></properties></project>");
+        tree.land("migrate");
+        write("A.java", "class A {}");
+        tree.land("bump core");
+        assertTrue(tree.migrated(), "the tree is carrying this harness's own commits");
+
+        tree.restartAt(manifest);
+
+        assertEquals(manifest, tree.head());
+        assertTrue(read("pom.xml").contains("17"), "the project is as it was cloned");
+        assertFalse(Files.exists(ws.resolve("A.java")), "and so is everything a stage added");
+        assertFalse(tree.migrated(),
+                "which is the point: a baseline measured here is a baseline and not a result");
+    }
+
+    /**
+     * AND IT TAKES THE BUILD OUTPUT WITH IT, which is the one thing a revert deliberately spares.
+     *
+     * <p>{@code revertTo} cleans without {@code -x} precisely so a critic's objection cannot delete
+     * a half-built target tree. A restart wants the opposite: classes compiled by a different
+     * pipeline version are not an input the next baseline may have, and target/ is on this
+     * repository's own exclude list, so nothing else would ever remove them.
+     */
+    @Test
+    void aRestartAlsoRemovesWhatADifferentPipelineBuilt() throws Exception {
+        String manifest = tree.head();
+        write("target/classes/Foo.class", "not really bytecode");
+        write("pom.xml", "<project><properties><java.version>21</java.version></properties></project>");
+        tree.land("migrate");
+
+        tree.revertTo(manifest);
+        assertTrue(Files.exists(ws.resolve("target/classes/Foo.class")),
+                "an objection may not delete build output");
+
+        tree.restartAt(manifest);
+        assertFalse(Files.exists(ws.resolve("target/classes/Foo.class")),
+                "a restart must, or the next baseline reads somebody else's classes");
+    }
 }

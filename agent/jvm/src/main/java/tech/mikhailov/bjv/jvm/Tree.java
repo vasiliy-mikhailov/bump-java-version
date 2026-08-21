@@ -129,6 +129,40 @@ public final class Tree {
     }
 
     /**
+     * BACK TO WHERE THE MANIFEST PUT IT, INCLUDING WHAT THE BUILDS LEFT: a restart rather than a
+     * revert.
+     *
+     * <p>A launcher that PRESERVES a checkout across a round boundary needs one thing a preserving
+     * launcher cannot do for itself. When the pipeline that made those commits is not the pipeline
+     * running now, the tree has to go back to the commit the manifest names, and the origin and its
+     * credential belong to the launcher, deliberately. The workspace is a full clone, so this is
+     * what a fresh clone and checkout would have produced, without the network.
+     *
+     * <p>{@code -x} IS THE DIFFERENCE FROM {@link #revertTo} AND IT IS THE POINT. That one cleans
+     * without it precisely so a critic's objection cannot delete a half-built target tree; a
+     * restart wants the opposite, because build output produced by a different pipeline version is
+     * not an input a baseline may have.
+     *
+     * <p>The abandoned commits are left dangling rather than pruned, so the journal that gets set
+     * aside beside them still names stages a reader can go and look at.
+     */
+    public void restartAt(String sha) {
+        try {
+            Shell.Output out = git("reset", "--hard", sha);
+            if (!out.ok()) {
+                note("restart failed: " + Runner.tail(out.text()));
+                return;
+            }
+            Shell.Output cleaned = git("clean", "-xfd");
+            if (!cleaned.ok()) {
+                note("restart could not clean the tree: " + Runner.tail(cleaned.text()));
+            }
+        } catch (IOException | InterruptedException e) {
+            note("restart failed: " + e.getMessage());
+        }
+    }
+
+    /**
      * Land what a stage did, so no later objection can reach back past it.
      *
      * <p>The commits are bookkeeping, never output: the scorer reads the working tree and the

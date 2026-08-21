@@ -161,10 +161,14 @@ public final class Bump {
         // a bump reads whichever was on disk when it started.
         Bom.beside(results);
 
-        String slug = bump.replaceAll("[^A-Za-z0-9]+", "_");
+        String slug = slugOf(bump);
         Path settlements = results.resolve("settlements.jsonl");
+        // WHICH ROUND OF ITS LANE BUDGET THIS IS, and where the launcher says the round is over.
+        // Counted off the record before anything else, because the row every write from here on
+        // carries it. See {@link Round}: this process has no clock and no budget of its own.
+        Round round = Round.of(results, bump);
         JsonlTrace trace = new JsonlTrace(results.resolve(slug).resolve("trace.jsonl"),
-                settlements, bump, Fingerprint.provenanceOf(bump, settlements),
+                settlements, bump, Fingerprint.provenanceOf(bump, settlements, round::number),
                 DECISIVE, DISPUTED);
         // THE JOURNAL SITS BESIDE THE TRACE IT BELONGS TO, and its rows carry the tree they landed
         // on: that is what a resume is checked against. The supplier is asked at write time rather
@@ -173,7 +177,10 @@ public final class Bump {
         Tree checkoutTree = new Tree(checkout, note -> trace.progress(bump, note));
         String sha = checkoutTree.head();
         Journal journal = new Journal(journalFile, checkoutTree::head);
-        boolean resumed = resuming(journal, results.resolve("settlements.jsonl"), bump, sha);
+        // WHAT THIS PROCESS WOULD PUT ITS NAME TO, as the row's own four fields, so the comparison
+        // and the record cannot drift apart: the compared string IS the recorded string.
+        String pipeline = pipelineOf(bump, results);
+        boolean resumed = resuming(journal, settlements, bump, sha, pipeline);
         if (!resumed) {
             // A FRESH START MUST NOT REPLAY A STALE JOURNAL, which is the whole failure mode of
             // getting a resume wrong: the skipped stages would be skipped against edits that are
@@ -185,9 +192,31 @@ public final class Bump {
             // migration's own result wearing the label of the thing it is judged against. The
             // journal exists because that measurement cannot be taken twice.
             //
-            // Under the shipped launcher this cannot happen, because run.sh re-clones. It is
-            // guarded anyway: the launcher that makes this feature worth having is one that
-            // PRESERVES the checkout, and this is the trap laid for it.
+            // THE LAUNCHER THAT PRESERVES THE CHECKOUT IS HERE NOW, so this is reachable, and the
+            // case that reaches it is a round boundary whose pipeline moved underneath it. Filing
+            // that repository as unmeasurable would be wrong: there is nothing wrong with it, only
+            // with this tree. So the tree is put back first.
+            //
+            // IT DOES NOT NEED THE NETWORK AND MUST NOT ASK FOR IT. The workspace is a full clone,
+            // so resetting to the sha the manifest names and cleaning everything untracked away is
+            // bit for bit what a fresh clone and checkout would produce, and the origin and its
+            // credential are the launcher's, deliberately. Afterwards migrated() is false, because
+            // no bjv: commit is reachable from the new HEAD, and the run is a genuine fresh start
+            // with a genuine baseline.
+            //
+            // THE SETTLEMENT BELOW STAYS EXACTLY WHERE IT IS, as the backstop behind the reset
+            // rather than instead of it. It is the last thing standing between a preserving
+            // launcher and a corpus of bumps that look healthy and measure nothing.
+            if (checkoutTree.migrated()) {
+                String manifestSha = bump.split("\\|").length > 1 ? bump.split("\\|")[1] : "";
+                if (!manifestSha.isBlank() && !checkoutTree.resolve(manifestSha).isBlank()) {
+                    trace.progress(bump, "this checkout carries commits from an earlier round of"
+                            + " this bump and the pipeline that made them is not the one running"
+                            + " now, so it goes back to " + manifestSha + " and starts again");
+                    checkoutTree.restartAt(manifestSha);
+                    sha = checkoutTree.head();
+                }
+            }
             if (checkoutTree.migrated()) {
                 String why = "no-baseline\nthis checkout already carries bjv commits and its"
                         + " journal does not stand on it, so there is no before-state left to"
@@ -199,7 +228,7 @@ public final class Bump {
             journal = restarted(journalFile, checkoutTree);
         }
         try {
-            Bump b = new Bump(checkout, bump, trace, journal, resumed);
+            Bump b = new Bump(checkout, bump, trace, journal, resumed, round);
             if (resumed) {
                 trace.progress(bump, "resuming: a journal for this bump stands on the checkout at "
                         + sha + ", so the stages it records are not paid for twice; the gates run"
@@ -222,8 +251,12 @@ public final class Bump {
             // and lost no test; it says nothing about whether the versions the target needs were
             // reached. Measured here because this is the last moment the working tree exists and
             // the hop is known, and filed beside the settlement rather than inside it.
+            // AND NOT ON A BUMP THAT IS ONLY PAUSED. The measurement reads the working tree, and a
+            // paused tree is half migrated: a compliance figure taken there is a partial migration
+            // filed as a finished one, which is exactly the shape of failure this project keeps
+            // producing. It runs on a state that means the bump is over.
             String[] part = bump.split("\\|");
-            if (part.length >= 4) {
+            if (part.length >= 4 && !Round.PAUSED.equals(state)) {
                 try {
                     Path written = results.resolve(slug).resolve("trace.jsonl");
                     Hop measured = new Hop(Integer.parseInt(part[2]), Integer.parseInt(part[3]));
@@ -252,45 +285,117 @@ public final class Bump {
     private static final String IN_FLIGHT = "bumping";
 
     /**
-     * DOES THIS ATTEMPT PICK UP A KILLED ONE, and the answer is no unless all three agree.
+     * DOES THIS ATTEMPT PICK UP AN UNFINISHED ONE, and the answer is no unless all four agree.
      *
-     * <p>A journal that recorded a completed stage, a last settlement row that still reads
-     * {@link #IN_FLIGHT}, and a checkout standing where the journal left it. Any one of them
-     * missing and the bump starts fresh, because a wrong resume is worse than a slow one: the
-     * stages it skips are skipped against edits that are not in this tree, and the bump is then
-     * judged on a workspace nobody built.
+     * <p>A journal that recorded a completed stage, a last settlement row saying the work was
+     * interrupted rather than concluded, a checkout standing where the journal left it, and the
+     * same pipeline that made it. Any one of them missing and the bump starts fresh, because a
+     * wrong resume is worse than a slow one: the stages it skips are skipped against edits that
+     * are not in this tree, and the bump is then judged on a workspace nobody built.
+     *
+     * <p>TWO WORDS MEAN INTERRUPTED AND ONE OF THEM IS NOT {@code requeued}. {@link #IN_FLIGHT} is
+     * a lane that died; {@link Round#PAUSED} is a lane that reached the end of its round, which is
+     * the same tree with the same journal and one more round behind it. {@code requeued} is
+     * somebody on a page asking for the work to be done again FROM THE START, and resuming one
+     * would hand that person back the state they were trying to discard.
+     *
+     * <p>THE FOURTH CLAUSE IS WHAT A ROUND BOUNDARY MADE NECESSARY. A killed lane was picked up by
+     * whatever image happened to run next, and it did not matter much because the checkout was
+     * re-cloned anyway and nothing ever actually resumed. Now something does, and this sweep
+     * deploys about once every ten hours against a six-hour budget, so a paused bump meeting a
+     * different pipeline is the ordinary case rather than the exotic one. Skipping stages a
+     * different pipeline paid for would file one pipeline's work under another's name.
      *
      * <p>Package-visible and static because it is the rule rather than a step of the run, and a
-     * rule with three clauses is worth being able to test one clause at a time.
+     * rule with four clauses is worth being able to test one clause at a time.
      */
-    static boolean resuming(Journal journal, Path settlements, String bump, String sha) {
+    static boolean resuming(Journal journal, Path settlements, String bump, String sha,
+                            String pipeline) {
         if (journal.tree().isEmpty()) {
             return false;
         }
-        if (!IN_FLIGHT.equals(lastSettledState(settlements, bump))) {
+        Map<String, String> last = lastSettledRow(settlements, bump);
+        String said = last.getOrDefault("state", "");
+        if (!IN_FLIGHT.equals(said) && !Round.PAUSED.equals(said)) {
+            return false;
+        }
+        if (!samePipeline(last, pipeline)) {
             return false;
         }
         return journal.standsOn(sha);
     }
 
     /**
-     * What the record last said about this bump, or nothing when it has never said anything.
+     * WHETHER THE ROW WAS WRITTEN BY THIS PIPELINE, field by field.
+     *
+     * <p>EMPTY AGAINST NON-EMPTY IS A DIFFERENCE, not a missing answer to be forgiven. Every row on
+     * disk before the launcher started forwarding the image identity carries an empty one, and
+     * reading that as agreement would resume across exactly the change that introduced the check.
+     * Empty on both sides IS equality, which is what stops a host where {@code docker image
+     * inspect} answers nothing from calling every run a different pipeline from itself.
+     *
+     * <p>All four fields, and none of them is redundant. {@code commit} and {@code image} answer
+     * where the code came from, and the image is not the commit here: this project iterates by
+     * deploying dirty trees, so two builds share a stamp exactly while somebody is iterating.
+     * {@code prompts} and {@code boms} answer what the agents were handed, which lives in a store
+     * beside the results and outside the image altogether. See {@link Version}.
+     */
+    private static boolean samePipeline(Map<String, String> row, String pipeline) {
+        for (String field : List.of("commit", "image", "prompts", "boms")) {
+            String recorded = row.getOrDefault(field, "");
+            String now = fieldOf(pipeline, field);
+            if (!recorded.equals(now)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** One field out of the composed fingerprint string, which is the form the row stores. */
+    private static String fieldOf(String fields, String name) {
+        Matcher at = Pattern.compile("\"" + name + "\":\"([^\"]*)\"").matcher(fields);
+        return at.find() ? at.group(1) : "";
+    }
+
+    /**
+     * WHAT THIS PROCESS WOULD PUT ITS NAME TO, as the row's own four fields.
+     *
+     * <p>The same call {@link Fingerprint#provenanceOf} makes, so the string compared IS the string
+     * recorded, character for character. The round is appended by the supplier OUTSIDE this, or
+     * every round would read as a new pipeline and nothing would ever resume.
+     */
+    static String pipelineOf(String bump, Path results) {
+        String[] p = bump.split("\\|");
+        return p.length < 4 ? "" : Version.fields(p[2] + "-" + p[3], results, Fingerprint.OF_A_BUMP);
+    }
+
+    /** The directory name a bump's record lives under: the key with everything unsafe flattened. */
+    static String slugOf(String bump) {
+        return bump.replaceAll("[^A-Za-z0-9]+", "_");
+    }
+
+    /**
+     * The last thing the record said about this bump, whole, or an empty row when it never has.
+     *
+     * <p>THE WHOLE ROW RATHER THAN ITS STATE, because two of the four resume conditions are read
+     * off it and they must be read off the SAME row: the state of one row beside the fingerprint
+     * of another would answer a question nobody asked.
      *
      * <p>Read leniently, for the reason the journal is: this file is appended to by a process that
      * gets killed, so a torn last line is the normal case rather than a fault. Rows for other bumps
      * share the file, so the key is checked rather than assumed.
      */
-    private static String lastSettledState(Path settlements, String bump) {
+    private static Map<String, String> lastSettledRow(Path settlements, String bump) {
         if (!Files.isReadable(settlements)) {
-            return "";
+            return Map.of();
         }
         String text;
         try {
             text = new String(Files.readAllBytes(settlements), StandardCharsets.UTF_8);
         } catch (IOException unreadable) {
-            return "";
+            return Map.of();
         }
-        String state = "";
+        Map<String, String> last = Map.of();
         for (String line : text.split("\n")) {
             if (!line.contains(bump)) {
                 continue;
@@ -304,12 +409,11 @@ public final class Bump {
             if (!bump.equals(row.getOrDefault("bump", ""))) {
                 continue;
             }
-            String said = row.getOrDefault("state", "");
-            if (!said.isBlank()) {
-                state = said;
+            if (!row.getOrDefault("state", "").isBlank()) {
+                last = row;
             }
         }
-        return state;
+        return last;
     }
 
     /**
@@ -452,12 +556,26 @@ public final class Bump {
     private Security.Scan after = Security.Scan.notMeasured("the gate never went green");
     private Security.Delta delta = Security.Delta.unknown("not computed", -1, -1);
 
+    /**
+     * WHETHER THE LANE HAS BEEN ASKED TO STOP, which is all this process knows about time.
+     *
+     * <p>There is no clock here and no budget here. The launcher owns both and says so by creating
+     * one file this container can see; see {@link Round}. Nothing an agent is handed mentions it,
+     * no tool reports it, and no prompt is built from it.
+     */
+    private final Round round;
+
     /** A bump with nothing to resume from: what {@link #stages()} builds, and what a test reads. */
     private Bump(Path ws, String bump, Trace trace) {
-        this(ws, bump, trace, null, false);
+        this(ws, bump, trace, null, false, Round.none());
     }
 
+    /** The five-argument form the tests use: a bump nobody is going to ask to stop. */
     private Bump(Path ws, String bump, Trace trace, Journal journal, boolean resumed) {
+        this(ws, bump, trace, journal, resumed, Round.none());
+    }
+
+    private Bump(Path ws, String bump, Trace trace, Journal journal, boolean resumed, Round round) {
         String[] parts = bump.split("\\|");
         // from and to are REQUIRED now: the hop is the experiment's independent variable and there
         // is no sensible default for it. A row without one is a manifest bug, not a thing to guess.
@@ -471,6 +589,7 @@ public final class Bump {
         this.trace = trace;
         this.journal = journal;
         this.resumed = resumed;
+        this.round = round;
         if (resumed) {
             // THE BUDGET IS DERIVED RATHER THAN KEPT, which is why no row records it. A second copy
             // of a number these rows already carry is a number that drifts, and this one drifts in
@@ -560,6 +679,28 @@ public final class Bump {
      */
     private Agent journaled(Agent node, Supplier<String> key) {
         return journal == null ? node : Flow.resumable(node, journal, key);
+    }
+
+    /**
+     * THE ROUND ENDS HERE, OR IT DOES NOT END IN THIS STAGE AT ALL.
+     *
+     * <p>Called at the top of a stage's body, which is the only place a boundary is free: what a
+     * stage landed is committed as it lands, so stopping in front of one loses nothing at all, and
+     * the journal beside the checkout says which commits belong to which stage. Stopping INSIDE a
+     * stage would lose the work the resume reverts anyway, and it would need a check in the agent
+     * loop, which is one refactor away from being something the agent can read.
+     *
+     * <p>IT IS INSIDE THE BODY AND {@link #journaled} IS OUTSIDE IT, which is what makes a replayed
+     * stage unable to trigger a boundary. That is correct: a replay costs nothing, and a resumed
+     * round that paused again on the first stage it replayed would never make progress.
+     *
+     * <p>{@link Flow.Settled} is how the three existing stop-the-run settlements travel, and this
+     * is the fourth. Nothing between here and {@link #run} catches it.
+     */
+    private void betweenStages(String stage) {
+        if (round.reached()) {
+            throw new Flow.Settled(round.account(stage));
+        }
     }
 
     /**
@@ -714,9 +855,12 @@ public final class Bump {
     /** What a campaign answers with when it ordered a step that stuck. The journal replays it. */
     private static final String LANDED = "a step landed";
 
-    private final Agent stepCampaign = Flow.code("module-repair-step", task ->
-            campaignOfSteps(campaignLog, campaignFloor, campaignAim, campaignPlatform)
-                    ? LANDED : "nothing landed")
+    private final Agent stepCampaign = Flow.code("module-repair-step", task -> {
+        // A CAMPAIGN IS THE LONGEST THING A MODULE DOES, so the boundary is offered in front of one
+        // as well as in front of the module. A campaign that has started runs to its own end.
+        betweenStages("a repair campaign for " + campaignModule);
+        return campaignOfSteps(campaignLog, campaignFloor, campaignAim, campaignPlatform)
+                ? LANDED : "nothing landed"; })
             .triplet().repeats("up to " + MODULE_TURNS * (REASK + 1) * STEPS + " per module, "
             + REPAIR_BUDGET + " per bump");
 
@@ -792,6 +936,10 @@ public final class Bump {
                 // regime while its journal row said Spring Boot. One triad per resumed module is
                 // the price of that, and it is the cheapest of the five.
                 Flow.code("platform", task -> {
+                    // THE WALK IS WHERE A ROUND MOST OFTEN ENDS, because it is where the hours go.
+                    // Asked once per module, at the top of the module's turn, so a boundary lands
+                    // between two modules and the ones behind it are committed and journaled.
+                    betweenStages("the module walk, before " + label(m));
                     platform[0] = platformOf(m);
                     return label(m) + ": " + platform[0];
                 }).triplet(),
@@ -997,6 +1145,7 @@ public final class Bump {
      * is prescribed by the manifest, so the tools do not depend on what the surveyor concludes.
      */
     private String surveyPhase(String task) throws IOException {
+        betweenStages("survey");
         // THE TOOLS FIRST, BECAUSE A RESUME SKIPS THE ANSWER AND NOT THE TOOLING. This stage is
         // where the runner, the scanner and the agents are made, and every stage after it runs on
         // them; a survey that came back out of the journal without building them would resume into
@@ -1061,6 +1210,7 @@ public final class Bump {
 
     /** BASELINE: a fact, and the one everything later is measured against. No baseline, no bump. */
     private String baselinePhase(String task) throws IOException {
+        betweenStages("baseline");
         // FIRST, THOUGH: IS THE TOOLING EVEN THERE. Builds here are sealed, so a Gradle wrapper
         // resolves its distribution out of a staged cache and cannot download. Staging can stop
         // half way and leaves a directory that looks exactly like a distribution; Gradle finds it,
@@ -1187,6 +1337,7 @@ public final class Bump {
 
     /** SECURITY BEFORE: the project's own state, and the last moment it still is. */
     private String securityBeforePhase(String task) throws IOException {
+        betweenStages("security-before");
         // Migrate applies recipes, floors and a target sweep next, every one of which moves a
         // resolved version, so a scan taken after it is not this project's prior state. It also
         // has to follow a build, because the collect is offline and copies only what the build
@@ -1207,6 +1358,7 @@ public final class Bump {
      * have run is not this project's prior state.
      */
     private String moduleFilterPhase(String task) throws IOException {
+        betweenStages("module-filter");
         // The before-scan travels into the migration: the Tomcat floor has to know which line the
         // project actually resolved, and no build file says that.
         tree.excludeBuildOutput();
@@ -1924,6 +2076,7 @@ public final class Bump {
      * settles on quotes a scan that has not been taken yet, so this cannot be where it is written.
      */
     private String gatePhase(String task) throws IOException {
+        betweenStages("gate");
         trace.progress(bump, "gate: building and testing the whole repository under JDK " + to);
         // The gate measures bytecode, so it must compile bytecode rather than inherit the
         // baseline's. Without this Maven finds the old classes newer than the sources and skips
@@ -1976,6 +2129,7 @@ public final class Bump {
      * number this stage has just measured. See {@link #account}.
      */
     private String securityAfterPhase(String task) throws IOException {
+        betweenStages("security-after");
         trace.progress(bump, "security: scanning after a green gate, under JDK " + to);
         after = security.scan(to, "after");
         delta = Security.compare(before, after);
@@ -2010,6 +2164,7 @@ public final class Bump {
      * for.
      */
     private String verdictPhase(String task) throws IOException {
+        betweenStages("verdict");
         String context = brief(lastLog)
                 + (lastVerdict == null ? "" : "\nThe scorer's last verdict: " + lastVerdict.state())
                 // THE GATE RUNS ONCE. Telling the arguers a budget was exhausted biases them
@@ -2052,6 +2207,7 @@ public final class Bump {
      * touches the workspace; the signature was the only thing pretending otherwise.
      */
     private String price(String task) throws IOException {
+        betweenStages("estimator");
         String context = "The bump " + bump + " (JDK " + from + " -> " + to
                 + ")"
                 + ". What the workspace became:\n" + tree.diff();

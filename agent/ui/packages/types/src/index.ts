@@ -59,6 +59,24 @@ export type Verdict =
   | 'behavior-change'
   | 'infra'
   | 'bumping'
+  /**
+   * A LANE RAN OUT OF ITS WALL-CLOCK BUDGET AND THE BUMP IS WAITING FOR THE NEXT ONE.
+   *
+   * Not a verdict, and deliberately not folded into `queued`: a bump that has never started and a
+   * bump that has burned three lane budgets are both waiting, and a reader who cannot tell them
+   * apart cannot find the second one. Its checkout and its journal are kept, so the next lane
+   * continues from where this one stopped.
+   */
+  | 'paused'
+  /**
+   * The harness stopped spending lanes on a bump that never reached a verdict.
+   *
+   * TERMINAL, AND NOT A JUDGEMENT ABOUT THE PROJECT, which is the thing to get right about it. It
+   * says a repository held N rounds of the budget without settling; it says nothing about whether
+   * the bump was possible. Anything that buckets states into successes and failures has to be told
+   * about this one on purpose.
+   */
+  | 'out-of-rounds'
   /** In the manifest, not yet picked up by a lane. Most of a fresh sweep is this. */
   | 'queued'
 
@@ -89,6 +107,16 @@ export type BumpSummary = {
   from: number
   to: number
   verdict: Verdict
+  /**
+   * WHICH ROUND OF THE LANE BUDGET THIS ROW BELONGS TO, from one upwards.
+   *
+   * Null means nobody was counting, which is not round one: most of this corpus settled before
+   * lanes had a budget at all. It also resets when the pipeline changes under a paused bump,
+   * because that run starts over, so a repository that has been picked up five times and never
+   * once resumed reads as round one here. The record page shows the whole boundary history for
+   * exactly that reason.
+   */
+  round: string | null
   /**
    * NULL, NOT ABSENT, and the distinction is load-bearing.
    *
@@ -268,11 +296,33 @@ export type Package = {
   cvesAfter: number | null
 }
 
+/**
+ * ONE ROUND OF THE LANE BUDGET THAT ENDED, AND WHICH PIPELINE ENDED IT.
+ *
+ * The fingerprint travels because it is the diagnosis rather than decoration: when it differs from
+ * the boundary before it, the harness was deployed while this bump was waiting and the next lane
+ * started the work over instead of continuing it. A round number alone cannot say that, because a
+ * fresh start resets it.
+ */
+export type RoundBoundary = {
+  at: number
+  /** `paused` for a boundary, `out-of-rounds` when the harness stopped spending on it. */
+  state: string
+  round: string | null
+  because: string | null
+  commit: string | null
+  image: string | null
+  prompts: string | null
+  boms: string | null
+}
+
 /** Everything one bump page needs, in one response. */
 export type BumpDetail = {
   summary: BumpSummary
   chain: ChainStage[]
   events: TraceEvent[]
+  /** Every round of the lane budget this bump has ended, oldest first. Empty for almost all of them. */
+  rounds: RoundBoundary[]
   packages: Package[]
   /** Distinct CRITICAL+HIGH, which is not the sum of the rows above: see the module column. */
   /** `after` is null when no after scan was taken, which is most bumps. */

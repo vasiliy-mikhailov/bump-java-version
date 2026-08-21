@@ -15,6 +15,7 @@ import {
   Loaded,
   PackageTable,
   PageHeader,
+  RoundHistory,
   SecurityDelta,
   Section,
   SetAsideButton,
@@ -166,7 +167,7 @@ function BumpPage() {
       header={<PageHeader title="bump" subtitle="—" actions={<Nav current="bumps" />} />}
     >
       {(detail) => {
-        const { summary, chain, events, packages, cves } = detail
+        const { summary, chain, events, packages, cves, rounds } = detail
         // WHAT THE PAGE BELIEVES ABOUT THIS BUMP BEING HELD: whatever the server last said, whether that
         // came from the listing on load or from an ask. `null` means nobody has answered yet, which is
         // not the same fact as "not held" and is why the record keeps three states rather than two.
@@ -348,6 +349,17 @@ function BumpPage() {
                       distinctBefore={cves.distinctBefore}
                       distinctAfter={cves.distinctAfter}
                     />
+                  </Section>
+                )}
+
+                {/* ONLY WHERE THERE IS A HISTORY TO SHOW, which is roughly one bump in eight.
+                    A lane has a wall-clock budget and most bumps finish inside their first one, so
+                    a section that appeared on every record would say nothing on nearly all of
+                    them. Where it does appear it answers the question the round number on the row
+                    above cannot: whether those rounds continued each other or started over. */}
+                {rounds.length === 0 ? null : (
+                  <Section title="rounds">
+                    <RoundHistory rounds={rounds} />
                   </Section>
                 )}
 

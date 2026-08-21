@@ -52,7 +52,17 @@ scenario() {                       # scenario <name> <cap>
   SWEEP_ENV=(OC_BASE=http://model.invalid OC_MODEL=fake-model "OC_KEY=$ENV_KEY")
   : > "$SC/fake/durations.tsv"
   : > "$SC/fake/events.log"
+  : > "$SC/fake/wedged.tsv"
+  : > "$SC/fake/clones.log"
 }
+
+# A LANE THAT DOES NOT READ THE ROUND MARKER, which is what the grace and the backstop row are for.
+wedged() { printf '%s\n' "$1" >> "$SC/fake/wedged.tsv"; }
+
+# What the record says about one bump, which is the fact almost every round assertion is about.
+rows()  { grep -F "\"bump\":\"$1|$2|$3|$4\"," "$SC/root/results/settlements.jsonl" 2>/dev/null; }
+state() { rows "$@" | tail -1 | sed -n 's/.*"state":"\([^"]*\)".*/\1/p'; }
+clones() { grep -c . "$SC/fake/clones.log" 2>/dev/null || echo 0; }
 
 # What the settings page would have written into the run root, in the format run.sh parses.
 store() {                          # store <name=value>...
@@ -371,12 +381,183 @@ t_settings() {
   report
 }
 
+# ---------------------------------------------------------------- 5. the round boundary
+#
+# A LANE HAS A WALL CLOCK NOW, AND WHAT IT COSTS A BUMP IS A ROUND RATHER THAN THE WORK. These are
+# the properties the feature is: a lane that runs past its budget stops, the record says the bump is
+# unfinished and which round it is on, the workspace is still there, and the next lane continues on
+# it rather than cloning again.
+#
+# THE BUDGET IS IN SECONDS HERE AND SIX HOURS IN PRODUCTION. BJV_ROUND_SECONDS is the seam; without
+# it every scenario below would take a working day.
+
+t_budget() {
+  scenario budget 2
+  # WEDGED ON PURPOSE. This lane never reads the marker, which is the case the grace and the
+  # launcher's own boundary row exist for: a container that has stopped reading anything at all.
+  # It is also the only hang guard this harness has ever had.
+  row stuck aa/stuck cafe1 8 17 60
+  wedged stuck
+  row quick bb/quick cafe1 8 17 1
+
+  echo "== budget: a lane that outlasts its round is stopped, and the bump is not finished =="
+  FAILED=0
+  SWEEP_ENV+=(BJV_ROUND_SECONDS=3 BJV_ROUND_GRACE_SECONDS=2 BJV_MAX_ROUNDS=2)
+  runsweep 90
+
+  local first
+  first=$(rows aa/stuck cafe1 8 17 | grep '"state":"paused"' | head -1)
+  [ -n "$first" ] || bad "the round never ended: $(rows aa/stuck cafe1 8 17 | tail -1)"
+  printf '%s' "$first" | grep -q '"round":"1"' \
+    || bad "the boundary row does not carry round 1: $first"
+  # THE FINGERPRINT IS LIFTED, NOT RECOMPUTED. The shell cannot hash a prompt store it has no reader
+  # for, and the next lane's resume decision is a comparison of exactly these four fields.
+  printf '%s' "$first" | grep -q '"prompts":"54906737","boms":"bb42094f"' \
+    || bad "the four pipeline fields were not carried onto the boundary row: $first"
+  grep -q "did not end at a stage edge" "$SC/run.log" \
+    || bad "the wedged lane was never killed, so nothing bounded it"
+  grep -q "round 1 ended" "$SC/run.log" || bad "the bump was not offered another round"
+  # PRESERVED ACROSS A KILL TOO, which is the half that would be easy to lose: the launcher writes
+  # the boundary row for a lane that could not, and the keep rule reads that row.
+  grep -q "ws stuck 2" "$SC/fake/events.log" \
+    || bad "round two did not find round one's workspace: $(grep '	ws ' "$SC/fake/events.log")"
+  [ "$RC" -ne 124 ] || bad "run.sh had to be killed: it did not terminate"
+  [ "${FAILED:-0}" -eq 0 ] && ok "the round ended, the row says which one, and the checkout survived"
+  report
+}
+
+t_continues() {
+  scenario continues 2
+  # Not wedged: this lane reads the marker and settles itself between stages, which is the ordinary
+  # path and the one that loses nothing.
+  row long aa/long cafe1 8 17 60
+
+  echo "== continues: the next lane picks up the same workspace instead of cloning again =="
+  FAILED=0
+  SWEEP_ENV+=(BJV_ROUND_SECONDS=3 BJV_ROUND_GRACE_SECONDS=60 BJV_MAX_ROUNDS=9)
+  runsweep 90
+
+  # THE ASSERTION THAT DECIDES WHETHER THE FEATURE HELPS OR HURTS. A round boundary that re-cloned
+  # would turn a long bump into an infinite sequence of fresh starts, which is worse than no feature
+  # at all, and it would look exactly like this from the outside except for these two lines.
+  [ "$(clones)" = "1" ] || bad "the workspace was cloned $(clones) times; a kept one is cloned once"
+  grep -q "ws long 2" "$SC/fake/events.log" \
+    || bad "the second round did not continue the first one's workspace"
+  grep -q '"state":"paused"' "$SC/root/results/settlements.jsonl" || bad "no round ever ended"
+  grep -q "did not end at a stage edge" "$SC/run.log" \
+    && bad "a lane that stops between stages must not need killing"
+  [ "$(state aa/long cafe1 8 17)" = "PASS" ] \
+    || bad "the continued round did not finish: $(state aa/long cafe1 8 17)"
+  [ "$RC" -ne 124 ] || bad "run.sh had to be killed: it did not terminate"
+  [ "${FAILED:-0}" -eq 0 ] && ok "one clone, two rounds, one workspace, and a verdict at the end"
+  report
+}
+
+t_repass() {
+  scenario repass 1
+  # THE SCHEDULING GAP, WHICH THE FEATURE DOES NOT WORK WITHOUT. run.sh makes one pass over the
+  # manifest; a bump paused at row one while the pass is at row three is never reconsidered unless
+  # something re-offers it. On a 1400-row sweep that wait is weeks, and usually for ever.
+  row first aa/first cafe1 8 17 60
+  row two   bb/two   cafe1 8 17 1
+  row three cc/three cafe1 8 17 1
+
+  echo "== repass: a bump paused early is offered again before the pass is over =="
+  FAILED=0
+  SWEEP_ENV+=(BJV_ROUND_SECONDS=3 BJV_ROUND_GRACE_SECONDS=60 BJV_MAX_ROUNDS=9)
+  runsweep 90
+
+  [ "$(grep -c "^start first" <(cut -f2- "$SC/fake/events.log"))" -ge 2 ] \
+    || bad "the paused bump was launched once and never came back"
+  for s in two three; do
+    grep -q "^start $s" <(cut -f2- "$SC/fake/events.log") \
+      || bad "$s never ran: a resume took the slot work that had never started was waiting for"
+  done
+  [ "$RC" -ne 124 ] || bad "run.sh had to be killed: it did not terminate"
+  [ "${FAILED:-0}" -eq 0 ] && ok "the paused bump came back and the unstarted rows still ran"
+  report
+}
+
+t_roundcap() {
+  scenario roundcap 1
+  # A bump that never finishes has to stop being offered, or the launcher cannot terminate at all.
+  row forever aa/forever cafe1 8 17 60
+  wedged forever
+
+  echo "== roundcap: a bump that never finishes stops costing lanes, and says so =="
+  FAILED=0
+  SWEEP_ENV+=(BJV_ROUND_SECONDS=2 BJV_ROUND_GRACE_SECONDS=2 BJV_MAX_ROUNDS=2)
+  runsweep 90
+
+  [ "$(state aa/forever cafe1 8 17)" = "out-of-rounds" ] \
+    || bad "after the cap the record says '$(state aa/forever cafe1 8 17)'"
+  # NOT A VERDICT ABOUT THE PROJECT, and it must not read like one.
+  rows aa/forever cafe1 8 17 | tail -1 | grep -q "nothing here is a judgement about the project" \
+    || bad "the account does not say what the state means"
+  [ ! -d "$SC/root/ws/forever" ] || bad "a bump nobody will run again is still holding a workspace"
+  [ "$RC" -ne 124 ] || bad "run.sh did not terminate: the cap is what makes it able to"
+  [ "${FAILED:-0}" -eq 0 ] && ok "two rounds, then a terminal state, a freed workspace and an exit"
+  report
+}
+
+t_wipeonsettle() {
+  scenario wipeonsettle 2
+  row a aa/a cafe1 8 17 1
+  row b bb/b cafe1 8 17 1
+
+  echo "== wipeonsettle: a bump that reached a verdict does not go on holding a checkout =="
+  FAILED=0
+  runsweep 60
+  [ ! -d "$SC/root/ws/a" ] || bad "a settled bump kept its workspace: 82% of the live tree is this"
+  [ ! -d "$SC/root/ws/b" ] || bad "a settled bump kept its workspace"
+  [ "${FAILED:-0}" -eq 0 ] && ok "the disk a finished bump was holding comes back"
+  report
+
+  FAILED=0
+  scenario keepws 1
+  SWEEP_ENV+=(BJV_KEEP_WS=1)
+  row a aa/a cafe1 8 17 1
+  echo "== wipeonsettle: and whoever wants to look at one can keep it =="
+  runsweep 60
+  [ -d "$SC/root/ws/a" ] || bad "BJV_KEEP_WS did not keep the workspace"
+  [ "${FAILED:-0}" -eq 0 ] && ok "BJV_KEEP_WS keeps it"
+  report
+}
+
+t_diskfloor() {
+  scenario diskfloor 1
+  row long aa/long cafe1 8 17 60
+
+  echo "== diskfloor: below the floor a boundary wipes instead of keeping =="
+  FAILED=0
+  # WIPING IS ALWAYS SAFE AND KEEPING IS THE RISKY CHOICE, so the floor costs time and never
+  # correctness: the next lane clones, the journal does not stand on the tree, and the bump starts
+  # clean with a real baseline.
+  SWEEP_ENV+=(BJV_ROUND_SECONDS=3 BJV_ROUND_GRACE_SECONDS=30 BJV_MAX_ROUNDS=9
+              BJV_FREE_GB=5 BJV_WS_FLOOR_GB=60)
+  runsweep 90
+
+  grep -q "below the 60GB floor" "$SC/run.log" \
+    || bad "the floor was never reached, so this scenario proved nothing: $(grep -c . "$SC/run.log") log lines"
+  [ "$(clones)" -ge 2 ] || bad "the workspace was kept anyway: cloned $(clones) times"
+  [ "$RC" -ne 124 ] || bad "run.sh had to be killed"
+  [ "${FAILED:-0}" -eq 0 ] && ok "a full disk costs a re-clone rather than a wrong measurement"
+  report
+}
+
 case "${1:-all}" in
   idle) t_idle ;;
   inpass) t_inpass ;;
   terminate) t_terminate ;;
   settings) t_settings ;;
-  all) t_idle; t_inpass; t_terminate; t_settings ;;
+  budget) t_budget ;;
+  continues) t_continues ;;
+  repass) t_repass ;;
+  roundcap) t_roundcap ;;
+  wipeonsettle) t_wipeonsettle ;;
+  diskfloor) t_diskfloor ;;
+  all) t_idle; t_inpass; t_terminate; t_settings; t_budget; t_continues; t_repass; \
+       t_roundcap; t_wipeonsettle; t_diskfloor ;;
   *) echo "unknown scenario: $1"; exit 2 ;;
 esac
 
