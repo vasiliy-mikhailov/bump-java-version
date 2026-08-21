@@ -5,6 +5,7 @@ import type { Finding } from '@bjv/types'
 import {
   ACCOUNT,
   Account,
+  CodeBlock,
   Disclosure,
   EmptyNote,
   FIELD,
@@ -343,25 +344,26 @@ function RegistryUpload({ onLoaded }: { onLoaded: () => void }) {
       <p style={{ ...ACCOUNT, margin: '0 0 10px' }}>
         One bump per line, five comma-separated fields:
       </p>
-      <pre
-        style={{
-          margin: '0 0 10px',
-          padding: '10px 12px',
-          overflowX: 'auto',
-          borderRadius: '6px',
-          background: 'var(--bg-subtle)',
-          border: '1px solid var(--border-soft)',
-          fontSize: '12px',
-          lineHeight: 1.5,
-          color: 'var(--text-secondary)',
-        }}
-      >
-        {`url, sha, from, to, key
+      {/* THE INLINE COPY THAT PROVED THE POINT, NOW THE COMPONENT. Eight of these declarations were
+          identical to the `CodeBlock` this repository already had, and the ninth was missing: the
+          monospace stack the component carried and this copy had dropped, so the sample rendered in
+          whatever face the browser gives a bare `<pre>`. An unused component drifting from its own
+          inline duplicate is the evidence that decided which version of `CodeBlock` became the
+          shared one, and this call site is the drift. It now reads the shared component, which
+          carries the stack, so the sample changes face here on most machines. That is deliberate.
+
+          THE MARGIN IS IN A WRAPPER BECAUSE THE COMPONENT HAS NONE. Three margins existed for one
+          box across the two repositories, so the shared shell sets `margin: 0` and the call site
+          says what it wants, the way `HEADING` already ships. `0 0 10px` is what this page had. */}
+      <div style={{ margin: '0 0 10px' }}>
+        <CodeBlock
+          code={`url, sha, from, to, key
 
 https://github.com/owner/name, bdc86ebe64e2ec6d…, 11, 17,
 https://github.com/owner/other,                 , 17, 21,
 https://git.internal/team/thing, 9f1c2d…        , 11, 17, ghp_xxx`}
-      </pre>
+        />
+      </div>
       <Account>
         <strong>Every comma is mandatory, including the last one.</strong> The sha and the key may be
         blank, but they may not be missing: a row with a comma dropped is a row whose columns cannot

@@ -90,6 +90,28 @@
   /* The bar under the header, from the colour of working to the colour of finished. */
   --state-progress-from: var(--state-bumping);
   --state-progress-to: var(--state-pass);
+
+  /* === What a syntax token is ===
+     `CodeBlock` came from the sibling tool in `ratchet-ui` 0.4.0 and colours four kinds of token:
+     a comment, a string, a keyword and a number. The shared package carries only the four NAMES,
+     with the drab achromatic placeholders it gives everything, so this is where they get a value.
+
+     THE VALUES ARE THE SIBLING'S, EXACTLY, which is this file's standing rule one level down: two
+     tools behind one nav that colour Java differently read as two products, and a reader crossing
+     the boundary registers a syntax scheme before reading a word of the source. They have to be
+     defined here rather than left to the package, because this dashboard imports `@bjv/ui/tokens.css`
+     and this file, never `ratchet-ui/tokens.css`, so the placeholders never reach it and
+     `color: var(--code-comment)` would be invalid at computed-value time and inherit its
+     surroundings instead.
+
+     `--code-keyword` HOLDS THE SAME HEX AS A LOST TEST AND THAT IS NOT A COLLISION. Nothing inside
+     a code block is coloured by settlement, so the two never appear in one place, and both tools
+     take the value from the same upstream scheme. Reading it as "keywords look like failures" is
+     the wrong frame: it is red because the scheme says keywords are red. */
+  --code-keyword: #cf222e;
+  --code-string: #0a3069;
+  --code-comment: #6e7781;
+  --code-number: #0550ae;
 }
 
 .dark {
@@ -119,4 +141,11 @@
 
   --cve-cleared: #3fb950;
   --cve-introduced: #f85149;
+
+  /* Lifted the same way the settlement colours are, and again to the sibling's values, so that a
+     reader switching themes does not have to relearn which colour means keyword. */
+  --code-keyword: #ff7b72;
+  --code-string: #a5d6ff;
+  --code-comment: #8b949e;
+  --code-number: #79c0ff;
 }

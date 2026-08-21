@@ -10,6 +10,19 @@
  * else. They are re-exported from here rather than imported directly by each screen, so this barrel
  * stays the one public surface and no call site had to move.
  *
+ * TWO OF THEM CAME THE OTHER WAY, AND THEY ARE THE FIRST TO DO SO. `CodeBlock` and `Lamp` are the
+ * sibling's, taken in 0.4.0 under a rule that had to be written before either could move. This
+ * repository's rule one asked that both dashboards wrote the thing AND that the difference was
+ * palette rather than behaviour, which means that the moment two versions differ in behaviour the
+ * rule excludes itself and hands the case to nothing. `CodeBlock` was declined that way, on a note
+ * describing everything the other version does MORE. The amendment: where the versions differ in
+ * behaviour, the shared one is the version with call sites. Ours had none, and the settings page
+ * beside it wrote the same box inline having dropped the font stack our own component carried.
+ *
+ * `Lamp` CARRIES NO VOCABULARY AND THAT IS DELIBERATE ON THEIR SIDE. It takes a colour and a whole
+ * sentence as props, because the two-lamp component it was lifted out of means something by red and
+ * green that this pipeline does not. `BumpTable` supplies both.
+ *
  * FIVE OF THEM WERE NEVER A FILE IN THIS REPOSITORY. `Account`, `HumanCost`, `KeyStatus`,
  * `TimeSpent` and `DataTable` are this dashboard's own inline code, extracted; the sibling had
  * already extracted its own and the names are the sibling's, because naming a thing is what the side
@@ -23,17 +36,18 @@
  */
 
 export { Card, type CardProps } from './Card'
-export { CodeBlock, type CodeBlockProps } from './CodeBlock'
 export { Disclosure, type DisclosureProps } from './Disclosure'
 export {
   ACCOUNT,
   ACCOUNT_QUIET,
   Account,
+  CodeBlock,
   DataTable,
   EmptyNote,
   HEADING,
   HumanCost,
   KeyStatus,
+  Lamp,
   Loaded,
   PAGE_GUTTER,
   Pill,
@@ -51,11 +65,13 @@ export {
   type Align,
   type Ask,
   type AskHow,
+  type CodeBlockProps,
   type Column,
   type DataTableProps,
   type EmptyNoteProps,
   type HumanCostProps,
   type KeyStatusProps,
+  type LampProps,
   type Landing,
   type LoadedProps,
   type PillProps,

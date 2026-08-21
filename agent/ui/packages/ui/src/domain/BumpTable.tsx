@@ -1,5 +1,5 @@
-import type { BumpSummary } from '@bjv/types'
-import { DataTable, EmptyNote, HumanCost, TimeSpent, type Column } from 'ratchet-ui/components'
+import type { BumpSummary, Verdict } from '@bjv/types'
+import { DataTable, EmptyNote, HumanCost, Lamp, TimeSpent, type Column } from 'ratchet-ui/components'
 import { RelativeTime } from '../primitives/RelativeTime'
 import { PipelineMark } from './PipelineMark'
 import type { StampedBump } from './pipeline'
@@ -49,6 +49,52 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
     {
       head: 'verdict',
       cell: (b) => <VerdictPill verdict={b.verdict} href={hrefFor(b.slug)} />,
+    },
+    {
+      /**
+       * THE TWO FACTS THE VERDICT WORD DOES NOT CARRY, and which this server has been computing on
+       * every row and sending to a page that could not show them. `baselineGreen` and `gateGreen`
+       * have been on the wire since they were added; until now the only thing in this repository
+       * that read either was a test fixture.
+       *
+       * LEFT IS THE BASELINE, taken under the project's own JDK before anything moved. RIGHT IS THE
+       * GATE, which is what settled the bump. They are not a proof in sequence, they are two
+       * questions asked at two moments, and only the second one is about the bump.
+       *
+       * THE COLOUR AND THE SENTENCES ARE THIS DASHBOARD'S. `Lamp` came from the sibling tool's
+       * request and takes both as props precisely so that neither pipeline's vocabulary travels: a
+       * green lamp there means a test that was made to fail and then passed, and it means nothing
+       * of the sort here.
+       *
+       * ONE COLOUR FOR BOTH LAMPS, WHICH IS HONEST HERE AND WOULD NOT BE THERE. The sibling's two
+       * lamps are red and green because its two questions want opposite answers. Both of these ask
+       * "was this green", so both are `--state-pass` and the reader tells them apart by position,
+       * explained once on the heading rather than repeated on every row. That is what this table
+       * already does for `pipeline`.
+       */
+      head: 'green',
+      headTitle:
+        'two lamps: the baseline before the bump, then the gate after it. Filled means it went green, a faint ring means it ran and did not, and a dashed outline means it was never reached.',
+      cell: (b) => (
+        <span
+          style={{ display: 'flex', gap: '5px', alignItems: 'center' }}
+          role="group"
+          aria-label="what the builds said"
+        >
+          <Lamp
+            lit={b.baselineGreen}
+            reached={b.verdict !== 'queued'}
+            colour="var(--state-pass)"
+            label={baselineSays(b)}
+          />
+          <Lamp
+            lit={b.gateGreen}
+            reached={gateRan(b.verdict)}
+            colour="var(--state-pass)"
+            label={gateSays(b)}
+          />
+        </span>
+      ),
     },
     {
       head: 'tests',
@@ -202,6 +248,70 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
       empty={<EmptyNote>No bumps yet. The sweep writes a row as soon as one starts.</EmptyNote>}
     />
   )
+}
+
+/**
+ * THE SETTLEMENTS THAT END A BUMP BEFORE THERE IS ANYTHING TO GATE.
+ *
+ * `no-baseline` and `NO_BASELINE_NOTESTS` are thrown from the baseline stage itself, when no test
+ * passed under the project's own JDK. `infra` is the harness failing rather than the project. None
+ * of the three has a gate behind it, so the right-hand lamp is hollow rather than dim: it never
+ * ran, which is a different answer from ran and did not go green.
+ */
+const NO_GATE_BEHIND_IT = new Set<Verdict>(['no-baseline', 'NO_BASELINE_NOTESTS', 'infra'])
+
+/**
+ * Whether the gate got a turn at all.
+ *
+ * A ROW STILL BUMPING IS HOLLOW TOO, and this is the case worth being careful about. The gate has
+ * not spoken yet; drawing it dim would say it ran and did not go green, which is inventing the half
+ * of the answer that has not arrived.
+ */
+function gateRan(verdict: Verdict): boolean {
+  return verdict !== 'queued' && verdict !== 'bumping' && !NO_GATE_BEHIND_IT.has(verdict)
+}
+
+/**
+ * WHAT THE LEFT LAMP MEANS, IN THIS DASHBOARD'S OWN SENTENCE.
+ *
+ * `baselineGreen` is `preTest.passed()`, written the moment the pre-bump suite has run under the
+ * project's OWN JDK, before anything is touched. It is not "the bump worked". It qualifies the
+ * CONSERVED SET: when it is false the harness still proceeds, and its own account says so, the
+ * suite is not all green and the red ones were red before this bump and are not in the set. So a
+ * dim baseline lamp is a statement about what this bump can be held to, not a failure of it.
+ */
+function baselineSays(b: BumpSummary): string {
+  if (b.baselineGreen) {
+    return `the baseline was green: every test passed under JDK ${b.from} before anything was changed`
+  }
+  if (b.verdict === 'queued') {
+    return 'nothing has run yet, so no baseline has been taken'
+  }
+  return `the baseline ran and was not all green; the tests that were already red under JDK ${b.from} are not in the set this bump has to conserve`
+}
+
+/**
+ * WHAT THE RIGHT LAMP MEANS, and it is the field the closers select on: the after-scan runs only
+ * when the gate went green and the arguer only when it did not.
+ *
+ * The verdict column already shows the WORD this produced. The lamp shows the fact underneath it,
+ * which is that the project built under the target JDK and kept every test the baseline was
+ * holding.
+ */
+function gateSays(b: BumpSummary): string {
+  if (b.gateGreen) {
+    return `the gate went green: it built under JDK ${b.to} and kept every test the baseline was holding`
+  }
+  if (gateRan(b.verdict)) {
+    return 'the gate ran and never went green, which is what settled this bump'
+  }
+  if (b.verdict === 'infra') {
+    return 'the harness failed before the gate could run'
+  }
+  if (NO_GATE_BEHIND_IT.has(b.verdict)) {
+    return 'there was no baseline to gate against, so the gate never ran'
+  }
+  return 'the gate has not spoken for this bump yet'
 }
 
 /**
