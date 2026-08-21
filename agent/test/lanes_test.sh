@@ -31,6 +31,16 @@ now_ms() { date +%s%3N; }
 # ---------------------------------------------------------------- scenario scaffolding
 
 MANROWS=""; DURS=""; POSTPONE=""
+
+# THE ENVIRONMENT A SWEEP IS STARTED IN, which used to be three literals inside runsweep. The
+# model-settings scenarios need to launch a sweep with one of them missing, which is the whole
+# question they ask, so it became a variable a scenario may replace.
+#
+# FABRICATED, AND OBVIOUSLY SO. Nothing under test here ever reaches a real endpoint, and a harness
+# that borrowed the shape of a live key would put credential material in a public repository.
+ENV_KEY="env-only-not-a-real-key"
+SWEEP_ENV=()
+
 scenario() {                       # scenario <name> <cap>
   SNAME=$1; CAP=$2
   SC=$T/work/$SNAME
@@ -39,8 +49,21 @@ scenario() {                       # scenario <name> <cap>
            "$SC/hoptools" "$SC/fake/ps"
   export BJV_FAKE=$SC/fake
   MANROWS=""; DURS=""; POSTPONE=""
+  SWEEP_ENV=(OC_BASE=http://model.invalid OC_MODEL=fake-model "OC_KEY=$ENV_KEY")
   : > "$SC/fake/durations.tsv"
   : > "$SC/fake/events.log"
+}
+
+# What the settings page would have written into the run root, in the format run.sh parses.
+store() {                          # store <name=value>...
+  : > "$SC/root/model"
+  local pair
+  for pair in "$@"; do printf '%s\n' "$pair" >> "$SC/root/model"; done
+}
+
+# One variable a lane was actually handed, read back off the `docker run` the shim recorded.
+lane_env() {                       # lane_env <VAR> <slug>
+  sed -n "s/^$1=//p" "$SC/fake/env.bjvagent_$2" 2>/dev/null | tail -1
 }
 
 row() {                            # row <slug> <repo> <sha> <from> <to> <seconds>
@@ -78,10 +101,11 @@ runsweep() {                       # runsweep <timeout-seconds>
   sampler "$SC/samples.tsv" & SAMPLER=$!
   local t0 rc
   t0=$(now_ms)
-  ( cd "$SC" && env -u BJV_ENV \
+  ( cd "$SC" && env -u BJV_ENV -u OC_BASE -u OC_MODEL -u OC_KEY -u PROPOSER_API_KEY \
       BJV_RUNROOT="$SC/root" BJV_HOPTOOLS="$SC/hoptools" BJV_ALLOW_NO_CACHE=1 \
-      GIT_BASE=https://git.invalid OC_BASE=http://model.invalid OC_MODEL=fake OC_KEY=fake \
+      GIT_BASE=https://git.invalid \
       LANES="$CAP" BJV_FAKE="$BJV_FAKE" \
+      ${SWEEP_ENV+"${SWEEP_ENV[@]}"} \
       timeout "$1" bash "$RUN" "$SC/manifest.tsv" ) > "$SC/run.log" 2>&1
   rc=$?
   ELAPSED_MS=$(( $(now_ms) - t0 ))
@@ -239,11 +263,120 @@ EOF
   report
 }
 
+# ---------------------------------------------------------------- 4. what a lane is told to call
+#
+# THE SENTENCE ON THE SETTINGS PAGE IS THE THING UNDER TEST. It says the key, the endpoint and the
+# model saved there are what the next lane is given, and for one release it was false: the page
+# wrote a file no launcher, no lane and no supervisor ever opened. These assert the property from
+# the only side that can see it, the `docker run` argument list a lane is actually launched with.
+#
+# Six claims, and the last two are the ones that would go wrong quietly. A store that cannot be read
+# must fall back to the environment rather than to nothing, because `$(cat missing)` and
+# `$(cat unreadable)` are the same empty string and letting either win launches a whole sweep with
+# no credentials. And a saved value must arrive as DATA: the file is written by a page on the public
+# internet, so a launcher that sourced it would run whatever was typed as the host user.
+t_settings() {
+  local saw
+  FAILED=0
+
+  # a. THE PAGE WINS AND THE ENVIRONMENT IS UNDERNEATH.
+  scenario settings_page 1
+  store "key=page-saved-not-a-real-key" "endpoint=http://page.invalid/v1" "model=page-model"
+  row s1 aa/s1 cafe1 8 17 1
+  echo "== settings: what is saved on the page is what the lane is given =="
+  runsweep 60
+  [ "$(lane_env OC_KEY s1)" = "page-saved-not-a-real-key" ] \
+    || bad "the lane was given the key '$(lane_env OC_KEY s1)' rather than the one on the page"
+  [ "$(lane_env OC_BASE s1)" = "http://page.invalid/v1" ] \
+    || bad "the lane was given the endpoint '$(lane_env OC_BASE s1)' rather than the one on the page"
+  [ "$(lane_env OC_MODEL s1)" = "page-model" ] \
+    || bad "the lane was given the model '$(lane_env OC_MODEL s1)' rather than the one on the page"
+  # And the page can tell that it happened, which is the difference between "saved" and "in force".
+  saw=$(cat "$SC/root/settings_seen" 2>/dev/null)
+  [ "$saw" = "$(stat -c %Y "$SC/root/model" 2>/dev/null)" ] \
+    || bad "the lane recorded '$saw' as the settings it read, not the store's own mtime"
+  [ "${FAILED:-0}" -eq 0 ] && ok "the page's key, endpoint and model reached the lane, and the lane said so"
+  report
+
+  # b. WITH NOTHING SAVED, THE ENVIRONMENT IS WHAT A LANE GETS.
+  FAILED=0
+  scenario settings_env 1
+  row s1 aa/s1 cafe1 8 17 1
+  echo "== settings: with nothing saved, the environment is still what a lane gets =="
+  runsweep 60
+  [ "$(lane_env OC_KEY s1)" = "$ENV_KEY" ] || bad "the environment's key did not reach the lane"
+  [ "$(lane_env OC_BASE s1)" = "http://model.invalid" ] || bad "the environment's endpoint did not reach the lane"
+  [ "$(lane_env OC_MODEL s1)" = "fake-model" ] || bad "the environment's model did not reach the lane"
+  [ "${FAILED:-0}" -eq 0 ] && ok "no store is not an empty store"
+  report
+
+  # c. AN UNREADABLE STORE IS NOT AN EMPTY STORE.
+  FAILED=0
+  scenario settings_unreadable 1
+  store "key=page-saved-not-a-real-key" "endpoint=http://page.invalid/v1"
+  chmod 000 "$SC/root/model"
+  row s1 aa/s1 cafe1 8 17 1
+  echo "== settings: a store that cannot be read falls back rather than launching with nothing =="
+  runsweep 60
+  [ "$(lane_env OC_KEY s1)" = "$ENV_KEY" ] \
+    || bad "an unreadable store left the lane with '$(lane_env OC_KEY s1)' instead of the environment's key"
+  [ "$(lane_env OC_BASE s1)" = "http://model.invalid" ] \
+    || bad "an unreadable store left the lane with '$(lane_env OC_BASE s1)' instead of the environment's endpoint"
+  # And it is said out loud, because this is otherwise indistinguishable from working.
+  grep -q "cannot be read" "$SC/run.log" || bad "nothing in the log said the store could not be read"
+  chmod 600 "$SC/root/model" 2>/dev/null
+  [ "${FAILED:-0}" -eq 0 ] && ok "the pipeline stayed where it was, and the launcher said why"
+  report
+
+  # d. BLANK IS NOT A VALUE, FIELD BY FIELD.
+  FAILED=0
+  scenario settings_blank 1
+  store "key=" "endpoint=http://page.invalid/v1" "model=page-model"
+  row s1 aa/s1 cafe1 8 17 1
+  echo "== settings: a blank saved key leaves the environment's alone, the other two still win =="
+  runsweep 60
+  [ "$(lane_env OC_KEY s1)" = "$ENV_KEY" ] \
+    || bad "a blank saved key overrode the environment's with '$(lane_env OC_KEY s1)'"
+  [ "$(lane_env OC_BASE s1)" = "http://page.invalid/v1" ] \
+    || bad "a blank key line stopped the endpoint on the same page from being read"
+  [ "$(lane_env OC_MODEL s1)" = "page-model" ] || bad "the page's model did not reach the lane"
+  [ "${FAILED:-0}" -eq 0 ] && ok "one blank line did not empty the credential or the rest of the file"
+  report
+
+  # e. NO KEY ANYWHERE MEANS NO LANE.
+  FAILED=0
+  scenario settings_nokey 1
+  SWEEP_ENV=(OC_BASE=http://model.invalid OC_MODEL=fake-model)
+  row s1 aa/s1 cafe1 8 17 1
+  echo "== settings: with no key anywhere the lane is refused rather than started =="
+  runsweep 60
+  [ ! -e "$SC/fake/env.bjvagent_s1" ] || bad "a lane was started with no key at all"
+  grep -q "not starting a lane" "$SC/run.log" || bad "the refusal was not reported"
+  [ "$RC" -ne 124 ] || bad "run.sh had to be killed"
+  [ "${FAILED:-0}" -eq 0 ] && ok "an unauthenticated lane is not started, and the log says which bump"
+  report
+
+  # f. A SAVED VALUE IS DATA, NOT A COMMAND.
+  FAILED=0
+  scenario settings_data 1
+  store 'model=$(touch '"$T"'/PWNED)x' "key=page-saved-not-a-real-key"
+  rm -f "$T/PWNED"
+  row s1 aa/s1 cafe1 8 17 1
+  echo "== settings: a saved value reaches the lane verbatim and is never executed =="
+  runsweep 60
+  [ ! -e "$T/PWNED" ] || bad "a value saved on the page was executed by the launcher"
+  [ "$(lane_env OC_MODEL s1)" = '$(touch '"$T"'/PWNED)x' ] \
+    || bad "the saved model arrived as '$(lane_env OC_MODEL s1)' rather than verbatim"
+  [ "${FAILED:-0}" -eq 0 ] && ok "the store is parsed, never sourced"
+  report
+}
+
 case "${1:-all}" in
   idle) t_idle ;;
   inpass) t_inpass ;;
   terminate) t_terminate ;;
-  all) t_idle; t_inpass; t_terminate ;;
+  settings) t_settings ;;
+  all) t_idle; t_inpass; t_terminate; t_settings ;;
   *) echo "unknown scenario: $1"; exit 2 ;;
 esac
 

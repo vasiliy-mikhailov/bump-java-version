@@ -9,6 +9,7 @@ import {
   Disclosure,
   EmptyNote,
   FIELD,
+  ForgetKeyChoice,
   KeyStatus,
   LabeledField,
   Loaded,
@@ -209,46 +210,61 @@ type Model = {
    */
   key: string
   keySet: boolean
-  /** "this page" or "the environment", in the words the pill beside it says them in. */
+  /** "this page" or "the environment", or "" when there is no key anywhere to have a source. */
   keySource: string
   /** The file under the run root, named and not pathed: the reader's shell is on the host. */
   storedIn: string
-  /** When it was saved here, or 0 when the key is the environment's. */
+  /** When the key was saved here, or 0 when the key is the environment's. */
   storedAt: number
+  /** Whether anything at all is saved here, which is what the card's provenance reports. */
+  edited: boolean
   /** True when the key on screen is not the one this dashboard process was started with. */
   differsFromLaunch: boolean
+  /** True when the last lane to start read the store as it stands now. A fact about the past. */
+  laneHasThis: boolean
+  /** When that lane started, or 0 when no lane has recorded which settings it read. */
+  laneStartedAt: number
   saved: boolean
   /** Why a save was refused, in words that do not repeat what was typed. */
   why: string
   model: string
   endpoint: string
   patienceMinutes: string
+  /** Shown and not settable: ratchet-llm writes both as literals. See the card. */
+  temperature: string
+  tokenCap: string
 }
 
 /**
- * THE ENDPOINT, AND THE KEY WITH IT, WHICH REVERSES WHAT THIS SECTION USED TO SAY.
+ * THE ENDPOINT, THE KEY AND THE MODEL, AND THE TWO REVERSALS THAT PUT THEM HERE.
  *
  * WHAT STOOD HERE IS KEPT, because a reader needs to know the trade was considered and overridden
  * rather than never made. It read: the sibling tool renders its API key here, with the reveal and
  * copy buttons that cannot work otherwise, and its own mount contract flags that as the part a
  * shell author must read twice: defensible for one person behind their own proxy, not on a portal
  * several developers reach. This tool is the second one mounted, so it takes the other side of that
- * trade. Whether a key is SET travels; the key never does. There is no reveal button because there
- * is nothing behind it.
+ * trade. Whether a key is SET travels; the key never does. It also read that the endpoint stays
+ * read-only, because a page that could redirect it could point every agent at a machine of its own
+ * choosing.
  *
- * THE OWNER REVERSED IT KNOWING THE KEY WOULD THEN TRAVEL to every browser that opens this page.
- * What protects it is one password, the basic_auth in front of the whole zone. The Java records the
- * same decision at more length, including where the key is stored and why it cannot be stored
- * anywhere better.
+ * BOTH WERE REVERSED BY THE OWNER, the key first and the endpoint for parity with the sibling. The
+ * Java records both at more length, including what the second one costs, which is more than the
+ * first: one password now stands between a browser and pointing every future lane at a server of
+ * somebody else's choosing, which is then handed the key from this same card.
  *
- * WHAT THIS PAGE MUST NOT DO IS IMPLY THE SAVE REACHED THE SWEEP. It does not: `run.sh` reads the
- * key once at startup and hands it to every lane it opens, so a running sweep keeps its launcher's
- * key no matter what is stored here. That sentence is on the card rather than in this comment,
- * because the reader who needs it is the one pressing save.
+ * WHAT THIS PAGE USED TO GET WRONG WAS NOT THE POLICY BUT THE CLAIM. It said what is saved here is
+ * what the next launch reads, and nothing read it: `model_key` was written by the server beside
+ * this card and opened by no launcher, no lane and no supervisor. `run.sh` reads the store once per
+ * LANE now, so the sentence is true and stronger, and the two cases where it is still not true, a
+ * launcher already inside its loop and the supervisor in this container, are said on the card with
+ * the evidence for which one is which.
  */
 export function ModelSection() {
   const [model, setModel] = useState<Model | null>(null)
-  const [typed, setTyped] = useState<string | null>(null)
+  const [typedKey, setTypedKey] = useState<string | null>(null)
+  const [typedModel, setTypedModel] = useState<string | null>(null)
+  const [typedEndpoint, setTypedEndpoint] = useState<string | null>(null)
+  const [forget, setForget] = useState(false)
   const [busy, setBusy] = useState(false)
   const [said, setSaid] = useState<string | undefined>(undefined)
   const [failed, setFailed] = useState<string | null>(null)
@@ -259,23 +275,36 @@ export function ModelSection() {
       .catch((e: Error) => setFailed(e.message))
   }, [])
 
-  const save = (key: string) => {
+  const save = (m: Model) => {
     setBusy(true)
     setSaid(undefined)
     read<Model>('/api/settings/model', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key }),
+      body: JSON.stringify({
+        // ABSENT MEANS LEAVE IT ALONE, AND ONLY THE KEY GETS THAT RULE. A blank key box is not
+        // sent at all, so a browser that empties it cannot unset the credential; the checkbox is
+        // the only way to drop one. The other two are always sent, because for them an emptied box
+        // is the instruction to fall back to the environment's value, and this page has no other
+        // way to say it.
+        ...((typedKey ?? m.key).trim().length === 0 ? {} : { key: typedKey ?? m.key }),
+        model: typedModel ?? m.model,
+        endpoint: typedEndpoint ?? m.endpoint,
+        ...(forget ? { forget: '1' } : {}),
+      }),
     })
       .then((r) => {
         setModel(r)
-        // WHAT THE SERVER KEPT, AND ONLY WHEN IT KEPT SOMETHING. A refused save leaves the box as
-        // it was typed, because the reader is about to correct it and retyping a key from a
-        // password manager to fix one character is how a second wrong key gets saved.
+        // WHAT THE SERVER KEPT, AND ONLY WHEN IT KEPT SOMETHING. A refused save leaves the boxes as
+        // they were typed, because the reader is about to correct one character and retyping a key
+        // from a password manager to fix it is how a second wrong key gets saved.
         if (r.saved) {
-          setTyped(null)
+          setTypedKey(null)
+          setTypedModel(null)
+          setTypedEndpoint(null)
+          setForget(false)
         }
-        setSaid(r.saved ? 'stored, and the sweep already running is unchanged' : r.why)
+        setSaid(r.saved ? 'stored, and read by the next lane that opens' : r.why)
       })
       .catch((e: Error) => setSaid(e.message))
       .finally(() => setBusy(false))
@@ -286,18 +315,21 @@ export function ModelSection() {
       {(model) => (
         <SettingCard
           title="the endpoint"
-          provenance={model.keySource === '' ? 'no key' : `the key is ${model.keySource}'s`}
+          provenance={model.edited ? 'edited' : "the environment's"}
+          changed={model.edited}
           footnote={
             <>
-              The key is readable and editable here, with the reveal and copy buttons that cannot work
-              otherwise. This page used to refuse to show it, on the grounds that a portal several
-              developers reach should not render a credential to all of them; that was reversed
-              deliberately, and what now protects the key is the one password in front of this zone.
-              Rotating that password is no longer the same act as rotating the key.
+              Takes effect on the next lane a launcher opens. Nothing running is disturbed: a bump is
+              a fresh container per repository, and run.sh reads this store beside the docker run
+              that starts one rather than once when the sweep began.
               <br />
-              The model, the endpoint and the patience below are the environment's and are shown only.
-              A page that could redirect the endpoint could point every agent at a machine of its own
-              choosing.
+              The key is readable and editable here, with the reveal and copy buttons that cannot
+              work otherwise, and so is the endpoint. This page used to refuse both, on the grounds
+              that a portal several developers reach should not render a credential to all of them
+              and that a page which can redirect the endpoint can point every agent at a machine of
+              its own choosing. Both were reversed deliberately, and what protects them is the one
+              password in front of this zone. Rotating that password is no longer the same act as
+              rotating the key.
             </>
           }
         >
@@ -306,29 +338,66 @@ export function ModelSection() {
               sentence says what to do with it. */}
           <KeyStatus
             keyed={model.keySet}
-            keySource={model.keySource}
-            whenAbsent="every agent call is refused before it is made, until a key is saved here or set on the container"
+            keySource={model.keySource === '' ? 'the environment' : model.keySource}
+            whenAbsent="nothing is saved here and nothing is set on the container, so no lane will open at all until a key is saved here or set on the container"
           />
           <Account>
-            A sweep already running keeps the key its launcher started with until that launcher
-            restarts. run.sh reads the key once, at startup, and hands it to each lane as it opens
-            one, so what is saved here is what the next launch reads and has no effect on the lanes
-            running now. This has already been observed the other way round: the key was changed in
-            the environment and every lane in flight carried on with the previous one.
-            {model.differsFromLaunch
-              ? ' Right now the key in the box is not the one this dashboard was started with, so nothing at all is using it yet.'
-              : ''}
+            Every lane reads this store first and the environment underneath, in that order, and a
+            lane with no key anywhere is refused rather than started. That refusal is what lets the
+            pill above be read as it is written: a green pill means the next lane is given this key
+            or does not open, instead of opening and sending an empty bearer token to an endpoint
+            that refuses it while the chain runs on to a verdict out of silence.
+            {model.laneHasThis ? (
+              <>
+                {' '}
+                The last lane to start read what is on this page
+                {model.laneStartedAt === 0 ? null : (
+                  <>
+                    {' '}
+                    (<RelativeTime at={model.laneStartedAt} />)
+                  </>
+                )}
+                .
+              </>
+            ) : model.laneStartedAt === 0 ? (
+              <>
+                {' '}
+                No lane has recorded which settings it read, which is what a launcher started before
+                this existed looks like. Until one does, nothing here proves a lane has picked this
+                up.
+              </>
+            ) : (
+              <>
+                {' '}
+                No lane has started with this since it was saved. The last one started{' '}
+                <RelativeTime at={model.laneStartedAt} /> and read what was here then. A launcher
+                already inside its loop is executing the script it was started with, because bash
+                reads a script by byte offset, so its lanes carry on with what it read until it
+                drains and is restarted.
+              </>
+            )}
+            {model.differsFromLaunch ? (
+              <>
+                {' '}
+                The supervisor sharing this container is a third case again: it built its models
+                when the container started, a JVM cannot change its own environment, and the key on
+                screen is not the one this process was handed. It keeps that one until the next
+                deploy.
+              </>
+            ) : null}
           </Account>
           <SecretField
             label="API key"
-            value={typed ?? model.key}
-            onChange={setTyped}
+            value={typedKey ?? model.key}
+            onChange={setTypedKey}
             hint={
               <>
-                Stored under the run root as {model.storedIn}, readable by nobody but the user the
-                sweep runs as. A blank or malformed save is refused rather than stored: a settings
-                page that can empty the key is a settings page that can stop the next sweep in
-                silence. To go back to the environment&rsquo;s key, delete that file with a shell.
+                This is the key in force, the one every lane is given. Blank leaves it alone rather
+                than clearing it, so a browser that empties this box cannot silently unset the
+                credential and leave every agent talking to an endpoint that refuses them; use the
+                checkbox to drop a key saved here and fall back to the environment&rsquo;s. Stored
+                under the run root as {model.storedIn}, readable by nobody but the user the sweep
+                runs as.
                 {model.storedAt === 0 ? null : (
                   <>
                     {' '}
@@ -338,27 +407,56 @@ export function ModelSection() {
               </>
             }
           />
-          <SaveRow onSave={() => save(typed ?? model.key)} busy={busy} said={said} />
+          <ForgetKeyChoice keySource={model.keySource} checked={forget} onChange={setForget} />
+          <LabeledField
+            label="model"
+            hint="What to ask for. Must be a name the endpoint below serves. Emptying this box falls back to the environment's, which is how an override is undone without a shell."
+          >
+            <input
+              style={FIELD}
+              value={typedModel ?? model.model}
+              onChange={(e) => setTypedModel(e.currentTarget.value)}
+              spellCheck={false}
+            />
+          </LabeledField>
+          <LabeledField
+            label="endpoint"
+            hint="OpenAI-shaped, ending in /v1. The scheme decides the protocol: https negotiates HTTP/2, anything else stays on 1.1, because offering h2c on a cleartext endpoint gets it accepted by vLLM which then loses the body. Emptying this box falls back to the environment's. This field redirects the fleet: every lane opened after a save is pointed at whatever is typed here and is handed the key above."
+          >
+            <input
+              style={FIELD}
+              value={typedEndpoint ?? model.endpoint}
+              onChange={(e) => setTypedEndpoint(e.currentTarget.value)}
+              spellCheck={false}
+            />
+          </LabeledField>
+          <SaveRow onSave={() => save(model)} busy={busy} said={said} />
           {/* WHAT A SAVE DOES NOT PROVE, said once rather than left to be assumed. The metering
               proxy is the thing that would know whether this key is a real one and which lane it
               bills, and it publishes its labels while keeping the mapping from key to label inside
               its own process. There is no cheap question this server can ask it, so the page claims
               nothing about it instead of inventing a check. */}
           <Account>
-            Saving stores the key; it does not test it. The inference proxy knows which label a key
-            meters as, but it publishes only the labels and never the mapping, and this container
-            cannot read another container&rsquo;s environment. A wrong key shows up as the next
-            launch&rsquo;s lanes being refused, not here.
+            Saving stores the values; it does not test them. The inference proxy knows which label a
+            key meters as, but it publishes only the labels and never the mapping, and this container
+            cannot read another container&rsquo;s environment. A wrong key or a wrong endpoint shows
+            up as the next lane being refused, not here.
           </Account>
           <div style={{ height: '14px' }} />
-          <LabeledField label="model" hint="What to ask for. Must be a name the endpoint below serves.">
-            <input style={READONLY} value={model.model} readOnly />
+          <LabeledField
+            label="temperature"
+            // SHOWN AND NOT SETTABLE, AND THE REASON IS ON THE PAGE RATHER THAN IN A COMMIT. The
+            // sibling's card sets this one. Ours would be a box that changes nothing, which is the
+            // exact defect the rest of this card was rewritten to remove.
+            hint="Zero, because these agents certify: a judge that answers differently on the same evidence twice is not a judge. Not settable here, and that is a limit rather than a policy: ratchet-llm builds every client with this written in, so moving it needs a ratchet-llm release and a rebuilt image, not a form."
+          >
+            <input style={READONLY} value={model.temperature} readOnly />
           </LabeledField>
           <LabeledField
-            label="endpoint"
-            hint="OpenAI-shaped, ending in /v1. The scheme decides the protocol."
+            label="token cap"
+            hint="How much of one answer to allow. Not settable here for the same reason as the temperature above: it is a constant inside ratchet-llm. The bound that is tunable from the outside is the thinking budget, which bounds the reasoning rather than the reply and is set on the container."
           >
-            <input style={READONLY} value={model.endpoint} readOnly />
+            <input style={READONLY} value={model.tokenCap} readOnly />
           </LabeledField>
           <LabeledField
             label="patience"

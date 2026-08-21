@@ -36,11 +36,12 @@ esac
 
 name=""
 mounts=()
+envs=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --name) name=${2:-}; shift 2 ;;
     -v) mounts+=("${2:-}"); shift 2 ;;
-    -e) shift 2 ;;
+    -e) envs+=("${2:-}"); shift 2 ;;
     --rm|-d|-i|-t|-it) shift ;;
     -*) shift ;;
     *) break ;;
@@ -48,6 +49,19 @@ while [ $# -gt 0 ]; do
 done
 cmd=("$@")            # image, then the command
 rest=("${cmd[@]:1}")
+
+# WHAT THE LANE WAS HANDED, WHICH IS THE OTHER HALF OF WHAT run.sh DECIDES. The occupancy tests only
+# ever needed the container to exist; the model-settings tests need to know which endpoint, model
+# and key it was given, and there is no other seam that sees a `docker run` argument list. Written
+# per container name, inside the scratch tree the harness throws away.
+#
+# The values here are the test's own fabrications. Nothing real is ever passed to this shim, and a
+# harness that wrote a live credential into a file under /tmp would be a worse bug than any it could
+# catch.
+if [ -n "$name" ]; then
+  : > "$BJV_FAKE/env.$name"
+  for e in ${envs+"${envs[@]}"}; do printf '%s\n' "$e" >> "$BJV_FAKE/env.$name"; done
+fi
 
 # Container path back to host path, so the housekeeping runs really do what run.sh believes they do.
 # The postponed-marker clearing especially: a shim that exits 0 without removing anything would make

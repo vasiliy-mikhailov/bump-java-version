@@ -19,6 +19,28 @@ need() {
   fi
 }
 
+# WHAT THE SETTINGS PAGE SAVED COUNTS AS SET NOW. run.sh reads that store once per lane, with the
+# environment underneath, so a check that looked only at the environment would report a sweep as
+# unlaunchable while the page already has everything it needs. Parsed, never sourced, for the same
+# reason the launcher parses it: the file is written by a page on the public internet.
+SETTINGS=${BJV_MODEL_SETTINGS:-${BJV_RUNROOT:-}/model}
+saved() {
+  [ -f "$SETTINGS" ] && [ -r "$SETTINGS" ] || return 0
+  sed -n "s/^$1=//p" "$SETTINGS" 2>/dev/null | tail -1
+}
+
+either() {                        # either <ENV_NAME> <name-in-the-store>
+  local n=$1 s
+  s=$(saved "$2")
+  if [ -n "${!n:-}" ]; then
+    echo "ok  $n=${!n}"
+  elif [ -n "$s" ]; then
+    echo "ok  $2=$s (saved on the settings page)"
+  else
+    echo "MISSING $n, and nothing named $2 is saved on the settings page"; fail=1
+  fi
+}
+
 echo "== env =="
 need BJV_IMAGE
 need BJV_JDK_IMAGE
@@ -26,14 +48,19 @@ need BJV_RUNROOT
 need BJV_HOPTOOLS
 need BJV_MANIFEST
 need GIT_BASE
-need OC_BASE
-need OC_MODEL
+either OC_BASE endpoint
+either OC_MODEL model
 need BJV_DASH_TOKEN
-if [ -z "${OC_KEY:-}" ]; then
-  echo "MISSING OC_KEY — Bump/Supervisor will fail closed (not a silent 'all good')"
-  fail=1
+# WHETHER, NEVER WHICH. The key is the one value here that is never echoed, and what matters is only
+# that a lane will be opened at all: run.sh refuses to start one with no key rather than launching a
+# lane that sends an empty bearer token and produces a verdict out of silence.
+if [ -n "${OC_KEY:-}" ] || [ -n "$(saved key)" ] \
+   || [ -s "${BJV_RUNROOT:-}/model_key" ] || [ -n "${PROPOSER_API_KEY:-}" ]; then
+  echo "ok  a model key is set"
 else
-  echo "ok  OC_KEY is set"
+  echo "MISSING a model key: nothing in OC_KEY, nothing in PROPOSER_API_KEY and nothing saved on"
+  echo "        the settings page. run.sh will refuse to open a lane, and the supervisor fails closed."
+  fail=1
 fi
 
 echo "== paths =="

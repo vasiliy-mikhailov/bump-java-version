@@ -33,15 +33,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>The reversal is recorded in {@code Settings.model}, alongside what it costs. What is asserted
  * here is the half a comment cannot hold: that the key really does travel to the page, that the
  * file it lands in is readable by nobody else, that it lands outside the directory this server
- * hands out, and that a save which would empty or mangle the key is refused rather than stored.
+ * hands out, and that a save which would mangle the key is refused rather than stored.
  *
- * <p>The last one is the reason the endpoint is worth a test at all. A settings page that can empty
- * the key is a settings page that can stop the next sweep and report success doing it.
+ * <p>WHAT A BLANK SAVE DOES MOVED, and the test that pinned it moved with it. It used to be
+ * refused, on the stated grounds that a save which silently did nothing is its own lie, and that
+ * was right while there was no other way to drop a saved key. There is one now, so blank means
+ * leave it alone and the checkbox means drop it. That pair is asserted next door in
+ * {@code WhatTheNextLaneReadsIsWhatThisPageSavedTest}, together with the reason the pair had to
+ * arrive at once.
  */
 class TheModelKeyIsSetOnThePageNowTest {
 
-    private static final String KEY = "sk-1f2e3d4c5b6a798877665544332211aabbccddeeff00112233445566778899";
-    private static final String OTHER = "sk-00112233445566778899aabbccddeeff1f2e3d4c5b6a79887766554433221100";
+    /**
+     * FABRICATED, AND IT HAS TO BE. A fixture that borrows the front of a real key puts credential
+     * material in a public repository, where a test file is the last place anybody looks for it.
+     * This repository has done it once already and had to amend the commit away.
+     */
+    private static final String KEY = "sk-testonly-1f2e3d4c5b6a798877665544332211aabbccddeeff0011";
+    private static final String OTHER = "sk-testonly-00112233445566778899aabbccddeeff1f2e3d4c5b6a";
 
     /**
      * The real endpoint over a real socket, because half of what is being asserted is in the
@@ -81,10 +90,14 @@ class TheModelKeyIsSetOnThePageNowTest {
         return Files.createDirectories(runRoot.resolve("results"));
     }
 
+    private static Path store(Path runRoot) {
+        return runRoot.resolve(ModelSettings.FILE);
+    }
+
     @Test
     void theKeyItselfTravelsToThePage(@TempDir Path runRoot) throws Exception {
         Path results = results(runRoot);
-        Files.writeString(runRoot.resolve("model_key"), KEY + "\n");
+        Files.writeString(store(runRoot), "key=" + KEY + "\n");
 
         Answer got = ask(results, "GET", null);
 
@@ -101,7 +114,7 @@ class TheModelKeyIsSetOnThePageNowTest {
         Answer got = ask(results, "POST", "{\"key\":\"" + KEY + "\"}");
 
         assertEquals("true", got.fields().get("saved"), got.body());
-        assertEquals(KEY, Files.readString(runRoot.resolve("model_key")).trim());
+        assertEquals("key=" + KEY, Files.readString(store(runRoot)).trim());
         // results/ is the directory this server serves. A credential in it is a credential
         // published, and no endpoint has to be careless for that to happen.
         try (Stream<Path> under = Files.walk(results)) {
@@ -112,7 +125,7 @@ class TheModelKeyIsSetOnThePageNowTest {
         }
         // And the staging file it was renamed from is gone, rather than left world-readable beside
         // the one whose permissions were the point.
-        assertFalse(Files.exists(runRoot.resolve("model_key.staged")));
+        assertFalse(Files.exists(runRoot.resolve(ModelSettings.FILE + ".staged")));
     }
 
     @Test
@@ -122,25 +135,9 @@ class TheModelKeyIsSetOnThePageNowTest {
 
         ask(results, "POST", "{\"key\":\"" + KEY + "\"}");
 
-        Set<PosixFilePermission> mode =
-                Files.getPosixFilePermissions(runRoot.resolve("model_key"));
+        Set<PosixFilePermission> mode = Files.getPosixFilePermissions(store(runRoot));
         assertEquals(Set.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE), mode,
                 "the run root is a bind mount, so the mode is the whole of the protection");
-    }
-
-    @Test
-    void anEmptyBoxIsRefusedRatherThanEmptyingTheKey(@TempDir Path runRoot) throws Exception {
-        Path results = results(runRoot);
-        Files.writeString(runRoot.resolve("model_key"), KEY + "\n");
-
-        Answer got = ask(results, "POST", "{\"key\":\"\"}");
-
-        assertEquals("false", got.fields().get("saved"));
-        assertTrue(got.fields().get("why").contains("empty box"), got.body());
-        // THE ONE THAT MATTERS: the key that was there is still there. A refusal that had already
-        // truncated the file would be a refusal in name only.
-        assertEquals(KEY, Files.readString(runRoot.resolve("model_key")).trim());
-        assertEquals(KEY, got.fields().get("key"), "and the page is told what is still in force");
     }
 
     @Test
@@ -155,7 +152,7 @@ class TheModelKeyIsSetOnThePageNowTest {
         // A REFUSAL IS THE EASIEST THING ON A PAGE TO SCREENSHOT. Every other refusal here quotes
         // the text it would not take; this one may not, because the text is a credential.
         assertFalse(got.body().contains(KEY), "the reply repeated the key back");
-        assertFalse(Files.exists(runRoot.resolve("model_key")));
+        assertFalse(Files.exists(store(runRoot)));
     }
 
     @Test
@@ -178,20 +175,37 @@ class TheModelKeyIsSetOnThePageNowTest {
         Answer got = ask(results, "POST", "{\"key\":\"" + OTHER + "\"}");
 
         assertEquals(OTHER, got.fields().get("key"));
-        assertEquals(OTHER, Files.readString(runRoot.resolve("model_key")).trim());
+        assertEquals("key=" + OTHER, Files.readString(store(runRoot)).trim());
     }
 
     @Test
-    void aKeySavedHereIsNotTheKeyAnythingIsRunningWith(@TempDir Path runRoot) throws Exception {
+    void aKeySavedHereIsNotYetTheKeyTheSupervisorInThisContainerIsUsing(@TempDir Path runRoot)
+            throws Exception {
         Path results = results(runRoot);
 
         Answer got = ask(results, "POST", "{\"key\":\"" + KEY + "\"}");
 
-        // run.sh reads its key once at startup and hands it to each lane on the command line, and
-        // this process was handed its own at deploy. Neither notices a file written now. The page
-        // says so in a sentence; the flag is what lets it say so only when it is true.
+        // Lanes read this store per lane now, so the page's claim about THEM is true. The
+        // supervisor is a separate case and stays one: it built its models when the container
+        // started and a JVM cannot change its own environment. differsFromLaunch is the evidence
+        // for that sentence, and the card only prints it when this is true.
         assertEquals("true", got.fields().get("differsFromLaunch"));
         assertNotEquals("0", got.fields().get("storedAt"), "and when it was written");
+    }
+
+    @Test
+    void aKeyTheOlderPageSavedIsStillHonouredRatherThanQuietlyDropped(@TempDir Path runRoot)
+            throws Exception {
+        Path results = results(runRoot);
+        Files.writeString(runRoot.resolve(ModelSettings.LEGACY_KEY_FILE), KEY + "\n");
+
+        Answer got = ask(results, "GET", null);
+
+        // The file the previous release wrote is still the owner's most recent deliberate statement
+        // of what the key should be. Upgrading to a page that reads a different file must not be
+        // this page unsetting a credential without being asked.
+        assertEquals(KEY, got.fields().get("key"));
+        assertEquals("this page", got.fields().get("keySource"));
     }
 
     @Test
@@ -204,13 +218,14 @@ class TheModelKeyIsSetOnThePageNowTest {
         // claim a file's value is in force when there is no file.
         assertNotEquals("this page", got.fields().get("keySource"));
         assertEquals("0", got.fields().get("storedAt"));
-        assertEquals("model_key", got.fields().get("storedIn"));
+        assertEquals("model", got.fields().get("storedIn"));
+        assertEquals("false", got.fields().get("edited"));
     }
 
     @Test
     void nothingBetweenHereAndTheBrowserMayKeepACopy(@TempDir Path runRoot) throws Exception {
         Path results = results(runRoot);
-        Files.writeString(runRoot.resolve("model_key"), KEY + "\n");
+        Files.writeString(store(runRoot), "key=" + KEY + "\n");
 
         Answer got = ask(results, "GET", null);
 

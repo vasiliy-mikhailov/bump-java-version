@@ -11,6 +11,7 @@ export { bomTotals, type BomTotals } from './boms'
 export { cveTotals, type CveTotals } from './cves'
 export { ChainStrip, type ChainStripProps } from './ChainStrip'
 export { EventFeed, type EventFeedProps } from './EventFeed'
+export { ForgetKeyChoice, type ForgetKeyChoiceProps } from './ForgetKeyChoice'
 export { PackageTable, collapse, type PackageTableProps } from './PackageTable'
 export { PipelineMark, type PipelineMarkProps } from './PipelineMark'
 export {

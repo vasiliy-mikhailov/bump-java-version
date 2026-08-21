@@ -44,23 +44,65 @@ mkdir -p "$WS" "$RESULTS" 2>/dev/null
 docker run --rm -v "$ROOT:/r" alpine chown -R "$(id -u):$(id -g)" /r/results >/dev/null 2>&1
 mkdir -p "$RESULTS/claims"
 
-# The API key comes from the environment / .env, never from the manifest or the command line.
-KEY=${OC_KEY:-${PROPOSER_API_KEY:-}}
+# WHAT THE SETTINGS PAGE SAVED, READ ONCE PER LANE AND NOT ONCE PER LAUNCHER.
+#
+# The key, the endpoint and the model name used to be read here, at startup, and stamped into every
+# lane this launcher would ever open. That is the same staleness the dashboard was built to remove:
+# the key was rotated in all three env files an hour before this was written, the page picked it up
+# on deploy, and every lane in flight carried on with the old one for the rest of the day. Worse,
+# the page said "what is saved here is what the next launch reads" while nothing read the file it
+# wrote at all.
+#
+# So the readers below are called from inside one(), which runs in its own subshell per bump. One
+# sed per lane costs nothing against a bump that runs for an hour, and it makes the effect boundary
+# the next LANE rather than the next launcher.
+#
+# PARSED, NEVER SOURCED. This file is written by a page on the public internet. `.` would make a
+# saved value a command this launcher runs as the host user.
+#
+# BLANK IS NOT A VALUE, AND GETTING THAT BACKWARDS IS THE OUTAGE THIS IS MEANT TO PREVENT. A missing
+# file, a directory, and a file the mode forbids all yield the empty string here, so every reader
+# checks for a non-empty answer before it stops looking. An empty answer allowed to win over $OC_KEY
+# is a whole sweep launched with no credentials, which has happened once already.
+SETTINGS=${BJV_MODEL_SETTINGS:-$ROOT/model}
+LEGACY_KEY=$ROOT/model_key
+readable() { [ -f "$SETTINGS" ] && [ -r "$SETTINGS" ]; }
+saved() { readable || return 0; sed -n "s/^$1=//p" "$SETTINGS" 2>/dev/null | tail -1 | tr -d '\r'; }
+# The page wins and the environment is underneath, which is the precedence the page's prose
+# describes and the Java's ModelSettings implements. model_key is what the page wrote before the
+# store existed: read, never written.
+model_key_now() {
+  local v; v=$(saved key)
+  [ -n "$v" ] || v=$(tr -d '\r\n' < "$LEGACY_KEY" 2>/dev/null)
+  [ -n "$v" ] || v=${OC_KEY:-${PROPOSER_API_KEY:-}}
+  printf '%s' "$v"
+}
+model_base_now() { local v; v=$(saved endpoint); [ -n "$v" ] || v=${OC_BASE:-}; printf '%s' "$v"; }
+model_name_now() { local v; v=$(saved model); [ -n "$v" ] || v=${OC_MODEL:-}; printf '%s' "$v"; }
+# WHICH SETTINGS A LANE WAS STARTED WITH, so the page can tell "saved" from "in force". The mtime of
+# the file that was read, and 0 when there was nothing readable to read: never the key, never a
+# digest of one. A store that exists and cannot be read records 0 on purpose, so the page says a
+# lane has not picked it up rather than claiming it has.
+settings_stamp() { readable && stat -c %Y "$SETTINGS" 2>/dev/null || echo 0; }
+if [ -e "$SETTINGS" ] && ! readable; then
+  echo "run.sh: $SETTINGS exists and cannot be read; every lane will use the environment instead" >&2
+fi
 : "${GIT_BASE:?set GIT_BASE (e.g. https://gitlab.example.com)}"
 
 # A LANE WITH NO ENDPOINT DIES IN SECONDS AND SAYS SO ONLY IN ITS OWN LOG.
 #
-# Model requires OC_BASE and OC_MODEL now rather than defaulting to one machine's inference host,
+# Model requires a base URL and a model name rather than defaulting to one machine's inference host,
 # and that is the right change: the default was a pin to the author's box, and it had gone stale
 # besides, naming a different model from the one this host's .env configures. What it introduced is
-# a silent failure at the other end. This loop passes those two through only when they are set, so
-# an unset pair does not stop anything: it launches lane after lane, each of which starts, throws
+# a silent failure at the other end. Unset, nothing stops: lane after lane starts, throws
 # IllegalStateException and exits. Thirty-five bumps went past that way in under a minute, each
 # leaving a "bumping" heartbeat and no verdict, before anyone opened a log.
 #
-# One refusal here, before the first lane, costs one line and reads as what it is.
-: "${OC_BASE:?set OC_BASE (bump-agent/.env, or the environment): a lane cannot start without one}"
-: "${OC_MODEL:?set OC_MODEL (bump-agent/.env, or the environment)}"
+# One refusal here, before the first lane, costs one line and reads as what it is. It asks the same
+# readers a lane will, so a value saved on the settings page satisfies it and an environment with
+# neither does not.
+[ -n "$(model_base_now)" ] || { echo "run.sh: no endpoint, on the settings page or in the environment (OC_BASE): a lane cannot start without one" >&2; exit 1; }
+[ -n "$(model_name_now)" ] || { echo "run.sh: no model, on the settings page or in the environment (OC_MODEL)" >&2; exit 1; }
 
 # AND THE SANDBOX MOUNTS, WHICH FAIL WORSE THAN THE ENDPOINT DOES.
 #
@@ -146,6 +188,24 @@ one() {
   local slug=$1 repo=$2 sha=$3 from=$4 to=$5
   local w=$WS/$slug
 
+  # WHAT THIS LANE IS TOLD TO CALL, READ NOW RATHER THAN WHEN THE SWEEP BEGAN. See the readers at
+  # the top: the settings page wins, the environment is underneath, and none of the three is ever
+  # echoed, put in the banner, or left anywhere `set -x` would reach.
+  local key base name
+  key=$(model_key_now); base=$(model_base_now); name=$(model_name_now)
+  if [ -z "$key" ]; then
+    # A LANE WITH NO KEY DOES NOT DIE, WHICH IS WHY THIS REFUSES RATHER THAN WARNS. ratchet passes
+    # an empty key straight through, the client sends "Authorization: Bearer " with nothing after
+    # it, every call is refused, and the chain catches each refusal per agent, records the agent as
+    # unreachable and runs on to a verdict built out of silence. That is worse than a crash: it
+    # produces results that look ordinary, which is how an hour once went by with no credentials at
+    # all. The settings page can now drop a key on purpose, so this refusal is not optional.
+    #
+    # BEFORE THE CLONE, so a misconfigured store costs a line rather than a repository.
+    echo "[$slug] no model key on the settings page, in OC_KEY or in PROPOSER_API_KEY; not starting a lane"
+    return 1
+  fi
+
   # WHERE FROM, AND WITH WHOSE CREDENTIAL. An uploaded registry carries a URL, because not every
   # repository is on github.com, and may carry a token for a private one. Both live beside the
   # manifest rather than in it: the manifest is keyed by owner/name because the whole record is,
@@ -197,9 +257,23 @@ one() {
   [ -d "${BJV_GRADLE_DISTS:-}" ] && vols+=(-v "$BJV_GRADLE_DISTS:$BJV_GRADLE_DISTS")
   [ -e "${BJV_GRADLE_INIT:-}" ] && vols+=(-v "$BJV_GRADLE_INIT:$BJV_GRADLE_INIT:ro")
 
-  local envs=(-e "OC_KEY=$KEY" -e "BJV_HOPTOOLS=$HOPTOOLS"
+  # WHAT THIS LANE READ, WHERE THE PAGE CAN SEE IT. Renamed into place rather than written in place,
+  # for the same reason as everything else in the run root: a reader holding it open must never see
+  # a half-written one.
+  # BASHPID AND NOT $$, because one() runs in a background subshell and $$ is the launcher's pid
+  # there: eight lanes opening at once would all stage through the same temp name and the mv would
+  # race itself.
+  local staged=$ROOT/.settings_seen.${BASHPID:-$$}
+  settings_stamp > "$staged" 2>/dev/null && mv -f "$staged" "$ROOT/settings_seen" 2>/dev/null
+  rm -f "$staged" 2>/dev/null
+
+  local envs=(-e "OC_KEY=$key" -e "OC_BASE=$base" -e "OC_MODEL=$name"
+              -e "BJV_HOPTOOLS=$HOPTOOLS"
               -e "BJV_PATIENCE_MINUTES=${BJV_PATIENCE_MINUTES:-45}")
-  for v in OC_BASE OC_MODEL BJV_REPO_URL BJV_NET BJV_M2 BJV_SETTINGS BJV_GRADLE_RO BJV_GRADLE_DISTS \
+  # OC_BASE and OC_MODEL are NOT in this loop any more: they are set above from the settings page
+  # with the environment underneath, and a second copy here would silently win or lose depending on
+  # which -e docker saw last.
+  for v in BJV_REPO_URL BJV_NET BJV_M2 BJV_SETTINGS BJV_GRADLE_RO BJV_GRADLE_DISTS \
            BJV_GRADLE_INIT BJV_JDK_IMAGE BJV_SCAN_IMAGE BJV_THINKING BJV_HANG_GUARD BJV_BUILD_SECONDS; do
     [ -n "${!v:-}" ] && envs+=(-e "$v=${!v}")
   done
