@@ -16,6 +16,7 @@ import {
   READONLY,
   RelativeTime,
   SaveRow,
+  SecretField,
   SettingCard,
 } from '@bjv/ui'
 import { read } from '@/lib/api'
@@ -201,23 +202,55 @@ export function RunSection() {
 }
 
 type Model = {
+  /**
+   * THE KEY ITSELF, which this payload used not to carry. The Java's `Settings.model` records the
+   * decision that put it here and what it costs; everything else about this field, the mask, the
+   * reveal, the no-store on the response, follows from it.
+   */
+  key: string
   keySet: boolean
+  /** "this page" or "the environment", in the words the pill beside it says them in. */
+  keySource: string
+  /** The file under the run root, named and not pathed: the reader's shell is on the host. */
+  storedIn: string
+  /** When it was saved here, or 0 when the key is the environment's. */
+  storedAt: number
+  /** True when the key on screen is not the one this dashboard process was started with. */
+  differsFromLaunch: boolean
+  saved: boolean
+  /** Why a save was refused, in words that do not repeat what was typed. */
+  why: string
   model: string
   endpoint: string
   patienceMinutes: string
 }
 
 /**
- * THE ENDPOINT, AND DELIBERATELY NOT THE KEY.
+ * THE ENDPOINT, AND THE KEY WITH IT, WHICH REVERSES WHAT THIS SECTION USED TO SAY.
  *
- * The sibling tool renders its API key here, with the reveal and copy buttons that cannot work
- * otherwise, and its own mount contract flags that as the part a shell author must read twice:
- * defensible for one person behind their own proxy, not on a portal several developers reach. This
- * tool is the second one mounted, so it takes the other side of that trade. Whether a key is SET
- * travels; the key never does. There is no reveal button because there is nothing behind it.
+ * WHAT STOOD HERE IS KEPT, because a reader needs to know the trade was considered and overridden
+ * rather than never made. It read: the sibling tool renders its API key here, with the reveal and
+ * copy buttons that cannot work otherwise, and its own mount contract flags that as the part a
+ * shell author must read twice: defensible for one person behind their own proxy, not on a portal
+ * several developers reach. This tool is the second one mounted, so it takes the other side of that
+ * trade. Whether a key is SET travels; the key never does. There is no reveal button because there
+ * is nothing behind it.
+ *
+ * THE OWNER REVERSED IT KNOWING THE KEY WOULD THEN TRAVEL to every browser that opens this page.
+ * What protects it is one password, the basic_auth in front of the whole zone. The Java records the
+ * same decision at more length, including where the key is stored and why it cannot be stored
+ * anywhere better.
+ *
+ * WHAT THIS PAGE MUST NOT DO IS IMPLY THE SAVE REACHED THE SWEEP. It does not: `run.sh` reads the
+ * key once at startup and hands it to every lane it opens, so a running sweep keeps its launcher's
+ * key no matter what is stored here. That sentence is on the card rather than in this comment,
+ * because the reader who needs it is the one pressing save.
  */
 export function ModelSection() {
   const [model, setModel] = useState<Model | null>(null)
+  const [typed, setTyped] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [said, setSaid] = useState<string | undefined>(undefined)
   const [failed, setFailed] = useState<string | null>(null)
 
   useEffect(() => {
@@ -226,30 +259,98 @@ export function ModelSection() {
       .catch((e: Error) => setFailed(e.message))
   }, [])
 
+  const save = (key: string) => {
+    setBusy(true)
+    setSaid(undefined)
+    read<Model>('/api/settings/model', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key }),
+    })
+      .then((r) => {
+        setModel(r)
+        // WHAT THE SERVER KEPT, AND ONLY WHEN IT KEPT SOMETHING. A refused save leaves the box as
+        // it was typed, because the reader is about to correct it and retyping a key from a
+        // password manager to fix one character is how a second wrong key gets saved.
+        if (r.saved) {
+          setTyped(null)
+        }
+        setSaid(r.saved ? 'stored, and the sweep already running is unchanged' : r.why)
+      })
+      .catch((e: Error) => setSaid(e.message))
+      .finally(() => setBusy(false))
+  }
+
   return (
     <Loaded what="model" failed={failed} value={model}>
       {(model) => (
         <SettingCard
           title="the endpoint"
-          provenance="the environment's"
+          provenance={model.keySource === '' ? 'no key' : `the key is ${model.keySource}'s`}
           footnote={
             <>
-              This page does not set any of these, and it never shows the key. The sibling tool does show
-              its own, and says in its mount contract why that is a trade rather than an oversight: the
-              reveal and copy buttons cannot work otherwise. On a portal several developers reach, a
-              settings page that renders a credential publishes it to all of them.
+              The key is readable and editable here, with the reveal and copy buttons that cannot work
+              otherwise. This page used to refuse to show it, on the grounds that a portal several
+              developers reach should not render a credential to all of them; that was reversed
+              deliberately, and what now protects the key is the one password in front of this zone.
+              Rotating that password is no longer the same act as rotating the key.
+              <br />
+              The model, the endpoint and the patience below are the environment's and are shown only.
+              A page that could redirect the endpoint could point every agent at a machine of its own
+              choosing.
             </>
           }
         >
-          {/* WHAT THE ABSENCE MEANS IS THIS PAGE'S SENTENCE AND NOT THE COMPONENT'S. The sibling
-              tool's settings page can set a key, so its no-key sentence tells a reader what to do
-              next; this one deliberately renders no key field at all, so its sentence has to say
-              that the fix is somewhere else entirely. Neither is true of the other page. */}
+          {/* WHAT THE ABSENCE MEANS IS THIS PAGE'S SENTENCE AND NOT THE COMPONENT'S, and this page
+              now has the sibling's answer rather than its old one: there is a box here, so the
+              sentence says what to do with it. */}
           <KeyStatus
             keyed={model.keySet}
-            keySource="the environment"
-            whenAbsent="every agent call will be refused until one is set on the container"
+            keySource={model.keySource}
+            whenAbsent="every agent call is refused before it is made, until a key is saved here or set on the container"
           />
+          <Account>
+            A sweep already running keeps the key its launcher started with until that launcher
+            restarts. run.sh reads the key once, at startup, and hands it to each lane as it opens
+            one, so what is saved here is what the next launch reads and has no effect on the lanes
+            running now. This has already been observed the other way round: the key was changed in
+            the environment and every lane in flight carried on with the previous one.
+            {model.differsFromLaunch
+              ? ' Right now the key in the box is not the one this dashboard was started with, so nothing at all is using it yet.'
+              : ''}
+          </Account>
+          <SecretField
+            label="API key"
+            value={typed ?? model.key}
+            onChange={setTyped}
+            hint={
+              <>
+                Stored under the run root as {model.storedIn}, readable by nobody but the user the
+                sweep runs as. A blank or malformed save is refused rather than stored: a settings
+                page that can empty the key is a settings page that can stop the next sweep in
+                silence. To go back to the environment&rsquo;s key, delete that file with a shell.
+                {model.storedAt === 0 ? null : (
+                  <>
+                    {' '}
+                    Saved <RelativeTime at={model.storedAt} />.
+                  </>
+                )}
+              </>
+            }
+          />
+          <SaveRow onSave={() => save(typed ?? model.key)} busy={busy} said={said} />
+          {/* WHAT A SAVE DOES NOT PROVE, said once rather than left to be assumed. The metering
+              proxy is the thing that would know whether this key is a real one and which lane it
+              bills, and it publishes its labels while keeping the mapping from key to label inside
+              its own process. There is no cheap question this server can ask it, so the page claims
+              nothing about it instead of inventing a check. */}
+          <Account>
+            Saving stores the key; it does not test it. The inference proxy knows which label a key
+            meters as, but it publishes only the labels and never the mapping, and this container
+            cannot read another container&rsquo;s environment. A wrong key shows up as the next
+            launch&rsquo;s lanes being refused, not here.
+          </Account>
+          <div style={{ height: '14px' }} />
           <LabeledField label="model" hint="What to ask for. Must be a name the endpoint below serves.">
             <input style={READONLY} value={model.model} readOnly />
           </LabeledField>

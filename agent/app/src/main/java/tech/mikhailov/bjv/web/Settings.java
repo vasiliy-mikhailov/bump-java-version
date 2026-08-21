@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,14 +33,27 @@ import tech.mikhailov.ratchet.flow.Shape;
  * <p>Four surfaces share this page and they are not equally powerful. The prompts and the bills of
  * materials are EDITED here, into a store beside the results, and a bump reads that store rather
  * than the code's own text. The lanes are edited too, because {@code run.sh} re-reads them every
- * round. The model endpoint, the repository URL and the cache locations are shown and nothing more:
- * a supply chain a web page can redirect is a supply chain a web page can redirect.
+ * round. The model key is edited too, into the run root, on a decision recorded at {@link #model}
+ * that reverses what this page used to do. The model endpoint, the repository URL and the cache
+ * locations are shown and nothing more: a supply chain a web page can redirect is a supply chain a
+ * web page can redirect.
  *
  * <p>THE EDITS ARE PART OF THE PIPELINE'S IDENTITY. They live outside the image, so a commit and an
  * image hash together still do not say which prompts a run used; see Version, and the two hashes
  * every settled row carries.
  */
 final class Settings {
+
+    /**
+     * WHERE THE MODEL KEY IS KEPT: beside {@code max_lanes}, the one other thing this page writes
+     * into the run root. The run root is this container's only mount, and it is outside the git
+     * work tree, which is what makes it the only place a credential typed here may land.
+     */
+    private static final String KEY_FILE = "model_key";
+
+    /** Nobody but the user the sweep and this page both run as. */
+    private static final Set<PosixFilePermission> OWNER_ONLY = Set.of(
+            PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE);
 
     private final Results results;
 
@@ -303,25 +320,163 @@ final class Settings {
     }
 
     /**
-     * THE ENDPOINT, AND DELIBERATELY NOT THE KEY.
+     * THE ENDPOINT, AND NOW THE KEY WITH IT, WHICH REVERSES WHAT THIS METHOD USED TO SAY.
      *
-     * <p>The sibling tool renders its API key into this page, with the reveal and copy buttons that
-     * cannot work otherwise, and its own mount contract calls that out as the part a shell author
-     * has to read twice: defensible for one person behind their own proxy, not on a portal several
-     * developers reach. This tool is the second one mounted, so it takes the other side of that
-     * trade — whether a key is SET travels, and the key never does. There is no reveal button
-     * because there is nothing behind it.
+     * <p>WHAT STOOD HERE IS KEPT, because a reader in six months needs to know the trade was
+     * considered and overridden rather than never thought about. It read: the sibling tool renders
+     * its API key into this page, with the reveal and copy buttons that cannot work otherwise, and
+     * its own mount contract calls that out as the part a shell author has to read twice:
+     * defensible for one person behind their own proxy, not on a portal several developers reach.
+     * This tool is the second one mounted, so it takes the other side of that trade, whether a key
+     * is SET travels, and the key never does. There is no reveal button because there is nothing
+     * behind it.
+     *
+     * <p>THE OWNER REVERSED THAT, KNOWING WHAT IT COSTS. The key is readable and editable here now,
+     * with the reveal and copy buttons the sibling has, which means it travels to every browser
+     * that opens this page and sits in whatever that browser keeps. What protects it is one
+     * password: the page answers at bump-java-version.mikhailov.tech behind Caddy's basic_auth and
+     * behind nothing else, so everybody who has that password now has the key, and rotating the
+     * password is no longer the same act as rotating the key.
+     *
+     * <p>The endpoint and the repository URL beside it stay read-only, on their own reasoning,
+     * which this does not touch. A key is a credential the reader already owns; a repository URL is
+     * where the code comes from, and a supply chain a web page can redirect is a supply chain a web
+     * page can redirect.
+     *
+     * <p>WHERE IT LIVES: beside {@code max_lanes} in the run root, owner-only, staged and renamed
+     * the way the corpus credentials are. That is not a preference. This container's one mount is
+     * the run root, and {@code agent/.env} is outside it: a page on the public internet with write
+     * access to the source tree would be a worse problem than the one this solves, so the mount
+     * stays as narrow as it is and the key goes where the page can already write.
+     *
+     * <p>THE FILE WINS THE DISPLAY AND THE ENVIRONMENT WINS THE PROCESS, and saying which is which
+     * is the whole of being honest here. The file is the most recent deliberate statement of what
+     * the key should be, so it is what the page shows. The environment is what THIS process was
+     * handed at deploy, and it is what the supervisor's own model calls keep using until the
+     * container restarts. {@code run.sh} reads its key once at startup and hands it to each lane on
+     * the command line, so a sweep already running keeps the key its launcher started with whatever
+     * is saved here. That is not a footnote: the key was rotated in all three env files an hour
+     * before this was written, this page picked it up on deploy, and every lane carried on with the
+     * old one. The page says so in a sentence, because a control that reports success while the
+     * thing it names carries on unchanged is the failure this codebase keeps finding.
+     *
+     * <p>NO LABEL COMES BACK, AND THAT IS A LIMIT RATHER THAN A CHOICE. The confirmation worth
+     * having after a save would be the metering proxy's own name for the key, "now metering as
+     * bump-java". That mapping lives in the {@code meterproxy} container's process environment; the
+     * proxy publishes labels on {@code /metrics} and {@code /data.json} and never the mapping,
+     * every other path it serves is forwarded upstream, and reading a container's environment needs
+     * the docker socket this one deliberately does not have. Asking with the key would prove that
+     * some request succeeded and would send the credential outward to find that out, which is a
+     * check invented to have a check. So the reply says what landed and stops there.
      */
-    String model() {
-        String key = System.getenv().getOrDefault("OC_KEY", "");
-        return Json.object(
+    void model(HttpExchange x) throws IOException {
+        Path stored = results.root().resolve(KEY_FILE);
+        boolean saved = false;
+        String why = "";
+        if ("POST".equalsIgnoreCase(x.getRequestMethod())) {
+            String offered = field(new String(x.getRequestBody().readAllBytes(),
+                    StandardCharsets.UTF_8), "key").trim();
+            why = whyThatIsNotAKey(offered);
+            if (why.isEmpty()) {
+                store(stored, offered);
+                saved = true;
+            }
+        }
+        // A REFUSAL COMES BACK AT 200 WITH ITS REASON, the way a refused bill of materials does.
+        // read() in the client throws away the body of anything that is not 2xx, so a 400 reaches
+        // the reader as "/api/settings/model answered 400" and the one sentence they need, that
+        // what they pasted is eight characters long, is lost. The reason never quotes what was
+        // sent: an error message is the easiest thing on a page to screenshot.
+        String held = Files.isRegularFile(stored) ? Files.readString(stored).trim() : "";
+        String launched = System.getenv().getOrDefault("OC_KEY", "");
+        String key = held.isBlank() ? launched : held;
+        Zone.json(x, Json.object(
+                Json.field("saved", String.valueOf(saved)),
+                Json.field("why", Json.string(why)),
+                // THE KEY ITSELF. See above for the decision that put it here.
+                Json.field("key", Json.string(key)),
+                // KEPT, BECAUSE THE PILL OVER THE FIELD STILL ASKS ONLY THIS. A page that renders
+                // the key has not stopped needing the one-word answer for when there is none, and
+                // the shared component that draws it takes a boolean.
                 Json.field("keySet", String.valueOf(!key.isBlank())),
+                Json.field("keySource", Json.string(key.isBlank() ? ""
+                        : held.isBlank() ? "the environment" : "this page")),
+                // NAMED, NOT PATHED. The reader who wants to drop a key saved here and fall back to
+                // the environment's does it with a shell, and the run root is a different path
+                // inside this container from the one they will type on the host.
+                Json.field("storedIn", Json.string(KEY_FILE)),
+                Json.field("storedAt", String.valueOf(
+                        held.isBlank() ? 0L : Files.getLastModifiedTime(stored).toMillis())),
+                // WHETHER WHAT IS ON SCREEN IS WHAT ANYTHING IS ACTUALLY USING. False means this
+                // process was started with the key it is showing; true means the key was saved
+                // after the last deploy, and neither the supervisor here nor a lane out there has
+                // it yet.
+                Json.field("differsFromLaunch", String.valueOf(!key.equals(launched))),
                 // NO DEFAULT. These were the author's own endpoint, the same pins removed from
                 // Model, and a page that invents a plausible value for unset configuration is a
                 // page that hides a broken deployment.
                 Json.field("model", Json.string(envOr("OC_MODEL", ""))),
                 Json.field("endpoint", Json.string(envOr("OC_BASE", ""))),
-                Json.field("patienceMinutes", Json.string(envOr("BJV_PATIENCE_MINUTES", "240"))));
+                Json.field("patienceMinutes", Json.string(envOr("BJV_PATIENCE_MINUTES", "240")))));
+    }
+
+    /**
+     * WHY A VALUE IS REFUSED, IN WORDS THAT DO NOT REPEAT IT.
+     *
+     * <p>A settings page that can empty the key is a settings page that can stop the next sweep
+     * without saying so, so blank is refused rather than stored. The sibling takes the other route
+     * and leaves a blank box alone, which is defensible where a checkbox exists to drop the saved
+     * key; there is no such checkbox here, and a save that silently did nothing is its own lie.
+     *
+     * <p>The rest is shape. A key from this endpoint is one run of printable characters, so what
+     * these catch is a paste accident: half a key, a whole line of shell, a wrapped file.
+     */
+    private static String whyThatIsNotAKey(String offered) {
+        if (offered.isBlank()) {
+            return "an empty box is not a key, and storing one would stop the next sweep without "
+                    + "saying anything";
+        }
+        if (offered.length() < 20) {
+            return "that is shorter than any key this endpoint issues";
+        }
+        if (offered.length() > 200) {
+            return "that is longer than a key, so something else came with it";
+        }
+        for (int i = 0; i < offered.length(); i++) {
+            char c = offered.charAt(i);
+            if (c < '!' || c > '~') {
+                return "a key is one run of printable characters, with no spaces or line breaks "
+                        + "anywhere in it";
+            }
+        }
+        return "";
+    }
+
+    /**
+     * OWNER-ONLY BEFORE IT HOLDS ANYTHING, THEN RENAMED OVER.
+     *
+     * <p>Registry writes the corpus credentials the same way and sets the mode afterwards. Here the
+     * mode is a creation attribute instead, because the window between a world-readable create and
+     * the chmod that closes it is a window on a bind mount, and this file is written by hand often
+     * enough to be worth not having one.
+     *
+     * <p>The rename is for the same reason as every other write into the run root: a sweep holding
+     * a file open must never see a truncated one. Nothing running reads this file, so the rename is
+     * belt and braces rather than a fix, and it costs nothing.
+     */
+    private static void store(Path target, String key) throws IOException {
+        Path staged = target.resolveSibling(target.getFileName() + ".staged");
+        Files.deleteIfExists(staged);
+        try {
+            Files.createFile(staged, PosixFilePermissions.asFileAttribute(OWNER_ONLY));
+        } catch (UnsupportedOperationException notPosix) {
+            // A filesystem without POSIX modes is not a reason to refuse the save. The run root
+            // here is an ext4 bind mount, so this branch exists for a test on a stranger's machine.
+            Files.createFile(staged);
+        }
+        Files.writeString(staged, key + "\n", StandardCharsets.UTF_8);
+        Files.move(staged, target, StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.ATOMIC_MOVE);
     }
 
     /**

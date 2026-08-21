@@ -37,7 +37,10 @@ import java.util.Set;
  *
  * <p>THE KEY NEVER COMES BACK OUT. It is a credential, it is written to a file the dashboard does
  * not serve and cannot reach through any endpoint, and the upload's reply says only how many rows
- * carried one. This is the same line the model settings page draws, one level down.
+ * carried one. The model settings page drew the same line one level up and no longer does, on a
+ * decision recorded in Settings.model. These are a different kind of secret: one token per
+ * repository, uploaded in bulk by whoever owns the corpus rather than typed by the reader looking
+ * at the page, and no reveal button was ever asked for. The line stays here.
  *
  * <p>THE MERGE IS AN ATOMIC RENAME, NEVER A TRUNCATE. The sweep re-reads its manifest at the top of
  * every round while holding it open, and this project has already lost a 1439-row run to a truncate

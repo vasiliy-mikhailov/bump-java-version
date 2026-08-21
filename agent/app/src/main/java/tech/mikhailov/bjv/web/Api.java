@@ -78,7 +78,10 @@ final class Api {
             case "/api/settings" -> Zone.json(x, settings.agents(Zone.param(x, "hop")));
             case "/api/settings/prompt" -> settings.prompt(x);
             case "/api/settings/run" -> settings.run(x);
-            case "/api/settings/model" -> Zone.json(x, settings.model());
+            // GET AND POST ON ONE PATH, the way the run settings above already are. The key is
+            // read and written here now, and a separate path for the write would let a stale tab
+            // post to one while it is reading the other.
+            case "/api/settings/model" -> settings.model(x);
             // THE CORPUS, ON THE SETTINGS PAGE. What the sweep is working through is a fact about
             // the queue rather than a setting anybody edits, so it is answered by the class that
             // owns the queue and not by the one that owns the boxes.

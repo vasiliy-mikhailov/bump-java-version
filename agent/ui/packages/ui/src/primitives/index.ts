@@ -23,6 +23,13 @@
  * sentence as props, because the two-lamp component it was lifted out of means something by red and
  * green that this pipeline does not. `BumpTable` supplies both.
  *
+ * `SecretField` IS THE SIBLING'S AND IS NOT SHARED YET. It is a file here rather than an import
+ * because `ratchet-ui` 0.4.0 does not carry it: the sibling wrote it when its settings page began
+ * showing an API key, and this one had no key field to put it in until that decision was reversed.
+ * There are two call sites now, which is what the sharing rule asks for, so it is the obvious
+ * candidate for the next tranche; the copy keeps the sibling's name and behaviour so that the move,
+ * when it happens, is a deletion.
+ *
  * FIVE OF THEM WERE NEVER A FILE IN THIS REPOSITORY. `Account`, `HumanCost`, `KeyStatus`,
  * `TimeSpent` and `DataTable` are this dashboard's own inline code, extracted; the sibling had
  * already extracted its own and the names are the sibling's, because naming a thing is what the side
@@ -87,6 +94,7 @@ export {
 export { FIELD, LabeledField, READONLY, type LabeledFieldProps } from './LabeledField'
 export { RelativeTime, duration, relative, spellMinutes, type RelativeTimeProps } from './RelativeTime'
 export { SaveRow, type SaveRowProps } from './SaveRow'
+export { SecretField, type SecretFieldProps } from './SecretField'
 export { TabRow, type TabItem, type TabRowProps } from './TabRow'
 export { CELL, CELL_NESTED, HEAD, HEAD_NESTED, MONO, ROW, TABLE } from './table'
 export { TextFold, type TextFoldProps } from './TextFold'
