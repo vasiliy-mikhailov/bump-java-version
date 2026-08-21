@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import tech.mikhailov.bjv.bump.Bump;
 import tech.mikhailov.ratchet.record.Json;
 
 /**
@@ -193,7 +194,7 @@ final class Corpus {
                 // PAUSED DOES NOT, and that is the whole point of the feature being visible. A bump
                 // that has never started and a bump that has burned three lane budgets are both
                 // waiting, and a reader who cannot tell them apart cannot find the second one.
-                Json.field("verdict", Json.string("requeued".equals(r.get("state"))
+                Json.field("verdict", Json.string(Bump.REQUEUED.equals(r.get("state"))
                         ? "queued" : r.getOrDefault("state", "bumping"))),
                 // WHICH ROUND OF ITS LANE BUDGET THIS ROW BELONGS TO. Optional because most of the
                 // corpus settled before rounds existed, and absent is not one: a dash means nobody

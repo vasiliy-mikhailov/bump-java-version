@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import tech.mikhailov.bjv.bump.Bump;
 import tech.mikhailov.ratchet.record.Json;
 
 /**
@@ -71,7 +72,8 @@ final class Rerun {
                     StandardOpenOption.APPEND);
             Files.writeString(results.dir().resolve("settlements.jsonl"),
                     "{\"at\":\"" + System.currentTimeMillis() + "\",\"bump\":\"" + bump
-                            + "\",\"kind\":\"settled\",\"state\":\"requeued\"}\n",
+                            + "\",\"kind\":\"settled\",\"state\":\"" + Bump.REQUEUED
+                            + "\"}\n",
                     StandardOpenOption.CREATE,
                     StandardOpenOption.APPEND);
         } catch (IOException couldNotWrite) {

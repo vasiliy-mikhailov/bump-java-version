@@ -1,7 +1,6 @@
 package tech.mikhailov.bjv.bump;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -21,8 +20,9 @@ import tech.mikhailov.ratchet.flow.Agent;
 import tech.mikhailov.ratchet.config.Env;
 import tech.mikhailov.ratchet.flow.Flow;
 import tech.mikhailov.ratchet.record.Journal;
-import tech.mikhailov.ratchet.record.Json;
 import tech.mikhailov.ratchet.record.JsonlTrace;
+import tech.mikhailov.ratchet.record.Resume;
+import tech.mikhailov.ratchet.record.Round;
 import tech.mikhailov.ratchet.llm.Model;
 import tech.mikhailov.ratchet.config.Prompts;
 import tech.mikhailov.ratchet.flow.Reply;
@@ -77,8 +77,10 @@ import tech.mikhailov.bjv.jvm.Tree;
  * <p>THE GATES ARE NOT AMONG THEM, deliberately. module-gate and gate are deterministic builds and
  * they are the arbiter; running one again after a kill is not waste but the answer to the only
  * question a resume actually has, which is what is true of the tree as it now is. The decision to
- * resume at all is {@link #resuming}, and it takes three conditions to say yes and any one to say
- * no, because a wrong resume is worse than a slow one.
+ * resume at all is {@link Resume}, which is the library's now rather than this program's: what a
+ * version IS here is prompts, BOMs and hops, and that is the only part of the rule this side keeps.
+ * It takes four conditions to say yes and any one to say no, because a wrong resume is worse than a
+ * slow one.
  */
 public final class Bump {
 
@@ -165,8 +167,8 @@ public final class Bump {
         Path settlements = results.resolve("settlements.jsonl");
         // WHICH ROUND OF ITS LANE BUDGET THIS IS, and where the launcher says the round is over.
         // Counted off the record before anything else, because the row every write from here on
-        // carries it. See {@link Round}: this process has no clock and no budget of its own.
-        Round round = Round.of(results, bump);
+        // carries it. See roundOf: this process has no clock and no budget of its own.
+        Round round = roundOf(results, bump);
         JsonlTrace trace = new JsonlTrace(results.resolve(slug).resolve("trace.jsonl"),
                 settlements, bump, Fingerprint.provenanceOf(bump, settlements, round::number),
                 DECISIVE, DISPUTED);
@@ -180,7 +182,8 @@ public final class Bump {
         // WHAT THIS PROCESS WOULD PUT ITS NAME TO, as the row's own four fields, so the comparison
         // and the record cannot drift apart: the compared string IS the recorded string.
         String pipeline = pipelineOf(bump, results);
-        boolean resumed = resuming(journal, settlements, bump, sha, pipeline);
+        boolean resumed = Resume.of(settlements, bump, IN_FLIGHT)
+                .picksUp(journal, sha, pipeline);
         if (!resumed) {
             // A FRESH START MUST NOT REPLAY A STALE JOURNAL, which is the whole failure mode of
             // getting a resume wrong: the skipped stages would be skipped against edits that are
@@ -277,84 +280,39 @@ public final class Bump {
     }
 
     /**
-     * THE ONE SETTLEMENT STATE THAT MEANS A RUN WAS INTERRUPTED RATHER THAN CONCLUDED.
+     * WHAT THIS PROJECT CALLS A LANE THAT DIED MID-SENTENCE.
      *
      * <p>Every other word in that column is a bump that finished having something to say, including
-     * {@code requeued}, which is somebody asking for the work to be done again from the start.
+     * {@link #REQUEUED}. {@link Round#PAUSED} is the library's own word for a round boundary and is
+     * resumable without being named here; this one is ours, so it is handed to {@link Resume}.
      */
     private static final String IN_FLIGHT = "bumping";
 
     /**
-     * DOES THIS ATTEMPT PICK UP AN UNFINISHED ONE, and the answer is no unless all four agree.
+     * SOMEBODY ON A PAGE ASKING FOR THE WORK TO BE DONE AGAIN FROM THE START.
      *
-     * <p>A journal that recorded a completed stage, a last settlement row saying the work was
-     * interrupted rather than concluded, a checkout standing where the journal left it, and the
-     * same pipeline that made it. Any one of them missing and the bump starts fresh, because a
-     * wrong resume is worse than a slow one: the stages it skips are skipped against edits that
-     * are not in this tree, and the bump is then judged on a workspace nobody built.
-     *
-     * <p>TWO WORDS MEAN INTERRUPTED AND ONE OF THEM IS NOT {@code requeued}. {@link #IN_FLIGHT} is
-     * a lane that died; {@link Round#PAUSED} is a lane that reached the end of its round, which is
-     * the same tree with the same journal and one more round behind it. {@code requeued} is
-     * somebody on a page asking for the work to be done again FROM THE START, and resuming one
-     * would hand that person back the state they were trying to discard.
-     *
-     * <p>THE FOURTH CLAUSE IS WHAT A ROUND BOUNDARY MADE NECESSARY. A killed lane was picked up by
-     * whatever image happened to run next, and it did not matter much because the checkout was
-     * re-cloned anyway and nothing ever actually resumed. Now something does, and this sweep
-     * deploys about once every ten hours against a six-hour budget, so a paused bump meeting a
-     * different pipeline is the ordinary case rather than the exotic one. Skipping stages a
-     * different pipeline paid for would file one pipeline's work under another's name.
-     *
-     * <p>Package-visible and static because it is the rule rather than a step of the run, and a
-     * rule with four clauses is worth being able to test one clause at a time.
+     * <p>ONE WORD IN ONE PLACE, because three parts of this program turn on it and they must not
+     * drift: the rerun endpoint writes it, the list reads it as queued, and the round count starts
+     * again at it. That last one is why it crosses into the library at all. A bump paused three
+     * times last week and then asked for again has spent nothing, and counting those boundaries met
+     * the launcher's ceiling on the first lane of a fresh attempt and filed the repository as out
+     * of rounds. {@code run.sh} resets its own count on the same word; neither side stores a number.
      */
-    static boolean resuming(Journal journal, Path settlements, String bump, String sha,
-                            String pipeline) {
-        if (journal.tree().isEmpty()) {
-            return false;
-        }
-        Map<String, String> last = lastSettledRow(settlements, bump);
-        String said = last.getOrDefault("state", "");
-        if (!IN_FLIGHT.equals(said) && !Round.PAUSED.equals(said)) {
-            return false;
-        }
-        if (!samePipeline(last, pipeline)) {
-            return false;
-        }
-        return journal.standsOn(sha);
-    }
+    public static final String REQUEUED = "requeued";
 
     /**
-     * WHETHER THE ROW WAS WRITTEN BY THIS PIPELINE, field by field.
+     * THE ROUND, BUILT OUT OF THIS PROJECT'S CONVENTIONS RATHER THAN THE LIBRARY'S.
      *
-     * <p>EMPTY AGAINST NON-EMPTY IS A DIFFERENCE, not a missing answer to be forgiven. Every row on
-     * disk before the launcher started forwarding the image identity carries an empty one, and
-     * reading that as agreement would resume across exactly the change that introduced the check.
-     * Empty on both sides IS equality, which is what stops a host where {@code docker image
-     * inspect} answers nothing from calling every run a different pipeline from itself.
-     *
-     * <p>All four fields, and none of them is redundant. {@code commit} and {@code image} answer
-     * where the code came from, and the image is not the commit here: this project iterates by
-     * deploying dirty trees, so two builds share a stamp exactly while somebody is iterating.
-     * {@code prompts} and {@code boms} answer what the agents were handed, which lives in a store
-     * beside the results and outside the image altogether. See {@link Version}.
+     * <p>{@link Round} counts boundaries and watches for a marker, and it holds no opinion about
+     * where either lives. Both of those are decisions this program already made and told
+     * {@code run.sh} about: the record is one file beside the results, and the launcher asks a lane
+     * to hand over by creating a file under {@code expiring/} named with the same slug the claims
+     * and the postponements use. Stated once here so the shell has a single thing to be compared
+     * against, and so that a test can compare it without running a bump.
      */
-    private static boolean samePipeline(Map<String, String> row, String pipeline) {
-        for (String field : List.of("commit", "image", "prompts", "boms")) {
-            String recorded = row.getOrDefault(field, "");
-            String now = fieldOf(pipeline, field);
-            if (!recorded.equals(now)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /** One field out of the composed fingerprint string, which is the form the row stores. */
-    private static String fieldOf(String fields, String name) {
-        Matcher at = Pattern.compile("\"" + name + "\":\"([^\"]*)\"").matcher(fields);
-        return at.find() ? at.group(1) : "";
+    static Round roundOf(Path results, String bump) {
+        return Round.of(results.resolve("settlements.jsonl"), bump,
+                results.resolve("expiring").resolve(slugOf(bump)), REQUEUED);
     }
 
     /**
@@ -372,48 +330,6 @@ public final class Bump {
     /** The directory name a bump's record lives under: the key with everything unsafe flattened. */
     static String slugOf(String bump) {
         return bump.replaceAll("[^A-Za-z0-9]+", "_");
-    }
-
-    /**
-     * The last thing the record said about this bump, whole, or an empty row when it never has.
-     *
-     * <p>THE WHOLE ROW RATHER THAN ITS STATE, because two of the four resume conditions are read
-     * off it and they must be read off the SAME row: the state of one row beside the fingerprint
-     * of another would answer a question nobody asked.
-     *
-     * <p>Read leniently, for the reason the journal is: this file is appended to by a process that
-     * gets killed, so a torn last line is the normal case rather than a fault. Rows for other bumps
-     * share the file, so the key is checked rather than assumed.
-     */
-    private static Map<String, String> lastSettledRow(Path settlements, String bump) {
-        if (!Files.isReadable(settlements)) {
-            return Map.of();
-        }
-        String text;
-        try {
-            text = new String(Files.readAllBytes(settlements), StandardCharsets.UTF_8);
-        } catch (IOException unreadable) {
-            return Map.of();
-        }
-        Map<String, String> last = Map.of();
-        for (String line : text.split("\n")) {
-            if (!line.contains(bump)) {
-                continue;
-            }
-            Map<String, String> row;
-            try {
-                row = Json.row(line);
-            } catch (RuntimeException torn) {
-                continue;
-            }
-            if (!bump.equals(row.getOrDefault("bump", ""))) {
-                continue;
-            }
-            if (!row.getOrDefault("state", "").isBlank()) {
-                last = row;
-            }
-        }
-        return last;
     }
 
     /**
