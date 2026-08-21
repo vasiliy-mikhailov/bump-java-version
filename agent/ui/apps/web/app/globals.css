@@ -9,7 +9,15 @@
    nothing else, so without this line the utility is simply never emitted: no error, no warning,
    no failing test, and not even a trace in the exported HTML, because a running pill only exists
    at run time from fetched data. `dist` rather than `src`, because the package ships its
-   compiled output and only `tokens.css` out of `src`. Paths here are relative to THIS file. */
+   compiled output and only `tokens.css` out of `src`. Paths here are relative to THIS file.
+
+   THIS GLOB READS PROSE AS WELL AS CODE, which is worth knowing before somebody diffs a built
+   stylesheet and finds a rule nothing asked for. Tailwind extracts candidates by scanning text, so
+   a word inside a shipped comment is a candidate: taking 0.3.0 added `.underline` to the bundle,
+   emitted from the sentence in `components/SectionTabs.js` that explains how the underline row
+   differs from the pill row. It costs 42 bytes and can never apply, because no element in this
+   dashboard carries a class at all. The direction that hurts is the other one, which is what the
+   check in `deploy.sh` is for. */
 @source "../../../packages/ui/node_modules/ratchet-ui/dist";
 
 /**
