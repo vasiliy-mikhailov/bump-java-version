@@ -73,7 +73,10 @@ saved() { readable || return 0; sed -n "s/^$1=//p" "$SETTINGS" 2>/dev/null | tai
 # store existed: read, never written.
 model_key_now() {
   local v; v=$(saved key)
-  [ -n "$v" ] || v=$(tr -d '\r\n' < "$LEGACY_KEY" 2>/dev/null)
+  # THE GUARD IS THE SHELL'S, NOT tr'S. A redirection is performed by the shell before the
+  # command runs, so `2>/dev/null` on tr never sees "no such file": that message is the
+  # shell's and it reached the log on every lane start until this test went in front of it.
+  [ -n "$v" ] || { [ -f "$LEGACY_KEY" ] && v=$(tr -d '\r\n' < "$LEGACY_KEY" 2>/dev/null); }
   [ -n "$v" ] || v=${OC_KEY:-${PROPOSER_API_KEY:-}}
   printf '%s' "$v"
 }
