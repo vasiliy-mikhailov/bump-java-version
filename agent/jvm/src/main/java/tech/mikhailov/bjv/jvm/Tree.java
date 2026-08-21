@@ -153,7 +153,12 @@ public final class Tree {
                 note("restart failed: " + Runner.tail(out.text()));
                 return;
             }
-            Shell.Output cleaned = git("clean", "-xfd");
+            // TWO f's, AND THE SECOND ONE IS THE POINT. `git clean -xfd` walks into an untracked
+            // directory and removes what it finds, but it steps over one that holds a .git of its
+            // own and leaves it whole. A vendored checkout is exactly that shape, so a single f
+            // would let an earlier pipeline's bytes survive the reset and turn up in the next
+            // round's diff, which is the failure this method exists to prevent.
+            Shell.Output cleaned = git("clean", "-xffd");
             if (!cleaned.ok()) {
                 note("restart could not clean the tree: " + Runner.tail(cleaned.text()));
             }

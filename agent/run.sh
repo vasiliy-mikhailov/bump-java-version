@@ -230,10 +230,15 @@ provenance_of() {
 
 # HOW MANY ROUNDS THIS BUMP HAS ALREADY ENDED, counted rather than kept. A stored counter would be
 # a second copy of a fact these rows already carry, and two copies drift; the rows are the fact.
+# A REQUEUE STARTS THE COUNT AGAIN, because a requeue is somebody asking for the work from the
+# start and Rerun says so in as many words. Counting every paused row this bump had ever had meant a
+# repository paused three times last week met MAX_ROUNDS on the first lane of a fresh attempt and
+# was filed out-of-rounds without doing anything, which reads as a verdict about the project and is
+# not one. awk rather than a second grep because the reset has to happen in row order.
 rounds_done() {
   [ -f "$RESULTS/settlements.jsonl" ] || { echo 0; return; }
   grep -F "\"bump\":\"$1\"," "$RESULTS/settlements.jsonl" 2>/dev/null |
-    grep -c '"state":"paused"'
+    awk '/"state":"requeued"/ { n = 0; next } /"state":"paused"/ { n++ } END { print n + 0 }'
 }
 
 # ONE ROW, APPENDED THE WAY THE JAVA APPENDS ONE. The field order is Settlement.write's, character
