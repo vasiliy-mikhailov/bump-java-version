@@ -251,14 +251,28 @@ export function BumpTable({ bumps, hrefFor, now = Date.now() }: BumpTableProps) 
 }
 
 /**
- * THE SETTLEMENTS THAT END A BUMP BEFORE THERE IS ANYTHING TO GATE.
+ * THE ONE SETTLEMENT THAT ENDS A BUMP BEFORE THERE IS ANYTHING TO GATE.
  *
- * `no-baseline` and `NO_BASELINE_NOTESTS` are thrown from the baseline stage itself, when no test
- * passed under the project's own JDK. `infra` is the harness failing rather than the project. None
- * of the three has a gate behind it, so the right-hand lamp is hollow rather than dim: it never
- * ran, which is a different answer from ran and did not go green.
+ * `no-baseline` is thrown from the baseline stage itself, and from nowhere else: `Bump.java` raises
+ * it when the checkout already carries this harness's commits, when the project does not build
+ * under its own JDK, and when no test passed under it. All three are before the gate is a
+ * possibility, so there is no gate behind the word and the right-hand lamp is hollow: never ran,
+ * which is a different answer from ran and did not go green.
+ *
+ * TWO OTHER WORDS WERE IN THIS SET AND THE SETTLEMENT RECORD SAYS THEY DO NOT BELONG.
+ * `NO_BASELINE_NOTESTS` is `Gate.decide`'s own return value, reached only after the gate has built
+ * and tested the repository under the target JDK, so the gate ran and answered. `infra` has two
+ * producers: one in the baseline stage for a half-staged Gradle distribution, which is before the
+ * gate, and one in the arguer, which `Flow.when` runs only when the gate has already run and was
+ * not green. Every one of the seventeen `infra` rows in this corpus is the arguer's.
+ *
+ * THE TWO INFRA PRODUCERS ARE INDISTINGUISHABLE ON THE WIRE, so this is a choice between two
+ * errors rather than a way of avoiding one. The settlement writes `gate=false` whether the gate
+ * answered no or never got a turn, and `Corpus.java` reads that one boolean, so a reader of the
+ * page cannot be told which happened. Hollow was wrong for every `infra` row that exists; dim is
+ * wrong only for a producer that has yet to write one.
  */
-const NO_GATE_BEHIND_IT = new Set<Verdict>(['no-baseline', 'NO_BASELINE_NOTESTS', 'infra'])
+const NO_GATE_BEHIND_IT = new Set<Verdict>(['no-baseline'])
 
 /**
  * Whether the gate got a turn at all.
@@ -281,11 +295,23 @@ function gateRan(verdict: Verdict): boolean {
  * dim baseline lamp is a statement about what this bump can be held to, not a failure of it.
  */
 function baselineSays(b: BumpSummary): string {
-  if (b.baselineGreen) {
-    return `the baseline was green: every test passed under JDK ${b.from} before anything was changed`
-  }
   if (b.verdict === 'queued') {
     return 'nothing has run yet, so no baseline has been taken'
+  }
+  // A `no-baseline` ROW IS THE BASELINE STAGE'S OWN ACCOUNT AND NEITHER GENERAL SENTENCE FITS IT.
+  // Both of the ones below read the boolean as a fact about a suite that ran, and on this word it
+  // is not one. The record carries three of these: two where the project could not be built or
+  // tested at all, which sent `baseline=false`, and one where nothing failed under the project's
+  // own JDK because nothing ran, which sent `baseline=true` and would otherwise be labelled "every
+  // test passed" beside a verdict saying there was no baseline. That pair contradicts itself on a
+  // row a reader can see today.
+  if (b.verdict === 'no-baseline') {
+    return b.baselineGreen
+      ? `nothing failed under JDK ${b.from}, and nothing passed either, so there is no set of tests for this bump to be held to`
+      : `the project could not be built or tested under its own JDK ${b.from}, so no baseline was ever taken`
+  }
+  if (b.baselineGreen) {
+    return `the baseline was green: every test passed under JDK ${b.from} before anything was changed`
   }
   return `the baseline ran and was not all green; the tests that were already red under JDK ${b.from} are not in the set this bump has to conserve`
 }
@@ -302,11 +328,21 @@ function gateSays(b: BumpSummary): string {
   if (b.gateGreen) {
     return `the gate went green: it built under JDK ${b.to} and kept every test the baseline was holding`
   }
+  // THE HARNESS FAILING IS STILL AN ANSWER FROM THE GATE, on every row this corpus has. The word
+  // comes from the arguer, which runs only when the gate has already run and was not green. It
+  // used to say the harness failed BEFORE the gate could run, which was true of a producer that
+  // has written no row and false of all seventeen that exist.
+  if (b.verdict === 'infra') {
+    return 'the gate never went green, and what settled this bump was the harness failing rather than the project'
+  }
+  // `Gate.decide`'s OWN FIRST BRANCH, so the gate built and tested and then had nothing to hold the
+  // result to. It reaches a settled row only through a resume whose journal recalled an empty
+  // baseline; a first run settles `no-baseline` in the baseline stage and never gets here.
+  if (b.verdict === 'NO_BASELINE_NOTESTS') {
+    return `the gate ran under JDK ${b.to} and had no baseline set to hold the project to, so there was nothing to conserve`
+  }
   if (gateRan(b.verdict)) {
     return 'the gate ran and never went green, which is what settled this bump'
-  }
-  if (b.verdict === 'infra') {
-    return 'the harness failed before the gate could run'
   }
   if (NO_GATE_BEHIND_IT.has(b.verdict)) {
     return 'there was no baseline to gate against, so the gate never ran'

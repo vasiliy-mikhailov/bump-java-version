@@ -101,22 +101,56 @@ describe('the two lamps beside the verdict', () => {
     expect(baseline.label).toBe('nothing has run yet, so no baseline has been taken')
   })
 
-  it('hollows the gate of every settlement thrown before there was anything to gate, because none of the three has a gate behind it', () => {
-    for (const [verdict, says] of [
-      ['no-baseline', 'there was no baseline to gate against, so the gate never ran'],
-      ['NO_BASELINE_NOTESTS', 'there was no baseline to gate against, so the gate never ran'],
-      ['infra', 'the harness failed before the gate could run'],
-    ] as [Verdict, string][]) {
-      const [, gate] = lamps({ verdict, baselineGreen: false, gateGreen: false })
-      expect(hollow(gate)).toBe(true)
-      expect(gate.label).toBe(says)
-    }
+  it('hollows the gate of the one settlement the baseline stage throws itself, because a bump that never had a baseline never had anything to gate', () => {
+    const [, gate] = lamps({ verdict: 'no-baseline', baselineGreen: false, gateGreen: false })
+    expect(hollow(gate)).toBe(true)
+    expect(gate.label).toBe('there was no baseline to gate against, so the gate never ran')
+  })
+
+  it('dims rather than hollows the gate of a bump settled as infrastructure, because the word comes from the arguer and the arguer runs only after a gate that ran and was not green', () => {
+    const [, gate] = lamps({ verdict: 'infra', baselineGreen: false, gateGreen: false })
+    expect(dim(gate)).toBe(true)
+    expect(gate.label).toBe(
+      'the gate never went green, and what settled this bump was the harness failing rather than the project',
+    )
+  })
+
+  it('dims rather than hollows the gate that found no baseline to hold the project to, because that verdict is the gate’s own and it had already built and tested under the target', () => {
+    const [, gate] = lamps({ verdict: 'NO_BASELINE_NOTESTS', baselineGreen: false, gateGreen: false })
+    expect(dim(gate)).toBe(true)
+    expect(gate.label).toBe(
+      'the gate ran under JDK 21 and had no baseline set to hold the project to, so there was nothing to conserve',
+    )
   })
 
   it('says of a baseline that ran and was not all green that the tests already red are not in the conserved set, because that qualifies what the bump can be held to rather than failing it', () => {
     const [baseline] = lamps({ verdict: 'FAIL_build_post', baselineGreen: false, gateGreen: false })
     expect(dim(baseline)).toBe(true)
     expect(baseline.label).toContain('not in the set this bump has to conserve')
+  })
+
+  it('never tells a no-baseline row that every test passed, because the record holds one that sent a green baseline for a suite in which nothing ran at all', () => {
+    const [green] = lamps({ verdict: 'no-baseline', baselineGreen: true, gateGreen: false })
+    expect(green.label).toBe(
+      'nothing failed under JDK 17, and nothing passed either, so there is no set of tests for this bump to be held to',
+    )
+    const [red] = lamps({ verdict: 'no-baseline', baselineGreen: false, gateGreen: false })
+    expect(red.label).toBe(
+      'the project could not be built or tested under its own JDK 17, so no baseline was ever taken',
+    )
+  })
+
+  it('lights the baseline lamp exactly when the wire says the baseline was green, because the lamp is the fact the server sent and not a second opinion about it', () => {
+    for (const verdict of [
+      'PASS',
+      'FAIL_test_conservation',
+      'no-baseline',
+      'infra',
+      'blocked-dependency',
+    ] as Verdict[]) {
+      expect(lit(lamps({ verdict, baselineGreen: true })[0])).toBe(true)
+      expect(lit(lamps({ verdict, baselineGreen: false })[0])).toBe(false)
+    }
   })
 
   it('draws both lamps in this dashboard’s own colour and takes none from the shared package, so that no other pipeline’s meaning of green travels with them', () => {
