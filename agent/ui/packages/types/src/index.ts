@@ -75,6 +75,19 @@ export type Verdict =
    */
   | 'paused'
   /**
+   * THE LANE DIED MID-STAGE AND FILED NOTHING, so the record froze on a progress note.
+   *
+   * Read rather than stored: the row in the record still says `bumping`, because a lane that dies
+   * writes no terminal state and the file is append-only. What contradicts it is the claim, which
+   * the launcher heartbeats every thirty seconds and which clears itself when the container goes.
+   *
+   * Counting the rows instead put 36 running agents on a page with 14 containers behind it, and
+   * the 22 in between had been dead for between half an hour and seven hours, each frozen on the
+   * stage it stopped in. Not terminal: `settled()` calls such a row unfinished, so the bump is
+   * taken again. What nobody was saying is that it is not happening now.
+   */
+  | 'lane-died'
+  /**
    * The harness stopped spending lanes on a bump that never reached a verdict.
    *
    * TERMINAL, AND NOT A JUDGEMENT ABOUT THE PROJECT, which is the thing to get right about it. It

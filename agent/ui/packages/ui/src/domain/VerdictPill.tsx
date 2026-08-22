@@ -27,6 +27,9 @@ const TONE: Record<Verdict, PillTone> = {
   // it, and it is the row a reader watching a slow sweep is looking for, so it does not read as
   // the thousand rows that have never started.
   paused: 'warn',
+  // NOT `running`, WHICH IS THE WHOLE POINT OF THE WORD. A dot that pulses beside a bump
+  // nothing is working on is the lie this replaced.
+  'lane-died': 'warn',
   'out-of-rounds': 'aside',
   queued: 'quiet',
 }
@@ -46,6 +49,8 @@ const WHY: Record<Verdict, string> = {
   bumping: 'still running',
   paused:
     'the lane stopped between two stages, either because its wall-clock budget ran out or because someone set the bump aside; the checkout and the journal are kept, and the next lane continues from there',
+  'lane-died':
+    'the lane stopped mid-stage without filing a verdict, so the record still reads as though it were working; nothing holds its claim, and the sweep will take it again',
   'out-of-rounds':
     'the harness stopped spending lanes on this after several rounds without a verdict; it is not a judgement about the project',
   queued: 'in the manifest, waiting for a lane',

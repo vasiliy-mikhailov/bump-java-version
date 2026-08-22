@@ -317,6 +317,7 @@ function gateRan(verdict: Verdict): boolean {
     verdict !== 'queued' &&
     verdict !== 'bumping' &&
     verdict !== 'paused' &&
+    verdict !== 'lane-died' &&
     verdict !== 'out-of-rounds' &&
     !NO_GATE_BEHIND_IT.has(verdict)
   )
@@ -382,6 +383,9 @@ function gateSays(b: BumpSummary): string {
   // stopped between two stages; whether the gate gets a turn is the next lane's business.
   if (b.verdict === 'paused') {
     return 'the round ended before the gate reached a verdict; the next lane continues from where this one stopped'
+  }
+  if (b.verdict === 'lane-died') {
+    return 'the lane stopped before the gate reached a verdict, and filed nothing on its way out'
   }
   if (b.verdict === 'out-of-rounds') {
     return 'the harness stopped spending lanes on this bump before the gate reached a verdict'

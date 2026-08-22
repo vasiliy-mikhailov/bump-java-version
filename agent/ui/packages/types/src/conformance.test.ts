@@ -128,6 +128,7 @@ describe('a corpus row measured against the shared work item', () => {
       'infra',
       'bumping',
       'paused',
+      'lane-died',
       'out-of-rounds',
       'queued',
     ])

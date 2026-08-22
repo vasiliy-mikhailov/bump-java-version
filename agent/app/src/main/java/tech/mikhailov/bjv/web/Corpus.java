@@ -50,10 +50,32 @@ final class Corpus {
      * where they belong, as their own verdict in the list and in the histogram above it.
      */
     String badges() {
-        long running = results.settlements().values().stream()
-                .filter(r -> "bumping".equals(r.getOrDefault("state", ""))).count();
-        return Json.object(Json.field("running", String.valueOf(running)));
+        // THE CLAIMS, NOT THE ROWS. A settlement that says bumping is a statement about the last
+        // thing that happened, not about now: a lane that dies writes no terminal row, so its
+        // progress note stands for ever and the count only ever climbs. It read 36 against 14 real
+        // containers, and the 22 in between had been dead for up to seven hours.
+        return Json.object(Json.field("running", String.valueOf(inFlight().size())));
     }
+
+    /**
+     * WHAT IS IN FLIGHT, READ ONCE PER RENDER RATHER THAN ONCE PER ROW.
+     *
+     * <p>The list goes out through a method reference, so a row that asked for itself would list
+     * the claims directory 1,428 times to answer a question whose answer cannot change between two
+     * rows of one response. Two seconds is longer than a render and far shorter than the heartbeat
+     * the answer is derived from, so nothing is stale that was not already allowed to be.
+     */
+    private java.util.Set<String> inFlight() {
+        long now = System.currentTimeMillis();
+        if (now - claimedAt > 2000) {
+            claimed = results.claimed();
+            claimedAt = now;
+        }
+        return claimed;
+    }
+
+    private volatile java.util.Set<String> claimed = java.util.Set.of();
+    private volatile long claimedAt;
 
     /**
      * HOW BIG THIS IS AND WHEN IT LAST MOVED, which is what a reader checks first.
@@ -168,6 +190,26 @@ final class Corpus {
         return Json.array(rows, this::summary);
     }
 
+    /**
+     * THE WORD A ROW READS AS, WHICH IS NOT ALWAYS THE WORD IT CARRIES.
+     *
+     * <p>Two of them are read rather than stored. A requeue is somebody asking for the work again
+     * and a reader already has a word for waiting. And a row that says {@code bumping} while
+     * nothing holds its claim is not running: the lane died mid-stage without filing a verdict, so
+     * the record froze on whatever progress note it was on. The launcher agrees, since
+     * {@code settled()} calls such a row unfinished and will take the bump again; what nobody said
+     * was that it is not happening now.
+     */
+    private String verdictOf(String state, String slug) {
+        if (Bump.REQUEUED.equals(state)) {
+            return "queued";
+        }
+        if ("bumping".equals(state) && !inFlight().contains(slug)) {
+            return "lane-died";
+        }
+        return state;
+    }
+
     /** The source JDK of a split bump key, or zero when it has none to compare on. */
     private static int hopFrom(String[] parts) {
         try {
@@ -194,8 +236,8 @@ final class Corpus {
                 // PAUSED DOES NOT, and that is the whole point of the feature being visible. A bump
                 // that has never started and a bump that has burned three lane budgets are both
                 // waiting, and a reader who cannot tell them apart cannot find the second one.
-                Json.field("verdict", Json.string(Bump.REQUEUED.equals(r.get("state"))
-                        ? "queued" : r.getOrDefault("state", "bumping"))),
+                Json.field("verdict", Json.string(verdictOf(r.getOrDefault("state", "bumping"),
+                        slug))),
                 // WHICH ROUND OF ITS LANE BUDGET THIS ROW BELONGS TO. Optional because most of the
                 // corpus settled before rounds existed, and absent is not one: a dash means nobody
                 // was counting, which is a different fact from a first round.

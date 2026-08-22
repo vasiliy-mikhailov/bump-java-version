@@ -31,6 +31,43 @@ final class Results {
         this.dir = dir;
     }
 
+    /**
+     * A LANE HEARTBEATS ITS CLAIM EVERY THIRTY SECONDS, so three minutes without one is a lane
+     * that is gone. The margin is six heartbeats because the answer is used to contradict the
+     * record, and a lane briefly slow to write should not be reported as dead.
+     */
+    static final long HEARTBEAT_STALE_MS = 180_000;
+
+    /**
+     * WHICH BUMPS ARE ACTUALLY IN FLIGHT, which is a different question from what the record last
+     * said about them.
+     *
+     * <p>The record is append-only and a lane that dies writes nothing, so its last row is whatever
+     * progress note it was on and reads as {@code bumping} for ever. Counting those rows put 36
+     * running agents on the page while 14 containers existed: 22 of them had died between half an
+     * hour and seven hours earlier, each frozen mid-stage. The claims directory is the fact, it is
+     * what the launcher's own {@code inflight()} consults, and it clears itself when a container
+     * goes, which is exactly the property the record lacks.
+     */
+    java.util.Set<String> claimed() {
+        Path claims = dir.resolve("claims");
+        if (!Files.isDirectory(claims)) {
+            return java.util.Set.of();
+        }
+        long now = System.currentTimeMillis();
+        java.util.Set<String> held = new java.util.LinkedHashSet<>();
+        try (var files = Files.list(claims)) {
+            for (Path f : files.toList()) {
+                if (now - Files.getLastModifiedTime(f).toMillis() < HEARTBEAT_STALE_MS) {
+                    held.add(f.getFileName().toString());
+                }
+            }
+        } catch (IOException unreadable) {
+            return java.util.Set.of();
+        }
+        return held;
+    }
+
     /** Where the bumps are: one directory per slug, with the settlement file beside them. */
     Path dir() {
         return dir;

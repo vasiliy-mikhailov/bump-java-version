@@ -178,25 +178,12 @@ final class Sweep {
      * <p>A claim older than the heartbeat is a lane that died without releasing it, which reads as
      * not running -- the same conclusion the daemon would have given, from a cheaper question.
      */
-    private static final long HEARTBEAT_STALE_MS = 180_000;
-
     private List<String> claimed() {
-        Path claims = results.resolve("claims");
-        if (!Files.isDirectory(claims)) {
-            return List.of();
-        }
-        long now = System.currentTimeMillis();
-        List<String> held = new ArrayList<>();
-        try (var files = Files.list(claims)) {
-            for (Path f : files.toList()) {
-                if (now - Files.getLastModifiedTime(f).toMillis() < HEARTBEAT_STALE_MS) {
-                    held.add(f.getFileName().toString());
-                }
-            }
-        } catch (IOException unreadable) {
-            return List.of();
-        }
-        return held;
+        // ONE READER OF THE CLAIMS DIRECTORY, IN Results. This held a second copy of the rule,
+        // heartbeat window and all, and the page then grew a third answer of its own by counting
+        // settlement rows instead: 36 running against 14 containers. Two readers of one fact is
+        // how that starts.
+        return List.copyOf(new Results(results).claimed());
     }
 
     // ---- the digest a supervisor reads ----
