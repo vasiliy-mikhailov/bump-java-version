@@ -182,7 +182,7 @@ public final class Bump {
         // WHAT THIS PROCESS WOULD PUT ITS NAME TO, as the row's own four fields, so the comparison
         // and the record cannot drift apart: the compared string IS the recorded string.
         String pipeline = pipelineOf(bump, results);
-        boolean resumed = Resume.of(settlements, bump, IN_FLIGHT)
+        boolean resumed = Resume.of(settlements, bump, IN_FLIGHT, Version::of)
                 .picksUp(journal, sha, pipeline);
         if (!resumed) {
             // A FRESH START MUST NOT REPLAY A STALE JOURNAL, which is the whole failure mode of

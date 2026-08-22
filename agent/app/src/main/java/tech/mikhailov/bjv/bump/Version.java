@@ -2,6 +2,7 @@ package tech.mikhailov.bjv.bump;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Map;
 
 import tech.mikhailov.ratchet.config.Env;
 import tech.mikhailov.ratchet.record.Digest;
@@ -134,6 +135,20 @@ public final class Version {
     }
 
     /** The whole fingerprint as JSON fields, for the settlement row and the trace. */
+    /**
+     * THE SAME FOUR NAMES, READ BACK OUT OF A ROW, and it is handed to ratchet rather than ratchet
+     * guessing them. Which columns of a settlement row are version columns is this project's
+     * knowledge and nobody else's, so it is expressed here and injected there. Escaping is applied
+     * on the way out because {@link #fields} applies it on the way in and the row arrives already
+     * unescaped, so the two strings are the same string or they are a real difference.
+     */
+    static String of(Map<String, String> row) {
+        return "\"commit\":\"" + Settlement.escape(row.getOrDefault("commit", ""))
+                + "\",\"image\":\"" + Settlement.escape(row.getOrDefault("image", ""))
+                + "\",\"prompts\":\"" + Settlement.escape(row.getOrDefault("prompts", ""))
+                + "\",\"boms\":\"" + Settlement.escape(row.getOrDefault("boms", "")) + "\"";
+    }
+
     static String fields(String hop, Path results, Parts parts) {
         return "\"commit\":\"" + Settlement.escape(commit())
                 + "\",\"image\":\"" + Settlement.escape(image())
