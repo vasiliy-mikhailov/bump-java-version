@@ -1127,8 +1127,9 @@ public final class Bump {
     /** BASELINE: a fact, and the one everything later is measured against. No baseline, no bump. */
     private String baselinePhase(String task) throws IOException {
         betweenStages("baseline");
-        // FIRST, THOUGH: IS THE TOOLING EVEN THERE. Builds here are sealed, so a Gradle wrapper
-        // resolves its distribution out of a staged cache and cannot download. Staging can stop
+        // FIRST, THOUGH: IS THE TOOLING EVEN THERE. A Gradle wrapper resolves its distribution
+        // out of a shared cache, and fills that cache itself when the version is not there yet.
+        // A download can stop
         // half way and leaves a directory that looks exactly like a distribution; Gradle finds it,
         // uses it, and dies reaching for a jar that was never unpacked. The verdict that produced
         // was "the project does not build under its own JDK", about a project not one line of which
