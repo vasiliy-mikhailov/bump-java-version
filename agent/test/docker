@@ -21,8 +21,11 @@ case "$sub" in
     ls "$PS" 2>/dev/null
     exit 0 ;;
   image)
-    # `docker image inspect -f '{{.Id}}' bjv`
-    echo "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    # `docker image inspect -f '{{.Id}}' bjv`. Read from a file rather than fixed, so a scenario can
+    # move the tag part-way through a sweep. That is not an exotic case: it is what every deploy
+    # does to a launcher that is already running, and the launcher cannot be told.
+    if [ -s "$BJV_FAKE/image_id" ]; then cat "$BJV_FAKE/image_id"
+    else echo "sha256:0000000000000000000000000000000000000000000000000000000000000000"; fi
     exit 0 ;;
   rm)
     # `docker rm -f bjvagent_<slug>` from the postpone path: the lane must actually die.

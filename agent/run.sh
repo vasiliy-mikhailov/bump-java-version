@@ -32,11 +32,6 @@ HOPTOOLS=${BJV_HOPTOOLS:-${BJV_ITER:+$BJV_ITER/hoptools}}
 HOPTOOLS=${HOPTOOLS:-$(cd "$HERE/../hoptools" 2>/dev/null && pwd)}
 : "${HOPTOOLS:?set BJV_HOPTOOLS to the host path of hoptools/}"
 AGENT_IMAGE=${BJV_IMAGE:-bjv}
-# WHAT THE TAG RESOLVED TO WHEN THIS LANE STARTED. bjv moves on every deploy and a running lane
-# keeps the image it began with, so the tag is not an answer to what produced a result. Resolved
-# once here and passed in, because the container cannot ask.
-BJV_IMAGE_ID=$(docker image inspect -f '{{.Id}}' "$AGENT_IMAGE" 2>/dev/null || echo "")
-export BJV_IMAGE_ID
 WS=$ROOT/ws
 RESULTS=$ROOT/results
 mkdir -p "$WS" "$RESULTS" 2>/dev/null
@@ -471,8 +466,8 @@ one() {
   # OC_BASE and OC_MODEL are NOT in this loop any more: they are set above from the settings page
   # with the environment underneath, and a second copy here would silently win or lose depending on
   # which -e docker saw last.
-  # BJV_IMAGE_ID IS IN THIS LIST NOW, AND ITS ABSENCE WAS SILENT. It is resolved at the top of this
-  # file and exported, and docker does not inherit the launcher's environment, so "image" was empty
+  # BJV_IMAGE_ID IS IN THIS LIST NOW, AND ITS ABSENCE WAS SILENT. It is resolved just below and
+  # docker does not inherit the launcher's environment, so "image" was empty
   # on every settlement row ever written. That was cosmetic until a round boundary had to decide
   # whether the pipeline moved: this project iterates by deploying dirty trees, and the live sweep's
   # own record shows a -dirty stamp covering 66 hours and 6129 rows, so the commit alone calls two
@@ -481,6 +476,18 @@ one() {
   # NOTHING ABOUT THE CLOCK IS IN THIS LIST. No budget, no grace, no round cap and no round number.
   # The container has no clock; it reacts to a marker and nothing else, so there is no environment
   # variable, no tool and no prompt through which an agent could learn that a lane is timed.
+  # WHAT THE TAG RESOLVES TO NOW, ASKED ONCE PER LANE. bjv moves on every deploy and a running
+  # container keeps the image it began with, so the tag is not an answer to what produced a result
+  # and the container cannot ask on its own behalf.
+  #
+  # THIS USED TO BE RESOLVED AT THE TOP OF THE FILE, which is a different claim and a false one. A
+  # launcher outlives deploys: it reads that line once and then stamps every lane it starts for the
+  # rest of the run, days later, with the image the tag meant before them. The live record shows
+  # the shape exactly, rows carrying a commit read from inside the new image beside an image id
+  # from before the build that produced it, which is a fingerprint that names a pipeline nobody
+  # ran. One inspect per lane is what the row costs to be true.
+  local BJV_IMAGE_ID
+  BJV_IMAGE_ID=$(docker image inspect -f '{{.Id}}' "$AGENT_IMAGE" 2>/dev/null || echo "")
   for v in BJV_REPO_URL BJV_NET BJV_M2 BJV_SETTINGS BJV_GRADLE_RO BJV_GRADLE_DISTS \
            BJV_GRADLE_INIT BJV_JDK_IMAGE BJV_SCAN_IMAGE BJV_THINKING BJV_HANG_GUARD \
            BJV_BUILD_SECONDS BJV_IMAGE_ID; do

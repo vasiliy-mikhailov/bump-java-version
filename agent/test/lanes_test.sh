@@ -577,6 +577,33 @@ t_diskfloor() {
   report
 }
 
+t_imageid() {
+  scenario imageid 1
+  row first  aa/first  cafe1 8 17 3
+  row second bb/second cafe1 8 17 2
+
+  echo "== imageid: a lane carries the image the tag meant when THAT lane started =="
+  FAILED=0
+  echo "sha256:aaaa" > "$SC/fake/image_id"
+  # THE DEPLOY, MID-SWEEP, which is the ordinary case rather than the awkward one: a launcher runs
+  # for days and the tag moves under it several times, and nothing tells it. Whatever it resolved
+  # once is what every later lane gets called, so the record names an image that did not run.
+  ( sleep 2; echo "sha256:bbbb" > "$SC/fake/image_id" ) &
+  local deploy=$!
+  runsweep 60
+  kill "$deploy" 2>/dev/null
+
+  [ "$(lane_env BJV_IMAGE_ID first)" = "sha256:aaaa" ] \
+    || bad "the first lane was stamped '$(lane_env BJV_IMAGE_ID first)' rather than what the tag \
+meant when it started"
+  [ "$(lane_env BJV_IMAGE_ID second)" = "sha256:bbbb" ] \
+    || bad "a lane started after the tag moved was stamped '$(lane_env BJV_IMAGE_ID second)', the \
+image from before it; a settlement row then names a pipeline that never ran, and a resume compares \
+against it"
+  [ "${FAILED:-0}" -eq 0 ] && ok "each lane carries the image the tag resolved to when it started"
+  report
+}
+
 case "${1:-all}" in
   idle) t_idle ;;
   inpass) t_inpass ;;
@@ -589,8 +616,9 @@ case "${1:-all}" in
   wipeonsettle) t_wipeonsettle ;;
   diskfloor) t_diskfloor ;;
   pauserow) t_pauserow ;;
+  imageid) t_imageid ;;
   all) t_idle; t_inpass; t_terminate; t_settings; t_budget; t_continues; t_repass; \
-       t_roundcap; t_wipeonsettle; t_diskfloor; t_pauserow ;;
+       t_roundcap; t_wipeonsettle; t_diskfloor; t_pauserow; t_imageid ;;
   *) echo "unknown scenario: $1"; exit 2 ;;
 esac
 
