@@ -86,21 +86,26 @@ class AGreenGateIsNotComplianceTest {
         // AND THE 9.0 HEAD SURVIVES BESIDE IT WHERE IT WAS. They do not compete: one answers for
         // projects on 9.0 and the other for projects on 10.1. Collapsing them into one row would
         // ask a Tomcat 9 project to cross into Tomcat 10, which is the jakarta rename.
+        //
+        // 9.0.118 AND NOT 9.0.105, because the head was itself carrying fifteen CRITICAL+HIGH.
+        // Measured 2026-08-22 against the database the corpus is scored with: 9.0.105 scores 15 and
+        // 9.0.118 scores none. A row that names a vulnerable version asks a project to move onto
+        // one, which is the opposite of what this list is for.
         assertTrue(headsOf(new Hop(21, 25), "tomcat-embed-core").containsAll(
-                List.of("9.0.105", "10.1.55")),
+                List.of("9.0.118", "10.1.55")),
                 headsOf(new Hop(21, 25), "tomcat-embed-core").toString());
     }
 
     @Test
     void aRowAnswersOnlyForProjectsOnItsOwnLine() {
-        // THE RULE THE WHOLE LIST RESTS ON. A project on Tomcat 9.0.65 is a patch away from 9.0.105
+        // THE RULE THE WHOLE LIST RESTS ON. A project on Tomcat 9.0.65 is a patch away from 9.0.118
         // and a migration away from 10.1.55, and only the first is this list's business.
         Bom.Compliance nine = Bom.against(new Hop(21, 25), Map.of(),
                 Map.of("org.apache.tomcat.embed:tomcat-embed-core", "9.0.65"), "maven");
 
         assertEquals(1, nine.applicable(), "one row applies, not two: " + nine.verdicts());
         assertEquals(1, nine.missed());
-        assertEquals("9.0.105", nine.outstanding().get(0).floor().version(),
+        assertEquals("9.0.118", nine.outstanding().get(0).floor().version(),
                 "and it is the head of the line the project is actually on");
 
         Bom.Compliance ten = Bom.against(new Hop(21, 25), Map.of(),
