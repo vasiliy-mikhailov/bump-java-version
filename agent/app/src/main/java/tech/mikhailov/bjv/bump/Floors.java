@@ -146,6 +146,51 @@ final class Floors {
                 .collect(java.util.stream.Collectors.joining("\n"));
     }
 
+    /**
+     * WHY A FLOOR IS A FLOOR, KEYED BY COORDINATE AND BY LINE.
+     *
+     * <p>THE LIST HANDED TO AN AGENT IS THE BILL OF MATERIALS NOW, and this file is no longer it.
+     * The two had drifted and the drift was the largest single reason a floor went unmet: the
+     * scorer holds one row per version line and this prose names one line per artifact, so
+     * jackson-databind was scored on twenty-two rows and shown one, on a line the scorer's own
+     * rule then made inapplicable. netty and postgresql are scored on every bump and appear here
+     * nowhere, while the brief that omitted them was headed "THESE, AND NOTHING ELSE". Measured
+     * over sixty-eight bumps that passed with floors unmet, most of the unmoved rows named an
+     * artifact the agent had never been shown.
+     *
+     * <p>What a TSV row cannot carry is the reason, and a floor without one is indistinguishable
+     * from a superstition. So the prose stays and becomes an annotation on the rows: keyed by
+     * coordinate and line, because tomcat's 9.0 row and its 10.1 row are two different arguments
+     * and a map keyed by artifact alone silently keeps the last one.
+     */
+    static java.util.Map<String, String> reasons(int target) {
+        java.util.Map<String, String> why = new java.util.LinkedHashMap<>();
+        for (String raw : forTarget(target).lines().toList()) {
+            String line = raw.strip();
+            if (line.startsWith("[after]")) {
+                line = line.substring("[after]".length()).strip();
+            }
+            int dash = line.indexOf('\u2014');
+            if (dash < 0) {
+                continue;
+            }
+            String[] head = line.substring(0, dash).strip().split("\\s+", 3);
+            if (head.length < 2) {
+                continue;
+            }
+            String reason = line.substring(dash + 1).strip();
+            why.putIfAbsent(head[0] + "@" + lineOf(head[1]), reason);
+            why.putIfAbsent(head[0], reason);
+        }
+        return why;
+    }
+
+    /** The major.minor a version sits on, which is the unit a row answers for. */
+    static String lineOf(String version) {
+        String[] part = version.split("[.-]");
+        return part.length >= 2 ? part[0] + "." + part[1] : version;
+    }
+
     private Floors() {
     }
 

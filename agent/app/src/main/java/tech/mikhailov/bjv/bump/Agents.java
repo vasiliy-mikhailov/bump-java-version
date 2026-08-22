@@ -580,10 +580,54 @@ public final class Agents {
                 .replace("{TARGET}", String.valueOf(hop.to()));
     }
 
+    /**
+     * THE ROWS THE SCORER ACTUALLY HOLDS, RENDERED FOR THE AGENT THAT HAS TO MEET THEM.
+     *
+     * <p>This used to be {@link Floors}, and the two lists were not the same list. The scorer reads
+     * the bill of materials, 337 rows on a hop, one per artifact per version line; the brief was
+     * seventeen lines of prose introduced as "THESE, AND NOTHING ELSE". Everything in the gap was
+     * scored on every bump and named to the agent on none of them, netty and postgresql among
+     * them, and where an artifact did appear the prose gave one line where the scorer had
+     * twenty-two: a project on jackson-databind 2.3 was shown 2.21.4, which the scorer's own line
+     * rule then refuses to apply to it. Reading sixty-eight bumps that passed with floors unmet,
+     * the commonest single finding was an agent that had done exactly what it was asked and was
+     * scored against a row it was never given.
+     *
+     * <p>Three things travel with each row that the prose could not say and the agent needs. The
+     * dialect, because a gradle-only row on a Maven module is noise a reader has to spend a turn
+     * ruling out. The other spellings, because the jacoco row scores {@code org.jacoco:*} and an
+     * agent shown only the maven plugin coordinate reported it not applicable on Gradle. And the
+     * reason, kept in {@link Floors} and matched per line, because a floor without one is
+     * indistinguishable from a superstition.
+     */
+    private String pins(boolean after) {
+        java.util.Map<String, String> why = Floors.reasons(hop.to());
+        return Bom.of(hop, after ? "hardens" : "enables").stream()
+                .map(f -> {
+                    StringBuilder row = new StringBuilder("- ")
+                            .append(f.coordinates()).append(' ').append(f.version());
+                    if (!"any".equals(f.dialect())) {
+                        row.append(" (").append(f.dialect()).append(" only)");
+                    }
+                    java.util.List<String> also = f.spellings().stream()
+                            .filter(s -> !s.equals(f.coordinates())).toList();
+                    if (!also.isEmpty()) {
+                        row.append(" [also spelled ").append(String.join(", ", also)).append(']');
+                    }
+                    String reason = why.get(f.coordinates() + "@" + Floors.lineOf(f.version()));
+                    if (reason == null) {
+                        reason = why.get(f.coordinates());
+                    }
+                    if (reason != null) {
+                        row.append(" \u2014 ").append(reason);
+                    }
+                    return row.toString();
+                })
+                .collect(java.util.stream.Collectors.joining("\n"));
+    }
+
     private String pinPrompt(String base, boolean after) {
-        return base.replace("{ALSO}", also(after)).replace("{PINS}", (after ? Floors.after(hop.to()) : Floors.before(hop.to()))
-                        .lines().map(l -> "- " + l.strip())
-                        .collect(java.util.stream.Collectors.joining("\n")))
+        return base.replace("{ALSO}", also(after)).replace("{PINS}", pins(after))
                 .replace("{FROM}", String.valueOf(hop.from()))
                 .replace("{TARGET}", String.valueOf(hop.to()))
                 // WHAT EACH PHASE IS FOR, NOW THAT ALMOST EVERYTHING HAPPENS IN THE SECOND ONE.

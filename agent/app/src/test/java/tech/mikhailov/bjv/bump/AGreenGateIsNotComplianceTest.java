@@ -241,40 +241,30 @@ class AGreenGateIsNotComplianceTest {
     }
 
     @Test
-    void nothingTheProseDemandsIsInvisibleToTheList() {
-        // TWO HAND-WRITTEN LISTS, MADE TO AGREE OUT LOUD. Parsing the prose to avoid this is what
-        // once decided every floor was met and skipped the phase for the whole corpus.
+    void everyReasonTheProseCarriesReachesARowThatCanShowIt() {
+        // THE PROSE IS NOT THE LIST ANY MORE, so this no longer checks that two hand-written lists
+        // agree on a number. The brief is rendered from the bill of materials and {@link Floors}
+        // supplies the reason for the rows it has an argument about, matched by coordinate and by
+        // line. What can still go wrong is an orphan: a reason for a coordinate or a line the list
+        // no longer carries is an argument no agent will ever be shown.
         //
-        // The agreement is not equality any more and cannot be. The list carries heads the prose
-        // does not state, because a head is per line and the prose names one line per artifact. So:
-        // every artifact the prose pins must appear here, and where a row shares a LINE with the
-        // prose's version the two must agree to the patch.
+        // KEYED PER LINE, WHICH THE VERSION THIS REPLACED WAS NOT. It collapsed the prose into a
+        // Map keyed by artifact, so tomcat's 9.0 row was silently overwritten by its 10.1 row and
+        // never compared at all; the 9.0 line drifted three ways between the prose and two TSVs
+        // and this test passed throughout.
         for (Hop hop : HOPS) {
-            Map<String, String> prose = new LinkedHashMap<>();
-            for (String raw : Floors.forTarget(hop.to()).lines().toList()) {
-                String line = raw.strip();
-                if (line.isEmpty()) {
+            for (String key : Floors.reasons(hop.to()).keySet()) {
+                if (!key.contains("@")) {
                     continue;
                 }
-                if (line.startsWith("[after]")) {
-                    line = line.substring("[after]".length()).strip();
-                }
-                String[] token = line.split("\\s+", 3);
-                prose.put(token[0], token[1]);
-            }
-
-            for (Map.Entry<String, String> row : prose.entrySet()) {
-                List<Bom.Floor> named = Bom.of(hop).stream()
-                        .filter(f -> f.spellings().contains(row.getKey()))
-                        .toList();
-                assertFalse(named.isEmpty(), hop + ": Floors pins " + row.getKey()
-                        + " and the bill of materials has never heard of it");
-                for (Bom.Floor f : named) {
-                    if (sameLine(f.version(), row.getValue())) {
-                        assertEquals(row.getValue(), f.version(),
-                                hop + ": " + row.getKey() + " disagrees on its own line");
-                    }
-                }
+                String coordinate = key.substring(0, key.indexOf('@'));
+                String line = key.substring(key.indexOf('@') + 1);
+                assertTrue(Bom.of(hop).stream()
+                                .anyMatch(f -> f.spellings().contains(coordinate)
+                                        && Floors.lineOf(f.version()).equals(line)),
+                        hop + ": Floors argues for " + coordinate + " on the " + line
+                                + " line and the bill of materials carries no such row, so the "
+                                + "reason reaches nobody");
             }
         }
     }
