@@ -154,21 +154,74 @@ public final class Migrate {
             // corpus ship without the exec bit, and jvmjob already invokes every one of them as
             // `bash ./gradlew` for that reason. Running it directly works on the eleven and fails
             // on the three with Permission denied, which reads like a project fault and is not one.
-            String gradle = Files.isRegularFile(ws.resolve("gradlew")) ? "bash ./gradlew" : "gradle";
-            // MEASURED ON rr_17_238, A GRADLE 8 KOTLIN REPOSITORY THAT DIED TWICE. Parsing a whole
-            // project into an OpenRewrite LST holds far more type metadata than compiling it does,
-            // and the default metaspace is sized for the compile. Reproducible, and reproducibly
-            // fixed by this.
-            String goal = gradle + " --no-daemon"
-                    + " -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g'"
-                    + " --init-script " + INIT + " rewriteRun";
-            Shell.Output out = Shell.run(ws, Runner.env(ws), Duration.ofSeconds(2700),
-                    hoptools + "/jvm-run", from, "jvmjob", "run", goal);
-            return "recipe run (gradle) rc=" + out.code() + "\n" + Runner.tail(out.text());
+            boolean wrapper = Files.isRegularFile(ws.resolve("gradlew"));
+            Shell.Output out = gradleRun(from, wrapper ? "bash ./gradlew" : "gradle");
+            if (out.code() == 0 || !wrapper || !wrapperCannotStart(out.text())) {
+                return "recipe run (gradle) rc=" + out.code() + "\n" + Runner.tail(out.text());
+            }
+            // A DEADLOCK, AND THE ONLY WAY OUT OF IT IS TO STOP ASKING THE WRAPPER. The recipe runs
+            // on the project's own gradlew, so a wrapper too old to start under the target JDK
+            // fails every recipe, and the wrapper is itself a floor: the tool that would raise it
+            // needs the recipe that the wrapper cannot run. Measured on one bump, the first call
+            // was bump_line onto Spring Boot, which would have carried all eighteen of its
+            // outstanding floors at once, and it died on the wrapper along with the twenty-nine
+            // calls after it. Both write tools then refused the wrapper itself, correctly, because
+            // 8.0 to 8.10.2 is a line move. Nothing was wrong with the project.
+            //
+            // The image carries a Gradle of its own, so the second attempt uses that. It is scoped
+            // to the failure that has no other exit: an ordinary recipe failure, a name that does
+            // not resolve or a project that will not parse, retries nothing and pays nothing,
+            // which matters because each attempt holds a forty-five minute leash.
+            Shell.Output again = gradleRun(from, "gradle");
+            String note = "the project's own wrapper could not start, so this ran on the "
+                    + "distribution the image carries";
+            if (again.code() != 0) {
+                return "recipe run (gradle) rc=" + out.code() + "\n" + Runner.tail(out.text())
+                        + "\n\nRetried because " + note + ": rc=" + again.code() + "\n"
+                        + Runner.tail(again.text());
+            }
+            return "recipe run (gradle, " + note + ") rc=" + again.code() + "\n"
+                    + Runner.tail(again.text());
         } catch (IOException | InterruptedException e) {
             Thread.currentThread().interrupt();
             return "recipe run (gradle) failed: " + e.getMessage();
         }
+    }
+
+    /**
+     * One attempt, with whichever Gradle it was handed.
+     *
+     * <p>MEASURED ON rr_17_238, A GRADLE 8 KOTLIN REPOSITORY THAT DIED TWICE. Parsing a whole
+     * project into an OpenRewrite LST holds far more type metadata than compiling it does, and the
+     * default metaspace is sized for the compile. Reproducible, and reproducibly fixed by this.
+     */
+    private Shell.Output gradleRun(String from, String gradle)
+            throws IOException, InterruptedException {
+        String goal = gradle + " --no-daemon"
+                + " -Dorg.gradle.jvmargs='-Xmx4g -XX:MaxMetaspaceSize=1g'"
+                + " --init-script " + INIT + " rewriteRun";
+        return Shell.run(ws, Runner.env(ws), Duration.ofSeconds(2700),
+                hoptools + "/jvm-run", from, "jvmjob", "run", goal);
+    }
+
+    /**
+     * WHETHER THE WRAPPER ITSELF NEVER STARTED, as opposed to the recipe having failed.
+     *
+     * <p>The distinction decides whether a second attempt is worth forty-five minutes. These are
+     * the shapes a wrapper too old for the JDK it is handed dies in, and none of them is something
+     * a different Gradle would fail at in the same way.
+     */
+    static boolean wrapperCannotStart(String text) {
+        if (text == null) {
+            return false;
+        }
+        return text.contains("cp_init generic class cache")
+                || text.contains("init generic class cache")
+                || text.contains("Unsupported class file major version")
+                || text.contains("BUG! exception in phase")
+                || text.contains("Could not determine java version")
+                || text.contains("Unsupported Java")
+                || text.contains("Could not open cp_proj");
     }
 
     /**
