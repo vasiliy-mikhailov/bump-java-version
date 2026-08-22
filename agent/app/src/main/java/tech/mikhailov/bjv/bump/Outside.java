@@ -164,7 +164,12 @@ final class Outside {
         } catch (IOException unreadable) {
             return "could not read the distribution cache: " + unreadable.getMessage();
         }
-        usable.sort((a, b) -> Migrate.compare(version(a), version(b)));
+        // BY VERSION, THEN BY NAME, so -all and -bin of one version sit together in a fixed order
+        // rather than wherever the filesystem happened to list them.
+        usable.sort((a, b) -> {
+            int byVersion = Migrate.compare(version(a), version(b));
+            return byVersion != 0 ? byVersion : a.compareTo(b);
+        });
         StringBuilder out = new StringBuilder();
         if (usable.isEmpty()) {
             out.append("Nothing is cached here yet.\n");
@@ -172,18 +177,33 @@ final class Outside {
             out.append("Gradle distributions already cached here, oldest first. "
                     + "Paste the url as distributionUrl:\n");
             for (String name : usable) {
-                out.append("  ").append(version(name)).append("  ")
+                out.append("  ").append(name.substring("gradle-".length())).append("  ")
                         .append(BASE).append(name).append(".zip\n");
             }
         }
-        if (!failed.isEmpty()) {
-            failed.sort(String::compareTo);
-            out.append("\nAsked for here and did not download:\n  ")
-                    .append(String.join("\n  ", failed)).append('\n');
+        // TWO REASONS A DOWNLOAD LEAVES NOTHING, AND THEY ARE NOT THE SAME NEWS. Every real Gradle
+        // distribution is named gradle-something, so a directory without that prefix records a url
+        // that cannot ever have resolved and was therefore assembled rather than copied. A prefixed
+        // one is a url of the right shape that did not finish, which is usually a lane killed
+        // mid-download and occasionally a version that was never published. Filing both under one
+        // sentence about typos was wrong about seven of the ten urls in this cache.
+        failed.sort(String::compareTo);
+        List<String> assembled = failed.stream().filter(u -> !u.startsWith(BASE + "gradle-")).toList();
+        List<String> stopped = failed.stream().filter(u -> u.startsWith(BASE + "gradle-")).toList();
+        if (!assembled.isEmpty()) {
+            out.append("\nThese urls do not exist. Every distribution is named gradle-something, so "
+                    + "each of these was assembled by hand:\n  ")
+                    .append(String.join("\n  ", assembled)).append('\n');
+        }
+        if (!stopped.isEmpty()) {
+            out.append("\nThese started downloading here and did not finish, so the next build that "
+                    + "wants one fetches it again. Usually that is a lane that was killed part way. "
+                    + "One that never finishes however often it is tried is a version that was never "
+                    + "published:\n  ")
+                    .append(String.join("\n  ", stopped)).append('\n');
         }
         out.append("\nThe cache fills on demand, so a version missing above is not unavailable: "
-                + "the build fetches it. A url that did not download is usually one that was "
-                + "typed rather than copied from this list.\n");
+                + "the build fetches it.\n");
         return out.toString();
     }
 

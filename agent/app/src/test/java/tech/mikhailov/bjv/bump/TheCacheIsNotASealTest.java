@@ -58,7 +58,7 @@ class TheCacheIsNotASealTest {
 
         String said = Outside.distributions(root);
 
-        String offered = said.substring(0, said.indexOf("Asked for here"));
+        String offered = said.substring(0, said.indexOf("did not finish"));
         assertFalse(offered.contains("8.8"),
                 "an incomplete download must not be offered as usable, because handing it back "
                         + "sends the build to the download that already failed: " + said);
@@ -79,6 +79,38 @@ class TheCacheIsNotASealTest {
         assertTrue(said.contains("9.1.0-bin.zip"),
                 "the failed request is the evidence that names the real cause, and hiding it is what "
                         + "turned a typo into an infra verdict: " + said);
+    }
+
+    @Test
+    void tellsAMalformedUrlApartFromAnInterruptedDownload() throws IOException {
+        Path root = Files.createTempDirectory("dists");
+        complete(root, "gradle-9.7.1-bin");
+        halfDownloaded(root, "9.1.0-bin");        // no prefix: a url nobody could have copied
+        halfDownloaded(root, "gradle-9.7.0-bin"); // prefixed: a real url that stopped part way
+
+        String said = Outside.distributions(root);
+        int malformed = said.indexOf("do not exist");
+        int stopped = said.indexOf("did not finish");
+
+        assertTrue(malformed > 0 && stopped > malformed, "both sections, in that order: " + said);
+        assertTrue(said.substring(malformed, stopped).contains("9.1.0-bin.zip"),
+                "the prefixless url is the one that was assembled by hand: " + said);
+        assertTrue(said.substring(stopped).contains("gradle-9.7.0-bin.zip"),
+                "and a stalled download of a real version must not be filed as somebody's typo, "
+                        + "which is what one sentence for both did to seven urls out of ten: " + said);
+    }
+
+    @Test
+    void separatesBinFromAllRatherThanPrintingTheVersionTwice() throws IOException {
+        Path root = Files.createTempDirectory("dists");
+        complete(root, "gradle-8.10.2-bin");
+        complete(root, "gradle-8.10.2-all");
+
+        String said = Outside.distributions(root);
+
+        assertTrue(said.contains("8.10.2-bin") && said.contains("8.10.2-all"),
+                "two distributions of one version are two different downloads and one is four "
+                        + "times the size; printing 8.10.2 twice says neither: " + said);
     }
 
     @Test
