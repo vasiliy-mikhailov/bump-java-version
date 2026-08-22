@@ -526,12 +526,14 @@ one() {
         # tell a decision from a failure. The round boundary beside this one says paused and
         # explains itself; this says so too.
         #
-        # STILL bumping, NOT paused. The round NUMBER is which round this row belongs to, so a
-        # pause in the first round says 1 exactly as a boundary would. What stops it costing
-        # anything is the state: rounds_done counts paused rows, and this is not one, so the next
-        # lane opens the same round rather than the next. A person pressing a button must not
-        # spend a round of a budget meant to bound how long a bump may take.
-        settle_row "$bkey" "bumping" \
+        # paused, the same word the round boundary below writes, because this is the same event
+        # reached by a different route: the lane stops, the checkout and the journal stay, the next
+        # lane continues. Writing bumping here to keep a button press from spending a round was a
+        # mistake worth naming, because it left a paused bump and a running one reading as the same
+        # word on the page, which is the one thing this row exists to prevent. A bump set aside
+        # four times has used its allowance exactly as one that ran out of time four times has, and
+        # a requeue starts the count over either way.
+        settle_row "$bkey" "paused" \
           "set aside while it was running${why:+: $why}; the checkout and the journal are kept, so \
 whichever lane takes it next continues rather than starting again" \
           "$(( $(rounds_done "$bkey") + 1 ))"

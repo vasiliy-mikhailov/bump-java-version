@@ -43,6 +43,7 @@ const bump = (slug: string, stamp: PipelineStamp = {}): StampedBump => ({
   to: 21,
   verdict: 'PASS',
   because: null,
+  round: null,
   baselineGreen: true,
   gateGreen: true,
   preTests: 148,

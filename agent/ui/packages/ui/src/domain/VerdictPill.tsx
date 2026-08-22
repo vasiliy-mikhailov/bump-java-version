@@ -44,7 +44,8 @@ const WHY: Record<Verdict, string> = {
   'behavior-change': 'reaching the target would require changing what the program does',
   infra: 'the harness or the environment failed, not the project',
   bumping: 'still running',
-  paused: 'a lane ran out of its wall-clock budget between two stages; the checkout and the journal are kept, and the next lane continues from there',
+  paused:
+    'the lane stopped between two stages, either because its wall-clock budget ran out or because someone set the bump aside; the checkout and the journal are kept, and the next lane continues from there',
   'out-of-rounds':
     'the harness stopped spending lanes on this after several rounds without a verdict; it is not a judgement about the project',
   queued: 'in the manifest, waiting for a lane',

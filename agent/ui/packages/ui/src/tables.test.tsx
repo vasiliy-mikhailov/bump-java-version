@@ -26,6 +26,7 @@ const BUMP: BumpSummary = {
   to: 21,
   verdict: 'PASS',
   because: null,
+  round: null,
   baselineGreen: true,
   gateGreen: true,
   preTests: 412,

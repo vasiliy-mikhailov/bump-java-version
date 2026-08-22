@@ -206,10 +206,11 @@ t_pauserow() {
   rows aa/pauseme cafe1 8 17 | grep -q "a person asked for it" \
     || bad "the row did not carry the reason the marker gave"
   rows aa/pauseme cafe1 8 17 | grep -q '"state":"paused"' \
-    && bad "a postponement must not be recorded as a round boundary"
+    || bad "a pause is the same event as a round ending and must wear the same word, or a paused \
+bump and a running one read identically on the page"
   [ "$(rows aa/pauseme cafe1 8 17 | grep -c '\"round\":\"1\"')" -gt 0 ] \
-    || bad "a pause must not spend a round"
-  [ "${FAILED:-0}" -eq 0 ] && ok "the pause is in the record, is not a round, and cost no round"
+    || bad "the row must say which round it belongs to"
+  [ "${FAILED:-0}" -eq 0 ] && ok "the pause is in the record and reads as a round boundary"
   report
 }
 

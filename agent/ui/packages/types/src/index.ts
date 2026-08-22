@@ -60,11 +60,17 @@ export type Verdict =
   | 'infra'
   | 'bumping'
   /**
-   * A LANE RAN OUT OF ITS WALL-CLOCK BUDGET AND THE BUMP IS WAITING FOR THE NEXT ONE.
+   * THE LANE STOPPED BETWEEN TWO STAGES AND THE BUMP IS WAITING FOR THE NEXT ONE.
+   *
+   * Two routes reach this word and it does not distinguish them, because nothing downstream of it
+   * cares: a wall-clock budget ran out, or someone pressed pause. Either way the lane stops where
+   * it stands, the round is over, and the next lane picks the work back up.
    *
    * Not a verdict, and deliberately not folded into `queued`: a bump that has never started and a
    * bump that has burned three lane budgets are both waiting, and a reader who cannot tell them
-   * apart cannot find the second one. Its checkout and its journal are kept, so the next lane
+   * apart cannot find the second one. Nor folded into `bumping`, which was the first attempt and
+   * the worse one: a paused bump and a running one then read as the same word on the page, and the
+   * row exists to prevent exactly that. Its checkout and its journal are kept, so the next lane
    * continues from where this one stopped.
    */
   | 'paused'
@@ -306,7 +312,7 @@ export type Package = {
  */
 export type RoundBoundary = {
   at: number
-  /** `paused` for a boundary, `out-of-rounds` when the harness stopped spending on it. */
+  /** `paused` for a boundary, whether the clock or a person ended it; `out-of-rounds` when the harness stopped spending on it. */
   state: string
   round: string | null
   because: string | null
