@@ -519,7 +519,22 @@ one() {
       fi
       touch "$RESULTS/claims/$bslug" 2>/dev/null
       if [ -e "$RESULTS/postponed/$bslug" ]; then
-        echo "[$slug] postponed: $(cut -c1-90 < "$RESULTS/postponed/$bslug" 2>/dev/null)"
+        why=$(cut -c1-90 < "$RESULTS/postponed/$bslug" 2>/dev/null)
+        echo "[$slug] postponed: $why"
+        # A ROW, BECAUSE SILENCE HERE LOOKS EXACTLY LIKE A LANE THAT DIED. Both leave whatever
+        # progress note the bump was on, and a reader asking why something is not moving cannot
+        # tell a decision from a failure. The round boundary beside this one says paused and
+        # explains itself; this says so too.
+        #
+        # STILL bumping, NOT paused. The round NUMBER is which round this row belongs to, so a
+        # pause in the first round says 1 exactly as a boundary would. What stops it costing
+        # anything is the state: rounds_done counts paused rows, and this is not one, so the next
+        # lane opens the same round rather than the next. A person pressing a button must not
+        # spend a round of a budget meant to bound how long a bump may take.
+        settle_row "$bkey" "bumping" \
+          "set aside while it was running${why:+: $why}; the checkout and the journal are kept, so \
+whichever lane takes it next continues rather than starting again" \
+          "$(( $(rounds_done "$bkey") + 1 ))"
         docker rm -f "bjvagent_$slug" >/dev/null 2>&1
         break
       fi

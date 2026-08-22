@@ -182,6 +182,37 @@ report() {
 # work is still on the manifest, the other cap-1 slots must be refilled. The unsettled work here is
 # the postponed set, which is what the live sweep has left: postponement frees a slot for work that
 # can progress, so once it is all that remains it IS the work.
+# A LANE SET ASIDE WHILE IT IS RUNNING LEAVES A ROW SAYING SO.
+#
+# Rounds gave postponement most of a round boundary without anyone touching it: the checkout is kept
+# and the next lane continues onto it. What it never gained was a row, so a lane somebody paused and
+# a lane that died looked identical to a reader, both sitting on whatever progress note they were on.
+# The state stays bumping rather than paused, because paused is a round boundary and rounds_done
+# counts those; a person pressing a button must not spend a round of the budget.
+t_pauserow() {
+  scenario pauserow 2
+  row long aa/pauseme cafe1 8 17 30
+
+  echo "== pauserow: a lane set aside mid-flight says so in the record =="
+  FAILED=0
+  ( sleep 4; echo "a person asked for it" \
+      > "$SC/root/results/postponed/$(bslug aa/pauseme cafe1 8 17)" ) &
+  local marker=$!
+  runsweep 60
+  kill "$marker" 2>/dev/null
+
+  rows aa/pauseme cafe1 8 17 | grep -q "set aside while it was running" \
+    || bad "a postponed lane left no row saying it was set aside: $(rows aa/pauseme cafe1 8 17 | tail -1)"
+  rows aa/pauseme cafe1 8 17 | grep -q "a person asked for it" \
+    || bad "the row did not carry the reason the marker gave"
+  rows aa/pauseme cafe1 8 17 | grep -q '"state":"paused"' \
+    && bad "a postponement must not be recorded as a round boundary"
+  [ "$(rows aa/pauseme cafe1 8 17 | grep -c '\"round\":\"1\"')" -gt 0 ] \
+    || bad "a pause must not spend a round"
+  [ "${FAILED:-0}" -eq 0 ] && ok "the pause is in the record, is not a round, and cost no round"
+  report
+}
+
 t_idle() {
   scenario idle 4
   row straggler aa/straggler cafe1 8 17 20
@@ -556,8 +587,9 @@ case "${1:-all}" in
   roundcap) t_roundcap ;;
   wipeonsettle) t_wipeonsettle ;;
   diskfloor) t_diskfloor ;;
+  pauserow) t_pauserow ;;
   all) t_idle; t_inpass; t_terminate; t_settings; t_budget; t_continues; t_repass; \
-       t_roundcap; t_wipeonsettle; t_diskfloor ;;
+       t_roundcap; t_wipeonsettle; t_diskfloor; t_pauserow ;;
   *) echo "unknown scenario: $1"; exit 2 ;;
 esac
 
